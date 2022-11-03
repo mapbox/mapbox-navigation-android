@@ -276,30 +276,10 @@ class MapboxRouteLineViewTest {
                     )
                 )
             )
-        val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
-        val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
-        val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
-        val restrictedLineLayer = mockk<LineLayer>(relaxed = true)
-        val topLevelLayer = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
             every {
-                styleLayerExists(any())
-            } returns true
-            every {
-                getLayer(LAYER_GROUP_1_TRAFFIC)
-            } returns primaryRouteTrafficLayer
-            every {
-                getLayer(LAYER_GROUP_1_MAIN)
-            } returns primaryRouteLayer
-            every {
-                getLayer(LAYER_GROUP_1_CASING)
-            } returns primaryRouteCasingLayer
-            every {
-                getLayer(LAYER_GROUP_1_RESTRICTED)
-            } returns restrictedLineLayer
-            every {
-                getLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
-            } returns topLevelLayer
+                setStyleLayerProperty(any(), any(), any())
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -311,10 +291,34 @@ class MapboxRouteLineViewTest {
             verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         }
 
-        verify { primaryRouteTrafficLayer.lineGradient(trafficLineExp) }
-        verify { primaryRouteLayer.lineGradient(routeLineExp) }
-        verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }
-        verify { restrictedLineLayer.lineGradient(restrictedRoadExp) }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAFFIC,
+                "line-gradient",
+                trafficLineExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_MAIN,
+                "line-gradient",
+                routeLineExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_CASING,
+                "line-gradient",
+                casingLineEx
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_RESTRICTED,
+                "line-gradient",
+                restrictedRoadExp
+            )
+        }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -358,36 +362,10 @@ class MapboxRouteLineViewTest {
                     )
                 )
             )
-        val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
-        val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
-        val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
-        val restrictedLineLayer = mockk<LineLayer>(relaxed = true)
-        val topLevelLayer = mockk<LineLayer>(relaxed = true)
-        val primaryTrailLayer = mockk<LineLayer>(relaxed = true)
-        val primaryTrailCasingLayer = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
-            every { styleLayerExists(any()) } returns true
             every {
-                getLayer(LAYER_GROUP_1_TRAFFIC)
-            } returns primaryRouteTrafficLayer
-            every {
-                getLayer(LAYER_GROUP_1_MAIN)
-            } returns primaryRouteLayer
-            every {
-                getLayer(LAYER_GROUP_1_CASING)
-            } returns primaryRouteCasingLayer
-            every {
-                getLayer(LAYER_GROUP_1_RESTRICTED)
-            } returns restrictedLineLayer
-            every {
-                getLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
-            } returns topLevelLayer
-            every {
-                getLayer(LAYER_GROUP_1_TRAIL)
-            } returns primaryTrailLayer
-            every {
-                getLayer(LAYER_GROUP_1_TRAIL_CASING)
-            } returns primaryTrailCasingLayer
+                setStyleLayerProperty(any(), any(), any())
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -399,12 +377,48 @@ class MapboxRouteLineViewTest {
             verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         }
 
-        verify { primaryRouteTrafficLayer.lineTrimOffset(trafficLineExp) }
-        verify { primaryRouteLayer.lineTrimOffset(routeLineExp) }
-        verify { primaryRouteCasingLayer.lineTrimOffset(casingLineEx) }
-        verify { restrictedLineLayer.lineTrimOffset(restrictedRoadExp) }
-        verify { primaryTrailLayer.lineTrimOffset(trailExp) }
-        verify { primaryTrailCasingLayer.lineTrimOffset(trailCasingExp) }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAFFIC,
+                "line-trim-offset",
+                trafficLineExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_MAIN,
+                "line-trim-offset",
+                routeLineExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_CASING,
+                "line-trim-offset",
+                casingLineEx
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_RESTRICTED,
+                "line-trim-offset",
+                restrictedRoadExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL,
+                "line-trim-offset",
+                trailExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL_CASING,
+                "line-trim-offset",
+                trailCasingExp
+            )
+        }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -414,6 +428,9 @@ class MapboxRouteLineViewTest {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         mockkObject(MapboxRouteLineUtils)
+        val expectedRoute1Expression = literal(listOf(0.0, 9.9))
+        val expectedRoute2Expression = literal(listOf(0.0, 0.0))
+        val expectedRoute3Expression = literal(listOf(0.0, 0.1))
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val primaryRouteFeatureCollection =
             FeatureCollection.fromFeatures(listOf(getEmptyFeature("1")))
@@ -520,6 +537,9 @@ class MapboxRouteLineViewTest {
             wayPointSource
         )
         every {
+            style.setStyleLayerProperty(any(), any(), any())
+        } returns ExpectedFactory.createNone()
+        every {
             MapboxRouteLineUtils.getTopRouteLineRelatedLayerId(style)
         } returns LAYER_GROUP_1_MAIN
 
@@ -535,45 +555,262 @@ class MapboxRouteLineViewTest {
         }
         verify(exactly = 1) { wayPointSource.featureCollection(waypointsFeatureCollection) }
 
-        verify { route1TrailCasing.lineGradient(layerGroup1Expression) }
-        verify { route1Trail.lineGradient(layerGroup1Expression) }
-        verify { route1Casing.lineGradient(layerGroup1Expression) }
-        verify { route1Main.lineGradient(layerGroup1Expression) }
-        verify { route1Traffic.lineGradient(layerGroup1Expression) }
-        verify { route1Restricted.lineGradient(layerGroup1Expression) }
-        verify { route2TrailCasing.lineGradient(layerGroup2Expression) }
-        verify { route2Trail.lineGradient(layerGroup2Expression) }
-        verify { route2Casing.lineGradient(layerGroup2Expression) }
-        verify { route2Main.lineGradient(layerGroup2Expression) }
-        verify { route2Traffic.lineGradient(layerGroup2Expression) }
-        verify { route2Restricted.lineGradient(layerGroup2Expression) }
-        verify { route3TrailCasing.lineGradient(layerGroup3Expression) }
-        verify { route3Trail.lineGradient(layerGroup3Expression) }
-        verify { route3Casing.lineGradient(layerGroup3Expression) }
-        verify { route3Main.lineGradient(layerGroup3Expression) }
-        verify { route3Traffic.lineGradient(layerGroup3Expression) }
-        verify { route3Restricted.lineGradient(layerGroup3Expression) }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL_CASING,
+                "line-gradient",
+                layerGroup1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL,
+                "line-gradient",
+                layerGroup1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_CASING,
+                "line-gradient",
+                layerGroup1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_MAIN,
+                "line-gradient",
+                layerGroup1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAFFIC,
+                "line-gradient",
+                layerGroup1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_RESTRICTED,
+                "line-gradient",
+                layerGroup1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAIL_CASING,
+                "line-gradient",
+                layerGroup2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAIL,
+                "line-gradient",
+                layerGroup2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_CASING,
+                "line-gradient",
+                layerGroup2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_MAIN,
+                "line-gradient",
+                layerGroup2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAFFIC,
+                "line-gradient",
+                layerGroup2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_RESTRICTED,
+                "line-gradient",
+                layerGroup2Expression
+            )
+        }
 
-        verify(exactly = 0) { route1TrailCasing.lineTrimOffset(literal(listOf(0.0, 9.9))) }
-        verify(exactly = 0) { route1Trail.lineTrimOffset(literal(listOf(0.0, 9.9))) }
-        verify { route1Casing.lineTrimOffset(literal(listOf(0.0, 9.9))) }
-        verify { route1Main.lineTrimOffset(literal(listOf(0.0, 9.9))) }
-        verify { route1Traffic.lineTrimOffset(literal(listOf(0.0, 9.9))) }
-        verify { route1Restricted.lineTrimOffset(literal(listOf(0.0, 9.9))) }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAIL_CASING,
+                "line-gradient",
+                layerGroup3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAIL,
+                "line-gradient",
+                layerGroup3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_CASING,
+                "line-gradient",
+                layerGroup3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_MAIN,
+                "line-gradient",
+                layerGroup3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAFFIC,
+                "line-gradient",
+                layerGroup3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_RESTRICTED,
+                "line-gradient",
+                layerGroup3Expression
+            )
+        }
 
-        verify(exactly = 0) { route2TrailCasing.lineTrimOffset(literal(listOf(0.0, 0.0))) }
-        verify(exactly = 0) { route2Trail.lineTrimOffset(literal(listOf(0.0, 0.0))) }
-        verify { route2Casing.lineTrimOffset(literal(listOf(0.0, 0.0))) }
-        verify { route2Main.lineTrimOffset(literal(listOf(0.0, 0.0))) }
-        verify { route2Traffic.lineTrimOffset(literal(listOf(0.0, 0.0))) }
-        verify { route2Restricted.lineTrimOffset(literal(listOf(0.0, 0.0))) }
+        verify(exactly = 0) {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL_CASING,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify(exactly = 0) {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_CASING,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_MAIN,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAFFIC,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_RESTRICTED,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
 
-        verify(exactly = 0) { route3TrailCasing.lineTrimOffset(literal(listOf(0.0, 0.1))) }
-        verify(exactly = 0) { route3Trail.lineTrimOffset(literal(listOf(0.0, 0.1))) }
-        verify { route3Casing.lineTrimOffset(literal(listOf(0.0, 0.1))) }
-        verify { route3Main.lineTrimOffset(literal(listOf(0.0, 0.1))) }
-        verify { route3Traffic.lineTrimOffset(literal(listOf(0.0, 0.1))) }
-        verify { route3Restricted.lineTrimOffset(literal(listOf(0.0, 0.1))) }
+        verify(exactly = 0) {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAIL_CASING,
+                "line-trim-offset",
+                expectedRoute2Expression
+            )
+        }
+        verify(exactly = 0) {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAIL,
+                "line-trim-offset",
+                expectedRoute2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_CASING,
+                "line-trim-offset",
+                expectedRoute2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_MAIN,
+                "line-trim-offset",
+                expectedRoute2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_TRAFFIC,
+                "line-trim-offset",
+                expectedRoute2Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_2_RESTRICTED,
+                "line-trim-offset",
+                expectedRoute2Expression
+            )
+        }
+
+        verify(exactly = 0) {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAIL_CASING,
+                "line-trim-offset",
+                expectedRoute3Expression
+            )
+        }
+        verify(exactly = 0) {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAIL,
+                "line-trim-offset",
+                expectedRoute3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_CASING,
+                "line-trim-offset",
+                expectedRoute3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_MAIN,
+                "line-trim-offset",
+                expectedRoute3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_TRAFFIC,
+                "line-trim-offset",
+                expectedRoute3Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_3_RESTRICTED,
+                "line-trim-offset",
+                expectedRoute3Expression
+            )
+        }
 
         verify(exactly = 1) { style.moveStyleLayer(LAYER_GROUP_1_TRAIL_CASING, any()) }
         verify(exactly = 1) { style.moveStyleLayer(LAYER_GROUP_1_TRAIL, any()) }
