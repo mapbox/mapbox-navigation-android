@@ -149,7 +149,7 @@ class MapboxTripSessionTest {
         mockkObject(MapboxNativeNavigatorImpl)
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
-        mockkObject(RoadObjectFactory)
+        mockkObject(RoadObjectFactory.Companion)
         every { location.toFixLocation() } returns fixLocation
         every { fixLocation.toLocation() } returns location
         every { keyFixPoints.toLocations() } returns keyPoints
@@ -1640,7 +1640,7 @@ class MapboxTripSessionTest {
         unmockkObject(MapboxNativeNavigatorImpl)
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
-        unmockkObject(RoadObjectFactory)
+        unmockkObject(RoadObjectFactory.Companion)
     }
 
     private fun mockLocation(): Location = mockk(relaxed = true)

@@ -7,7 +7,7 @@ import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
-import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.Companion.toUpcomingRoadObjects
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.BasicSetRoutesInfo
@@ -71,7 +71,7 @@ class MapboxTripSessionNoSetupTest {
 
     @Before
     fun setUp() {
-        mockkObject(RoadObjectFactory)
+        mockkObject(RoadObjectFactory.Companion)
     }
 
     @After

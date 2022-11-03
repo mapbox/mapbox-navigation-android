@@ -9,7 +9,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.Companion.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject

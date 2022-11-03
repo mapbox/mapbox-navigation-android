@@ -15,7 +15,7 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.SDKRouteParser
-import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.Companion.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.toNavigationRoute
