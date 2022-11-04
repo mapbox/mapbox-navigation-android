@@ -66,6 +66,29 @@ class RoutesPreviewControllerTest {
     }
 
     @Test
+    fun `register observer when preview is active`() {
+        val routesPreviewController = createRoutePreviewController()
+        val testRoutes = createNavigationRoutes(
+            response = createDirectionsResponse(
+                uuid = "test",
+                routes = listOf(
+                    createDirectionsRoute(),
+                    createDirectionsRoute()
+                )
+            )
+        )
+        routesPreviewController.previewNavigationRoutes(testRoutes)
+
+        var previewUpdate: RoutesPreviewUpdate? = null
+        routesPreviewController.registerRoutesPreviewObserver {
+            previewUpdate = it
+        }
+
+        assertNotNull(previewUpdate)
+        assertEquals(previewUpdate!!.routesPreview, routesPreviewController.getRoutesPreview())
+    }
+
+    @Test
     fun `set previewed routes with the second route as a primary`() {
         val routesPreviewController = createRoutePreviewController()
         var previewUpdate: RoutesPreviewUpdate? = null
