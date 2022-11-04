@@ -28,8 +28,10 @@ class RoutesPreviewControllerTest {
         routesPreviewController.registerRoutesPreviewObserver {
             previewUpdate = it
         }
+        val preview = routesPreviewController.getRoutesPreview()
 
         assertNull(previewUpdate)
+        assertNull(preview)
     }
 
     @Test
