@@ -143,7 +143,7 @@ class RouterInterfaceAdapter(
 
                 ),
                 com.mapbox.navigator.RouterOrigin.CUSTOM,
-                hashMapOf()
+                hashMapOf(),
             )
             return -1
         }

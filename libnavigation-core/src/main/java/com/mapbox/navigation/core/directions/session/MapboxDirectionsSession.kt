@@ -10,7 +10,9 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.core.SetRoutesInfo
+import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.internal.utils.initialLegIndex
+import com.mapbox.navigation.core.internal.utils.mapToReason
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -42,20 +44,24 @@ internal class MapboxDirectionsSession(
     @RoutesExtra.RoutesUpdateReason
     private var routesUpdateReason: String = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
 
-    override var initialLegIndex = 0
+    override var initialLegIndex = DEFAULT_INITIAL_LEG_INDEX
         private set
+
+    internal companion object {
+        internal const val DEFAULT_INITIAL_LEG_INDEX = 0
+    }
 
     override fun setRoutes(
         routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutesInfo,
+        setRoutesInfo: SetRoutes,
     ) {
-        this.initialLegIndex = setRoutesInfo.legIndex
+        this.initialLegIndex = setRoutesInfo.initialLegIndex()
         if (routesInitialized && this.routes.isEmpty() && routes.isEmpty()) {
             return
         }
         RouteCompatibilityCache.setDirectionsSessionResult(routes)
         this.routes = routes
-        this.routesUpdateReason = setRoutesInfo.reason
+        this.routesUpdateReason = setRoutesInfo.mapToReason()
         routesObservers.forEach {
             it.onRoutesChanged(
                 RoutesUpdatedResult(

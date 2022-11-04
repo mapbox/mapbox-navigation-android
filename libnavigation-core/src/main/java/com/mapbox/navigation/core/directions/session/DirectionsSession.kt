@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.core.SetRoutesInfo
+import com.mapbox.navigation.core.SetRoutes
 
 internal interface DirectionsSession : RouteRefresh {
 
@@ -20,7 +20,7 @@ internal interface DirectionsSession : RouteRefresh {
 
     fun setRoutes(
         routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutesInfo,
+        setRoutesInfo: SetRoutes,
     )
 
     /**

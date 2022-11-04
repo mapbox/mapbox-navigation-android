@@ -2,7 +2,6 @@ package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.session.NativeSetRouteError
 import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import io.mockk.coEvery
@@ -33,7 +32,7 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         coEvery {
             tripSession.setRoutes(
                 routes,
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                SetRoutes.NewRoutes(initialLegIndex)
             )
         } returns NativeSetRouteValue(routes, emptyList())
 
@@ -50,7 +49,7 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         coEvery {
             tripSession.setRoutes(
                 routes,
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                SetRoutes.NewRoutes(initialLegIndex)
             )
         } returns NativeSetRouteError("error")
 
@@ -67,7 +66,7 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         coEvery {
             tripSession.setRoutes(
                 routes,
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                SetRoutes.NewRoutes(initialLegIndex)
             )
         } returns NativeSetRouteValue(routes, emptyList())
 
