@@ -7,9 +7,9 @@ import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 
 /***
  * @param routesList - previewed routes ordered in way specific for mapbox navigation: [primary, alternative1, alternative2].
- * @param alternativesMetadata - alternative metadata for valid alternatives from [routesList]
+ * @param alternativesMetadata - alternative metadata for valid alternatives from [routesList]. [AlternativeRouteMetadata.alternativeId] is always 0 in preview.
  * @param originalRoutesList - original routes list which doesn't change order no matter which primary route is selected.
- * @param primaryRouteIndex - index of primary route from the [originalRoutesList]
+ * @param primaryRouteIndex - index of primary route from the [originalRoutesList].
  *
  * Use [routesList] when you want to pass routes to other Navigation SDK components,
  * for example start active guidance calling [MapboxNavigation.setNavigationRoutes] or

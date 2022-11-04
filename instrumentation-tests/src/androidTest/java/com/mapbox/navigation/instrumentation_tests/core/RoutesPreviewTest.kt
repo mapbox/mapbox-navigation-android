@@ -168,6 +168,10 @@ class RoutesPreviewTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         val previewAlternativeMetadata = updatedPreview.routesPreview!!.alternativesMetadata.first()
         val activeGuidanceAlternativeMetadata = mapboxNavigation
             .getAlternativeMetadataFor(routes[0])!!
+        assertEquals(
+            0,
+            previewAlternativeMetadata.alternativeId
+        )
         assertNotEquals(
             previewAlternativeMetadata.alternativeId,
             activeGuidanceAlternativeMetadata.alternativeId
