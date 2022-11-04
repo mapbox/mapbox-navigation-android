@@ -68,15 +68,7 @@ class RoutesPreviewControllerTest {
     @Test
     fun `register observer when preview is active`() {
         val routesPreviewController = createRoutePreviewController()
-        val testRoutes = createNavigationRoutes(
-            response = createDirectionsResponse(
-                uuid = "test",
-                routes = listOf(
-                    createDirectionsRoute(),
-                    createDirectionsRoute()
-                )
-            )
-        )
+        val testRoutes = createNavigationRoutes()
         routesPreviewController.previewNavigationRoutes(testRoutes)
 
         var previewUpdate: RoutesPreviewUpdate? = null
@@ -115,6 +107,22 @@ class RoutesPreviewControllerTest {
         assertEquals(testRoutes[1], preview.primaryRoute)
         assertEquals(testRoutes[0], preview.alternativesMetadata.first().navigationRoute)
         assertEquals(1, preview.primaryRouteIndex)
+    }
+
+    @Test
+    fun `preview the same set of routes a few times`() {
+        val routesPreviewController = createRoutePreviewController()
+        var eventCount = 0
+        routesPreviewController.registerRoutesPreviewObserver {
+            eventCount++
+        }
+
+        val testRoutes = createNavigationRoutes()
+        routesPreviewController.previewNavigationRoutes(testRoutes)
+        routesPreviewController.previewNavigationRoutes(testRoutes)
+        routesPreviewController.previewNavigationRoutes(testRoutes)
+
+        assertEquals(1, eventCount)
     }
 
     @Test
