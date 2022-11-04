@@ -4,6 +4,24 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `ComponentInstaller` for the `TripProgressComponent` that offers simplified integration of the `MapboxTripProgressView` and `MapboxTripProgressApi`. [#6513](https://github.com/mapbox/mapbox-navigation-android/pull/6513)
+- Introduced new `ViewOptionsCustomization` options that allows showing/hiding of various `NavigationView` subviews. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showManeuver` can be used to show/hide the maneuver view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showSpeedLimit` can be used to show/hide the speed limit view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRoadName` can be used to show/hide the road name view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showActionButtons` can be used to show/hide action buttons layout. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showCompassActionButton` can be used to show/hide compass action button. The default is `false`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showCameraModeActionButton` can be used to show/hide toggle camera mode action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showToggleAudioActionButton` can be used to show/hide toggle voice instructions action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRecenterActionButton` can be used to show/hide re-center camera action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showTripProgress` can be used to show/hide info panel's trip progress view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRoutePreviewButton` can be used to show/hide info panel's show route preview button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showStartNavigationButton` can be used to show/hide info panel's start navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showEndNavigationButton` can be used to show/hide info panel's end navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+- Introduced `ViewOptionsCustomization.showPoiName` and `ViewOptionsCustomization.showArrivalText` that allows showing/hiding of the POI and arrival text view. [#6515](https://github.com/mapbox/mapbox-navigation-android/pull/6515)
+- Introduced `ViewBinderCustomization.infoPanelPoiNameBinder` and `ViewBinderCustomization.infoPanelArrivalTextBinder` that allows injection of custom Info Panel POI and arrival text view into `NavigationView`. [#6515](https://github.com/mapbox/mapbox-navigation-android/pull/6515)
+- Added `LocationMatcherResult#inTunnel` which indicates if a current matched location is in a tunnel. [#6548](https://github.com/mapbox/mapbox-navigation-android/pull/6548)
+- Added experimental routes preview state, see `MapboxNavigaton#setRoutesPreview`, `MapboxNavigaton#changeRoutesPreviewPrimaryRoute`, `MapboxNavigaton#registerRoutesPreviewObserver`, `MapboxNavigaton#getRoutesPreview`. [#6495](https://github.com/mapbox/mapbox-navigation-android/pull/6495)
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.10.0-alpha.2 - 04 November, 2022

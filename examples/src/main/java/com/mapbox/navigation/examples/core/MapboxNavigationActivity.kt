@@ -5,11 +5,13 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
@@ -19,8 +21,10 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -35,6 +39,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
@@ -52,11 +57,10 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
@@ -70,11 +74,10 @@ import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxNavigationActivity : AppCompatActivity() {
 
     /* ----- Layout binding reference ----- */
@@ -229,18 +232,17 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
 
     private val routesObserver = RoutesObserver { result ->
-        if (result.routes.isNotEmpty()) {
+        if (result.navigationRoutes.isNotEmpty()) {
             // generate route geometries asynchronously and render them
-            CoroutineScope(Dispatchers.Main).launch {
-                val result = routeLineAPI.setRoutes(
-                    listOf(RouteLine(result.routes.first(), null))
-                )
+            routeLineAPI.setNavigationRoutes(
+                result.navigationRoutes,
+                mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
+            ) {
                 val style = mapboxMap.getStyle()
                 if (style != null) {
-                    routeLineView.renderRouteDrawData(style, result)
+                    routeLineView.renderRouteDrawData(style, it)
                 }
             }
-
             // update the camera position to account for the new route
             viewportDataSource.onRouteChanged(result.routes.first())
             viewportDataSource.evaluate()
@@ -263,9 +265,46 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
     }
 
+    private val routesPreviewObserver = RoutesPreviewObserver { update ->
+        val routePreview = update.routesPreview
+        if (routePreview != null) {
+            routeLineAPI.setNavigationRoutes(
+                routePreview.routesList,
+                routePreview.alternativesMetadata
+            ) {
+                val style = mapboxMap.getStyle()
+                if (style != null) {
+                    routeLineView.renderRouteDrawData(style, it)
+                }
+            }
+            // update the camera position to account for the new route
+            viewportDataSource.onRouteChanged(routePreview.primaryRoute)
+            viewportDataSource.evaluate()
+        }
+    }
+
     private val navigationSessionStateObserver = NavigationSessionStateObserver {
         logD("NavigationSessionState=$it", LOG_CATEGORY)
         logD("sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}", LOG_CATEGORY)
+    }
+
+    private val routeClickPadding = com.mapbox.android.gestures.Utils.dpToPx(30f)
+
+    private val previewMapClickListener = OnMapClickListener {
+        lifecycleScope.launch {
+            mapboxNavigation.getRoutesPreview() ?: return@launch
+            val result = routeLineAPI.findClosestRoute(
+                it,
+                binding.mapView.getMapboxMap(),
+                routeClickPadding
+            )
+
+            val routeFound = result.value?.navigationRoute
+            if (routeFound != null && routeFound != routeLineAPI.getPrimaryNavigationRoute()) {
+                mapboxNavigation.changeRoutesPreviewPrimaryRoute(routeFound)
+            }
+        }
+        false
     }
 
     @SuppressLint("MissingPermission")
@@ -401,6 +440,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 findRoute(point)
                 true
             }
+            binding.mapView.gestures.addOnMapClickListener(previewMapClickListener)
         }
 
         // initialize view interactions
@@ -438,6 +478,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.registerRoutesPreviewObserver(routesPreviewObserver)
     }
 
     override fun onStop() {
@@ -447,6 +488,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.unregisterRoutesPreviewObserver(routesPreviewObserver)
     }
 
     override fun onDestroy() {
@@ -468,6 +510,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
+                .alternatives(true)
                 .coordinatesList(listOf(origin, destination))
                 .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .build(),
@@ -476,7 +519,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    setRouteAndStartNavigation(routes)
+                    setRoutesPreview(routes)
                 }
 
                 override fun onFailure(
@@ -491,6 +534,18 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    private fun setRoutesPreview(routes: List<NavigationRoute>) {
+        binding.navigateButton.apply {
+            visibility = View.VISIBLE
+            setOnClickListener {
+                visibility = View.GONE
+                setRouteAndStartNavigation(mapboxNavigation.getRoutesPreview()!!.routesList)
+                mapboxNavigation.setRoutesPreview(emptyList())
+            }
+        }
+        mapboxNavigation.setRoutesPreview(routes)
     }
 
     private fun setRouteAndStartNavigation(route: List<NavigationRoute>) {

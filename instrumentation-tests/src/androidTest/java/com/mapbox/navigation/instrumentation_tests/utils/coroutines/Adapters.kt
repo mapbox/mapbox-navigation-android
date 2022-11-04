@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
@@ -18,6 +19,8 @@ import com.mapbox.navigation.core.RoutesSetError
 import com.mapbox.navigation.core.RoutesSetSuccess
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.preview.RoutesPreviewObserver
+import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -39,6 +42,20 @@ fun MapboxNavigation.routesUpdates(): Flow<RoutesUpdatedResult> {
         navigation.registerRoutesObserver(observer)
         awaitClose {
             navigation.unregisterRoutesObserver(observer)
+        }
+    }
+}
+
+@ExperimentalPreviewMapboxNavigationAPI
+fun MapboxNavigation.routesPreviewUpdates(): Flow<RoutesPreviewUpdate> {
+    val navigation = this
+    return callbackFlow {
+        val observer = RoutesPreviewObserver {
+            trySend(it)
+        }
+        navigation.registerRoutesPreviewObserver(observer)
+        awaitClose {
+            navigation.unregisterRoutesPreviewObserver(observer)
         }
     }
 }

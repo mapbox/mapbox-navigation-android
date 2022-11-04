@@ -8,6 +8,8 @@ import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
+import com.mapbox.navigation.core.preview.NativeRoutesDataParser
+import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.routerefresh.EVDataHolder
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
@@ -23,6 +25,7 @@ import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
+import kotlinx.coroutines.CoroutineScope
 
 internal object NavigationComponentProvider {
 
@@ -99,6 +102,13 @@ internal object NavigationComponentProvider {
     ).also {
         historyRecordingStateHandler.registerCopilotSessionObserver(it)
     }
+
+    fun createRoutesPreviewController(
+        scope: CoroutineScope
+    ) = RoutesPreviewController(
+        routesDataParser = NativeRoutesDataParser(),
+        scope = scope
+    )
 
     fun createRouteRefreshRequestDataProvider(): RouteProgressDataProvider =
         RouteProgressDataProvider()
