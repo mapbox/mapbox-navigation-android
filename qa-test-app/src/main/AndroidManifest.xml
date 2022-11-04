@@ -33,6 +33,10 @@
             android:name=".view.componentinstaller.ComponentsAltActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
+        <activity
+            android:name=".view.componentinstaller.RoadObjectsMappingTestingActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            />
         <activity android:name=".view.AppLifecycleActivity" />
         <activity android:name=".view.AlternativeRouteActivity" />
         <activity android:name=".view.MapboxRouteLineActivity" />

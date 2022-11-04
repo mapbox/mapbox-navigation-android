@@ -27,7 +27,8 @@ import kotlin.coroutines.resumeWithException
 
 @ExperimentalPreviewMapboxNavigationAPI
 class FindRouteOnLongPress(
-    val mapView: MapView
+    val mapView: MapView,
+    private val customizeRouteOptions: RouteOptions.Builder.() -> Unit = {}
 ) : UIComponent(), OnMapLongClickListener {
 
     private var originLocation: Location? = null
@@ -71,6 +72,7 @@ class FindRouteOnLongPress(
             .coordinatesList(listOf(origin, destination))
             .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .alternatives(true)
+            .apply(customizeRouteOptions)
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,

@@ -73,6 +73,15 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             app:extendableButtonIcon="@drawable/mapbox_ic_camera_recenter" />
+
+        <com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+            android:id="@+id/zoomToRomeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            app:extendableButtonIcon="@drawable/mapbox_ic_pin" />
+
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <ProgressBar

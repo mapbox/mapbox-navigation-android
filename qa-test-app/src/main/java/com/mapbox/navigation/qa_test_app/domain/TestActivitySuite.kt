@@ -26,6 +26,7 @@ import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
 import com.mapbox.navigation.qa_test_app.view.TripOverviewActivity
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsActivity
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsAltActivity
+import com.mapbox.navigation.qa_test_app.view.componentinstaller.RoadObjectsMappingTestingActivity
 import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationViewCustomizedActivity
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
@@ -35,6 +36,12 @@ object TestActivitySuite {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     val testActivities = listOf(
+        TestActivityDescription(
+            "mapToRoadObject Perf. Testing",
+            R.string.experimental_components_install,
+        ) { activity ->
+            activity.startActivity<RoadObjectsMappingTestingActivity>()
+        },
         TestActivityDescription(
             "Components install via MapboxNavigationApp",
             R.string.experimental_components_install,
