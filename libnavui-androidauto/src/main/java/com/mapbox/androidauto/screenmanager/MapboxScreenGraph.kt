@@ -11,6 +11,7 @@ import com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES_FEEDBACK
 import com.mapbox.androidauto.screenmanager.MapboxScreen.FREE_DRIVE
 import com.mapbox.androidauto.screenmanager.MapboxScreen.FREE_DRIVE_FEEDBACK
 import com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK
+import com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK_FEEDBACK
 import com.mapbox.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION
 import com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW
 import com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK
@@ -25,6 +26,7 @@ import com.mapbox.androidauto.screenmanager.factories.FavoritesScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.FreeDriveFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.FreeDriveScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.GeoDeeplinkPlacesCarScreenFactory
+import com.mapbox.androidauto.screenmanager.factories.GeoDeeplinkPlacesFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.NeedsLocationPermissionScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.RoutePreviewFeedbackScreenFactory
 import com.mapbox.androidauto.screenmanager.factories.RoutePreviewScreenFactory
@@ -58,6 +60,8 @@ fun MapboxCarContext.prepareScreens() = apply {
             to FavoritesFeedbackScreenFactory(mapboxCarContext),
         GEO_DEEPLINK
             to GeoDeeplinkPlacesCarScreenFactory(mapboxCarContext),
+        GEO_DEEPLINK_FEEDBACK
+            to GeoDeeplinkPlacesFeedbackScreenFactory(mapboxCarContext),
         ROUTE_PREVIEW
             to RoutePreviewScreenFactory(mapboxCarContext),
         ROUTE_PREVIEW_FEEDBACK

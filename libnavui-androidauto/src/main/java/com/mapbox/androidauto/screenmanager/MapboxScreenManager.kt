@@ -2,6 +2,7 @@ package com.mapbox.androidauto.screenmanager
 
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.car.app.Session
@@ -9,6 +10,7 @@ import androidx.car.app.model.Template
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.internal.context.MapboxCarContextOwner
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.channels.BufferOverflow
@@ -21,8 +23,57 @@ import java.util.ArrayDeque
 import java.util.Deque
 
 /**
- * The Mapbox Navigation Android Auto SDK is prepared with a default experience. This object allows
- * you to customize the experience to meet your needs.
+ * The Mapbox Navigation Android Auto SDK is prepared with a default and customizable experience.
+ * [MapboxScreenManager] allows you to prepare an experience that includes many screens with a
+ * single function. Use the [MapboxCarContext.prepareScreens] to get started.
+ *
+ * ### How it works
+ * Using [String] to [MapboxScreenFactory] pairing, the [MapboxScreenManager] will create a screen
+ * based on a string provided. You can change which screen should show by updating the key value pair.
+ *
+ * Communication with [MapboxScreenManager] can be done statically. Observe the screen changes
+ * with [MapboxScreenManager.screenEvent], and change the car screen with different
+ * [MapboxScreenOperation]. Each operation has requirements built into [MapboxScreenManager]. For
+ * example, the [MapboxScreenManager.goBack] function requires a back stack so it requires an
+ * instance of [MapboxScreenManager]. The [MapboxScreenManager.replaceTop] does not require a
+ * backstack, and can be done when the car is not in foreground - this operation can be done
+ * statically.
+ *
+ * ### Set up
+ * The [MapboxScreenManager] is provided to you through the [MapboxCarContext]. It is important
+ * to keep the screen manager lifecycle close to [CarContext] to avoid memory leaks. The
+ * [MapboxScreenManager] does not work without the [ScreenManager] which is also bound to the
+ * [CarContext].
+ *
+ * Use [MapboxCarContext.prepareScreens] to prepare a default experience. The extension will use
+ * the [putAll] function to create a mapping between [String] and [MapboxScreenFactory]. All of the
+ * Mapbox screens keys can be found in [MapboxScreen]. The default screen graph requires a
+ * [MapboxCarContext] so use it to prepare the screens during initialization.
+ *
+ * Example
+ * ```
+ * class MySession : Session() {
+ *   private val mapboxCarContext = MapboxCarContext(lifecycle, MapboxCarMap())
+ *       .prepareScreens()
+ * --snip--
+ * }
+ * ```
+ *
+ * ### Customization
+ *
+ * At any point, you can change the mapping of the [MapboxScreenManager] with setters. The
+ * [MapboxScreenFactory] instances are expected to have a lifecycle as long as the [Session], so
+ * an instance of [MapboxScreenManager] is required. You can access this class through the
+ *
+ * [MapboxScreenFactory.create]
+ * Example
+ * ```
+ * mapboxCarContext.screenManager["MY_SCREEN"] = MyScreenFactory()
+ *
+ * // When your app is showing on the Android Auto head unit, the MyScreenFactory will be shown
+ * // on the top of the back stack.
+ * MapboxScreenManager.replaceTop("MY_SCREEN")
+ * ```
  */
 class MapboxScreenManager internal constructor(
     private val carContextOwner: MapboxCarContextOwner
