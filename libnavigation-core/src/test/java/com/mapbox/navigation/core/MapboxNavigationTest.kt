@@ -157,6 +157,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun destroy_unregisterAllRoutesPreviewObservers() {
+        createMapboxNavigation()
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { routesPreviewController.unregisterAllRoutesPreviewObservers() }
+    }
+
+    @Test
     fun init_registerOffRouteObserver_MapboxNavigation_recreated() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()

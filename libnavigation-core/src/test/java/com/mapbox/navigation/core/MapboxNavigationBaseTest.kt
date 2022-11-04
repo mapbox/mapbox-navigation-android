@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
+import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -100,6 +101,7 @@ internal open class MapboxNavigationBaseTest {
     val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)
     val threadController = mockk<ThreadController>(relaxed = true)
     val routeProgressDataProvider = mockk<RouteProgressDataProvider>(relaxed = true)
+    val routesPreviewController = mockk<RoutesPreviewController>(relaxed = true)
 
     val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -206,6 +208,9 @@ internal open class MapboxNavigationBaseTest {
         every {
             NavigationComponentProvider.createRouteRefreshRequestDataProvider()
         } returns routeProgressDataProvider
+        every {
+            NavigationComponentProvider.createRoutesPreviewController(any())
+        } returns routesPreviewController
 
         every {
             navigator.create(
