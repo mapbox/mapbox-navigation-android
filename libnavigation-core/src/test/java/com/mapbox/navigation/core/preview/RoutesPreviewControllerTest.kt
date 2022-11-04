@@ -126,6 +126,25 @@ class RoutesPreviewControllerTest {
     }
 
     @Test
+    fun `cleanup routes a few times`() {
+        val routesPreviewController = createRoutePreviewController()
+        var eventCount = 0
+        routesPreviewController.registerRoutesPreviewObserver {
+            eventCount++
+        }
+
+        routesPreviewController.previewNavigationRoutes(createNavigationRoutes())
+        routesPreviewController.previewNavigationRoutes(emptyList())
+        routesPreviewController.previewNavigationRoutes(emptyList())
+        routesPreviewController.previewNavigationRoutes(emptyList())
+
+        assertEquals(
+            2, // one for set and one for cleanup
+            eventCount
+        )
+    }
+
+    @Test
     fun `select different primary route`() {
         val routesPreviewController = createRoutePreviewController()
         var previewUpdate: RoutesPreviewUpdate? = null
