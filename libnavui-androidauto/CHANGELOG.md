@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## androidauto-v0.16.0 - 04 November, 2022
+### Changelog
+[Changes between 0.15.0 and 0.16.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.15.0...androidauto-v0.16.0)
+
+#### Features
 - Added `MapboxCarMapLoader` to handle dark and light map style configuration changes. [#6530](https://github.com/mapbox/mapbox-navigation-android/pull/6530)
 
 #### Bug fixes and improvements
@@ -11,6 +18,13 @@ Mapbox welcomes participation and contributions from everyone.
 - Flattened the `car` package because it is adding an unnecessary and confusing layer. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
 - Removed `Fragment.attachAudioGuidance` extension function because it will be replaced by `ComponentInstaller`. [#6527](https://github.com/mapbox/mapbox-navigation-android/pull/6527)
 - Fixed an issue with compass, logo and speed limit widgets that caused them to disappear if road label widget was not added to the same screen. [#6541](https://github.com/mapbox/mapbox-navigation-android/pull/6541)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.3.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.3.0))
+- Mapbox Search `v1.0.0-beta.39` ([release notes](https://github.com/mapbox/mapbox-search-android/releases/tag/v1.0.0-beta.39))
+- Mapbox Navigation `v2.9.0-rc.2` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.9.0-rc.2))
+
 
 ## androidauto-v0.15.0 - October 21, 2022
 ### Changelog
