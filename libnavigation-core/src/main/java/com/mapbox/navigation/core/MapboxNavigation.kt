@@ -854,7 +854,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /***
-     * Sets routes to preview. Triggers an update in [RoutesPreviewObserver].
+     * Sets routes to preview.
+     * Triggers an update in [RoutesPreviewObserver] and changes [MapboxNavigation.getRoutesPreview].
+     * Routes preview requires async processing, so new routes won't be immediately available in [RoutesPreviewObserver] and [MapboxNavigation.getRoutesPreview].
+     * Subscribe for updates using [MapboxNavigation.registerRoutesPreviewObserver] to receive new routes preview when processing will be completed.
      *
      * If [routes] isn't empty, the route with [primaryRouteIndex] is considered as primary, the others as alternatives.
      * To cleanup routes preview state pass an empty list as [routes].
