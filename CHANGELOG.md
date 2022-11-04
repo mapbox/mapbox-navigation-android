@@ -5,6 +5,8 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Slightly decreased the memory consumption of the online router. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
+- Improved positioning and location signal simulation in tunnels. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
 
 ## Mapbox Navigation SDK 2.9.0-rc.2 - 03 November, 2022
 ### Changelog
