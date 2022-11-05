@@ -46,7 +46,7 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
         with(mapboxCarMapSurface) {
             logAndroidAuto("onAttached load style")
             mapSurface.getMapboxMap().loadStyle(
-                mapStyle(carContext.isDarkMode),
+                getStyleExtension(carContext.isDarkMode),
                 onStyleLoaded = { style ->
                     logAndroidAuto("onAttached style loaded")
                     style.addPersistentStyleCustomLayer(
@@ -63,6 +63,17 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         mapboxCarMapSurface.getStyle()?.removeStyleLayer(EMPTY_LAYER_ID)
         mapboxMap = null
+    }
+
+    /**
+     * Returns the current style contract. If an override has not been set the default is returned.
+     */
+    fun getStyleExtension(isDarkMode: Boolean): StyleContract.StyleExtension {
+        return if (isDarkMode) {
+            darkStyleOverride ?: DEFAULT_NIGHT_STYLE
+        } else {
+            lightStyleOverride ?: DEFAULT_DAY_STYLE
+        }
     }
 
     /**
@@ -96,7 +107,7 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
      */
     fun onCarConfigurationChanged(carContext: CarContext) = apply {
         mapboxMap?.loadStyle(
-            mapStyle(carContext.isDarkMode),
+            getStyleExtension(carContext.isDarkMode),
             onStyleLoaded = { style ->
                 logAndroidAuto("updateMapStyle styleAvailable ${style.styleURI}")
             },
@@ -104,14 +115,6 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
         ) ?: logAndroidAuto(
             "onCarConfigurationChanged did not load the map because the map is not attached"
         )
-    }
-
-    private fun mapStyle(isDarkMode: Boolean): StyleContract.StyleExtension {
-        return if (isDarkMode) {
-            darkStyleOverride ?: DEFAULT_NIGHT_STYLE
-        } else {
-            lightStyleOverride ?: DEFAULT_DAY_STYLE
-        }
     }
 
     private companion object {
