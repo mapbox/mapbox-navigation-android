@@ -73,6 +73,8 @@
 
         <activity android:name=".view.DropInButtonsActivity" />
 
+        <activity android:name=".view.RoutesPreviewActivity" />
+
         <service
             android:name=".car.MainCarAppService"
             android:exported="true"
