@@ -240,7 +240,7 @@ internal class RouteAlternativesController constructor(
     }
 }
 
-private fun RouteAlternative.mapToMetadata(
+internal fun RouteAlternative.mapToMetadata(
     navigationRoute: NavigationRoute
 ): AlternativeRouteMetadata {
     return AlternativeRouteMetadata(

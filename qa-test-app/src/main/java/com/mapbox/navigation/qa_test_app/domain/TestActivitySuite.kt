@@ -22,6 +22,7 @@ import com.mapbox.navigation.qa_test_app.view.RouteLineScalingActivity
 import com.mapbox.navigation.qa_test_app.view.RouteNumericTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
+import com.mapbox.navigation.qa_test_app.view.RoutesPreviewActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
 import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
 import com.mapbox.navigation.qa_test_app.view.TripOverviewActivity
@@ -188,6 +189,12 @@ object TestActivitySuite {
             R.string.drop_in_buttons_activity_description
         ) { activity ->
             activity.startActivity<DropInButtonsActivity>()
+        },
+        TestActivityDescription(
+            "Route preview",
+            R.string.drop_in_buttons_activity_description
+        ) { activity ->
+            activity.startActivity<RoutesPreviewActivity>()
         },
     )
 }

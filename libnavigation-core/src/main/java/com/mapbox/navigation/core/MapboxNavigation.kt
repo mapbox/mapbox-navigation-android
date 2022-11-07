@@ -64,6 +64,8 @@ import com.mapbox.navigation.core.internal.utils.paramsProvider
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
+import com.mapbox.navigation.core.preview.RoutesPreview
+import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
@@ -273,6 +275,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.eHorizonOptions.alertServiceOptions.collectBridges,
             navigationOptions.eHorizonOptions.alertServiceOptions.collectRestrictedAreas
         ),
+    )
+
+    private val routesPreviewController = NavigationComponentProvider.createRoutesPreviewController(
+        threadController.getMainScopeAndRootJob().scope
     )
 
     private val routeUpdateMutex = Mutex()
@@ -847,6 +853,75 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
     }
 
+    /***
+     * Sets routes to preview.
+     * Triggers an update in [RoutesPreviewObserver] and changes [MapboxNavigation.getRoutesPreview].
+     * Preview state is updated asynchronously as it requires the SDK to process routes and compute alternative metadata. Subscribe for updates using [MapboxNavigation.registerRoutesPreviewObserver] to receive new routes preview state when the processing will be completed.
+     *
+     * If [routes] isn't empty, the route with [primaryRouteIndex] is considered as primary, the others as alternatives.
+     * To cleanup routes preview state pass an empty list as [routes].
+     *
+     * Use [RoutesPreview.routesList] to start Active Guidance after route's preview:
+     * ```
+     * mapboxNavigation.getRoutesPreview()?.routesList?.let{ routesList ->
+     *     mapboxNavigation.setNavigationRoutes(routesList)
+     * }
+     * ```
+     * Routes preview state is controlled by the SDK's user. If you want to stop routes preview when you start active guidance, do it manually:
+     * ```
+     * mapboxNavigation.setRoutesPreview(emptyList())
+     * ```
+     *
+     * @param routes to preview
+     * @param primaryRouteIndex index of primary route from [routes]
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    @JvmOverloads
+    fun setRoutesPreview(routes: List<NavigationRoute>, primaryRouteIndex: Int = 0) {
+        routesPreviewController.previewNavigationRoutes(routes, primaryRouteIndex)
+    }
+
+    /***
+     * Changes primary route for current preview state without changing order of [RoutesPreview.originalRoutesList].
+     * Order is important for a case when routes are displayed as a list on UI, the list shouldn't change order when a user choose different primary route.
+     *
+     * In case [changeRoutesPreviewPrimaryRoute] is called while the the other set of routes are being processed, the current state with a new routes will be reapplied after the current processing.
+     *
+     * @param newPrimaryRoute is a new primary route
+     * @throws [IllegalArgumentException] if [newPrimaryRoute] isn't found in the previewed routes list
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    @Throws(IllegalArgumentException::class)
+    fun changeRoutesPreviewPrimaryRoute(newPrimaryRoute: NavigationRoute) {
+        routesPreviewController.changeRoutesPreviewPrimaryRoute(newPrimaryRoute)
+    }
+
+    /***
+     * Registers [RoutesPreviewObserver] to be notified when routes preview state changes.
+     * [observer] is immediately called with current preview state
+     *
+     * @param observer to be called on routes preview state changes
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun registerRoutesPreviewObserver(observer: RoutesPreviewObserver) {
+        routesPreviewController.registerRoutesPreviewObserver(observer)
+    }
+
+    /***
+     * Unregisters observer which were registered using [registerRoutesPreviewObserver]
+     * @param observer which stops receiving updates when routes preview changes
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun unregisterRoutesPreviewObserver(observer: RoutesPreviewObserver) {
+        routesPreviewController.unregisterRoutesPreviewObserver(observer)
+    }
+
+    /***
+     * Returns current state of routes preview
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun getRoutesPreview(): RoutesPreview? = routesPreviewController.getRoutesPreview()
+
     /**
      * Requests road graph data update and invokes the callback on result.
      * Use this method if the frequency of application relaunch is too low
@@ -1065,6 +1140,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             reachabilityObserverId = null
         }
         routeRefreshController.unregisterAllRouteRefreshStateObservers()
+        routesPreviewController.unregisterAllRoutesPreviewObservers()
 
         isDestroyed = true
         hasInstance = false

@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added experimental routes preview state, see `MapboxNavigaton#setRoutesPreview`, `MapboxNavigaton#changeRoutesPreviewPrimaryRoute`, `MapboxNavigaton#registerRoutesPreviewObserver`, `MapboxNavigaton#getRoutesPreview`. [#6495](https://github.com/mapbox/mapbox-navigation-android/pull/6495)
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.10.0-alpha.2 - 04 November, 2022
