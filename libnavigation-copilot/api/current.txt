@@ -1,0 +1,121 @@
+// Signature format: 3.0
+package com.mapbox.navigation.copilot {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class HistoryEvent {
+  }
+
+  public final class HistoryEventsKt {
+  }
+
+  @Keep @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class HistoryPoint {
+    ctor public HistoryPoint(double latitude, double longitude);
+    method public double component1();
+    method public double component2();
+    method public com.mapbox.navigation.copilot.HistoryPoint copy(double latitude, double longitude);
+    method public double getLatitude();
+    method public double getLongitude();
+    property public final double latitude;
+    property public final double longitude;
+  }
+
+  @Keep @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class HistoryRoutablePoint {
+    ctor public HistoryRoutablePoint(com.mapbox.navigation.copilot.HistoryPoint coordinates);
+    method public com.mapbox.navigation.copilot.HistoryPoint component1();
+    method public com.mapbox.navigation.copilot.HistoryRoutablePoint copy(com.mapbox.navigation.copilot.HistoryPoint coordinates);
+    method public com.mapbox.navigation.copilot.HistoryPoint getCoordinates();
+    property public final com.mapbox.navigation.copilot.HistoryPoint coordinates;
+  }
+
+  @Keep @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class HistorySearchResult {
+    ctor public HistorySearchResult(String id, String name, String address, com.mapbox.navigation.copilot.HistoryPoint? coordinates, java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? routablePoint);
+    method public String component1();
+    method public String component2();
+    method public String component3();
+    method public com.mapbox.navigation.copilot.HistoryPoint? component4();
+    method public java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? component5();
+    method public com.mapbox.navigation.copilot.HistorySearchResult copy(String id, String name, String address, com.mapbox.navigation.copilot.HistoryPoint? coordinates, java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? routablePoint);
+    method public String getAddress();
+    method public com.mapbox.navigation.copilot.HistoryPoint? getCoordinates();
+    method public String getId();
+    method public String getName();
+    method public java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? getRoutablePoint();
+    property public final String address;
+    property public final com.mapbox.navigation.copilot.HistoryPoint? coordinates;
+    property public final String id;
+    property public final String name;
+    property public final java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? routablePoint;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxCopilot implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void push(com.mapbox.navigation.copilot.HistoryEvent historyEvent);
+    method public void start();
+    method public void stop();
+    field public static final com.mapbox.navigation.copilot.MapboxCopilot INSTANCE;
+  }
+
+  @Keep @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SearchResultUsed {
+    ctor public SearchResultUsed(String provider, String id, String name, String address, com.mapbox.navigation.copilot.HistoryPoint coordinates, java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? routablePoint);
+    method public String component1();
+    method public String component2();
+    method public String component3();
+    method public String component4();
+    method public com.mapbox.navigation.copilot.HistoryPoint component5();
+    method public java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? component6();
+    method public com.mapbox.navigation.copilot.SearchResultUsed copy(String provider, String id, String name, String address, com.mapbox.navigation.copilot.HistoryPoint coordinates, java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? routablePoint);
+    method public String getAddress();
+    method public com.mapbox.navigation.copilot.HistoryPoint getCoordinates();
+    method public String getId();
+    method public String getName();
+    method public String getProvider();
+    method public java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? getRoutablePoint();
+    property public final String address;
+    property public final com.mapbox.navigation.copilot.HistoryPoint coordinates;
+    property public final String id;
+    property public final String name;
+    property public final String provider;
+    property public final java.util.List<com.mapbox.navigation.copilot.HistoryRoutablePoint>? routablePoint;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SearchResultUsedEvent extends com.mapbox.navigation.copilot.HistoryEvent {
+    ctor public SearchResultUsedEvent(com.mapbox.navigation.copilot.SearchResultUsed searchResultUsed);
+    method public com.mapbox.navigation.copilot.SearchResultUsed component1();
+    method public com.mapbox.navigation.copilot.SearchResultUsedEvent copy(com.mapbox.navigation.copilot.SearchResultUsed searchResultUsed);
+    method public com.mapbox.navigation.copilot.SearchResultUsed getSearchResultUsed();
+    property public final com.mapbox.navigation.copilot.SearchResultUsed searchResultUsed;
+  }
+
+  @Keep @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SearchResults {
+    ctor public SearchResults(String provider, String request, String? response, String? error, String searchQuery, java.util.List<com.mapbox.navigation.copilot.HistorySearchResult>? results);
+    method public String component1();
+    method public String component2();
+    method public String? component3();
+    method public String? component4();
+    method public String component5();
+    method public java.util.List<com.mapbox.navigation.copilot.HistorySearchResult>? component6();
+    method public com.mapbox.navigation.copilot.SearchResults copy(String provider, String request, String? response, String? error, String searchQuery, java.util.List<com.mapbox.navigation.copilot.HistorySearchResult>? results);
+    method public String? getError();
+    method public String getProvider();
+    method public String getRequest();
+    method public String? getResponse();
+    method public java.util.List<com.mapbox.navigation.copilot.HistorySearchResult>? getResults();
+    method public String getSearchQuery();
+    property public final String? error;
+    property public final String provider;
+    property public final String request;
+    property public final String? response;
+    property public final java.util.List<com.mapbox.navigation.copilot.HistorySearchResult>? results;
+    property public final String searchQuery;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SearchResultsEvent extends com.mapbox.navigation.copilot.HistoryEvent {
+    ctor public SearchResultsEvent(com.mapbox.navigation.copilot.SearchResults searchResults);
+    method public com.mapbox.navigation.copilot.SearchResults component1();
+    method public com.mapbox.navigation.copilot.SearchResultsEvent copy(com.mapbox.navigation.copilot.SearchResults searchResults);
+    method public com.mapbox.navigation.copilot.SearchResults getSearchResults();
+    property public final com.mapbox.navigation.copilot.SearchResults searchResults;
+  }
+
+}
+

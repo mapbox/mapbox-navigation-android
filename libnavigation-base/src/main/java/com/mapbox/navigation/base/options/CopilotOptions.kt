@@ -1,13 +1,17 @@
-package com.mapbox.navigation.base.internal
+package com.mapbox.navigation.base.options
+
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
  * Defines options for Copilot.
  *
  * @param shouldSendHistoryOnlyWithFeedback true if Copilot History files should be sent only when they include Feedback events. Default is false
  */
+@ExperimentalPreviewMapboxNavigationAPI
 class CopilotOptions private constructor(
     val shouldSendHistoryOnlyWithFeedback: Boolean
 ) {
+
     /**
      * @return the builder that created the [CopilotOptions]
      */
