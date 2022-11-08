@@ -42,6 +42,8 @@ import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
+import com.mapbox.navigation.copilot.v2.HistoryEvent
+import com.mapbox.navigation.copilot.v2.internal.MapboxCopilot
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -1095,6 +1097,29 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 }
             }
         )
+    }
+
+    /**
+     * start
+     */
+    fun startCopilot() {
+        MapboxCopilot.start()
+    }
+
+    /**
+     * stop
+     */
+    fun stopCopilot() {
+        MapboxCopilot.stop()
+    }
+
+    /**
+     * push
+     *
+     * @param historyEvent [SearchResultsEvent] or [SearchResultUsedEvent]
+     */
+    fun pushCopilot(historyEvent: HistoryEvent) {
+        MapboxCopilot.push(historyEvent)
     }
 
     /**

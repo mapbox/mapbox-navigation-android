@@ -28,6 +28,7 @@ ext {
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.8.0',
       mapboxMapsAndroidAuto     : '0.3.0',
+      mapboxCopilot             : '0.9.0-SNAPSHOT',
       androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',
       androidXArchCoreVersion   : '2.1.0',
@@ -80,6 +81,7 @@ ext {
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
       mapboxSearchSdk           : "com.mapbox.search:mapbox-search-android:${version.mapboxSearchSdk}",
+      mapboxCopilot             : "com.mapbox.navigation.v2:copilot:${version.mapboxCopilot}",
 
       /**
        * explicitly define Mapbox OkHttp dependency so that we are sure it's in sync with the Common SDK version we define

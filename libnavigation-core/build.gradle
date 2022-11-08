@@ -51,6 +51,8 @@ dependencies {
     implementation project(':libnavigation-metrics')
     implementation dependenciesList.mapboxSdkTurf
 
+    implementation dependenciesList.mapboxCopilot
+
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidStartup
