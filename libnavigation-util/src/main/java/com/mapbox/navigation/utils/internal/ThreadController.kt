@@ -1,11 +1,14 @@
 package com.mapbox.navigation.utils.internal
 
+import android.os.Handler
+import android.os.Looper
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
@@ -46,13 +49,27 @@ data class JobControl(val job: Job, val scope: CoroutineScope)
 
 class ThreadController {
 
+    private val sdkLooper = Looper.myLooper()!!
+
     companion object {
         val IODispatcher: CoroutineDispatcher = Dispatchers.IO
         val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+        lateinit var sdkDispatcher: CoroutineDispatcher
+    }
+
+    init {
+        sdkDispatcher = Handler(sdkLooper).asCoroutineDispatcher()
     }
 
     internal var ioRootJob = SupervisorJob()
     internal var mainRootJob = SupervisorJob()
+
+    fun checkSDkThread() {
+        assert(Looper.myLooper() == sdkLooper) {
+            "Current lopper doesn't match the same the SDK were created from. " +
+                "You should call the SDK's methods from the thread were the SDK was created"
+        }
+    }
 
     /**
      * This method cancels all coroutines that are children of io and navigator jobs.
@@ -97,8 +114,8 @@ class ThreadController {
     /**
      * Same as [getIOScopeAndRootJob], but using the MainThread dispatcher.
      */
-    fun getMainScopeAndRootJob(): JobControl {
+    fun getSDKScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(mainRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main))
+        return JobControl(parentJob, CoroutineScope(parentJob + ThreadController.sdkDispatcher))
     }
 }

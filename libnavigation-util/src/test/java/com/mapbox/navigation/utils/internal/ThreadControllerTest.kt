@@ -124,7 +124,7 @@ class ThreadControllerTest {
         val mainRootJob = SupervisorJob()
         threadController.mainRootJob = mainRootJob
 
-        val mainJobController = threadController.getMainScopeAndRootJob()
+        val mainJobController = threadController.getSDKScopeAndRootJob()
 
         assertEquals(mainRootJob.children.first(), mainJobController.job)
         assertEquals(

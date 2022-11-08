@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 internal class TripServiceActivity : AppCompatActivity() {
 
     private val threadController = ThreadController()
-    private var mainJobController = threadController.getMainScopeAndRootJob()
+    private var mainJobController = threadController.getSDKScopeAndRootJob()
     private lateinit var tripNotification: TripNotification
     private lateinit var mapboxTripService: MapboxTripService
     private var textUpdateJob: Job = Job()

@@ -128,7 +128,7 @@ internal open class MapboxNavigationBaseTest {
 
     @Before
     open fun setUp() {
-        every { threadController.getMainScopeAndRootJob() } answers {
+        every { threadController.getSDKScopeAndRootJob() } answers {
             JobControl(mockk(), coroutineRule.createTestScope())
         }
         mockkObject(LoggerProvider)

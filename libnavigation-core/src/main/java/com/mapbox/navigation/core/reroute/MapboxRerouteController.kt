@@ -34,7 +34,7 @@ internal class MapboxRerouteController(
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
 
-    private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
+    private val mainJobController: JobControl = threadController.getSDKScopeAndRootJob()
 
     private var requestId: Long? = null
 

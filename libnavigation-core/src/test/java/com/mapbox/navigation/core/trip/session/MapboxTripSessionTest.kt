@@ -152,7 +152,7 @@ class MapboxTripSessionTest {
         every { location.toFixLocation() } returns fixLocation
         every { fixLocation.toLocation() } returns location
         every { keyFixPoints.toLocations() } returns keyPoints
-        every { threadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { threadController.getSDKScopeAndRootJob() } returns JobControl(parentJob, testScope)
         navigationOptions = NavigationOptions.Builder(context).build()
         tripSession = buildTripSession()
 

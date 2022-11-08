@@ -30,7 +30,7 @@ internal class RouteAlternativesController constructor(
 
     private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
 
-    private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
+    private val mainJobControl by lazy { threadController.getSDKScopeAndRootJob() }
 
     private var observerProcessingJob: Job? = null
 

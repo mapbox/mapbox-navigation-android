@@ -46,7 +46,7 @@ internal class TripSessionLocationEngine constructor(
         locationEngine.requestLocationUpdates(
             navigationOptions.locationEngineRequest,
             locationEngineCallback,
-            Looper.getMainLooper()
+            Looper.myLooper()
         )
         locationEngine.getLastLocation(locationEngineCallback)
     }
