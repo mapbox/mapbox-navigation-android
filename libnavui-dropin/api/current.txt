@@ -239,7 +239,7 @@ package com.mapbox.navigation.dropin {
     method public Integer? getInfoPanelMarginEnd();
     method public Integer? getInfoPanelMarginStart();
     method public Integer? getInfoPanelPeekHeight();
-    method public com.mapbox.maps.plugin.LocationPuck? getLocationPuck();
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions? getLocationPuckOptions();
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? getManeuverViewOptions();
     method public Integer? getPoiNameTextAppearance();
     method public Integer? getRecenterButtonStyle();
@@ -260,7 +260,7 @@ package com.mapbox.navigation.dropin {
     method public void setInfoPanelMarginEnd(Integer?);
     method public void setInfoPanelMarginStart(Integer?);
     method public void setInfoPanelPeekHeight(Integer?);
-    method public void setLocationPuck(com.mapbox.maps.plugin.LocationPuck?);
+    method public void setLocationPuckOptions(com.mapbox.navigation.ui.maps.puck.LocationPuckOptions?);
     method public void setManeuverViewOptions(com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions?);
     method public void setPoiNameTextAppearance(Integer?);
     method public void setRecenterButtonStyle(Integer?);
@@ -281,7 +281,7 @@ package com.mapbox.navigation.dropin {
     property public final Integer? infoPanelMarginEnd;
     property public final Integer? infoPanelMarginStart;
     property public final Integer? infoPanelPeekHeight;
-    property public final com.mapbox.maps.plugin.LocationPuck? locationPuck;
+    property public final com.mapbox.navigation.ui.maps.puck.LocationPuckOptions? locationPuckOptions;
     property public final com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions? maneuverViewOptions;
     property public final Integer? poiNameTextAppearance;
     property public final Integer? recenterButtonStyle;
@@ -306,7 +306,7 @@ package com.mapbox.navigation.dropin {
     method @Px public int defaultInfoPanelMarginEnd();
     method @Px public int defaultInfoPanelMarginStart();
     method @Px public int defaultInfoPanelPeekHeight(android.content.Context context);
-    method public com.mapbox.maps.plugin.LocationPuck defaultLocationPuck(android.content.Context context);
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions defaultLocationPuckOptions(android.content.Context context);
     method public com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions defaultManeuverViewOptions();
     method @StyleRes public int defaultPoiNameTextAppearance();
     method @StyleRes public int defaultRecenterButtonStyle();

@@ -55,7 +55,7 @@ import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultEndN
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginEnd
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultInfoPanelMarginStart
-import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultLocationPuck
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultLocationPuckOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultManeuverViewOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRecenterButtonStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameBackground
@@ -83,6 +83,7 @@ import com.mapbox.navigation.qa_test_app.view.base.DrawerActivity
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.utils.internal.toPoint
 
@@ -352,12 +353,17 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 mapStyleUriNight = Style.DARK
             }
             binding.navigationView.customizeViewStyles {
-                locationPuck = LocationPuck2D(
-                    bearingImage = ContextCompat.getDrawable(
-                        this@MapboxNavigationViewCustomizedActivity,
-                        R.drawable.ic_sv_puck
+                locationPuckOptions = LocationPuckOptions
+                    .Builder(applicationContext)
+                    .freeDrivePuck(
+                        LocationPuck2D(
+                            bearingImage = ContextCompat.getDrawable(
+                                this@MapboxNavigationViewCustomizedActivity,
+                                R.drawable.ic_sv_puck
+                            )
+                        )
                     )
-                )
+                    .build()
             }
         } else {
             // Reset defaults
@@ -371,7 +377,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 mapStyleUriNight = NavigationStyles.NAVIGATION_NIGHT_STYLE
             }
             binding.navigationView.customizeViewStyles {
-                locationPuck = defaultLocationPuck(applicationContext)
+                locationPuckOptions = defaultLocationPuckOptions(applicationContext)
             }
         }
     }
