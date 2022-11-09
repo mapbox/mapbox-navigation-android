@@ -11,6 +11,7 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.arrival.ArrivalTextComponent
@@ -23,6 +24,7 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
@@ -175,10 +177,12 @@ class ViewStyleCustomization {
     var arrivalTextAppearance: Int? = null
 
     /**
-     * Provide custom [LocationPuck] for [MapView].
-     * Use [defaultLocationPuck] to reset to default.
+     * Provide [LocationPuckOptions] containing references to either [LocationPuck2D] or
+     * [LocationPuck3D] for location puck in each of the different navigation states to be
+     * displayed on top of the [MapView].
+     * Use [defaultLocationPuckOptions] to reset to default.
      */
-    var locationPuck: LocationPuck? = null
+    var locationPuckOptions: LocationPuckOptions? = null
 
     companion object {
         /**
@@ -362,12 +366,8 @@ class ViewStyleCustomization {
         /**
          * Default [LocationPuck] for [MapView].
          */
-        fun defaultLocationPuck(context: Context): LocationPuck = LocationPuck2D(
-            bearingImage = ContextCompat.getDrawable(
-                context,
-                R.drawable.mapbox_navigation_puck_icon,
-            )
-        )
+        fun defaultLocationPuckOptions(context: Context): LocationPuckOptions =
+            LocationPuckOptions.Builder(context).build()
 
         private fun defaultMutcdProperties() = MapboxExitProperties.PropertiesMutcd(
             exitBackground = R.drawable.mapbox_dropin_exit_board_background,

@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+-:warning: Introduced `ViewStyleCustomization.locationPuckOptions` in favor of `ViewStyleCustomization.locationPuck` that can be used to leverage `LocationPuckOptions` to change the location puck at runtime for each navigation state. [#6574](https://github.com/mapbox/mapbox-navigation-android/pull/6574)
 #### Bug fixes and improvements
 - Slightly decreased the memory consumption of the online router. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
 - Improved positioning and location signal simulation in tunnels. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)

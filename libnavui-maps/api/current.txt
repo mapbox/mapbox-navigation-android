@@ -730,6 +730,43 @@ package com.mapbox.navigation.ui.maps.location {
 
 }
 
+package com.mapbox.navigation.ui.maps.puck {
+
+  public final class LocationPuckOptions {
+    method public com.mapbox.maps.plugin.LocationPuck getActiveNavigationPuck();
+    method public com.mapbox.maps.plugin.LocationPuck getArrivalPuck();
+    method public android.content.Context getContext();
+    method public com.mapbox.maps.plugin.LocationPuck getDestinationPreviewPuck();
+    method public com.mapbox.maps.plugin.LocationPuck getFreeDrivePuck();
+    method public com.mapbox.maps.plugin.LocationPuck getRoutePreviewPuck();
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder toBuilder();
+    property public final com.mapbox.maps.plugin.LocationPuck activeNavigationPuck;
+    property public final com.mapbox.maps.plugin.LocationPuck arrivalPuck;
+    property public final android.content.Context context;
+    property public final com.mapbox.maps.plugin.LocationPuck destinationPreviewPuck;
+    property public final com.mapbox.maps.plugin.LocationPuck freeDrivePuck;
+    property public final com.mapbox.maps.plugin.LocationPuck routePreviewPuck;
+  }
+
+  public static final class LocationPuckOptions.Builder {
+    ctor public LocationPuckOptions.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder activeNavigationPuck(com.mapbox.maps.plugin.LocationPuck activeNavigationPuck);
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder arrivalPuck(com.mapbox.maps.plugin.LocationPuck arrivalPuck);
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions build();
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder defaultPuck(com.mapbox.maps.plugin.LocationPuck defaultPuck);
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder destinationPreviewPuck(com.mapbox.maps.plugin.LocationPuck destinationPreviewPuck);
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder freeDrivePuck(com.mapbox.maps.plugin.LocationPuck freeDrivePuck);
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder routePreviewPuck(com.mapbox.maps.plugin.LocationPuck routePreviewPuck);
+    field public static final com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder.Companion Companion;
+  }
+
+  public static final class LocationPuckOptions.Builder.Companion {
+    method public com.mapbox.maps.plugin.LocationPuck navigationPuck(android.content.Context context);
+    method public com.mapbox.maps.plugin.LocationPuck regularPuck(android.content.Context context);
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.roadname.api {
 
   @Deprecated public final class MapboxRoadNameLabelApi {

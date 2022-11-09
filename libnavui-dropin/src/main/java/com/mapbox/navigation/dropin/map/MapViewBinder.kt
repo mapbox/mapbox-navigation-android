@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.map
 import android.content.Context
 import android.view.ViewGroup
 import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
@@ -24,6 +25,8 @@ import com.mapbox.navigation.ui.maps.internal.ui.LocationComponent
 import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
+import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
+import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 
@@ -71,8 +74,16 @@ abstract class MapViewBinder : UIBinder {
         return navigationListOf(
             CameraLayoutObserver(store, mapView, navigationViewBinding),
             LocationComponent(context.locationProvider),
-            reloadOnChange(context.styles.locationPuck) { locationPuck ->
-                LocationPuckComponent(mapView.location, locationPuck, context.locationProvider)
+            reloadOnChange(
+                navigationState,
+                context.styles.locationPuckOptions
+            ) { navState, _ ->
+                locationPuckComponent(
+                    navState,
+                    mapView.location,
+                    context.locationProvider,
+                    context.styles.locationPuckOptions.value
+                )
             },
             LogoAttributionComponent(mapView, context.systemBarsInsets),
             reloadOnChange(
@@ -113,6 +124,51 @@ abstract class MapViewBinder : UIBinder {
         RouteLineComponent(mapView.getMapboxMap(), mapView, lineOptions, contractProvider = {
             RouteLineComponentContractImpl(context.store, context.mapClickBehavior)
         })
+
+    private fun locationPuckComponent(
+        navigationState: NavigationState,
+        location: LocationComponentPlugin,
+        provider: NavigationLocationProvider,
+        options: LocationPuckOptions
+    ): LocationPuckComponent {
+        return when (navigationState) {
+            NavigationState.FreeDrive -> {
+                LocationPuckComponent(
+                    location,
+                    options.freeDrivePuck,
+                    provider,
+                )
+            }
+            NavigationState.DestinationPreview -> {
+                LocationPuckComponent(
+                    location,
+                    options.destinationPreviewPuck,
+                    provider,
+                )
+            }
+            NavigationState.RoutePreview -> {
+                LocationPuckComponent(
+                    location,
+                    options.routePreviewPuck,
+                    provider,
+                )
+            }
+            NavigationState.ActiveNavigation -> {
+                LocationPuckComponent(
+                    location,
+                    options.activeNavigationPuck,
+                    provider,
+                )
+            }
+            NavigationState.Arrival -> {
+                LocationPuckComponent(
+                    location,
+                    options.arrivalPuck,
+                    provider,
+                )
+            }
+        }
+    }
 
     private fun longPressMapComponent(navigationState: NavigationState, mapView: MapView) =
         when (navigationState) {
