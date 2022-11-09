@@ -1677,6 +1677,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Invoke when any component of EV data is changed so that it can be used in refresh requests.
      * You can pass only changed components of EV data via [data], all the previous values
      * that have not changed will be cached on the SDK side.
+     * **NOTE: Only provide parameters that are compatible with an EV route refresh. If you pass any other parameters via this method, the route refresh request will fail.**
+     *
      * Example:
      * ```
      *     mapOf(
