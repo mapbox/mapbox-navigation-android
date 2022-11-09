@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.custom
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Road object type that provides information about custom objects.
@@ -14,11 +13,10 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
 class Custom internal constructor(
     id: String,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
-) : RoadObject(id, RoadObjectType.CUSTOM, length, location, provider, isUrban, nativeRoadObject) {
+) : RoadObject(id, RoadObjectType.CUSTOM, length, provider, isUrban, nativeRoadObject) {
 
     /**
      * Returns a string representation of the object.

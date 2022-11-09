@@ -58,7 +58,6 @@ class RoadObjectFactoryTest {
             ID,
             TunnelInfo(TUNNEL_NAME),
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -83,7 +82,6 @@ class RoadObjectFactoryTest {
                 CountryBorderCrossingAdminInfo(CANADA_CODE_2, CANADA_CODE_3)
             ),
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -106,7 +104,6 @@ class RoadObjectFactoryTest {
             TollCollectionType.TOLL_GANTRY,
             "toll_name_1",
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -129,7 +126,6 @@ class RoadObjectFactoryTest {
             TollCollectionType.TOLL_BOOTH,
             "toll_name_2",
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -161,7 +157,6 @@ class RoadObjectFactoryTest {
             ),
             guideMapUri = "some_uri",
             length = LENGTH,
-            location = location,
             provider = SDKRoadObjectProvider.MAPBOX,
             isUrban = false,
             nativeRoadObject = nativeObject
@@ -193,7 +188,6 @@ class RoadObjectFactoryTest {
             ),
             guideMapUri = "some_uri",
             length = LENGTH,
-            location = location,
             provider = SDKRoadObjectProvider.MAPBOX,
             isUrban = false,
             nativeRoadObject = nativeObject
@@ -215,7 +209,6 @@ class RoadObjectFactoryTest {
         val expected = RestrictedArea(
             ID,
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -257,7 +250,6 @@ class RoadObjectFactoryTest {
                 listOf(INCIDENT_AFFECTED_ROAD_NAME),
             ),
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -283,7 +275,6 @@ class RoadObjectFactoryTest {
             ID,
             RailwayCrossingInfo(),
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject

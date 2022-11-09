@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.reststop
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Road object type that provides information about rest stops on the road.
@@ -23,7 +22,6 @@ class RestStop internal constructor(
     val amenities: List<Amenity>?,
     val guideMapUri: String?,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
@@ -31,7 +29,6 @@ class RestStop internal constructor(
     id,
     RoadObjectType.REST_STOP,
     length,
-    location,
     provider,
     isUrban,
     nativeRoadObject

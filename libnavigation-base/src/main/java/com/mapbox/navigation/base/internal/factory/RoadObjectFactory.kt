@@ -28,7 +28,13 @@ object RoadObjectFactory {
         List<UpcomingRoadObject> {
         return this
             .filter { SUPPORTED_ROAD_OBJECTS.contains(it.roadObject.type) }
-            .map { buildUpcomingRoadObject(it) }
+            .map {
+                buildUpcomingRoadObject(
+                    buildRoadObject(it.roadObject),
+                    it.distanceToStart,
+                    null
+                )
+            }
     }
 
     /**
@@ -65,17 +71,6 @@ object RoadObjectFactory {
         roadObject: RoadObject,
         distanceToStart: Double?,
         distanceInfo: RoadObjectDistanceInfo?
-    ) = UpcomingRoadObject(
-        roadObjectProvider = { roadObject },
-        distanceToStartProvider = { distanceToStart },
-        distanceInfoProvider = { distanceInfo }
-    )
-
-    private fun buildUpcomingRoadObject(
-        nativeUpcomingRouteAlert: com.mapbox.navigator.UpcomingRouteAlert
-    ) = UpcomingRoadObject(
-        roadObjectProvider = { buildRoadObject(nativeUpcomingRouteAlert.roadObject) },
-        distanceToStartProvider = { nativeUpcomingRouteAlert.distanceToStart },
-        distanceInfoProvider = { null }
-    )
+    ) =
+        UpcomingRoadObject(roadObject, distanceToStart, distanceInfo)
 }

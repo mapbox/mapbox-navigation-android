@@ -15,35 +15,20 @@ import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectD
  * - [RoadObjectDistanceInfoType.POLYGON]
  * - [RoadObjectDistanceInfoType.SUB_GRAPH]
  *
- * @param roadObjectProvider initializer function for the [roadObject] property
- * @param distanceToStartProvider initializer function for the [distanceToStart] property
- * @param distanceInfoProvider initializer function for the [distanceInfo] property
+ * @param roadObject road object
+ * @param distanceToStart remaining distance to the start of the object.
+ * This value will be negative after passing the start of the object and until we cross the finish
+ * point of the [RoadObject]s geometry for objects that are on the actively navigated route,
+ * but it will be zero for [EHorizon] objects. It will be null if couldn't be determined.
+ * @param distanceInfo provides extra distance details for the road objects. It will be non-null
+ * for objects coming from the electronic horizon and null for objects that are on the current route
+ * that we are actively navigating on.
  */
 class UpcomingRoadObject internal constructor(
-    roadObjectProvider: () -> RoadObject,
-    distanceToStartProvider: () -> Double?,
-    distanceInfoProvider: () -> RoadObjectDistanceInfo?,
+    val roadObject: RoadObject,
+    val distanceToStart: Double?,
+    val distanceInfo: RoadObjectDistanceInfo?,
 ) {
-    /**
-     * The Road Object instance.
-     */
-    val roadObject: RoadObject by lazy { roadObjectProvider() }
-
-    /**
-     * Remaining distance to the start of the object.
-     *
-     * This value will be negative after passing the start of the object and until we cross the finish
-     * point of the [RoadObject]s geometry for objects that are on the actively navigated route,
-     * but it will be zero for [EHorizon] objects. It will be null if couldn't be determined.
-     */
-    val distanceToStart: Double? by lazy { distanceToStartProvider() }
-
-    /**
-     * Provides extra distance details for the road objects. It will be non-null
-     * for objects coming from the electronic horizon and null for objects that are on the current route
-     * that we are actively navigating on.
-     */
-    val distanceInfo: RoadObjectDistanceInfo? by lazy { distanceInfoProvider() }
 
     /**
      * Indicates whether some other object is "equal to" this one.

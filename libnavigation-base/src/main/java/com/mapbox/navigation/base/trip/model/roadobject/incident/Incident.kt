@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Incident alert provides information about incidents on a way like *congestion*, *mass transit*,
@@ -15,7 +14,6 @@ class Incident internal constructor(
     id: String,
     val info: IncidentInfo,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
@@ -23,7 +21,6 @@ class Incident internal constructor(
     id,
     RoadObjectType.INCIDENT,
     length,
-    location,
     provider,
     isUrban,
     nativeRoadObject
