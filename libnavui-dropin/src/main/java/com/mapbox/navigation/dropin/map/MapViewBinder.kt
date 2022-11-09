@@ -26,6 +26,7 @@ import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
+import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 
@@ -80,7 +81,8 @@ abstract class MapViewBinder : UIBinder {
                 locationPuckComponent(
                     navState,
                     mapView.location,
-                    context.locationProvider
+                    context.locationProvider,
+                    context.styles.locationPuckOptions.value
                 )
             },
             LogoAttributionComponent(mapView, context.systemBarsInsets),
@@ -126,41 +128,42 @@ abstract class MapViewBinder : UIBinder {
     private fun locationPuckComponent(
         navigationState: NavigationState,
         location: LocationComponentPlugin,
-        provider: NavigationLocationProvider
+        provider: NavigationLocationProvider,
+        options: LocationPuckOptions
     ): LocationPuckComponent {
         return when (navigationState) {
             NavigationState.FreeDrive -> {
                 LocationPuckComponent(
                     location,
-                    context.styles.locationPuckOptions.value.freeDrivePuck,
+                    options.freeDrivePuck,
                     provider,
                 )
             }
             NavigationState.DestinationPreview -> {
                 LocationPuckComponent(
                     location,
-                    context.styles.locationPuckOptions.value.destinationPreviewPuck,
+                    options.destinationPreviewPuck,
                     provider,
                 )
             }
             NavigationState.RoutePreview -> {
                 LocationPuckComponent(
                     location,
-                    context.styles.locationPuckOptions.value.routePreviewPuck,
+                    options.routePreviewPuck,
                     provider,
                 )
             }
             NavigationState.ActiveNavigation -> {
                 LocationPuckComponent(
                     location,
-                    context.styles.locationPuckOptions.value.activeNavigationPuck,
+                    options.activeNavigationPuck,
                     provider,
                 )
             }
             NavigationState.Arrival -> {
                 LocationPuckComponent(
                     location,
-                    context.styles.locationPuckOptions.value.arrivalPuck,
+                    options.arrivalPuck,
                     provider,
                 )
             }
