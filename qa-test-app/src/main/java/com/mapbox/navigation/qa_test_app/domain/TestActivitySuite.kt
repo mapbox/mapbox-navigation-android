@@ -9,6 +9,7 @@ import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.CustomAlternativeRouteColoringActivity
 import com.mapbox.navigation.qa_test_app.view.DropInButtonsActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
+import com.mapbox.navigation.qa_test_app.view.HandlerThreadActivity
 import com.mapbox.navigation.qa_test_app.view.IconsPreviewActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingWithRestrictionsActivity
@@ -195,6 +196,12 @@ object TestActivitySuite {
             R.string.drop_in_buttons_activity_description
         ) { activity ->
             activity.startActivity<RoutesPreviewActivity>()
+        },
+        TestActivityDescription(
+            "Handler Thread",
+            R.string.handler_thread_description
+        ) { activity ->
+            activity.startActivity<HandlerThreadActivity>()
         },
     )
 }

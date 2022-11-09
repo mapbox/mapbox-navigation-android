@@ -75,6 +75,8 @@
 
         <activity android:name=".view.RoutesPreviewActivity" />
 
+        <activity android:name=".view.HandlerThreadActivity" />
+
         <service
             android:name=".car.MainCarAppService"
             android:exported="true"

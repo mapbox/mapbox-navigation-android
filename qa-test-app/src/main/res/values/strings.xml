@@ -46,6 +46,7 @@
     <string name="route_line_scaling_description" translatable="false">Tests that route line scaling gets applied correctly when choosing routes.</string>
     <string name="route_preivew_activity_description" translatable="false">Example of how to use routes privew</string>
     <string name="drop_in_buttons_activity_description" translatable="false">Screen for viewing SDK buttons.</string>
+    <string name="handler_thread_description" translatable="false">Navigation activity where SDK\'s core works on a handler thread instead of the main.</string>
 
     <string-array name="drop_in_info_panel_overrides" translatable="false">
         <item>--</item>
