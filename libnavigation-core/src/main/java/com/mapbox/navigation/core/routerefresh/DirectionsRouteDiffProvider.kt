@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.google.gson.JsonElement
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -25,6 +26,9 @@ internal class DirectionsRouteDiffProvider {
                         "route ${newRoute.id} leg $legIndex"
                 )
             }
+        }
+        if (oldRoute.directionsResponse.waypoints() != newRoute.directionsResponse.waypoints()) {
+            routeDiffs.add("Updated waypoints at route ${newRoute.id}")
         }
         return routeDiffs
     }
@@ -69,6 +73,12 @@ internal class DirectionsRouteDiffProvider {
         if (oldLegAnnotation?.congestionNumeric() != newLegAnnotation?.congestionNumeric()) {
             updatedAnnotations.add("congestionNumeric")
         }
+        if (oldLegAnnotation?.stateOfCharge() != newLegAnnotation?.stateOfCharge()) {
+            updatedAnnotations.add("state_of_charge")
+        }
         return updatedAnnotations
     }
+
+    private fun LegAnnotation.stateOfCharge(): JsonElement? =
+        getUnrecognizedProperty("state_of_charge")
 }

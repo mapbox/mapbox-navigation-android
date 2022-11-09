@@ -19,19 +19,19 @@ class DirectionsRouteDiffProviderTest {
     @Test
     fun buildRouteDiffs() {
         val oldRoute = createTestNavigationRoute(
-            createTestLeg(57.14, 8.571, 42.85, 90, "low", 71),
-            createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42),
-            createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
-            createTestLeg(71.42, 14.28, 85.71, 90, "low", 57),
-            createTestLeg(42.85, 57.14, 28.57, 120, "low", 28),
+            createTestLeg(57.14, 8.571, 42.85, 90, "low", 71, 90),
+            createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42, 89),
+            createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14, 87),
+            createTestLeg(71.42, 14.28, 85.71, 90, "low", 57, 85),
+            createTestLeg(42.85, 57.14, 28.57, 120, "low", 28, 80),
             createRouteLeg(),
         )
         val newRoute = createTestNavigationRoute(
             createRouteLeg(annotation = null),
-            createTestLeg(57.14, 14.28, 85.71, 120, "low", 42),
-            createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
-            createTestLeg(71.42, 28.57, 42.85, 120, "unknown", 57),
-            createTestLeg(142.8, 57.14, 28.57, 90, "low", 71),
+            createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89),
+            createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14, 87),
+            createTestLeg(71.42, 28.57, 42.85, 120, "unknown", 57, 84),
+            createTestLeg(142.8, 57.14, 28.57, 90, "low", 71, 79),
             createRouteLeg(
                 incidents = listOf(createIncident()),
                 closures = listOf(createClosure())
@@ -41,19 +41,23 @@ class DirectionsRouteDiffProviderTest {
         assertEquals(
             listOf(
                 "Updated distance, duration, speed, congestion at route testDiff#0 leg 1",
-                "Updated duration, speed, maxSpeed, congestion at route testDiff#0 leg 3",
-                "Updated distance, maxSpeed, congestionNumeric at route testDiff#0 leg 4",
+                "Updated duration, speed, maxSpeed, congestion, state_of_charge " +
+                    "at route testDiff#0 leg 3",
+                "Updated distance, maxSpeed, congestionNumeric, state_of_charge " +
+                    "at route testDiff#0 leg 4",
                 "Updated incidents, closures at route testDiff#0 leg 5",
             ),
             routeDiffProvider.buildRouteDiffs(oldRoute, newRoute, currentLegIndex = 1),
         )
     }
 
-    private fun createTestNavigationRoute(vararg legs: RouteLeg): NavigationRoute {
+    private fun createTestNavigationRoute(
+        vararg legs: RouteLeg
+    ): NavigationRoute {
         return createNavigationRoute(
             createDirectionsRoute(
                 requestUuid = "testDiff",
-                legs = legs.toList()
+                legs = legs.toList(),
             )
         )
     }
@@ -65,6 +69,7 @@ class DirectionsRouteDiffProviderTest {
         maxSpeed: Int,
         congestion: String,
         congestionNumeric: Int,
+        stateOfCharge: Int,
     ): RouteLeg {
         return createRouteLeg(
             createRouteLegAnnotation(
@@ -73,8 +78,9 @@ class DirectionsRouteDiffProviderTest {
                 maxSpeed = listOf(createMaxSpeed(speed = maxSpeed)),
                 distance = listOf(distance),
                 duration = listOf(duration),
-                speed = listOf(speed)
-            )
+                speed = listOf(speed),
+                stateOfCharge = listOf(stateOfCharge),
+            ),
         )
     }
 }
