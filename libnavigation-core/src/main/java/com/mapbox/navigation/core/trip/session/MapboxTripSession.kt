@@ -320,7 +320,7 @@ internal class MapboxTripSession(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-            threadController.checkSDkThread()
+            threadController.assertSDKThread()
             logD(
                 "navigatorObserver#onStatus; " +
                     "fixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}, " +

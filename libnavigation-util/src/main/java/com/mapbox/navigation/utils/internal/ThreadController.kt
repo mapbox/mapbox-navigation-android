@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainCoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
@@ -47,32 +48,33 @@ fun Exception.ifChannelException(action: () -> Unit) {
 
 data class JobControl(val job: Job, val scope: CoroutineScope)
 
-class ThreadController constructor(){
+class ThreadController constructor(
+    private val sdkLooper: Looper = Looper.myLooper()
+        ?: error(
+            "You can't create SDK from a thread without looper. " +
+                "Make sure you create the Navigation SDK from the main thread " +
+                "or called Looper.prepare on current thread."
+        ),
+) {
 
-    private val sdkLooper: Looper
-    private val sdkDispatcher: CoroutineDispatcher
+    private val sdkDispatcher: MainCoroutineDispatcher = if (sdkLooper == Looper.getMainLooper()) {
+        Dispatchers.Main
+    } else {
+        Handler(sdkLooper).asCoroutineDispatcher("mapbox navigation SDK dispatcher")
+    }
 
     companion object {
         val IODispatcher: CoroutineDispatcher = Dispatchers.IO
         val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
     }
 
-    init {
-        val currentLooper = Looper.myLooper()
-        require(currentLooper != null) {
-            "You can't create the SDK from a thread which doesn't have looper"
-        }
-        sdkLooper = currentLooper
-        sdkDispatcher = Handler(sdkLooper).asCoroutineDispatcher()
-    }
-
     internal var ioRootJob = SupervisorJob()
     internal var mainRootJob = SupervisorJob()
 
-    fun checkSDkThread() {
+    fun assertSDKThread() {
         require(Looper.myLooper() == sdkLooper) {
             "Current lopper doesn't match the same the SDK were created from. " +
-                "You should call the SDK's methods from the thread were the SDK was created"
+                "You should call the SDK's methods from the thread were the SDK was created."
         }
     }
 
@@ -117,10 +119,11 @@ class ThreadController constructor(){
     }
 
     /**
-     * Same as [getIOScopeAndRootJob], but using the MainThread dispatcher.
+     * Same as [getIOScopeAndRootJob], but using the SDK thread dispatcher.
      */
-    fun getSDKScopeAndRootJob(): JobControl {
+    fun getSDKScopeAndRootJob(immediate: Boolean = false): JobControl {
         val parentJob = SupervisorJob(mainRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + sdkDispatcher))
+        val dispatcher = if (immediate) sdkDispatcher.immediate else sdkDispatcher
+        return JobControl(parentJob, CoroutineScope(parentJob + dispatcher))
     }
 }
