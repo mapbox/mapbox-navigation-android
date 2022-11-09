@@ -47,17 +47,22 @@ fun Exception.ifChannelException(action: () -> Unit) {
 
 data class JobControl(val job: Job, val scope: CoroutineScope)
 
-class ThreadController {
+class ThreadController constructor(){
 
-    private val sdkLooper = Looper.myLooper()!!
+    private val sdkLooper: Looper
+    private val sdkDispatcher: CoroutineDispatcher
 
     companion object {
         val IODispatcher: CoroutineDispatcher = Dispatchers.IO
         val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
-        lateinit var sdkDispatcher: CoroutineDispatcher
     }
 
     init {
+        val currentLooper = Looper.myLooper()
+        require(currentLooper != null) {
+            "You can't create the SDK from a thread which doesn't have looper"
+        }
+        sdkLooper = currentLooper
         sdkDispatcher = Handler(sdkLooper).asCoroutineDispatcher()
     }
 
@@ -65,7 +70,7 @@ class ThreadController {
     internal var mainRootJob = SupervisorJob()
 
     fun checkSDkThread() {
-        assert(Looper.myLooper() == sdkLooper) {
+        require(Looper.myLooper() == sdkLooper) {
             "Current lopper doesn't match the same the SDK were created from. " +
                 "You should call the SDK's methods from the thread were the SDK was created"
         }
@@ -116,6 +121,6 @@ class ThreadController {
      */
     fun getSDKScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(mainRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + ThreadController.sdkDispatcher))
+        return JobControl(parentJob, CoroutineScope(parentJob + sdkDispatcher))
     }
 }
