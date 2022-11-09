@@ -1,5 +1,9 @@
 package com.mapbox.navigation.testing
 
+import android.os.Looper
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -29,8 +33,12 @@ class MainCoroutineRule : TestRule {
         @Throws(Throwable::class)
         override fun evaluate() {
             Dispatchers.setMain(testDispatcher)
-
-            base.evaluate()
+            mockkStatic(Looper::class) {
+                val looperMock = mockk<Looper>(relaxed = true)
+                every { Looper.myLooper() } returns looperMock
+                every { Looper.getMainLooper() } returns looperMock
+                base.evaluate()
+            }
 
             Dispatchers.resetMain() // Restore original main dispatcher
             createdScopes.forEach { it.cleanupTestCoroutines() }
