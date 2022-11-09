@@ -42,6 +42,7 @@ import com.mapbox.navigation.ui.maps.internal.ui.LocationComponent
 import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponent
+import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import io.mockk.Runs
@@ -164,9 +165,29 @@ class MapViewBinderTest {
 
         val firstComponent = components.findComponent { it is LocationPuckComponent }
         navContext.applyStyleCustomization {
-            locationPuck =
-                LocationPuck2D(bearingImage = ctx.getDrawable(android.R.drawable.arrow_down_float))
+            locationPuckOptions = LocationPuckOptions
+                .Builder(ctx)
+                .freeDrivePuck(
+                    LocationPuck2D(
+                        bearingImage = ctx.getDrawable(android.R.drawable.arrow_down_float)
+                    )
+                )
+                .build()
         }
+        val secondComponent = components.findComponent { it is LocationPuckComponent }
+
+        assertNotNull(firstComponent)
+        assertNotNull(secondComponent)
+        assertNotEquals(secondComponent, firstComponent)
+    }
+
+    @Test
+    fun `bind should reload LocationPuckComponent on navigation state change`() {
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        val firstComponent = components.findComponent { it is LocationPuckComponent }
+        store.updateState { it.copy(navigation = NavigationState.RoutePreview) }
         val secondComponent = components.findComponent { it is LocationPuckComponent }
 
         assertNotNull(firstComponent)

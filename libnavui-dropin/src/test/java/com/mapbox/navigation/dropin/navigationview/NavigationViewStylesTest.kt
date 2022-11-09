@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.ViewStyleCustomization
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
+import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -57,7 +58,7 @@ class NavigationViewStylesTest {
         assertEquals(c.roadNameBackground, sut.roadNameBackground.value)
         assertEquals(c.roadNameTextAppearance, sut.roadNameTextAppearance.value)
         assertEquals(c.arrivalTextAppearance, sut.arrivalTextAppearance.value)
-        assertEquals(c.locationPuck, sut.locationPuck.value)
+        assertEquals(c.locationPuckOptions, sut.locationPuckOptions.value)
     }
 
     private fun customization() = ViewStyleCustomization().apply {
@@ -81,11 +82,16 @@ class NavigationViewStylesTest {
         roadNameBackground = android.R.drawable.spinner_background
         roadNameTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
         arrivalTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
-        locationPuck = LocationPuck2D(
-            bearingImage = ContextCompat.getDrawable(
-                ctx,
-                android.R.drawable.ic_media_play
+        locationPuckOptions = LocationPuckOptions
+            .Builder(ctx)
+            .freeDrivePuck(
+                LocationPuck2D(
+                    bearingImage = ContextCompat.getDrawable(
+                        ctx,
+                        android.R.drawable.ic_media_play
+                    )
+                )
             )
-        )
+            .build()
     }
 }
