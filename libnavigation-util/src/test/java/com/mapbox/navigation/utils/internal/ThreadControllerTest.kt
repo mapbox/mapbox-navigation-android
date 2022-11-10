@@ -27,22 +27,6 @@ class ThreadControllerTest {
     private val threadController = AndroidThreadController()
 
     @Test
-    fun jobCountValidationNonUIScope() {
-        val maxCoroutines = 100
-        val jobControl = threadController.getIOScopeAndRootJob()
-        repeat(maxCoroutines) {
-            jobControl.scope.launch {
-                suspendCoroutine {
-                    // do nothing. Just not to finish a coroutine
-                }
-            }
-        }
-        assertTrue(jobControl.job.children.count() == maxCoroutines)
-        jobControl.job.cancel()
-        assertTrue(jobControl.job.isCancelled)
-    }
-
-    @Test
     fun monitorChannelWithException_callsOnCancellation_whenChannelClosed() {
         var flag = false
         val channel: Channel<String> = Channel()
@@ -89,16 +73,6 @@ class ThreadControllerTest {
     }
 
     @Test
-    fun checksCancelAllNonUICoroutines() {
-        val mockedIORootJob: CompletableJob = mockk(relaxed = true)
-        threadController.ioRootJob = mockedIORootJob
-
-        threadController.cancelAllNonUICoroutines()
-
-        verify { mockedIORootJob.cancelChildren() }
-    }
-
-    @Test
     fun checksCancelAllUICoroutines() {
         val mockedMainRootJob: CompletableJob = mockk(relaxed = true)
         threadController.mainRootJob = mockedMainRootJob
@@ -106,20 +80,6 @@ class ThreadControllerTest {
         threadController.cancelSDKScope()
 
         verify { mockedMainRootJob.cancelChildren() }
-    }
-
-    @Test
-    fun checksGetIOScopeAndRootJob() {
-        val ioRootJob = SupervisorJob()
-        threadController.ioRootJob = ioRootJob
-
-        val ioJobController = threadController.getIOScopeAndRootJob()
-
-        assertEquals(ioRootJob.children.first(), ioJobController.job)
-        assertEquals(
-            CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(),
-            ioJobController.scope.toString()
-        )
     }
 
     @Test
