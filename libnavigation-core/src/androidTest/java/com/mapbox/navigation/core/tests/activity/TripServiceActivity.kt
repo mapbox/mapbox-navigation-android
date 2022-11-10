@@ -88,7 +88,7 @@ internal class TripServiceActivity : AppCompatActivity() {
         super.onDestroy()
         stopService()
         threadController.cancelAllNonUICoroutines()
-        threadController.cancel()
+        threadController.cancelSDKScope()
     }
 
     private fun changeText() {

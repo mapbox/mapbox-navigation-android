@@ -103,7 +103,7 @@ class ThreadControllerTest {
         val mockedMainRootJob: CompletableJob = mockk(relaxed = true)
         threadController.mainRootJob = mockedMainRootJob
 
-        threadController.cancel()
+        threadController.cancelSDKScope()
 
         verify { mockedMainRootJob.cancelChildren() }
     }

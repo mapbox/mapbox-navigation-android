@@ -7,7 +7,6 @@ package com.mapbox.navigation.core
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import androidx.annotation.RequiresPermission
-import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.annotation.module.MapboxModuleType
@@ -233,7 +232,6 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  */
-@UiThread
 class MapboxNavigation @VisibleForTesting internal constructor(
     val navigationOptions: NavigationOptions,
     private val threadController: ThreadController,
@@ -1172,7 +1170,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             telemetry.destroy(this@MapboxNavigation)
         }
         //threadController.cancelAllNonUICoroutines()
-        threadController.cancel()
+        threadController.cancelSDKScope()
         ifNonNull(reachabilityObserverId) {
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
