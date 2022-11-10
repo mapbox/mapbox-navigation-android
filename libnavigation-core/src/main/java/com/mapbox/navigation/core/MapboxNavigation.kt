@@ -120,6 +120,7 @@ import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.navigator.internal.router.RouterInterfaceAdapter
+import com.mapbox.navigation.utils.internal.AndroidThreadController
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -238,7 +239,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val threadController: ThreadController,
 ) {
 
-    constructor(navigationOptions: NavigationOptions) : this(navigationOptions, ThreadController())
+    constructor(navigationOptions: NavigationOptions) : this(navigationOptions, AndroidThreadController())
 
     private val accessToken: String? = navigationOptions.accessToken
     private val mainJobController = threadController.getSDKScopeAndRootJob()
@@ -1170,8 +1171,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         runInTelemetryContext { telemetry ->
             telemetry.destroy(this@MapboxNavigation)
         }
-        threadController.cancelAllNonUICoroutines()
-        threadController.cancelAllUICoroutines()
+        //threadController.cancelAllNonUICoroutines()
+        threadController.cancel()
         ifNonNull(reachabilityObserverId) {
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null

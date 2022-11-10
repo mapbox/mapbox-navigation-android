@@ -7,6 +7,7 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.TestThreadController
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.ElectronicHorizonPosition
@@ -48,7 +49,7 @@ class EHorizonSubscriptionManagerTest {
     private val subscriptionManager: EHorizonSubscriptionManager =
         EHorizonSubscriptionManagerImpl(
             navigator,
-            ThreadController(),
+            TestThreadController(),
         )
 
     @Before

@@ -17,11 +17,14 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.suspendCoroutine
 
+@RunWith(RobolectricTestRunner::class)
 class ThreadControllerTest {
 
-    private val threadController = ThreadController()
+    private val threadController = AndroidThreadController()
 
     @Test
     fun jobCountValidationNonUIScope() {
@@ -100,7 +103,7 @@ class ThreadControllerTest {
         val mockedMainRootJob: CompletableJob = mockk(relaxed = true)
         threadController.mainRootJob = mockedMainRootJob
 
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
 
         verify { mockedMainRootJob.cancelChildren() }
     }

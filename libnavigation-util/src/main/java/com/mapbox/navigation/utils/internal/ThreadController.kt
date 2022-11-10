@@ -2,6 +2,7 @@ package com.mapbox.navigation.utils.internal
 
 import android.os.Handler
 import android.os.Looper
+import com.mapbox.navigation.utils.internal.ThreadController.Companion.IODispatcher
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -48,14 +49,25 @@ fun Exception.ifChannelException(action: () -> Unit) {
 
 data class JobControl(val job: Job, val scope: CoroutineScope)
 
-class ThreadController constructor(
+interface ThreadController {
+    companion object {
+        val IODispatcher: CoroutineDispatcher = Dispatchers.IO
+        val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+    }
+
+    fun assertSDKThread()
+    fun getSDKScopeAndRootJob(immediate: Boolean = false): JobControl
+    fun cancel()
+}
+
+class AndroidThreadController constructor(
     private val sdkLooper: Looper = Looper.myLooper()
         ?: error(
             "You can't create SDK from a thread without looper. " +
                 "Make sure you create the Navigation SDK from the main thread " +
                 "or called Looper.prepare on current thread."
         ),
-) {
+): ThreadController {
 
     private val sdkDispatcher: MainCoroutineDispatcher = if (sdkLooper == Looper.getMainLooper()) {
         Dispatchers.Main
@@ -63,15 +75,10 @@ class ThreadController constructor(
         Handler(sdkLooper).asCoroutineDispatcher("mapbox navigation SDK dispatcher")
     }
 
-    companion object {
-        val IODispatcher: CoroutineDispatcher = Dispatchers.IO
-        val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
-    }
-
     internal var ioRootJob = SupervisorJob()
     internal var mainRootJob = SupervisorJob()
 
-    fun assertSDKThread() {
+    override fun assertSDKThread() {
         require(Looper.myLooper() == sdkLooper) {
             "Current lopper doesn't match the same the SDK were created from. " +
                 "You should call the SDK's methods from the thread were the SDK was created."
@@ -93,7 +100,7 @@ class ThreadController constructor(
      * all coroutines that where started via ThreadController.mainScope.launch(). It is basically
      * a kill switch for all UI scoped coroutines.
      */
-    fun cancelAllUICoroutines() {
+    override fun cancel() {
         mainRootJob.cancelChildren()
     }
 
@@ -121,7 +128,7 @@ class ThreadController constructor(
     /**
      * Same as [getIOScopeAndRootJob], but using the SDK thread dispatcher.
      */
-    fun getSDKScopeAndRootJob(immediate: Boolean = false): JobControl {
+    override fun getSDKScopeAndRootJob(immediate: Boolean): JobControl {
         val parentJob = SupervisorJob(mainRootJob)
         val dispatcher = if (immediate) sdkDispatcher.immediate else sdkDispatcher
         return JobControl(parentJob, CoroutineScope(parentJob + dispatcher))

@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.TestThreadController
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
@@ -41,7 +42,7 @@ class MapboxTripServiceTest {
             tripNotification,
             initializeLambda,
             terminateLambda,
-            ThreadController(),
+            TestThreadController(),
         )
         every { tripNotification.getNotificationId() } answers { NOTIFICATION_ID }
         every { tripNotification.getNotification() } answers { notification }

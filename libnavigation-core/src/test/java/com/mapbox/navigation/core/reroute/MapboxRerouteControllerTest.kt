@@ -16,7 +16,7 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.testing.TestThreadController
 import io.mockk.MockKAnnotations
 import io.mockk.clearMocks
 import io.mockk.every
@@ -92,7 +92,7 @@ class MapboxRerouteControllerTest {
                 tripSession,
                 routeOptionsUpdater,
                 rerouteOptions,
-                ThreadController()
+                TestThreadController()
             )
         )
     }

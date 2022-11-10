@@ -168,7 +168,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun init_registerOffRouteObserver_MapboxNavigation_recreated() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
         val navigationOptions = provideNavigationOptions().build()
 
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
@@ -180,7 +180,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun destroy_unregisterAllOffRouteObservers_MapboxNavigation_recreated() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
         val navigationOptions = provideNavigationOptions().build()
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
@@ -744,7 +744,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify tile config path`() {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -766,7 +766,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify tile config dataset`() {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -793,7 +793,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify incidents options null when no params set`() {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
         val slot = slot<NavigatorConfig>()
         every { NavigatorLoader.createConfig(any(), capture(slot)) } returns mockk()
 
@@ -804,7 +804,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify incidents options non-null when graph set`() {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
         val slot = slot<NavigatorConfig>()
         every { NavigatorLoader.createConfig(any(), capture(slot)) } returns mockk()
         val options = navigationOptions.toBuilder()
@@ -823,7 +823,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify incidents options non-null when apiUrl set`() {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
         val slot = slot<NavigatorConfig>()
         every { NavigatorLoader.createConfig(any(), capture(slot)) } returns mockk()
         val options = navigationOptions.toBuilder()
@@ -1015,7 +1015,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify tile config tilesVersion and isFallback on init`() {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -1043,7 +1043,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify tile config tilesVersion and isFallback on fallback`() {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
 
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
@@ -1077,7 +1077,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify tile config tilesVersion and isFallback on return to latest tiles version`() {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
 
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
@@ -1107,7 +1107,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify route and routeProgress are set after navigator recreation`() = runBlocking {
-        threadController.cancelAllUICoroutines()
+        threadController.cancel()
 
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
