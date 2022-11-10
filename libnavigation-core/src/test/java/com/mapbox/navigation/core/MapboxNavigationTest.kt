@@ -1107,8 +1107,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify route and routeProgress are set after navigator recreation`() = runBlocking {
-        threadController.cancelSDKScope()
-
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
             tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))

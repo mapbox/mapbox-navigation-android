@@ -44,6 +44,7 @@ import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.testing.TestThreadController
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -99,7 +100,7 @@ internal open class MapboxNavigationBaseTest {
     val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxed = true)
     val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)
-    val threadController = mockk<ThreadController>(relaxed = true)
+    val threadController = TestThreadController()
     val routeProgressDataProvider = mockk<RouteProgressDataProvider>(relaxed = true)
     val routesPreviewController = mockk<RoutesPreviewController>(relaxed = true)
 
@@ -128,9 +129,6 @@ internal open class MapboxNavigationBaseTest {
 
     @Before
     open fun setUp() {
-        every { threadController.getSDKScopeAndRootJob() } answers {
-            JobControl(mockk(), coroutineRule.createTestScope())
-        }
         mockkObject(LoggerProvider)
         mockkObject(NavigatorLoader)
         every {
