@@ -87,7 +87,6 @@ internal class TripServiceActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopService()
-        threadController.cancelAllNonUICoroutines()
         threadController.cancelSDKScope()
     }
 
