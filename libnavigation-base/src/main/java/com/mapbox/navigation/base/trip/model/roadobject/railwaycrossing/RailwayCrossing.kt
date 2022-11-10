@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Road object type that provides information about railway crossing on the route.
@@ -16,7 +15,6 @@ class RailwayCrossing internal constructor(
     id: String,
     val info: RailwayCrossingInfo,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
@@ -24,7 +22,6 @@ class RailwayCrossing internal constructor(
     id,
     RoadObjectType.RAILWAY_CROSSING,
     length,
-    location,
     provider,
     isUrban,
     nativeRoadObject

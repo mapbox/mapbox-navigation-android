@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.tollcollection
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Road object type that provides information about toll collection points on the route.
@@ -18,7 +17,6 @@ class TollCollection internal constructor(
     @TollCollectionType.Type val tollCollectionType: Int,
     val name: String?,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
@@ -26,7 +24,6 @@ class TollCollection internal constructor(
     id,
     RoadObjectType.TOLL_COLLECTION,
     length,
-    location,
     provider,
     isUrban,
     nativeRoadObject

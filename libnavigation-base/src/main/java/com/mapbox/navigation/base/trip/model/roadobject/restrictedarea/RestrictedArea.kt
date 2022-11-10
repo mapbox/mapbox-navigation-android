@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.restrictedarea
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Road object type that provides information about restricted areas on the road.
@@ -14,7 +13,6 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
 class RestrictedArea internal constructor(
     id: String,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
@@ -22,7 +20,6 @@ class RestrictedArea internal constructor(
     id,
     RoadObjectType.RESTRICTED_AREA,
     length,
-    location,
     provider,
     isUrban,
     nativeRoadObject,

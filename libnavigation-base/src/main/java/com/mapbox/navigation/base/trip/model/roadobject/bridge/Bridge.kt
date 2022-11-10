@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.bridge
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Road object type that provides information about bridges on the route.
@@ -14,11 +13,10 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
 class Bridge internal constructor(
     id: String,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
-) : RoadObject(id, RoadObjectType.BRIDGE, length, location, provider, isUrban, nativeRoadObject) {
+) : RoadObject(id, RoadObjectType.BRIDGE, length, provider, isUrban, nativeRoadObject) {
 
     /**
      * Returns a string representation of the object.

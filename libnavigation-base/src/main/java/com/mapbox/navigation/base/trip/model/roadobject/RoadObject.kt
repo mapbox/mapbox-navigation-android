@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.trip.model.roadobject
 
+import com.mapbox.navigation.base.trip.model.eh.mapToRoadObjectLocation
 import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType
 
@@ -22,19 +23,6 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  * - [RoadObjectType.CUSTOM]
  *
  * @param length length of the object, null if the object is point-like.
- * @param location location of the road object.
- * Road objects coming from the electronic horizon might have the next [RoadObjectLocationType]:
- * - [RoadObjectLocationType.GANTRY]
- * - [RoadObjectLocationType.OPEN_LR_LINE]
- * - [RoadObjectLocationType.OPEN_LR_POINT]
- * - [RoadObjectLocationType.POINT]
- * - [RoadObjectLocationType.POLYGON]
- * - [RoadObjectLocationType.POLYLINE]
- * - [RoadObjectLocationType.POLYLINE]
- *
- * Road objects coming from the active route will have only [RoadObjectLocationType]:
- * - [RoadObjectLocationType.ROUTE_ALERT]
- *
  * @param provider provider of the road object
  * @param isUrban **true** whenever [RoadObject] is in urban area, **false** otherwise. **null** if
  * road object cannot be defined if one is in urban or not (most probably is in both at the same time)
@@ -43,11 +31,28 @@ abstract class RoadObject internal constructor(
     val id: String,
     val objectType: Int,
     val length: Double?,
-    val location: RoadObjectLocation,
     val provider: String,
     val isUrban: Boolean?,
     internal val nativeRoadObject: com.mapbox.navigator.RoadObject,
 ) {
+    /**
+     * Location of the road object.
+     *
+     * Road objects coming from the electronic horizon might have the next [RoadObjectLocationType]:
+     * - [RoadObjectLocationType.GANTRY]
+     * - [RoadObjectLocationType.OPEN_LR_LINE]
+     * - [RoadObjectLocationType.OPEN_LR_POINT]
+     * - [RoadObjectLocationType.POINT]
+     * - [RoadObjectLocationType.POLYGON]
+     * - [RoadObjectLocationType.POLYLINE]
+     * - [RoadObjectLocationType.POLYLINE]
+     *
+     * Road objects coming from the active route will have only [RoadObjectLocationType]:
+     * - [RoadObjectLocationType.ROUTE_ALERT]
+     */
+    val location: RoadObjectLocation by lazy {
+        nativeRoadObject.location.mapToRoadObjectLocation()
+    }
 
     /**
      * Indicates whether some other object is "equal to" this one.
