@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.tunnel
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Road object type that provides information about tunnels on the route.
@@ -16,11 +15,10 @@ class Tunnel internal constructor(
     id: String,
     val info: TunnelInfo,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
-) : RoadObject(id, RoadObjectType.TUNNEL, length, location, provider, isUrban, nativeRoadObject) {
+) : RoadObject(id, RoadObjectType.TUNNEL, length, provider, isUrban, nativeRoadObject) {
 
     /**
      * Indicates whether some other object is "equal to" this one.
