@@ -33,12 +33,7 @@ class MainCoroutineRule : TestRule {
         @Throws(Throwable::class)
         override fun evaluate() {
             Dispatchers.setMain(testDispatcher)
-            mockkStatic(Looper::class) {
-                val looperMock = mockk<Looper>(relaxed = true)
-                every { Looper.myLooper() } returns looperMock
-                every { Looper.getMainLooper() } returns looperMock
-                base.evaluate()
-            }
+            base.evaluate()
 
             Dispatchers.resetMain() // Restore original main dispatcher
             createdScopes.forEach { it.cleanupTestCoroutines() }

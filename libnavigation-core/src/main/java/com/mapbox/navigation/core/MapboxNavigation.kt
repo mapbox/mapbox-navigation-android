@@ -6,6 +6,7 @@ package com.mapbox.navigation.core
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.os.Looper
 import androidx.annotation.RequiresPermission
 import androidx.annotation.VisibleForTesting
 import com.mapbox.android.core.location.LocationEngine
@@ -228,7 +229,21 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * When the routes are manually cleared, the SDK automatically fall back to either [Idle] or [FreeDrive] state.
  *
- * You can use [setRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
+ * You can use [setNavigationRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
+ *
+ * ### Multithreading
+ *
+ * [MapboxNavigation] can be used only from one thread.
+ * It doesn't matter if it's UI or worker thread, it should be the same single thread during whole lifecycle of [MapboxNavigation].
+ * Let's refer this thread the SDK thread.
+ * [MapboxNavigation] dispatches all the callbacks to the SDK thread and expects that all methods from [MapboxNavigation] will be called from the SDK thread only.
+ *
+ * Create [MapboxNavigation] from a thread which you want to use as the SDK thread.
+ * [MapboxNavigation] remembers it and will dispatch all the callbacks there.
+ * [MapboxNavigation] will throw an exception if any of the methods will be called from another(not the SDK thread).
+ *
+ * It's okay to use the main thread as the SDK thread. The SDK doesn't perform heavy computation on the SDK thread.
+ * Please make sure that the SDK thread has initialized [Looper].
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  */
@@ -237,7 +252,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val threadController: ThreadController,
 ) {
 
-    constructor(navigationOptions: NavigationOptions) : this(navigationOptions, AndroidThreadController())
+    constructor(navigationOptions: NavigationOptions) : this(
+        navigationOptions,
+        AndroidThreadController()
+    )
 
     private val accessToken: String? = navigationOptions.accessToken
     private val mainJobController = threadController.getSDKScopeAndRootJob()
@@ -982,7 +1000,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         threadController.assertSDKThread()
         rerouteController?.interrupt()
         restartRouteScope()
-        threadController.getSDKScopeAndRootJob(immediate = true).scope.launch  {
+        threadController.getSDKScopeAndRootJob(immediate = true).scope.launch {
             routeUpdateMutex.withLock {
                 historyRecordingStateHandler.setRoutes(routes)
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
@@ -1021,7 +1039,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun resetTripSessionRoutes() {
-        threadController.getSDKScopeAndRootJob(immediate = true).scope.launch  {
+        threadController.getSDKScopeAndRootJob(immediate = true).scope.launch {
             routeUpdateMutex.withLock {
                 val routes = directionsSession.routes
                 val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
@@ -1251,7 +1269,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun registerRoutesObserver(routesObserver: RoutesObserver) {
         threadController.assertSDKThread()
-        threadController.getSDKScopeAndRootJob(immediate = true).scope.launch  {
+        threadController.getSDKScopeAndRootJob(immediate = true).scope.launch {
             routeUpdateMutex.withLock {
                 directionsSession.registerRoutesObserver(routesObserver)
             }
