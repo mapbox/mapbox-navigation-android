@@ -100,7 +100,9 @@ internal open class MapboxNavigationBaseTest {
     val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxed = true)
     val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)
-    val threadController = TestThreadController()
+    val threadController = TestThreadController(
+        dispatcher = coroutineRule.testDispatcher
+    )
     val routeProgressDataProvider = mockk<RouteProgressDataProvider>(relaxed = true)
     val routesPreviewController = mockk<RoutesPreviewController>(relaxed = true)
 

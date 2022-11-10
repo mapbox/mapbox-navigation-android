@@ -42,7 +42,9 @@ class MapboxTripServiceTest {
             tripNotification,
             initializeLambda,
             terminateLambda,
-            TestThreadController(),
+            TestThreadController(
+                dispatcher = coroutineRule.testDispatcher
+            ),
         )
         every { tripNotification.getNotificationId() } answers { NOTIFICATION_ID }
         every { tripNotification.getNotification() } answers { notification }

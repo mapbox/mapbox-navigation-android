@@ -1043,8 +1043,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify tile config tilesVersion and isFallback on fallback`() {
-        threadController.cancelSDKScope()
-
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
             tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
@@ -1077,8 +1075,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `verify tile config tilesVersion and isFallback on return to latest tiles version`() {
-        threadController.cancelSDKScope()
-
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
             tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
