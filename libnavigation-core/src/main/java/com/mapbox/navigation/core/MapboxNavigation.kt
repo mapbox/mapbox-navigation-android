@@ -276,7 +276,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     )
 
     private val routesPreviewController = NavigationComponentProvider.createRoutesPreviewController(
-        threadController.getSDKScopeAndRootJob().scope
+        threadController.createChildSDKScope()
     )
 
     private val routeUpdateMutex = Mutex()
