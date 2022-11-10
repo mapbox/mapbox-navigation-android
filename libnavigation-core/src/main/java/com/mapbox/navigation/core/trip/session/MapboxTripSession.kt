@@ -283,6 +283,7 @@ internal class MapboxTripSession(
             tripService.startService()
         }
         tripSessionLocationEngine.startLocationUpdates(withReplayEnabled) {
+            threadController.assertSDKThread()
             updateRawLocation(it)
         }
         state = TripSessionState.STARTED

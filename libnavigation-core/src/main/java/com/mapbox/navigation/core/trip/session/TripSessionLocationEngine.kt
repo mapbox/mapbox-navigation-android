@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.trip.session
 
 import android.annotation.SuppressLint
 import android.location.Location
+import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import com.mapbox.android.core.location.LocationEngine
@@ -43,12 +44,26 @@ internal class TripSessionLocationEngine constructor(
         } else {
             navigationOptions.locationEngine
         }
+        val currentLooper = Looper.myLooper()!!
         locationEngine.requestLocationUpdates(
             navigationOptions.locationEngineRequest,
             locationEngineCallback,
-            Looper.myLooper()
+            currentLooper
         )
-        locationEngine.getLastLocation(locationEngineCallback)
+        locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
+            override fun onSuccess(result: LocationEngineResult?) {
+                result?.locations?.lastOrNull()?.let {
+                    logIfLocationIsNotFreshEnough(it)
+                    Handler(currentLooper).post {
+                        onRawLocationUpdate(it)
+                    }
+                }
+            }
+
+            override fun onFailure(exception: java.lang.Exception) {
+                logD("location on failure exception=$exception", LOG_CATEGORY)
+            }
+        })
     }
 
     fun stopLocationUpdates() {
