@@ -6,7 +6,7 @@ import androidx.annotation.ColorInt
 /**
  * Modify the look and feel of the road label.
  */
-class RoadLabelOptions private constructor(
+class CarRoadLabelOptions private constructor(
     @ColorInt
     val backgroundColor: Int,
     @ColorInt
@@ -28,7 +28,7 @@ class RoadLabelOptions private constructor(
     }
 
     /**
-     * Build a new [RoadLabelOptions]
+     * Build a new [CarRoadLabelOptions]
      */
     class Builder {
         private var backgroundColor: Int = DEFAULT_BACKGROUND_COLOR
@@ -66,10 +66,10 @@ class RoadLabelOptions private constructor(
         }
 
         /**
-         * Build the [RoadLabelOptions]
+         * Build the [CarRoadLabelOptions]
          */
-        fun build(): RoadLabelOptions {
-            return RoadLabelOptions(
+        fun build(): CarRoadLabelOptions {
+            return CarRoadLabelOptions(
                 backgroundColor = backgroundColor,
                 roundedLabelColor = roundedLabelColor,
                 shadowColor = shadowColor,

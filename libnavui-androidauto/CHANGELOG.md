@@ -6,6 +6,15 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Added `MapboxCarMapLoader.getStyleExtension` to get access to the values set. [#6571](https://github.com/mapbox/mapbox-navigation-android/pull/6571)
+- Removed `@MapboxExperimental` from `MapboxCarMapObserver` implementations. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
+- Renamed `CarCompassSurfaceRenderer` to `CarCompassRenderer`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
+- Renamed `CarLogoSurfaceRenderer` to `CarLogoRenderer`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
+- Renamed `RoadLabelSurfaceLayer` to `CarRoadLabelRenderer`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
+- Renamed `CarRouteLine` to `CarRouteLineRenderer`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
+- Renamed `RoadLabelOptions` to `CarRoadLabelOptions`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
+- Renamed `RoadLabelRenderer` to `CarRoadLabelRenderer`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
+- Made `ActiveGuidanceScreen` internal in favor of `MapboxScreen.ACTIVE_GUIDANCE`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
+- Made `NeedsLocationPermissionsScreen` internal in favor of `MapboxScreen.NEEDS_LOCATION_PERMISSION`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
 
 ## androidauto-v0.16.0 - 04 November, 2022
 ### Changelog

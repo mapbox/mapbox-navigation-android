@@ -10,6 +10,8 @@ import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
 import androidx.car.app.model.SearchTemplate
 import androidx.car.app.model.Template
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.feedback.ui.CarFeedbackAction
@@ -20,16 +22,14 @@ import com.mapbox.androidauto.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.preview.CarRoutePreviewRequestCallback
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.internal.extensions.attachCreated
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.search.result.SearchSuggestion
 import kotlinx.coroutines.launch
 
 /**
  * This screen allows the user to search for a destination.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class PlaceSearchScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
 ) : Screen(searchCarContext.carContext) {
@@ -64,7 +64,17 @@ internal class PlaceSearchScreen @UiThread constructor(
         addBackPressedHandler {
             searchCarContext.mapboxScreenManager.goBack()
         }
-        attachCreated(searchCarContext.routePreviewRequest, searchCarContext.carPlaceSearch)
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onCreate(owner: LifecycleOwner) {
+                MapboxNavigationApp.registerObserver(searchCarContext.routePreviewRequest)
+                MapboxNavigationApp.registerObserver(searchCarContext.carPlaceSearch)
+            }
+
+            override fun onDestroy(owner: LifecycleOwner) {
+                MapboxNavigationApp.unregisterObserver(searchCarContext.routePreviewRequest)
+                MapboxNavigationApp.unregisterObserver(searchCarContext.carPlaceSearch)
+            }
+        })
     }
 
     override fun onGetTemplate(): Template {

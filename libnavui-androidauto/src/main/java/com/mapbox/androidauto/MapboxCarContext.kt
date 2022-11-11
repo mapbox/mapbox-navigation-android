@@ -18,7 +18,6 @@ import com.mapbox.androidauto.notification.MapboxCarNotificationOptions
 import com.mapbox.androidauto.preview.CarRoutePreviewRequest
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.settings.MapboxCarStorage
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 
 /**
@@ -30,7 +29,6 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMap
  * @param lifecycle used to access the [CarContext].
  * @param mapboxCarMap controls the Mapbox car map surface.
  */
-@OptIn(MapboxExperimental::class)
 class MapboxCarContext(
     /**
      * Gives access to the [Lifecycle] that owns the [CarContext].

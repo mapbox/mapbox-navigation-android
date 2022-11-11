@@ -10,7 +10,6 @@ import com.mapbox.androidauto.search.PlaceRecord
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@OptIn(MapboxExperimental::class)
 class PlacesListOnMapManager(
     private val placesListOnMapProvider: PlacesListOnMapProvider,
 ) : MapboxCarMapObserver {

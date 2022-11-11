@@ -9,14 +9,12 @@ import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import java.util.concurrent.ConcurrentHashMap
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CarSearchLocationProvider : LocationEngine, MapboxNavigationObserver {
 
     var location: Location? = null

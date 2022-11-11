@@ -31,7 +31,6 @@ import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.search.PlaceRecord
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
@@ -42,7 +41,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
  * After a destination has been selected. This view previews the route and lets
  * you select alternatives. From here, you can start turn-by-turn navigation.
  */
-@OptIn(MapboxExperimental::class)
 internal class CarRoutePreviewScreen @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext,
     private val placeRecord: PlaceRecord,
@@ -52,7 +50,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
 
     private val carRoutesProvider = PreviewCarRoutesProvider(navigationRoutes)
     private var selectedIndex = 0
-    private val carRouteLine = CarRouteLine(carRoutesProvider)
+    private val carRouteLineRenderer = CarRouteLineRenderer(carRoutesProvider)
     private val carLocationRenderer = CarLocationRenderer()
     private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
     private val carNavigationCamera = CarNavigationCamera(
@@ -106,7 +104,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
                 mapboxCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
-                mapboxCarContext.mapboxCarMap.registerObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.registerObserver(carRouteLineRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(surfaceListener)
             }
 
@@ -115,7 +113,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
-                mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLineRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
             }
         })

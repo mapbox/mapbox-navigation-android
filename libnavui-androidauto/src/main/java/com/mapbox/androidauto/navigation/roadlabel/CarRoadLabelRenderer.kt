@@ -30,13 +30,13 @@ import com.mapbox.navigation.ui.shield.model.RouteShield
  * removing the listener with [MapboxCarMap.unregisterObserver].
  */
 @OptIn(MapboxExperimental::class)
-class RoadLabelSurfaceLayer : MapboxCarMapObserver {
+class CarRoadLabelRenderer : MapboxCarMapObserver {
 
-    private val roadLabelRenderer = RoadLabelRenderer()
+    private val roadLabelBitmapRenderer = CarRoadLabelBitmapRenderer()
     private val routeShieldApi = MapboxRouteShieldApi()
     private val mapUserStyleObserver = MapUserStyleObserver()
     private var styleLoadedListener: OnStyleLoadedListener? = null
-    private var roadNameObserver: RoadNameObserver? = null
+    private var roadNameObserver: CarRoadNameObserver? = null
     private var roadLabelWidget: BitmapWidget? = null
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
@@ -49,15 +49,16 @@ class RoadLabelSurfaceLayer : MapboxCarMapObserver {
         ).also { roadLabelWidget = it }
         mapboxCarMapSurface.mapSurface.addWidget(roadLabelWidget)
         val carContext = mapboxCarMapSurface.carContext
-        val roadNameObserver = object : RoadNameObserver(routeShieldApi, mapUserStyleObserver) {
+        val roadNameObserver = object : CarRoadNameObserver(routeShieldApi, mapUserStyleObserver) {
             override fun onRoadUpdate(road: List<RoadComponent>, shields: List<RouteShield>) {
                 val options = roadLabelOptions(carContext)
-                val bitmap = roadLabelRenderer.render(carContext.resources, road, shields, options)
+                val bitmap = roadLabelBitmapRenderer
+                    .render(carContext.resources, road, shields, options)
                 roadLabelWidget.updateBitmap(bitmap ?: EMPTY_BITMAP)
             }
         }.also { roadNameObserver = it }
         styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached {
-            val bitmap = roadLabelRenderer.render(
+            val bitmap = roadLabelBitmapRenderer.render(
                 carContext.resources,
                 roadNameObserver.currentRoad,
                 roadNameObserver.currentShields,
@@ -87,7 +88,7 @@ class RoadLabelSurfaceLayer : MapboxCarMapObserver {
         roadLabelWidget?.setTranslation(translationX.toFloat(), -edgeInsets.bottom.toFloat())
     }
 
-    private fun roadLabelOptions(carContext: CarContext): RoadLabelOptions =
+    private fun roadLabelOptions(carContext: CarContext): CarRoadLabelOptions =
         if (carContext.isDarkMode) {
             DARK_OPTIONS
         } else {
@@ -96,13 +97,13 @@ class RoadLabelSurfaceLayer : MapboxCarMapObserver {
 
     private companion object {
 
-        private val DARK_OPTIONS = RoadLabelOptions.Builder()
+        private val DARK_OPTIONS = CarRoadLabelOptions.Builder()
             .shadowColor(null)
             .roundedLabelColor(Color.BLACK)
             .textColor(Color.WHITE)
             .build()
 
-        private val LIGHT_OPTIONS = RoadLabelOptions.Builder()
+        private val LIGHT_OPTIONS = CarRoadLabelOptions.Builder()
             .roundedLabelColor(Color.WHITE)
             .textColor(Color.BLACK)
             .build()

@@ -7,7 +7,6 @@ import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.animation.camera
@@ -20,7 +19,6 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 
-@OptIn(MapboxExperimental::class)
 class CarLocationsOverviewCamera(
     private val initialCameraOptions: CameraOptions = CameraOptions.Builder()
         .zoom(DEFAULT_INITIAL_ZOOM)

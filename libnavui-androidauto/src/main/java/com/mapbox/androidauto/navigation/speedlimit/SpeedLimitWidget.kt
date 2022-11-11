@@ -16,7 +16,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 /**
  * Widget to display a speed limit sign on the map.
  */
-@OptIn(MapboxExperimental::class)
+@MapboxExperimental
 class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD) : BitmapWidget(
     drawSpeedLimitSign(speedLimit = null, speed = 0, initialSignFormat, warn = false),
     WidgetPosition(WidgetPosition.Horizontal.RIGHT, WidgetPosition.Vertical.BOTTOM),

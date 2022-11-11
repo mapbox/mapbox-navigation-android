@@ -13,27 +13,25 @@ import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.location.CarLocationRenderer
 import com.mapbox.androidauto.navigation.CarCameraMode
 import com.mapbox.androidauto.navigation.CarNavigationCamera
-import com.mapbox.androidauto.navigation.roadlabel.RoadLabelSurfaceLayer
+import com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelRenderer
 import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
-import com.mapbox.androidauto.preview.CarRouteLine
-import com.mapbox.maps.MapboxExperimental
+import com.mapbox.androidauto.preview.CarRouteLineRenderer
 
 /**
  * When the app is launched from Android Auto
  */
-@OptIn(MapboxExperimental::class)
-class FreeDriveCarScreen @UiThread constructor(
+internal class FreeDriveCarScreen @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext
 ) : Screen(mapboxCarContext.carContext) {
 
-    val carRouteLine = CarRouteLine()
+    val carRouteLineRenderer = CarRouteLineRenderer()
     val carLocationRenderer = CarLocationRenderer()
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
     val carNavigationCamera = CarNavigationCamera(
         initialCarCameraMode = CarCameraMode.FOLLOWING,
         alternativeCarCameraMode = null,
     )
-    private val roadLabelSurfaceLayer = RoadLabelSurfaceLayer()
+    private val carRoadLabelRenderer = CarRoadLabelRenderer()
     private val mapActionStripBuilder = MapboxMapActionStrip(this, carNavigationCamera)
 
     init {
@@ -41,9 +39,9 @@ class FreeDriveCarScreen @UiThread constructor(
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 logAndroidAuto("FreeDriveCarScreen onResume")
-                mapboxCarContext.mapboxCarMap.registerObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.registerObserver(carRouteLineRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carLocationRenderer)
-                mapboxCarContext.mapboxCarMap.registerObserver(roadLabelSurfaceLayer)
+                mapboxCarContext.mapboxCarMap.registerObserver(carRoadLabelRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
                 mapboxCarContext.mapboxCarMap.setGestureHandler(carNavigationCamera.gestureHandler)
@@ -51,9 +49,9 @@ class FreeDriveCarScreen @UiThread constructor(
 
             override fun onPause(owner: LifecycleOwner) {
                 logAndroidAuto("FreeDriveCarScreen onPause")
-                mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLine)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLineRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carLocationRenderer)
-                mapboxCarContext.mapboxCarMap.unregisterObserver(roadLabelSurfaceLayer)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carRoadLabelRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
                 mapboxCarContext.mapboxCarMap.setGestureHandler(null)

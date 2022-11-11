@@ -6,7 +6,6 @@ import com.mapbox.androidauto.internal.extensions.getStyle
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.androidauto.internal.surfacelayer.EmptyLayerHost
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
@@ -26,7 +25,6 @@ import com.mapbox.navigation.ui.maps.NavigationStyles
  * [MapboxCarMap.unregisterObserver]. Override the [Session.onCarConfigurationChanged] and call the
  * [onCarConfigurationChanged].
  */
-@OptIn(MapboxExperimental::class)
 class MapboxCarMapLoader : MapboxCarMapObserver {
 
     private var mapboxMap: MapboxMap? = null

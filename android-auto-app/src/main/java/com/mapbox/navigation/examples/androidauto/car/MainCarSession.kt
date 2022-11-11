@@ -14,13 +14,12 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
 import com.mapbox.androidauto.map.MapboxCarMapLoader
-import com.mapbox.androidauto.map.compass.CarCompassSurfaceRenderer
-import com.mapbox.androidauto.map.logo.CarLogoSurfaceRenderer
+import com.mapbox.androidauto.map.compass.CarCompassRenderer
+import com.mapbox.androidauto.map.logo.CarLogoRenderer
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.screenmanager.prepareScreens
 import com.mapbox.maps.MapInitOptions
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -31,13 +30,11 @@ import com.mapbox.navigation.examples.androidauto.ReplayRouteTripSession
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-@OptIn(MapboxExperimental::class)
 class MainCarSession : Session() {
 
     private val mapboxCarMapLoader = MapboxCarMapLoader()
     private val mapboxCarMap = MapboxCarMap().registerObserver(mapboxCarMapLoader)
     private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap).prepareScreens()
-
     private val mapboxNavigation by requireMapboxNavigation()
 
     init {
@@ -46,8 +43,8 @@ class MainCarSession : Session() {
         CarAppSyncComponent.getInstance().setCarSession(this)
 
         // Add BitmapWidgets to the map that will be shown whenever the map is visible.
-        val logoSurfaceRenderer = CarLogoSurfaceRenderer()
-        val compassSurfaceRenderer = CarCompassSurfaceRenderer()
+        val logoSurfaceRenderer = CarLogoRenderer()
+        val compassSurfaceRenderer = CarCompassRenderer()
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
                 // You must give the MapboxCarMap an instance of the carContext.
@@ -83,6 +80,7 @@ class MainCarSession : Session() {
 
     // Handle the geo deeplink for voice activated navigation. This will handle the case when
     // you ask the head unit to "Navigate to coffee shop".
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (PermissionsManager.areLocationPermissionsGranted(carContext)) {

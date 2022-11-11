@@ -6,8 +6,8 @@ import androidx.test.filters.SmallTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
-import com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions
-import com.mapbox.androidauto.navigation.roadlabel.RoadLabelRenderer
+import com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelBitmapRenderer
+import com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions
 import com.mapbox.androidauto.testing.BitmapTestUtil
 import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 @ExperimentalMapboxNavigationAPI
 @RunWith(AndroidJUnit4ClassRunner::class)
 @SmallTest
-class RoadLabelRendererTest {
+class RoadLabelBitmapRendererTest {
 
     @Rule
     @JvmField
@@ -40,7 +40,7 @@ class RoadLabelRendererTest {
         "test_road_label_images"
     )
 
-    private val roadLabelBitmapRenderer = RoadLabelRenderer()
+    private val roadLabelBitmapRenderer = CarRoadLabelBitmapRenderer()
     private val resources = InstrumentationRegistry.getInstrumentation().context.resources
 
     @Test
@@ -49,7 +49,7 @@ class RoadLabelRendererTest {
             resources,
             createRoad("Pennsylvania Avenue"),
             emptyList(),
-            RoadLabelOptions.Builder()
+            CarRoadLabelOptions.Builder()
                 .backgroundColor(0x784D4DD3)
                 .build()
         )
@@ -63,7 +63,7 @@ class RoadLabelRendererTest {
             resources,
             createRoad("11th Street"),
             emptyList(),
-            RoadLabelOptions.Builder()
+            CarRoadLabelOptions.Builder()
                 .backgroundColor(0x784D4DD3)
                 .build()
         )
@@ -80,7 +80,7 @@ class RoadLabelRendererTest {
                     "uakitanatahu"
             ),
             emptyList(),
-            RoadLabelOptions.Builder()
+            CarRoadLabelOptions.Builder()
                 .backgroundColor(0x784D4DD3)
                 .build()
         )
@@ -94,7 +94,7 @@ class RoadLabelRendererTest {
             resources,
             createRoad("Eu Tong Sen Street"),
             emptyList(),
-            RoadLabelOptions.Builder()
+            CarRoadLabelOptions.Builder()
                 .shadowColor(null)
                 .roundedLabelColor(0xFF1A65CA.toInt())
                 .textColor(Color.WHITE)
@@ -124,7 +124,7 @@ class RoadLabelRendererTest {
                     mockk()
                 )
             ),
-            RoadLabelOptions.Builder()
+            CarRoadLabelOptions.Builder()
                 .backgroundColor(0x784D4DD3)
                 .build(),
         )

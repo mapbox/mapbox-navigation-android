@@ -5,14 +5,12 @@ import androidx.car.app.ScreenManager
 import androidx.car.app.Session
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Before
 import org.junit.Test
 
-@OptIn(MapboxExperimental::class)
 class MapboxCarContextTest {
 
     private val session: Session = mockk()
