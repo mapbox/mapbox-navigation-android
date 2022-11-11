@@ -207,7 +207,7 @@ class RouterWrapper(
 
         return router.getRouteRefresh(
             refreshOptions
-        ) { result, _ ->
+        ) { result, _, _ ->
             logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
             result.fold(
                 {

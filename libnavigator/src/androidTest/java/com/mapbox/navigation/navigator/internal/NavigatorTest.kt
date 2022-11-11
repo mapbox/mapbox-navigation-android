@@ -19,6 +19,7 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.SetRoutesParams
+import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
 import org.junit.Assert.assertTrue
@@ -44,7 +45,8 @@ class NavigatorTest {
                     routes.map { it.nativeRoute() }.first(),
                     0,
                     routes.map { it.nativeRoute() }.drop(1),
-                )
+                ),
+                SetRoutesReason.NEW_ROUTE
             ) { expected ->
                 assertTrue(expected.isValue)
                 cdl.countDown()

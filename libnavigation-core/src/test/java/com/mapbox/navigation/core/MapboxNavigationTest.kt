@@ -44,6 +44,7 @@ import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.Runs
@@ -1123,7 +1124,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         every { tripSession.getRouteProgress() } returns routeProgress
         every { routeProgress.currentLegProgress } returns legProgress
         every { legProgress.legIndex } returns index
-        coEvery { navigator.setRoutes(any(), any(), any()) } answers {
+        coEvery { navigator.setRoutes(any(), any(), any(), any()) } answers {
             createSetRouteResult()
         }
 
@@ -1132,7 +1133,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
 
         coVerify {
-            navigator.setRoutes(primaryRoute, index, listOf(alternativeRoute))
+            navigator.setRoutes(
+                primaryRoute,
+                index,
+                SetRoutesReason.NEW_ROUTE,
+                listOf(alternativeRoute)
+            )
         }
     }
 

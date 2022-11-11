@@ -134,6 +134,7 @@ import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.RouterInterface
+import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.Dispatchers
@@ -1895,6 +1896,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 navigator.setRoutes(
                     primaryRoute = routes[0],
                     startingLeg = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0,
+                    setRoutesReason = SetRoutesReason.NEW_ROUTE,
                     alternatives = routes.drop(1)
                 )
             }

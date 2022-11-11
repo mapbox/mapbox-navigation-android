@@ -282,6 +282,7 @@ class RouterInterfaceAdapterTest {
             nativeRouteRefreshCallback.run(
                 capture(slotNativeRouterRefreshCallback),
                 capture(slotNativeRouterOrigin),
+                hashMapOf(),
             )
         } just Runs
         return Triple(

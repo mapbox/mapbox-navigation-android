@@ -42,6 +42,7 @@ import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesParams
+import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -150,6 +151,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override suspend fun setRoutes(
         primaryRoute: NavigationRoute?,
         startingLeg: Int,
+        setRoutesReason: SetRoutesReason,
         alternatives: List<NavigationRoute>,
     ): Expected<String, SetRoutesResult> = suspendCancellableCoroutine { continuation ->
         navigator!!.setRoutes(
@@ -159,7 +161,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                     startingLeg,
                     alternatives.map { it.nativeRoute() }
                 )
-            }
+            },
+            setRoutesReason
         ) { result ->
             result.onError {
                 logE(
