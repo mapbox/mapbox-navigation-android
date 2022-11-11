@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.navigationview
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.dropin.NavigationViewApiErrorTypes
 import com.mapbox.navigation.dropin.util.TestStore
@@ -30,7 +29,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxNavigationViewApiTest {
 
     private lateinit var sut: MapboxNavigationViewApi

@@ -5,7 +5,6 @@ import com.mapbox.api.geocoding.v5.MapboxGeocoding
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -25,7 +24,7 @@ import org.junit.Test
 import retrofit2.Callback
 import retrofit2.Response
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class GeocoderTest {
 
     @get:Rule

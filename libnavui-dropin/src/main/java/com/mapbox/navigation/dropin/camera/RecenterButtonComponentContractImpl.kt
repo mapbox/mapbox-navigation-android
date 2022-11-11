@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.camera
 
 import android.view.View
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
@@ -10,7 +9,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class RecenterButtonComponentContractImpl(
     scope: CoroutineScope,
     private val store: Store

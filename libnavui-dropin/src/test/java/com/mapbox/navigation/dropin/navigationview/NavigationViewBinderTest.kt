@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.navigationview
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.EmptyBinder
 import com.mapbox.navigation.dropin.ViewBinderCustomization
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
@@ -17,7 +16,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationViewBinderTest {
 
     lateinit var sut: NavigationViewBinder

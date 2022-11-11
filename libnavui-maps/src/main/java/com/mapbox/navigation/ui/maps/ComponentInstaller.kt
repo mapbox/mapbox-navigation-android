@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.installer
+package com.mapbox.navigation.ui.maps
 
 import android.content.Context
 import androidx.core.content.ContextCompat
@@ -18,7 +18,6 @@ import com.mapbox.navigation.ui.base.installer.ComponentInstaller
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.findComponent
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
-import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
@@ -51,9 +50,9 @@ import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 @ExperimentalPreviewMapboxNavigationAPI
 fun ComponentInstaller.locationPuck(
     mapView: MapView,
-    config: LocationPuckComponentConfig.() -> Unit = {}
+    config: LocationPuckConfig.() -> Unit = {}
 ): Installation {
-    val componentConfig = LocationPuckComponentConfig().apply(config)
+    val componentConfig = LocationPuckConfig().apply(config)
     val locationPuck = componentConfig.locationPuck ?: LocationPuck2D(
         bearingImage = ContextCompat.getDrawable(
             mapView.context,
@@ -88,9 +87,9 @@ fun ComponentInstaller.locationPuck(
 @ExperimentalPreviewMapboxNavigationAPI
 fun ComponentInstaller.routeLine(
     mapView: MapView,
-    config: RouteLineComponentConfig.() -> Unit = {}
+    config: RouteLineConfig.() -> Unit = {}
 ): Installation {
-    val componentConfig = RouteLineComponentConfig(mapView.context).apply(config)
+    val componentConfig = RouteLineConfig(mapView.context).apply(config)
     return component(RouteLineComponent(mapView.getMapboxMap(), mapView, componentConfig.options))
 }
 
@@ -103,9 +102,9 @@ fun ComponentInstaller.routeLine(
 @ExperimentalPreviewMapboxNavigationAPI
 fun ComponentInstaller.routeArrow(
     mapView: MapView,
-    config: RouteArrowComponentConfig.() -> Unit = {}
+    config: RouteArrowConfig.() -> Unit = {}
 ): Installation {
-    val componentConfig = RouteArrowComponentConfig(mapView.context).apply(config)
+    val componentConfig = RouteArrowConfig(mapView.context).apply(config)
     return component(RouteArrowComponent(mapView.getMapboxMap(), componentConfig.options))
 }
 
@@ -119,9 +118,9 @@ fun ComponentInstaller.routeArrow(
 fun ComponentInstaller.roadName(
     mapView: MapView,
     roadNameView: MapboxRoadNameView,
-    config: RoadNameComponentConfig.() -> Unit = {}
+    config: RoadNameConfig.() -> Unit = {}
 ): Installation {
-    val componentConfig = RoadNameComponentConfig().apply(config)
+    val componentConfig = RoadNameConfig().apply(config)
     val contract = MapboxRoadNameComponentContract(mapView.getMapboxMap())
     return components(
         contract,
@@ -143,9 +142,9 @@ fun ComponentInstaller.roadName(
 fun ComponentInstaller.recenterButton(
     mapView: MapView,
     button: MapboxExtendableButton,
-    config: RecenterButtonComponentConfig.() -> Unit = {}
+    config: RecenterButtonConfig.() -> Unit = {}
 ): Installation {
-    val componentConfig = RecenterButtonComponentConfig().apply(config)
+    val componentConfig = RecenterButtonConfig().apply(config)
     val contract = MapboxRecenterButtonComponentContract(mapView, componentConfig)
     return components(
         contract,
@@ -153,6 +152,30 @@ fun ComponentInstaller.recenterButton(
             recenterButton = button,
             contractProvider = { contract }
         )
+    )
+}
+
+/**
+ * Install component that toggles [NavigationCamera] between [NavigationCameraState.OVERVIEW] and
+ * [NavigationCameraState.FOLLOWING] on [button] click.
+ *
+ * The installed component will first use the [NavigationCamera] instance from [CameraModeConfig].
+ * If not available, it will attempt to use the [NavigationCamera] instance managed by the NavigationCamera component.
+ * (see [ComponentInstaller.navigationCamera])
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+fun ComponentInstaller.cameraModeButton(
+    button: MapboxCameraModeButton,
+    config: CameraModeConfig.() -> Unit = {}
+): Installation {
+    val componentConfig = CameraModeConfig().apply(config)
+    val contract = MapboxCameraModeButtonComponentContract {
+        componentConfig.navigationCamera
+            ?: findComponent<NavigationCameraComponent>()?.navigationCamera
+    }
+    return components(
+        contract,
+        CameraModeButtonComponent(button) { contract }
     )
 }
 
@@ -165,9 +188,9 @@ fun ComponentInstaller.recenterButton(
 @ExperimentalPreviewMapboxNavigationAPI
 fun ComponentInstaller.navigationCamera(
     mapView: MapView,
-    config: NavigationCameraComponentConfig.() -> Unit = {}
+    config: NavigationCameraConfig.() -> Unit = {}
 ): Installation {
-    val componentConfig = NavigationCameraComponentConfig().apply(config)
+    val componentConfig = NavigationCameraConfig().apply(config)
     val viewportDataSource =
         componentConfig.viewportDataSource ?: MapboxNavigationViewportDataSource(
             mapboxMap = mapView.getMapboxMap()
@@ -188,34 +211,10 @@ fun ComponentInstaller.navigationCamera(
 }
 
 /**
- * Install component that toggles [NavigationCamera] between [NavigationCameraState.OVERVIEW] and
- * [NavigationCameraState.FOLLOWING] on [button] click.
- *
- * The installed component will first use the [NavigationCamera] instance from [CameraModeComponentConfig].
- * If not available, it will attempt to use the [NavigationCamera] instance managed by the NavigationCamera component.
- * (see [ComponentInstaller.navigationCamera])
- */
-@ExperimentalPreviewMapboxNavigationAPI
-fun ComponentInstaller.cameraModeButton(
-    button: MapboxCameraModeButton,
-    config: CameraModeComponentConfig.() -> Unit = {}
-): Installation {
-    val componentConfig = CameraModeComponentConfig().apply(config)
-    val contract = MapboxCameraModeButtonComponentContract {
-        componentConfig.navigationCamera
-            ?: findComponent<NavigationCameraComponent>()?.navigationCamera
-    }
-    return components(
-        contract,
-        CameraModeButtonComponent(button) { contract }
-    )
-}
-
-/**
  * Camera mode button component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class CameraModeComponentConfig internal constructor() {
+class CameraModeConfig internal constructor() {
     /**
      * Instance of [NavigationCamera] to use with this component.
      * Passing `null` will use [NavigationCamera] instance managed by the [ComponentInstaller.navigationCamera] component.
@@ -227,7 +226,7 @@ class CameraModeComponentConfig internal constructor() {
  * NavigationCamera component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class NavigationCameraComponentConfig internal constructor() {
+class NavigationCameraConfig internal constructor() {
     /**
      * Instance of [MapboxNavigationViewportDataSource] to use with the [NavigationCamera].
      * This value is ignored when [navigationCamera] is set.
@@ -250,7 +249,7 @@ class NavigationCameraComponentConfig internal constructor() {
  * Recenter button component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class RecenterButtonComponentConfig internal constructor() {
+class RecenterButtonConfig internal constructor() {
     /**
      * Options for camera re-center request.
      */
@@ -268,7 +267,7 @@ class RecenterButtonComponentConfig internal constructor() {
  * Road name component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class RoadNameComponentConfig internal constructor() {
+class RoadNameConfig internal constructor() {
     /**
      * A [MapboxRouteShieldApi] instance to use with this component.
      */
@@ -279,7 +278,7 @@ class RoadNameComponentConfig internal constructor() {
  * Route line component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class RouteLineComponentConfig internal constructor(context: Context) {
+class RouteLineConfig internal constructor(context: Context) {
     /**
      * Options used to create [MapboxRouteLineApi] and [MapboxRouteLineView] instance.
      */
@@ -292,7 +291,7 @@ class RouteLineComponentConfig internal constructor(context: Context) {
  * Route arrow component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class RouteArrowComponentConfig internal constructor(context: Context) {
+class RouteArrowConfig internal constructor(context: Context) {
     /**
      * Options used to create [MapboxRouteArrowView] instance.
      */
@@ -303,7 +302,7 @@ class RouteArrowComponentConfig internal constructor(context: Context) {
  * Location puck component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class LocationPuckComponentConfig internal constructor() {
+class LocationPuckConfig internal constructor() {
     /**
      * An instance of either [LocationPuck2D] or [LocationPuck3D] to use with this component.
      */

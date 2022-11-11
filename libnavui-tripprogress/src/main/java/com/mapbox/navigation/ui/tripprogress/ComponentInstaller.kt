@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.tripprogress.installer
+package com.mapbox.navigation.ui.tripprogress
 
 import android.content.Context
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI

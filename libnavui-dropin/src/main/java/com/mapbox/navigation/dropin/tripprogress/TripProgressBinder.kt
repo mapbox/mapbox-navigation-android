@@ -4,7 +4,6 @@ import android.transition.Scene
 import android.transition.TransitionManager
 import android.view.ViewGroup
 import androidx.lifecycle.viewModelScope
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxTripProgressViewLayoutBinding
@@ -17,7 +16,6 @@ import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatt
 import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class TripProgressBinder(
     private val context: NavigationViewContext
 ) : UIBinder {

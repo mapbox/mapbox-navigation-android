@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.map.longpress
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.dropin.util.HapticFeedback
@@ -12,7 +11,6 @@ import com.mapbox.navigation.ui.app.internal.extension.dispatch
 import com.mapbox.navigation.ui.app.internal.showDestinationPreview
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class FreeDriveLongPressMapComponent(
     private val store: Store,
     private val mapView: MapView,

@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.camera.CameraComponent
@@ -34,7 +33,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
  * Base Binder class used for inflating and binding Map View.
  * Use [MapViewBinder.defaultBinder] to access default implementation.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 abstract class MapViewBinder : UIBinder {
 
     internal lateinit var context: NavigationViewContext

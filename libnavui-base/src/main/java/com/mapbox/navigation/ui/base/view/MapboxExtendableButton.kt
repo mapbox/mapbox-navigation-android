@@ -6,13 +6,11 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.DrawableRes
-import androidx.annotation.StyleRes
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.base.R
 import com.mapbox.navigation.ui.base.databinding.MapboxExtendableButtonLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
@@ -21,7 +19,6 @@ import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 /**
  * Button with an icon and expand behaviour.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 @UiThread
 class MapboxExtendableButton : FrameLayout {
 
@@ -110,23 +107,6 @@ class MapboxExtendableButton : FrameLayout {
 
         if (0 < state.duration && !state.text.isNullOrEmpty() && !helper.isAnimationRunning) {
             helper.showTextAndExtend(state.text, state.duration)
-        }
-    }
-
-    /**
-     * Allows you to change the style of [MapboxExtendableButton].
-     * @param style Int
-     */
-    fun updateStyle(@StyleRes style: Int) {
-        context.obtainStyledAttributes(
-            style,
-            R.styleable.MapboxExtendableButton
-        ).apply {
-            try {
-                applyAttributes(this)
-            } finally {
-                recycle()
-            }
         }
     }
 

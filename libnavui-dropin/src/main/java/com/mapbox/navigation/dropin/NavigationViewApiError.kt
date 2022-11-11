@@ -15,7 +15,7 @@ class NavigationViewApiError internal constructor(
 ) : Throwable(message)
 
 /**
- * All Error types returned by the NavigationApi.
+ * All error types returned by the [NavigationViewApi].
  */
 object NavigationViewApiErrorTypes {
     /**

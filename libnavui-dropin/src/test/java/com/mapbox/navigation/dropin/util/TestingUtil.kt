@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.util
 import android.location.Location
 import android.location.LocationManager
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.MapboxNavigationObserverChain
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -36,7 +35,6 @@ object TestingUtil {
      * Recursively traverse a receiver's ([MapboxNavigationObserverChain] or [ReloadingComponent])
      * component tree and return first component that matches given [predicate].
      */
-    @ExperimentalPreviewMapboxNavigationAPI
     fun MapboxNavigationObserver?.findComponent(
         predicate: (MapboxNavigationObserver?) -> Boolean
     ): MapboxNavigationObserver? {

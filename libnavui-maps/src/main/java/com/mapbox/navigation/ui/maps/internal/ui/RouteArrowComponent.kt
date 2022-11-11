@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
 import com.mapbox.maps.MapboxMap
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
-@ExperimentalPreviewMapboxNavigationAPI
 class RouteArrowComponent(
     private val mapboxMap: MapboxMap,
     private val routeArrowOptions: RouteArrowOptions,

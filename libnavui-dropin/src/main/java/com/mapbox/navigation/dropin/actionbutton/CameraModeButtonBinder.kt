@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.actionbutton
 import android.view.ViewGroup
 import androidx.annotation.Px
 import androidx.lifecycle.viewModelScope
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.camera.CameraModeButtonComponentContractImpl
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
@@ -13,7 +12,6 @@ import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.maps.internal.ui.CameraModeButtonComponent
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class CameraModeButtonBinder(
     private val context: NavigationViewContext,
     @Px private val verticalSpacing: Int = 0

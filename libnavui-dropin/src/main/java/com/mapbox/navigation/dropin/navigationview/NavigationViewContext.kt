@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.graphics.Insets
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.dropin.ViewBinderCustomization
 import com.mapbox.navigation.dropin.ViewOptionsCustomization
 import com.mapbox.navigation.dropin.ViewStyleCustomization
@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * If your data should survive configuration changes, place it inside
  * [NavigationViewModel].
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationViewContext(
     val context: Context,
     val lifecycleOwner: LifecycleOwner,

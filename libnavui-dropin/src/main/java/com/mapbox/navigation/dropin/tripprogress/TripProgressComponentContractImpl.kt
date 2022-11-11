@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.tripprogress
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
@@ -9,7 +8,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class TripProgressComponentContractImpl(
     scope: CoroutineScope,
     store: Store

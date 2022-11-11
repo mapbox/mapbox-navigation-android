@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.speedlimit.internal
 
 import androidx.annotation.StyleRes
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -11,7 +10,6 @@ import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-@ExperimentalPreviewMapboxNavigationAPI
 class SpeedLimitComponent(
     @StyleRes val style: Int,
     @StyleRes val textAppearance: Int,

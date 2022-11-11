@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.speedlimit.internal
 
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.base.speed.model.SpeedLimitUnit
@@ -27,7 +26,6 @@ import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
-@ExperimentalPreviewMapboxNavigationAPI
 class SpeedLimitComponentTest {
 
     @get:Rule
@@ -42,12 +40,12 @@ class SpeedLimitComponentTest {
 
     @Before
     fun setUp() {
-        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
     }
 
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
     }
 
     @Test

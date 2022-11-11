@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
@@ -17,13 +16,6 @@ import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
-/**
- * Default experience for location permissions.
- *
- * @param componentActivity used for requesting location permissions
- * @param tripSessionStarterViewModel used to notify when location permissions are granted
- */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class LocationPermissionComponent(
     componentActivity: ComponentActivity,
     private val store: Store

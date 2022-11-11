@@ -1,12 +1,12 @@
 // Signature format: 3.0
 package com.mapbox.navigation.dropin {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class EmptyBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
+  public final class EmptyBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
     ctor public EmptyBinder();
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
   }
 
-  @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
+  @UiThread public final class NavigationView extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleOwner {
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context), androidx.lifecycle.ViewModelStoreOwner viewModelStoreOwner = context.toViewModelStoreOwner());
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null, String accessToken = attrs.navigationViewAccessToken(context));
     ctor public NavigationView(android.content.Context context, android.util.AttributeSet? attrs = null);
@@ -24,7 +24,7 @@ package com.mapbox.navigation.dropin {
     property public final com.mapbox.navigation.dropin.NavigationViewApi api;
   }
 
-  @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewApi {
+  @UiThread public abstract class NavigationViewApi {
     ctor public NavigationViewApi();
     method public abstract com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer? getCurrentVoiceInstructionsPlayer();
     method public abstract boolean isReplayEnabled();
@@ -60,7 +60,7 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.api.directions.v5.models.RouteOptions.Builder intercept(com.mapbox.api.directions.v5.models.RouteOptions.Builder builder);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewBinderCustomization {
+  public final class ViewBinderCustomization {
     ctor public ViewBinderCustomization();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getActionButtonsBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getActionCameraModeButtonBinder();
@@ -142,7 +142,7 @@ package com.mapbox.navigation.dropin {
     property public final com.mapbox.navigation.ui.base.lifecycle.UIBinder? speedLimitBinder;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewOptionsCustomization {
+  public final class ViewOptionsCustomization {
     ctor public ViewOptionsCustomization();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions? getDistanceFormatterOptions();
     method public Boolean? getEnableMapLongClickIntercept();
@@ -227,7 +227,7 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions defaultRouteLineOptions(android.content.Context context);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ViewStyleCustomization {
+  public final class ViewStyleCustomization {
     ctor public ViewStyleCustomization();
     method public Integer? getArrivalTextAppearance();
     method public Integer? getAudioGuidanceButtonStyle();
@@ -323,7 +323,7 @@ package com.mapbox.navigation.dropin {
 
 package com.mapbox.navigation.dropin.actionbutton {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ActionButtonDescription {
+  public final class ActionButtonDescription {
     ctor public ActionButtonDescription(android.view.View view, com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position position = com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position.END);
     method public com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position getPosition();
     method public android.view.View getView();
@@ -336,7 +336,7 @@ package com.mapbox.navigation.dropin.actionbutton {
     enum_constant public static final com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription.Position START;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class ActionButtonsBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
+  public abstract class ActionButtonsBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
     ctor public ActionButtonsBinder();
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
     method @UiThread protected abstract android.view.ViewGroup? getCameraModeButtonContainer(android.view.ViewGroup layout);
@@ -358,7 +358,7 @@ package com.mapbox.navigation.dropin.actionbutton {
 
 package com.mapbox.navigation.dropin.infopanel {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class InfoPanelBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
+  public abstract class InfoPanelBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
     ctor public InfoPanelBinder();
     method @UiThread public void applySystemBarsInsets(android.view.ViewGroup layout, androidx.core.graphics.Insets insets);
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
@@ -379,7 +379,7 @@ package com.mapbox.navigation.dropin.map {
   public final class MapLayoutCoordinatorKt {
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapViewBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
+  public abstract class MapViewBinder implements com.mapbox.navigation.ui.base.lifecycle.UIBinder {
     ctor public MapViewBinder();
     method public com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver bind(android.view.ViewGroup viewGroup);
     method public abstract com.mapbox.maps.MapView getMapView(android.content.Context context);
@@ -392,7 +392,7 @@ package com.mapbox.navigation.dropin.map {
     method public com.mapbox.navigation.dropin.map.MapViewBinder defaultBinder();
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapViewObserver {
+  public abstract class MapViewObserver {
     ctor public MapViewObserver();
     method public void onAttached(com.mapbox.maps.MapView mapView);
     method public void onDetached(com.mapbox.maps.MapView mapView);
@@ -405,7 +405,7 @@ package com.mapbox.navigation.dropin.navigationview {
   public final class MapboxNavigationViewApiKt {
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class NavigationViewListener {
+  public abstract class NavigationViewListener {
     ctor public NavigationViewListener();
     method public void onActiveNavigation();
     method public void onArrival();

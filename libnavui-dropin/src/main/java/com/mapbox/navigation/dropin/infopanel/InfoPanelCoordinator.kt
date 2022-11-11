@@ -7,7 +7,6 @@ import androidx.constraintlayout.widget.Guideline
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
@@ -26,7 +25,6 @@ import kotlinx.coroutines.launch
  * Coordinator for navigation information.
  * This is also known as the bottom sheet.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 internal class InfoPanelCoordinator(
     private val context: NavigationViewContext,
     private val infoPanel: ViewGroup,

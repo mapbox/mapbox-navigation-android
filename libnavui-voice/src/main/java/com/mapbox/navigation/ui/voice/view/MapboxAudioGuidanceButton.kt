@@ -12,7 +12,6 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 import com.mapbox.navigation.ui.voice.R
@@ -21,7 +20,6 @@ import com.mapbox.navigation.ui.voice.databinding.MapboxAudioGuidanceButtonLayou
 /**
  * Default button that allows user to mute and un-mute audio guidance.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 class MapboxAudioGuidanceButton : FrameLayout {
 
     private val binding =

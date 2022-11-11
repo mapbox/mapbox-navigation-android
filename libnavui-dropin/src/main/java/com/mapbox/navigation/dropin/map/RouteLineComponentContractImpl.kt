@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.map
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Store
@@ -13,7 +12,6 @@ import com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentContract
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class RouteLineComponentContractImpl(
     private val store: Store,
     private val mapClickBehavior: MapClickBehavior,

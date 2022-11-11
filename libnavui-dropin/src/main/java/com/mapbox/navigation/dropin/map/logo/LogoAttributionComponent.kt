@@ -4,12 +4,10 @@ import androidx.core.graphics.Insets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.attribution.attribution
 import com.mapbox.maps.plugin.logo.logo
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import kotlinx.coroutines.flow.StateFlow
 
-@ExperimentalPreviewMapboxNavigationAPI
 internal class LogoAttributionComponent(
     private val mapView: MapView,
     private val systemBarInsets: StateFlow<Insets?>

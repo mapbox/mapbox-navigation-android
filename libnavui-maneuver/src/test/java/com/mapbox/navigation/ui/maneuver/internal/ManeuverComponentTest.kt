@@ -5,7 +5,6 @@ import android.view.View
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -48,7 +47,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.N])
 @ExperimentalCoroutinesApi
-@ExperimentalPreviewMapboxNavigationAPI
 class ManeuverComponentTest {
 
     @get:Rule
@@ -58,13 +56,13 @@ class ManeuverComponentTest {
 
     @Before
     fun setUp() {
-        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
+        mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
         every { mockNavigation.flowRouteProgress() } returns flowOf(routeProgress)
     }
 
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationEx")
+        unmockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
     }
 
     private val callbackSlot = slot<RouteShieldCallback>()

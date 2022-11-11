@@ -2,12 +2,10 @@ package com.mapbox.navigation.dropin.map
 
 import androidx.annotation.VisibleForTesting
 import com.mapbox.maps.MapView
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.concurrent.CopyOnWriteArraySet
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapViewOwner {
 
     private var mapView: MapView? = null

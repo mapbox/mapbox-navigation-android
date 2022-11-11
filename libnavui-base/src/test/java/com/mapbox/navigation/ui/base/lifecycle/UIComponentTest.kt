@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.base.lifecycle
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.mockk
@@ -14,7 +13,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-@ExperimentalPreviewMapboxNavigationAPI
 @OptIn(ExperimentalCoroutinesApi::class)
 class UIComponentTest {
 
@@ -82,7 +80,6 @@ class UIComponentTest {
     }
 }
 
-@ExperimentalPreviewMapboxNavigationAPI
 class TestUIComponent(initialValue: Int) : UIComponent() {
     val captured = mutableListOf<Int>()
     val stateFlow = MutableStateFlow(initialValue)

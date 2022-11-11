@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.Px
 import androidx.annotation.UiThread
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.navigationListOf
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.EmptyBinder
@@ -23,7 +22,6 @@ import com.mapbox.navigation.ui.base.lifecycle.UIBinder
  * Base Binder class used for inflating and binding Action Buttons layout.
  * Use [ActionButtonsBinder.defaultBinder] to access default implementation.
  */
-@ExperimentalPreviewMapboxNavigationAPI
 abstract class ActionButtonsBinder : UIBinder {
 
     internal var context: NavigationViewContext? = null

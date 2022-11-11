@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.map
 
 import com.mapbox.maps.MapView
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -9,7 +8,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapViewOwnerTest {
 
     @Test
@@ -139,7 +137,6 @@ internal class MapViewOwnerTest {
     }
 }
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal open class TestMapViewObserver : MapViewObserver() {
     private var attachedTo: MapView? = null
 
