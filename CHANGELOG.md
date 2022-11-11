@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.10.0-alpha.3 - 11 November, 2022
+### Changelog
+[Changes between v2.10.0-alpha.2 and v2.10.0-alpha.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-alpha.2...v2.10.0-alpha.3)
+
+#### Features
 - Added public-preview Copilot feature. [#6572](https://github.com/mapbox/mapbox-navigation-android/pull/6572)
 -:warning: Introduced `ViewStyleCustomization.locationPuckOptions` in favor of `ViewStyleCustomization.locationPuck` that can be used to leverage `LocationPuckOptions` to change the location puck at runtime for each navigation state. [#6574](https://github.com/mapbox/mapbox-navigation-android/pull/6574)
 - Removed `@Experimental` annotation from all files related to Drop-In UI. [#6471](https://github.com/mapbox/mapbox-navigation-android/pull/6471)
@@ -13,6 +20,15 @@ Mapbox welcomes participation and contributions from everyone.
 - :warning: Updated the `RoadObject#location` property to be lazily initialized. This change greatly decreases `RouteProgress` generation time and boosts performance when navigating routes with many `UpcomingRoadObject`s [#6573](https://github.com/mapbox/mapbox-navigation-android/pull/6573)
 #### Known issues :bangbang:
 - The first `BannerInstructions` of `RouterProgress` and `BannerInstructionsObserver` may not be delivered after starting active guidance.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0-beta.1))
+- Mapbox Navigation Native `v121.0.0`
+- Mapbox Core Common `v23.2.0-beta.1`
+- Mapbox Java `v6.10.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.2))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.10.0-alpha.2 - 04 November, 2022
 ### Changelog
