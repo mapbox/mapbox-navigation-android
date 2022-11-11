@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.trip.model.roadobject.border
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 
 /**
  * Road object type that provides information about country border crossings on the route.
@@ -16,7 +15,6 @@ class CountryBorderCrossing internal constructor(
     id: String,
     val countryBorderCrossingInfo: CountryBorderCrossingInfo,
     length: Double?,
-    location: RoadObjectLocation,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
     nativeRoadObject: com.mapbox.navigator.RoadObject,
@@ -24,7 +22,6 @@ class CountryBorderCrossing internal constructor(
     id,
     RoadObjectType.COUNTRY_BORDER_CROSSING,
     length,
-    location,
     provider,
     isUrban,
     nativeRoadObject

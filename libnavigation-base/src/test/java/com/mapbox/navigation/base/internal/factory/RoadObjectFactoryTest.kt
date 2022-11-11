@@ -1,8 +1,11 @@
-package com.mapbox.navigation.base.trip.model.roadobject
+package com.mapbox.navigation.base.internal.factory
 
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
+import com.mapbox.navigation.base.trip.model.roadobject.SDKAmenity
+import com.mapbox.navigation.base.trip.model.roadobject.SDKAmenityType
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo
@@ -27,12 +30,14 @@ import com.mapbox.navigator.RoadObject
 import com.mapbox.navigator.RoadObjectMetadata
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RouteAlertLocation
+import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.match.openlr.Standard
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
-import org.junit.Ignore
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.Date
+import java.util.*
 
 private typealias SDKRouteAlertLocation =
     com.mapbox.navigation.base.trip.model.roadobject.location.RouteAlertLocation
@@ -40,22 +45,19 @@ private typealias SDKRouteAlertLocation =
 private typealias SDKRoadObjectProvider =
     com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 
-// https://github.com/mapbox/mapbox-navigation-android/issues/4492
-@Ignore
-class RoadObjectMapperTest {
+class RoadObjectFactoryTest {
 
     private val shape: Geometry = Point.fromLngLat(LONGITUDE, LATITUDE)
     private val location = SDKRouteAlertLocation(shape)
 
     @Test
-    fun `tunnel entrance alert is parsed correctly`() {
+    fun `buildRoadObject - tunnel entrance alert is parsed correctly`() {
         val nativeObject = tunnel
 
         val expected = Tunnel(
             ID,
             TunnelInfo(TUNNEL_NAME),
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -70,7 +72,7 @@ class RoadObjectMapperTest {
     }
 
     @Test
-    fun `country border crossing alert is parsed correctly`() {
+    fun `buildRoadObject - country border crossing alert is parsed correctly`() {
         val nativeObject = countryBorderCrossing
 
         val expected = CountryBorderCrossing(
@@ -80,7 +82,6 @@ class RoadObjectMapperTest {
                 CountryBorderCrossingAdminInfo(CANADA_CODE_2, CANADA_CODE_3)
             ),
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -95,7 +96,7 @@ class RoadObjectMapperTest {
     }
 
     @Test
-    fun `toll collection alert is parsed correctly (gantry)`() {
+    fun `buildRoadObject - toll collection alert is parsed correctly (gantry)`() {
         val nativeObject = tollCollectionGantry
 
         val expected = TollCollection(
@@ -103,7 +104,6 @@ class RoadObjectMapperTest {
             TollCollectionType.TOLL_GANTRY,
             "toll_name_1",
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -118,7 +118,7 @@ class RoadObjectMapperTest {
     }
 
     @Test
-    fun `toll collection alert is parsed correctly (booth)`() {
+    fun `buildRoadObject - toll collection alert is parsed correctly (booth)`() {
         val nativeObject = tollCollectionBooth
 
         val expected = TollCollection(
@@ -126,7 +126,6 @@ class RoadObjectMapperTest {
             TollCollectionType.TOLL_BOOTH,
             "toll_name_2",
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -142,20 +141,25 @@ class RoadObjectMapperTest {
     }
 
     @Test
-    fun `rest stop alert is parsed correctly (rest)`() {
+    fun `buildRoadObject - rest stop alert is parsed correctly (rest)`() {
         val nativeObject = restStopRest
 
         val expected = RestStop(
-            ID,
-            RestStopType.REST_AREA,
-            "rest_stop_name",
-            emptyList(),
-            "some_uri",
-            LENGTH,
-            location,
-            SDKRoadObjectProvider.MAPBOX,
-            false,
-            nativeObject
+            id = ID,
+            restStopType = RestStopType.REST_AREA,
+            name = "rest_stop_name",
+            amenities = listOf(
+                SDKAmenity(
+                    type = SDKAmenityType.ATM,
+                    name = amenityATM.name,
+                    brand = amenityATM.brand
+                )
+            ),
+            guideMapUri = "some_uri",
+            length = LENGTH,
+            provider = SDKRoadObjectProvider.MAPBOX,
+            isUrban = false,
+            nativeRoadObject = nativeObject
         )
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as RestStop
 
@@ -168,20 +172,25 @@ class RoadObjectMapperTest {
     }
 
     @Test
-    fun `rest stop alert is parsed correctly (service)`() {
+    fun `buildRoadObject - rest stop alert is parsed correctly (service)`() {
         val nativeObject = restStopService
 
         val expected = RestStop(
-            ID,
-            RestStopType.SERVICE_AREA,
-            "rest_area_name",
-            emptyList(),
-            "some_uri",
-            LENGTH,
-            location,
-            SDKRoadObjectProvider.MAPBOX,
-            false,
-            nativeObject
+            id = ID,
+            restStopType = RestStopType.SERVICE_AREA,
+            name = "rest_area_name",
+            amenities = listOf(
+                SDKAmenity(
+                    type = SDKAmenityType.ATM,
+                    name = amenityATM.name,
+                    brand = amenityATM.brand
+                )
+            ),
+            guideMapUri = "some_uri",
+            length = LENGTH,
+            provider = SDKRoadObjectProvider.MAPBOX,
+            isUrban = false,
+            nativeRoadObject = nativeObject
         )
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as RestStop
 
@@ -194,13 +203,12 @@ class RoadObjectMapperTest {
     }
 
     @Test
-    fun `restricted area alert is parsed correctly`() {
+    fun `buildRoadObject - restricted area alert is parsed correctly`() {
         val nativeObject = restrictedArea
 
         val expected = RestrictedArea(
             ID,
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -215,7 +223,7 @@ class RoadObjectMapperTest {
     }
 
     @Test
-    fun `incident alert collection is parsed correctly`() {
+    fun `buildRoadObject - incident alert collection is parsed correctly`() {
         val nativeObject = incident
 
         val expected = Incident(
@@ -242,7 +250,6 @@ class RoadObjectMapperTest {
                 listOf(INCIDENT_AFFECTED_ROAD_NAME),
             ),
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -250,21 +257,24 @@ class RoadObjectMapperTest {
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
-        assertEquals(expected, roadObject)
-        assertEquals(expected.hashCode(), roadObject.hashCode())
-        assertEquals(expected.toString(), roadObject.toString())
+        assertNotNull(roadObject as Incident)
         assertEquals(RoadObjectType.INCIDENT, roadObject.objectType)
+        assertEquals(expected.info.toString(), roadObject.info.toString())
+        assertEquals(expected.length, roadObject.length)
+        assertEquals(expected.location, roadObject.location)
+        assertEquals(expected.provider, roadObject.provider)
+        assertEquals(expected.isUrban, roadObject.isUrban)
+        assertEquals(expected.nativeRoadObject, nativeObject)
     }
 
     @Test
-    fun `railway crossing alert is parsed correctly`() {
+    fun `buildRoadObject - railway crossing alert is parsed correctly`() {
         val nativeObject = railwayCrossing
 
         val expected = RailwayCrossing(
             ID,
             RailwayCrossingInfo(),
             LENGTH,
-            location,
             SDKRoadObjectProvider.MAPBOX,
             false,
             nativeObject
@@ -278,8 +288,48 @@ class RoadObjectMapperTest {
         assertEquals(RoadObjectType.RAILWAY_CROSSING, roadObject.objectType)
     }
 
+    @Test
+    fun `toUpcomingRoadObjects - should map native to SDK UpcomingRoadObjects`() {
+        val nativeObjects: List<com.mapbox.navigator.UpcomingRouteAlert> = listOf(
+            tunnel,
+            countryBorderCrossing,
+            tollCollectionGantry,
+            tollCollectionBooth,
+            restStopRest,
+            restStopService,
+            restrictedArea,
+            incident,
+            railwayCrossing,
+        ).mapIndexed { distanceToStart, roadObject ->
+            UpcomingRouteAlert(roadObject, distanceToStart.toDouble())
+        }
+
+        val sdkObjects = nativeObjects.toUpcomingRoadObjects()
+
+        assertEquals(nativeObjects.size, sdkObjects.size)
+        assertTrue(sdkObjects[0].roadObject is Tunnel)
+        assertTrue(sdkObjects[1].roadObject is CountryBorderCrossing)
+        assertTrue(sdkObjects[2].roadObject is TollCollection)
+        assertTrue(sdkObjects[3].roadObject is TollCollection)
+        assertTrue(sdkObjects[4].roadObject is RestStop)
+        assertTrue(sdkObjects[5].roadObject is RestStop)
+        assertTrue(sdkObjects[6].roadObject is RestrictedArea)
+        assertTrue(sdkObjects[7].roadObject is Incident)
+        assertTrue(sdkObjects[8].roadObject is RailwayCrossing)
+        sdkObjects.forEachIndexed { distanceToStart, obj ->
+            assertEquals(distanceToStart.toDouble(), obj.distanceToStart)
+        }
+    }
+
+    private fun matchedRoadObjectLocation(geometry: Geometry): MatchedRoadObjectLocation {
+        return MatchedRoadObjectLocation.valueOf(object : RouteAlertLocation(1) {
+            override fun getShape(): Geometry = geometry
+        })
+    }
+
     private val incident = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.INCIDENT,
+        location = matchedRoadObjectLocation(location.shape),
         incidentInfo = com.mapbox.navigator.IncidentInfo(
             INCIDENT_ID,
             com.mapbox.navigator.match.openlr.OpenLR(INCIDENT_OPEN_LR, Standard.TOM_TOM),
@@ -306,16 +356,19 @@ class RoadObjectMapperTest {
 
     private val tunnel = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TUNNEL,
+        location = matchedRoadObjectLocation(location.shape),
         tunnelInfo = com.mapbox.navigator.TunnelInfo(TUNNEL_NAME)
     )
 
     private val railwayCrossing = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.RAILWAY_CROSSING,
+        location = matchedRoadObjectLocation(location.shape),
         railwayCrossingInfo = com.mapbox.navigator.RailwayCrossingInfo(true)
     )
 
     private val countryBorderCrossing = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.BORDER_CROSSING,
+        location = matchedRoadObjectLocation(location.shape),
         countryBorderCrossingInfo = com.mapbox.navigator.BorderCrossingInfo(
             com.mapbox.navigator.AdminInfo(USA_CODE_3, USA_CODE_2),
             com.mapbox.navigator.AdminInfo(CANADA_CODE_3, CANADA_CODE_2)
@@ -324,6 +377,7 @@ class RoadObjectMapperTest {
 
     private val tollCollectionGantry = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TOLL_COLLECTION_POINT,
+        location = matchedRoadObjectLocation(location.shape),
         tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
             com.mapbox.navigator.TollCollectionType.TOLL_GANTRY,
             "toll_name_1"
@@ -332,38 +386,49 @@ class RoadObjectMapperTest {
 
     private val tollCollectionBooth = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TOLL_COLLECTION_POINT,
+        location = matchedRoadObjectLocation(location.shape),
         tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
             com.mapbox.navigator.TollCollectionType.TOLL_BOOTH,
             "toll_name_2",
         )
     )
 
+    private val amenityATM = Amenity(
+        com.mapbox.navigator.AmenityType.ATM,
+        "amenity_ATM",
+        "brand_ATM"
+    )
+
     private val restStopRest = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.SERVICE_AREA,
+        location = matchedRoadObjectLocation(location.shape),
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
             com.mapbox.navigator.ServiceAreaType.REST_AREA,
             "rest_stop_name",
-            listOf(Amenity(com.mapbox.navigator.AmenityType.ATM, "amenity_1", "brand_1")),
+            listOf(amenityATM),
             "some_uri",
         )
     )
 
     private val restStopService = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.SERVICE_AREA,
+        location = matchedRoadObjectLocation(location.shape),
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
             com.mapbox.navigator.ServiceAreaType.SERVICE_AREA,
             "rest_area_name",
-            listOf(Amenity(com.mapbox.navigator.AmenityType.ATM, "amenity_1", "brand_1")),
+            listOf(amenityATM),
             "some_uri",
         )
     )
 
     private val restrictedArea = createRoadObject(
-        type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA
+        type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
+        location = matchedRoadObjectLocation(location.shape),
     )
 
     private fun createRoadObject(
         type: com.mapbox.navigator.RoadObjectType,
+        location: MatchedRoadObjectLocation,
         incidentInfo: com.mapbox.navigator.IncidentInfo? = null,
         tunnelInfo: com.mapbox.navigator.TunnelInfo? = null,
         countryBorderCrossingInfo: com.mapbox.navigator.BorderCrossingInfo? = null,
@@ -386,9 +451,6 @@ class RoadObjectMapperTest {
                 RoadObjectMetadata.valueOf(railwayCrossingInfo!!)
             else -> mockk()
         }
-
-        val routeAlertLocation: RouteAlertLocation = mockk()
-        val location = MatchedRoadObjectLocation.valueOf(routeAlertLocation)
 
         return RoadObject(
             ID,

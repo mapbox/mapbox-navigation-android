@@ -25,6 +25,7 @@ import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
 import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
 import com.mapbox.navigation.qa_test_app.view.TripOverviewActivity
+import com.mapbox.navigation.qa_test_app.view.UpcomingRoadObjectsActivity
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsActivity
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsAltActivity
 import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationViewCustomizedActivity
@@ -60,6 +61,12 @@ object TestActivitySuite {
             launchAfterPermissionResult = false,
         ) { activity ->
             activity.startActivity<RoadObjectsActivity>()
+        },
+        TestActivityDescription(
+            "List Upcoming Road Objects",
+            R.string.road_object_activity_description,
+        ) { activity ->
+            activity.startActivity<UpcomingRoadObjectsActivity>()
         },
         TestActivityDescription(
             "Alternative Route Selection",

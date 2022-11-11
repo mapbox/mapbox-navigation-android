@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.trip.model.roadobject
 
-import com.mapbox.navigation.base.trip.model.eh.mapToRoadObjectLocation
 import com.mapbox.navigation.base.trip.model.eh.mapToRoadObjectProvider
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo
@@ -57,7 +56,6 @@ internal typealias SDKRailwayCrossingInfo =
     com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
 
 internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
-    val location = location.mapToRoadObjectLocation()
     val provider = provider.mapToRoadObjectProvider()
     return when (type) {
         RoadObjectType.INCIDENT ->
@@ -65,7 +63,6 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 id,
                 metadata.incidentInfo.toIncidentInfo(),
                 length,
-                location,
                 provider,
                 isUrban,
                 this,
@@ -76,7 +73,6 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 metadata.tollCollectionInfo.toTollCollectionType(),
                 metadata.tollCollectionInfo.name,
                 length,
-                location,
                 provider,
                 isUrban,
                 this,
@@ -89,7 +85,6 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                     metadata.borderCrossingInfo.to.toBorderCrossingAdminInfo()
                 ),
                 length,
-                location,
                 provider,
                 isUrban,
                 this,
@@ -99,7 +94,6 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 id,
                 metadata.tunnelInfo.toTunnelInfo(),
                 length,
-                location,
                 provider,
                 isUrban,
                 this
@@ -107,7 +101,6 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
         RoadObjectType.RESTRICTED_AREA -> RestrictedArea(
             id,
             length,
-            location,
             provider,
             isUrban,
             this,
@@ -120,18 +113,16 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 metadata.serviceAreaInfo.amenities.toAmenities(),
                 metadata.serviceAreaInfo.guideMapUri,
                 length,
-                location,
                 provider,
                 isUrban,
                 this,
             )
-        RoadObjectType.BRIDGE -> Bridge(id, length, location, provider, isUrban, this)
-        RoadObjectType.CUSTOM -> Custom(id, length, location, provider, isUrban, this)
+        RoadObjectType.BRIDGE -> Bridge(id, length, provider, isUrban, this)
+        RoadObjectType.CUSTOM -> Custom(id, length, provider, isUrban, this)
         RoadObjectType.RAILWAY_CROSSING -> RailwayCrossing(
             id,
             metadata.railwayCrossingInfo.toRailwayCrossingInfo(),
             length,
-            location,
             provider,
             isUrban,
             this,

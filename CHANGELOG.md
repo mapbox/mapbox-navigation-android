@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Slightly decreased the memory consumption of the online router. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
 - Improved positioning and location signal simulation in tunnels. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
+- :warning: Updated the `RoadObject#location` property to be lazily initialized. This change greatly decreases `RouteProgress` generation time and boosts performance when navigating routes with many `UpcomingRoadObject`s. [#6573](https://github.com/mapbox/mapbox-navigation-android/pull/6573)
 
 ## Mapbox Navigation SDK 2.9.0-rc.2 - 03 November, 2022
 ### Changelog
