@@ -4,6 +4,156 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added public-preview Copilot feature. [#6572](https://github.com/mapbox/mapbox-navigation-android/pull/6572)
+-:warning: Introduced `ViewStyleCustomization.locationPuckOptions` in favor of `ViewStyleCustomization.locationPuck` that can be used to leverage `LocationPuckOptions` to change the location puck at runtime for each navigation state. [#6574](https://github.com/mapbox/mapbox-navigation-android/pull/6574)
+- Removed `@Experimental` annotation from all files related to Drop-In UI. [#6471](https://github.com/mapbox/mapbox-navigation-android/pull/6471)
+- Added experimental routes preview state, see `MapboxNavigaton#setRoutesPreview`, `MapboxNavigaton#changeRoutesPreviewPrimaryRoute`, `MapboxNavigaton#registerRoutesPreviewObserver`, `MapboxNavigaton#getRoutesPreview`. [#6495](https://github.com/mapbox/mapbox-navigation-android/pull/6495)
+#### Bug fixes and improvements
+- Updated route refresh log to account for state_of_charge annotations and waypoints updates. [#6579](https://github.com/mapbox/mapbox-navigation-android/pull/6579)
+- :warning: Updated the `RoadObject#location` property to be lazily initialized. This change greatly decreases `RouteProgress` generation time and boosts performance when navigating routes with many `UpcomingRoadObject`s [#6573](https://github.com/mapbox/mapbox-navigation-android/pull/6573)
+#### Known issues :bangbang:
+- The first `BannerInstructions` of `RouterProgress` and `BannerInstructionsObserver` may not be delivered after starting active guidance.
+
+## Mapbox Navigation SDK 2.10.0-alpha.2 - 04 November, 2022
+### Changelog
+[Changes between v2.10.0-alpha.1 and v2.10.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-alpha.1...v2.10.0-alpha.2)
+
+#### Features
+#### Bug fixes and improvements
+- Fixed an issue where "silent waypoints" (not regular waypoints that define legs) had markers added on the map when route line was drawn with `MapboxRouteLineApi` and `MapboxRouteLineView`. [#6526](https://github.com/mapbox/mapbox-navigation-android/pull/6526)
+- Fixed an issue where `DirectionsResponse#waypoints` list was cleared after a successful non-EV route refresh. [#6539](https://github.com/mapbox/mapbox-navigation-android/pull/6539)
+- Fixed an issue with EV route refresh failing in cases where EV data updates are not provided. Now, the initial parameters from a route request will be used as a fallback. [#6534](https://github.com/mapbox/mapbox-navigation-android/pull/6534)
+- Slightly decreased the memory consumption of the online router. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
+- Improved positioning and location signal simulation in tunnels. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
+- Mapbox Navigation Native `v119.0.1`
+- Mapbox Core Common `v23.1.1`
+- Mapbox Java `v6.9.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.2))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
+## Mapbox Navigation SDK 2.9.0-rc.2 - 03 November, 2022
+### Changelog
+[Changes between v2.9.0-rc.1 and v2.9.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-rc.1...v2.9.0-rc.2)
+
+#### Features
+- Added `ComponentInstaller` for the `TripProgressComponent` that offers simplified integration of the `MapboxTripProgressView` and `MapboxTripProgressApi`. [#6513](https://github.com/mapbox/mapbox-navigation-android/pull/6513)
+- Introduced new `ViewOptionsCustomization` options that allows showing/hiding of various `NavigationView` subviews. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showManeuver` can be used to show/hide the maneuver view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showSpeedLimit` can be used to show/hide the speed limit view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRoadName` can be used to show/hide the road name view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showActionButtons` can be used to show/hide action buttons layout. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showCompassActionButton` can be used to show/hide compass action button. The default is `false`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showCameraModeActionButton` can be used to show/hide toggle camera mode action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showToggleAudioActionButton` can be used to show/hide toggle voice instructions action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRecenterActionButton` can be used to show/hide re-center camera action button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showTripProgress` can be used to show/hide info panel's trip progress view. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showRoutePreviewButton` can be used to show/hide info panel's show route preview button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showStartNavigationButton` can be used to show/hide info panel's start navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+  - `ViewOptionsCustomization.showEndNavigationButton` can be used to show/hide info panel's end navigation button. The default is `true`. [#6506](https://github.com/mapbox/mapbox-navigation-android/pull/6506)
+- Introduced `ViewOptionsCustomization.showPoiName` and `ViewOptionsCustomization.showArrivalText` that allows showing/hiding of the POI and arrival text view. [#6515](https://github.com/mapbox/mapbox-navigation-android/pull/6515)
+- Introduced `ViewBinderCustomization.infoPanelPoiNameBinder` and `ViewBinderCustomization.infoPanelArrivalTextBinder` that allows injection of custom Info Panel POI and arrival text view into `NavigationView`. [#6515](https://github.com/mapbox/mapbox-navigation-android/pull/6515)
+- Added `LocationMatcherResult#inTunnel` which indicates if a current matched location is in a tunnel. [#6548](https://github.com/mapbox/mapbox-navigation-android/pull/6548)
+#### Bug fixes and improvements
+- :warning: Removed `MapboxMapScalebarParams` and replaced `ViewStyleCustomization.mapScalebarParams` by `ViewOptionsCustomization.showMapScalebar` [#6523](https://github.com/mapbox/mapbox-navigation-android/pull/6523)
+- Refactored `ScalebarComponent` to use `ViewOptionsCustomization.distanceFormatterOptions` to change between imperial and metric based unit. [#6523](https://github.com/mapbox/mapbox-navigation-android/pull/6523)
+- :warning: Updated `NavigationView` buttons customization to allow styling via XML styles: [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.compassButtonParams` option has been replaced by `ViewStyleCustomization.compassButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultCompassButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.cameraModeButtonParams` option has been replaced by `ViewStyleCustomization.cameraModeButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultCameraModeButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.audioGuidanceButtonParams` option has been replaced by `ViewStyleCustomization.audioGuidanceButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultAudioGuidanceButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.recenterButtonParams` option has been replaced by `ViewStyleCustomization.recenterButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultRecenterButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.routePreviewButtonParams` option has been replaced by `ViewStyleCustomization.routePreviewButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultRoutePreviewButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.startNavigationButtonParams` option has been replaced by `ViewStyleCustomization.startNavigationButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultStartNavigationButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - `ViewStyleCustomization.endNavigationButtonParams` option has been replaced by `ViewStyleCustomization.endNavigationButtonStyle`. The default style can be accessed via `ViewStyleCustomization.defaultEndNavigationButtonStyle()` [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+  - The `MapboxExtendableButtonParams` class has been removed. Any action button placement adjustments must be done via custom `ActionButtonsBinder` implementation. [#6498](https://github.com/mapbox/mapbox-navigation-android/pull/6498)
+- Fixed an issue with `NavigationView` that caused road label position to not update in some cases. [#6538](https://github.com/mapbox/mapbox-navigation-android/pull/6538)
+- Slightly improved performance of updates to the traveled portion of the route in MapboxRouteLineView. [#6528](https://github.com/mapbox/mapbox-navigation-android/pull/6528)
+- Fixed a problem with custom route line layer scaling not getting applied to the correct layer(s) when switching between routes. [#6544](https://github.com/mapbox/mapbox-navigation-android/pull/6544)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
+- Mapbox Navigation Native `v119.0.0`
+- Mapbox Core Common `v23.1.1`
+- Mapbox Java `v6.9.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.2))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
+## Mapbox Navigation SDK 2.10.0-alpha.1 - 28 October, 2022
+### Changelog
+[Changes between v2.9.0 and v2.10.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0...v2.10.0-alpha.1)
+
+#### Features
+- Added support for EV route refresh. [#6511](https://github.com/mapbox/mapbox-navigation-android/pull/6511)
+- Added `MapboxNavigation#onEVDataUpdated` method to be invoked by the end user to notify Navigation SDK of EV data changes so that it can be used in refresh requests. [#6511](https://github.com/mapbox/mapbox-navigation-android/pull/6511)
+#### Bug fixes and improvements
+- Fixed an issue where re-routes could have failed for EV routes. [#6005](https://github.com/mapbox/mapbox-navigation-android/pull/6005)
+
+:warning: `RouteProgress#remainingWaypoints` defines the amount of all remaining waypoints, including explicit (requested with `RouteOptions#coordinatesList`) and implicit (added on the fly, like Electric Vehicle waypoints - [see](https://docs.mapbox.com/api/navigation/directions/#electric-vehicle-routing)) ones.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
+- Mapbox Navigation Native `v119.0.0`
+- Mapbox Core Common `v23.1.1`
+- Mapbox Java `v6.9.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.1))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
+## Mapbox Navigation SDK 2.9.0-rc.1 - 28 October, 2022
+### Changelog
+[Changes between v2.9.0-beta.3 and v2.9.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-beta.3...v2.9.0-rc.1)
+
+#### Features
+#### Bug fixes and improvements
+- Improved experience in tunnels and reduced the likelihood of losing road edge matching candidates. [#6510](https://github.com/mapbox/mapbox-navigation-android/pull/6510)
+- Fixed an issue with `NavigationView` that caused road label position to not update in some cases. [#6508](https://github.com/mapbox/mapbox-navigation-android/pull/6508)
+- Fixed an issue where the SDK was trying to send telemetry events when telemetry is switched off globally. [#6512](https://github.com/mapbox/mapbox-navigation-android/pull/6512)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
+- Mapbox Navigation Native `v119.0.0`
+- Mapbox Core Common `v23.1.1`
+- Mapbox Java `v6.9.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0-beta.1))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+## Mapbox Navigation SDK 2.9.0-beta.3 - 21 October, 2022
+### Changelog
+[Changes between v2.9.0-beta.2 and v2.9.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-beta.2...v2.9.0-beta.3)
+
+#### Features
+- Added `ViewBinderCustomization.infoPanelRoutePreviewButtonBinder` and `ViewBinderCustomization.infoPanelStartNavigationButtonBinder` that allows injection of custom Info Panel buttons for Route Preview and Start Navigation in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
+- Added `ViewBinderCustomization.actionCompassButtonBinder`, `ViewBinderCustomization.actionCameraModeButtonBinder`, `ViewBinderCustomization.actionToggleAudioButtonBinder` and `ViewBinderCustomization.actionRecenterButtonBinder` that allows injection of a custom Compass, Camera Mode, Toggle Voice Instructions and Camera Recenter Buttons in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
+- Introduced `ActionButtonsBinder` base `UIBinder` class, that allows use of a custom action buttons layout with default action buttons in `NavigationView`. [#6490](https://github.com/mapbox/mapbox-navigation-android/pull/6490)
+#### Bug fixes and improvements
+- Improved precision of congestion visualization and independent leg styling transitions, especially for long routes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
+- Fixed an issue with congestion visualization on the route line that occurred during route refreshes. [#6476](https://github.com/mapbox/mapbox-navigation-android/pull/6476)
+- Made `MapViewBinder#shouldLoadMapStyle` false by default. [#6485](https://github.com/mapbox/mapbox-navigation-android/pull/6485)
+- Fixed an issue that prevented any registered `OnBackPressedCallback`s to fire when `NavigationView` is attached. [#6483](https://github.com/mapbox/mapbox-navigation-android/pull/6483)
+- Removed `NavigationViewListener.onBackPressed()`. You can register your own [OnBackPressedCallback](https://developer.android.com/reference/androidx/activity/OnBackPressedCallback) to intercept any `NavigationView` BACK press events. [#6483](https://github.com/mapbox/mapbox-navigation-android/pull/6483)
+- Fixed an issue with `NavigationView` that caused trip session not to start after granting location permissions that were requested outside of Drop-In UI by an application. [#6489](https://github.com/mapbox/mapbox-navigation-android/pull/6489)
+- Fixed an issue with `NavigationView` that caused unexpected camera movements when switching between navigation states. [#6487](https://github.com/mapbox/mapbox-navigation-android/pull/6487)
+- Supported changing `MapboxVoiceInstructionsPlayer` language in runtime via `updateLanguage` method. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
+- Deprecated `MapboxVoiceInstructionsPlayer` constructors that accept access token and introduced the ones without it. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
+- Introduced `NavigationViewApi.getCurrentVoiceInstructionsPlayer()` which can be used to play custom voice instructions. [#6475](https://github.com/mapbox/mapbox-navigation-android/pull/6475)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0-rc.1))
+- Mapbox Navigation Native `v118.0.0`
+- Mapbox Core Common `v23.1.0-rc.2`
+- Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
+## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
+### Changelog
+[Changes between v2.9.0-beta.1 and v2.9.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0-beta.1...v2.9.0-beta.2)
+
 #### Bug fixes and improvements
 - Updated `RecenterButtonComponent` and `CameraModeButtonComponent` to show in `RoutePreview` state. [#6465](https://github.com/mapbox/mapbox-navigation-android/pull/6465)
 - Fixed an issue where restrictions were drawn only on the first leg of the route, if independent leg styling was not used (default behavior). [#6440](https://github.com/mapbox/mapbox-navigation-android/pull/6440)
