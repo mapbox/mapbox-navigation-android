@@ -1,4 +1,4 @@
-package com.mapbox.navigation.qa_test_app.car
+package com.mapbox.navigation.examples.androidauto.car
 
 import androidx.car.app.CarAppService
 import androidx.car.app.validation.HostValidator

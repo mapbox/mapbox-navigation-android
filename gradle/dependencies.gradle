@@ -23,11 +23,11 @@ ext {
       mapboxCore                : '5.0.2',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '23.2.0-beta.1',
-      mapboxSearchSdk           : '1.0.0-beta.39',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.8.0',
       mapboxMapsAndroidAuto     : '0.3.0',
+      mapboxSearchAndroidAuto   : '1.0.0-beta.39',
       androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',
       androidXArchCoreVersion   : '2.1.0',
@@ -80,7 +80,8 @@ ext {
       mapboxCore                : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
-      mapboxSearchSdk           : "com.mapbox.search:mapbox-search-android:${version.mapboxSearchSdk}",
+      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto:${version.mapboxMapsAndroidAuto}",
+      mapboxSearchAndroidAuto   : "com.mapbox.search:mapbox-search-android:${version.mapboxSearchAndroidAuto}",
 
       /**
        * explicitly define Mapbox OkHttp dependency so that we are sure it's in sync with the Common SDK version we define
@@ -93,7 +94,6 @@ ext {
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxBaseAndroid}",
       mapboxAndroidCommon       : "com.mapbox.base:common:${version.mapboxBaseAndroid}",
       mapboxLogger              : "com.mapbox.common:logger:${version.mapboxBaseAndroid}",
-      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto:${version.mapboxMapsAndroidAuto}",
 
       // Kotlin
       kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version.kotlinStdLib}",
