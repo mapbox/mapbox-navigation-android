@@ -43,6 +43,7 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper provideFeedbackMetadataWrapper();
+    method public void refreshRoutesImmediately();
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerDeveloperMetadataObserver(com.mapbox.navigation.core.DeveloperMetadataObserver developerMetadataObserver);

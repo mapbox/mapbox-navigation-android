@@ -141,7 +141,6 @@ import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
@@ -268,7 +267,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val routeRefreshController: RouteRefreshController
-    private var routeRefreshScope = createChildScope()
     private val arrivalProgressObserver: ArrivalProgressObserver
     private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
         navigationOptions.eHorizonOptions.length,
@@ -553,12 +551,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
+            threadController,
             navigationOptions.routeRefreshOptions,
             directionsSession,
             routeRefreshRequestDataProvider,
             routeAlternativesController,
             evDynamicDataHolder
         )
+        routeRefreshController.registerRouteRefreshObserver {
+            internalSetNavigationRoutes(it.routes, SetRoutes.RefreshRoutes(it.routeProgressData))
+        }
 
         defaultRerouteController = MapboxRerouteController(
             directionsSession,
@@ -1022,6 +1024,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         CacheHandleWrapper.requestRoadGraphDataUpdate(navigator.cache, callback)
     }
 
+    /**
+     * Immediately refresh current navigation routes.
+     * Listen for refreshed routes using [RoutesObserver].
+     */
+    fun refreshRoutesImmediately() {
+        routeRefreshController.requestImmediateRouteRefresh(getNavigationRoutes())
+    }
+
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
         setRoutesInfo: SetRoutes,
@@ -1041,7 +1051,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 // do not interrupt reroute when primary route has not changed
             }
         }
-        restartRouteRefreshScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 historyRecordingStateHandler.setRoutes(routes)
@@ -1217,7 +1226,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
-        routeRefreshController.unregisterAllRouteRefreshStateObservers()
+        routeRefreshController.destroy()
         routesPreviewController.unregisterAllRoutesPreviewObservers()
 
         isDestroyed = true
@@ -1892,17 +1901,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         routeRefreshRequestDataProvider.onNewRoutes()
-        if (result.navigationRoutes.isNotEmpty()) {
-            routeRefreshScope.launch {
-                val refreshed = routeRefreshController.refresh(
-                    result.navigationRoutes
-                )
-                internalSetNavigationRoutes(
-                    refreshed.routes,
-                    SetRoutes.RefreshRoutes(refreshed.routeProgressData),
-                )
-            }
-        }
+        routeRefreshController.requestPlannedRouteRefresh(result.navigationRoutes)
     }
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
@@ -2064,13 +2063,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 )
             }
         }
-    }
-
-    private fun createChildScope() = threadController.getMainScopeAndRootJob().scope
-
-    private fun restartRouteRefreshScope() {
-        routeRefreshScope.cancel()
-        routeRefreshScope = createChildScope()
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

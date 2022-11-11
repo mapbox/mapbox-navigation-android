@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `MapboxNavigation#refreshRoutesImmediately` to trigger route refresh request immediately. [#6610](https://github.com/mapbox/mapbox-navigation-android/pull/6610)
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.11.0-alpha.1 - 13 January, 2023
@@ -591,6 +592,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 [Changes between v2.10.0-alpha.1 and v2.10.0-alpha.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-alpha.1...v2.10.0-alpha.2)
 
 #### Features
+- Added `MapboxNavigation#refreshRoutesImmediately` to request an immediate refresh of current routes.
 #### Bug fixes and improvements
 - Fixed an issue where "silent waypoints" (not regular waypoints that define legs) had markers added on the map when route line was drawn with `MapboxRouteLineApi` and `MapboxRouteLineView`. [#6526](https://github.com/mapbox/mapbox-navigation-android/pull/6526)
 - Fixed an issue where `DirectionsResponse#waypoints` list was cleared after a successful non-EV route refresh. [#6539](https://github.com/mapbox/mapbox-navigation-android/pull/6539)

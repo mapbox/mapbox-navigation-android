@@ -30,6 +30,7 @@ import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routerefresh.RefreshedRouteInfo
+import com.mapbox.navigation.core.routerefresh.RouteRefreshObserver
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
@@ -65,7 +66,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -723,7 +723,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         coVerifyOrder {
             routeProgressDataProvider.onNewRoutes()
-            routeRefreshController.refresh(routes)
+            routeRefreshController.requestPlannedRouteRefresh(routes)
         }
     }
 
@@ -744,7 +744,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coVerify(exactly = 1) {
             routeProgressDataProvider.onNewRoutes()
         }
-        coVerify(exactly = 0) { routeRefreshController.refresh(any()) }
+        coVerify(exactly = 1) { routeRefreshController.requestPlannedRouteRefresh(emptyList()) }
     }
 
     @Test
@@ -1443,49 +1443,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun `route refresh of previous route completes after new route is set`() =
-        coroutineRule.runBlockingTest {
-            every { NavigationComponentProvider.createDirectionsSession(any()) } answers {
-                MapboxDirectionsSession(mockk(relaxed = true))
-            }
-            createMapboxNavigation()
-            val first = listOf(createNavigationRoute(createDirectionsRoute(requestUuid = "test1")))
-            val second = listOf(createNavigationRoute(createDirectionsRoute(requestUuid = "test2")))
-            val refreshOrFirstRoute = CompletableDeferred<Unit>()
-            coEvery { routeRefreshController.refresh(any()) } coAnswers {
-                CompletableDeferred<Unit>().await() // never completes
-                firstArg()
-            }
-            coEvery { routeRefreshController.refresh(first) } coAnswers {
-                refreshOrFirstRoute.await()
-                RefreshedRouteInfo(
-                    listOf(createNavigationRoute(createDirectionsRoute(requestUuid = "test1.1"))),
-                    RouteProgressData(1, 2, 3)
-                )
-            }
-            coEvery { tripSession.setRoutes(second, any()) } coAnswers {
-                NativeSetRouteValue(second, emptyList())
-            }
-
-            val routesUpdates = mutableListOf<RoutesUpdatedResult>()
-            mapboxNavigation.registerRoutesObserver {
-                routesUpdates.add(it)
-            }
-            mapboxNavigation.setNavigationRoutes(first)
-            mapboxNavigation.setNavigationRoutes(second)
-            refreshOrFirstRoute.complete(Unit)
-
-            assertEquals(
-                listOf(first, second),
-                routesUpdates.map { it.navigationRoutes }
-            )
-            assertEquals(
-                listOf(RoutesExtra.ROUTES_UPDATE_REASON_NEW, RoutesExtra.ROUTES_UPDATE_REASON_NEW),
-                routesUpdates.map { it.reason }
-            )
-        }
-
-    @Test
     fun `set route - new routes immediately interrupts reroute`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(rerouteController)
@@ -1657,8 +1614,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 )
             } returns NativeSetRouteError("some error")
             coEvery {
-                routeRefreshController.refresh(routes)
-            } returns RefreshedRouteInfo(refreshedRoutes, routeProgressData)
+                routeRefreshController.requestPlannedRouteRefresh(routes)
+            } coAnswers { RefreshedRouteInfo(refreshedRoutes, routeProgressData) }
 
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
             routeObserversSlot.forEach {
@@ -1765,14 +1722,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val acceptedRefreshRoutes = listOf(refreshedRoutes[0], refreshedRoutes[2])
             val ignoredRefreshRoutes = listOf(IgnoredRoute(refreshedRoutes[1], invalidRouteReason))
             coEvery {
-                routeRefreshController.refresh(routes)
-            } returns RefreshedRouteInfo(refreshedRoutes, routeProgressData)
-            coEvery {
                 tripSession.setRoutes(refreshedRoutes, ofType(SetRoutes.RefreshRoutes::class))
             } returns NativeSetRouteValue(refreshedRoutes, listOf(alternativeWithId("id#2")))
             routeObserversSlot.forEach {
                 it.onRoutesChanged(RoutesUpdatedResult(routes, emptyList(), reason))
             }
+            interceptRefreshObserver().onRoutesRefreshed(
+                RefreshedRouteInfo(refreshedRoutes, routeProgressData)
+            )
 
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
@@ -1808,14 +1765,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
             val refreshedRoutes = listOf(mockk<NavigationRoute>(relaxed = true))
             coEvery {
-                routeRefreshController.refresh(routes)
-            } returns RefreshedRouteInfo(refreshedRoutes, routeProgressData)
-            coEvery {
                 tripSession.setRoutes(any(), any())
             } returns NativeSetRouteError("some error")
             routeObserversSlot.forEach {
                 it.onRoutesChanged(RoutesUpdatedResult(routes, ignoredRoutes, reason))
             }
+            interceptRefreshObserver().onRoutesRefreshed(
+                RefreshedRouteInfo(refreshedRoutes, routeProgressData)
+            )
 
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
@@ -1973,13 +1930,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun onDestroyUnregisterAllRouteRefreshStateObserver() {
+    fun onDestroyDestroysRouteRefreshController() {
         createMapboxNavigation()
 
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) {
-            routeRefreshController.unregisterAllRouteRefreshStateObservers()
+            routeRefreshController.destroy()
         }
     }
 
@@ -2017,6 +1974,32 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             tripSession.setRoutes(routes, any())
             routesPreviewController.previewNavigationRoutes(emptyList())
         }
+    }
+
+    @Test
+    fun refreshRoutesImmediatelyNoRoutes() {
+        createMapboxNavigation()
+
+        mapboxNavigation.refreshRoutesImmediately()
+
+        verify(exactly = 1) { routeRefreshController.requestImmediateRouteRefresh(emptyList()) }
+    }
+
+    @Test
+    fun refreshRoutesImmediatelyHasRoutes() = coroutineRule.runBlockingTest {
+        val routes = listOf(createNavigationRoute(), createNavigationRoute())
+        createMapboxNavigation()
+        every { directionsSession.routes } returns routes
+
+        mapboxNavigation.refreshRoutesImmediately()
+
+        verify(exactly = 1) { routeRefreshController.requestImmediateRouteRefresh(routes) }
+    }
+
+    private fun interceptRefreshObserver(): RouteRefreshObserver {
+        val observers = mutableListOf<RouteRefreshObserver>()
+        verify { routeRefreshController.registerRouteRefreshObserver(capture(observers)) }
+        return observers.last()
     }
 
     private fun alternativeWithId(mockId: String): RouteAlternative {
