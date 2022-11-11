@@ -456,7 +456,7 @@ class RouterWrapperTests {
         ).first()
 
         routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard)
+        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
 
         val expected = NavigationRoute.create(
             DirectionsResponse.fromJson(
@@ -503,7 +503,11 @@ class RouterWrapperTests {
             ),
             routerRefreshCallback
         )
-        refreshRouteSlot.captured.run(routerRefreshSuccessSecondLeg, nativeOriginOnboard)
+        refreshRouteSlot.captured.run(
+            routerRefreshSuccessSecondLeg,
+            nativeOriginOnboard,
+            hashMapOf()
+        )
 
         val expected = NavigationRoute.create(
             DirectionsResponse.fromJson(
@@ -539,7 +543,7 @@ class RouterWrapperTests {
         )
 
         routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        refreshRouteSlot.captured.run(routerResultFailure, nativeOriginOnboard)
+        refreshRouteSlot.captured.run(routerResultFailure, nativeOriginOnboard, hashMapOf())
 
         val errorMessage =
             """

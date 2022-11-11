@@ -142,7 +142,8 @@ class RouterInterfaceAdapter(
                     )
 
                 ),
-                com.mapbox.navigator.RouterOrigin.CUSTOM
+                com.mapbox.navigator.RouterOrigin.CUSTOM,
+                hashMapOf()
             )
             return -1
         }
@@ -162,6 +163,7 @@ class RouterInterfaceAdapter(
                     callback.run(
                         ExpectedFactory.createValue(route.directionsResponse.toJson()),
                         NativeRouterOrigin.CUSTOM,
+                        hashMapOf()
                     )
                 }
 
@@ -177,7 +179,8 @@ class RouterInterfaceAdapter(
                                 requestId,
                             )
                         ),
-                        NativeRouterOrigin.CUSTOM
+                        NativeRouterOrigin.CUSTOM,
+                        hashMapOf()
                     )
                 }
             }

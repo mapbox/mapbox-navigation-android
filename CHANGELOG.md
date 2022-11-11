@@ -10,6 +10,8 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Updated route refresh log to account for state_of_charge annotations and waypoints updates. [#6579](https://github.com/mapbox/mapbox-navigation-android/pull/6579)
 - :warning: Updated the `RoadObject#location` property to be lazily initialized. This change greatly decreases `RouteProgress` generation time and boosts performance when navigating routes with many `UpcomingRoadObject`s [#6573](https://github.com/mapbox/mapbox-navigation-android/pull/6573)
+#### Known issues :bangbang:
+- The first `BannerInstructions` of `RouterProgress` and `BannerInstructionsObserver` may not be delivered after starting active guidance.
 
 ## Mapbox Navigation SDK 2.10.0-alpha.2 - 04 November, 2022
 ### Changelog
