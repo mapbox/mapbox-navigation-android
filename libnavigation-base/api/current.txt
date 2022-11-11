@@ -322,6 +322,18 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder collectTunnels(boolean collectTunnels);
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CopilotOptions {
+    method public boolean getShouldSendHistoryOnlyWithFeedback();
+    method public com.mapbox.navigation.base.options.CopilotOptions.Builder toBuilder();
+    property public final boolean shouldSendHistoryOnlyWithFeedback;
+  }
+
+  public static final class CopilotOptions.Builder {
+    ctor public CopilotOptions.Builder();
+    method public com.mapbox.navigation.base.options.CopilotOptions build();
+    method public com.mapbox.navigation.base.options.CopilotOptions.Builder shouldSendHistoryOnlyWithFeedback(boolean flag);
+  }
+
   public final class DeviceProfile {
     method public String getCustomConfig();
     method public com.mapbox.navigation.base.options.DeviceType getDeviceType();
@@ -415,6 +427,7 @@ package com.mapbox.navigation.base.options {
   public final class NavigationOptions {
     method public String? getAccessToken();
     method public android.content.Context getApplicationContext();
+    method public com.mapbox.navigation.base.options.CopilotOptions getCopilotOptions();
     method public com.mapbox.navigation.base.options.DeviceProfile getDeviceProfile();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
     method public com.mapbox.navigation.base.options.EHorizonOptions getEHorizonOptions();
@@ -434,6 +447,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder toBuilder();
     property public final String? accessToken;
     property public final android.content.Context applicationContext;
+    property public final com.mapbox.navigation.base.options.CopilotOptions copilotOptions;
     property public final com.mapbox.navigation.base.options.DeviceProfile deviceProfile;
     property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions;
     property public final com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions;
@@ -456,6 +470,7 @@ package com.mapbox.navigation.base.options {
     ctor public NavigationOptions.Builder(android.content.Context applicationContext);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder accessToken(String? accessToken);
     method public com.mapbox.navigation.base.options.NavigationOptions build();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.NavigationOptions.Builder copilotOptions(com.mapbox.navigation.base.options.CopilotOptions copilotOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder deviceProfile(com.mapbox.navigation.base.options.DeviceProfile deviceProfile);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder distanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder eHorizonOptions(com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions);

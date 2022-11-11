@@ -27,6 +27,7 @@ android {
 
 dependencies {
     api project(":libnavigation-core")
+    api project(':libnavigation-copilot')
     api project(":libnavui-maneuver")
     api project(":libnavui-maps")
     api project(":libnavui-shield")

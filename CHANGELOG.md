@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added public-preview Copilot feature. [#6572](https://github.com/mapbox/mapbox-navigation-android/pull/6572)
 -:warning: Introduced `ViewStyleCustomization.locationPuckOptions` in favor of `ViewStyleCustomization.locationPuck` that can be used to leverage `LocationPuckOptions` to change the location puck at runtime for each navigation state. [#6574](https://github.com/mapbox/mapbox-navigation-android/pull/6574)
 - Removed `@Experimental` annotation from all files related to Drop-In UI. [#6471](https://github.com/mapbox/mapbox-navigation-android/pull/6471)
 #### Bug fixes and improvements
