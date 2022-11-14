@@ -3,7 +3,6 @@ package com.mapbox.navigation.copilot
 import android.content.pm.ApplicationInfo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.gson.Gson
 import com.mapbox.common.UploadOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -31,6 +30,7 @@ import com.mapbox.navigation.core.internal.telemetry.UserFeedback
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import java.io.File
 import java.util.Locale
 
@@ -115,7 +115,9 @@ internal class MapboxCopilotImpl(
      */
     fun start() {
         registerUserFeedbackCallback(userFeedbackCallback)
-        ProcessLifecycleOwner.get().lifecycle.addObserver(foregroundBackgroundLifecycleObserver)
+        MapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(
+            foregroundBackgroundLifecycleObserver
+        )
         mapboxNavigation.registerHistoryRecordingStateChangeObserver(
             historyRecordingStateChangeObserver
         )
@@ -126,7 +128,9 @@ internal class MapboxCopilotImpl(
      */
     fun stop() {
         unregisterUserFeedbackCallback(userFeedbackCallback)
-        ProcessLifecycleOwner.get().lifecycle.removeObserver(foregroundBackgroundLifecycleObserver)
+        MapboxNavigationApp.lifecycleOwner.lifecycle.removeObserver(
+            foregroundBackgroundLifecycleObserver
+        )
         mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(
             historyRecordingStateChangeObserver
         )
