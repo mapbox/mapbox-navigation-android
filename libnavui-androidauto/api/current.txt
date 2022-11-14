@@ -253,6 +253,7 @@ package com.mapbox.androidauto.map {
 
   public final class MapboxCarMapLoader implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public MapboxCarMapLoader();
+    method public com.mapbox.maps.extension.style.StyleContract.StyleExtension getStyleExtension(boolean isDarkMode);
     method public com.mapbox.androidauto.map.MapboxCarMapLoader onCarConfigurationChanged(androidx.car.app.CarContext carContext);
     method public com.mapbox.androidauto.map.MapboxCarMapLoader setDarkStyleOverride(com.mapbox.maps.extension.style.StyleContract.StyleExtension? styleContract);
     method public com.mapbox.androidauto.map.MapboxCarMapLoader setLightStyleOverride(com.mapbox.maps.extension.style.StyleContract.StyleExtension? styleContract);

@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Added `MapboxCarMapLoader.getStyleExtension` to get access to the values set. [#6571](https://github.com/mapbox/mapbox-navigation-android/pull/6571)
 
 ## androidauto-v0.16.0 - 04 November, 2022
 ### Changelog

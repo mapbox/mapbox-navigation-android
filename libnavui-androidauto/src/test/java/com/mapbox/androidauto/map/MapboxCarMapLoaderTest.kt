@@ -87,6 +87,33 @@ class MapboxCarMapLoaderTest {
         assertEquals("test-dark-override", styleExtensionSlot.captured.styleUri)
     }
 
+    @Test
+    fun `getStyleExtension will return the default styles`() {
+        assertEquals(
+            NavigationStyles.NAVIGATION_DAY_STYLE,
+            sut.getStyleExtension(false).styleUri
+        )
+        assertEquals(
+            NavigationStyles.NAVIGATION_NIGHT_STYLE,
+            sut.getStyleExtension(true).styleUri
+        )
+    }
+
+    @Test
+    fun `getStyleExtension will return the overridden styles`() {
+        sut.setLightStyleOverride(mockk { every { styleUri } returns "test-light-override" })
+        sut.setDarkStyleOverride(mockk { every { styleUri } returns "test-dark-override" })
+
+        assertEquals(
+            "test-light-override",
+            sut.getStyleExtension(false).styleUri
+        )
+        assertEquals(
+            "test-dark-override",
+            sut.getStyleExtension(true).styleUri
+        )
+    }
+
     private fun mockMapboxCarMapSurface(
         styleExtensionSlot: CapturingSlot<StyleContract.StyleExtension>
     ): MapboxCarMapSurface {
