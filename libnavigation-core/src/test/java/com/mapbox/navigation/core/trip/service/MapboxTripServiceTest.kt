@@ -9,7 +9,6 @@ import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.TestThreadController
 import com.mapbox.navigation.utils.internal.LoggerFrontend
-import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

@@ -1187,7 +1187,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         runInTelemetryContext { telemetry ->
             telemetry.destroy(this@MapboxNavigation)
         }
-        //threadController.cancelAllNonUICoroutines()
         threadController.cancelSDKScope()
         ifNonNull(reachabilityObserverId) {
             ReachabilityService.removeReachabilityObserver(it)

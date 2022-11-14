@@ -8,7 +8,6 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImp
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.TestThreadController
-import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.ElectronicHorizonPosition
 import com.mapbox.navigator.RoadObjectDistance

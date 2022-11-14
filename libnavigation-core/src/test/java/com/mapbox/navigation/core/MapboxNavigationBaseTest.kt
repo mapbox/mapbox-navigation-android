@@ -45,9 +45,7 @@ import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.TestThreadController
-import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
-import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.CacheHandle
 import io.mockk.coEvery
 import io.mockk.every

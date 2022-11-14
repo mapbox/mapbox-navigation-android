@@ -283,7 +283,7 @@ internal class MapboxTripSession(
             tripService.startService()
         }
         tripSessionLocationEngine.startLocationUpdates(withReplayEnabled) {
-            threadController.assertSDKThread()
+            // this may happen on on the sdk thread
             updateRawLocation(it)
         }
         state = TripSessionState.STARTED
@@ -296,9 +296,9 @@ internal class MapboxTripSession(
                 "location ($locationHash) elapsed time: ${rawLocation.elapsedRealtimeNanos}",
             LOG_CATEGORY
         )
-        this.rawLocation = rawLocation
-        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
         mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            this@MapboxTripSession.rawLocation = rawLocation
+            locationObservers.forEach { it.onNewRawLocation(rawLocation) }
             logD(
                 "updateRawLocation; notify navigator for ($locationHash) - start",
                 LOG_CATEGORY
