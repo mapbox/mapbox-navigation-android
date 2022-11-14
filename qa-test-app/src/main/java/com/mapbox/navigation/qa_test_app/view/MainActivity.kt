@@ -4,20 +4,22 @@ import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.ActivityMainBinding
 import com.mapbox.navigation.qa_test_app.domain.TestActivityDescription
 import com.mapbox.navigation.qa_test_app.domain.TestActivitySuite
 import com.mapbox.navigation.qa_test_app.utils.PermissionsHelper
 import com.mapbox.navigation.qa_test_app.utils.PermissionsState
-import com.mapbox.navigation.qa_test_app.view.adapters.ActivitiesListAdaptersSupport
-import com.mapbox.navigation.qa_test_app.view.adapters.GenericListAdapter
-import com.mapbox.navigation.qa_test_app.view.adapters.GenericListAdapterItemSelectedFun
+import com.mapbox.navigation.qa_test_app.view.main.ActivitiesListFragment
+import com.mapbox.navigation.qa_test_app.view.main.MainViewModel
+import com.mapbox.navigation.qa_test_app.view.main.PageInfo
+import com.mapbox.navigation.qa_test_app.view.util.observe
 import kotlinx.coroutines.launch
 
 /**
@@ -25,6 +27,8 @@ import kotlinx.coroutines.launch
  * necessary.
  */
 class MainActivity : AppCompatActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
 
     private val permissionsHelper = PermissionsHelper()
     private val binding: ActivityMainBinding by lazy {
@@ -35,24 +39,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        val layoutManager = LinearLayoutManager(this)
-        binding.activitiesList.layoutManager = LinearLayoutManager(this)
-        binding.activitiesList.adapter = GenericListAdapter(
-            ActivitiesListAdaptersSupport.activitiesListOnBindViewHolderFun,
-            ActivitiesListAdaptersSupport.viewHolderFactory,
-            activitySelectedDelegate,
-            auxViewClickMap = mapOf(Pair(R.id.infoLabel, infoIconClickListenerFun))
-        )
-        binding.activitiesList.addItemDecoration(
-            DividerItemDecoration(this, layoutManager.orientation)
-        )
-    }
+        binding.pager.adapter = PagerAdapter(supportFragmentManager, viewModel.pages)
+        binding.tabLayout.setupWithViewPager(binding.pager)
 
-    override fun onStart() {
-        super.onStart()
-        (binding.activitiesList.adapter as GenericListAdapter<TestActivityDescription, *>).swap(
-            TestActivitySuite.testActivities
-        )
+        viewModel.didSelectItemEvent.observe(this) { element ->
+            if (element.launchAfterPermissionResult) {
+                launchAfterPermissionResult(element)
+            } else {
+                element.launchActivityFun(this@MainActivity)
+            }
+        }
+
+        viewModel.didSelectInfoEvent.observe(this) { element ->
+            AlertDialog.Builder(this@MainActivity)
+                .setMessage(element.fullDescriptionResource)
+                .setTitle("Test Description")
+                .setPositiveButton("Ok") { dlg, _ ->
+                    dlg.dismiss()
+                }.show()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -91,24 +96,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val activitySelectedDelegate:
-        GenericListAdapterItemSelectedFun<TestActivityDescription> = { _, element ->
-            if (element.launchAfterPermissionResult) {
-                launchAfterPermissionResult(element)
-            } else {
-                element.launchActivityFun(this)
-            }
-        }
+    @Suppress("DEPRECATION")
+    class PagerAdapter(
+        fm: FragmentManager,
+        private val pages: List<PageInfo>
+    ) : FragmentStatePagerAdapter(fm) {
 
-    private val infoIconClickListenerFun:
-        GenericListAdapterItemSelectedFun<TestActivityDescription> = { _, element ->
-            AlertDialog.Builder(this)
-                .setMessage(element.fullDescriptionResource)
-                .setTitle("Test Description")
-                .setPositiveButton("Ok") { dlg, _ ->
-                    dlg.dismiss()
-                }.show()
-        }
+        override fun getCount(): Int = pages.size
+
+        override fun getItem(i: Int): Fragment = ActivitiesListFragment.create(pages[i].category)
+
+        override fun getPageTitle(position: Int): CharSequence = pages[position].title
+    }
 
     companion object {
         private val DEFAULT_PERMISSIONS = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)

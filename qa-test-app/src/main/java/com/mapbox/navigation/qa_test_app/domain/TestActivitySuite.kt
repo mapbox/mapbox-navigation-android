@@ -1,7 +1,7 @@
 package com.mapbox.navigation.qa_test_app.domain
 
-import android.app.Activity
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
@@ -30,23 +30,36 @@ import com.mapbox.navigation.qa_test_app.view.UpcomingRoadObjectsActivity
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsActivity
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsAltActivity
 import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationViewCustomizedActivity
+import com.mapbox.navigation.qa_test_app.view.main.SelectDestinationDialogFragment
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
-typealias LaunchActivityFun = (Activity) -> Unit
+typealias LaunchActivityFun = (AppCompatActivity) -> Unit
+
+data class Destination(val name: String, val point: Point)
 
 object TestActivitySuite {
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    const val CATEGORY_NONE = "none"
+    const val CATEGORY_DROP_IN = "Drop-In UI"
+    const val CATEGORY_COMPONENTS = "Component Installer"
+
+    private val testDestinations = listOf(
+        Destination("Newmarket: A&B office", Point.fromLngLat(-79.4443, 44.0620)),
+        Destination("Toronto: Lume Kitchen and Lounge", Point.fromLngLat(-79.4843, 43.6244))
+    )
+
     val testActivities = listOf(
         TestActivityDescription(
             "Components install via MapboxNavigationApp",
             R.string.experimental_components_install,
+            category = CATEGORY_COMPONENTS
         ) { activity ->
             activity.startActivity<ComponentsActivity>()
         },
         TestActivityDescription(
             "Components install via MapboxNavigation",
             R.string.experimental_alt_components_install,
+            category = CATEGORY_COMPONENTS
         ) { activity ->
             activity.startActivity<ComponentsAltActivity>()
         },
@@ -174,26 +187,41 @@ object TestActivitySuite {
         TestActivityDescription(
             "Default NavigationView",
             R.string.navigation_view_description,
+            category = CATEGORY_DROP_IN,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewActivity>() },
         TestActivityDescription(
             "Customized NavigationView",
             R.string.navigation_view_customized_description,
+            category = CATEGORY_DROP_IN,
             launchAfterPermissionResult = false
         ) { activity -> activity.startActivity<MapboxNavigationViewCustomizedActivity>() },
         TestActivityDescription(
+            "Navigate to point with NavigationView",
+            R.string.navigation_view_description,
+            category = CATEGORY_DROP_IN,
+            launchAfterPermissionResult = false
+        ) { activity ->
+            SelectDestinationDialogFragment(testDestinations) { dest, startReplay ->
+                MapboxNavigationViewActivity.startActivity(activity, dest.point, startReplay)
+            }.show(activity.supportFragmentManager, SelectDestinationDialogFragment.TAG)
+        },
+        TestActivityDescription(
             "Fullscreen NavigationView in a Fragment",
             R.string.navigation_view_fragment_description,
-            launchAfterPermissionResult = false
+            launchAfterPermissionResult = false,
+            category = CATEGORY_DROP_IN,
         ) { activity -> activity.startActivity<MapboxNavigationViewFragmentActivity>() },
         TestActivityDescription(
             "NavigationView lifecycle test with Fragments",
             R.string.navigation_view_fragment_lifecycle_description,
-            launchAfterPermissionResult = false
+            launchAfterPermissionResult = false,
+            category = CATEGORY_DROP_IN,
         ) { activity -> activity.startActivity<NavigationViewFragmentLifecycleActivity>() },
         TestActivityDescription(
             "Drop In Buttons",
-            R.string.drop_in_buttons_activity_description
+            R.string.drop_in_buttons_activity_description,
+            category = CATEGORY_DROP_IN
         ) { activity ->
             activity.startActivity<DropInButtonsActivity>()
         },
@@ -204,4 +232,12 @@ object TestActivitySuite {
             activity.startActivity<RoutesPreviewActivity>()
         },
     )
+
+    fun getTestActivities(category: String): List<TestActivityDescription> {
+        return if (category == CATEGORY_NONE) {
+            testActivities
+        } else {
+            testActivities.filter { it.category == category }
+        }
+    }
 }
