@@ -337,7 +337,9 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
     @Test
     fun verify_identifying_events_can_be_found() {
-        mapboxNavigation.startTripSession()
+        runOnMainSync {
+            mapboxNavigation.startTripSession()
+        }
         val firstJson = """{"identifier":"first"}"""
         val secondJson = """{"identifier":"second"}"""
         val thirdJson = """{"identifier":"third"}"""
@@ -355,13 +357,15 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     }
 
     private fun startAndStopRecording(eventJson: String): String {
-        mapboxNavigation.historyRecorder.startRecording()
-        mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, eventJson)
         var filePath: String? = null
         val countDownLatch = CountDownLatch(1)
-        mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
-            filePath = filePathFromNative
-            countDownLatch.countDown()
+        runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
+            mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, eventJson)
+            mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
+                filePath = filePathFromNative
+                countDownLatch.countDown()
+            }
         }
         countDownLatch.await()
         return filePath!!

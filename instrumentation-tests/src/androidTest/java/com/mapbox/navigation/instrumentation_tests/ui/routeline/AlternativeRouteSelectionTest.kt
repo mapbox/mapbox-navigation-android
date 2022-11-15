@@ -63,7 +63,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
 
     @After
     fun tearDown() {
-        mapboxNavigation.onDestroy()
+        runOnMainSync { mapboxNavigation.onDestroy() }
     }
 
     @Test

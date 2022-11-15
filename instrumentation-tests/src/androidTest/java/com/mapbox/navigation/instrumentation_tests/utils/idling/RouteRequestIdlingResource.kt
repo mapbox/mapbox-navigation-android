@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.ui.http.MockWebServerRule
+import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import org.junit.Assert.fail
 
 /**
@@ -39,7 +40,9 @@ class RouteRequestIdlingResource(
      */
     fun requestRoutesSync(): List<DirectionsRoute> {
         IdlingRegistry.getInstance().register(idlingResource)
-        mapboxNavigation.requestRoutes(routeOptions, routesRequestCallback)
+        runOnMainSync {
+            mapboxNavigation.requestRoutes(routeOptions, routesRequestCallback)
+        }
         Espresso.onIdle()
         IdlingRegistry.getInstance().unregister(idlingResource)
         return directionsRoutes!!
