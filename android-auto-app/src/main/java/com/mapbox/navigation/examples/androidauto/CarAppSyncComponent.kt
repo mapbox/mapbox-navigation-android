@@ -27,7 +27,6 @@ import kotlinx.coroutines.launch
  * The libraries are defining public apis so that there can be options to determine the experience
  * while both the car and phone are displayed.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CarAppSyncComponent private constructor() : MapboxNavigationObserver {
 
     private var navigationView: NavigationView? = null
@@ -74,8 +73,15 @@ class CarAppSyncComponent private constructor() : MapboxNavigationObserver {
     private val appListener = object : NavigationViewListener() {
         override fun onFreeDrive() {
             if (PermissionsManager.areLocationPermissionsGranted(navigationView!!.context)) {
-                logI(LOG_TAG, "updateCarAppState onFreeDrive")
-                MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
+                // TODO use the RoutesPreview feature introduced in 2.10. Until then, the route
+                //   preview state requires a custom implementation.
+                //   https://github.com/mapbox/mapbox-navigation-android/blob/main/CHANGELOG.md
+                val currentCarScreen = MapboxScreenManager.current()?.key
+                val isInRoutePreview = currentCarScreen == MapboxScreen.ROUTE_PREVIEW
+                if (!isInRoutePreview) {
+                    logI(LOG_TAG, "updateCarAppState onFreeDrive")
+                    MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
+                }
             }
         }
 

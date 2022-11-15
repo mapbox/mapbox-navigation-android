@@ -19,7 +19,10 @@ import com.mapbox.androidauto.map.logo.CarLogoRenderer
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.screenmanager.prepareScreens
+import com.mapbox.maps.ContextMode
 import com.mapbox.maps.MapInitOptions
+import com.mapbox.maps.MapOptions
+import com.mapbox.maps.applyDefaultParams
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -48,7 +51,18 @@ class MainCarSession : Session() {
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
                 // You must give the MapboxCarMap an instance of the carContext.
-                mapboxCarMap.setup(carContext, MapInitOptions(context = carContext))
+                // The BitmapWidget needs to use ContextMode.SHARED to remove an optimization
+                // that can crash or create artifacts.
+                mapboxCarMap.setup(
+                    carContext,
+                    MapInitOptions(
+                        context = carContext,
+                        mapOptions = MapOptions.Builder()
+                            .applyDefaultParams(carContext)
+                            .contextMode(ContextMode.SHARED)
+                            .build()
+                    )
+                )
                 checkLocationPermissions()
                 observeAutoDrive()
             }
@@ -61,6 +75,10 @@ class MainCarSession : Session() {
             override fun onPause(owner: LifecycleOwner) {
                 mapboxCarMap.unregisterObserver(logoSurfaceRenderer)
                 mapboxCarMap.unregisterObserver(compassSurfaceRenderer)
+            }
+
+            override fun onDestroy(owner: LifecycleOwner) {
+                mapboxCarMap.clearObservers()
             }
         })
     }
