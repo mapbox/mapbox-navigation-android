@@ -10,7 +10,7 @@ import com.mapbox.androidauto.R
 /**
  * Provides instructions for accepting location permissions.
  */
-class NeedsLocationPermissionsScreen(
+internal class NeedsLocationPermissionsScreen(
     carContext: CarContext
 ) : Screen(carContext) {
     override fun onGetTemplate(): Template {

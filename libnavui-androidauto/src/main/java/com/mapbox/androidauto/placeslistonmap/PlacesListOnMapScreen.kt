@@ -22,14 +22,12 @@ import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.search.PlaceRecord
 import com.mapbox.androidauto.search.SearchCarContext
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
-@OptIn(MapboxExperimental::class)
 internal class PlacesListOnMapScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
     placesProvider: PlacesListOnMapProvider,

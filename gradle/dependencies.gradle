@@ -26,7 +26,7 @@ ext {
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.8.0',
-      mapboxMapsAndroidAuto     : '0.3.0',
+      mapboxMapsAndroidAuto     : '0.4.0',
       mapboxSearchAndroidAuto   : '1.0.0-beta.39',
       androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',

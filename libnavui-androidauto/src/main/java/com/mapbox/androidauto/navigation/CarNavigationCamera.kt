@@ -9,7 +9,6 @@ import com.mapbox.androidauto.routes.CarRoutesProvider
 import com.mapbox.androidauto.routes.NavigationCarRoutesProvider
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.androidauto.DefaultMapboxCarMapGestureHandler
@@ -45,7 +44,6 @@ private const val DEFAULT_INITIAL_ZOOM = 15.0
  * @param carRoutesProvider provides routes that can adjust the camera view port
  * @param initialCameraOptions set camera options when the camera is attached
  */
-@OptIn(MapboxExperimental::class)
 @UiThread
 class CarNavigationCamera(
     private val initialCarCameraMode: CarCameraMode,

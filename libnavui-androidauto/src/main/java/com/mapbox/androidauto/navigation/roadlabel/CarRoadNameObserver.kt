@@ -11,7 +11,7 @@ import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 
-abstract class RoadNameObserver(
+internal abstract class CarRoadNameObserver(
     private val routeShieldApi: MapboxRouteShieldApi,
     private val mapUserStyleObserver: MapUserStyleObserver
 ) : MapboxNavigationObserver {

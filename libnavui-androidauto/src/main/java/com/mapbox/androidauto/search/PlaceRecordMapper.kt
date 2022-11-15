@@ -1,7 +1,6 @@
 package com.mapbox.androidauto.search
 
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
-import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.search.record.FavoriteRecord
 import com.mapbox.search.result.SearchAddress
 import com.mapbox.search.result.SearchResult
@@ -43,4 +42,11 @@ internal object PlaceRecordMapper {
             categories = carmenFeature.placeType() ?: emptyList()
         )
     }
+
+    private inline fun <R1, R2, T> ifNonNull(r1: R1?, r2: R2?, func: (R1, R2) -> T): T? =
+        if (r1 != null && r2 != null) {
+            func(r1, r2)
+        } else {
+            null
+        }
 }

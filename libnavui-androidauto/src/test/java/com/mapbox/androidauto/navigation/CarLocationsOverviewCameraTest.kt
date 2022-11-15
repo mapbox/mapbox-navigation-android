@@ -4,7 +4,6 @@ import com.mapbox.androidauto.testing.CarAppTestRule
 import com.mapbox.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapSurface
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
@@ -19,7 +18,6 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(MapboxExperimental::class)
 class CarLocationsOverviewCameraTest : MapboxRobolectricTestRunner() {
 
     @get:Rule

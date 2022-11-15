@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Gives the [CarRoutePreviewScreen] the ability to control the selected route rendered
- * by the [CarRouteLine] and [CarNavigationCamera].
+ * by the [CarRouteLineRenderer] and [CarNavigationCamera].
  */
 class PreviewCarRoutesProvider(routes: List<NavigationRoute>) : CarRoutesProvider {
 

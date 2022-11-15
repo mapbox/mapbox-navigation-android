@@ -8,7 +8,7 @@ import com.mapbox.maps.extension.androidauto.widgets.CompassWidget
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 
 @OptIn(MapboxExperimental::class)
-class CarCompassSurfaceRenderer : MapboxCarMapObserver {
+class CarCompassRenderer : MapboxCarMapObserver {
 
     private var mapboxMap: MapboxMap? = null
     private var compassWidget: CompassWidget? = null

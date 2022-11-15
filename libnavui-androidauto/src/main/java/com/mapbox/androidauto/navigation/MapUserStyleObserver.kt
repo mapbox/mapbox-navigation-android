@@ -1,11 +1,9 @@
 package com.mapbox.androidauto.navigation
 
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 
-@OptIn(MapboxExperimental::class)
 class MapUserStyleObserver : MapboxCarMapObserver {
     var userId: String = ""
     var styleId: String = ""

@@ -12,7 +12,7 @@ import kotlin.math.roundToInt
 /**
  * This class will a road name and create a bitmap that fits the text.
  */
-class RoadLabelRenderer {
+internal class CarRoadLabelBitmapRenderer {
 
     /**
      * Render [road] and [shields] to a [Bitmap]
@@ -21,7 +21,7 @@ class RoadLabelRenderer {
         resources: Resources,
         road: List<RoadComponent>,
         shields: List<RouteShield>,
-        options: RoadLabelOptions = RoadLabelOptions.default
+        options: CarRoadLabelOptions = CarRoadLabelOptions.default
     ): Bitmap? {
         if (road.isEmpty()) return null
         textPaint.color = options.textColor
@@ -83,7 +83,7 @@ class RoadLabelRenderer {
         return Rect().also { textPaint.getTextBounds(text, 0, text.length, it) }
     }
 
-    private fun Canvas.drawLabelBackground(options: RoadLabelOptions) = apply {
+    private fun Canvas.drawLabelBackground(options: CarRoadLabelOptions) = apply {
         val cardWidth = width - LABEL_PADDING
         val cardHeight = height - LABEL_PADDING
 

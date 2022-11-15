@@ -14,7 +14,7 @@ import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
 /**
  * Handle the android auto car app settings.
  */
-class CarSettingsScreen(
+internal class CarSettingsScreen(
     private val mapboxCarContext: MapboxCarContext
 ) : Screen(mapboxCarContext.carContext) {
 

@@ -9,7 +9,6 @@ import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.bindgen.Expected
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.onEach
  *
  * @see [ActiveGuidanceScreen] for an example.
  */
-@MapboxExperimental
 class CarNavigationInfoProvider
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(

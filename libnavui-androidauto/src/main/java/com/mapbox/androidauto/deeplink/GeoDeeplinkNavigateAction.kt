@@ -5,11 +5,13 @@ import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplinkParser
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
+@ExperimentalPreviewMapboxNavigationAPI
 class GeoDeeplinkNavigateAction(val mapboxCarContext: MapboxCarContext) {
     fun onNewIntent(intent: Intent): Boolean {
         val mapboxNavigation = MapboxNavigationApp.current()

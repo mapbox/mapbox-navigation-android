@@ -8,7 +8,6 @@ import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.placeslistonmap.PlacesListOnMapLayerUtil
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
@@ -16,7 +15,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
-@OptIn(MapboxExperimental::class)
 class CarActiveGuidanceMarkers : MapboxCarMapObserver {
     private var styleLoadedListener: OnStyleLoadedListener? = null
     private var mapboxCarMapSurface: MapboxCarMapSurface? = null

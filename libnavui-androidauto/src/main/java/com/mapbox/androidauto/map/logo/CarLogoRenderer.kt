@@ -9,7 +9,7 @@ import com.mapbox.maps.extension.androidauto.widgets.LogoWidget
 import com.mapbox.maps.renderer.widget.WidgetPosition
 
 @OptIn(MapboxExperimental::class)
-class CarLogoSurfaceRenderer : MapboxCarMapObserver {
+class CarLogoRenderer : MapboxCarMapObserver {
 
     private var logoWidget: LogoWidget? = null
 

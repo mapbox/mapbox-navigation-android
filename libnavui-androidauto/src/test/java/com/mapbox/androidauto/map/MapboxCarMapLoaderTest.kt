@@ -1,6 +1,5 @@
 package com.mapbox.androidauto.map
 
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.extension.style.StyleContract
@@ -14,7 +13,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(MapboxExperimental::class)
 class MapboxCarMapLoaderTest {
 
     @get:Rule

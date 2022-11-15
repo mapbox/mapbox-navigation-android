@@ -7,7 +7,6 @@ import com.mapbox.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.routes.CarRoutesProvider
 import com.mapbox.androidauto.routes.NavigationCarRoutesProvider
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
@@ -41,8 +40,7 @@ import kotlinx.coroutines.launch
  *
  * Anything for rendering the car's route line, is handled here at this point.
  */
-@OptIn(MapboxExperimental::class)
-class CarRouteLine(
+class CarRouteLineRenderer(
     private val carRoutesProvider: CarRoutesProvider = NavigationCarRoutesProvider()
 ) : MapboxCarMapObserver {
 

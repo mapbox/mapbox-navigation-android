@@ -4,7 +4,6 @@ import androidx.car.app.Screen
 import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.mapbox.androidauto.testing.CarAppTestRule
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -26,7 +25,6 @@ import org.junit.Test
  * Observe [MapboxCarMapSurface] and [MapboxNavigation] properties that create the
  * [NavigationTemplate.NavigationInfo].
  */
-@OptIn(MapboxExperimental::class)
 class CarNavigationInfoProviderTest {
 
     @get:Rule

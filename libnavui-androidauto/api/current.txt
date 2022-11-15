@@ -87,7 +87,7 @@ package com.mapbox.androidauto.deeplink {
     property public final com.mapbox.api.geocoding.v5.MapboxGeocoding? currentMapboxGeocoding;
   }
 
-  public final class GeoDeeplinkNavigateAction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class GeoDeeplinkNavigateAction {
     ctor public GeoDeeplinkNavigateAction(com.mapbox.androidauto.MapboxCarContext mapboxCarContext);
     method public com.mapbox.androidauto.MapboxCarContext getMapboxCarContext();
     method public boolean onNewIntent(android.content.Intent intent);
@@ -206,19 +206,6 @@ package com.mapbox.androidauto.freedrive {
     method public androidx.car.app.model.ActionStrip.Builder builder();
   }
 
-  public final class FreeDriveCarScreen extends androidx.car.app.Screen {
-    ctor @UiThread public FreeDriveCarScreen(com.mapbox.androidauto.MapboxCarContext mapboxCarContext);
-    method public com.mapbox.androidauto.location.CarLocationRenderer getCarLocationRenderer();
-    method public com.mapbox.androidauto.navigation.CarNavigationCamera getCarNavigationCamera();
-    method public com.mapbox.androidauto.preview.CarRouteLine getCarRouteLine();
-    method public com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer getCarSpeedLimitRenderer();
-    method public androidx.car.app.model.Template onGetTemplate();
-    property public final com.mapbox.androidauto.location.CarLocationRenderer carLocationRenderer;
-    property public final com.mapbox.androidauto.navigation.CarNavigationCamera carNavigationCamera;
-    property public final com.mapbox.androidauto.preview.CarRouteLine carRouteLine;
-    property public final com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer carSpeedLimitRenderer;
-  }
-
 }
 
 package com.mapbox.androidauto.location {
@@ -263,16 +250,16 @@ package com.mapbox.androidauto.map {
 
 package com.mapbox.androidauto.map.compass {
 
-  public final class CarCompassSurfaceRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarCompassSurfaceRenderer();
+  public final class CarCompassRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarCompassRenderer();
   }
 
 }
 
 package com.mapbox.androidauto.map.logo {
 
-  public final class CarLogoSurfaceRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarLogoSurfaceRenderer();
+  public final class CarLogoRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarLogoRenderer();
   }
 
 }
@@ -341,7 +328,7 @@ package com.mapbox.androidauto.navigation {
     method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? mapNavigationInfo(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> expectedManeuvers, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> routeShields, com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
-  @com.mapbox.maps.MapboxExperimental public final class CarNavigationInfoProvider implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+  public final class CarNavigationInfoProvider implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarNavigationInfoProvider();
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.navigation.CarNavigationInfo> getCarNavigationInfo();
     method public com.mapbox.androidauto.navigation.CarNavigationInfoProvider invalidateOnChange(androidx.car.app.Screen screen);
@@ -472,53 +459,35 @@ package com.mapbox.androidauto.navigation.maneuver {
 
 package com.mapbox.androidauto.navigation.roadlabel {
 
-  public final class RoadLabelOptions {
+  public final class CarRoadLabelOptions {
     method public int getBackgroundColor();
     method public int getRoundedLabelColor();
     method public Integer? getShadowColor();
     method public int getTextColor();
-    method public com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions.Builder toBuilder();
+    method public com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder toBuilder();
     property public final int backgroundColor;
     property public final int roundedLabelColor;
     property public final Integer? shadowColor;
     property public final int textColor;
-    field public static final com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions.Companion Companion;
+    field public static final com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions.Companion Companion;
   }
 
-  public static final class RoadLabelOptions.Builder {
-    ctor public RoadLabelOptions.Builder();
-    method public com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions.Builder backgroundColor(@ColorInt int backgroundColor);
-    method public com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions build();
-    method public com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions.Builder roundedLabelColor(@ColorInt int roundedLabelColor);
-    method public com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions.Builder shadowColor(@ColorInt Integer? shadowColor);
-    method public com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions.Builder textColor(@ColorInt int textColor);
+  public static final class CarRoadLabelOptions.Builder {
+    ctor public CarRoadLabelOptions.Builder();
+    method public com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder backgroundColor(@ColorInt int backgroundColor);
+    method public com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions build();
+    method public com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder roundedLabelColor(@ColorInt int roundedLabelColor);
+    method public com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder shadowColor(@ColorInt Integer? shadowColor);
+    method public com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder textColor(@ColorInt int textColor);
   }
 
-  public static final class RoadLabelOptions.Companion {
-    method public com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions getDefault();
-    property public final com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions default;
+  public static final class CarRoadLabelOptions.Companion {
+    method public com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions getDefault();
+    property public final com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelOptions default;
   }
 
-  public final class RoadLabelRenderer {
-    ctor public RoadLabelRenderer();
-    method public android.graphics.Bitmap? render(android.content.res.Resources resources, java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> road, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> shields, com.mapbox.androidauto.navigation.roadlabel.RoadLabelOptions options = RoadLabelOptions.default);
-  }
-
-  public final class RoadLabelSurfaceLayer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public RoadLabelSurfaceLayer();
-  }
-
-  public abstract class RoadNameObserver implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
-    ctor public RoadNameObserver(com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi routeShieldApi, com.mapbox.androidauto.navigation.MapUserStyleObserver mapUserStyleObserver);
-    method public final java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> getCurrentRoad();
-    method public final java.util.List<com.mapbox.navigation.ui.shield.model.RouteShield> getCurrentShields();
-    method public final void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
-    method public final void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
-    method public abstract void onRoadUpdate(java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> road, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> shields);
-    method public final void setCurrentRoad(java.util.List<com.mapbox.navigation.base.road.model.RoadComponent>);
-    method public final void setCurrentShields(java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield>);
-    property public final java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> currentRoad;
-    property public final java.util.List<com.mapbox.navigation.ui.shield.model.RouteShield> currentShields;
+  public final class CarRoadLabelRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarRoadLabelRenderer();
   }
 
 }
@@ -544,7 +513,7 @@ package com.mapbox.androidauto.navigation.speedlimit {
     method public com.mapbox.androidauto.navigation.speedlimit.SpeedLimitOptions.Builder warningThreshold(int warningThreshold);
   }
 
-  public final class SpeedLimitWidget extends com.mapbox.maps.renderer.widget.BitmapWidget {
+  @com.mapbox.maps.MapboxExperimental public final class SpeedLimitWidget extends com.mapbox.maps.renderer.widget.BitmapWidget {
     ctor public SpeedLimitWidget(com.mapbox.navigation.base.speed.model.SpeedLimitSign initialSignFormat = com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD);
     method public void update(Integer? speedLimit, int speed, com.mapbox.navigation.base.speed.model.SpeedLimitSign? signFormat, int threshold);
     method public void update(com.mapbox.navigation.base.speed.model.SpeedLimitSign? signFormat, int threshold);
@@ -569,15 +538,6 @@ package com.mapbox.androidauto.notification {
     ctor public MapboxCarNotificationOptions.Builder();
     method public com.mapbox.androidauto.notification.MapboxCarNotificationOptions build();
     method public com.mapbox.androidauto.notification.MapboxCarNotificationOptions.Builder startAppService(Class<? extends androidx.car.app.CarAppService>? startAppService);
-  }
-
-}
-
-package com.mapbox.androidauto.permissions {
-
-  public final class NeedsLocationPermissionsScreen extends androidx.car.app.Screen {
-    ctor public NeedsLocationPermissionsScreen(androidx.car.app.CarContext carContext);
-    method public androidx.car.app.model.Template onGetTemplate();
   }
 
 }
@@ -630,8 +590,8 @@ package com.mapbox.androidauto.placeslistonmap {
 
 package com.mapbox.androidauto.preview {
 
-  public final class CarRouteLine implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarRouteLine(com.mapbox.androidauto.routes.CarRoutesProvider carRoutesProvider = com.mapbox.androidauto.routes.NavigationCarRoutesProvider());
+  public final class CarRouteLineRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarRouteLineRenderer(com.mapbox.androidauto.routes.CarRoutesProvider carRoutesProvider = com.mapbox.androidauto.routes.NavigationCarRoutesProvider());
   }
 
   public fun interface CarRouteOptionsInterceptor {
@@ -878,11 +838,6 @@ package com.mapbox.androidauto.search {
 }
 
 package com.mapbox.androidauto.settings {
-
-  public final class CarSettingsScreen extends androidx.car.app.Screen {
-    ctor public CarSettingsScreen(com.mapbox.androidauto.MapboxCarContext mapboxCarContext);
-    method public androidx.car.app.model.Template onGetTemplate();
-  }
 
   public final class MapboxCarStorage {
     method public androidx.car.app.CarContext getCarContext();
