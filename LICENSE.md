@@ -3815,6 +3815,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android DB.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android for Cars App Library (Build navigation, parking, and charging apps for Android Auto).
 URL: [https://developer.android.com/jetpack/androidx/releases/car-app#1.1.0](https://developer.android.com/jetpack/androidx/releases/car-app#1.1.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3839,8 +3845,20 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android Lifecycle Process.
+URL: [https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0](https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Lifecycle Runtime.
 URL: [https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0](https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Lifecycle Service.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -3889,6 +3907,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 Mapbox Navigation uses portions of the Android Resources Library (The Resources Library is a static library that you can add to your Android application in order to use resource APIs that backport the latest APIs to older versions of the platform. Compatible on devices running API 14 or later.).
 URL: [https://developer.android.com/jetpack/androidx/releases/appcompat#1.3.1](https://developer.android.com/jetpack/androidx/releases/appcompat#1.3.1)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Room-Common.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Room-Runtime.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -3983,6 +4013,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android Support SQLite - Framework Implementation (The implementation of Support SQLite library using the framework code.).
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Support VectorDrawable.
 URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3997,6 +4033,18 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 Mapbox Navigation uses portions of the Android Transition Support Library.
 URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android WorkManager Kotlin Extensions.
+URL: [https://developer.android.com/jetpack/androidx/releases/work#2.7.1](https://developer.android.com/jetpack/androidx/releases/work#2.7.1)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android WorkManager Runtime (Android WorkManager runtime library).
+URL: [https://developer.android.com/jetpack/androidx/releases/work#2.7.1](https://developer.android.com/jetpack/androidx/releases/work#2.7.1)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -4254,6 +4302,12 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 ===========================================================================
 
 Mapbox Navigation uses portions of the Mapbox Navigation Base (Artifact that provides the set of interface definitions and DTOs used in the modular Navigation SDK).
+URL: [https://github.com/mapbox/mapbox-navigation-android](https://github.com/mapbox/mapbox-navigation-android)
+License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos/)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Mapbox Navigation Copilot (Artifact that provides Copilot capabilities).
 URL: [https://github.com/mapbox/mapbox-navigation-android](https://github.com/mapbox/mapbox-navigation-android)
 License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos/)
 

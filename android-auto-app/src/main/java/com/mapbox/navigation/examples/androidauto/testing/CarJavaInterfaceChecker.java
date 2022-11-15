@@ -1,4 +1,6 @@
-package com.mapbox.navigation.qa_test_app.testing;
+package com.mapbox.navigation.examples.androidauto.testing;
+
+import static com.mapbox.maps.extension.style.StyleExtensionImplKt.style;
 
 import android.app.Application;
 import android.text.SpannableString;
@@ -8,17 +10,21 @@ import androidx.car.app.CarContext;
 import androidx.car.app.model.Distance;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.mapbox.androidauto.navigation.MapboxCarNavigationManager;
-import com.mapbox.androidauto.navigation.CarDistanceFormatter;
 import com.mapbox.androidauto.internal.search.CarPlaceSearch;
+import com.mapbox.androidauto.map.MapboxCarMapLoader;
+import com.mapbox.androidauto.navigation.CarDistanceFormatter;
+import com.mapbox.androidauto.navigation.MapboxCarNavigationManager;
 import com.mapbox.maps.extension.androidauto.MapboxCarMap;
+import com.mapbox.maps.extension.style.StyleContract;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp;
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver;
+import com.mapbox.navigation.ui.maps.NavigationStyles;
 
 import java.util.List;
 
+import kotlin.Unit;
 import kotlinx.coroutines.CoroutineScope;
 
 class CarJavaInterfaceChecker {
@@ -92,5 +98,15 @@ class CarJavaInterfaceChecker {
   void CarDistanceFormatter() {
     SpannableString spannableString = CarDistanceFormatter.formatDistance(1200.0);
     Distance distance = CarDistanceFormatter.carDistance(1200.0);
+  }
+
+  void MapboxCarMapLoader() {
+    MapboxCarMapLoader sut = new MapboxCarMapLoader();
+    sut.setDarkStyleOverride(styleExtension(NavigationStyles.NAVIGATION_NIGHT_STYLE));
+    sut.setLightStyleOverride(styleExtension(NavigationStyles.NAVIGATION_DAY_STYLE));
+  }
+
+  StyleContract.StyleExtension styleExtension(String styleUri) {
+    return style(styleUri, builder -> Unit.INSTANCE);
   }
 }

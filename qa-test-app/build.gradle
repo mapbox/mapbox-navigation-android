@@ -94,9 +94,6 @@ dependencies {
     implementation project(':libnavui-status')
     implementation project(':libnavui-dropin')
 
-    // Android Auto
-    implementation project(':libnavui-androidauto')
-
     // test
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner

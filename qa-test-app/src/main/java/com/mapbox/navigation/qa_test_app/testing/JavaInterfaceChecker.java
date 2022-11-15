@@ -1,19 +1,45 @@
 package com.mapbox.navigation.qa_test_app.testing;
 
-import static com.mapbox.maps.extension.style.StyleExtensionImplKt.style;
+import android.app.Application;
 
-import com.mapbox.androidauto.map.MapboxCarMapLoader;
-import com.mapbox.maps.extension.style.StyleContract;
-import com.mapbox.maps.extension.style.StyleExtensionImpl;
+import androidx.lifecycle.LifecycleOwner;
+
+import com.mapbox.navigation.base.options.NavigationOptions;
+import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp;
-import com.mapbox.navigation.ui.maps.NavigationStyles;
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver;
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 import kotlinx.coroutines.CoroutineScope;
 
 class JavaInterfaceChecker {
+
+  void MapboxNavigationApp(
+          Application application,
+          LifecycleOwner lifecycleOwner,
+          NavigationOptions navigationOptions,
+          MapboxNavigationObserver observer
+  ) {
+    // Set up now
+    MapboxNavigationApp.setup(navigationOptions);
+
+    // Set up provider
+    MapboxNavigationApp.setup(() -> navigationOptions);
+
+    // Control lifecycles
+    MapboxNavigationApp.attach(lifecycleOwner);
+    MapboxNavigationApp.disable();
+    MapboxNavigationApp.detach(lifecycleOwner);
+    MapboxNavigationApp.attachAllActivities(application);
+    MapboxNavigationApp.getLifecycleOwner();
+
+    // Get current instance
+    MapboxNavigation mapboxNavigation = MapboxNavigationApp.current();
+
+    // Register and unregister observer
+    MapboxNavigationApp.registerObserver(observer);
+    MapboxNavigationApp.unregisterObserver(observer);
+  }
 
   void MapboxAudioGuidance(
           CoroutineScope coroutineScope
@@ -27,15 +53,5 @@ class JavaInterfaceChecker {
     JavaFlow.collect(sut.stateFlow(), coroutineScope, (enabled) -> {
       // observe state
     });
-  }
-
-  void MapboxCarMapLoader() {
-    MapboxCarMapLoader sut = new MapboxCarMapLoader();
-    sut.setDarkStyleOverride(styleExtension(NavigationStyles.NAVIGATION_NIGHT_STYLE));
-    sut.setLightStyleOverride(styleExtension(NavigationStyles.NAVIGATION_DAY_STYLE));
-  }
-
-  StyleContract.StyleExtension styleExtension(String styleUri) {
-    return style(styleUri, builder -> Unit.INSTANCE);
   }
 }
