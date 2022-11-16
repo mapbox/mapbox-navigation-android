@@ -251,8 +251,10 @@ package com.mapbox.navigation.core.history {
 
   public final class MapboxHistoryReader implements java.util.Iterator<com.mapbox.navigation.core.history.model.HistoryEvent> kotlin.jvm.internal.markers.KMappedMarker {
     ctor public MapboxHistoryReader(String filePath);
+    method public String getFilePath();
     method public boolean hasNext();
     method @kotlin.jvm.Throws(exceptionClasses=NullPointerException::class) public com.mapbox.navigation.core.history.model.HistoryEvent next() throws java.lang.NullPointerException;
+    property public final String filePath;
   }
 
   public final class MapboxHistoryRecorder {

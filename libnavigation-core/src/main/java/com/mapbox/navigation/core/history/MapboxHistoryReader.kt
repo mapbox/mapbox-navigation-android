@@ -11,6 +11,7 @@ import com.mapbox.navigator.HistoryReaderInterface
  * All files in the [MapboxHistoryRecorder.fileDirectory] can be read with this reader.
  */
 class MapboxHistoryReader @VisibleForTesting internal constructor(
+    val filePath: String,
     private val nativeHistoryReader: HistoryReaderInterface,
     private val historyEventMapper: HistoryEventMapper
 ) : Iterator<HistoryEvent> {
@@ -19,6 +20,7 @@ class MapboxHistoryReader @VisibleForTesting internal constructor(
      * @param filePath absolute path to a file containing the native history file.
      */
     constructor(filePath: String) : this(
+        filePath,
         HistoryReader(filePath),
         HistoryEventMapper()
     )
