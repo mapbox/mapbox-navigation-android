@@ -485,16 +485,15 @@ class RoutesPreviewActivity : AppCompatActivity() {
             visibility = View.VISIBLE
             setOnClickListener {
                 visibility = View.GONE
-                setRouteAndStartNavigation(mapboxNavigation.getRoutesPreview()!!.routesList)
-                mapboxNavigation.setRoutesPreview(emptyList())
+                setRouteAndStartNavigation()
             }
         }
         mapboxNavigation.setRoutesPreview(routes)
     }
 
-    private fun setRouteAndStartNavigation(route: List<NavigationRoute>) {
+    private fun setRouteAndStartNavigation() {
         // set route
-        mapboxNavigation.setNavigationRoutes(route)
+        mapboxNavigation.moveRoutesFromPreviewToNavigator()
 
         // show UI elements
         binding.soundButton.visibility = View.VISIBLE

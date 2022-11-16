@@ -122,6 +122,10 @@ object DecodeUtils {
         return stepsGeometryDecodeCache.getOrDecode(legStep.geometry(), precision)
     }
 
+    /**
+     * Clears the caches that were filled by invoking
+     * [stepGeometryToPoints], [completeGeometryToPoints], etc.
+     */
     @JvmStatic
     fun clearCache() {
         synchronized(stepsGeometryDecodeCache) {
