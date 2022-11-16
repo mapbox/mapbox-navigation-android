@@ -259,6 +259,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     )
     private val tripNotificationInterceptorOwner = TripNotificationInterceptorOwner()
     private val internalRoutesObserver: RoutesObserver
+    private val routesCacheClearer = NavigationComponentProvider.createRoutesCacheClearer()
     private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
@@ -569,6 +570,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
         registerRoutesObserver(internalRoutesObserver)
+        setUpRouteCacheClearer()
 
         roadObjectsStore = RoadObjectsStore(navigator)
         graphAccessor = GraphAccessor(navigator)
@@ -1989,6 +1991,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun restartRouteScope() {
         routeScope.cancel()
         routeScope = createChildScope()
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun setUpRouteCacheClearer() {
+        registerRoutesObserver(routesCacheClearer)
+        registerRoutesPreviewObserver(routesCacheClearer)
     }
 
     private companion object {

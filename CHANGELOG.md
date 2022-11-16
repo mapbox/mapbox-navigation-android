@@ -44,6 +44,8 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.10.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.2))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 
+- Added `DecodeUtils#clearCache` to allow trigger route geometry cache clearing in order to reduce memory usage.
+- Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available.
 
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog
