@@ -19,6 +19,9 @@ data class MockDirectionsRequestHandler(
     val expectedCoordinates: List<Point>?,
     val relaxedExpectedCoordinates: Boolean = false,
 ) : BaseMockRequestHandler() {
+
+    var jsonResponseModifier: ((String) -> String) = { it }
+
     override fun handleInternal(request: RecordedRequest): MockResponse? {
         val prefix = if (relaxedExpectedCoordinates) {
             """/directions/v5/mapbox/$profile"""
@@ -27,7 +30,7 @@ data class MockDirectionsRequestHandler(
         }
 
         return if (request.path!!.startsWith(prefix)) {
-            MockResponse().setBody(jsonResponse)
+            MockResponse().setBody(jsonResponseModifier(jsonResponse))
         } else {
             null
         }

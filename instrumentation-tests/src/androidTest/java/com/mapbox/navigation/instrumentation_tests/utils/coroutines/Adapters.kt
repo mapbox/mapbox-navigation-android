@@ -22,6 +22,7 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
@@ -69,6 +70,17 @@ fun MapboxNavigation.routeProgressUpdates(): Flow<RouteProgress> {
         navigation.registerRouteProgressObserver(observer)
         awaitClose {
             navigation.unregisterRouteProgressObserver(observer)
+        }
+    }
+}
+
+fun MapboxNavigation.offRouteUpdates(): Flow<Boolean> {
+    val navigation = this
+    return callbackFlow {
+        val observer = OffRouteObserver { trySend(it) }
+        navigation.registerOffRouteObserver(observer)
+        awaitClose {
+            navigation.unregisterOffRouteObserver(observer)
         }
     }
 }

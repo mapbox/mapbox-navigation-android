@@ -469,6 +469,24 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun non_offroute_cancels_reroute() {
+        createMapboxNavigation()
+        mapboxNavigation.setRerouteController(rerouteController)
+        val observers = mutableListOf<OffRouteObserver>()
+        verify { tripSession.registerOffRouteObserver(capture(observers)) }
+
+        observers.forEach {
+            it.onOffRouteStateChanged(false)
+        }
+
+        verify(exactly = 1) { rerouteController.interrupt() }
+        verify(ordering = Ordering.ORDERED) {
+            tripSession.registerOffRouteObserver(any())
+            rerouteController.interrupt()
+        }
+    }
+
+    @Test
     fun `new routes are set after reroute`() {
         val newRoutes = listOf(mockk<NavigationRoute>(relaxed = true), mockk(relaxed = true))
         val navigationRerouteController: NavigationRerouteController = mockk(relaxed = true) {

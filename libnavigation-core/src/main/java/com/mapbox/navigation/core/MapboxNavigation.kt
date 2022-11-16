@@ -1831,6 +1831,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
         if (offRoute) {
             reroute()
+        } else {
+            cancelReroute()
         }
     }
 
@@ -1910,6 +1912,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
             )
         }
+    }
+
+    private fun cancelReroute() {
+        rerouteController?.interrupt()
     }
 
     private inline fun <T> runInTelemetryContext(func: (MapboxNavigationTelemetry) -> T): T? {
