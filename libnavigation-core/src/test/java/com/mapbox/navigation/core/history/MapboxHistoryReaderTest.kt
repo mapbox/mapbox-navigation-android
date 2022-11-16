@@ -19,7 +19,7 @@ class MapboxHistoryReaderTest {
         val nativeHistoryReader: HistoryReaderInterface = mockk {
             every { next() } returns mockk()
         }
-        val sut = MapboxHistoryReader(nativeHistoryReader, historyEventMapper)
+        val sut = MapboxHistoryReader(mockk(), nativeHistoryReader, historyEventMapper)
 
         val next = sut.next()
 
@@ -31,7 +31,7 @@ class MapboxHistoryReaderTest {
         val nativeHistoryReader: HistoryReaderInterface = mockk {
             every { next() } returns null
         }
-        val sut = MapboxHistoryReader(nativeHistoryReader, historyEventMapper)
+        val sut = MapboxHistoryReader(mockk(), nativeHistoryReader, historyEventMapper)
 
         val hasNext = sut.hasNext()
 
@@ -43,7 +43,7 @@ class MapboxHistoryReaderTest {
         val nativeHistoryReader: HistoryReaderInterface = mockk {
             every { next() } returns null
         }
-        val sut = MapboxHistoryReader(nativeHistoryReader, historyEventMapper)
+        val sut = MapboxHistoryReader(mockk(), nativeHistoryReader, historyEventMapper)
 
         // Should crash
         sut.next()
