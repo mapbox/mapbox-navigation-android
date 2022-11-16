@@ -16,10 +16,18 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
+import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.offRouteUpdates
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
@@ -30,6 +38,11 @@ import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.first
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -199,5 +212,79 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
             }
             check(newWaypoints[1] == mockRoute.routeWaypoints.last())
         }
+    }
+
+    @Test
+    fun reroute_is_cancelled_when_the_user_returns_to_route() = sdkTest {
+        val responseDelay = 4000L
+        val mockRoute = RoutesProvider.dc_very_short(activity)
+        val originLocation = mockRoute.routeWaypoints.first()
+        val initialLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = originLocation.latitude()
+            longitude = originLocation.longitude()
+        }
+        val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = originLocation.latitude() + 0.002
+            longitude = originLocation.longitude()
+        }
+
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val requestHandler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            jsonResponse = readRawFileText(activity, R.raw.reroute_response_dc_very_short),
+            expectedCoordinates = mockRoute.routeWaypoints,
+            relaxedExpectedCoordinates = false
+        )
+        val rerouteRequestHandler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            jsonResponse = readRawFileText(activity, R.raw.empty_directions_response),
+            expectedCoordinates = listOf(
+                Point.fromLngLat(
+                    offRouteLocationUpdate.longitude,
+                    offRouteLocationUpdate.latitude
+                ),
+                mockRoute.routeWaypoints.last()
+            ),
+            relaxedExpectedCoordinates = true
+        )
+        rerouteRequestHandler.jsonResponseModifier = DelayedResponseModifier(responseDelay)
+        mockWebServerRule.requestHandlers.add(requestHandler)
+        mockWebServerRule.requestHandlers.add(rerouteRequestHandler)
+
+        val originalRoutes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(activity)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build()
+        ).getSuccessfulResultOrThrowException().routes
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(originalRoutes)
+
+        val rerouteStates = mutableListOf<RerouteState>()
+        val rerouteStatesObserver = RerouteController.RerouteStateObserver { rerouteState ->
+            rerouteStates.add(rerouteState)
+        }
+        mapboxNavigation.getRerouteController()!!
+            .registerRerouteStateObserver(rerouteStatesObserver)
+
+        mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 5)
+        // wait for OFF_ROUTE
+        mapboxNavigation.offRouteUpdates().filter { it }.first()
+        mockLocationReplayerRule.loopUpdate(initialLocation, times = 120)
+        // wait until the puck returns to the route
+        mapboxNavigation.offRouteUpdates().filterNot { it }.first()
+        delay(responseDelay)
+
+        assertEquals(
+            listOf(
+                RerouteState.Idle,
+                RerouteState.FetchingRoute,
+                RerouteState.Interrupted,
+                RerouteState.Idle,
+            ),
+            rerouteStates
+        )
     }
 }
