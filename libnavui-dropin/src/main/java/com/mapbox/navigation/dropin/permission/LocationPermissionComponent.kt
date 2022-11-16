@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -63,8 +64,12 @@ internal class LocationPermissionComponent(
                 store.dispatch(TripSessionStarterAction.OnLocationPermission(true))
             }
         } else {
-            launcher?.launch(LOCATION_PERMISSIONS)
-
+            val fragActivity = componentActivityRef.get() as? FragmentActivity
+            if (fragActivity != null) {
+                PermissionsLauncherFragment.create(fragActivity, LOCATION_PERMISSIONS, callback)
+            } else {
+                launcher?.launch(LOCATION_PERMISSIONS)
+            }
             notifyGrantedOnForegrounded(mapboxNavigation.navigationOptions.applicationContext)
         }
     }
@@ -93,6 +98,9 @@ internal class LocationPermissionComponent(
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
 
+        (componentActivityRef.get() as? FragmentActivity)?.also {
+            PermissionsLauncherFragment.destroy(it)
+        }
         launcher?.unregister()
     }
 
