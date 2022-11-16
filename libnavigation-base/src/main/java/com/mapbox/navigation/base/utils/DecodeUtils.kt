@@ -122,6 +122,16 @@ object DecodeUtils {
         return stepsGeometryDecodeCache.getOrDecode(legStep.geometry(), precision)
     }
 
+    @JvmStatic
+    fun clearCache() {
+        synchronized(stepsGeometryDecodeCache) {
+            cachedRoutes.clear()
+            stepsGeometryDecodeCache.evictAll()
+            stepsGeometryDecodeCache.resize(1)
+        }
+        completeGeometryDecodeCache.evictAll()
+    }
+
     /**
      * todo Remove inline references to RouteOptions in favor of taking geometry type as an argument or expose the extensions on top of NavigationRoute instead.
      */

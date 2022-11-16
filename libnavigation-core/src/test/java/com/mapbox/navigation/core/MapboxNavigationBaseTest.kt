@@ -102,6 +102,7 @@ internal open class MapboxNavigationBaseTest {
     val threadController = mockk<ThreadController>(relaxed = true)
     val routeProgressDataProvider = mockk<RouteProgressDataProvider>(relaxed = true)
     val routesPreviewController = mockk<RoutesPreviewController>(relaxed = true)
+    val routesCacheClearer = mockk<RoutesCacheClearer>(relaxed = true)
 
     val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -211,6 +212,7 @@ internal open class MapboxNavigationBaseTest {
         every {
             NavigationComponentProvider.createRoutesPreviewController(any())
         } returns routesPreviewController
+        every { NavigationComponentProvider.createRoutesCacheClearer() } returns routesCacheClearer
 
         every {
             navigator.create(

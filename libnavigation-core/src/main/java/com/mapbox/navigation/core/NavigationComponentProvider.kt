@@ -114,4 +114,6 @@ internal object NavigationComponentProvider {
         RouteProgressDataProvider()
 
     fun createEVDataHolder(): EVDataHolder = EVDataHolder()
+
+    fun createRoutesCacheClearer(): RoutesCacheClearer = RoutesCacheClearer()
 }

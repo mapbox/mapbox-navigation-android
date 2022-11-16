@@ -140,7 +140,18 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDispatcher() {
         createMapboxNavigation()
-        verify(exactly = 2) { directionsSession.registerRoutesObserver(any()) }
+        // + 1 for navigationSession
+        // + 1 for routesCacheClearer
+        verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
+    }
+
+    @Test
+    fun init_registersRoutesCacheClearerAsObservers() {
+        createMapboxNavigation()
+        verify(exactly = 1) {
+            directionsSession.registerRoutesObserver(routesCacheClearer)
+            routesPreviewController.registerRoutesPreviewObserver(routesCacheClearer)
+        }
     }
 
     @Test
