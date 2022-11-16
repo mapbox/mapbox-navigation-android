@@ -33,6 +33,7 @@ package com.mapbox.navigation.core {
     method public Integer? getZLevel();
     method public boolean isDestroyed();
     method public boolean isRunningForegroundService();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void moveRoutesFromPreviewToNavigator() throws java.lang.IllegalArgumentException;
     method public void navigateNextRouteLeg(com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback callback);
     method public void onDestroy();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void onEVDataUpdated(java.util.Map<java.lang.String,java.lang.String> data);

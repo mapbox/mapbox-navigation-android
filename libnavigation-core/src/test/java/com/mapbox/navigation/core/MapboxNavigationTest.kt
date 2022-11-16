@@ -21,6 +21,7 @@ import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingSt
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
+import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -1766,6 +1767,30 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             evDataHolder.updateData(data)
+        }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun moveRoutesFromPreviewToNavigatorNoPreviewedRoutes() {
+        createMapboxNavigation()
+        every { routesPreviewController.getRoutesPreview() } returns null
+
+        mapboxNavigation.moveRoutesFromPreviewToNavigator()
+    }
+
+    @Test
+    fun moveRoutesFromPreviewToNavigatorHasPreviewedRoutes() = coroutineRule.runBlockingTest {
+        val routes = listOf<NavigationRoute>(mockk())
+        createMapboxNavigation()
+        every {
+            routesPreviewController.getRoutesPreview()
+        } returns RoutesPreview(routes, emptyList(), listOf(mockk()), 0)
+
+        mapboxNavigation.moveRoutesFromPreviewToNavigator()
+
+        coVerifyOrder {
+            tripSession.setRoutes(routes, any())
+            routesPreviewController.previewNavigationRoutes(emptyList())
         }
     }
 }

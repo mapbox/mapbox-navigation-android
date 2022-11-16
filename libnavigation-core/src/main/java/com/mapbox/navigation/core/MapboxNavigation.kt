@@ -896,6 +896,27 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routesPreviewController.changeRoutesPreviewPrimaryRoute(newPrimaryRoute)
     }
 
+    /**
+     * Convenience method that takes previewed routes and sets them to Navigator,
+     * clearing the previewed routes afterwards.
+     * Equivalent to:
+     * ```
+     * mapboxNavigation.setNavigationRoutes(mapboxNavigation.getRoutesPreview()!!.routesList)
+     * mapboxNavigation.setRoutesPreview(emptyList())
+     * ```
+     * @throws IllegalArgumentException when previewed routes are empty.
+     */
+    @Throws(IllegalArgumentException::class)
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun moveRoutesFromPreviewToNavigator() {
+        val preview = getRoutesPreview()
+        requireNotNull(preview) {
+            "Can't move routes from preview to navigator as no previewed routes are available"
+        }
+        setNavigationRoutes(preview.routesList)
+        setRoutesPreview(emptyList())
+    }
+
     /***
      * Registers [RoutesPreviewObserver] to be notified when routes preview state changes.
      * [observer] is immediately called with current preview state

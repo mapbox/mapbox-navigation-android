@@ -46,6 +46,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 - Added `DecodeUtils#clearCache` to allow trigger route geometry cache clearing in order to reduce memory usage.
 - Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available.
+- Added `DecodeUtils#clearCache` to allow trigger route geometry cache clearing in order to reduce memory usage. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
+- Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
+- Added convenience `MapboxNavigation#moveRoutesFromPreviewToNavigator` method to simplify transition from Routes Preview state to Active Guidance state. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
 
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog
