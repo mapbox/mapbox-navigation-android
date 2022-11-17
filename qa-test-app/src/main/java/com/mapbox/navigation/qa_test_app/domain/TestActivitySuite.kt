@@ -39,10 +39,6 @@ data class Destination(val name: String, val point: Point)
 
 object TestActivitySuite {
 
-    const val CATEGORY_NONE = "none"
-    const val CATEGORY_DROP_IN = "Drop-In UI"
-    const val CATEGORY_COMPONENTS = "Component Installer"
-
     private val testDestinations = listOf(
         Destination("Newmarket: A&B office", Point.fromLngLat(-79.4443, 44.0620)),
         Destination("Toronto: Lume Kitchen and Lounge", Point.fromLngLat(-79.4843, 43.6244))
