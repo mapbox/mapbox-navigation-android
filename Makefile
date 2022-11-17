@@ -34,6 +34,7 @@ APPLICATION_MODULES = \
 qa-test-app \
 examples \
 instrumentation-tests \
+android-auto-app \
 
 define run-gradle-tasks
     COMMAND="./gradlew"; \
