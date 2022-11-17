@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.voice.api
 
 import androidx.annotation.VisibleForTesting
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -22,11 +23,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
@@ -121,73 +122,57 @@ internal constructor(
     /**
      * Top level flow that will switch based on the language and muted state.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     private fun audioGuidanceFlow(
         mapboxNavigation: MapboxNavigation
     ): Flow<MapboxAudioGuidanceState> {
-        return combine(
+        return mapboxNavigation.audioGuidanceVoice().flatMapLatest { audioGuidance ->
+            var lastPlayedInstructions: VoiceInstructions? = null
+            mutedStateFlow.flatMapLatest { isMuted ->
+                val voiceInstructions = mapboxVoiceInstructions.voiceInstructions()
+                    .map { state ->
+                        internalStateFlow.updateAndGet {
+                            MapboxAudioGuidanceState(
+                                isMuted = isMuted,
+                                isPlayable = state.isPlayable,
+                                voiceInstructions = state.voiceInstructions
+                            )
+                        }
+                    }
+
+                if (isMuted) {
+                    voiceInstructions
+                } else {
+                    voiceInstructions
+                        .filter { it.voiceInstructions != lastPlayedInstructions }
+                        .flatMapConcat {
+                            lastPlayedInstructions = it.voiceInstructions
+                            audioGuidance.speak(it.voiceInstructions)
+                        }
+                        .map { speechAnnouncement ->
+                            internalStateFlow.updateAndGet {
+                                MapboxAudioGuidanceState(
+                                    isPlayable = it.isPlayable,
+                                    isMuted = it.isMuted,
+                                    voiceInstructions = it.voiceInstructions,
+                                    speechAnnouncement = speechAnnouncement
+                                )
+                            }
+                        }
+                }
+            }
+        }
+    }
+
+    private fun MapboxNavigation.audioGuidanceVoice(): Flow<MapboxAudioGuidanceVoice> =
+        combine(
             mapboxVoiceInstructions.voiceLanguage(),
             configOwner!!.language(),
         ) { voiceLanguage, deviceLanguage -> voiceLanguage ?: deviceLanguage }
             .distinctUntilChanged()
-            .flatMapLatest { language ->
-                val audioGuidance =
-                    audioGuidanceServices.mapboxAudioGuidanceVoice(mapboxNavigation, language)
-                mutedStateFlow.flatMapLatest { isMuted ->
-                    if (isMuted) {
-                        silentFlow()
-                    } else {
-                        speechFlow(audioGuidance)
-                    }
-                }
+            .map { language ->
+                audioGuidanceServices.mapboxAudioGuidanceVoice(this, language)
             }
-    }
-
-    /**
-     * This flow will monitor navigation state to determine if audio is available.
-     */
-    private fun silentFlow(): Flow<MapboxAudioGuidanceState> {
-        return mapboxVoiceInstructions.voiceInstructions()
-            .map { state ->
-                internalStateFlow.updateAndGet {
-                    MapboxAudioGuidanceState(
-                        isMuted = true,
-                        isPlayable = state.isPlayable,
-                        voiceInstructions = state.voiceInstructions
-                    )
-                }
-            }
-    }
-
-    /**
-     * The same as the [silentFlow] except that it will speak announcements.
-     */
-    @OptIn(FlowPreview::class)
-    private fun speechFlow(
-        audioGuidance: MapboxAudioGuidanceVoice
-    ): Flow<MapboxAudioGuidanceState> {
-        return mapboxVoiceInstructions.voiceInstructions()
-            .flatMapConcat { voice ->
-                internalStateFlow.update {
-                    MapboxAudioGuidanceState(
-                        isMuted = false,
-                        isPlayable = voice.isPlayable,
-                        voiceInstructions = voice.voiceInstructions
-                    )
-                }
-                audioGuidance.speak(voice.voiceInstructions)
-            }
-            .map { speechAnnouncement ->
-                internalStateFlow.updateAndGet {
-                    MapboxAudioGuidanceState(
-                        isPlayable = it.isPlayable,
-                        isMuted = it.isMuted,
-                        voiceInstructions = it.voiceInstructions,
-                        speechAnnouncement = speechAnnouncement
-                    )
-                }
-            }
-    }
 
     private suspend fun restoreMutedState() {
         dataStoreOwner?.apply {
