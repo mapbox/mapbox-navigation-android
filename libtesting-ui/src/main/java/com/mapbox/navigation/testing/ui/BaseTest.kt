@@ -15,14 +15,9 @@ import com.mapbox.navigation.testing.ui.http.MockWebServerRule
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.Rule
+import org.junit.rules.RuleChain
 
 abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
-
-    companion object {
-        @ClassRule
-        @JvmField
-        val mockLocationUpdatesRule = MockLocationUpdatesRule()
-    }
 
     private val permissionsToGrant by lazy {
         listOf(
@@ -36,10 +31,17 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
         }
     }
 
-    @get:Rule
-    val permissionsRule: GrantPermissionRule = GrantPermissionRule.grant(
+    private val permissionsRule: GrantPermissionRule = GrantPermissionRule.grant(
         *permissionsToGrant.toTypedArray()
     )
+
+    val mockLocationUpdatesRule = MockLocationUpdatesRule()
+
+    // We should first grant permissions, then set up location
+    @get:Rule
+    val permissionsThenLocationChain = RuleChain
+        .outerRule(permissionsRule)
+        .around(mockLocationUpdatesRule)
 
     @get:Rule
     val activityRule = ActivityScenarioRule(activityClass)
