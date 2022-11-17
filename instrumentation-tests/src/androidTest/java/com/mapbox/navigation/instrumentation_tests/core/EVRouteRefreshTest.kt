@@ -17,7 +17,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -367,7 +366,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             mapboxNavigation.onEVDataUpdated(evData)
             mapboxNavigation.startTripSession()
             // corresponds to currentRouteGeometryIndex = 384
-            waitUntilStayingOnPosition(48.209765, 11.478632)
+            stayOnPosition(48.209765, 11.478632)
             mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.routeProgressUpdates().filter { progress ->
                 progress.currentRouteGeometryIndex == geometryIndex
@@ -474,7 +473,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         mapboxNavigation.startTripSession()
         // corresponds to currentRouteGeometryIndex = 774
         val geometryIndexLocation = Point.fromLngLat(11.064252, 48.391238)
-        waitUntilStayingOnPosition(
+        stayOnPosition(
             geometryIndexLocation.latitude(),
             geometryIndexLocation.longitude(),
             90f
@@ -516,11 +515,11 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
     }
 
-    private suspend fun stayOnInitialPosition() {
-        waitUntilStayingOnPosition(twoCoordinates[0].latitude(), twoCoordinates[0].longitude())
+    private fun stayOnInitialPosition() {
+        stayOnPosition(twoCoordinates[0].latitude(), twoCoordinates[0].longitude())
     }
 
-    private suspend fun waitUntilStayingOnPosition(
+    private fun stayOnPosition(
         latitude: Double,
         longitude: Double,
         bearing: Float = 190f
@@ -533,10 +532,6 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             },
             times = 120
         )
-        mapboxNavigation.flowLocationMatcherResult().filter {
-            it.enhancedLocation.latitude == latitude &&
-                it.enhancedLocation.longitude == longitude
-        }.first()
     }
 
     private fun generateRouteOptions(

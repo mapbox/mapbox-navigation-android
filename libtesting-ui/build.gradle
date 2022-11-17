@@ -27,4 +27,5 @@ dependencies {
     }
     api dependenciesList.androidXConstraintLayout
     api dependenciesList.mockwebserver
+    compileOnly dependenciesList.gmsLocation
 }

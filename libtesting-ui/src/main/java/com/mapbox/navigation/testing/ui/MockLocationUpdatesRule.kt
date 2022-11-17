@@ -2,17 +2,13 @@ package com.mapbox.navigation.testing.ui
 
 import android.content.Context
 import android.location.Location
-import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
-import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.mapbox.navigation.testing.ui.utils.executeShellCommandBlocking
 import org.junit.rules.ExternalResource
 import java.util.Date
-
-private const val mockProviderName = LocationManager.GPS_PROVIDER
 
 /**
  * Rule that sets up a mock location provider that can inject location samples
@@ -23,9 +19,7 @@ class MockLocationUpdatesRule : ExternalResource() {
     private val instrumentation = getInstrumentation()
     private val appContext = (ApplicationProvider.getApplicationContext() as Context)
 
-    private val locationManager: LocationManager by lazy {
-        (appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager)
-    }
+    private val locationMocker: LocationMocker = LocationMockerProvider.getLocationMocker(appContext)
 
     override fun before() {
         instrumentation.uiAutomation.executeShellCommandBlocking(
@@ -34,29 +28,11 @@ class MockLocationUpdatesRule : ExternalResource() {
                 " android:mock_location allow"
         )
 
-        try {
-            locationManager.addTestProvider(
-                mockProviderName,
-                false,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                3,
-                2
-            )
-        } catch (ex: Exception) {
-            // unstable
-            Log.w("MockLocationUpdatesRule", "addTestProvider failed")
-        }
-        locationManager.setTestProviderEnabled(mockProviderName, true)
+        locationMocker.before()
     }
 
     override fun after() {
-        locationManager.setTestProviderEnabled(mockProviderName, false)
-        locationManager.removeTestProvider(mockProviderName)
+        locationMocker.after()
     }
 
     /**
@@ -71,16 +47,11 @@ class MockLocationUpdatesRule : ExternalResource() {
             "MockLocationUpdatesRule is supported only on Android devices " +
                 "running version >= Build.VERSION_CODES.M"
         }
-        check(location.provider == mockProviderName) {
-            """
-              location provider "${location.provider}" is not equal to required "$mockProviderName"
-            """.trimIndent()
-        }
-        locationManager.setTestProviderLocation(mockProviderName, location)
+        locationMocker.mockLocation(location)
     }
 
     fun generateLocationUpdate(modifyFn: (Location.() -> Unit)? = null): Location {
-        val location = Location(mockProviderName)
+        val location = locationMocker.generateDefaultLocation()
         location.time = Date().time
         location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
         location.accuracy = 5f

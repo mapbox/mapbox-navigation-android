@@ -15,7 +15,6 @@ import com.mapbox.navigation.core.history.model.HistoryEvent
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
-import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.instrumentation_tests.R
@@ -306,10 +305,6 @@ class HistoryRecordingStateChangeObserverTest :
 
         mapboxNavigation.startTripSession()
         stayOnPosition(offRouteLocationUpdate.toPoint())
-        mapboxNavigation.flowLocationMatcherResult().filter {
-            it.enhancedLocation.latitude == offRouteLocationUpdate.latitude &&
-                it.enhancedLocation.longitude == offRouteLocationUpdate.longitude
-        }.first()
         mapboxNavigation.setNavigationRoutes(routes)
         assertEquals(
             listOf(
@@ -402,6 +397,7 @@ class HistoryRecordingStateChangeObserverTest :
                     ),
                     mockRoute.routeWaypoints.last()
                 ),
+                relaxedExpectedCoordinates = true
             )
         )
     }
