@@ -1,6 +1,9 @@
 package com.mapbox.navigation.qa_test_app.view.main
 
 import androidx.lifecycle.ViewModel
+import com.mapbox.navigation.qa_test_app.domain.CATEGORY_COMPONENTS
+import com.mapbox.navigation.qa_test_app.domain.CATEGORY_DROP_IN
+import com.mapbox.navigation.qa_test_app.domain.CATEGORY_NONE
 import com.mapbox.navigation.qa_test_app.domain.TestActivityDescription
 import com.mapbox.navigation.qa_test_app.domain.TestActivitySuite
 import kotlinx.coroutines.channels.BufferOverflow
@@ -19,9 +22,9 @@ class MainViewModel : ViewModel() {
     val didSelectInfoEvent: Flow<TestActivityDescription> = _didSelectInfoEvent.asSharedFlow()
 
     val pages: List<PageInfo> = listOf(
-        PageInfo("All", TestActivitySuite.CATEGORY_NONE),
-        PageInfo("Drop-In UI", TestActivitySuite.CATEGORY_DROP_IN),
-        PageInfo("Component Installer", TestActivitySuite.CATEGORY_COMPONENTS)
+        PageInfo("All", CATEGORY_NONE),
+        PageInfo("Drop-In UI", CATEGORY_DROP_IN),
+        PageInfo("Component Installer", CATEGORY_COMPONENTS)
     )
 
     fun getActivitiesList(category: String): List<TestActivityDescription> {
