@@ -23,7 +23,7 @@ internal class InfoPanelStartNavigationButtonBinder(
                 right = button.resources.getDimensionPixelSize(R.dimen.mapbox_infoPanel_paddingEnd)
             )
 
-            StartNavigationButtonComponent(context.store, context.routeOptionsProvider, button)
+            StartNavigationButtonComponent(context.store, button)
         }
     }
 }
