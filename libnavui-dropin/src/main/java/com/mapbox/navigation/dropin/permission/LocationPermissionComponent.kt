@@ -66,7 +66,7 @@ internal class LocationPermissionComponent(
         } else {
             val fragActivity = componentActivityRef.get() as? FragmentActivity
             if (fragActivity != null) {
-                PermissionsLauncherFragment.create(fragActivity, LOCATION_PERMISSIONS, callback)
+                PermissionsLauncherFragment.install(fragActivity, LOCATION_PERMISSIONS, callback)
             } else {
                 launcher?.launch(LOCATION_PERMISSIONS)
             }
@@ -99,7 +99,7 @@ internal class LocationPermissionComponent(
         super.onDetached(mapboxNavigation)
 
         (componentActivityRef.get() as? FragmentActivity)?.also {
-            PermissionsLauncherFragment.destroy(it)
+            PermissionsLauncherFragment.uninstall(it)
         }
         launcher?.unregister()
     }

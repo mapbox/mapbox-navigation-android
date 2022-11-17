@@ -22,12 +22,12 @@ internal class PermissionsLauncherFragment(
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        val areGranted = permissions.fold(false) { acc, permission ->
-            acc && checkSelfPermission(context, permission) == PERMISSION_GRANTED
+        val missingPermissions = permissions.filter { permission ->
+            checkSelfPermission(context, permission) != PERMISSION_GRANTED
         }
-        if (!areGranted) {
+        if (missingPermissions.isNotEmpty()) {
             launcher = registerForActivityResult(RequestMultiplePermissions(), onResult)
-            launcher?.launch(permissions)
+            launcher?.launch(missingPermissions.toTypedArray())
         }
     }
 
@@ -39,7 +39,7 @@ internal class PermissionsLauncherFragment(
     companion object {
         const val TAG = "MapboxPermissionsLauncherFragment"
 
-        fun create(
+        fun install(
             fragActivity: FragmentActivity,
             permissions: Array<String>,
             onResult: ActivityResultCallback<Map<String, Boolean>>
@@ -52,7 +52,7 @@ internal class PermissionsLauncherFragment(
             }
         }
 
-        fun destroy(fragActivity: FragmentActivity) {
+        fun uninstall(fragActivity: FragmentActivity) {
             if (!fragActivity.isFinishing) {
                 fragActivity.supportFragmentManager.apply {
                     findFragmentByTag(TAG)?.also {
