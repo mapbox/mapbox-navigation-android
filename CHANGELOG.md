@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Updated `MapboxAudioGuidance`, used by `NavigationView`, to avoid playback of duplicate voice instructions when un-muting. [#6608](https://github.com/mapbox/mapbox-navigation-android/pull/6608)
 
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog
