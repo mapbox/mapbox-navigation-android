@@ -118,7 +118,7 @@ class MapboxMetricsReporterTest {
             MapboxMetricsReporter.addEvent(metricEvent)
 
             assertTrue(slotEvent.isCaptured)
-            assertEquals(EventPriority.IMMEDIATE, slotEvent.captured.priority)
+            assertEquals(EventPriority.QUEUED, slotEvent.captured.priority)
             assertEquals(metricEvent.toValue(), slotEvent.captured.attributes)
             assertEquals(null, slotEvent.captured.deferredOptions)
         }

@@ -119,7 +119,7 @@ object MapboxMetricsReporter : MetricsReporter {
                 return
             }
             eventsService.sendEvent(
-                Event(EventPriority.IMMEDIATE, metricEvent.toValue(), null)
+                Event(EventPriority.QUEUED, metricEvent.toValue(), null)
             ) {
                 if (it != null) {
                     logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
