@@ -3,6 +3,8 @@ package com.mapbox.navigation.dropin.tripsession
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -12,8 +14,11 @@ import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterState
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -48,6 +53,13 @@ class TripSessionComponentTest {
         testStore = spyk(TestStore())
         testLifecycle = TestLifecycleOwner()
         sut = TripSessionComponent(testLifecycle.lifecycle, testStore)
+
+        mockkStatic(PermissionsManager::class)
+        every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
+        mockkStatic(LocationEngineProvider::class)
+        every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk {
+            every { getLastLocation(any()) } just runs
+        }
     }
 
     @After

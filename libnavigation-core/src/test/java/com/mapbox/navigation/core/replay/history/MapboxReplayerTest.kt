@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.coVerify
@@ -536,6 +537,37 @@ class MapboxReplayerTest {
             assertEquals(30, timeCapture.size)
             assertEquals(105.0, timeCapture[25].first.eventTimestamp, 0.0)
         }
+
+    @Test
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun `clearPlayedEvents should not change event playback`() = coroutineRule.runBlockingTest {
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1000.000),
+                ReplayEventGetStatus(1001.000),
+                ReplayEventGetStatus(1003.000)
+            )
+        )
+        val timeCapture = mutableListOf<Long>()
+        mapboxReplayer.registerObserver { events ->
+            if (events.isNotEmpty()) {
+                timeCapture.add(currentTime)
+                advanceTimeMillis(75)
+                mapboxReplayer.clearPlayedEvents()
+            }
+        }
+
+        mapboxReplayer.play()
+        for (i in 0..3000) {
+            advanceTimeMillis(1)
+        }
+        mapboxReplayer.finish()
+
+        assertEquals(3, timeCapture.size)
+        assertEquals(0L, timeCapture[0])
+        assertEquals(1000L, timeCapture[1])
+        assertEquals(3000L, timeCapture[2])
+    }
 
     /**
      * Helpers for moving the simulation clock

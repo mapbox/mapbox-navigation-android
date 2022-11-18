@@ -436,6 +436,7 @@ package com.mapbox.navigation.core.replay {
   @UiThread public final class MapboxReplayer {
     ctor public MapboxReplayer();
     method public void clearEvents();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void clearPlayedEvents();
     method public double durationSeconds();
     method public double eventRealtimeOffset(double eventTimestamp);
     method public double eventSeconds(double eventTimestamp);
@@ -582,6 +583,17 @@ package com.mapbox.navigation.core.replay.history {
 
 package com.mapbox.navigation.core.replay.route {
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ReplayPolylineDecodeStream implements java.util.Iterator<com.mapbox.geojson.Point> kotlin.jvm.internal.markers.KMappedMarker {
+    ctor public ReplayPolylineDecodeStream(String encodedPath, int precision);
+    method public java.util.List<com.mapbox.geojson.Point> decode(double minDistance, @com.mapbox.turf.TurfConstants.TurfUnitCriteria String units = "kilometers");
+    method public com.mapbox.geojson.Point? getCurrent();
+    method public String getEncodedPath();
+    method public boolean hasNext();
+    method public com.mapbox.geojson.Point next();
+    property public final com.mapbox.geojson.Point? current;
+    property public final String encodedPath;
+  }
+
   public final class ReplayProgressObserver implements com.mapbox.navigation.core.trip.session.RouteProgressObserver {
     ctor public ReplayProgressObserver(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer, com.mapbox.navigation.core.replay.route.ReplayRouteMapper replayRouteMapper = com.mapbox.navigation.core.replay.route.ReplayRouteMapper());
     ctor public ReplayProgressObserver(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer);
@@ -597,6 +609,7 @@ package com.mapbox.navigation.core.replay.route {
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapDirectionsRouteGeometry(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapDirectionsRouteLegAnnotation(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapGeometry(String geometry);
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapPointList(java.util.List<com.mapbox.geojson.Point> points);
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapRouteLegAnnotation(com.mapbox.api.directions.v5.models.RouteLeg routeLeg);
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapRouteLegGeometry(com.mapbox.api.directions.v5.models.RouteLeg routeLeg);
     method public static com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation mapToUpdateLocation(double eventTimestamp, com.mapbox.geojson.Point point);
@@ -636,6 +649,32 @@ package com.mapbox.navigation.core.replay.route {
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder minAcceleration(double minAcceleration);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder turnSpeedMps(double minSpeedMps);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder uTurnSpeedMps(double uTurnSpeedMps);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ReplayRouteSession implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public ReplayRouteSession();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions getOptions();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteSession setOptions(com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions options);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ReplayRouteSessionOptions {
+    method public double getDecodeMinDistance();
+    method public boolean getLocationResetEnabled();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions getReplayRouteOptions();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions.Builder toBuilder();
+    property public final double decodeMinDistance;
+    property public final boolean locationResetEnabled;
+    property public final com.mapbox.navigation.core.replay.route.ReplayRouteOptions replayRouteOptions;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class ReplayRouteSessionOptions.Builder {
+    ctor public ReplayRouteSessionOptions.Builder();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions build();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions.Builder decodeMinDistance(double decodeDistance);
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions.Builder locationResetEnabled(boolean locationResetEnabled);
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions.Builder replayRouteOptions(com.mapbox.navigation.core.replay.route.ReplayRouteOptions replayRouteOptions);
   }
 
 }
