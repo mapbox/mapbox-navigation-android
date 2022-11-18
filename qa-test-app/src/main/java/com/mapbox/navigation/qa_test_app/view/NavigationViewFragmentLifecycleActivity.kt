@@ -34,7 +34,7 @@ class NavigationViewFragmentLifecycleActivity : AppCompatActivity() {
         supportFragmentManager.commit {
             add(
                 R.id.navigationViewFragment,
-                PageNavigationFragment(FIRST_FRAGMENT_TAG),
+                PageNavigationFragment().apply { this.logTag = FIRST_FRAGMENT_TAG },
                 FIRST_FRAGMENT_TAG
             )
         }
@@ -57,9 +57,15 @@ class NavigationViewFragmentLifecycleActivity : AppCompatActivity() {
     private fun swapFragments() {
         val fragment = supportFragmentManager.findFragmentById(R.id.navigationViewFragment)
         val newFragmentPair = if (fragment?.tag == FIRST_FRAGMENT_TAG) {
-            Pair(PageNavigationFragment(SECOND_FRAGMENT_TAG), SECOND_FRAGMENT_TAG)
+            Pair(
+                PageNavigationFragment().apply { this.logTag = SECOND_FRAGMENT_TAG },
+                SECOND_FRAGMENT_TAG
+            )
         } else {
-            Pair(PageNavigationFragment(FIRST_FRAGMENT_TAG), FIRST_FRAGMENT_TAG)
+            Pair(
+                PageNavigationFragment().apply { this.logTag = FIRST_FRAGMENT_TAG },
+                FIRST_FRAGMENT_TAG
+            )
         }
         supportFragmentManager.commit {
             replace(R.id.navigationViewFragment, newFragmentPair.first, newFragmentPair.second)
@@ -69,8 +75,9 @@ class NavigationViewFragmentLifecycleActivity : AppCompatActivity() {
 }
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class PageNavigationFragment(private val logTag: String) : Fragment() {
+class PageNavigationFragment : Fragment() {
 
+    var logTag: String = ""
     var navigationView: NavigationView? = null
         private set
     private var frame: FrameLayout? = null
