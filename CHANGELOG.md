@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Updated `MapboxAudioGuidance`, used by `NavigationView`, to avoid playback of duplicate voice instructions when un-muting. [#6608](https://github.com/mapbox/mapbox-navigation-android/pull/6608)
 - Optimized rerouting: now the reroute request is interrupted if the puck returns to the route. [#6614](https://github.com/mapbox/mapbox-navigation-android/pull/6614)
 - Fixed crash in `MapboxInfoPanelHeaderArrivalLayoutBinding.java` by disabling layout transitions in `InfoPanelHeaderActiveGuidanceBinder`, `InfoPanelHeaderArrivalBinder`, `InfoPanelHeaderDestinationPreviewBinder` and `InfoPanelHeaderRoutesPreviewBinder`. [#6616](https://github.com/mapbox/mapbox-navigation-android/pull/6616)
+- Fixed location permissions request when hosting `NavigationView` in a Fragment. [#6618](https://github.com/mapbox/mapbox-navigation-android/pull/6618) 
 
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog
