@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed locations problem: sometimes the puck was matched to a wrong route edge. [#6627](https://github.com/mapbox/mapbox-navigation-android/pull/6627)
 
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog
