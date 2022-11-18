@@ -5,10 +5,25 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.10.0-beta.1 - 18 November, 2022
+### Changelog
+[Changes between v2.10.0-alpha.3 and v2.10.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-alpha.3...v2.10.0-beta.1)
+
+#### Bug fixes and improvements
 - Updated `MapboxAudioGuidance`, used by `NavigationView`, to avoid playback of duplicate voice instructions when un-muting. [#6608](https://github.com/mapbox/mapbox-navigation-android/pull/6608)
 - Optimized rerouting: now the reroute request is interrupted if the puck returns to the route. [#6614](https://github.com/mapbox/mapbox-navigation-android/pull/6614)
 - Fixed crash in `MapboxInfoPanelHeaderArrivalLayoutBinding.java` by disabling layout transitions in `InfoPanelHeaderActiveGuidanceBinder`, `InfoPanelHeaderArrivalBinder`, `InfoPanelHeaderDestinationPreviewBinder` and `InfoPanelHeaderRoutesPreviewBinder`. [#6616](https://github.com/mapbox/mapbox-navigation-android/pull/6616)
 - Fixed location permissions request when hosting `NavigationView` in a Fragment. [#6618](https://github.com/mapbox/mapbox-navigation-android/pull/6618) 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0-beta.1))
+- Mapbox Navigation Native `v121.0.0`
+- Mapbox Core Common `v23.2.0-beta.1`
+- Mapbox Java `v6.10.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.2))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog
