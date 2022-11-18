@@ -13,20 +13,21 @@ import androidx.fragment.app.FragmentActivity
 /**
  * A view-less fragment that requests permissions using [ActivityResultCaller] interface.
  */
-internal class PermissionsLauncherFragment(
-    private val permissions: Array<String>,
-    private val onResult: ActivityResultCallback<Map<String, Boolean>>
-) : Fragment() {
+internal class PermissionsLauncherFragment : Fragment() {
 
+    private var permissions: Array<String>? = null
+    private var onResult: ActivityResultCallback<Map<String, Boolean>>? = null
     private var launcher: ActivityResultLauncher<Array<String>>? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        val missingPermissions = permissions.filter { permission ->
+        val missingPermissions = permissions?.filter { permission ->
             checkSelfPermission(context, permission) != PERMISSION_GRANTED
         }
-        if (missingPermissions.isNotEmpty()) {
-            launcher = registerForActivityResult(RequestMultiplePermissions(), onResult)
+        if (!missingPermissions.isNullOrEmpty()) {
+            launcher = registerForActivityResult(RequestMultiplePermissions()) {
+                onResult?.onActivityResult(it)
+            }
             launcher?.launch(missingPermissions.toTypedArray())
         }
     }
@@ -45,9 +46,13 @@ internal class PermissionsLauncherFragment(
             onResult: ActivityResultCallback<Map<String, Boolean>>
         ) {
             fragActivity.supportFragmentManager.apply {
+                val fragment = PermissionsLauncherFragment().apply {
+                    this.permissions = permissions
+                    this.onResult = onResult
+                }
                 val t = beginTransaction()
                 findFragmentByTag(TAG)?.also { t.remove(it) }
-                t.add(PermissionsLauncherFragment(permissions, onResult), TAG)
+                t.add(fragment, TAG)
                 t.commit()
             }
         }
@@ -56,7 +61,7 @@ internal class PermissionsLauncherFragment(
             if (!fragActivity.isFinishing) {
                 fragActivity.supportFragmentManager.apply {
                     findFragmentByTag(TAG)?.also {
-                        beginTransaction().remove(it).commit()
+                        beginTransaction().remove(it).commitAllowingStateLoss()
                     }
                 }
             }
