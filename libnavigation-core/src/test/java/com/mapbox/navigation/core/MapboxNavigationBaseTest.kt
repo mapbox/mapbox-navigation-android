@@ -23,6 +23,7 @@ import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routealternatives.AllAlternativesObserversHolder
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routerefresh.EVDataHolder
@@ -87,7 +88,12 @@ internal open class MapboxNavigationBaseTest {
     val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
     val routeRefreshController: RouteRefreshController = mockk(relaxed = true)
     val evDataHolder: EVDataHolder = mockk(relaxed = true)
-    val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true)
+    val allAlternativesObserversHolder: AllAlternativesObserversHolder = mockk(relaxed = true)
+    val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true) {
+        every {
+            allAlternativesObserversHolder
+        } returns this@MapboxNavigationBaseTest.allAlternativesObserversHolder
+    }
     val routeProgress: RouteProgress = mockk(relaxed = true)
     val navigationSession: NavigationSession = mockk(relaxed = true)
     val billingController: BillingController = mockk(relaxUnitFun = true)

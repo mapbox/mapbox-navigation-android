@@ -76,6 +76,7 @@ import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
+import com.mapbox.navigation.core.routealternatives.OffboardRoutesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
@@ -1136,7 +1137,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllRoadObjectsOnRouteObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
-        routeAlternativesController.unregisterAll()
+        routeAlternativesController.clear()
         internalSetNavigationRoutes(emptyList(), SetRoutes.CleanUp)
         resetTripSession()
         navigator.unregisterAllObservers()
@@ -1607,7 +1608,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @param routeAlternativesObserver RouteAlternativesObserver
      */
     fun registerRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
-        routeAlternativesController.register(routeAlternativesObserver)
+        routeAlternativesController.allAlternativesObserversHolder
+            .register(routeAlternativesObserver)
     }
 
     /**
@@ -1616,7 +1618,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @param routeAlternativesObserver RouteAlternativesObserver
      */
     fun unregisterRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
-        routeAlternativesController.unregister(routeAlternativesObserver)
+        routeAlternativesController.allAlternativesObserversHolder
+            .unregister(routeAlternativesObserver)
     }
 
     /**
@@ -1626,7 +1629,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun registerRouteAlternativesObserver(
         routeAlternativesObserver: NavigationRouteAlternativesObserver
     ) {
-        routeAlternativesController.register(routeAlternativesObserver)
+        routeAlternativesController.allAlternativesObserversHolder
+            .register(routeAlternativesObserver)
     }
 
     /**
@@ -1635,7 +1639,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun unregisterRouteAlternativesObserver(
         routeAlternativesObserver: NavigationRouteAlternativesObserver
     ) {
-        routeAlternativesController.unregister(routeAlternativesObserver)
+        routeAlternativesController.allAlternativesObserversHolder
+            .unregister(routeAlternativesObserver)
     }
 
     /**
@@ -1670,6 +1675,29 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationRoutes: List<NavigationRoute>
     ): List<AlternativeRouteMetadata> {
         return navigationRoutes.mapNotNull { getAlternativeMetadataFor(it) }
+    }
+
+    /**
+     * Start observing incoming online routes for a trip session via [OffboardRoutesObserver].
+     * Use this method if you want to switch to online route on the fly.
+     * See [OffboardRoutesObserver.onOffboardRoutesAvailable] for more details.
+     *
+     * @param observer [OffboardRoutesObserver]
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun registerOffboardRoutesObserver(observer: OffboardRoutesObserver) {
+        routeAlternativesController.allAlternativesObserversHolder.register(observer)
+    }
+
+    /**
+     * Stop observing incoming online routes for a trip session via [OffboardRoutesObserver].
+     *
+     * @param observer [OffboardRoutesObserver]
+     */
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun unregisterOffboardRoutesObserver(observer: OffboardRoutesObserver) {
+        routeAlternativesController.allAlternativesObserversHolder.unregister(observer)
     }
 
     /**

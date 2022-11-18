@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added `MapboxNavigation#registerOffboardRoutesObserver` along with `OffboardRoutesObserver` interface to allow for keeping track of new offboard generated routes. [#6628](https://github.com/mapbox/mapbox-navigation-android/pull/6628)
 #### Bug fixes and improvements
 - Fixed crash in `PermissionsLauncherFragment` occurring on device rotation. [#6635](https://github.com/mapbox/mapbox-navigation-android/pull/6635)
 - Fixed a rare `java.lang.IllegalArgumentException: The Path cannot loop back on itself.` exception when using `NavigationLocationProvider`. [#6641](https://github.com/mapbox/mapbox-navigation-android/pull/6641)

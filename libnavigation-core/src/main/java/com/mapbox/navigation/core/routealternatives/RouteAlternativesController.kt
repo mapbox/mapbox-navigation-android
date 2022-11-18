@@ -1,32 +1,36 @@
 package com.mapbox.navigation.core.routealternatives
 
+import com.mapbox.navigation.base.internal.NavigationRouteProvider
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toDirectionsRoutes
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteIntersection
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 
 internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
     navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
-    private val threadController: ThreadController
-) {
+    private val threadController: ThreadController,
+    val allAlternativesObserversHolder: AllAlternativesObserversHolder,
+) : FirstAndLastObserverListener {
+
+    init {
+        allAlternativesObserversHolder.addFirstAndLastObserverListener(this)
+    }
 
     private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
 
@@ -45,55 +49,14 @@ internal class RouteAlternativesController constructor(
             enableOnEmptyAlternativesRequest(true)
         }
 
-    private val observers = CopyOnWriteArraySet<NavigationRouteAlternativesObserver>()
-
-    private val legacyObserversMap =
-        hashMapOf<RouteAlternativesObserver, NavigationRouteAlternativesObserver>()
-
     private val metadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
 
-    fun register(routeAlternativesObserver: RouteAlternativesObserver) {
-        val observer = object : NavigationRouteAlternativesObserver {
-            override fun onRouteAlternatives(
-                routeProgress: RouteProgress,
-                alternatives: List<NavigationRoute>,
-                routerOrigin: RouterOrigin
-            ) {
-                routeAlternativesObserver.onRouteAlternatives(
-                    routeProgress,
-                    alternatives.toDirectionsRoutes(),
-                    routerOrigin
-                )
-            }
-
-            override fun onRouteAlternativesError(error: RouteAlternativesError) {
-                logE("Error: ${error.message}", LOG_CATEGORY)
-            }
-        }
-        legacyObserversMap[routeAlternativesObserver] = observer
-        register(observer)
+    override fun onFirstObserver() {
+        nativeRouteAlternativesController.addObserver(nativeObserver)
     }
 
-    fun unregister(routeAlternativesObserver: RouteAlternativesObserver) {
-        val observer = legacyObserversMap.remove(routeAlternativesObserver)
-        if (observer != null) {
-            unregister(observer)
-        }
-    }
-
-    fun register(routeAlternativesObserver: NavigationRouteAlternativesObserver) {
-        val isStopped = observers.isEmpty()
-        observers.add(routeAlternativesObserver)
-        if (isStopped) {
-            nativeRouteAlternativesController.addObserver(nativeObserver)
-        }
-    }
-
-    fun unregister(routeAlternativesObserver: NavigationRouteAlternativesObserver) {
-        observers.remove(routeAlternativesObserver)
-        if (observers.isEmpty()) {
-            nativeRouteAlternativesController.removeObserver(nativeObserver)
-        }
+    override fun onLastObserver() {
+        nativeRouteAlternativesController.removeObserver(nativeObserver)
     }
 
     fun triggerAlternativeRequest(listener: NavigationRouteAlternativesRequestCallback?) {
@@ -135,10 +98,9 @@ internal class RouteAlternativesController constructor(
         }
     }
 
-    fun unregisterAll() {
+    fun clear() {
         nativeRouteAlternativesController.removeAllObservers()
-        observers.clear()
-        legacyObserversMap.clear()
+        allAlternativesObserversHolder.clear()
         observerProcessingJob?.cancel()
     }
 
@@ -163,24 +125,34 @@ internal class RouteAlternativesController constructor(
                             logD("skipping alternatives update - no progress", LOG_CATEGORY)
                             return@processRouteAlternatives
                         }
-
-                    observers.forEach {
-                        it.onRouteAlternatives(routeProgress, alternatives, origin)
-                    }
+                    allAlternativesObserversHolder.onRouteAlternatives(
+                        routeProgress,
+                        alternatives,
+                        origin
+                    )
                 }
         }
 
-        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) = Unit
-
-        override fun onError(message: String) {
-            observers.forEach {
-                // NN should expose origin of a failed alternatives request and the used URL,
-                // refs https://github.com/mapbox/mapbox-navigation-native/issues/5401
-                // and https://github.com/mapbox/mapbox-navigation-native/issues/5402
-                it.onRouteAlternativesError(
-                    RouteAlternativesError(message = message)
+        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) {
+            logI("onOnlinePrimaryRouteAvailable: route ${onlinePrimaryRoute.routeId}", LOG_CATEGORY)
+            val navigationRoute = NavigationRouteProvider.createSingleRoute(onlinePrimaryRoute)
+            if (navigationRoute != null) {
+                allAlternativesObserversHolder.onOffboardRoutesAvailable(listOf(navigationRoute))
+            } else {
+                logW(
+                    "Could not parse native online route ${onlinePrimaryRoute.routeId}",
+                    LOG_CATEGORY
                 )
             }
+        }
+
+        override fun onError(message: String) {
+            // NN should expose origin of a failed alternatives request and the used URL,
+            // refs https://github.com/mapbox/mapbox-navigation-native/issues/5401
+            // and https://github.com/mapbox/mapbox-navigation-native/issues/5402
+            allAlternativesObserversHolder.onRouteAlternativesError(
+                RouteAlternativesError(message = message)
+            )
         }
     }
 
@@ -235,8 +207,8 @@ internal class RouteAlternativesController constructor(
         }
     }
 
-    private companion object {
-        private const val LOG_CATEGORY = "RouteAlternativesController"
+    internal companion object {
+        internal const val LOG_CATEGORY = "RouteAlternativesController"
     }
 }
 

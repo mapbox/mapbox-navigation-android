@@ -98,6 +98,27 @@ object RoutesProvider {
         )
     }
 
+    fun route_response_alternative_start(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.route_response_alternative_start)
+        val coordinates = listOf(
+            Point.fromLngLat(-122.2750659, 37.8052036),
+            Point.fromLngLat(-122.2647245, 37.8138895)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+            emptyList()
+        )
+    }
+
     fun dc_very_short_two_legs(context: Context): MockRoute {
         val jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short_two_legs)
         val coordinates = listOf(
@@ -145,7 +166,8 @@ object RoutesProvider {
     }
 
     fun MockRoute.toNavigationRoutes(
-        routeOptionsBlock: RouteOptions.Builder.() -> RouteOptions.Builder = { this }
+        routeOptionsBlock: RouteOptions.Builder.() -> RouteOptions.Builder = { this },
+        routerOrigin: RouterOrigin = RouterOrigin.Custom()
     ) : List<NavigationRoute> {
         return NavigationRoute.create(
             this.routeResponse,
@@ -154,7 +176,7 @@ object RoutesProvider {
                 .coordinatesList(this.routeWaypoints)
                 .routeOptionsBlock()
                 .build(),
-            RouterOrigin.Custom()
+            routerOrigin
         )
     }
 

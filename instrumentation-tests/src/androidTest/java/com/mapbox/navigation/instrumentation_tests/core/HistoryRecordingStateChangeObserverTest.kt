@@ -249,9 +249,9 @@ class HistoryRecordingStateChangeObserverTest :
                 .navigatorPredictionMillis(0L)
                 .build()
         )
-        val routes = mockRoute.toNavigationRoutes {
-            baseUrl(mockWebServerRule.baseUrl)
-        }
+        val routes = mockRoute.toNavigationRoutes(
+            { baseUrl(mockWebServerRule.baseUrl) }
+        )
 
         val eventsChannel = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
         observeHistoryRecordingEvents(eventsChannel)
@@ -293,9 +293,9 @@ class HistoryRecordingStateChangeObserverTest :
     @Test
     fun history_recording_observer_reroute() = sdkTest {
         val mockRoute = RoutesProvider.dc_very_short(activity)
-        val routes = mockRoute.toNavigationRoutes {
-            baseUrl(mockWebServerRule.baseUrl)
-        }
+        val routes = mockRoute.toNavigationRoutes(
+            { baseUrl(mockWebServerRule.baseUrl) }
+        )
         val offRouteLocationUpdate = getOffRouteLocation(mockRoute.routeWaypoints.first())
         setUpMockRequestHandlersForReroute(mockRoute, offRouteLocationUpdate)
 

@@ -50,6 +50,7 @@ package com.mapbox.navigation.core {
     method public void registerNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);
     method public void registerNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerOffboardRoutesObserver(com.mapbox.navigation.core.routealternatives.OffboardRoutesObserver observer);
     method public void registerRoadObjectsOnRouteObserver(com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver roadObjectsOnRouteObserver);
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver routeAlternativesObserver);
@@ -92,6 +93,7 @@ package com.mapbox.navigation.core {
     method public void unregisterNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);
     method public void unregisterNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterOffboardRoutesObserver(com.mapbox.navigation.core.routealternatives.OffboardRoutesObserver observer);
     method public void unregisterRoadObjectsOnRouteObserver(com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver roadObjectsOnRouteObserver);
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver routeAlternativesObserver);
@@ -760,6 +762,10 @@ package com.mapbox.navigation.core.routealternatives {
   public interface NavigationRouteAlternativesRequestCallback {
     method public void onRouteAlternativeRequestFinished(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> alternatives, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onRouteAlternativesRequestError(com.mapbox.navigation.core.routealternatives.RouteAlternativesError error);
+  }
+
+  public fun interface OffboardRoutesObserver {
+    method public void onOffboardRoutesAvailable(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
   }
 
   public final class RouteAlternativesControllerKt {

@@ -6,8 +6,10 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -15,10 +17,13 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.OffboardRoutesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
@@ -26,10 +31,13 @@ import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteAlternative
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.channels.Channel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -38,6 +46,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.net.URI
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -58,8 +67,8 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private val coordinates = listOf(
-        Point.fromLngLat(-122.2750659, 37.8052036),
-        Point.fromLngLat(-122.2647245, 37.8138895)
+        Point.fromLngLat(-122.275113, 37.805222),
+        Point.fromLngLat(-122.264756, 37.813895),
     )
 
     private companion object {
@@ -81,6 +90,11 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
                 NavigationOptions.Builder(activity)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
                     .routeAlternativesOptions(routeAlternativesOptions)
+                    .routingTilesOptions(
+                        RoutingTilesOptions.Builder()
+                            .tilesBaseUri(URI(mockWebServerRule.baseUrl))
+                            .build()
+                    )
                     .build()
             )
             mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
@@ -300,6 +314,26 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun offboardRoutesObserver() = sdkTest {
+        setupMockRequestHandlers(coordinates)
+        val onboardRoutes = RoutesProvider.route_response_alternative_start(activity)
+            .toNavigationRoutes(routerOrigin = RouterOrigin.Onboard)
+
+        val offboardRoutesChannel = Channel<List<NavigationRoute>>(Channel.UNLIMITED)
+        val observer = OffboardRoutesObserver {
+            offboardRoutesChannel.trySend(it)
+        }
+        mapboxNavigation.registerOffboardRoutesObserver(observer)
+
+        mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(onboardRoutes)
+        mapboxNavigation.requestAlternativeRoutes()
+        assertEquals(1, offboardRoutesChannel.receive().size)
+    }
+
     private fun setupMockRequestHandlers(coordinates: List<Point>) {
         // Nav-native requests alternate routes, so we are only
         // ensuring the initial route has alternatives.
@@ -307,7 +341,8 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(activity, R.raw.route_response_alternative_start),
-                coordinates
+                coordinates,
+                relaxedExpectedCoordinates = true
             )
         )
     }
@@ -320,5 +355,15 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
             .build()
         val routeRequestIdlingResource = RouteRequestIdlingResource(mapboxNavigation, routeOptions)
         return routeRequestIdlingResource.requestRoutesSync()
+    }
+
+    private fun stayOnInitialPosition() {
+        mockLocationReplayerRule.loopUpdate(
+            mockLocationUpdatesRule.generateLocationUpdate {
+                this.latitude = coordinates[0].latitude()
+                this.longitude = coordinates[0].longitude()
+            },
+            times = 120
+        )
     }
 }

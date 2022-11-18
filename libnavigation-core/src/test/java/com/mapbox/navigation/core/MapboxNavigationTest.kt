@@ -25,6 +25,9 @@ import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.OffboardRoutesObserver
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.routerefresh.RefreshedRouteInfo
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -1791,6 +1794,89 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coVerifyOrder {
             tripSession.setRoutes(routes, any())
             routesPreviewController.previewNavigationRoutes(emptyList())
+        }
+    }
+
+    @Test
+    fun `registerRouteAlternativesObserver legacy`() {
+        val observer = mockk<RouteAlternativesObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.registerRouteAlternativesObserver(observer)
+
+        verify(exactly = 1) {
+            allAlternativesObserversHolder.register(observer)
+        }
+    }
+
+    @Test
+    fun `unregisterRouteAlternativesObserver legacy`() {
+        val observer = mockk<RouteAlternativesObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.unregisterRouteAlternativesObserver(observer)
+
+        verify(exactly = 1) {
+            allAlternativesObserversHolder.unregister(observer)
+        }
+    }
+
+    @Test
+    fun registerRouteAlternativesObserver() {
+        val observer = mockk<NavigationRouteAlternativesObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.registerRouteAlternativesObserver(observer)
+
+        verify(exactly = 1) {
+            allAlternativesObserversHolder.register(observer)
+        }
+    }
+
+    @Test
+    fun unregisterRouteAlternativesObserver() {
+        val observer = mockk<NavigationRouteAlternativesObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.unregisterRouteAlternativesObserver(observer)
+
+        verify(exactly = 1) {
+            allAlternativesObserversHolder.unregister(observer)
+        }
+    }
+
+    @Test
+    fun registerOffboardRoutesObserver() {
+        val observer = mockk<OffboardRoutesObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.registerOffboardRoutesObserver(observer)
+
+        verify(exactly = 1) {
+            allAlternativesObserversHolder.register(observer)
+        }
+    }
+
+    @Test
+    fun unregisterOffboardRoutesObserver() {
+        val observer = mockk<OffboardRoutesObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.unregisterOffboardRoutesObserver(observer)
+
+        verify(exactly = 1) {
+            allAlternativesObserversHolder.unregister(observer)
+        }
+    }
+
+    @Test
+    fun `onDestroy clears alternative observers`() {
+        createMapboxNavigation()
+
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) {
+            routeAlternativesController.clear()
         }
     }
 }
