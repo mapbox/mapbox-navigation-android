@@ -609,13 +609,13 @@ jobs:
           steps:
             - read-workspace
             - verify-codestyle
-            - run-android-lint
             - verify-license
             - verify-common-sdk-version
             - check-api-core
             - check-api-ui
             - check-api-androidauto
             - check-public-documentation
+            - run-android-lint
       - run: exit 0
 
   publish-documentation:
