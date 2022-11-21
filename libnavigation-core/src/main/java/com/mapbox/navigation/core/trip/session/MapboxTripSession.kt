@@ -14,11 +14,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
-import com.mapbox.navigation.core.BasicSetRoutesInfo
-import com.mapbox.navigation.core.SetAlternativeRoutesInfo
-import com.mapbox.navigation.core.SetRefreshedRoutesInfo
-import com.mapbox.navigation.core.SetRoutesInfo
-import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.internal.utils.initialLegIndex
 import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
@@ -79,26 +76,43 @@ internal class MapboxTripSession(
 
     override suspend fun setRoutes(
         routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutesInfo,
+        setRoutes: SetRoutes,
     ): NativeSetRouteResult {
-        logD(
-            "routes update (reason: ${setRoutesInfo.reason}, " +
-                "route IDs: ${routes.map { it.id }}) - starting",
-            LOG_CATEGORY
-        )
-        val result = when (setRoutesInfo) {
-            is BasicSetRoutesInfo -> {
-                isUpdatingRoute = true
-                setRouteToNativeNavigator(routes, setRoutesInfo)
-                    .also { isUpdatingRoute = false }
+        fun logMessage(suffix: String): () -> String = {
+            "routes update (reason: ${setRoutes::class.java.simpleName}, " +
+                "route IDs: ${routes.map { it.id }}) $suffix"
+        }
+        logD(LOG_CATEGORY, logMessage("- starting"))
+
+        val result = when (setRoutes) {
+            is SetRoutes.CleanUp -> {
+                setRouteToNativeNavigator(
+                    routes,
+                    setRoutes.initialLegIndex(),
+                    SetRoutesReason.CLEAN_UP
+                )
             }
-            is SetAlternativeRoutesInfo -> {
+            is SetRoutes.NewRoutes -> {
+                setRouteToNativeNavigator(
+                    routes,
+                    setRoutes.initialLegIndex(),
+                    SetRoutesReason.NEW_ROUTE
+                )
+            }
+            is SetRoutes.Reroute -> {
+                setRouteToNativeNavigator(
+                    routes,
+                    setRoutes.initialLegIndex(),
+                    SetRoutesReason.REROUTE
+                )
+            }
+            is SetRoutes.Alternatives -> {
                 NativeSetRouteValue(
                     routes = routes,
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
                 )
             }
-            is SetRefreshedRoutesInfo -> {
+            is SetRoutes.RefreshRoutes -> {
                 if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()
                     lateinit var refreshRouteResult: Expected<String, List<RouteAlternative>>
@@ -141,28 +155,25 @@ internal class MapboxTripSession(
                 }
             }
         }
-        logD(
-            "routes update (reason: ${setRoutesInfo.reason}, " +
-                "route IDs: ${routes.map { it.id }}) - finished",
-            LOG_CATEGORY
-        )
+        logD(LOG_CATEGORY, logMessage("- finished"))
         return result
     }
 
     private suspend fun setRouteToNativeNavigator(
         routes: List<NavigationRoute>,
-        setRoutesInfo: BasicSetRoutesInfo,
-    ): NativeSetRouteResult {
+        legIndex: Int,
+        reason: SetRoutesReason,
+    ): NativeSetRouteResult = updateRouteTransaction {
         logD(
             "native routes update (route IDs: ${routes.map { it.id }}) - starting",
             LOG_CATEGORY
         )
         val newPrimaryRoute = routes.firstOrNull()
-        return navigator.setRoutes(
+        return@updateRouteTransaction navigator.setRoutes(
             newPrimaryRoute,
-            setRoutesInfo.legIndex,
-            setRoutesInfo.toSetRoutesReason(),
-            routes.drop(1)
+            legIndex,
+            routes.drop(1),
+            reason,
         ).onValue {
             updateLegIndexJob?.cancel()
             this@MapboxTripSession.primaryRoute = newPrimaryRoute
@@ -709,12 +720,10 @@ internal class MapboxTripSession(
         }
     }
 
-    private fun BasicSetRoutesInfo.toSetRoutesReason(): SetRoutesReason {
-        return when (this.reason) {
-            RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP -> SetRoutesReason.CLEAN_UP
-            RoutesExtra.ROUTES_UPDATE_REASON_NEW -> SetRoutesReason.NEW_ROUTE
-            RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> SetRoutesReason.REROUTE
-            else -> throw IllegalArgumentException("Invalid routes update reason: $this")
+    private inline fun <T> updateRouteTransaction(func: () -> T): T {
+        isUpdatingRoute = true
+        return func().also {
+            isUpdatingRoute = false
         }
     }
 }

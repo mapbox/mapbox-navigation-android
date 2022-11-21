@@ -13,11 +13,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
-import com.mapbox.navigation.core.BasicSetRoutesInfo
 import com.mapbox.navigation.core.RouteProgressData
-import com.mapbox.navigation.core.SetAlternativeRoutesInfo
-import com.mapbox.navigation.core.SetRefreshedRoutesInfo
-import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
@@ -116,7 +113,7 @@ class MapboxTripSessionTest {
         geometryIndex,
         66
     )
-    private val setRoutesInfo = BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, legIndex)
+    private val setRoutesInfo = SetRoutes.NewRoutes(legIndex)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private lateinit var navigationOptions: NavigationOptions
@@ -158,7 +155,7 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
 
         coEvery { navigator.updateLocation(any()) } returns false
-        coEvery { navigator.setRoutes(any(), any(), any()) } returns createSetRouteResult()
+        coEvery { navigator.setRoutes(any(), any(), any(), any()) } returns createSetRouteResult()
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
         coEvery {
             navigator.refreshRoute(any())
@@ -281,7 +278,7 @@ class MapboxTripSessionTest {
         tripSession.start(true)
         tripSession.setRoutes(
             emptyList(),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+            SetRoutes.CleanUp
         )
         tripSession.stop()
 
@@ -412,7 +409,7 @@ class MapboxTripSessionTest {
             updateLocationAndJoin()
             tripSession.setRoutes(
                 emptyList(),
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+                SetRoutes.CleanUp
             )
             val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
             tripSession.registerRouteProgressObserver(observer)
@@ -499,7 +496,7 @@ class MapboxTripSessionTest {
 
         tripSession.setRoutes(
             routes,
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_REROUTE, 2)
+            SetRoutes.Reroute
         )
 
         parentJob.cancelAndJoin()
@@ -528,12 +525,12 @@ class MapboxTripSessionTest {
 
         tripSession.setRoutes(
             emptyList(),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+            SetRoutes.CleanUp
         )
 
         parentJob.cancelAndJoin()
-        verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(false) }
-        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(true) }
+//        verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(false) }
+//        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(true) }
         verifyOrder {
             offRouteObserver.onOffRouteStateChanged(false)
             offRouteObserver.onOffRouteStateChanged(true)
@@ -582,8 +579,8 @@ class MapboxTripSessionTest {
             navigator.setRoutes(
                 routes.first(),
                 setRoutesInfo.legIndex,
+                listOf(alternative),
                 SetRoutesReason.NEW_ROUTE,
-                listOf(alternative)
             )
         }
     }
@@ -618,13 +615,13 @@ class MapboxTripSessionTest {
     fun setRoute_nullable() = coroutineRule.runBlockingTest {
         tripSession.setRoutes(
             emptyList(),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+            SetRoutes.CleanUp
         )
 
         coVerify(exactly = 1) {
             navigator.setRoutes(
                 null,
-                setRoutesReason = SetRoutesReason.CLEAN_UP,
+                reason = SetRoutesReason.CLEAN_UP,
             )
         }
     }
@@ -644,7 +641,7 @@ class MapboxTripSessionTest {
 
             tripSession.setRoutes(
                 refreshedRoutes,
-                SetRefreshedRoutesInfo(RouteProgressData(0, 0, null))
+                SetRoutes.RefreshRoutes(RouteProgressData(0, 0, null))
             )
 
             refreshedRoutes.forEach {
@@ -653,7 +650,7 @@ class MapboxTripSessionTest {
             coVerify(exactly = 0) {
                 navigator.setRoutes(
                     any(),
-                    setRoutesReason = SetRoutesReason.NEW_ROUTE,
+                    reason = SetRoutesReason.NEW_ROUTE,
                 )
             }
             coVerify(exactly = 0) { navigator.setAlternativeRoutes(any()) }
@@ -669,11 +666,11 @@ class MapboxTripSessionTest {
             }
             tripSession.setRoutes(
                 routes + alternative,
-                SetAlternativeRoutesInfo(2)
+                SetRoutes.Alternatives(2)
             )
 
             coVerify(exactly = 0) {
-                navigator.setRoutes(routes.first(), 2, any())
+                navigator.setRoutes(routes.first(), 2, any(), any())
             }
             coVerify(exactly = 0) { navigator.refreshRoute(any()) }
         }
@@ -692,7 +689,7 @@ class MapboxTripSessionTest {
             } returns nativeAlternatives
             val result = tripSession.setRoutes(
                 routes + alternative,
-                SetAlternativeRoutesInfo(2)
+                SetRoutes.Alternatives(2)
             )
 
             assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
@@ -709,11 +706,11 @@ class MapboxTripSessionTest {
             }
             val nativeAlternatives = listOf(mockk<RouteAlternative>())
             coEvery {
-                navigator.setRoutes(any(), any(), any(), listOf(alternative))
+                navigator.setRoutes(any(), any(), listOf(alternative), any())
             } returns createSetRouteResult(nativeAlternatives)
             val result = tripSession.setRoutes(
                 routes + alternative,
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, legIndex)
+                SetRoutes.NewRoutes(legIndex)
             )
 
             assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
@@ -730,7 +727,7 @@ class MapboxTripSessionTest {
             } returns emptyList()
             val result = tripSession.setRoutes(
                 emptyList(),
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, legIndex)
+                SetRoutes.CleanUp
             )
 
             assertTrue((result as NativeSetRouteValue).nativeAlternatives.isEmpty())
@@ -747,11 +744,11 @@ class MapboxTripSessionTest {
             }
             val nativeAlternatives = listOf(mockk<RouteAlternative>())
             coEvery {
-                navigator.setRoutes(any(), any(), any(), eq(listOf(alternative)))
+                navigator.setRoutes(any(), any(), eq(listOf(alternative)), any())
             } returns createSetRouteResult(nativeAlternatives = nativeAlternatives)
             val result = tripSession.setRoutes(
                 routes + alternative,
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_REROUTE, legIndex)
+                SetRoutes.Reroute
             )
 
             assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
@@ -785,7 +782,7 @@ class MapboxTripSessionTest {
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 refreshedRoutes,
-                SetRefreshedRoutesInfo(routeProgressData),
+                SetRoutes.RefreshRoutes(routeProgressData),
             )
 
             assertEquals(
@@ -826,7 +823,7 @@ class MapboxTripSessionTest {
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 refreshedRoutes,
-                SetRefreshedRoutesInfo(routeProgressData),
+                SetRoutes.RefreshRoutes(routeProgressData),
             )
 
             assertEquals(
@@ -851,7 +848,7 @@ class MapboxTripSessionTest {
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 routes,
-                SetRefreshedRoutesInfo(routeProgressData),
+                SetRoutes.RefreshRoutes(routeProgressData),
             )
 
             assertEquals(error, (result as NativeSetRouteError).error)
@@ -1031,7 +1028,7 @@ class MapboxTripSessionTest {
         tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
         tripSession.setRoutes(
             listOf(navigationRoute),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
 
         verify(exactly = 1) { roadObjectsObserver.onNewRoadObjectsOnTheRoute(roadObjects) }
@@ -1053,11 +1050,11 @@ class MapboxTripSessionTest {
             tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
             tripSession.setRoutes(
                 listOf(initialRoute),
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             tripSession.setRoutes(
                 listOf(refreshedRoute),
-                SetRefreshedRoutesInfo(RouteProgressData(0, 0, null)),
+                SetRoutes.RefreshRoutes(RouteProgressData(0, 0, null)),
             )
 
             verifyOrder {
@@ -1076,12 +1073,12 @@ class MapboxTripSessionTest {
             tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
             tripSession.setRoutes(
                 listOf(mockNavigationRoute(roadObjects)),
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             tripSession.unregisterRoadObjectsOnRouteObserver(roadObjectsObserver)
             tripSession.setRoutes(
                 listOf(mockNavigationRoute(roadObjects)),
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
 
             verify(exactly = 1) { roadObjectsObserver.onNewRoadObjectsOnTheRoute(roadObjects) }
@@ -1095,7 +1092,7 @@ class MapboxTripSessionTest {
 
         tripSession.setRoutes(
             listOf(mockNavigationRoute(roadObjects)),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
 
@@ -1109,12 +1106,12 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
         tripSession.setRoutes(
             listOf(mockNavigationRoute(roadObjects)),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
         tripSession.setRoutes(
             emptyList(),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, 0)
+            SetRoutes.CleanUp
         )
 
         verifySequence {
@@ -1143,12 +1140,12 @@ class MapboxTripSessionTest {
         tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
         tripSession.setRoutes(
             listOf(mockNavigationRoute(roadObjects)),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         tripSession.unregisterAllRoadObjectsOnRouteObservers()
         tripSession.setRoutes(
             listOf(mockNavigationRoute(roadObjects)),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
 
         verify(exactly = 1) { roadObjectsObserver.onNewRoadObjectsOnTheRoute(roadObjects) }
@@ -1268,7 +1265,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun `local route reference updated after route set`() = coroutineRule.runBlockingTest {
-        coEvery { navigator.setRoutes(any(), any(), any()) } coAnswers {
+        coEvery { navigator.setRoutes(any(), any(), any(), any()) } coAnswers {
             delay(100)
             createSetRouteResult()
         }
@@ -1292,7 +1289,7 @@ class MapboxTripSessionTest {
 
         tripSession.setRoutes(
             emptyList(),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, legIndex)
+            SetRoutes.CleanUp
         )
 
         assertNull(tripSession.primaryRoute)
@@ -1300,7 +1297,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun `offRoute state is reset when setRoute is called`() = coroutineRule.runBlockingTest {
-        coEvery { navigator.setRoutes(any(), setRoutesReason = any()) } coAnswers {
+        coEvery { navigator.setRoutes(any(), reason = any()) } coAnswers {
             delay(100)
             createSetRouteResult()
         }
@@ -1333,7 +1330,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun `routeProgress is reset when setRoute is called`() = coroutineRule.runBlockingTest {
-        coEvery { navigator.setRoutes(any(), setRoutesReason = any()) } coAnswers {
+        coEvery { navigator.setRoutes(any(), reason = any()) } coAnswers {
             delay(100)
             createSetRouteResult()
         }
@@ -1367,7 +1364,7 @@ class MapboxTripSessionTest {
             setRoutesInfo
         )
         coEvery {
-            navigator.setRoutes(any(), setRoutesReason = any())
+            navigator.setRoutes(any(), reason = any())
         } coAnswers {
             delay(100)
             createSetRouteResult()
@@ -1375,7 +1372,7 @@ class MapboxTripSessionTest {
         pauseDispatcher {
             tripSession.setRoutes(
                 listOf(),
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+                SetRoutes.CleanUp
             )
             val alertsSlot = mutableListOf<List<UpcomingRoadObject>>()
             verify(exactly = 3) {
@@ -1391,7 +1388,7 @@ class MapboxTripSessionTest {
     fun `routeProgress updates ignored while primary route is being set`() = coroutineRule.runBlockingTest {
         val primary = mockNavigationRoute()
         val alternative = mockNavigationRoute()
-        coEvery { navigator.setRoutes(primary, legIndex, any(), listOf(alternative)) } coAnswers {
+        coEvery { navigator.setRoutes(primary, legIndex, listOf(alternative), any()) } coAnswers {
             delay(100)
             createSetRouteResult()
         }
@@ -1415,54 +1412,62 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `routeProgress updates not ignored while only alternative route is being set`() = coroutineRule.runBlockingTest {
-        val primary = mockNavigationRoute()
-        val alternative = mockNavigationRoute()
-        coEvery { navigator.setAlternativeRoutes(listOf(alternative)) } coAnswers {
-            delay(100)
-            emptyList()
+    fun `routeProgress updates not ignored while only alternative route is being set`() =
+        coroutineRule.runBlockingTest {
+            val primary = mockNavigationRoute()
+            val alternative = mockNavigationRoute()
+            coEvery { navigator.setAlternativeRoutes(listOf(alternative)) } coAnswers {
+                delay(100)
+                emptyList()
+            }
+
+            val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
+
+            val tripSession = buildTripSession()
+            tripSession.registerRouteProgressObserver(observer)
+            tripSession.start(withTripService = true)
+
+            pauseDispatcher {
+                val setRoutesInfo = SetRoutes.Alternatives(legIndex)
+                launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
+                runCurrent()
+                advanceTimeBy(delayTimeMillis = 50)
+                navigatorObserverImplSlot.captured.onStatus(
+                    navigationStatusOrigin,
+                    navigationStatus
+                )
+                verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
+            }
         }
-
-        val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
-
-        val tripSession = buildTripSession()
-        tripSession.registerRouteProgressObserver(observer)
-        tripSession.start(withTripService = true)
-
-        pauseDispatcher {
-            val setRoutesInfo = SetAlternativeRoutesInfo(legIndex)
-            launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
-            runCurrent()
-            advanceTimeBy(delayTimeMillis = 50)
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-            verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
-        }
-    }
 
     @Test
-    fun `routeProgress updates not ignored while primary route is being refreshed`() = coroutineRule.runBlockingTest {
-        val primary = mockNavigationRoute()
-        val alternative = mockNavigationRoute()
-        coEvery { navigator.refreshRoute(primary) } coAnswers {
-            delay(100)
-            ExpectedFactory.createValue(emptyList())
+    fun `routeProgress updates not ignored while primary route is being refreshed`() =
+        coroutineRule.runBlockingTest {
+            val primary = mockNavigationRoute()
+            val alternative = mockNavigationRoute()
+            coEvery { navigator.refreshRoute(primary) } coAnswers {
+                delay(100)
+                ExpectedFactory.createValue(emptyList())
+            }
+
+            val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
+
+            val tripSession = buildTripSession()
+            tripSession.registerRouteProgressObserver(observer)
+            tripSession.start(withTripService = true)
+
+            pauseDispatcher {
+                val setRoutesInfo = SetRoutes.RefreshRoutes(routeProgressData)
+                launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
+                runCurrent()
+                advanceTimeBy(delayTimeMillis = 50)
+                navigatorObserverImplSlot.captured.onStatus(
+                    navigationStatusOrigin,
+                    navigationStatus
+                )
+                verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
+            }
         }
-
-        val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
-
-        val tripSession = buildTripSession()
-        tripSession.registerRouteProgressObserver(observer)
-        tripSession.start(withTripService = true)
-
-        pauseDispatcher {
-            val setRoutesInfo = SetRefreshedRoutesInfo(routeProgressData)
-            launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
-            runCurrent()
-            advanceTimeBy(delayTimeMillis = 50)
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-            verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
-        }
-    }
 
     @Test
     fun `enhancedLocation, locationMatcherResult, zLevel are updating while setting a route, routeProgress, bannerInstructions and offRoute state are skipped`() =
@@ -1578,7 +1583,7 @@ class MapboxTripSessionTest {
     @Test
     fun `updateLegIndexJob is cancelled and callback is fired when setRoute succeeds`() =
         coroutineRule.runBlockingTest {
-            coEvery { navigator.setRoutes(any(), setRoutesReason = any()) } coAnswers {
+            coEvery { navigator.setRoutes(any(), reason = any()) } coAnswers {
                 delay(50)
                 createSetRouteResult()
             }
@@ -1601,7 +1606,7 @@ class MapboxTripSessionTest {
                 launch {
                     tripSession.setRoutes(
                         routes,
-                        BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, legIndex)
+                        SetRoutes.NewRoutes(legIndex)
                     )
                 }
                 advanceTimeBy(75)
@@ -1615,7 +1620,7 @@ class MapboxTripSessionTest {
     @Test
     fun `updateLegIndexJob isn't cancelled and callback is fired when setRoute fails`() =
         coroutineRule.runBlockingTest {
-            coEvery { navigator.setRoutes(any(), any(), any()) } coAnswers {
+            coEvery { navigator.setRoutes(any(), any(), any(), any()) } coAnswers {
                 delay(50)
                 createSetRouteError()
             }
@@ -1637,7 +1642,7 @@ class MapboxTripSessionTest {
                 launch {
                     tripSession.setRoutes(
                         routes,
-                        BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, legIndex)
+                        SetRoutes.NewRoutes(legIndex)
                     )
                 }
                 advanceTimeBy(75)

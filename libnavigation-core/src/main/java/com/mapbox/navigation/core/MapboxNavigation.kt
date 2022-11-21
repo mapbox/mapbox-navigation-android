@@ -839,13 +839,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         // Telemetry uses this field to determine what type of event should be triggered.
         val setRoutesInfo = when {
-            routes.isEmpty() -> BasicSetRoutesInfo(
-                RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
-                initialLegIndex
-            )
+            routes.isEmpty() -> SetRoutes.CleanUp
             routes.first() == directionsSession.routes.firstOrNull() ->
-                SetAlternativeRoutesInfo(initialLegIndex)
-            else -> BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                SetRoutes.Alternatives(initialLegIndex)
+            else -> SetRoutes.NewRoutes(initialLegIndex)
         }
         internalSetNavigationRoutes(
             routes,
@@ -952,7 +949,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutesInfo,
+        setRoutesInfo: SetRoutes,
         callback: RoutesSetCallback? = null,
     ) {
         rerouteController?.interrupt()
@@ -1000,10 +997,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeUpdateMutex.withLock {
                 val routes = directionsSession.routes
                 val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
-                setRoutesToTripSession(
-                    routes,
-                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, legIndex)
-                )
+                setRoutesToTripSession(routes, SetRoutes.NewRoutes(legIndex))
             }
         }
     }
@@ -1014,7 +1008,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     private suspend fun setRoutesToTripSession(
         routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutesInfo,
+        setRoutesInfo: SetRoutes,
     ): NativeSetRouteResult {
         return tripSession.setRoutes(routes, setRoutesInfo).apply {
             if (this is NativeSetRouteValue) {
@@ -1118,10 +1112,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
-        internalSetNavigationRoutes(
-            emptyList(),
-            BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
-        )
+        internalSetNavigationRoutes(emptyList(), SetRoutes.CleanUp)
         resetTripSession()
         navigator.unregisterAllObservers()
         navigationVersionSwitchObservers.clear()
@@ -1822,7 +1813,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 )
                 internalSetNavigationRoutes(
                     refreshed.routes,
-                    SetRefreshedRoutesInfo(refreshed.routeProgressData),
+                    SetRoutes.RefreshRoutes(refreshed.routeProgressData),
                 )
             }
         }
@@ -1898,8 +1889,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 navigator.setRoutes(
                     primaryRoute = routes[0],
                     startingLeg = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0,
-                    setRoutesReason = SetRoutesReason.NEW_ROUTE,
-                    alternatives = routes.drop(1)
+                    alternatives = routes.drop(1),
+                    when (isFallback) {
+                        true -> SetRoutesReason.FALLBACK_TO_OFFLINE
+                        false -> SetRoutesReason.RESTORE_TO_ONLINE
+                    }
                 )
             }
         }
@@ -1909,7 +1903,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         rerouteController?.reroute { routes, _ ->
             internalSetNavigationRoutes(
                 routes,
-                BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
+                SetRoutes.Reroute
             )
         }
     }

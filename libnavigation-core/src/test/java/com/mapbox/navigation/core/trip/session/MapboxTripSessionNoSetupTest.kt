@@ -10,8 +10,7 @@ import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
-import com.mapbox.navigation.core.BasicSetRoutesInfo
-import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_NEW
+import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.infra.TestLocationEngine
 import com.mapbox.navigation.core.infra.recorders.BannerInstructionsObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.OffRouteObserverRecorder
@@ -96,7 +95,7 @@ class MapboxTripSessionNoSetupTest {
         tripSession.registerRouteProgressObserver(routeProgressObserver)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         // act
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
@@ -128,7 +127,7 @@ class MapboxTripSessionNoSetupTest {
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         val routeProgressObserver = RouteProgressObserverRecorder()
@@ -162,13 +161,13 @@ class MapboxTripSessionNoSetupTest {
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         locationEngine.updateLocation(
             createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
@@ -197,7 +196,7 @@ class MapboxTripSessionNoSetupTest {
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
@@ -229,7 +228,7 @@ class MapboxTripSessionNoSetupTest {
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+            SetRoutes.NewRoutes(0)
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
@@ -263,7 +262,7 @@ class MapboxTripSessionNoSetupTest {
             tripSession.start(true)
             tripSession.setRoutes(
                 listOf(createNavigationRoute()),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             locationEngine.updateLocation(
                 createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
@@ -295,7 +294,7 @@ class MapboxTripSessionNoSetupTest {
             tripSession.start(true)
             tripSession.setRoutes(
                 listOf(createNavigationRoute()),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             // act
             locationEngine.updateLocation(createLocation())
@@ -331,7 +330,7 @@ class MapboxTripSessionNoSetupTest {
             tripSession.start(false)
             tripSession.setRoutes(
                 listOf(createNavigationRoute()),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             // act
             navigatorObservers.onStatus(
@@ -395,14 +394,14 @@ class MapboxTripSessionNoSetupTest {
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             coEvery {
-                nativeNavigator.setRoutes(failingRoute, any(), any())
+                nativeNavigator.setRoutes(failingRoute, any(), any(), any())
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             locationEngine.updateLocation(
                 createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
@@ -450,14 +449,14 @@ class MapboxTripSessionNoSetupTest {
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             coEvery {
-                nativeNavigator.setRoutes(failingRoute, any(), any())
+                nativeNavigator.setRoutes(failingRoute, any(), any(), any())
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             // assert
             assertEquals(initialRoadObject, roadObjectsObserver.records.last())
@@ -486,15 +485,15 @@ class MapboxTripSessionNoSetupTest {
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             locationEngine.updateLocation(createLocation())
             coEvery {
-                nativeNavigator.setRoutes(failingRoute, any(), any())
+                nativeNavigator.setRoutes(failingRoute, any(), any(), any())
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             // assert
             assertEquals(true, observer.records.last())
@@ -521,15 +520,15 @@ class MapboxTripSessionNoSetupTest {
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             locationEngine.updateLocation(createLocation())
             coEvery {
-                nativeNavigator.setRoutes(failingRoute, any(), any())
+                nativeNavigator.setRoutes(failingRoute, any(), any(), any())
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             // assert
             assertNotNull(tripSession.getRouteProgress())
@@ -558,17 +557,17 @@ class MapboxTripSessionNoSetupTest {
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             locationEngine.updateLocation(
                 createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
             )
             coEvery {
-                nativeNavigator.setRoutes(failingRoute, any(), any())
+                nativeNavigator.setRoutes(failingRoute, any(), any(), any())
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                BasicSetRoutesInfo(ROUTES_UPDATE_REASON_NEW, 0)
+                SetRoutes.NewRoutes(0)
             )
             locationEngine.updateLocation(
                 createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
@@ -700,7 +699,7 @@ object StatusWithOffRouteUpdateUtil {
 private fun createNativeNavigatorMock(): MapboxNativeNavigator {
     val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
     coEvery {
-        nativeNavigator.setRoutes(any(), any(), any())
+        nativeNavigator.setRoutes(any(), any(), any(), any())
     } returns createSetRouteResult()
     return nativeNavigator
 }

@@ -84,8 +84,8 @@ interface MapboxNativeNavigator {
     suspend fun setRoutes(
         primaryRoute: NavigationRoute?,
         startingLeg: Int = 0,
-        setRoutesReason: SetRoutesReason,
         alternatives: List<NavigationRoute> = emptyList(),
+        reason: SetRoutesReason,
     ): Expected<String, SetRoutesResult>
 
     suspend fun setAlternativeRoutes(

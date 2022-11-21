@@ -259,7 +259,7 @@ internal open class MapboxNavigationBaseTest {
                 any(),
             )
         } returns navigator
-        coEvery { navigator.setRoutes(any(), any(), any()) } answers {
+        coEvery { navigator.setRoutes(any(), any(), any(), any()) } answers {
             createSetRouteResult()
         }
         every { navigator.cache } returns cache

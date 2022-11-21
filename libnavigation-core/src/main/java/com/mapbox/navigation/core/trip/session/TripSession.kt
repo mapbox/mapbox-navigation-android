@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.trip.session
 import android.location.Location
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.SetRoutesInfo
+import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -13,7 +13,7 @@ internal interface TripSession {
     val tripService: TripService
     suspend fun setRoutes(
         routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutesInfo,
+        setRoutes: SetRoutes,
     ): NativeSetRouteResult
 
     fun getRawLocation(): Location?

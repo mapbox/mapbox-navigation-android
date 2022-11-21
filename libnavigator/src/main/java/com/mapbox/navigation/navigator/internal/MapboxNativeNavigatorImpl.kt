@@ -151,8 +151,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override suspend fun setRoutes(
         primaryRoute: NavigationRoute?,
         startingLeg: Int,
-        setRoutesReason: SetRoutesReason,
         alternatives: List<NavigationRoute>,
+        reason: SetRoutesReason,
     ): Expected<String, SetRoutesResult> = suspendCancellableCoroutine { continuation ->
         navigator!!.setRoutes(
             primaryRoute?.let { route ->
@@ -162,7 +162,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                     alternatives.map { it.nativeRoute() }
                 )
             },
-            setRoutesReason
+            reason,
         ) { result ->
             result.onError {
                 logE(

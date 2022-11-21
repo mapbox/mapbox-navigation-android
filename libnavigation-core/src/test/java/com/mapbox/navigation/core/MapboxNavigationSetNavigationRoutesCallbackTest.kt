@@ -3,7 +3,6 @@ package com.mapbox.navigation.core
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.session.NativeSetRouteError
 import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import com.mapbox.navigator.RouteAlternative
@@ -50,7 +49,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex)
                 )
             } returns NativeSetRouteValue(
                 routes,
@@ -77,7 +76,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex)
                 )
             } returns NativeSetRouteValue(routes, emptyList())
 
@@ -98,7 +97,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex)
                 )
             } returns NativeSetRouteError(errorMessage)
 
@@ -119,7 +118,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, initialLegIndex),
+                    SetRoutes.CleanUp,
 
                 )
             } returns NativeSetRouteValue(routes, emptyList())
@@ -141,7 +140,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex)
                 )
             } returns NativeSetRouteValue(routes, emptyList())
 
@@ -168,7 +167,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex)
                 )
             } returns NativeSetRouteValue(
                 routes,
@@ -198,7 +197,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    BasicSetRoutesInfo(RoutesExtra.ROUTES_UPDATE_REASON_NEW, initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex)
                 )
             } returns NativeSetRouteValue(
                 routes,
