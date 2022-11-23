@@ -105,7 +105,6 @@ class ReplayRouteSession : MapboxNavigationObserver {
         mapboxNavigation.resetReplayLocation()
     }
 
-    @SuppressLint("MissingPermission")
     private fun MapboxNavigation.resetReplayLocation() {
         mapboxReplayer.clearEvents()
         resetTripSession()
@@ -172,6 +171,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
      * is an active route before it tries to push a gps location. This is needed to avoid a race
      * condition between setting routes and requesting a location.
      */
+    @SuppressLint("MissingPermission")
     private fun pushRealLocation(context: Context) {
         LocationEngineProvider.getBestLocationEngine(context.applicationContext)
             .getLastLocation(
