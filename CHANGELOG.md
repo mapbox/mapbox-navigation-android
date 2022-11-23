@@ -7,6 +7,8 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed crash in `PermissionsLauncherFragment` occurring on device rotation. [#6635](https://github.com/mapbox/mapbox-navigation-android/pull/6635)
 - Fixed a rare `java.lang.IllegalArgumentException: The Path cannot loop back on itself.` exception when using `NavigationLocationProvider`. [#6641](https://github.com/mapbox/mapbox-navigation-android/pull/6641)
+- Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
+- Added convenience `MapboxNavigation#moveRoutesFromPreviewToNavigator` method to simplify transition from Routes Preview state to Active Guidance state. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog
@@ -44,11 +46,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.10.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.2))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 
-- Added `DecodeUtils#clearCache` to allow trigger route geometry cache clearing in order to reduce memory usage.
-- Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available.
-- Added `DecodeUtils#clearCache` to allow trigger route geometry cache clearing in order to reduce memory usage. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
-- Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
-- Added convenience `MapboxNavigation#moveRoutesFromPreviewToNavigator` method to simplify transition from Routes Preview state to Active Guidance state. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
 
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog
