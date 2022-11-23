@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Fixed crash in `PermissionsLauncherFragment` occurring on device rotation. [#6635](https://github.com/mapbox/mapbox-navigation-android/pull/6635)
+- Fixed a rare `java.lang.IllegalArgumentException: The Path cannot loop back on itself.` exception when using `NavigationLocationProvider`. [#6641](https://github.com/mapbox/mapbox-navigation-android/pull/6641)
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog
