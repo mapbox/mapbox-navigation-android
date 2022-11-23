@@ -980,6 +980,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void showRouteWithLegIndexHighlighted(int legIndexToHighlight, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>> consumer);
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> updateTraveledRouteLine(com.mapbox.geojson.Point point);
     method public void updateWithRouteProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>> consumer);
+    method public void updateWithRouteProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, boolean useCacheOptimization, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>> consumer);
     field public static final com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi.Companion Companion;
   }
 

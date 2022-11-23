@@ -63,6 +63,7 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
+import com.mapbox.turf.DistanceProvider
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
@@ -76,6 +77,7 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.max
 
 /**
  * Responsible for generating route line related data which can be rendered on the map to
@@ -218,6 +220,7 @@ class MapboxRouteLineApi(
             List<RouteLineExpressionData>
             >,
         List<RouteLineExpressionData>> by lazy { LruCache(2) }
+    private val stepDistanceCache = StepDistanceCache()
 
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
@@ -686,6 +689,9 @@ class MapboxRouteLineApi(
     /**
      * Updates the state of the route line based on data in the [RouteProgress] passing a result
      * to the consumer that should be rendered by the [MapboxRouteLineView].
+     * Uses cache optimization by default. This should boost CPU usage but might increase memory consumption.
+     * If you don't want to use cache optimization, pass `false` to `useCacheOptimization`
+     * in an appropriate overload.
      *
      * If the vanishing route line feature and style inactive route legs independently
      * features were not enabled in [MapboxRouteLineOptions], this method does not need to
@@ -699,8 +705,37 @@ class MapboxRouteLineApi(
      */
     fun updateWithRouteProgress(
         routeProgress: RouteProgress,
-        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>,
     ) {
+        updateWithRouteProgress(routeProgress, true, consumer)
+    }
+
+    /**
+     * Updates the state of the route line based on data in the [RouteProgress] passing a result
+     * to the consumer that should be rendered by the [MapboxRouteLineView].
+     * NOTE: if `useCacheOptimization` is true, distances between coordinates of step geometry
+     * will caches in order to be reused for internal purposes.
+     * This should boost CPU usage but might increase memory consumption.
+     *
+     * If the vanishing route line feature and style inactive route legs independently
+     * features were not enabled in [MapboxRouteLineOptions], this method does not need to
+     * be called as it won't produce any updates.
+     *
+     * This method will execute tasks on a background thread.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param routeProgress a route progress object
+     * @param consumer a consumer for the result of this call
+     * @param useCacheOptimization whether should use cache optimization
+     */
+    fun updateWithRouteProgress(
+        routeProgress: RouteProgress,
+        useCacheOptimization: Boolean,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>,
+    ) {
+        if (useCacheOptimization) {
+            stepDistanceCache.onRouteProgressUpdate(routeProgress)
+        }
         val currentPrimaryRoute = primaryRoute
         if (currentPrimaryRoute == null) {
             val msg = "You're calling #updateWithRouteProgress without any routes being set."
@@ -720,7 +755,7 @@ class MapboxRouteLineApi(
             return
         }
 
-        updateUpcomingRoutePointIndex(routeProgress)
+        updateUpcomingRoutePointIndex(routeProgress, useCacheOptimization)
         updateVanishingPointState(routeProgress.currentState)
 
         // If the de-emphasize inactive route legs feature is enabled and the vanishing route line
@@ -1079,7 +1114,10 @@ class MapboxRouteLineApi(
         }
     }
 
-    internal fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
+    internal fun updateUpcomingRoutePointIndex(
+        routeProgress: RouteProgress,
+        useCacheOptimization: Boolean
+    ) {
         ifNonNull(
             routeProgress.currentLegProgress,
             routeProgress.currentLegProgress?.currentStepProgress,
@@ -1095,12 +1133,25 @@ class MapboxRouteLineApi(
              * We'll add the distance from the upcoming point to the current's puck position later.
              */
             allRemainingPoints += try {
-                TurfMisc.lineSliceAlong(
-                    LineString.fromLngLats(currentStepProgress.stepPoints ?: emptyList()),
-                    currentStepProgress.distanceTraveled.toDouble(),
-                    currentStepProgress.step?.distance() ?: 0.0,
-                    TurfConstants.UNIT_METERS
-                ).coordinates().drop(1).size
+                val line = if (useCacheOptimization) {
+                    TurfMisc.lineSliceAlong(
+                        LineString.fromLngLats(currentStepProgress.stepPoints ?: emptyList()),
+                        stepDistanceCache.currentDistances()?.map {
+                            DistanceProvider { it }
+                        } ?: emptyList(),
+                        currentStepProgress.distanceTraveled.toDouble(),
+                        currentStepProgress.step?.distance() ?: 0.0,
+                        TurfConstants.UNIT_METERS
+                    )
+                } else {
+                    TurfMisc.lineSliceAlong(
+                        LineString.fromLngLats(currentStepProgress.stepPoints ?: emptyList()),
+                        currentStepProgress.distanceTraveled.toDouble(),
+                        currentStepProgress.step?.distance() ?: 0.0,
+                        TurfConstants.UNIT_METERS
+                    )
+                }
+                max(line.coordinates().size - 1, 0)
             } catch (e: TurfException) {
                 0
             }

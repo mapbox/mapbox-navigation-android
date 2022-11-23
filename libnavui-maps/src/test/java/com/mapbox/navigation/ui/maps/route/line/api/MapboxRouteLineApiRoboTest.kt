@@ -323,7 +323,7 @@ class MapboxRouteLineApiRoboTest {
 
         api.updateVanishingPointState(RouteProgressState.TRACKING)
         api.setNavigationRoutes(listOf(route))
-        api.updateUpcomingRoutePointIndex(routeProgress)
+        api.updateUpcomingRoutePointIndex(routeProgress, false)
 
         val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
 
@@ -369,14 +369,14 @@ class MapboxRouteLineApiRoboTest {
 
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
-            api.updateUpcomingRoutePointIndex(routeProgress)
+            api.updateUpcomingRoutePointIndex(routeProgress, false)
 
             pauseDispatcher {
                 val result1 = api.updateTraveledRouteLine(lineString.coordinates()[1])
                 assertTrue(result1.isValue)
 
                 Thread.sleep(1000L)
-                api.updateUpcomingRoutePointIndex(routeProgress) // only update the progress
+                api.updateUpcomingRoutePointIndex(routeProgress, false) // only update the progress
                 Thread.sleep(300L) // in summary we've waited for 1.3s since last point update
                 val result2 = api.updateTraveledRouteLine(lineString.coordinates()[1])
                 assertTrue(result2.isValue) // should succeed because threshold was 1.2s
@@ -406,7 +406,7 @@ class MapboxRouteLineApiRoboTest {
 
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
-            api.updateUpcomingRoutePointIndex(routeProgress)
+            api.updateUpcomingRoutePointIndex(routeProgress, false)
 
             mockkObject(MapboxRouteLineUtils)
             val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
@@ -447,7 +447,7 @@ class MapboxRouteLineApiRoboTest {
 
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
-            api.updateUpcomingRoutePointIndex(routeProgress)
+            api.updateUpcomingRoutePointIndex(routeProgress, false)
 
             val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
 

@@ -427,7 +427,7 @@ class MapboxRouteLineApiTest {
         api.updateVanishingPointState(RouteProgressState.TRACKING)
         api.setNavigationRoutes(listOf(route))
 
-        api.updateUpcomingRoutePointIndex(routeProgress)
+        api.updateUpcomingRoutePointIndex(routeProgress, false)
 
         verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = 6 }
     }
@@ -454,7 +454,7 @@ class MapboxRouteLineApiTest {
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
 
-            api.updateUpcomingRoutePointIndex(routeProgress)
+            api.updateUpcomingRoutePointIndex(routeProgress, false)
 
             verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = 6 }
 
@@ -479,7 +479,7 @@ class MapboxRouteLineApiTest {
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
 
-            api.updateUpcomingRoutePointIndex(routeProgress)
+            api.updateUpcomingRoutePointIndex(routeProgress, false)
 
             verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = null }
         }
@@ -499,7 +499,7 @@ class MapboxRouteLineApiTest {
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
 
-            api.updateUpcomingRoutePointIndex(routeProgress)
+            api.updateUpcomingRoutePointIndex(routeProgress, false)
 
             verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = null }
         }
@@ -518,6 +518,27 @@ class MapboxRouteLineApiTest {
         api.setNavigationRoutes(listOf(route))
 
         api.updateWithRouteProgress(routeProgress) {}
+
+        verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = 6 }
+        verify {
+            mockVanishingRouteLine.updateVanishingPointState(RouteProgressState.TRACKING)
+        }
+    }
+
+    @Test
+    fun updateWithRouteProgressNoCache() = coroutineRule.runBlockingTest {
+        val route = loadNavigationRoute("short_route.json")
+        val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
+            every { vanishPointOffset } returns 0.0
+        }
+        val options = mockRouteOptions()
+        every { options.vanishingRouteLine } returns mockVanishingRouteLine
+        val api = MapboxRouteLineApi(options)
+        val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
+        api.setNavigationRoutes(listOf(route))
+
+        api.updateWithRouteProgress(routeProgress, false) {}
 
         verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = 6 }
         verify {

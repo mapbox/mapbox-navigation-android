@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Optimized `MapboxRouteLineApi#updateWithRouteProgress` by enabling cache optimization be default. Added `MapboxRouteLineApi#updateWithRouteProgress(RouteProgress, Boolean, MapboxNavigationConsumer)` to use in order to disable cach optimization.
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog
