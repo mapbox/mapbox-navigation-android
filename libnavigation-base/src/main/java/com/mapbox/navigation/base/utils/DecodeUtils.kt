@@ -127,7 +127,7 @@ object DecodeUtils {
      * [stepGeometryToPoints], [completeGeometryToPoints], etc.
      */
     @JvmStatic
-    fun clearCache() {
+    internal fun clearCacheInternal() {
         synchronized(stepsGeometryDecodeCache) {
             cachedRoutes.clear()
             stepsGeometryDecodeCache.evictAll()

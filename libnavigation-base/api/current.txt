@@ -1720,7 +1720,6 @@ package com.mapbox.navigation.base.trip.notification {
 package com.mapbox.navigation.base.utils {
 
   public final class DecodeUtils {
-    method public static void clearCache();
     method public static com.mapbox.geojson.LineString completeGeometryToLineString(com.mapbox.api.directions.v5.models.DirectionsRoute);
     method public static java.util.List<com.mapbox.geojson.Point> completeGeometryToPoints(com.mapbox.api.directions.v5.models.DirectionsRoute);
     method public static com.mapbox.geojson.LineString stepGeometryToLineString(com.mapbox.api.directions.v5.models.DirectionsRoute, com.mapbox.api.directions.v5.models.LegStep legStep);

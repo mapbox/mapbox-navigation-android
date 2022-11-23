@@ -911,7 +911,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun moveRoutesFromPreviewToNavigator() {
         val preview = getRoutesPreview()
         requireNotNull(preview) {
-            "Can't move routes from preview to navigator as no previewed routes are available"
+            "Can't move routes from preview to navigator as no previewed routes are available. " +
+                "Make sure you have set routes to preview and received previewed routes " +
+                "in RoutesPreviewObserver before moving them to navigator."
         }
         setNavigationRoutes(preview.routesList)
         setRoutesPreview(emptyList())

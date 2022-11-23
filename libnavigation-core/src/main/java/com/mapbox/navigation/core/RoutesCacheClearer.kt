@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.clearCache
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils
 import com.mapbox.navigation.core.directions.session.RoutesObserver
