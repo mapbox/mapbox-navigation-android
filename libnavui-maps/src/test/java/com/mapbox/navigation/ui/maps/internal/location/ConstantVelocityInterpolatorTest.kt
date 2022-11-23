@@ -72,6 +72,29 @@ class ConstantVelocityInterpolatorTest {
         )
     }
 
+    @Test
+    fun `should not crash because of error accumulation`() { // caused by NAVAND-925
+        val startPoint = Point.fromLngLat(48.36654772857354, 11.13222120183356)
+        val keyPoints = arrayOf(
+            Point.fromLngLat(48.416596, 11.027287),
+            Point.fromLngLat(48.416520999999996, 11.027080999999999),
+            Point.fromLngLat(48.416281, 11.02683),
+            Point.fromLngLat(48.416156, 11.02656),
+            Point.fromLngLat(48.416146999999995, 11.026156),
+            Point.fromLngLat(48.416205999999995, 11.02605),
+            Point.fromLngLat(48.416253, 11.025912),
+            Point.fromLngLat(48.416194, 11.025749),
+            Point.fromLngLat(48.416028, 11.025495999999999),
+            Point.fromLngLat(48.415786, 11.025307),
+            Point.fromLngLat(48.415642999999996, 11.025171),
+            Point.fromLngLat(48.4156, 11.025034),
+            Point.fromLngLat(48.415535999999996, 11.024955),
+            Point.fromLngLat(48.415535999999996, 11.024955000000004),
+        )
+        // no crash
+        ConstantVelocityInterpolator(startPoint, keyPoints)
+    }
+
     private fun calculatePathValues(p0: Point, vararg points: Point): List<Pair<Float, Float>> {
         val distances = mutableListOf<Double>()
         var totalDistance = 0.0
