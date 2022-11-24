@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed a rare `java.lang.IllegalArgumentException: The Path cannot loop back on itself.` exception when using `NavigationLocationProvider`. [#6641](https://github.com/mapbox/mapbox-navigation-android/pull/6641)
 - Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
 - Added convenience `MapboxNavigation#moveRoutesFromPreviewToNavigator` method to simplify transition from Routes Preview state to Active Guidance state. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
+- Minor performance improvements for `MapboxNavigationViewportDataSource#evaluate`. [#6645](https://github.com/mapbox/mapbox-navigation-android/pull/6645)
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog
