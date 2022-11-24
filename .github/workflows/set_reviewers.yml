@@ -24,4 +24,4 @@ jobs:
           python3 -m pip install requests PyBambooHR retry
 
       - name: execute py script
-        run: python3 scripts/set_reviewers_test.py
+        run: python3 scripts/set_reviewers.py
