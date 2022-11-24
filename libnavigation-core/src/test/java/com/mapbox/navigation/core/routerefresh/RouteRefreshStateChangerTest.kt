@@ -98,7 +98,7 @@ class RouteRefreshStateChangerTest(
                 arrayOf(
                     RouteRefreshExtra.REFRESH_STATE_CANCELED,
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                    false
+                    true
                 ),
                 arrayOf(
                     RouteRefreshExtra.REFRESH_STATE_CANCELED,

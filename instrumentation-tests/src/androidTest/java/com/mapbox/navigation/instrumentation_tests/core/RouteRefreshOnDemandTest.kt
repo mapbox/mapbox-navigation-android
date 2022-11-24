@@ -74,7 +74,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         )
     }
 
-    @Test
+    @Test(timeout = 10_000)
     fun route_refresh_on_demand_executes_before_refresh_interval() = sdkTest {
         val routeRefreshOptions = RouteRefreshOptions.Builder()
             .intervalMillis(TimeUnit.MINUTES.toMillis(1))
@@ -113,7 +113,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             .build()
         RouteRefreshOptions::class.java.getDeclaredField("intervalMillis").apply {
             isAccessible = true
-            set(routeRefreshOptions, 10_000L)
+            set(routeRefreshOptions, 5_000L)
         }
         refreshHandler.jsonResponseModifier = DynamicResponseModifier()
         createMapboxNavigation(routeRefreshOptions)
@@ -129,7 +129,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             }
         }
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-        delay(5000)
+        delay(2500)
 
         mapboxNavigation.refreshRoutesImmediately()
         mapboxNavigation.routesUpdates()
@@ -137,12 +137,12 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             .first()
         assertEquals(1, routeRefreshes.size)
 
-        // no route refresh 6 seconds after refresh on demand
-        delay(6000)
+        // no route refresh 4 seconds after refresh on demand
+        delay(4000)
         assertEquals(1, routeRefreshes.size)
 
-        delay(4000)
-        // has new refresh 10 seconds after refresh on demand
+        delay(1000)
+        // has new refresh 5 seconds after refresh on demand
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
             .take(2)

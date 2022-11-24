@@ -1027,6 +1027,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Immediately refresh current navigation routes.
      * Listen for refreshed routes using [RoutesObserver].
+     *
+     * The on-demand refresh request is not guaranteed to succeed and call the [RoutesObserver],
+     * [refreshRoutesImmediately] invocations cannot be coupled with
+     * [RoutesObserver.onRoutesChanged] callbacks for state management.
+     * You can use [registerRouteRefreshStateObserver] to monitor refresh statuses independently.
      */
     fun refreshRoutesImmediately() {
         routeRefreshController.requestImmediateRouteRefresh(getNavigationRoutes())

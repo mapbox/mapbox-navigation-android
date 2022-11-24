@@ -18,6 +18,7 @@ internal object RouteRefreshStateChanger {
         ),
         RouteRefreshExtra.REFRESH_STATE_CANCELED to listOf(
             RouteRefreshExtra.REFRESH_STATE_STARTED,
+            RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
             null,
         ),
         RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED to listOf(

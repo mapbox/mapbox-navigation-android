@@ -386,14 +386,38 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun pause() {
+    fun pauseNotPaused() {
         sut.pause()
 
         verify(exactly = 1) { cancellableHandler.cancelAll() }
     }
 
     @Test
-    fun resumeNoRoutes() {
+    fun pausePaused() {
+        sut.pause()
+        clearAllMocks(answers = false)
+
+        sut.pause()
+
+        verify(exactly = 0) { cancellableHandler.cancelAll() }
+    }
+
+    @Test
+    fun pauseResumed() {
+        sut.pause()
+        sut.resume()
+        clearAllMocks(answers = false)
+
+        sut.pause()
+
+        verify(exactly = 1) { cancellableHandler.cancelAll() }
+    }
+
+    @Test
+    fun resumePausedNoRoutes() {
+        sut.pause()
+        clearAllMocks(answers = false)
+
         sut.resume()
 
         verify(exactly = 0) {
@@ -403,7 +427,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumeHasRoutesShouldNotRetry() {
+    fun resumePausedHasRoutesShouldNotRetry() {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -411,6 +435,7 @@ class PlannedRouteRefreshControllerTest {
             RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         sut.startRoutesRefreshing(routes)
+        sut.pause()
         clearAllMocks(answers = false)
         every { retryStrategy.shouldRetry() } returns false
 
@@ -420,7 +445,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumeHasRoutesShouldRetry() {
+    fun resumePausedHasRoutesShouldRetry() {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -428,6 +453,7 @@ class PlannedRouteRefreshControllerTest {
             RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         sut.startRoutesRefreshing(routes)
+        sut.pause()
         clearAllMocks(answers = false)
         every { retryStrategy.shouldRetry() } returns true
 
@@ -437,7 +463,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumeHasRoutesShouldRetryDoesNotNotifyOnStart() {
+    fun resumeNotPausedHasRoutesShouldRetry() {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -449,14 +475,52 @@ class PlannedRouteRefreshControllerTest {
         every { retryStrategy.shouldRetry() } returns true
 
         sut.resume()
+
+        verify(exactly = 0) { cancellableHandler.postDelayed(any(), any(), any()) }
+    }
+
+    @Test
+    fun resumeResumedHasRoutesShouldRetry() {
+        val route1 = mockk<NavigationRoute>(relaxed = true)
+        val route2 = mockk<NavigationRoute>(relaxed = true)
+        val routes = listOf(route1, route2)
+        every {
+            RouteRefreshValidator.validateRoute(any())
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        sut.startRoutesRefreshing(routes)
+        sut.pause()
+        sut.resume()
+        clearAllMocks(answers = false)
+        every { retryStrategy.shouldRetry() } returns true
+
+        sut.resume()
+
+        verify(exactly = 0) { cancellableHandler.postDelayed(any(), any(), any()) }
+    }
+
+    @Test
+    fun resumePausedHasRoutesShouldRetryNotifiesOnStart() {
+        val route1 = mockk<NavigationRoute>(relaxed = true)
+        val route2 = mockk<NavigationRoute>(relaxed = true)
+        val routes = listOf(route1, route2)
+        every {
+            RouteRefreshValidator.validateRoute(any())
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        sut.startRoutesRefreshing(routes)
+        sut.pause()
+        clearAllMocks(answers = false)
+        every { retryStrategy.shouldRetry() } returns true
+
+        sut.resume()
         startRequest()
 
-        verify(exactly = 0) { stateHolder.onStarted() }
+        verify(exactly = 1) { stateHolder.onStarted() }
     }
 
     @Test
     fun emptyRoutesAreNotRemembered() {
         sut.startRoutesRefreshing(emptyList())
+        sut.pause()
         clearAllMocks(answers = false)
 
         sut.resume()
@@ -486,6 +550,7 @@ class PlannedRouteRefreshControllerTest {
             )
         } returns message
         sut.startRoutesRefreshing(listOf(route1, route2))
+        sut.pause()
         clearAllMocks(answers = false)
 
         sut.resume()
@@ -509,6 +574,7 @@ class PlannedRouteRefreshControllerTest {
             RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         sut.startRoutesRefreshing(routes)
+        sut.pause()
         clearAllMocks(answers = false)
         every { retryStrategy.shouldRetry() } returns true
 
@@ -531,6 +597,7 @@ class PlannedRouteRefreshControllerTest {
             RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         sut.startRoutesRefreshing(routes)
+        sut.pause()
         clearAllMocks(answers = false)
         every { retryStrategy.shouldRetry() } returns true
 
@@ -554,6 +621,7 @@ class PlannedRouteRefreshControllerTest {
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         sut.startRoutesRefreshing(routes)
         sut.startRoutesRefreshing(emptyList())
+        sut.pause()
         clearAllMocks(answers = false)
 
         sut.resume()
@@ -576,6 +644,7 @@ class PlannedRouteRefreshControllerTest {
         } returns RouteRefreshValidator.RouteValidationResult.Invalid("")
         sut.startRoutesRefreshing(listOf(route1))
         sut.startRoutesRefreshing(listOf(route2))
+        sut.pause()
         clearAllMocks(answers = false)
 
         sut.resume()
@@ -606,6 +675,7 @@ class PlannedRouteRefreshControllerTest {
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         sut.startRoutesRefreshing(listOf(route1, route2))
         sut.startRoutesRefreshing(listOf(route3, route4))
+        sut.pause()
         clearAllMocks(answers = false)
         every { retryStrategy.shouldRetry() } returns true
 
@@ -630,6 +700,7 @@ class PlannedRouteRefreshControllerTest {
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         sut.startRoutesRefreshing(listOf(route1, route2))
         sut.startRoutesRefreshing(listOf(route3, route4))
+        sut.pause()
         clearAllMocks(answers = false)
         every { retryStrategy.shouldRetry() } returns true
 

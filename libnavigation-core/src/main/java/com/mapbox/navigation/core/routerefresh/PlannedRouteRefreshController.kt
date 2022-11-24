@@ -32,6 +32,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         RetryRouteRefreshStrategy(maxRetryCount = 2)
     )
 
+    private var paused = false
     private var routesToRefresh: List<NavigationRoute>? = null
 
     fun startRoutesRefreshing(routes: List<NavigationRoute>) {
@@ -63,13 +64,19 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     }
 
     override fun pause() {
-        cancellableHandler.cancelAll()
+        if (!paused) {
+            paused = true
+            cancellableHandler.cancelAll()
+        }
     }
 
     override fun resume() {
-        routesToRefresh?.let {
-            if (retryStrategy.shouldRetry()) {
-                scheduleUpdateRetry(it)
+        if (paused) {
+            paused = false
+            routesToRefresh?.let {
+                if (retryStrategy.shouldRetry()) {
+                    scheduleUpdateRetry(it, shouldNotifyOnStart = true)
+                }
             }
         }
     }
@@ -81,8 +88,8 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         }
     }
 
-    private fun scheduleUpdateRetry(routes: List<NavigationRoute>) {
-        postAttempt { executePlannedRefresh(routes, shouldNotifyOnStart = false) }
+    private fun scheduleUpdateRetry(routes: List<NavigationRoute>, shouldNotifyOnStart: Boolean) {
+        postAttempt { executePlannedRefresh(routes, shouldNotifyOnStart = shouldNotifyOnStart) }
     }
 
     private fun postAttempt(attemptBlock: () -> Unit) {
@@ -122,7 +129,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                     listener.onRoutesRefreshed(routeRefresherResult)
                 } else {
                     if (retryStrategy.shouldRetry()) {
-                        scheduleUpdateRetry(routes)
+                        scheduleUpdateRetry(routes, shouldNotifyOnStart = false)
                     } else {
                         stateHolder.onFailure(null)
                         if (routeRefresherResult.refreshedRoutes != routes) {

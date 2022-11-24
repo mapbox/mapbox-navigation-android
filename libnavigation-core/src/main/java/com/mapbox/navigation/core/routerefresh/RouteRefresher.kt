@@ -44,7 +44,7 @@ internal class RouteRefresher(
         val refreshedRoutes = refreshRoutesOrNull(routes, routeProgressData, routeRefreshTimeout)
         return if (refreshedRoutes.any { it != null }) {
             RouteRefresherResult(
-                true,
+                success = true,
                 refreshedRoutes.mapIndexed { index, navigationRoute ->
                     navigationRoute ?: routes[index]
                 },
@@ -52,7 +52,7 @@ internal class RouteRefresher(
             )
         } else {
             RouteRefresherResult(
-                false,
+                success = false,
                 routes.map { removeExpiringDataFromRoute(it, routeProgressData.legIndex) },
                 routeProgressData
             )
