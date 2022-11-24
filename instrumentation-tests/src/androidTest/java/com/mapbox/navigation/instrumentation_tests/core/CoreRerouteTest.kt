@@ -216,7 +216,6 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
     @Test
     fun reroute_is_cancelled_when_the_user_returns_to_route() = sdkTest {
-        val responseDelay = 4000L
         val mockRoute = RoutesProvider.dc_very_short(activity)
         val originLocation = mockRoute.routeWaypoints.first()
         val initialLocation = mockLocationUpdatesRule.generateLocationUpdate {
@@ -247,7 +246,8 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
             ),
             relaxedExpectedCoordinates = true
         )
-        rerouteRequestHandler.jsonResponseModifier = DelayedResponseModifier(responseDelay)
+        val responseModifier = DelayedResponseModifier(10000)
+        rerouteRequestHandler.jsonResponseModifier = responseModifier
         mockWebServerRule.requestHandlers.add(requestHandler)
         mockWebServerRule.requestHandlers.add(rerouteRequestHandler)
 
@@ -275,7 +275,8 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         mockLocationReplayerRule.loopUpdate(initialLocation, times = 120)
         // wait until the puck returns to the route
         mapboxNavigation.offRouteUpdates().filterNot { it }.first()
-        delay(responseDelay)
+        delay(2000)
+        responseModifier.interruptDelay()
 
         assertEquals(
             listOf(
