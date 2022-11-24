@@ -4,6 +4,9 @@ on:
     types: [ opened, reopened, ready_for_review ]
 jobs:
   process:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
