@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
@@ -333,8 +334,9 @@ class MapboxNavigationViewportDataSource(
      * @see [getViewportData]
      */
     fun evaluate() {
-        updateFollowingData()
-        updateOverviewData()
+        val cameraState = mapboxMap.cameraState
+        updateFollowingData(cameraState)
+        updateOverviewData(cameraState)
 
         options.followingFrameOptions.run {
             followingCameraOptions =
@@ -688,7 +690,7 @@ class MapboxNavigationViewportDataSource(
         overviewPitchProperty.override = null
     }
 
-    private fun updateFollowingData() {
+    private fun updateFollowingData(cameraState: CameraState) {
         val pointsForFollowing: MutableList<Point> = pointsToFrameOnCurrentStep.toMutableList()
         val localTargetLocation = targetLocation
 
@@ -701,7 +703,6 @@ class MapboxNavigationViewportDataSource(
 
         if (pointsForFollowing.isEmpty()) {
             options.followingFrameOptions.run {
-                val cameraState = mapboxMap.cameraState
                 followingBearingProperty.fallback = cameraState.bearing
                 followingPitchProperty.fallback = defaultPitch
                 followingCenterProperty.fallback = cameraState.center
@@ -717,7 +718,7 @@ class MapboxNavigationViewportDataSource(
                 getSmootherBearingForMap(
                     enabled,
                     maxBearingAngleDiff,
-                    mapboxMap.cameraState.bearing,
+                    cameraState.bearing,
                     locationBearing,
                     pointsForFollowing
                 )
@@ -743,7 +744,6 @@ class MapboxNavigationViewportDataSource(
             } else {
                 val mapSize = mapboxMap.getSize()
                 val screenBox = getScreenBoxForFraming(mapSize, followingPadding)
-                val cameraState = mapboxMap.cameraState
                 val padding = getMapAnchoredPaddingFromUserPadding(
                     mapSize,
                     followingPadding,
@@ -778,7 +778,7 @@ class MapboxNavigationViewportDataSource(
         updateDebuggerForFollowing(pointsForFollowing)
     }
 
-    private fun updateOverviewData() {
+    private fun updateOverviewData(cameraState: CameraState) {
         val pointsForOverview = simplifiedRemainingPointsOnRoute.toMutableList()
 
         val localTargetLocation = targetLocation
@@ -790,7 +790,6 @@ class MapboxNavigationViewportDataSource(
 
         if (pointsForOverview.isEmpty()) {
             options.overviewFrameOptions.run {
-                val cameraState = mapboxMap.cameraState
                 overviewBearingProperty.fallback = cameraState.bearing
                 overviewPitchProperty.fallback = cameraState.pitch
                 overviewCenterProperty.fallback = cameraState.center
@@ -801,7 +800,7 @@ class MapboxNavigationViewportDataSource(
         }
 
         overviewBearingProperty.fallback = normalizeBearing(
-            mapboxMap.cameraState.bearing,
+            cameraState.bearing,
             BEARING_NORTH
         )
 
@@ -813,7 +812,7 @@ class MapboxNavigationViewportDataSource(
                 overviewPitchProperty.get()
             )
         } else {
-            mapboxMap.cameraState.toCameraOptions()
+            cameraState.toCameraOptions()
         }
 
         overviewCenterProperty.fallback = cameraFrame.center!!
