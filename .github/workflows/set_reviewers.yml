@@ -10,12 +10,12 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
 #      BAMBOO_API_KEY: ${{ secrets.BAMBOO_API_KEY }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           ref: ${{github.head_ref}}
 
       - name: setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.7.7'
 
