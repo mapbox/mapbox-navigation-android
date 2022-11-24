@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
 - Added convenience `MapboxNavigation#moveRoutesFromPreviewToNavigator` method to simplify transition from Routes Preview state to Active Guidance state. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
 - Minor performance improvements for `MapboxNavigationViewportDataSource#evaluate`. [#6645](https://github.com/mapbox/mapbox-navigation-android/pull/6645)
+- Minor optimization when updating the vanishing route line by removing check for route line related layers. [#6642](https://github.com/mapbox/mapbox-navigation-android/pull/6642)
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog
