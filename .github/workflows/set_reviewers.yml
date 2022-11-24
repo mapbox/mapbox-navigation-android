@@ -1,0 +1,27 @@
+name: Set reviewers
+on:
+  pull_request:
+    types: [ opened, reopened, ready_for_review ]
+jobs:
+  process:
+#    runs-on: [ self-hosted, Linux, X64 ]
+    env:
+#      GITHUB_API_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+#      BAMBOO_API_KEY: ${{ secrets.BAMBOO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          ref: ${{github.head_ref}}
+
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7.7'
+
+      - name: install python packages
+        run: |
+          python3 -m pip install requests PyBambooHR retry
+
+      - name: execute py script
+        run: python3 scripts/set_reviewers_test.py
