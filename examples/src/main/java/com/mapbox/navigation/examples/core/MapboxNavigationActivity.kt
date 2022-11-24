@@ -3,6 +3,7 @@ package com.mapbox.navigation.examples.core
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.view.View.INVISIBLE
@@ -12,14 +13,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
+import com.mapbox.maps.extension.style.layers.generated.CircleLayer
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -226,6 +235,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
             // update bottom trip progress summary
             binding.tripProgressView.render(tripProgressApi.getTripProgress(routeProgress))
+
+            //addPointToPixelMapPoints(routeLineAPI.getFillerPointsInTree())
         }
 
     private val routesObserver = RoutesObserver { result ->
@@ -268,6 +279,21 @@ class MapboxNavigationActivity : AppCompatActivity() {
         logD("sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}", LOG_CATEGORY)
     }
 
+    private val locationComponent by lazy {
+        binding.mapView.location.apply {
+            setLocationProvider(navigationLocationProvider)
+            enabled = true
+        }
+    }
+
+    private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        val result = routeLineAPI.updateTraveledRouteLine(point)
+        mapboxMap.getStyle()?.apply {
+            // Render the result to update the map.
+            routeLineView.renderRouteLineUpdate(this, result)
+        }
+    }
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -280,7 +306,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     this@MapboxNavigationActivity,
-                    R.drawable.mapbox_navigation_puck_icon
+                    R.drawable.custom_user_puck_icon
                 )
             )
             setLocationProvider(navigationLocationProvider)
@@ -317,7 +343,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 // not handled
             }
         })
-
+        mapboxNavigation.setRerouteController(null)
         // initialize Navigation Camera
         viewportDataSource = MapboxNavigationViewportDataSource(
             binding.mapView.getMapboxMap()
@@ -387,6 +413,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         // initialize route line
         val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this)
             .withRouteLineBelowLayerId("road-label")
+            .withVanishingRouteLineEnabled(true)
             .build()
         routeLineAPI = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
@@ -401,6 +428,10 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 findRoute(point)
                 true
             }
+
+            //fixme remove this
+            initPointLayer(style)
+            locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
         }
 
         // initialize view interactions
@@ -525,5 +556,30 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxNavigationActivity"
+    }
+
+    private val LINE_END_LAYER_ID = "DRAW_UTIL_LINE_END_LAYER_ID"
+    private val LINE_END_SOURCE_ID = "DRAW_UTIL_LINE_END_SOURCE_ID"
+    private fun initPointLayer(style: Style) {
+        if (!style.styleSourceExists(LINE_END_SOURCE_ID)) {
+            geoJsonSource(LINE_END_SOURCE_ID) {}.bindTo(style)
+        }
+
+        if (!style.styleLayerExists(LINE_END_LAYER_ID)) {
+            CircleLayer(LINE_END_LAYER_ID, LINE_END_SOURCE_ID)
+                .circleRadius(2.0)
+                .circleOpacity(1.0)
+                .circleColor(Color.BLACK)
+                .bindTo(style)
+        }
+    }
+
+    // todo remove this
+    private fun addPointToPixelMapPoints(points: List<Point>) {
+        val features = points.map { Feature.fromGeometry(it) }
+
+        (mapboxMap.getStyle()!!.getSource(LINE_END_SOURCE_ID) as GeoJsonSource).apply {
+            this.featureCollection(FeatureCollection.fromFeatures(features))
+        }
     }
 }

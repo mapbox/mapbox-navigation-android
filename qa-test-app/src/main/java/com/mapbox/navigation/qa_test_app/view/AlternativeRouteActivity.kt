@@ -182,7 +182,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             CameraOptions.Builder()
                 .center(Point.fromLngLat(location.longitude, location.latitude))
                 .bearing(location.bearing.toDouble())
-                .zoom(13.0)
+                .zoom(15.0)
                 .padding(EdgeInsets(1000.0, 0.0, 0.0, 0.0))
                 .build(),
             mapAnimationOptionsBuilder.build()

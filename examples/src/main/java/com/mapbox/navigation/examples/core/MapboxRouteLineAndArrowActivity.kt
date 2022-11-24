@@ -16,13 +16,19 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.gestures.Utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
+import com.mapbox.maps.extension.style.layers.generated.CircleLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -38,6 +44,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -203,7 +210,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             null,
             ContextCompat.getDrawable(
                 this@MapboxRouteLineAndArrowActivity,
-                R.drawable.mapbox_navigation_puck_icon
+                R.drawable.custom_user_puck_icon
             ),
             null,
             null
@@ -227,7 +234,6 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         // to the MapboxRouteLineApi to generate the data necessary to draw the route(s)
         // on the map.
         val routeLines = result.routes.map { RouteLine(it, null) }
-
         routeLineApi.setRoutes(
             routeLines
         ) { value ->
@@ -253,14 +259,6 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        // RouteLine: This line is only necessary if the vanishing route line feature
-        // is enabled.
-        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
-            mapboxMap.getStyle()?.apply {
-                routeLineView.renderRouteLineUpdate(this, result)
-            }
-        }
-
         // RouteArrow: The next maneuver arrows are driven by route progress events.
         // Generate the next maneuver arrow update data and pass it to the view class
         // to visualize the updates on the map.
@@ -269,6 +267,8 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             // Render the result to update the map.
             routeArrowView.renderManeuverUpdate(this, arrowUpdate)
         }
+
+        //addPointToPixelMapPoints(routeLineApi.getFillerPointsInTree())
     }
 
     // RouteLine: Below is a demonstration of selecting different routes. On a map click, a call
@@ -359,6 +359,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
                     locationEngineCallback
                 )
                 viewBinding.mapView.gestures.addOnMapLongClickListener(this)
+                initPointLayer(style)
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
@@ -394,7 +395,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             .applyLanguageAndVoiceUnitOptions(this)
             .coordinatesList(listOf(origin, destination))
             .layersList(listOf(mapboxNavigation.getZLevel(), null))
-            .alternatives(true)
+            .alternatives(false)
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,
@@ -453,6 +454,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
                 startSimulation(route)
             }
         }
+
         viewBinding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
 
@@ -512,6 +514,32 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         }
 
         override fun onFailure(exception: Exception) {
+        }
+    }
+
+    // todo remove this
+    private val LINE_END_LAYER_ID = "DRAW_UTIL_LINE_END_LAYER_ID"
+    private val LINE_END_SOURCE_ID = "DRAW_UTIL_LINE_END_SOURCE_ID"
+    private fun initPointLayer(style: Style) {
+        if (!style.styleSourceExists(LINE_END_SOURCE_ID)) {
+            geoJsonSource(LINE_END_SOURCE_ID) {}.bindTo(style)
+        }
+
+        if (!style.styleLayerExists(LINE_END_LAYER_ID)) {
+            CircleLayer(LINE_END_LAYER_ID, LINE_END_SOURCE_ID)
+                .circleRadius(2.0)
+                .circleOpacity(1.0)
+                .circleColor(Color.BLACK)
+                .bindTo(style)
+        }
+    }
+
+    // todo remove this
+    private fun addPointToPixelMapPoints(points: List<Point>) {
+        val features = points.map { Feature.fromGeometry(it) }
+
+        (mapboxMap.getStyle()!!.getSource(LINE_END_SOURCE_ID) as GeoJsonSource).apply {
+            this.featureCollection(FeatureCollection.fromFeatures(features))
         }
     }
 }

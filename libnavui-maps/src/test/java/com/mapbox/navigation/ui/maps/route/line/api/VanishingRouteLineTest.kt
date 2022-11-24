@@ -1,8 +1,13 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
+import com.mapbox.navigation.ui.maps.testing.TestingUtil
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.every
