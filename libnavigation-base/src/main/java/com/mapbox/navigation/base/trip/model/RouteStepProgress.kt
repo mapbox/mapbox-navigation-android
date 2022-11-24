@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.trip.model
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.geojson.Point
 
@@ -20,7 +21,8 @@ import com.mapbox.geojson.Point
  * float value between 0 and 1 and isn't guaranteed to reach 1 before the user reaches the
  * next step (if another step exist in route)
  * @param durationRemaining [Double] The duration remaining in seconds until the user reaches the end of the current step
- * @param geometryIndex [Int] Step-wise index representing the geometry point right in front of the user
+ * @param geometryIndex [Int] Step-wise index representing the geometry point that starts the segment
+ *  the user is currently on, effectively this represents the index of last visited geometry point in the step.
  */
 class RouteStepProgress internal constructor(
     val stepIndex: Int,

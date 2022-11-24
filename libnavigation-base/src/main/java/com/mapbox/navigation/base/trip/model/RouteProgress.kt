@@ -42,8 +42,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * @param routeAlternativeId in case of [currentState] equal to [RouteProgressState.OFF_ROUTE],
  * this field can provide the route ID of an alternative route that user turned into causing off-route event (if there is one).
  * This field can be used to find a route with [NavigationRoute.id] that can be immediately used as the new primary route.
- * @param currentRouteGeometryIndex route-wise index representing the geometry point
- * right in front of the user (see [DirectionsRoute.geometry]).
+ * @param currentRouteGeometryIndex route-wise index representing the geometry point that starts the segment
+ *  the user is currently on, effectively this represents the index of last visited geometry point in the route (see [DirectionsRoute.geometry] or [DecodeUtils.completeGeometryToPoints] if [RouteOptions.overview] is [DirectionsCriteria.OVERVIEW_FULL]).
  */
 class RouteProgress internal constructor(
     val navigationRoute: NavigationRoute,

@@ -19,7 +19,6 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
-import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.ifNonNull

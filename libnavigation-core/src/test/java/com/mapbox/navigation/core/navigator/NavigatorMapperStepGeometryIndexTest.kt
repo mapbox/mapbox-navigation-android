@@ -86,6 +86,9 @@ class NavigatorMapperStepGeometryIndexTest(
             every { routeState } returns RouteState.INITIALIZED
         }
         val actual = getRouteProgressFrom(route, status, 0, null, null, null)
-        assertEquals(expectedStepGeometryIndex, actual!!.currentLegProgress!!.currentStepProgress!!.geometryIndex)
+        assertEquals(
+            expectedStepGeometryIndex,
+            actual!!.currentLegProgress!!.currentStepProgress!!.geometryIndex
+        )
     }
 }
