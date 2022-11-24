@@ -6,7 +6,6 @@ jobs:
   process:
     runs-on: ubuntu-latest
     env:
-#      GITHUB_API_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
 #      BAMBOO_API_KEY: ${{ secrets.BAMBOO_API_KEY }}
     steps:
@@ -28,6 +27,7 @@ jobs:
           curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > /usr/local/bin/mbx-ci
           chmod 755 /usr/local/bin/mbx-ci
           export GITHUB_WRITER_TOKEN=testvalue
+          echo "::set-env name=GITHUB_WRITER_TOKEN::$GITHUB_WRITER_TOKEN"
 #          export GITHUB_WRITER_TOKEN=$(mbx-ci github writer public token)
 
       - name: execute py script
