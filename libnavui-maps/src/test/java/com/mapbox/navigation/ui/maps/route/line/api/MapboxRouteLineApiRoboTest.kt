@@ -378,12 +378,44 @@ class MapboxRouteLineApiRoboTest {
                 Thread.sleep(1000L)
                 api.updateUpcomingRoutePointIndex(routeProgress) // only update the progress
                 Thread.sleep(300L) // in summary we've waited for 1.3s since last point update
-                val result2 = api.updateTraveledRouteLine(lineString.coordinates()[1])
+                val result2 = api.updateTraveledRouteLine(lineString.coordinates()[2])
                 assertTrue(result2.isValue) // should succeed because threshold was 1.2s
 
                 Thread.sleep(500L) // wait less than threshold
                 val result3 = api.updateTraveledRouteLine(lineString.coordinates()[1])
                 assertTrue(result3.isError)
+            }
+        }
+
+    @Test
+    fun updateTraveledRouteLine_noUpdateWhenPointDistanceTooSmall() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .withVanishingRouteLineEnabled(true)
+                .displayRestrictedRoadSections(false)
+                .vanishingRouteLineUpdateInterval(TimeUnit.MILLISECONDS.toNanos(1200))
+                .build()
+            val api = MapboxRouteLineApi(options)
+            val route = loadNavigationRoute("short_route.json")
+            val lineString = LineString.fromPolyline(
+                route.directionsRoute.geometry() ?: "",
+                Constants.PRECISION_6
+            )
+            val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
+
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setNavigationRoutes(listOf(route))
+            api.updateUpcomingRoutePointIndex(routeProgress)
+
+            pauseDispatcher {
+                val result1 = api.updateTraveledRouteLine(lineString.coordinates()[1])
+                assertTrue(result1.isValue)
+
+                Thread.sleep(1000L)
+                api.updateUpcomingRoutePointIndex(routeProgress)
+                Thread.sleep(300L)
+                val result2 = api.updateTraveledRouteLine(lineString.coordinates()[1])
+                assertTrue(result2.isError)
             }
         }
 

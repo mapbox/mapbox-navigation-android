@@ -65,6 +65,7 @@ import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
+import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -218,10 +219,12 @@ class MapboxRouteLineApi(
             List<RouteLineExpressionData>
             >,
         List<RouteLineExpressionData>> by lazy { LruCache(2) }
+    private var lastLocationPoint: Point? = null
 
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
         private const val LOG_CATEGORY = "MapboxRouteLineApi"
+        private const val MIN_VANISHING_UPDATE_DISTANCE_IN_METERS = 1
     }
 
     init {
@@ -454,6 +457,21 @@ class MapboxRouteLineApi(
             )
         }
 
+        ifNonNull(lastLocationPoint) {
+            if (point == lastLocationPoint) {
+                val distance = TurfMeasurement.distance(it, point, TurfConstants.UNIT_METERS)
+                if (distance < MIN_VANISHING_UPDATE_DISTANCE_IN_METERS) {
+                    return ExpectedFactory.createError(
+                        RouteLineError(
+                            "Distance from last update is insufficient to warrant recalculation.",
+                            null
+                        )
+                    )
+                }
+            }
+        }
+        lastLocationPoint = point
+
         val stopGap: Double = ifNonNull(primaryRoute?.directionsRoute) { route ->
             RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.distance()
         } ?: .00000000001 // an arbitrarily small value so Expression values are in ascending order
@@ -550,6 +568,7 @@ class MapboxRouteLineApi(
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
+                lastLocationPoint = null
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
                 routes.clear()
@@ -1205,6 +1224,7 @@ class MapboxRouteLineApi(
     private suspend fun buildDrawRoutesState(
         featureDataProvider: () -> List<RouteFeatureData>
     ): Expected<RouteLineError, RouteSetValue> {
+        lastLocationPoint = null
         val routeFeatureDataDef = jobControl.scope.async {
             featureDataProvider()
         }
