@@ -23,5 +23,12 @@ jobs:
         run: |
           python3 -m pip install requests PyBambooHR retry
 
+      - name: install mbx-ci
+        run: |
+          curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > /usr/local/bin/mbx-ci
+          chmod 755 /usr/local/bin/mbx-ci
+          export GITHUB_WRITER_TOKEN=testvalue
+#          export GITHUB_WRITER_TOKEN=$(mbx-ci github writer public token)
+
       - name: execute py script
         run: python3 scripts/set_reviewers.py
