@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
+import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -96,6 +97,7 @@ private fun NavigationStatus.getRouteProgress(
         var routeProgressDistanceTraveled = 0f
         var routeProgressDurationRemaining = 0.0
         var routeProgressFractionTraveled = 0f
+        var stepGeometryIndex = 0
 
         ifNonNull(route.directionsRoute.legs(), activeGuidanceInfo) { legs, activeGuidanceInfo ->
             if (legIndex < legs.size) {
@@ -127,6 +129,19 @@ private fun NavigationStatus.getRouteProgress(
                             route.directionsRoute.stepGeometryToPoints(legStep)
                         }
                         routeProgressCurrentState = routeState.convertState()
+
+                        val prevStepsPoints = steps.take(stepIndex).map {
+                            route.directionsRoute.stepGeometryToPoints(it)
+                        }
+                        stepGeometryIndex = shapeIndex - prevStepsPoints.sumOf { it.size - 1 }
+                        if (stepGeometryIndex < 0) {
+                            logW(
+                                "Inconsistent state: got shapeIndex=$shapeIndex for " +
+                                    "legIndex=$legIndex, stepIndex=$stepIndex " +
+                                    "and route geometry: ${route.directionsRoute.geometry()}"
+                            )
+                            stepGeometryIndex = 0
+                        }
                     }
 
                     stepDistanceTraveled =
@@ -160,7 +175,8 @@ private fun NavigationStatus.getRouteProgress(
             stepDistanceRemaining,
             stepDistanceTraveled,
             stepFractionTraveled,
-            stepDurationRemaining
+            stepDurationRemaining,
+            stepGeometryIndex,
         )
 
         val routeLegProgress = buildRouteLegProgressObject(

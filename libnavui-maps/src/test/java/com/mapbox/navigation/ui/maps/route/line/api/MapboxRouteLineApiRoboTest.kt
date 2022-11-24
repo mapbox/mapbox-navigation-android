@@ -1184,6 +1184,7 @@ class MapboxRouteLineApiRoboTest {
                             route.directionsRoute.legs()!![0].steps()!![stepIndexValue].distance()
                     }
                     every { stepIndex } returns stepIndexValue
+                    every { geometryIndex } returns 0
                 }
             }
             every { currentState } returns RouteProgressState.TRACKING

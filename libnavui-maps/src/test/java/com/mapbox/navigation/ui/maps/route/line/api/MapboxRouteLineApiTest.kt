@@ -456,7 +456,7 @@ class MapboxRouteLineApiTest {
 
             api.updateUpcomingRoutePointIndex(routeProgress)
 
-            verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = 6 }
+            verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = 7 }
 
             unmockkObject(MapboxRouteLineUtils)
         }
@@ -1034,6 +1034,7 @@ class MapboxRouteLineApiTest {
                             route.directionsRoute.legs()!![0].steps()!![stepIndexValue].distance()
                     }
                     every { stepIndex } returns stepIndexValue
+                    every { geometryIndex } returns 0
                 }
             }
             every { currentState } returns RouteProgressState.TRACKING

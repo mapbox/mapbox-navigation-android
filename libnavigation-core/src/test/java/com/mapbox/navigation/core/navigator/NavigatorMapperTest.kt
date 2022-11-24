@@ -78,7 +78,8 @@ class NavigatorMapperTest {
                     distanceRemaining = 35f,
                     distanceTraveled = 30f,
                     fractionTraveled = 50f,
-                    durationRemaining = 3.0
+                    durationRemaining = 3.0,
+                    geometryIndex = 6
                 ),
                 geometryIndex = legGeometryIndex
             ),

@@ -939,6 +939,7 @@ package com.mapbox.navigation.base.trip.model {
     method public float getDistanceTraveled();
     method public double getDurationRemaining();
     method public float getFractionTraveled();
+    method public int getGeometryIndex();
     method public Integer? getInstructionIndex();
     method public int getIntersectionIndex();
     method public com.mapbox.api.directions.v5.models.LegStep? getStep();
@@ -948,6 +949,7 @@ package com.mapbox.navigation.base.trip.model {
     property public final float distanceTraveled;
     property public final double durationRemaining;
     property public final float fractionTraveled;
+    property public final int geometryIndex;
     property public final Integer? instructionIndex;
     property public final int intersectionIndex;
     property public final com.mapbox.api.directions.v5.models.LegStep? step;

@@ -42,7 +42,8 @@ fun createDirectionsRoute(
     distance: Double = 5.0,
     duration: Double = 9.0,
     routeIndex: String = "0",
-    requestUuid: String? = "testUUID"
+    requestUuid: String? = "testUUID",
+    geometry: String? = null,
 ): DirectionsRoute = DirectionsRoute.builder()
     .distance(distance)
     .duration(duration)
@@ -50,6 +51,7 @@ fun createDirectionsRoute(
     .routeOptions(routeOptions)
     .routeIndex(routeIndex)
     .requestUuid(requestUuid)
+    .geometry(geometry)
     .build()
 
 fun createRouteLeg(

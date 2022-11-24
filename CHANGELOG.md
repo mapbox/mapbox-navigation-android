@@ -12,6 +12,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Minor performance improvements for `MapboxNavigationViewportDataSource#evaluate`. [#6645](https://github.com/mapbox/mapbox-navigation-android/pull/6645)
 - Minor optimization when updating the vanishing route line by removing check for route line related layers. [#6642](https://github.com/mapbox/mapbox-navigation-android/pull/6642)
 - Added minor optimization to vanishing route line calculations by checking if the incoming point equal to the previous point in order to avoid recalculation and re-rendering. [#6643](https://github.com/mapbox/mapbox-navigation-android/pull/6643)
+- Added `RouteStepProgress#geometryIndex`. [#6646](https://github.com/mapbox/mapbox-navigation-android/pull/6646)
+- Optimized CPU usage of `MapboxRouteLineApi#updateWithRouteProgress`. [#6646](https://github.com/mapbox/mapbox-navigation-android/pull/6646)
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog

@@ -1104,46 +1104,38 @@ class MapboxRouteLineApi(
             routeProgress.currentLegProgress?.currentStepProgress,
             routePointsProvider(routeProgress.navigationRoute)
         ) { currentLegProgress, currentStepProgress, completeRoutePoints ->
-            var allRemainingPoints = 0
-
-            /**
-             * Finds the count of remaining points in the current step.
-             *
-             * TurfMisc.lineSliceAlong places an additional point at index 0 to mark the precise
-             * cut-off point which we can safely ignore.
-             * We'll add the distance from the upcoming point to the current's puck position later.
-             */
-            allRemainingPoints += try {
-                TurfMisc.lineSliceAlong(
-                    LineString.fromLngLats(currentStepProgress.stepPoints ?: emptyList()),
-                    currentStepProgress.distanceTraveled.toDouble(),
-                    currentStepProgress.step?.distance() ?: 0.0,
-                    TurfConstants.UNIT_METERS
-                ).coordinates().drop(1).size
-            } catch (e: TurfException) {
-                0
-            }
-
-            /**
-             * Add to the count of remaining points all of the remaining points on the current leg,
-             * after the current step.
-             */
+            val currentStepRemainingPoints: Int
+            val nextStepsRemainingPoints: Int
             if (currentLegProgress.legIndex < completeRoutePoints.stepPoints.size) {
                 val currentLegSteps = completeRoutePoints.stepPoints[currentLegProgress.legIndex]
-                allRemainingPoints += if (currentStepProgress.stepIndex < currentLegSteps.size) {
-                    currentLegSteps.slice(
+                if (currentStepProgress.stepIndex < currentLegSteps.size) {
+                    /**
+                     * Finds the count of remaining points in the current step.
+                     */
+                    currentStepRemainingPoints = currentLegSteps[currentStepProgress.stepIndex]
+                        .size - currentStepProgress.geometryIndex - 1
+                    /**
+                     * Add to the count of remaining points all of the remaining points on the current leg,
+                     * after the current step.
+                     */
+                    nextStepsRemainingPoints = currentLegSteps.slice(
                         currentStepProgress.stepIndex + 1 until currentLegSteps.size - 1
-                    ).flatten().size
+                    ).sumOf { it.size }
                 } else {
-                    0
+                    currentStepRemainingPoints = 0
+                    nextStepsRemainingPoints = 0
                 }
+            } else {
+                currentStepRemainingPoints = 0
+                nextStepsRemainingPoints = 0
             }
+            var allRemainingPoints = currentStepRemainingPoints + nextStepsRemainingPoints
 
             /**
              * Add to the count of remaining points all of the remaining legs.
              */
             for (i in currentLegProgress.legIndex + 1 until completeRoutePoints.stepPoints.size) {
-                allRemainingPoints += completeRoutePoints.stepPoints[i].flatten().size
+                allRemainingPoints += completeRoutePoints.stepPoints[i].sumOf { it.size }
             }
 
             /**

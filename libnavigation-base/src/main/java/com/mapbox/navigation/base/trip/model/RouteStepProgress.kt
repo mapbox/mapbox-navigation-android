@@ -20,6 +20,7 @@ import com.mapbox.geojson.Point
  * float value between 0 and 1 and isn't guaranteed to reach 1 before the user reaches the
  * next step (if another step exist in route)
  * @param durationRemaining [Double] The duration remaining in seconds until the user reaches the end of the current step
+ * @param geometryIndex [Int] Step-wise index representing the geometry point right in front of the user
  */
 class RouteStepProgress internal constructor(
     val stepIndex: Int,
@@ -30,7 +31,8 @@ class RouteStepProgress internal constructor(
     val distanceRemaining: Float,
     val distanceTraveled: Float,
     val fractionTraveled: Float,
-    val durationRemaining: Double
+    val durationRemaining: Double,
+    val geometryIndex: Int,
 ) {
 
     /**
@@ -51,6 +53,7 @@ class RouteStepProgress internal constructor(
         if (distanceTraveled != other.distanceTraveled) return false
         if (fractionTraveled != other.fractionTraveled) return false
         if (durationRemaining != other.durationRemaining) return false
+        if (geometryIndex != other.geometryIndex) return false
 
         return true
     }
@@ -68,6 +71,7 @@ class RouteStepProgress internal constructor(
         result = 31 * result + distanceTraveled.hashCode()
         result = 31 * result + fractionTraveled.hashCode()
         result = 31 * result + durationRemaining.hashCode()
+        result = 31 * result + geometryIndex.hashCode()
         return result
     }
 
@@ -84,7 +88,8 @@ class RouteStepProgress internal constructor(
             "distanceRemaining=$distanceRemaining, " +
             "distanceTraveled=$distanceTraveled, " +
             "fractionTraveled=$fractionTraveled, " +
-            "durationRemaining=$durationRemaining" +
+            "durationRemaining=$durationRemaining," +
+            "geometryIndex=$geometryIndex" +
             ")"
     }
 }

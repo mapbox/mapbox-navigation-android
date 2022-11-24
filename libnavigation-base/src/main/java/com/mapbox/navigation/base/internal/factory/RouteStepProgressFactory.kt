@@ -25,6 +25,7 @@ object RouteStepProgressFactory {
      * float value between 0 and 1 and isn't guaranteed to reach 1 before the user reaches the
      * next step (if another step exist in route)
      * @param durationRemaining [Double] The duration remaining in seconds until the user reaches the end of the current step
+     * @param geometryIndex [Int] Step-wise index representing the geometry point right in front of the user
      */
     fun buildRouteStepProgressObject(
         stepIndex: Int,
@@ -35,7 +36,8 @@ object RouteStepProgressFactory {
         distanceRemaining: Float,
         distanceTraveled: Float,
         fractionTraveled: Float,
-        durationRemaining: Double
+        durationRemaining: Double,
+        geometryIndex: Int,
     ): RouteStepProgress {
         return RouteStepProgress(
             stepIndex = stepIndex,
@@ -46,7 +48,8 @@ object RouteStepProgressFactory {
             distanceRemaining = distanceRemaining,
             distanceTraveled = distanceTraveled,
             fractionTraveled = fractionTraveled,
-            durationRemaining = durationRemaining
+            durationRemaining = durationRemaining,
+            geometryIndex = geometryIndex
         )
     }
 }
