@@ -4,7 +4,7 @@ on:
     types: [ opened, reopened, ready_for_review ]
 jobs:
   process:
-#    runs-on: [ self-hosted, Linux, X64 ]
+    runs-on: ubuntu-latest
     env:
 #      GITHUB_API_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
