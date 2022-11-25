@@ -288,7 +288,6 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         style: Style,
         update: Expected<RouteLineError, RouteLineUpdateValue>
     ) {
-        MapboxRouteLineUtils.initializeLayers(style, options)
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 update.onValue {

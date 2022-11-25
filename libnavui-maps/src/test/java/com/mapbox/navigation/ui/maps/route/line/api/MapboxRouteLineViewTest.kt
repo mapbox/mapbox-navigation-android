@@ -288,7 +288,6 @@ class MapboxRouteLineViewTest {
             val view = MapboxRouteLineView(options)
             view.initPrimaryRouteLineLayerGroup(MapboxRouteLineUtils.layerGroup1SourceLayerIds)
             view.renderRouteLineUpdate(style, state)
-            verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         }
 
         verify {
@@ -374,7 +373,6 @@ class MapboxRouteLineViewTest {
             val view = MapboxRouteLineView(options)
             view.initPrimaryRouteLineLayerGroup(MapboxRouteLineUtils.layerGroup1SourceLayerIds)
             view.renderRouteLineUpdate(style, state)
-            verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         }
 
         verify {
