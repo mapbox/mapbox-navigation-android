@@ -65,7 +65,6 @@ import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
-import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -224,7 +223,6 @@ class MapboxRouteLineApi(
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
         private const val LOG_CATEGORY = "MapboxRouteLineApi"
-        private const val MIN_VANISHING_UPDATE_DISTANCE_IN_METERS = 1
     }
 
     init {
@@ -457,18 +455,13 @@ class MapboxRouteLineApi(
             )
         }
 
-        ifNonNull(lastLocationPoint) {
-            if (point == lastLocationPoint) {
-                val distance = TurfMeasurement.distance(it, point, TurfConstants.UNIT_METERS)
-                if (distance < MIN_VANISHING_UPDATE_DISTANCE_IN_METERS) {
-                    return ExpectedFactory.createError(
-                        RouteLineError(
-                            "Distance from last update is insufficient to warrant recalculation.",
-                            null
-                        )
-                    )
-                }
-            }
+        if (point == lastLocationPoint) {
+            return ExpectedFactory.createError(
+                RouteLineError(
+                    "Provided point is equal to the last update, skipping recalculation.",
+                    null
+                )
+            )
         }
         lastLocationPoint = point
 
