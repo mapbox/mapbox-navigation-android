@@ -8,6 +8,8 @@ pr_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/pulls/" 
 headers = {"Authorization": "Bearer " + token}
 pr = requests.get(pr_url, headers=headers).json()
 
+print(pr)
+
 if pr['draft']:
     print("It is draft pr")
     exit()
