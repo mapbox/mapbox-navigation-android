@@ -78,7 +78,7 @@ class VanishingRouteLineRoboTest {
             Constants.PRECISION_6
         )
         val vanishingRouteLine = VanishingRouteLine()
-        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
+        vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 1
         val segments: List<RouteLineExpressionData> =
             MapboxRouteLineUtils.calculateRouteLineSegments(
                 route,
@@ -124,7 +124,7 @@ class VanishingRouteLineRoboTest {
             Constants.PRECISION_6
         )
         val vanishingRouteLine = VanishingRouteLine()
-        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
+        vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 1
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],
@@ -165,7 +165,7 @@ class VanishingRouteLineRoboTest {
             Constants.PRECISION_6
         )
         val vanishingRouteLine = VanishingRouteLine()
-        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
+        vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 1
         val segments: List<RouteLineExpressionData> =
             MapboxRouteLineUtils.calculateRouteLineSegments(
                 route,
@@ -212,7 +212,7 @@ class VanishingRouteLineRoboTest {
             Constants.PRECISION_6
         )
         val vanishingRouteLine = VanishingRouteLine()
-        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
+        vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 1
         val segments: List<RouteLineExpressionData> =
             MapboxRouteLineUtils.calculateRouteLineSegments(
                 route,
@@ -261,7 +261,7 @@ class VanishingRouteLineRoboTest {
             " [rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadNavigationRoute("multileg-route-two-legs.json")
         val vanishingRouteLine = VanishingRouteLine()
-        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 7
+        vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 7
         vanishingRouteLine.vanishPointOffset = 0.1322571610688955
         val segments = listOf(
             RouteLineExpressionData(0.0, -27392, 0),

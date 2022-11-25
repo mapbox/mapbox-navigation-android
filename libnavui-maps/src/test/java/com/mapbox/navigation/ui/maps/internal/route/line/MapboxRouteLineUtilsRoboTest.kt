@@ -515,24 +515,6 @@ class MapboxRouteLineUtilsRoboTest {
     }
 
     @Test
-    fun `calculateRouteGranularDistances - flat steps list distances`() {
-        val route = loadNavigationRoute("short_route.json")
-
-        val result = MapboxRouteLineUtils.granularDistancesProvider(route)!!
-
-        assertEquals(8, result.flatStepDistances.size)
-        assertEquals(result.flatStepDistances[1], result.flatStepDistances[2])
-        assertEquals(result.flatStepDistances[4], result.flatStepDistances[5])
-        assertEquals(result.flatStepDistances[6], result.flatStepDistances[7])
-        assertEquals(Point.fromLngLat(-122.523671, 37.975379), result.flatStepDistances[0].point)
-        assertEquals(0.0000025451727518618744, result.flatStepDistances[0].distanceRemaining, 0.0)
-        assertEquals(Point.fromLngLat(-122.523117, 37.975107), result.flatStepDistances[4].point)
-        assertEquals(0.00000014622044645899132, result.flatStepDistances[4].distanceRemaining, 0.0)
-        assertEquals(Point.fromLngLat(-122.523131, 37.975067), result.flatStepDistances[7].point)
-        assertEquals(0.0, result.flatStepDistances[7].distanceRemaining, 0.0)
-    }
-
-    @Test
     fun `calculateRouteGranularDistances - route distances`() {
         val route = loadNavigationRoute("short_route.json")
 
@@ -642,7 +624,7 @@ class MapboxRouteLineUtilsRoboTest {
         val result = MapboxRouteLineUtils.findDistanceToNearestPointOnCurrentLine(
             lineString.coordinates()[15],
             distances!!,
-            12
+            upcomingIndex = 10
         )
 
         assertEquals(296.6434687878863, result, 0.0)
@@ -1134,39 +1116,5 @@ class MapboxRouteLineUtilsRoboTest {
         MapboxRouteLineUtils.extractRouteData(route2, trafficCongestionProvider)
         assertEquals(putCount + 5, MapboxRouteLineUtils.extractRouteDataCache.putCount())
         assertEquals(hitCount + 5, MapboxRouteLineUtils.extractRouteDataCache.hitCount())
-    }
-
-    @Test
-    fun `trim route points cache`() {
-        val route1 = mockk<NavigationRoute>(relaxed = true) {
-            every { id } returns "1"
-        }
-        val route2 = mockk<NavigationRoute>(relaxed = true) {
-            every { id } returns "2"
-        }
-        MapboxRouteLineUtils.routePointsProvider(route1)
-        MapboxRouteLineUtils.routePointsProvider(route1)
-        MapboxRouteLineUtils.routePointsProvider(route2)
-        MapboxRouteLineUtils.routePointsProvider(route2)
-        verify(exactly = 1) { route1.directionsRoute }
-        verify(exactly = 1) { route2.directionsRoute }
-
-        MapboxRouteLineUtils.trimRouteDataCacheToSize(1) // removes route1
-        MapboxRouteLineUtils.routePointsProvider(route1)
-        MapboxRouteLineUtils.routePointsProvider(route2)
-        verify(exactly = 2) { route1.directionsRoute }
-        verify(exactly = 1) { route2.directionsRoute }
-
-        MapboxRouteLineUtils.trimRouteDataCacheToSize(0) // removes both routes
-        MapboxRouteLineUtils.routePointsProvider(route1)
-        MapboxRouteLineUtils.routePointsProvider(route2)
-        verify(exactly = 3) { route1.directionsRoute }
-        verify(exactly = 2) { route2.directionsRoute }
-
-        MapboxRouteLineUtils.trimRouteDataCacheToSize(2) // doesn't remove anything
-        MapboxRouteLineUtils.routePointsProvider(route1)
-        MapboxRouteLineUtils.routePointsProvider(route2)
-        verify(exactly = 3) { route1.directionsRoute }
-        verify(exactly = 2) { route2.directionsRoute }
     }
 }

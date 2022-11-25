@@ -49,7 +49,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvide
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineSourceKey
-import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
@@ -81,10 +80,6 @@ internal object MapboxRouteLineUtils {
     private val extractRouteRestrictionDataCache: LruCache<
         CacheResultUtils.CacheResultKeyRoute<
             List<ExtractedRouteRestrictionData>>, List<ExtractedRouteRestrictionData>>
-        by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
-
-    private val routePointsCache: LruCache<
-        CacheResultUtils.CacheResultKeyRoute<RoutePoints?>, RoutePoints?>
         by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
 
     private val granularDistancesCache: LruCache<
@@ -701,33 +696,14 @@ internal object MapboxRouteLineUtils {
         }
 
     /**
-     * Decodes the route geometry into [RoutePoints].
-     */
-    internal val routePointsProvider: (
-        route: NavigationRoute,
-    ) -> RoutePoints? =
-        { route: NavigationRoute ->
-            val stepPoints = route.directionsRoute.stepsGeometryToPoints()
-
-            RoutePoints(
-                stepPoints = stepPoints,
-                flatList = stepPoints.flatten().flatten(),
-            )
-        }.cacheRouteResult(routePointsCache)
-
-    /**
      * Decodes the route and produces [RouteLineGranularDistances].
      */
     internal val granularDistancesProvider: (
         route: NavigationRoute,
     ) -> RouteLineGranularDistances? =
         { route: NavigationRoute ->
-            val points = routePointsProvider(route)
-            if (points?.flatList?.isNotEmpty() == true) {
-                calculateGranularDistances(points.stepPoints)
-            } else {
-                null
-            }
+            val points = route.directionsRoute.stepsGeometryToPoints()
+            calculateGranularDistances(points)
         }.cacheRouteResult(granularDistancesCache)
 
     internal fun getTrafficCongestionAnnotationProvider(
@@ -953,7 +929,6 @@ internal object MapboxRouteLineUtils {
             routeDistances = routeArray.toTypedArray(),
             legsDistances = legsArray.toTypedArray(),
             stepsDistances = stepsArray as Array<Array<Array<RouteLineDistancesIndex>>>,
-            flatStepDistances = stepsArray.flatten().toTypedArray().flatten().toTypedArray(),
         )
     }
 
@@ -1060,7 +1035,7 @@ internal object MapboxRouteLineUtils {
     ): Double {
         return TurfMisc.nearestPointOnLine(
             point,
-            granularDistances.flatStepDistances.run {
+            granularDistances.routeDistances.run {
                 val points = mutableListOf<Point>()
                 for (i in max(upcomingIndex - 10, 0)..upcomingIndex) {
                     points.add(this[i].point)
@@ -1547,7 +1522,6 @@ internal object MapboxRouteLineUtils {
     internal fun trimRouteDataCacheToSize(size: Int) {
         extractRouteDataCache.trimToSize(size)
         extractRouteRestrictionDataCache.trimToSize(size)
-        routePointsCache.trimToSize(size)
         granularDistancesCache.trimToSize(size)
     }
 

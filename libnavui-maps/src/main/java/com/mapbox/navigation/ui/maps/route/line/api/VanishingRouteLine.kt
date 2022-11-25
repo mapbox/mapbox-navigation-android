@@ -29,10 +29,10 @@ import com.mapbox.navigation.utils.internal.logD
 internal class VanishingRouteLine {
 
     /**
-     * the distance index used for calculating the point at which the primary route line
-     * should change its appearance
+     * The index of the upcoming segment of the road. A segment is an element between two geometry points in the route,
+     * see [RouteLineGranularDistances.routeDistances].
      */
-    var primaryRouteRemainingDistancesIndex: Int? = null
+    var upcomingRouteGeometrySegmentIndex: Int? = null
 
     /**
      * a value representing the percentage distance traveled
@@ -64,7 +64,7 @@ internal class VanishingRouteLine {
         granularDistances: RouteLineGranularDistances,
         index: Int
     ): Double? {
-        val upcomingIndex = granularDistances.flatStepDistances.getOrNull(index)
+        val upcomingIndex = granularDistances.routeDistances.getOrNull(index)
         if (upcomingIndex == null) {
             logD(
                 "Upcoming route line index is null.",
@@ -121,7 +121,7 @@ internal class VanishingRouteLine {
         point: Point,
         granularDistances: RouteLineGranularDistances
     ): VanishingRouteLineExpressions? {
-        return ifNonNull(primaryRouteRemainingDistancesIndex) { index ->
+        return ifNonNull(upcomingRouteGeometrySegmentIndex) { index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
                 vanishPointOffset = offset
                 val trimmedOffsetExpression = literal(listOf(0.0, offset))
@@ -158,7 +158,7 @@ internal class VanishingRouteLine {
         useSoftGradient: Boolean,
     ): VanishingRouteLineExpressions? {
         return ifNonNull(
-            primaryRouteRemainingDistancesIndex
+            upcomingRouteGeometrySegmentIndex
         ) { index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
                 vanishPointOffset = offset

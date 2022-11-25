@@ -4,19 +4,19 @@ import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
-import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.getRouteDrawData
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
@@ -26,8 +26,11 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.ui.maps.testing.TestRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -73,6 +76,14 @@ class MapboxRouteLineApiRoboTest {
 
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+
+    private val shortRoute by lazy { TestRoute(fileName = "short_route.json") }
+    private val routeWithRestrictions by lazy {
+        TestRoute(fileName = "route-with-restrictions.json")
+    }
+    private val multiLegRouteTwoLegs by lazy {
+        TestRoute(fileName = "multileg-route-two-legs.json")
+    }
 
     @Before
     fun setUp() {
@@ -148,6 +159,73 @@ class MapboxRouteLineApiRoboTest {
         assertEquals(
             expectedWaypointFeature1,
             result.value!!.waypointsSource.features()!![1].geometry().toString()
+        )
+    }
+
+    @Test
+    fun setRoutesWithCallback() {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
+            " [rgba, 47.0, 122.0, 198.0, 1.0]]"
+        val expectedRouteLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+            "0.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expectedTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "1.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
+            "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
+            " Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
+            "Point{type=Point, bbox=null, coordinates=[-122.523579, 37.975173]}, " +
+            "Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
+            "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}]}"
+        val expectedWaypointFeature0 =
+            "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
+        val expectedWaypointFeature1 =
+            "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
+        val route = loadRoute("short_route.json")
+        val routes = listOf(RouteLine(route, null))
+
+        var result: RouteSetValue? = null
+        val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> {
+            result = it.value
+        }
+        api.setRoutes(routes, consumer)
+
+        assertEquals(
+            expectedCasingExpression,
+            result!!.primaryRouteLineData.dynamicData.casingExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedRouteLineExpression,
+            result!!.primaryRouteLineData.dynamicData.baseExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedTrafficLineExpression,
+            result!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedPrimaryRouteSourceGeometry,
+            result!!.primaryRouteLineData.featureCollection.features()!![0].geometry()
+                .toString()
+        )
+        assertTrue(
+            result!!.alternativeRouteLinesData[0].featureCollection.features()!!.isEmpty()
+        )
+        assertTrue(
+            result!!.alternativeRouteLinesData[1].featureCollection.features()!!.isEmpty()
+        )
+        assertEquals(
+            expectedWaypointFeature0,
+            result!!.waypointsSource.features()!![0].geometry().toString()
+        )
+        assertEquals(
+            expectedWaypointFeature1,
+            result!!.waypointsSource.features()!![1].geometry().toString()
         )
     }
 
@@ -314,12 +392,12 @@ class MapboxRouteLineApiRoboTest {
         val expectedRouteExpression = "[literal, [0.0, 0.3240769449298392]]"
         val expectedTrafficExpression = "[literal, [0.0, 0.3240769449298392]]"
         val expectedRestrictedExpression = "[literal, [0.0, 0.3240769449298392]]"
-        val route = loadNavigationRoute("short_route.json")
+        val route = shortRoute.navigationRoute
         val lineString = LineString.fromPolyline(
             route.directionsRoute.geometry() ?: "",
             Constants.PRECISION_6
         )
-        val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
+        val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
         api.updateVanishingPointState(RouteProgressState.TRACKING)
         api.setNavigationRoutes(listOf(route))
@@ -360,12 +438,12 @@ class MapboxRouteLineApiRoboTest {
                 .vanishingRouteLineUpdateInterval(TimeUnit.MILLISECONDS.toNanos(1200))
                 .build()
             val api = MapboxRouteLineApi(options)
-            val route = loadNavigationRoute("short_route.json")
+            val route = shortRoute.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
                 Constants.PRECISION_6
             )
-            val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
+            val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
@@ -396,12 +474,12 @@ class MapboxRouteLineApiRoboTest {
                 .vanishingRouteLineUpdateInterval(TimeUnit.MILLISECONDS.toNanos(1200))
                 .build()
             val api = MapboxRouteLineApi(options)
-            val route = loadNavigationRoute("short_route.json")
+            val route = shortRoute.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
                 Constants.PRECISION_6
             )
-            val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
+            val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
@@ -428,13 +506,13 @@ class MapboxRouteLineApiRoboTest {
                 .vanishingRouteLineUpdateInterval(0)
                 .build()
             val api = MapboxRouteLineApi(options)
-            val expectedRestrictedExpression = "[literal, [0.0, 0.05416168943228483]]"
-            val route = loadNavigationRoute("route-with-restrictions.json")
+            val expectedRestrictedExpression = "[literal, [0.0, 0.04111412293617067]]"
+            val route = routeWithRestrictions.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
                 Constants.PRECISION_6
             )
-            val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
+            val routeProgress = routeWithRestrictions.mockRouteProgress(stepIndexValue = 2)
 
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
@@ -470,12 +548,12 @@ class MapboxRouteLineApiRoboTest {
                 .vanishingRouteLineUpdateInterval(0)
                 .build()
             val api = MapboxRouteLineApi(options)
-            val route = loadNavigationRoute("short_route.json")
+            val route = shortRoute.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
                 Constants.PRECISION_6
             )
-            val routeProgress = mockRouteProgress(route, stepIndexValue = 2)
+            val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
@@ -520,7 +598,7 @@ class MapboxRouteLineApiRoboTest {
             val realOptions = MapboxRouteLineOptions.Builder(ctx)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val route = loadNavigationRoute("multileg-route-two-legs.json")
+            val route = multiLegRouteTwoLegs.navigationRoute
             val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
                 every { vanishPointOffset } returns 0.0
             }
@@ -536,7 +614,7 @@ class MapboxRouteLineApiRoboTest {
                 every { routeStyleDescriptors } returns listOf()
             }
             val api = MapboxRouteLineApi(options)
-            val routeProgress = mockRouteProgress(route)
+            val routeProgress = multiLegRouteTwoLegs.mockRouteProgress()
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
             api.updateWithRouteProgress(routeProgress) {}
@@ -563,12 +641,12 @@ class MapboxRouteLineApiRoboTest {
             " [rgba, 0.0, 0.0, 0.0, 0.0], 0.4897719974699625, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedCasingExp = "[step, [line-progress], [rgba, 47.0, 122.0, 198.0, 1.0], 0.0," +
             " [rgba, 0.0, 0.0, 0.0, 0.0], 0.4897719974699625, [rgba, 47.0, 122.0, 198.0, 1.0]]"
-        val route = loadNavigationRoute("multileg-route-two-legs.json")
+        val route = multiLegRouteTwoLegs.navigationRoute
         val options = MapboxRouteLineOptions.Builder(ctx)
             .styleInactiveRouteLegsIndependently(true)
             .build()
         val api = MapboxRouteLineApi(options)
-        val routeProgress = mockRouteProgress(route, legIndexValue = 1)
+        val routeProgress = multiLegRouteTwoLegs.mockRouteProgress(legIndexValue = 1)
         api.setNavigationRoutes(listOf(route))
 
         api.updateWithRouteProgress(routeProgress) { result ->
@@ -1009,7 +1087,6 @@ class MapboxRouteLineApiRoboTest {
                     emptyArray(),
                     emptyArray(),
                     emptyArray(),
-                    emptyArray()
                 )
             }
         )
@@ -1044,7 +1121,6 @@ class MapboxRouteLineApiRoboTest {
                     arrayOf(mockk(relaxed = true), mockk(relaxed = true)),
                     arrayOf(arrayOf(mockk(relaxed = true), mockk(relaxed = true))),
                     arrayOf(arrayOf(arrayOf(mockk(relaxed = true), mockk(relaxed = true)))),
-                    arrayOf(mockk(relaxed = true), mockk(relaxed = true)),
                 )
             }
         )
@@ -1097,7 +1173,6 @@ class MapboxRouteLineApiRoboTest {
                     ),
                     legsDistances = emptyArray(),
                     stepsDistances = emptyArray(),
-                    flatStepDistances = emptyArray(),
                 )
             }
         )
@@ -1147,7 +1222,6 @@ class MapboxRouteLineApiRoboTest {
                     ),
                     legsDistances = emptyArray(),
                     stepsDistances = emptyArray(),
-                    flatStepDistances = emptyArray(),
                 )
             }
         )
@@ -1164,29 +1238,4 @@ class MapboxRouteLineApiRoboTest {
             )
         }
     }
-
-    private fun mockRouteProgress(
-        route: NavigationRoute,
-        stepIndexValue: Int = 0,
-        legIndexValue: Int = 0
-    ): RouteProgress =
-        mockk {
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns legIndexValue
-                every { currentStepProgress } returns mockk {
-                    every { stepPoints } returns PolylineUtils.decode(
-                        route.directionsRoute.legs()!![0].steps()!![stepIndexValue].geometry()!!,
-                        6
-                    )
-                    every { distanceTraveled } returns 0f
-                    every { step } returns mockk {
-                        every { distance() } returns
-                            route.directionsRoute.legs()!![0].steps()!![stepIndexValue].distance()
-                    }
-                    every { stepIndex } returns stepIndexValue
-                }
-            }
-            every { currentState } returns RouteProgressState.TRACKING
-            every { navigationRoute } returns route
-        }
 }

@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueriedFeature
@@ -35,7 +34,6 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.gr
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.routePointsProvider
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
@@ -63,9 +61,6 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
-import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfException
-import com.mapbox.turf.TurfMisc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
@@ -1092,61 +1087,8 @@ class MapboxRouteLineApi(
     }
 
     internal fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
-        ifNonNull(
-            routeProgress.currentLegProgress,
-            routeProgress.currentLegProgress?.currentStepProgress,
-            routePointsProvider(routeProgress.navigationRoute)
-        ) { currentLegProgress, currentStepProgress, completeRoutePoints ->
-            var allRemainingPoints = 0
-
-            /**
-             * Finds the count of remaining points in the current step.
-             *
-             * TurfMisc.lineSliceAlong places an additional point at index 0 to mark the precise
-             * cut-off point which we can safely ignore.
-             * We'll add the distance from the upcoming point to the current's puck position later.
-             */
-            allRemainingPoints += try {
-                TurfMisc.lineSliceAlong(
-                    LineString.fromLngLats(currentStepProgress.stepPoints ?: emptyList()),
-                    currentStepProgress.distanceTraveled.toDouble(),
-                    currentStepProgress.step?.distance() ?: 0.0,
-                    TurfConstants.UNIT_METERS
-                ).coordinates().drop(1).size
-            } catch (e: TurfException) {
-                0
-            }
-
-            /**
-             * Add to the count of remaining points all of the remaining points on the current leg,
-             * after the current step.
-             */
-            if (currentLegProgress.legIndex < completeRoutePoints.stepPoints.size) {
-                val currentLegSteps = completeRoutePoints.stepPoints[currentLegProgress.legIndex]
-                allRemainingPoints += if (currentStepProgress.stepIndex < currentLegSteps.size) {
-                    currentLegSteps.slice(
-                        currentStepProgress.stepIndex + 1 until currentLegSteps.size - 1
-                    ).flatten().size
-                } else {
-                    0
-                }
-            }
-
-            /**
-             * Add to the count of remaining points all of the remaining legs.
-             */
-            for (i in currentLegProgress.legIndex + 1 until completeRoutePoints.stepPoints.size) {
-                allRemainingPoints += completeRoutePoints.stepPoints[i].flatten().size
-            }
-
-            /**
-             * When we know the number of remaining points and the number of all points,
-             * calculate the index of the upcoming point.
-             */
-            val allPoints = completeRoutePoints.flatList.size
-            routeLineOptions.vanishingRouteLine?.primaryRouteRemainingDistancesIndex =
-                allPoints - allRemainingPoints - 1
-        } ?: run { routeLineOptions.vanishingRouteLine?.primaryRouteRemainingDistancesIndex = null }
+        routeLineOptions.vanishingRouteLine?.upcomingRouteGeometrySegmentIndex =
+            routeProgress.currentRouteGeometryIndex + 1
 
         lastIndexUpdateTimeNano = System.nanoTime()
     }

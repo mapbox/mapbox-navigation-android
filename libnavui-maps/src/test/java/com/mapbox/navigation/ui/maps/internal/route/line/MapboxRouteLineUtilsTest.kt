@@ -1370,20 +1370,6 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun parseRoutePoints() {
-        val route = loadNavigationRoute("multileg_route.json")
-
-        val result = MapboxRouteLineUtils.routePointsProvider(route)!!
-
-        assertEquals(128, result.flatList.size)
-        assertEquals(15, result.stepPoints.flatten().size)
-        assertEquals(result.flatList[1].latitude(), result.flatList[2].latitude(), 0.0)
-        assertEquals(result.flatList[1].longitude(), result.flatList[2].longitude(), 0.0)
-        assertEquals(result.flatList[126].latitude(), result.flatList[127].latitude(), 0.0)
-        assertEquals(result.flatList[126].longitude(), result.flatList[127].longitude(), 0.0)
-    }
-
-    @Test
     fun whenAnnotationIsCongestionNumericThenResolveLowCongestionNumeric() {
         val lowCongestionNumeric = 4
         val congestionResource = RouteLineColorResources.Builder().build()

@@ -1,7 +1,9 @@
 package com.mapbox.navigation.base.internal.factory
 
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -10,6 +12,8 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.base.utils.DecodeUtils
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 
 /**
  * Internal factory to build [RouteProgress] objects
@@ -43,8 +47,9 @@ object RouteProgressFactory {
      * a lack of confidence in the progress updates being sent.
      * @param alternativeRouteId id of an alternative route user started to follow deviating from
      * a primary route. **null** if a route does not exist
-     * @param currentRouteGeometryIndex route-wise index representing the geometry point
-     * right in front of the user (see [DirectionsRoute.geometry]).
+     * @param currentRouteGeometryIndex route-wise index representing the geometry point that starts the segment
+     * the user is currently on, effectively this represents the index of last visited geometry point in the route
+     * (see [DirectionsRoute.geometry] or [DecodeUtils.completeGeometryToPoints] if [RouteOptions.overview] is [DirectionsCriteria.OVERVIEW_FULL]).
      */
     fun buildRouteProgressObject(
         route: NavigationRoute,
