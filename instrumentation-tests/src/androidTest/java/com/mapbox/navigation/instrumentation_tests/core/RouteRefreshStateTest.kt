@@ -390,19 +390,18 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         mapboxNavigation.refreshRoutesImmediately()
         mapboxNavigation.refreshRoutesImmediately()
         mapboxNavigation.refreshRoutesImmediately()
+        delay(4000)
 
-        waitForRefreshes(2)
+        waitForRefresh()
 
         assertEquals(
             listOf(
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
             ),
             observer.getStatesSnapshot()
         )
-        assertEquals(2, refreshHandler.handledRequests.size)
+        assertEquals(1, refreshHandler.handledRequests.size)
     }
 
     @Test

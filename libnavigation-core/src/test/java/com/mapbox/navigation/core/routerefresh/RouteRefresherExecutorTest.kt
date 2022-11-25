@@ -74,53 +74,12 @@ class RouteRefresherExecutorTest {
 
         coroutineRule.testDispatcher.advanceTimeBy(10000)
 
-        coVerifyOrder {
+        coVerify {
             callback.onResult(routeRefresherResult)
-            callback2.onStarted()
-            callback2.onResult(routeRefresherResult2)
-        }
-    }
-
-    @Test
-    fun onlyTwoRequestsCanBeInQueue() = coroutineRule.runBlockingTest {
-        val routes2 = listOf<NavigationRoute>(mockk(), mockk(), mockk())
-        val routes3 = listOf<NavigationRoute>(mockk())
-        val routes4 = listOf<NavigationRoute>(mockk(), mockk())
-        val callback2 = mockk<RouteRefresherProgressCallback>(relaxed = true)
-        val callback3 = mockk<RouteRefresherProgressCallback>(relaxed = true)
-        val callback4 = mockk<RouteRefresherProgressCallback>(relaxed = true)
-
-        coEvery { routeRefresher.refresh(routes, any()) } coAnswers {
-            delay(10000)
-            routeRefresherResult
-        }
-
-        sut.postRoutesToRefresh(routes, callback)
-        sut.postRoutesToRefresh(routes2, callback2)
-        sut.postRoutesToRefresh(routes3, callback3)
-        sut.postRoutesToRefresh(routes4, callback4)
-
-        coroutineRule.testDispatcher.advanceTimeBy(10000)
-
-        coVerify(exactly = 1) {
-            routeRefresher.refresh(routes, timeout)
-            routeRefresher.refresh(routes4, timeout)
-        }
-        coVerify(exactly = 0) {
-            routeRefresher.refresh(routes2, timeout)
-            routeRefresher.refresh(routes3, timeout)
-        }
-        coVerify(exactly = 1) {
-            callback.onStarted()
-            callback.onResult(any())
-            callback4.onStarted()
-            callback4.onResult(any())
         }
         coVerify(exactly = 0) {
             callback2.onStarted()
             callback2.onResult(any())
-            callback3.onStarted()
-            callback3.onResult(any())
         }
     }
 }
