@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -51,6 +52,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
+    private lateinit var failedRefreshHandlerWrapper: FailByRequestMockRequestHandler
     private lateinit var refreshHandler: MockDirectionsRefreshHandler
     private lateinit var mapboxNavigation: MapboxNavigation
     private val twoCoordinates = listOf(
@@ -72,6 +74,11 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             R.raw.route_response_route_refresh_annotations,
             "route_response_route_refresh"
         )
+    }
+
+    @After
+    fun tearDown() {
+        failedRefreshHandlerWrapper.failResponse = false
     }
 
     @Test(timeout = 10_000)
@@ -149,6 +156,55 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             .toList()
     }
 
+    @Test
+    fun failed_route_refresh_on_demand_does_not_notify_refresh_observer_before_timeout() = sdkTest {
+        val refreshes = mutableListOf<RoutesUpdatedResult>()
+        val routeRefreshOptions = RouteRefreshOptions.Builder()
+            .intervalMillis(TimeUnit.MINUTES.toMillis(1))
+            .build()
+        failedRefreshHandlerWrapper.failResponse = true
+        createMapboxNavigation(routeRefreshOptions)
+        val routeOptions = generateRouteOptions(twoCoordinates)
+        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.registerRoutesObserver {
+            if (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH) {
+                refreshes.add(it)
+            }
+        }
+        stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+
+        mapboxNavigation.refreshRoutesImmediately()
+        delay(2000)
+        assertEquals(0, refreshes.size)
+    }
+
+    @Test
+    fun failed_route_refresh_on_demand_notifies_refresh_observer_after_timeout() = sdkTest {
+        val routeRefreshOptions = createRouteRefreshOptionsWithInvalidInterval(3000)
+        failedRefreshHandlerWrapper.failResponse = true
+        createMapboxNavigation(routeRefreshOptions)
+        val routeOptions = generateRouteOptions(twoCoordinates)
+        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+
+        delay(7000) // 2 failed planned attempts + accuracy
+        mapboxNavigation.refreshRoutesImmediately() // fail and postpone next planned attempt
+        delay(2000)
+        mapboxNavigation.refreshRoutesImmediately() // dispatch new routes with REFRESH reason
+
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .first()
+    }
+
     private fun createMapboxNavigation(routeRefreshOptions: RouteRefreshOptions) {
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(activity)
@@ -204,7 +260,8 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             readRawFileText(activity, refreshResponse),
             acceptedGeometryIndex
         )
-        mockWebServerRule.requestHandlers.add(FailByRequestMockRequestHandler(refreshHandler))
+        failedRefreshHandlerWrapper = FailByRequestMockRequestHandler(refreshHandler)
+        mockWebServerRule.requestHandlers.add(failedRefreshHandlerWrapper)
         mockWebServerRule.requestHandlers.add(MockRoutingTileEndpointErrorRequestHandler())
     }
 
@@ -213,4 +270,17 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             ?.annotation()
             ?.duration()
             ?.sum()!!
+
+    private fun createRouteRefreshOptionsWithInvalidInterval(
+        intervalMillis: Long
+    ): RouteRefreshOptions {
+        val routeRefreshOptions = RouteRefreshOptions.Builder()
+            .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+            .build()
+        RouteRefreshOptions::class.java.getDeclaredField("intervalMillis").apply {
+            isAccessible = true
+            set(routeRefreshOptions, intervalMillis)
+        }
+        return routeRefreshOptions
+    }
 }

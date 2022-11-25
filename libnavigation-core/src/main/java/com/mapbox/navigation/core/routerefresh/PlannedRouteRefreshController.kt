@@ -29,7 +29,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         stateHolder,
         listener,
         CancellableHandler(scope),
-        RetryRouteRefreshStrategy(maxRetryCount = 2)
+        RetryRouteRefreshStrategy(maxRetryCount = MAX_RETRY_COUNT)
     )
 
     private var paused = false
@@ -132,14 +132,16 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                         scheduleUpdateRetry(routes, shouldNotifyOnStart = false)
                     } else {
                         stateHolder.onFailure(null)
-                        if (routeRefresherResult.refreshedRoutes != routes) {
-                            listener.onRoutesRefreshed(routeRefresherResult)
-                        } else {
-                            scheduleNewUpdate(routes)
-                        }
+                        listener.onRoutesRefreshed(routeRefresherResult)
+                        scheduleNewUpdate(routes)
                     }
                 }
             }
         }
+    }
+
+    companion object {
+
+        const val MAX_RETRY_COUNT = 2
     }
 }

@@ -282,7 +282,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun finishRequestUnsuccessfullyShouldNotRetryRoutesDidNotChange() {
+    fun finishRequestUnsuccessfullyShouldNotRetry() {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -301,13 +301,13 @@ class PlannedRouteRefreshControllerTest {
             retryStrategy.reset()
             cancellableHandler.postDelayed(interval, any(), any())
         }
-        verify(exactly = 0) {
+        verify(exactly = 1) {
             listener.onRoutesRefreshed(any())
         }
     }
 
     @Test
-    fun finishRequestUnsuccessfullyShouldNotRetryRoutesDidNotChangeShouldNotifyOnStart() {
+    fun finishRequestUnsuccessfullyShouldNotRetryShouldNotifyOnStart() {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -322,35 +322,6 @@ class PlannedRouteRefreshControllerTest {
         startRequest()
 
         verify(exactly = 1) { stateHolder.onStarted() }
-    }
-
-    @Test
-    fun finishRequestUnsuccessfullyShouldNotRetryRoutesChanged() {
-        val route1 = mockk<NavigationRoute>(relaxed = true)
-        val route2 = mockk<NavigationRoute>(relaxed = true)
-        val newRoute1 = mockk<NavigationRoute>(relaxed = true)
-        val newRoute2 = mockk<NavigationRoute>(relaxed = true)
-        val routes = listOf(route1, route2)
-        every {
-            RouteRefreshValidator.validateRoute(any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { retryStrategy.shouldRetry() } returns false
-
-        sut.startRoutesRefreshing(routes)
-        val result = RouteRefresherResult(
-            false,
-            listOf(newRoute1, newRoute2),
-            RouteProgressData(1, 2, 3)
-        )
-        finishRequest(result)
-
-        verify(exactly = 1) {
-            stateHolder.onFailure(null)
-            listener.onRoutesRefreshed(result)
-        }
-        verify(exactly = 0) {
-            cancellableHandler.postDelayed(any(), any(), any())
-        }
     }
 
     private fun startRequest() {

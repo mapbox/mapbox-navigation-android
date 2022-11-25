@@ -352,7 +352,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
         mapboxNavigation.refreshRoutesImmediately()
 
-        waitForRefresh()
+        delay(2500) // execute request
 
         assertEquals(
             listOf(
@@ -461,7 +461,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         mapboxNavigation.refreshRoutesImmediately()
         delay(5000)
 
-        waitForRefreshes(2) // immediate + planned
+        waitForRefresh()
 
         assertEquals(
             listOf(
@@ -533,7 +533,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
         mapboxNavigation.refreshRoutesImmediately()
 
-        waitForRefreshes(2) // one from immediate and the next planned
+        waitForRefresh()
 
         assertEquals(
             listOf(

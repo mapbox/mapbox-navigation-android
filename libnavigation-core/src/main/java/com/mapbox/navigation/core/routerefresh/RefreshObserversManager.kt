@@ -7,7 +7,7 @@ internal fun interface RouteRefreshObserver {
     fun onRoutesRefreshed(routeInfo: RefreshedRouteInfo)
 }
 
-internal class RefreshObserversManager : RouteRefresherListener {
+internal class RefreshObserversManager {
 
     private val refreshObservers = CopyOnWriteArraySet<RouteRefreshObserver>()
 
@@ -23,7 +23,7 @@ internal class RefreshObserversManager : RouteRefresherListener {
         refreshObservers.clear()
     }
 
-    override fun onRoutesRefreshed(result: RouteRefresherResult) {
+    fun onRoutesRefreshed(result: RouteRefresherResult) {
         refreshObservers.forEach { observer ->
             observer.onRoutesRefreshed(result.toRefreshedRoutesInfo())
         }

@@ -1536,15 +1536,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val initialRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
             val routeProgressData = RouteProgressData(5, 12, 43)
             val refreshedRoutes = listOf(mockk<NavigationRoute>(relaxed = true))
-            coEvery {
-                routeRefreshController.refresh(initialRoutes)
-            } returns RefreshedRouteInfo(refreshedRoutes, routeProgressData)
 
             routeObserversSlot.forEach {
                 it.onRoutesChanged(
                     createRoutesUpdatedResult(initialRoutes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 )
             }
+            interceptRefreshObserver().onRoutesRefreshed(
+                RefreshedRouteInfo(refreshedRoutes, routeProgressData)
+            )
 
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
