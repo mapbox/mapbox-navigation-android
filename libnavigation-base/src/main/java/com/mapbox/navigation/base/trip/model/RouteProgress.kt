@@ -1,11 +1,15 @@
 package com.mapbox.navigation.base.trip.model
 
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.base.utils.DecodeUtils
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 
 /**
  * This class contains all progress information at any given time during a navigation session. This
@@ -42,8 +46,9 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * @param routeAlternativeId in case of [currentState] equal to [RouteProgressState.OFF_ROUTE],
  * this field can provide the route ID of an alternative route that user turned into causing off-route event (if there is one).
  * This field can be used to find a route with [NavigationRoute.id] that can be immediately used as the new primary route.
- * @param currentRouteGeometryIndex route-wise index representing the geometry point
- * right in front of the user (see [DirectionsRoute.geometry]).
+ * @param currentRouteGeometryIndex route-wise index representing the geometry point that starts the segment
+ * the user is currently on, effectively this represents the index of last visited geometry point in the route
+ * (see [DirectionsRoute.geometry] or [DecodeUtils.completeGeometryToPoints] if [RouteOptions.overview] is [DirectionsCriteria.OVERVIEW_FULL]).
  */
 class RouteProgress internal constructor(
     val navigationRoute: NavigationRoute,

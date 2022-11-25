@@ -24,7 +24,8 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  * is currently on
  * @param upcomingStep Next/upcoming step immediately after the current step. If the user is on the last step
  * on the last leg, this will return null since a next step doesn't exist
- * @param geometryIndex Leg-wise index representing the geometry point right in front of the user
+ * @param geometryIndex Leg-wise index representing the geometry point that starts the segment
+ * the user is currently on, effectively this represents the index of last visited geometry point in the leg.
  */
 class RouteLegProgress internal constructor(
     val legIndex: Int,
