@@ -1,27 +1,18 @@
-package com.mapbox.navigation.core.routerefresh
+package com.mapbox.navigation.core.ev
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class EVDataHolderTest {
+class EVDynamicDataHolderTest {
 
-    private val evDataHolder = EVDataHolder()
+    private val evDynamicDataHolder = EVDynamicDataHolder()
     private val curve = "0,40;50,120"
     private val charge = "90"
     private val auxConsumption = "70"
     private val preConditioningTime = "10"
-    private val electricInitial = mapOf(
-        "engine" to JsonPrimitive("electric"),
-        "energy_consumption_curve" to JsonPrimitive(curve),
-        "ev_initial_charge" to JsonPrimitive(charge),
-        "auxiliary_consumption" to JsonPrimitive(auxConsumption),
-        "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
-        "aaa" to JsonPrimitive("bbb"),
-    )
-    private val nonElectricInitial = mapOf(
-        "engine" to JsonPrimitive("non-electric"),
+    private val initial = mapOf(
         "energy_consumption_curve" to JsonPrimitive(curve),
         "ev_initial_charge" to JsonPrimitive(charge),
         "auxiliary_consumption" to JsonPrimitive(auxConsumption),
@@ -31,12 +22,7 @@ class EVDataHolderTest {
 
     @Test
     fun `currentData() with no updates and empty initial`() {
-        assertEquals(0, evDataHolder.currentData(emptyMap()).size)
-    }
-
-    @Test
-    fun `currentData() with no updates and non-EV initial`() {
-        assertEquals(0, evDataHolder.currentData(nonElectricInitial).size)
+        assertEquals(0, evDynamicDataHolder.currentData(emptyMap()).size)
     }
 
     @Test
@@ -47,27 +33,19 @@ class EVDataHolderTest {
             "auxiliary_consumption" to auxConsumption,
             "ev_pre_conditioning_time" to preConditioningTime,
         )
-        assertEquals(expected, evDataHolder.currentData(electricInitial))
+        assertEquals(expected, evDynamicDataHolder.currentData(initial))
     }
 
     @Test
     fun `currentData() after one update with empty initial`() {
         val data = mapOf("aaa" to "bbb", "ccc" to "ddd")
-        evDataHolder.updateData(data)
+        evDynamicDataHolder.updateData(data)
 
-        assertEquals(data, evDataHolder.currentData(emptyMap()))
+        assertEquals(data, evDynamicDataHolder.currentData(emptyMap()))
     }
 
     @Test
-    fun `currentData() after one update with non-electric initial`() {
-        val data = mapOf("aaa" to "bbb", "ccc" to "ddd")
-        evDataHolder.updateData(data)
-
-        assertEquals(data, evDataHolder.currentData(nonElectricInitial))
-    }
-
-    @Test
-    fun `currentData() after one update with electric initial`() {
+    fun `currentData() after one update`() {
         val data = mapOf(
             "energy_consumption_curve" to "3,300",
             "auxiliary_consumption" to "80"
@@ -78,9 +56,9 @@ class EVDataHolderTest {
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
         )
-        evDataHolder.updateData(data)
+        evDynamicDataHolder.updateData(data)
 
-        assertEquals(expected, evDataHolder.currentData(electricInitial))
+        assertEquals(expected, evDynamicDataHolder.currentData(initial))
     }
 
     @Test
@@ -88,25 +66,14 @@ class EVDataHolderTest {
         val data1 = mapOf("aaa" to "bbb", "ccc" to "ddd", "eee" to "fff")
         val data2 = mapOf("ccc" to "zzz", "ggg" to "yyy")
         val expected = mapOf("aaa" to "bbb", "ccc" to "zzz", "ggg" to "yyy", "eee" to "fff")
-        evDataHolder.updateData(data1)
-        evDataHolder.updateData(data2)
+        evDynamicDataHolder.updateData(data1)
+        evDynamicDataHolder.updateData(data2)
 
-        assertEquals(expected, evDataHolder.currentData(emptyMap()))
+        assertEquals(expected, evDynamicDataHolder.currentData(emptyMap()))
     }
 
     @Test
-    fun `currentData() after two updates with non-electric initial`() {
-        val data1 = mapOf("aaa" to "bbb", "ccc" to "ddd", "eee" to "fff")
-        val data2 = mapOf("ccc" to "zzz", "ggg" to "yyy")
-        val expected = mapOf("aaa" to "bbb", "ccc" to "zzz", "ggg" to "yyy", "eee" to "fff")
-        evDataHolder.updateData(data1)
-        evDataHolder.updateData(data2)
-
-        assertEquals(expected, evDataHolder.currentData(nonElectricInitial))
-    }
-
-    @Test
-    fun `currentData() after two updates with electric initial`() {
+    fun `currentData() after two updates`() {
         val data1 = mapOf(
             "energy_consumption_curve" to "3,300",
             "ev_initial_charge" to "78",
@@ -126,24 +93,10 @@ class EVDataHolderTest {
             "ev_pre_conditioning_time" to preConditioningTime,
         )
 
-        evDataHolder.updateData(data1)
-        evDataHolder.updateData(data2)
+        evDynamicDataHolder.updateData(data1)
+        evDynamicDataHolder.updateData(data2)
 
-        assertEquals(expected, evDataHolder.currentData(electricInitial))
-    }
-
-    @Test
-    fun `currentData() with non-string engine in initial`() {
-        val initial = mapOf(
-            "engine" to JsonObject(),
-            "energy_consumption_curve" to JsonPrimitive(curve),
-            "ev_initial_charge" to JsonPrimitive(charge),
-            "auxiliary_consumption" to JsonPrimitive(auxConsumption),
-            "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
-            "aaa" to JsonPrimitive("bbb"),
-        )
-
-        assertEquals(0, evDataHolder.currentData(initial).size)
+        assertEquals(expected, evDynamicDataHolder.currentData(initial))
     }
 
     @Test
@@ -162,6 +115,6 @@ class EVDataHolderTest {
             "ev_pre_conditioning_time" to preConditioningTime,
         )
 
-        assertEquals(expected, evDataHolder.currentData(initial))
+        assertEquals(expected, evDynamicDataHolder.currentData(initial))
     }
 }

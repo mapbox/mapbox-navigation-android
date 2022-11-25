@@ -77,6 +77,9 @@ class MapboxRerouteControllerTest {
     @MockK
     lateinit var primaryRerouteObserver: RerouteController.RerouteStateObserver
 
+    @MockK
+    private lateinit var defaultRerouteOptionsAdapter: RerouteOptionsAdapter
+
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
@@ -86,13 +89,17 @@ class MapboxRerouteControllerTest {
         every {
             directionsSession.getPrimaryRouteOptions()
         } returns MapboxJavaObjectsFactory.routeOptions()
+        every { defaultRerouteOptionsAdapter.onRouteOptions(any()) } answers {
+            firstArg()
+        }
         rerouteController = spyk(
             MapboxRerouteController(
                 directionsSession,
                 tripSession,
                 routeOptionsUpdater,
                 rerouteOptions,
-                ThreadController()
+                ThreadController(),
+                defaultRerouteOptionsAdapter
             )
         )
     }
@@ -511,6 +518,29 @@ class MapboxRerouteControllerTest {
     }
 
     @Test
+    fun uses_default_route_options_delegate() {
+        mockRouteOptionsResult(successFromResult)
+        val mockNewRouteOptions = MapboxJavaObjectsFactory.routeOptions()
+        every { defaultRerouteOptionsAdapter.onRouteOptions(any()) } returns mockNewRouteOptions
+        val routeOptionsSlot = slot<RouteOptions>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                capture(routeOptionsSlot),
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        rerouteController.reroute(routeCallback)
+        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+
+        verify(exactly = 1) {
+            defaultRerouteOptionsAdapter.onRouteOptions(routeOptionsFromSuccessResult)
+        }
+        assertEquals(mockNewRouteOptions, routeOptionsSlot.captured)
+    }
+
+    @Test
     fun uses_route_options_delegate() {
         mockRouteOptionsResult(successFromResult)
         val mockNewRouteOptions = MapboxJavaObjectsFactory.routeOptions()
@@ -534,6 +564,30 @@ class MapboxRerouteControllerTest {
             mockRerouteOptionsDelegateManger.onRouteOptions(routeOptionsFromSuccessResult)
         }
         assertEquals(mockNewRouteOptions, routeOptionsSlot.captured)
+    }
+
+    @Test
+    fun uses_same_route_options_when_delegate_is_null() {
+        mockRouteOptionsResult(successFromResult)
+        val mockNewRouteOptions = MapboxJavaObjectsFactory.routeOptions()
+        every { defaultRerouteOptionsAdapter.onRouteOptions(any()) } returns mockNewRouteOptions
+        val routeOptionsSlot = slot<RouteOptions>()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                capture(routeOptionsSlot),
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        rerouteController.setRerouteOptionsAdapter(null)
+        rerouteController.reroute(routeCallback)
+        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+
+        verify(exactly = 0) {
+            defaultRerouteOptionsAdapter.onRouteOptions(any())
+        }
+        assertEquals(routeOptionsFromSuccessResult, routeOptionsSlot.captured)
     }
 
     private fun mockRouteOptionsResult(

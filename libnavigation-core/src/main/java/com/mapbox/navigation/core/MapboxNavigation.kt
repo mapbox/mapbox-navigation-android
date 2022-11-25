@@ -291,7 +291,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val routeRefreshRequestDataProvider =
         NavigationComponentProvider.createRouteRefreshRequestDataProvider()
 
-    private val evDataHolder = NavigationComponentProvider.createEVDataHolder()
+    private val evDynamicDataHolder = NavigationComponentProvider.createEVDynamicDataHolder()
 
     // Router provided via @Modules, might be outer
     private val moduleRouter: NavigationRouterV2
@@ -552,7 +552,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.routeRefreshOptions,
             directionsSession,
             routeRefreshRequestDataProvider,
-            evDataHolder
+            evDynamicDataHolder
         )
 
         defaultRerouteController = MapboxRerouteController(
@@ -561,6 +561,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeOptionsProvider,
             navigationOptions.rerouteOptions,
             threadController,
+            evDynamicDataHolder
         )
         rerouteController = defaultRerouteController
 
@@ -1357,7 +1358,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     /**
      * Set [RerouteOptionsAdapter]. It allows modify [RouteOptions] of default implementation of
-     * [NavigationRerouteController] ([RerouteController])
+     * [NavigationRerouteController] ([RerouteController]).
+     * NOTE: by default Navigation SDK uses [RerouteOptionsAdapter] implementation that applies
+     * the latest EV data provided via [MapboxNavigation.onEVDataUpdated] to EV reroute request
+     * parameters. If you provide a custom implementation of [RerouteOptionsAdapter],
+     * it's your responsibility to account for the latest EV data.
      */
     fun setRerouteOptionsAdapter(
         rerouteOptionsAdapter: RerouteOptionsAdapter?
@@ -1800,7 +1805,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun onEVDataUpdated(data: Map<String, String>) {
-        evDataHolder.updateData(data)
+        evDynamicDataHolder.updateData(data)
     }
 
     private fun createHistoryRecorderHandles(config: ConfigHandle) =

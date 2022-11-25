@@ -15,6 +15,7 @@ import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.core.RouteProgressDataProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteRefresh
+import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.add
 import com.mapbox.navigation.testing.factories.createClosure
@@ -66,7 +67,7 @@ class RouteRefreshControllerTest {
         mockk<RouteProgressDataProvider>(relaxed = true) {
             coEvery { getRouteRefreshRequestDataOrWait() } returns routeProgressData
         }
-    private val evDataHolder = mockk<EVDataHolder>(relaxed = true)
+    private val evRefreshDataProvider = mockk<EVRefreshDataProvider>(relaxed = true)
     private val mockStatesObserver = mockk<RouteRefreshStatesObserver>(relaxUnitFun = true)
 
     @Test
@@ -343,8 +344,14 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `refresh several routes uses first route's options`() = runBlockingTest {
-        val firstUnrecognizedProperties = mapOf("aaa" to JsonPrimitive("bbb"))
-        val secondUnrecognizedProperties = mapOf("ccc" to JsonPrimitive("ddd"))
+        val firstOptions = createRouteOptions(
+            unrecognizedProperties = mapOf("aaa" to JsonPrimitive("bbb")),
+            enableRefresh = true
+        )
+        val secondOptions = createRouteOptions(
+            unrecognizedProperties = mapOf("ccc" to JsonPrimitive("ddd")),
+            enableRefresh = true
+        )
         val firstEvData = mapOf("eee" to "fff")
         val secondEvData = mapOf("ggg" to "hhh")
         val firstRefreshRequestData = RouteRefreshRequestData(
@@ -359,8 +366,8 @@ class RouteRefreshControllerTest {
             routeProgressData.legGeometryIndex,
             secondEvData
         )
-        every { evDataHolder.currentData(firstUnrecognizedProperties) } returns firstEvData
-        every { evDataHolder.currentData(secondUnrecognizedProperties) } returns secondEvData
+        every { evRefreshDataProvider.get(firstOptions) } returns firstEvData
+        every { evRefreshDataProvider.get(secondOptions) } returns secondEvData
         val initialRoutes = createNavigationRoutes(
             createDirectionsResponse(
                 routes = listOf(
@@ -379,16 +386,10 @@ class RouteRefreshControllerTest {
         )
         val inputRoutes = listOf(
             spyk(initialRoutes[0]) {
-                every { routeOptions } returns createRouteOptions(
-                    unrecognizedProperties = firstUnrecognizedProperties,
-                    enableRefresh = true
-                )
+                every { routeOptions } returns firstOptions
             },
             spyk(initialRoutes[1]) {
-                every { routeOptions } returns createRouteOptions(
-                    unrecognizedProperties = secondUnrecognizedProperties,
-                    enableRefresh = true
-                )
+                every { routeOptions } returns secondOptions
             },
         )
         val refreshedRoutes = createNavigationRoutes(
@@ -1409,7 +1410,7 @@ class RouteRefreshControllerTest {
         routeRefreshOptions,
         routeRefresh,
         routeProgressDataProvider,
-        evDataHolder,
+        evRefreshDataProvider,
         routeDiffProvider,
         localDateProvider,
     ).also {

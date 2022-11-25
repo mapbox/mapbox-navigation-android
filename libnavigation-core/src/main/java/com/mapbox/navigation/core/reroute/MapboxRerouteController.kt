@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.reroute
 
 import androidx.annotation.MainThread
+import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.route.routerOrigin
@@ -12,6 +13,7 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
@@ -24,12 +26,13 @@ import java.util.concurrent.CopyOnWriteArraySet
 /**
  * Default implementation of [RerouteController]
  */
-internal class MapboxRerouteController(
+internal class MapboxRerouteController @VisibleForTesting constructor(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
     private val routeOptionsUpdater: RouteOptionsUpdater,
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
+    defaultRerouteOptionsAdapter: RerouteOptionsAdapter,
 ) : NavigationRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
@@ -38,7 +41,23 @@ internal class MapboxRerouteController(
 
     private var requestId: Long? = null
 
-    private var rerouteOptionsAdapter: RerouteOptionsAdapter? = null
+    constructor(
+        directionsSession: DirectionsSession,
+        tripSession: TripSession,
+        routeOptionsUpdater: RouteOptionsUpdater,
+        rerouteOptions: RerouteOptions,
+        threadController: ThreadController,
+        evDynamicDataHolder: EVDynamicDataHolder,
+    ) : this(
+        directionsSession,
+        tripSession,
+        routeOptionsUpdater,
+        rerouteOptions,
+        threadController,
+        MapboxRerouteOptionsAdapter(evDynamicDataHolder)
+    )
+
+    private var rerouteOptionsAdapter: RerouteOptionsAdapter? = defaultRerouteOptionsAdapter
 
     override var state: RerouteState = RerouteState.Idle
         private set(value) {
