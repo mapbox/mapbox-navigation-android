@@ -8,6 +8,7 @@ import com.mapbox.maps.Style
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.dropin.ViewOptionsCustomization
+import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -60,6 +61,8 @@ internal class NavigationViewOptionsTest {
         assertEquals(c.showEndNavigationButton, sut.showEndNavigationButton.value)
         assertEquals(c.showPoiName, sut.showPoiName.value)
         assertEquals(c.showArrivalText, sut.showArrivalText.value)
+        assertEquals(c.enableBuildingHighlightOnArrival, sut.enableBuildingHighlightOnArrival.value)
+        assertEquals(c.buildingHighlightOptions, sut.buildingHighlightOptions.value)
     }
 
     private fun customization() =
@@ -75,6 +78,10 @@ internal class NavigationViewOptionsTest {
             routeArrowOptions = RouteArrowOptions.Builder(ctx)
                 .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
                 .withArrowColor(Color.YELLOW)
+                .build()
+            enableBuildingHighlightOnArrival = false
+            buildingHighlightOptions = MapboxBuildingHighlightOptions.Builder()
+                .fillExtrusionOpacity(0.2)
                 .build()
             showInfoPanelInFreeDrive = true
             enableMapLongClickIntercept = false

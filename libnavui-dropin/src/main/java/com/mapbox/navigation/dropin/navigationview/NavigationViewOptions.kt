@@ -4,9 +4,11 @@ import android.content.Context
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.dropin.ViewOptionsCustomization
+import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultBuildingHighlightOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,10 @@ internal class NavigationViewOptions(context: Context) {
         MutableStateFlow(defaultRouteLineOptions(context))
     private var _routeArrowOptions: MutableStateFlow<RouteArrowOptions> =
         MutableStateFlow(defaultRouteArrowOptions(context))
+    private var _buildingHighlightOptions: MutableStateFlow<MapboxBuildingHighlightOptions> =
+        MutableStateFlow(defaultBuildingHighlightOptions(context))
+    private var _enableBuildingHighlightOnArrival: MutableStateFlow<Boolean> =
+        MutableStateFlow(true)
     private var _showInfoPanelInFreeDrive: MutableStateFlow<Boolean> =
         MutableStateFlow(false)
     private var _enableMapLongClickIntercept: MutableStateFlow<Boolean> =
@@ -57,6 +63,10 @@ internal class NavigationViewOptions(context: Context) {
     var mapStyleUriNight: StateFlow<String> = _mapStyleUriNight.asStateFlow()
     val routeLineOptions: StateFlow<MapboxRouteLineOptions> = _routeLineOptions.asStateFlow()
     val routeArrowOptions: StateFlow<RouteArrowOptions> = _routeArrowOptions.asStateFlow()
+    val buildingHighlightOptions: StateFlow<MapboxBuildingHighlightOptions> =
+        _buildingHighlightOptions.asStateFlow()
+    val enableBuildingHighlightOnArrival: StateFlow<Boolean> =
+        _enableBuildingHighlightOnArrival.asStateFlow()
     val showInfoPanelInFreeDrive: StateFlow<Boolean> = _showInfoPanelInFreeDrive.asStateFlow()
     val enableMapLongClickIntercept: StateFlow<Boolean> = _enableMapLongClickIntercept.asStateFlow()
     val isInfoPanelHideable: StateFlow<Boolean> = _isInfoPanelHideable.asStateFlow()
@@ -90,6 +100,10 @@ internal class NavigationViewOptions(context: Context) {
         customization.mapStyleUriNight?.also { _mapStyleUriNight.value = it }
         customization.routeLineOptions?.also { _routeLineOptions.value = it }
         customization.routeArrowOptions?.also { _routeArrowOptions.value = it }
+        customization.buildingHighlightOptions?.also { _buildingHighlightOptions.value = it }
+        customization.enableBuildingHighlightOnArrival?.also {
+            _enableBuildingHighlightOnArrival.value = it
+        }
         customization.showInfoPanelInFreeDrive?.also { _showInfoPanelInFreeDrive.value = it }
         customization.enableMapLongClickIntercept?.also { _enableMapLongClickIntercept.value = it }
         customization.isInfoPanelHideable?.also { _isInfoPanelHideable.value = it }

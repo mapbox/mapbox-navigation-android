@@ -1,12 +1,15 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
+import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
 import com.mapbox.navigation.ui.base.lifecycle.Binder
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
+import com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -41,6 +44,18 @@ class ViewOptionsCustomization {
      * Use [ViewOptionsCustomization.defaultRouteArrowOptions] to reset to default.
      */
     var routeArrowOptions: RouteArrowOptions? = null
+
+    /**
+     * Provide custom [MapboxBuildingHighlightOptions] for the [MapboxBuildingView].
+     * Use [defaultBuildingHighlightOptions] to reset to default.
+     */
+    var buildingHighlightOptions: MapboxBuildingHighlightOptions? = null
+
+    /**
+     * Set whether to highlight a building upon arrival.
+     * Set to `true` for the default behavior.
+     */
+    var enableBuildingHighlightOnArrival: Boolean? = null
 
     /**
      * Set if the Info Panel should be visible for the Free Drive state. When set to `true`
@@ -189,5 +204,15 @@ class ViewOptionsCustomization {
         fun defaultRouteArrowOptions(context: Context) = RouteArrowOptions.Builder(context)
             .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             .build()
+
+        /**
+         * Default [MapboxBuildingHighlightOptions] for the [MapboxBuildingView].
+         */
+        fun defaultBuildingHighlightOptions(context: Context) =
+            MapboxBuildingHighlightOptions.Builder()
+                .fillExtrusionColor(
+                    ResourcesCompat.getColor(context.resources, R.color.colorPrimary, context.theme)
+                )
+                .build()
     }
 }

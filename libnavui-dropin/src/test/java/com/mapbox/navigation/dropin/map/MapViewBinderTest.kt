@@ -37,6 +37,8 @@ import com.mapbox.navigation.dropin.util.TestingUtil.findComponent
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
+import com.mapbox.navigation.ui.maps.internal.ui.BuildingHighlightComponent
 import com.mapbox.navigation.ui.maps.internal.ui.LocationComponent
 import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponent
@@ -380,6 +382,55 @@ class MapViewBinderTest {
         components.onAttached(mapboxNavigation)
 
         assertNotNull(components.findComponent { it is ScalebarComponent })
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `bind should attach BuildingHighlightComponent when NavigationViewOptions_enableBuildingHighlightOnArrival is TRUE`() {
+        navContext.applyOptionsCustomization {
+            enableBuildingHighlightOnArrival = true
+        }
+
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        assertNotNull(components.findComponent { it is BuildingHighlightComponent })
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `bind should NOT attach BuildingHighlightComponent when NavigationViewOptions_enableBuildingHighlightOnArrival is FALSE`() {
+        navContext.applyOptionsCustomization {
+            enableBuildingHighlightOnArrival = false
+        }
+
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        assertNull(components.findComponent { it is BuildingHighlightComponent })
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `bind should reload BuildingHighlightComponent on NavigationViewOptions_buildingHighlightOptions change`() {
+        navContext.applyOptionsCustomization {
+            enableBuildingHighlightOnArrival = true
+            buildingHighlightOptions = MapboxBuildingHighlightOptions.Builder().build()
+        }
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        val firstComponent = components.findComponent { it is BuildingHighlightComponent }
+        navContext.applyOptionsCustomization {
+            buildingHighlightOptions = MapboxBuildingHighlightOptions.Builder()
+                .fillExtrusionOpacity(0.9)
+                .build()
+        }
+        val secondComponent = components.findComponent { it is BuildingHighlightComponent }
+
+        assertNotNull(firstComponent)
+        assertNotNull(secondComponent)
+        assertNotEquals(secondComponent, firstComponent)
     }
 
     @Test

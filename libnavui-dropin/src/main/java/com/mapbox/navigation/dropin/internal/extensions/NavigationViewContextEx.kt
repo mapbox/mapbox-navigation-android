@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.annotation.Px
 import androidx.constraintlayout.widget.Guideline
+import com.mapbox.maps.MapView
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.EmptyBinder
 import com.mapbox.navigation.dropin.LeftFrameCoordinator
@@ -33,6 +35,7 @@ import com.mapbox.navigation.dropin.roadname.RoadNameCoordinator
 import com.mapbox.navigation.dropin.speedlimit.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.tripprogress.TripProgressBinder
 import com.mapbox.navigation.dropin.tripsession.TripSessionComponent
+import com.mapbox.navigation.ui.maps.internal.ui.BuildingHighlightComponent
 import kotlinx.coroutines.flow.combine
 
 internal fun NavigationViewContext.poiNameComponent(
@@ -198,6 +201,23 @@ internal fun NavigationViewContext.recenterButtonComponent(
     }
     return reloadOnChange(binderFlow) { it.bind(buttonContainer) }
 }
+
+internal fun NavigationViewContext.buildingHighlightComponent(
+    mapView: MapView
+): MapboxNavigationObserver =
+    reloadOnChange(
+        options.enableBuildingHighlightOnArrival,
+        options.buildingHighlightOptions
+    ) { enabled, options ->
+        if (enabled) {
+            BuildingHighlightComponent(mapView.getMapboxMap(), options)
+        } else {
+            object : MapboxNavigationObserver {
+                override fun onAttached(mapboxNavigation: MapboxNavigation) = Unit
+                override fun onDetached(mapboxNavigation: MapboxNavigation) = Unit
+            }
+        }
+    }
 
 internal fun NavigationViewContext.analyticsComponent() =
     AnalyticsComponent()

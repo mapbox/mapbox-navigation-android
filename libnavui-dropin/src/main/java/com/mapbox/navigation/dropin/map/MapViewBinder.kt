@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.camera.CameraComponent
 import com.mapbox.navigation.dropin.camera.CameraLayoutObserver
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
+import com.mapbox.navigation.dropin.internal.extensions.buildingHighlightComponent
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.dropin.map.geocoding.GeocodingComponent
 import com.mapbox.navigation.dropin.map.logo.LogoAttributionComponent
@@ -114,7 +115,8 @@ abstract class MapViewBinder : UIBinder {
                 context.options.showMapScalebar,
                 context.systemBarsInsets,
                 context.options.distanceFormatterOptions,
-            )
+            ),
+            context.buildingHighlightComponent(mapView)
         )
     }
 

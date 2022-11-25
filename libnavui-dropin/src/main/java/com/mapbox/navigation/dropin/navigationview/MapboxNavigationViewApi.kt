@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.navigationview
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.extensions.getDestination
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.dropin.NavigationViewApi
 import com.mapbox.navigation.dropin.NavigationViewApiError
@@ -134,10 +135,6 @@ internal class MapboxNavigationViewApi(
         if (routes.isEmpty()) throw InvalidRoutesInfoError()
 
         return routes.first().getDestination() ?: throw IncompleteRoutesInfoError()
-    }
-
-    private fun NavigationRoute.getDestination(): Point? {
-        return routeOptions.coordinatesList().lastOrNull()
     }
 
     @Suppress("FunctionName")

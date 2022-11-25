@@ -1,6 +1,18 @@
 // Signature format: 3.0
 package com.mapbox.navigation.ui.maps {
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class BuildingHighlightConfig {
+    method public com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView? getBuildingView();
+    method public com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi? getBuildingsApi();
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions getOptions();
+    method public void setBuildingView(com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView?);
+    method public void setBuildingsApi(com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi?);
+    method public void setOptions(com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions);
+    property public final com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView? buildingView;
+    property public final com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi? buildingsApi;
+    property public final com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions options;
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CameraModeConfig {
     method public com.mapbox.navigation.ui.maps.camera.NavigationCamera? getNavigationCamera();
     method public void setNavigationCamera(com.mapbox.navigation.ui.maps.camera.NavigationCamera?);
@@ -8,6 +20,7 @@ package com.mapbox.navigation.ui.maps {
   }
 
   public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation buildingHighlight(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.BuildingHighlightConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation cameraModeButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton button, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.CameraModeConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation locationPuck(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.LocationPuckConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation navigationCamera(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.NavigationCameraConfig,kotlin.Unit> config = {});
@@ -120,7 +133,7 @@ package com.mapbox.navigation.ui.maps.building.api {
 
 package com.mapbox.navigation.ui.maps.building.model {
 
-  public final class BuildingError {
+  public final class BuildingError extends java.lang.Error {
     method public String? getErrorMessage();
     property public final String? errorMessage;
   }

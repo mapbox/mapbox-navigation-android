@@ -15,6 +15,7 @@ import com.mapbox.navigation.qa_test_app.view.componentinstaller.components.Find
 import com.mapbox.navigation.qa_test_app.view.customnavview.dp
 import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.buildingHighlight
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.cameraModeButton
 import com.mapbox.navigation.ui.maps.locationPuck
@@ -64,6 +65,7 @@ class ComponentsActivity : AppCompatActivity() {
             navigationCamera(binding.mapView) {
                 viewportDataSource = cameraViewportDataSource()
             }
+            buildingHighlight(binding.mapView)
 
             // custom components
             component(FindRouteOnLongPress(binding.mapView))
