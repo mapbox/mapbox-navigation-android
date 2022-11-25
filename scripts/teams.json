@@ -1,14 +1,44 @@
-{
-  "core": [
-    {
-      "login": "SevaZhukov",
-      "email": "sevastian.zhukov@mapbox.com"
-    }
-  ],
-  "ui": [
-    {
-      "login": "SevaZhukov",
-      "email": "sevastian.zhukov@mapbox.com"
-    }
-  ]
-}
+[
+  {
+    "name": "core",
+    "users": [
+      {
+        "login": "RingerJK"
+      },
+      {
+        "login": "VysotskiVadim"
+      },
+      {
+        "login": "dzinad"
+      }
+    ]
+  },
+  {
+    "name": "ui",
+    "users": [
+      {
+        "login": "abhishek1508"
+      },
+      {
+        "login": "kmadsen"
+      },
+      {
+        "login": "tomaszrybakiewicz"
+      }
+    ]
+  },
+  {
+    "name": "app",
+    "users": [
+      {
+        "login": "Zayankovsky"
+      },
+      {
+        "login": "korshaknn"
+      },
+      {
+        "login": "Guardiola31337"
+      }
+    ]
+  }
+]
