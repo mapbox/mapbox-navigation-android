@@ -141,6 +141,32 @@ fun MapboxNavigation.flowOnFinalDestinationArrival(): Flow<RouteProgress> = call
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+fun MapboxNavigation.flowOnWaypointArrival(): Flow<RouteProgress> = callbackFlow {
+    val observer = object : ArrivalObserver {
+        override fun onWaypointArrival(routeProgress: RouteProgress) {
+            trySend(routeProgress)
+        }
+        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) = Unit
+        override fun onFinalDestinationArrival(routeProgress: RouteProgress) = Unit
+    }
+    registerArrivalObserver(observer)
+    awaitClose { unregisterArrivalObserver(observer) }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun MapboxNavigation.flowOnNextRouteLegStart(): Flow<RouteLegProgress> = callbackFlow {
+    val observer = object : ArrivalObserver {
+        override fun onWaypointArrival(routeProgress: RouteProgress) = Unit
+        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+            trySend(routeLegProgress)
+        }
+        override fun onFinalDestinationArrival(routeProgress: RouteProgress) = Unit
+    }
+    registerArrivalObserver(observer)
+    awaitClose { unregisterArrivalObserver(observer) }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
 fun MapboxNavigation.flowNavigationSessionState(): Flow<NavigationSessionState> = callbackFlow {
     val observer = NavigationSessionStateObserver { trySend(it) }
     registerNavigationSessionStateObserver(observer)

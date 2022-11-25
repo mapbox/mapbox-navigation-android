@@ -252,6 +252,24 @@
                     android:text="Enable scalebar"
                     android:textAllCaps="true" />
 
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleBuildingHighlight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Enable building highlight"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleBuildingHighlightCustomization"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Custom building highlight"
+                    android:textAllCaps="true" />
+
             </androidx.appcompat.widget.LinearLayoutCompat>
 
             <!-- Actions Customization -->

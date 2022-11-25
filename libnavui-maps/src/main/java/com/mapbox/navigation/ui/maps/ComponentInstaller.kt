@@ -11,6 +11,7 @@ import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -18,9 +19,13 @@ import com.mapbox.navigation.ui.base.installer.ComponentInstaller
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.findComponent
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+import com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi
+import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
+import com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.internal.ui.BuildingHighlightComponent
 import com.mapbox.navigation.ui.maps.internal.ui.CameraModeButtonComponent
 import com.mapbox.navigation.ui.maps.internal.ui.LocationComponent
 import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
@@ -211,6 +216,27 @@ fun ComponentInstaller.navigationCamera(
 }
 
 /**
+ * Install component that highlights building upon arrival.
+ *
+ * The installed component registers itself as a [ArrivalObserver] and [RoutesObserver].
+ * It highlights building on [ArrivalObserver.onFinalDestinationArrival] callback and
+ * un-highlights when the next route leg is started or when a list of routes is cleared.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+fun ComponentInstaller.buildingHighlight(
+    mapView: MapView,
+    config: BuildingHighlightConfig.() -> Unit = {}
+): Installation {
+    val componentConfig = BuildingHighlightConfig().apply(config)
+    val map = mapView.getMapboxMap()
+    val api = componentConfig.buildingsApi ?: MapboxBuildingsApi(map)
+    val view = componentConfig.buildingView ?: MapboxBuildingView()
+    return component(
+        BuildingHighlightComponent(map, componentConfig.options, api, view)
+    )
+}
+
+/**
  * Camera mode button component configuration class.
  */
 @ExperimentalPreviewMapboxNavigationAPI
@@ -317,4 +343,25 @@ class LocationPuckConfig internal constructor() {
      * Set whether the [locationProvider] should register as a MapboxNavigation [LocationObserver].
      */
     var enableLocationUpdates: Boolean = true
+}
+
+/**
+ * Building Highlight component configuration class.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
+class BuildingHighlightConfig internal constructor() {
+    /**
+     * Options used by [MapboxBuildingView] to highlight a building.
+     */
+    var options: MapboxBuildingHighlightOptions = MapboxBuildingHighlightOptions.Builder().build()
+
+    /**
+     * An instance of [MapboxBuildingsApi] to use with this component.
+     */
+    var buildingsApi: MapboxBuildingsApi? = null
+
+    /**
+     * An instance of [MapboxBuildingView] to use with this component.
+     */
+    var buildingView: MapboxBuildingView? = null
 }

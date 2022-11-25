@@ -24,6 +24,8 @@ import com.mapbox.navigation.qa_test_app.view.customnavview.dp
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.installComponents
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
+import com.mapbox.navigation.ui.maps.buildingHighlight
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.cameraModeButton
 import com.mapbox.navigation.ui.maps.locationPuck
@@ -95,6 +97,12 @@ class ComponentsAltActivity : AppCompatActivity() {
             navigationCamera(binding.mapView) {
                 switchToIdleOnMapGesture = true
                 viewportDataSource = cameraViewportDataSource()
+            }
+            buildingHighlight(binding.mapView) {
+                options = MapboxBuildingHighlightOptions.Builder()
+                    .fillExtrusionColor(Color.parseColor("#00FF00"))
+                    .fillExtrusionOpacity(0.9)
+                    .build()
             }
 
             // custom components

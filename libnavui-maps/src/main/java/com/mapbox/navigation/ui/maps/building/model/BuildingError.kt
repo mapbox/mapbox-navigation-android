@@ -6,4 +6,4 @@ package com.mapbox.navigation.ui.maps.building.model
  */
 class BuildingError internal constructor(
     val errorMessage: String?
-)
+) : Error(errorMessage)

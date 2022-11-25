@@ -44,6 +44,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultBuildingHighlightOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteArrowOptions
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization
@@ -83,6 +84,7 @@ import com.mapbox.navigation.qa_test_app.view.base.DrawerActivity
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.utils.internal.toPoint
@@ -429,6 +431,18 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.enableScalebar,
             ::toggleEnableScalebar
         )
+
+        bindSwitch(
+            menuBinding.toggleBuildingHighlight,
+            viewModel.enableBuildingHighlight,
+            ::toggleBuildingHighlight
+        )
+
+        bindSwitch(
+            menuBinding.toggleBuildingHighlightCustomization,
+            viewModel.enableBuildingHighlightCustomization,
+            ::toggleBuildingHighlightCustomization
+        )
     }
 
     private fun toggleCustomMap(enabled: Boolean) {
@@ -447,6 +461,25 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
     private fun toggleEnableScalebar(enabled: Boolean) {
         binding.navigationView.customizeViewOptions {
             showMapScalebar = enabled
+        }
+    }
+
+    private fun toggleBuildingHighlight(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            enableBuildingHighlightOnArrival = enabled
+        }
+    }
+
+    private fun toggleBuildingHighlightCustomization(enabled: Boolean) {
+        binding.navigationView.customizeViewOptions {
+            buildingHighlightOptions = if (enabled) {
+                MapboxBuildingHighlightOptions.Builder()
+                    .fillExtrusionColor(Color.parseColor("#FF0000"))
+                    .fillExtrusionOpacity(0.8)
+                    .build()
+            } else {
+                defaultBuildingHighlightOptions(this@MapboxNavigationViewCustomizedActivity)
+            }
         }
     }
 

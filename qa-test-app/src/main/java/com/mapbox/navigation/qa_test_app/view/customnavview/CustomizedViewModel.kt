@@ -23,6 +23,8 @@ class CustomizedViewModel : ViewModel() {
     // Map
     val showCustomMapView = MutableLiveData(false)
     val enableScalebar = MutableLiveData(false)
+    val enableBuildingHighlight = MutableLiveData(true)
+    val enableBuildingHighlightCustomization = MutableLiveData(false)
 
     // Action Buttons
     val actionsShowCompassButton = MutableLiveData(false)

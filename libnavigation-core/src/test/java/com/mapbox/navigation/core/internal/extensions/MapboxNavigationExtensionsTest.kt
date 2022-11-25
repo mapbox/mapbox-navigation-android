@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.internal.extensions
 import android.location.Location
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -25,6 +26,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
@@ -218,6 +220,40 @@ class MapboxNavigationExtensionsTest {
         advanceUntilIdle()
 
         verify { navigation.unregisterArrivalObserver(callbackSlot.captured) }
+    }
+
+    @Test
+    fun navigationOnWaypointArrivalFlowable() = coroutineRule.runBlockingTest {
+        val navigation = mockk<MapboxNavigation>(relaxed = true)
+        val routeProgress = mockk<RouteProgress>()
+        val arrivalObserver = slot<ArrivalObserver>()
+        every {
+            navigation.registerArrivalObserver(capture(arrivalObserver))
+        } answers {
+            arrivalObserver.captured.onWaypointArrival(routeProgress)
+        }
+
+        val flowResult = navigation.flowOnWaypointArrival().first()
+
+        assertEquals(routeProgress, flowResult)
+        verify { navigation.unregisterArrivalObserver(arrivalObserver.captured) }
+    }
+
+    @Test
+    fun navigationOnNextRouteLegStartFlowable() = coroutineRule.runBlockingTest {
+        val navigation = mockk<MapboxNavigation>(relaxed = true)
+        val routeLegProgress = mockk<RouteLegProgress>()
+        val arrivalObserver = slot<ArrivalObserver>()
+        every {
+            navigation.registerArrivalObserver(capture(arrivalObserver))
+        } answers {
+            arrivalObserver.captured.onNextRouteLegStart(routeLegProgress)
+        }
+
+        val flowResult = navigation.flowOnNextRouteLegStart().first()
+
+        assertEquals(routeLegProgress, flowResult)
+        verify { navigation.unregisterArrivalObserver(arrivalObserver.captured) }
     }
 
     @Test

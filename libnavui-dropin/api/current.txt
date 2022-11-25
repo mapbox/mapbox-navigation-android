@@ -144,7 +144,9 @@ package com.mapbox.navigation.dropin {
 
   public final class ViewOptionsCustomization {
     ctor public ViewOptionsCustomization();
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions? getBuildingHighlightOptions();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions? getDistanceFormatterOptions();
+    method public Boolean? getEnableBuildingHighlightOnArrival();
     method public Boolean? getEnableMapLongClickIntercept();
     method public Integer? getInfoPanelForcedState();
     method public String? getMapStyleUriDay();
@@ -169,7 +171,9 @@ package com.mapbox.navigation.dropin {
     method public Boolean? getShowToggleAudioActionButton();
     method public Boolean? getShowTripProgress();
     method public Boolean? isInfoPanelHideable();
+    method public void setBuildingHighlightOptions(com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions?);
     method public void setDistanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions?);
+    method public void setEnableBuildingHighlightOnArrival(Boolean?);
     method public void setEnableMapLongClickIntercept(Boolean?);
     method public void setInfoPanelForcedState(Integer?);
     method public void setInfoPanelHideable(Boolean?);
@@ -194,7 +198,9 @@ package com.mapbox.navigation.dropin {
     method public void setShowStartNavigationButton(Boolean?);
     method public void setShowToggleAudioActionButton(Boolean?);
     method public void setShowTripProgress(Boolean?);
+    property public final com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions? buildingHighlightOptions;
     property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions? distanceFormatterOptions;
+    property public final Boolean? enableBuildingHighlightOnArrival;
     property public final Boolean? enableMapLongClickIntercept;
     property public final Integer? infoPanelForcedState;
     property public final Boolean? isInfoPanelHideable;
@@ -223,6 +229,7 @@ package com.mapbox.navigation.dropin {
   }
 
   public static final class ViewOptionsCustomization.Companion {
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions defaultBuildingHighlightOptions(android.content.Context context);
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions defaultRouteArrowOptions(android.content.Context context);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions defaultRouteLineOptions(android.content.Context context);
   }
