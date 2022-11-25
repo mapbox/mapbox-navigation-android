@@ -25,17 +25,6 @@ jobs:
         run: |
           python3 -m pip install requests PyBambooHR retry
 
-      - name: install mbx-ci
-        run: |
-          curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > /usr/local/bin/mbx-ci
-          chmod 755 /usr/local/bin/mbx-ci
-
-      - name: Configure AWS Credentials
-        uses: mapbox/configure-aws-credentials-internal@v2
-        with:
-          gh-action-role-domain: ${{ secrets.GH_ROLE_SERVICE_DOMAIN }}
-
       - name: execute py script
         run: |
-          export GITHUB_WRITER_TOKEN=$(mbx-ci github writer public token)
           python3 scripts/set_reviewers.py
