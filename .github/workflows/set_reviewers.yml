@@ -5,13 +5,12 @@ on:
 jobs:
   process:
     permissions:
-      id-token: write
+      pull-requests: write
       contents: read
     runs-on: ubuntu-latest
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      BAMBOO_API_KEY: ${{ secrets.BAMBOO_API_KEY }}
     steps:
       - uses: actions/checkout@v3
         with:
