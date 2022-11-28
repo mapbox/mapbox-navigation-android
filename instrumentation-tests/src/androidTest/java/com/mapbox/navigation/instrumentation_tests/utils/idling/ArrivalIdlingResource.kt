@@ -6,7 +6,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.testing.ui.idling.NavigationIdlingResource
-import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 
 /**
  * Becomes idle when [ArrivalObserver.onFinalDestinationArrival] gets invoked.
@@ -22,24 +21,22 @@ class ArrivalIdlingResource(
     private var callback: IdlingResource.ResourceCallback? = null
 
     init {
-        runOnMainSync {
-            mapboxNavigation.registerArrivalObserver(
-                object : ArrivalObserver {
-                    override fun onWaypointArrival(routeProgress: RouteProgress) {
-                        // do nothing
-                    }
-
-                    override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
-                        // do nothing
-                    }
-
-                    override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
-                        arrived = true
-                        callback?.onTransitionToIdle()
-                    }
+        mapboxNavigation.registerArrivalObserver(
+            object : ArrivalObserver {
+                override fun onWaypointArrival(routeProgress: RouteProgress) {
+                    // do nothing
                 }
-            )
-        }
+
+                override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+                    // do nothing
+                }
+
+                override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+                    arrived = true
+                    callback?.onTransitionToIdle()
+                }
+            }
+        )
     }
 
     override fun getName() = this::class.simpleName
