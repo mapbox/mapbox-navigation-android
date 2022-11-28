@@ -295,6 +295,12 @@ class NavigationRoute internal constructor(
      */
     val upcomingRoadObjects = nativeRoute.routeInfo.alerts.toUpcomingRoadObjects()
 
+    /**
+     * Compatibility function to always access the valid [DirectionsWaypoint]s collection.
+     *
+     * Returns [DirectionsResponse.waypoints] or [DirectionsRoute.waypoints]
+     * depending on whether [RouteOptions.waypointsPerRoute] was set.
+     */
     val waypoints: List<DirectionsWaypoint>? by lazy {
         if (routeOptions.waypointsPerRoute() == true) {
             directionsRoute.waypoints()
