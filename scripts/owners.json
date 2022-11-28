@@ -59,5 +59,16 @@
       "libnavui-androidauto",
       "libnavui-app"
     ]
+  },
+  {
+    "teams": [
+      "devops"
+    ],
+    "modules": [
+      ".circleci",
+      ".github",
+      "gradle",
+      "scripts"
+    ]
   }
 ]

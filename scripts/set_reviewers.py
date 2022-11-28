@@ -22,7 +22,7 @@ current_reviewers = list(map(lambda reviewer: reviewer['login'], pr['requested_r
 
 # check existing approvals on pr
 
-reviews_url = prs_url + "/" + pr_number + "/reviews"
+reviews_url = pr_url + "/reviews"
 reviews = requests.get(reviews_url, headers=headers).json()
 for review in reviews:
     if review['state'] == 'APPROVED':
@@ -41,6 +41,8 @@ with open('scripts/teams.json') as json_file:
     for team in teams:
         team_name = team['name']
         for user in team['users']:
+            if user == author:
+                continue
             users.append({
                 'login': user,
                 'team': team_name,
@@ -94,12 +96,9 @@ for user in users:
 
 # get changes
 
-pr_files_url = prs_url + "/" + pr_number + '/files'
+pr_files_url = pr_url + '/files'
 pr_files = requests.get(pr_files_url, headers=headers).json()
 changed_modules = set(map(lambda reviewer: reviewer['filename'].split('/')[0], pr_files))
-
-# test data
-changed_modules.add('libnavigation-copilot')
 
 # find owners
 
@@ -127,7 +126,8 @@ for user in users:
 for user in users:
     if user['login'] not in found_reviewers or user['team'] == "any":
         found_reviewers.append(user['login'])
-        break
+        if len(found_reviewers) == 2:
+            break
 
 print("Reviewers to assign")
 print(found_reviewers)
