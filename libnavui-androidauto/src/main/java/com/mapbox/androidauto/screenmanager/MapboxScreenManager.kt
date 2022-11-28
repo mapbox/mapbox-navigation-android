@@ -23,32 +23,23 @@ import java.util.ArrayDeque
 import java.util.Deque
 
 /**
- * The Mapbox Navigation Android Auto SDK is prepared with a default and customizable experience.
  * [MapboxScreenManager] allows you to prepare an experience that includes many screens with a
  * single function. Use the [MapboxCarContext.prepareScreens] to get started.
  *
  * ### How it works
  * Using [String] to [MapboxScreenFactory] pairing, the [MapboxScreenManager] will create a screen
- * based on a string provided. You can change which screen should show by updating the key value pair.
+ * based on a string provided. You can customize screens by setting the key value pair.
  *
- * Communication with [MapboxScreenManager] can be done statically. Observe the screen changes
- * with [MapboxScreenManager.screenEvent], and change the car screen with different
- * [MapboxScreenOperation]. Each operation has requirements built into [MapboxScreenManager]. For
- * example, the [MapboxScreenManager.goBack] function requires a back stack so it requires an
- * instance of [MapboxScreenManager]. The [MapboxScreenManager.replaceTop] does not require a
- * backstack, and can be done when the car is not in foreground - this operation can be done
- * statically.
+ * [MapboxScreenManager] can be observed and controlled by the car or app. Observe the screen
+ * changes with [MapboxScreenManager.screenEvent], change the screen with operations like
+ * [MapboxScreenManager.replaceTop]. See the [MapboxScreenOperation] for all of the available
+ * operations, each operation is applied through [MapboxScreenManager] functions.
  *
  * ### Set up
  * The [MapboxScreenManager] is provided to you through the [MapboxCarContext]. It is important
- * to keep the screen manager lifecycle close to [CarContext] to avoid memory leaks. The
+ * to keep the screen manager lifecycle close to [CarContext] to avoid memory leaks.
  * [MapboxScreenManager] does not work without the [ScreenManager] which is also bound to the
  * [CarContext].
- *
- * Use [MapboxCarContext.prepareScreens] to prepare a default experience. The extension will use
- * the [putAll] function to create a mapping between [String] and [MapboxScreenFactory]. All of the
- * Mapbox screens keys can be found in [MapboxScreen]. The default screen graph requires a
- * [MapboxCarContext] so use it to prepare the screens during initialization.
  *
  * Example
  * ```
