@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -28,6 +29,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class HandlerThreadTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
@@ -49,20 +51,18 @@ class HandlerThreadTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         sdkThread.start()
         handler = Handler(sdkThread.looper)
         sdkDispatcher = handler.asCoroutineDispatcher()
-        handler.post {
-            mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .build()
-            )
-        }
+
+        mapboxNavigation = MapboxNavigationProvider.create(
+            NavigationOptions.Builder(activity)
+                .accessToken(getMapboxAccessTokenFromResources(activity))
+                .looper(sdkThread.looper)
+                .build()
+        )
     }
 
     @After
     fun tearDown() {
-        handler.post {
-            mapboxNavigation.onDestroy()
-        }
+        mapboxNavigation.onDestroy()
         sdkThread.quitSafely()
     }
 
