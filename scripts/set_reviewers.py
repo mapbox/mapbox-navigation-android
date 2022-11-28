@@ -123,11 +123,12 @@ for user in users:
         found_reviewers.append(user['login'])
         break
 
-for user in users:
-    if user['login'] not in found_reviewers or user['team'] == "any":
-        found_reviewers.append(user['login'])
-        if len(found_reviewers) == 2:
-            break
+if len(current_reviewers) + len(found_reviewers) < 2:
+    for user in users:
+        if user['login'] not in found_reviewers or user['team'] == "any":
+            found_reviewers.append(user['login'])
+            if len(current_reviewers) + len(found_reviewers) == 2:
+                break
 
 print("Reviewers to assign")
 print(found_reviewers)
