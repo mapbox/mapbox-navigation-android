@@ -7,7 +7,8 @@ import requests
 pr_number = os.environ['PR_NUMBER']
 token = os.environ['GITHUB_TOKEN']
 
-pr_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/pulls/" + pr_number
+prs_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/pulls"
+pr_url = prs_url + "/" + pr_number
 
 headers = {"Authorization": "Bearer " + token}
 pr = requests.get(pr_url, headers=headers).json()
@@ -21,7 +22,7 @@ current_reviewers = list(map(lambda reviewer: reviewer['login'], pr['requested_r
 
 # check existing approvals on pr
 
-reviews_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/pulls/" + pr_number + "/reviews"
+reviews_url = prs_url + "/" + pr_number + "/reviews"
 reviews = requests.get(reviews_url, headers=headers).json()
 for review in reviews:
     if review['state'] == 'APPROVED':
@@ -41,7 +42,7 @@ with open('scripts/teams.json') as json_file:
         team_name = team['name']
         for user in team['users']:
             users.append({
-                'login': user['login'],
+                'login': user,
                 'team': team_name,
                 'reviews': 0,
                 'done_reviews': 0
@@ -49,8 +50,7 @@ with open('scripts/teams.json') as json_file:
 
 # get users reviews
 
-pulls_url = "https://api.github.com/repos/mapbox/1tap-android/pulls"
-pulls = requests.get(pulls_url, headers=headers).json()
+pulls = requests.get(prs_url, headers=headers).json()
 
 for pull in pulls:
     reviewers = pull['requested_reviewers']
@@ -61,7 +61,7 @@ for pull in pulls:
 
 # get users done reviews
 
-closed_pulls_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/pulls?state=closed&per_page=100"
+closed_pulls_url = prs_url + "?state=closed&per_page=100"
 closed_pulls = requests.get(closed_pulls_url, headers=headers).json()
 
 today = datetime.date.today()
@@ -76,7 +76,7 @@ for pull in list(closed_pulls + pulls):
         if closed_date + datetime.timedelta(days=7) < today:
             continue
     pull_number = pull['number']
-    reviews_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/pulls/" + str(pull_number) + "/reviews"
+    reviews_url = prs_url + "/" + str(pull_number) + "/reviews"
     reviews = requests.get(reviews_url, headers=headers).json()
     for review in reviews:
         if review['state'] == 'APPROVED':
@@ -94,12 +94,12 @@ for user in users:
 
 # get changes
 
-pr_files_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/pulls/" + pr_number + '/files'
+pr_files_url = prs_url + "/" + pr_number + '/files'
 pr_files = requests.get(pr_files_url, headers=headers).json()
 changed_modules = set(map(lambda reviewer: reviewer['filename'].split('/')[0], pr_files))
 
 # test data
-changed_modules.add('examples')
+changed_modules.add('libnavigation-copilot')
 
 # find owners
 
@@ -125,9 +125,12 @@ for user in users:
         break
 
 for user in users:
-    if user['login'] not in found_reviewers:
+    if user['login'] not in found_reviewers or user['team'] == "any":
         found_reviewers.append(user['login'])
         break
 
 print("Reviewers to assign")
 print(found_reviewers)
+
+pr_url = prs_url + '/%s/requested_reviewers'
+requests.post(pr_url % pr_number, json={'reviewers': found_reviewers}, headers=headers)

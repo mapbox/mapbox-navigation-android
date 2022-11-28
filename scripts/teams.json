@@ -2,43 +2,31 @@
   {
     "name": "core",
     "users": [
-      {
-        "login": "RingerJK"
-      },
-      {
-        "login": "VysotskiVadim"
-      },
-      {
-        "login": "dzinad"
-      }
+      "RingerJK",
+      "VysotskiVadim",
+      "dzinad"
     ]
   },
   {
     "name": "ui",
     "users": [
-      {
-        "login": "abhishek1508"
-      },
-      {
-        "login": "kmadsen"
-      },
-      {
-        "login": "tomaszrybakiewicz"
-      }
+      "abhishek1508",
+      "kmadsen",
+      "tomaszrybakiewicz"
     ]
   },
   {
     "name": "app",
     "users": [
-      {
-        "login": "Zayankovsky"
-      },
-      {
-        "login": "korshaknn"
-      },
-      {
-        "login": "Guardiola31337"
-      }
+      "Zayankovsky",
+      "korshaknn",
+      "Guardiola31337"
+    ]
+  },
+  {
+    "name": "any",
+    "users": [
+      "LukasPaczos"
     ]
   }
 ]
