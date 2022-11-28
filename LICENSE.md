@@ -3822,7 +3822,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Android for Cars App Library (Build navigation, parking, and charging apps for Android Auto).
-URL: [https://developer.android.com/jetpack/androidx/releases/car-app#1.1.0](https://developer.android.com/jetpack/androidx/releases/car-app#1.1.0)
+URL: [https://developer.android.com/jetpack/androidx/releases/car-app#1.2.0](https://developer.android.com/jetpack/androidx/releases/car-app#1.2.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
