@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Introduced `ReplayRouteSession` and `ReplayRouteSessionOptions`. When enabled the active route will be simulated. This will replay routes in a memory efficient way, so you can simulate long routes at high location frequencies. [#6636](https://github.com/mapbox/mapbox-navigation-android/pull/6636)
 #### Bug fixes and improvements
 - Fixed crash in `PermissionsLauncherFragment` occurring on device rotation. [#6635](https://github.com/mapbox/mapbox-navigation-android/pull/6635)
 - Fixed a rare `java.lang.IllegalArgumentException: The Path cannot loop back on itself.` exception when using `NavigationLocationProvider`. [#6641](https://github.com/mapbox/mapbox-navigation-android/pull/6641)

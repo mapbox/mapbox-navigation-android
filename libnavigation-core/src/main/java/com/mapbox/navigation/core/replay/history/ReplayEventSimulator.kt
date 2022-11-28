@@ -20,7 +20,6 @@ import kotlin.math.roundToLong
 internal class ReplayEventSimulator(
     private val replayEvents: ReplayEvents
 ) {
-
     private val jobControl = InternalJobControlFactory.createMainScopeJobControl()
 
     // The pivot will move forward through the events with time.
@@ -29,6 +28,7 @@ internal class ReplayEventSimulator(
     private var simulatorTimeScale: Double = 1.0
 
     private var pivotIndex = 0
+    private var clearingPlayedEvents = false
 
     fun launchSimulator(replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
         resetSimulatorClock()
@@ -62,6 +62,9 @@ internal class ReplayEventSimulator(
     }
 
     fun seekTo(indexOfEvent: Int) {
+        check(!clearingPlayedEvents) {
+            "Do not seekTo while calling clearPlayedEvents"
+        }
         historyTimeOffset = replayEvents.events[indexOfEvent].eventTimestamp
         pivotIndex = indexOfEvent
         resetSimulatorClock()
@@ -69,6 +72,23 @@ internal class ReplayEventSimulator(
 
     fun playbackSpeed(scale: Double) {
         simulatorTimeScale = scale
+        resetSimulatorClock()
+    }
+
+    fun stopAndClearEvents() {
+        jobControl.job.cancelChildren()
+        pivotIndex = 0
+        replayEvents.events.clear()
+        clearingPlayedEvents = false
+        resetSimulatorClock()
+    }
+
+    fun clearPlayedEvents() {
+        clearingPlayedEvents = true
+    }
+
+    fun pushEvents(events: List<ReplayEventBase>) {
+        this.replayEvents.events.addAll(events)
         resetSimulatorClock()
     }
 
@@ -95,6 +115,14 @@ internal class ReplayEventSimulator(
             } else {
                 break
             }
+        }
+        if (clearingPlayedEvents) {
+            val currentEvents = replayEvents.events.toList()
+            val nextReplayEventList = currentEvents.subList(pivotIndex, currentEvents.size)
+            replayEvents.events.clear()
+            replayEvents.events.addAll(nextReplayEventList)
+            pivotIndex = 0
+            clearingPlayedEvents = false
         }
 
         return eventHappened

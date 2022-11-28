@@ -57,8 +57,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
             )
         }
         directionsRoute.geometry() ?: return emptyList()
-        return replayRouteDriver.drivePointList(options, directionsRoute.completeGeometryToPoints())
-            .map { mapToUpdateLocation(it) }
+        return mapPointList(directionsRoute.completeGeometryToPoints())
     }
 
     /**
@@ -88,7 +87,17 @@ class ReplayRouteMapper @JvmOverloads constructor(
      * @return [ReplayEventBase] [List]
      */
     fun mapGeometry(geometry: String): List<ReplayEventBase> {
-        return replayRouteDriver.drivePointList(options, PolylineUtils.decode(geometry, 6))
+        return mapPointList(PolylineUtils.decode(geometry, 6))
+    }
+
+    /**
+     * Take a list of [Point] and map it to events that can be replayed by the [MapboxReplayer].
+     *
+     * @param points containing location coordinates to be replayed.
+     * @return [ReplayEventBase] [List]
+     */
+    fun mapPointList(points: List<Point>): List<ReplayEventBase> {
+        return replayRouteDriver.drivePointList(options, points)
             .map { mapToUpdateLocation(it) }
     }
 

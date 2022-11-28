@@ -28,7 +28,13 @@ internal class ReplayRouteDriver {
         points: List<Point>
     ): List<ReplayRouteLocation> {
         val distinctPoints = routeSmoother.distinctPoints(points)
-        if (distinctPoints.size < 2) return emptyList()
+        if (distinctPoints.isEmpty()) return emptyList()
+        if (distinctPoints.size == 1) {
+            val location = ReplayRouteLocation(null, distinctPoints[0])
+            location.timeMillis = timeMillis
+            timeMillis += 1000.0 / options.frequency
+            return listOf(location)
+        }
 
         val smoothLocations = routeInterpolator.createSpeedProfile(options, distinctPoints)
         val replayRouteLocations = interpolateLocations(options, distinctPoints, smoothLocations)

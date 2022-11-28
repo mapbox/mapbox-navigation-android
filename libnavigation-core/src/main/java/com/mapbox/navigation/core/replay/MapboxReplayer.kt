@@ -9,6 +9,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventSimulator
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
@@ -37,7 +38,7 @@ class MapboxReplayer {
      * @return [MapboxReplayer]
      */
     fun pushEvents(events: List<ReplayEventBase>): MapboxReplayer {
-        this.replayEvents.events.addAll(events)
+        replayEventSimulator.pushEvents(events)
         return this
     }
 
@@ -46,9 +47,19 @@ class MapboxReplayer {
      * to start playing a new route, [pushEvents] and then [play].
      */
     fun clearEvents() {
-        stop()
-        seekTo(0.0)
-        replayEvents.events.clear()
+        replayEventSimulator.stopAndClearEvents()
+    }
+
+    /**
+     * Remove all of the events that have been emitted by [ReplayEventsObserver].
+     *
+     * This is used to reduce the memory footprint of the replayer. Note that functions
+     * that require previous events will be changed. For example [seekTo] and [durationSeconds]
+     * will not account for the events removed after calling this function.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun clearPlayedEvents() {
+        replayEventSimulator.clearPlayedEvents()
     }
 
     /**
