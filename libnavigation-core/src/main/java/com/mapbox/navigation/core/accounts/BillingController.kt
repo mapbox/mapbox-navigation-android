@@ -383,7 +383,7 @@ internal class BillingController(
      */
     private fun getRemainingWaypointsOnRoute(routeProgress: RouteProgress?): List<Point>? {
         return routeProgress?.navigationRoute?.let { route ->
-            val waypoints = route.directionsResponse.waypoints()
+            val waypoints = route.waypoints
             waypoints?.drop(
                 (waypoints.size - routeProgress.remainingWaypoints).coerceAtLeast(1)
             )?.map {
@@ -397,7 +397,7 @@ internal class BillingController(
      * ignoring origin.
      */
     private fun getWaypointsOnRoute(navigationRoute: NavigationRoute): List<Point>? {
-        return navigationRoute.directionsResponse.waypoints()?.drop(1)?.map {
+        return navigationRoute.waypoints?.drop(1)?.map {
             it.location()
         }
     }
