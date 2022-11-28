@@ -21,9 +21,9 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteAlternativesIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
-import com.mapbox.navigation.instrumentation_tests.utils.idling.firstLocationSync
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
@@ -101,7 +101,8 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         }
 
         // Wait for enhanced locations to start and then set the routes.
-        mapboxNavigation.firstLocationSync()
+        val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
+        firstLocationIdlingResource.firstLocationSync()
         runOnMainSync {
             mapboxNavigation.setRoutes(routes)
         }
@@ -126,7 +127,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
         // Verify alternative routes events were triggered.
         assertEquals(2, routes.size)
-        assertTrue(runOnMainSync { mapboxNavigation.getNavigationRoutes() }.isNotEmpty())
+        assertTrue(mapboxNavigation.getNavigationRoutes().isNotEmpty())
         firstAlternative.verifyOnRouteAlternativesAndProgressReceived()
         firstAlternative.alternatives!!.forEach {
             assertFalse(routes.contains(it))
@@ -147,7 +148,8 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         }
 
         // Wait for enhanced locations to start and then set the routes.
-        mapboxNavigation.firstLocationSync()
+        val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
+        firstLocationIdlingResource.firstLocationSync()
 
         // Subscribing for alternatives
         val firstAlternative = RouteAlternativesIdlingResource(
@@ -179,7 +181,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
         // Verify alternative routes events were triggered.
         assertEquals(2, routes.size)
-        assertTrue(runOnMainSync { mapboxNavigation.getNavigationRoutes() }.isNotEmpty())
+        assertTrue(mapboxNavigation.getRoutes().isNotEmpty())
         firstAlternative.verifyOnRouteAlternativesAndProgressReceived()
 
         assertNotEquals(
@@ -208,7 +210,8 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         }
 
         // Wait for enhanced locations to start and then set the routes.
-        mapboxNavigation.firstLocationSync()
+        val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
+        firstLocationIdlingResource.firstLocationSync()
         runOnMainSync {
             // infinity subscription to avoid triggering NN on every new observer
             mapboxNavigation.registerRouteAlternativesObserver(
