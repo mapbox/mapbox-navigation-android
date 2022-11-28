@@ -3,11 +3,13 @@ package com.mapbox.navigation.core.routeoptions
 import com.google.gson.JsonElement
 import com.mapbox.api.directions.v5.models.RouteOptions
 
-const val KEY_ENGINE = "engine"
-const val VALUE_ELECTRIC = "electric"
+internal const val ROUTE_OPTIONS_KEY_ENGINE = "engine"
+internal const val ROUTE_OPTIONS_VALUE_ELECTRIC = "electric"
 
-fun RouteOptions.isEVRoute(): Boolean =
-    unrecognizedJsonProperties?.get(KEY_ENGINE)?.asStringOrNull() == VALUE_ELECTRIC
+internal fun RouteOptions.isEVRoute(): Boolean =
+    unrecognizedJsonProperties?.get(
+        ROUTE_OPTIONS_KEY_ENGINE
+    )?.asStringOrNull() == ROUTE_OPTIONS_VALUE_ELECTRIC
 
 private fun JsonElement.asStringOrNull(): String? = try {
     asString

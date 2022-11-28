@@ -1359,10 +1359,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Set [RerouteOptionsAdapter]. It allows modify [RouteOptions] of default implementation of
      * [NavigationRerouteController] ([RerouteController]).
-     * NOTE: by default Navigation SDK uses [RerouteOptionsAdapter] implementation that applies
-     * the latest EV data provided via [MapboxNavigation.onEVDataUpdated] to EV reroute request
-     * parameters. If you provide a custom implementation of [RerouteOptionsAdapter],
-     * it's your responsibility to account for the latest EV data.
      */
     fun setRerouteOptionsAdapter(
         rerouteOptionsAdapter: RerouteOptionsAdapter?

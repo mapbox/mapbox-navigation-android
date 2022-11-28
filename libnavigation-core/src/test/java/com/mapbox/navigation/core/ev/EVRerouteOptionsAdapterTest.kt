@@ -1,23 +1,26 @@
 package com.mapbox.navigation.core.ev
 
 import com.google.gson.JsonPrimitive
+import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.core.routeoptions.isEVRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class EVRouteOptionsModifierTest {
+class EVRerouteOptionsAdapterTest {
 
     private val evDynamicDataHolder = mockk<EVDynamicDataHolder>(relaxed = true)
-    private val sut = EVRouteOptionsModifier(evDynamicDataHolder)
+    private val sut = EVRerouteOptionsAdapter(evDynamicDataHolder)
 
     @Test
     fun `non EV route`() {
         val options = createRouteOptions(unrecognizedProperties = null)
 
-        assertTrue(options === sut.modify(options))
+        assertTrue(options === sut.onRouteOptions(options))
     }
 
     @Test
@@ -26,7 +29,7 @@ class EVRouteOptionsModifierTest {
         every { evDynamicDataHolder.currentData(unrecognizedProperties) } returns emptyMap()
         val options = createRouteOptions(unrecognizedProperties = unrecognizedProperties)
 
-        assertEquals(options, sut.modify(options))
+        assertEquals(options, sut.onRouteOptions(options))
     }
 
     @Test
@@ -44,7 +47,7 @@ class EVRouteOptionsModifierTest {
             )
         )
 
-        assertEquals(expectedOptions, sut.modify(options))
+        assertEquals(expectedOptions, sut.onRouteOptions(options))
     }
 
     @Test
@@ -56,7 +59,7 @@ class EVRouteOptionsModifierTest {
         every { evDynamicDataHolder.currentData(unrecognizedProperties) } returns emptyMap()
         val options = createRouteOptions(unrecognizedProperties = unrecognizedProperties)
 
-        assertEquals(options, sut.modify(options))
+        assertEquals(options, sut.onRouteOptions(options))
     }
 
     @Test
@@ -78,6 +81,25 @@ class EVRouteOptionsModifierTest {
             )
         )
 
-        assertEquals(expectedOptions, sut.modify(options))
+        assertEquals(expectedOptions, sut.onRouteOptions(options))
+    }
+
+    @Test
+    fun `EV route (recognized implicitly with extension fun) with null unrecognized fields`() {
+        mockkStatic(RouteOptions::isEVRoute) {
+            every {
+                evDynamicDataHolder.currentData(emptyMap())
+            } returns mapOf("aaa" to "bbb", "cc" to "dd")
+            val options = createRouteOptions(unrecognizedProperties = null)
+            every { options.isEVRoute() } returns true
+            val expectedOptions = createRouteOptions(
+                unrecognizedProperties = mapOf(
+                    "aaa" to JsonPrimitive("bbb"),
+                    "cc" to JsonPrimitive("dd")
+                )
+            )
+
+            assertEquals(expectedOptions, sut.onRouteOptions(options))
+        }
     }
 }

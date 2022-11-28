@@ -32,7 +32,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val routeOptionsUpdater: RouteOptionsUpdater,
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
-    defaultRerouteOptionsAdapter: RerouteOptionsAdapter,
+    private val internalRerouteOptionsAdapter: RerouteOptionsAdapter,
 ) : NavigationRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
@@ -57,7 +57,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         MapboxRerouteOptionsAdapter(evDynamicDataHolder)
     )
 
-    private var rerouteOptionsAdapter: RerouteOptionsAdapter? = defaultRerouteOptionsAdapter
+    private var externalRerouteOptionsAdapter: RerouteOptionsAdapter? = null
 
     override var state: RerouteState = RerouteState.Idle
         private set(value) {
@@ -166,9 +166,11 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
                     is RouteOptionsUpdater.RouteOptionsResult.Success -> {
-                        val modifiedRerouteOption = rerouteOptionsAdapter
-                            ?.onRouteOptions(routeOptionsResult.routeOptions)
-                            ?: routeOptionsResult.routeOptions
+                        val modifiedRerouteOption = internalRerouteOptionsAdapter.onRouteOptions(
+                            routeOptionsResult.routeOptions
+                        ).run {
+                            externalRerouteOptionsAdapter?.onRouteOptions(this) ?: this
+                        }
                         request(callback, modifiedRerouteOption)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
@@ -251,6 +253,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     }
 
     internal fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
-        this.rerouteOptionsAdapter = rerouteOptionsAdapter
+        this.externalRerouteOptionsAdapter = rerouteOptionsAdapter
     }
 }

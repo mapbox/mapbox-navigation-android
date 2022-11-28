@@ -60,7 +60,6 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
     private lateinit var mapboxNavigation: MapboxNavigation
-    private val responseTestUuid = "ev_route_response_for_refresh"
     private val twoCoordinates = listOf(
         Point.fromLngLat(11.5852259, 48.1760993),
         Point.fromLngLat(10.3406374, 49.16479)

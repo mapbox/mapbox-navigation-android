@@ -15,7 +15,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Added minor optimization to vanishing route line calculations by checking if the incoming point equal to the previous point in order to avoid recalculation and re-rendering. [#6643](https://github.com/mapbox/mapbox-navigation-android/pull/6643)
 - Improved performance of `MapboxRouteLineApi#updateWithRouteProgress` function execution. [#6648](https://github.com/mapbox/mapbox-navigation-android/pull/6648)
 - Fixed a rare issue where the offset marking the traveled portion of the route would be ahead of the user location puck, especially around sharp maneuvers. [#6648](https://github.com/mapbox/mapbox-navigation-android/pull/6648)
-- Supported applying latest EV data provided via `MapboxNavigation#onEVDataUpdated` to EV reroute requests.
+- Supported applying latest EV data provided via `MapboxNavigation#onEVDataUpdated` to EV reroute requests. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
+- Fixed an issue where reroute requests where not applying the latest EV data provided via `MapboxNavigation#onEVDataUpdated`. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog

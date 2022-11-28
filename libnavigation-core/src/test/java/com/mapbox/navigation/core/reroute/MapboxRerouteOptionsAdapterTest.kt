@@ -12,38 +12,38 @@ class MapboxRerouteOptionsAdapterTest {
     private val inputOptions = createRouteOptions(profile = DirectionsCriteria.PROFILE_DRIVING)
 
     @Test
-    fun noModifiers() {
+    fun noAdapters() {
         val sut = MapboxRerouteOptionsAdapter(emptyList())
 
         assertEquals(inputOptions, sut.onRouteOptions(inputOptions))
     }
 
     @Test
-    fun singleModifier() {
+    fun singleAdapter() {
         val outputOptions = createRouteOptions(profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-        val modifier = mockk<RouteOptionsModifier> {
-            every { modify(inputOptions) } returns outputOptions
+        val adapter = mockk<RerouteOptionsAdapter> {
+            every { onRouteOptions(inputOptions) } returns outputOptions
         }
-        val sut = MapboxRerouteOptionsAdapter(listOf(modifier))
+        val sut = MapboxRerouteOptionsAdapter(listOf(adapter))
 
         assertEquals(outputOptions, sut.onRouteOptions(inputOptions))
     }
 
     @Test
-    fun multipleModifiers() {
+    fun multipleAdapters() {
         val outputOptions1 = createRouteOptions(profile = DirectionsCriteria.PROFILE_DRIVING)
         val outputOptions2 = createRouteOptions(profile = DirectionsCriteria.PROFILE_WALKING)
         val outputOptions3 = createRouteOptions(profile = DirectionsCriteria.PROFILE_CYCLING)
-        val modifier1 = mockk<RouteOptionsModifier> {
-            every { modify(inputOptions) } returns outputOptions1
+        val adapter1 = mockk<RerouteOptionsAdapter> {
+            every { onRouteOptions(inputOptions) } returns outputOptions1
         }
-        val modifier2 = mockk<RouteOptionsModifier> {
-            every { modify(outputOptions1) } returns outputOptions2
+        val adapter2 = mockk<RerouteOptionsAdapter> {
+            every { onRouteOptions(outputOptions1) } returns outputOptions2
         }
-        val modifier3 = mockk<RouteOptionsModifier> {
-            every { modify(outputOptions2) } returns outputOptions3
+        val adapter3 = mockk<RerouteOptionsAdapter> {
+            every { onRouteOptions(outputOptions2) } returns outputOptions3
         }
-        val sut = MapboxRerouteOptionsAdapter(listOf(modifier1, modifier2, modifier3))
+        val sut = MapboxRerouteOptionsAdapter(listOf(adapter1, adapter2, adapter3))
 
         assertEquals(outputOptions3, sut.onRouteOptions(inputOptions))
     }

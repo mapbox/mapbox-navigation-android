@@ -236,9 +236,7 @@ internal class RouteRefreshController(
             routeProgressData.legIndex,
             routeProgressData.routeGeometryIndex,
             routeProgressData.legGeometryIndex,
-            hashMapOf<String, String>().apply {
-                putAll(evRefreshDataProvider.get(route.routeOptions))
-            }
+            HashMap(evRefreshDataProvider.get(route.routeOptions))
         )
         return when (val result = requestRouteRefresh(route, routeRefreshRequestData)) {
             is RouteRefreshResult.Fail -> {
