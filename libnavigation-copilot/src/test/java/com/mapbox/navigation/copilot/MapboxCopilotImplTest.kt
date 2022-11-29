@@ -40,6 +40,7 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -1856,6 +1857,45 @@ class MapboxCopilotImplTest {
 
         verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(DRIVE_ENDS_EVENT_NAME, any())
+        }
+    }
+
+    @Test
+    fun `startRecording as soon as onShouldStartRecording`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val userFeedbackCallback = slot<UserFeedbackCallback>()
+        every { registerUserFeedbackCallback(capture(userFeedbackCallback)) } just Runs
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val searchResults =
+            SearchResults("mapbox", "https://mapbox.com", null, null, "?query=test1", null)
+        mapboxCopilot.push(SearchResultsEvent(searchResults))
+        val activeGuidanceHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            activeGuidanceHistoryRecordingSessionState
+        )
+        val expectedEventJson = """
+            {"provider":"mapbox","request":"https://mapbox.com","searchQuery":"?query\u003dtest1"}
+        """.trimIndent()
+
+        verifyOrder {
+            mockedHistoryRecorder.startRecording()
+            mockedHistoryRecorder.pushHistory(
+                SEARCH_RESULTS_EVENT_NAME,
+                expectedEventJson,
+            )
         }
     }
 
