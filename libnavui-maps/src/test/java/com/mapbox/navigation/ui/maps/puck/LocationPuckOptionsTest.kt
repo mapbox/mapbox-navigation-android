@@ -21,6 +21,7 @@ class LocationPuckOptionsTest :
             .routePreviewPuck(mockk())
             .activeNavigationPuck(mockk())
             .arrivalPuck(mockk())
+            .idlePuck(mockk())
     }
 
     override fun trigger() {

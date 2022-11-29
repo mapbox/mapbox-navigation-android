@@ -747,6 +747,7 @@ package com.mapbox.navigation.ui.maps.puck {
     method public android.content.Context getContext();
     method public com.mapbox.maps.plugin.LocationPuck getDestinationPreviewPuck();
     method public com.mapbox.maps.plugin.LocationPuck getFreeDrivePuck();
+    method public com.mapbox.maps.plugin.LocationPuck getIdlePuck();
     method public com.mapbox.maps.plugin.LocationPuck getRoutePreviewPuck();
     method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder toBuilder();
     property public final com.mapbox.maps.plugin.LocationPuck activeNavigationPuck;
@@ -754,6 +755,7 @@ package com.mapbox.navigation.ui.maps.puck {
     property public final android.content.Context context;
     property public final com.mapbox.maps.plugin.LocationPuck destinationPreviewPuck;
     property public final com.mapbox.maps.plugin.LocationPuck freeDrivePuck;
+    property public final com.mapbox.maps.plugin.LocationPuck idlePuck;
     property public final com.mapbox.maps.plugin.LocationPuck routePreviewPuck;
   }
 
@@ -765,6 +767,7 @@ package com.mapbox.navigation.ui.maps.puck {
     method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder defaultPuck(com.mapbox.maps.plugin.LocationPuck defaultPuck);
     method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder destinationPreviewPuck(com.mapbox.maps.plugin.LocationPuck destinationPreviewPuck);
     method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder freeDrivePuck(com.mapbox.maps.plugin.LocationPuck freeDrivePuck);
+    method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder idlePuck(com.mapbox.maps.plugin.LocationPuck idlePuck);
     method public com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder routePreviewPuck(com.mapbox.maps.plugin.LocationPuck routePreviewPuck);
     field public static final com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder.Companion Companion;
   }

@@ -6,6 +6,8 @@ import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.navigation.ui.maps.R
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder
 
 /**
  * Gives options to specify either [LocationPuck2D] or [LocationPuck3D] references to the location
@@ -15,11 +17,12 @@ import com.mapbox.navigation.ui.maps.R
  * `defaultPuck()` on the [Builder] and that would be used for pucks in all navigation states.
  *
  * @param context from which to reference puck drawables
- * @param freeDrivePuck stores the puck appearance to be displayed in free drive state
- * @param destinationPreviewPuck stores the puck appearance to be displayed in destination preview state
- * @param routePreviewPuck stores the puck appearance to be displayed in route preview state
- * @param activeNavigationPuck stores the puck appearance to be displayed in active navigation state
- * @param arrivalPuck stores the puck appearance to be displayed in arrival state
+ * @param freeDrivePuck stores the puck appearance to be displayed in free drive state when in the [NavigationCameraState.FOLLOWING]
+ * @param destinationPreviewPuck stores the puck appearance to be displayed in destination preview state when in the [NavigationCameraState.FOLLOWING]
+ * @param routePreviewPuck stores the puck appearance to be displayed in route preview state when in the [NavigationCameraState.FOLLOWING]
+ * @param activeNavigationPuck stores the puck appearance to be displayed in active navigation state when in the [NavigationCameraState.FOLLOWING]
+ * @param arrivalPuck stores the puck appearance to be displayed in arrival state when in the [NavigationCameraState.FOLLOWING]
+ * @param idlePuck stores the puck appearance to be displayed for all navigation states when in the [NavigationCameraState.IDLE] or the [NavigationCameraState.OVERVIEW]
  */
 class LocationPuckOptions private constructor(
     val context: Context,
@@ -28,6 +31,7 @@ class LocationPuckOptions private constructor(
     val routePreviewPuck: LocationPuck,
     val activeNavigationPuck: LocationPuck,
     val arrivalPuck: LocationPuck,
+    val idlePuck: LocationPuck
 ) {
 
     /**
@@ -39,6 +43,7 @@ class LocationPuckOptions private constructor(
         routePreviewPuck(routePreviewPuck)
         activeNavigationPuck(activeNavigationPuck)
         arrivalPuck(arrivalPuck)
+        idlePuck(idlePuck)
     }
 
     /**
@@ -56,6 +61,7 @@ class LocationPuckOptions private constructor(
         if (routePreviewPuck != other.routePreviewPuck) return false
         if (activeNavigationPuck != other.activeNavigationPuck) return false
         if (arrivalPuck != other.arrivalPuck) return false
+        if (idlePuck != other.idlePuck) return false
 
         return true
     }
@@ -70,6 +76,7 @@ class LocationPuckOptions private constructor(
         result = 31 * result + routePreviewPuck.hashCode()
         result = 31 * result + activeNavigationPuck.hashCode()
         result = 31 * result + arrivalPuck.hashCode()
+        result = 31 * result + idlePuck.hashCode()
         return result
     }
 
@@ -84,6 +91,7 @@ class LocationPuckOptions private constructor(
             "routePreviewPuck=$routePreviewPuck, " +
             "activeNavigationPuck=$activeNavigationPuck, " +
             "arrivalPuck=$arrivalPuck" +
+            "idlePuck=$idlePuck" +
             ")"
     }
 
@@ -92,16 +100,29 @@ class LocationPuckOptions private constructor(
      */
     class Builder(private val context: Context) {
 
-        private var freeDrivePuck: LocationPuck = regularPuck(context)
-        private var destinationPreviewPuck: LocationPuck = regularPuck(context)
-        private var routePreviewPuck: LocationPuck = regularPuck(context)
-        private var activeNavigationPuck: LocationPuck = navigationPuck(context)
-        private var arrivalPuck: LocationPuck = navigationPuck(context)
+        private var freeDrivePuck: LocationPuck
+        private var destinationPreviewPuck: LocationPuck
+        private var routePreviewPuck: LocationPuck
+        private var activeNavigationPuck: LocationPuck
+        private var arrivalPuck: LocationPuck
+        private var idlePuck: LocationPuck
+
+        init {
+            val navigationPuck = navigationPuck(context)
+            val regularPuck = regularPuck(context)
+
+            freeDrivePuck = navigationPuck
+            destinationPreviewPuck = navigationPuck
+            routePreviewPuck = navigationPuck
+            activeNavigationPuck = navigationPuck
+            arrivalPuck = navigationPuck
+            idlePuck = regularPuck
+        }
 
         /**
-         * Apply the same [LocationPuck2D] or [LocationPuck3D] to location puck in all different
-         * navigation states
-         * @param defaultPuck [LocationPuck] to be used in all navigation states
+         * Apply the same [LocationPuck2D] or [LocationPuck3D] to location puck for all navigation states
+         * and any [NavigationCameraState]
+         * @param defaultPuck [LocationPuck] to be used in all states
          */
         fun defaultPuck(defaultPuck: LocationPuck): Builder = apply {
             this.freeDrivePuck = defaultPuck
@@ -109,10 +130,12 @@ class LocationPuckOptions private constructor(
             this.routePreviewPuck = defaultPuck
             this.activeNavigationPuck = defaultPuck
             this.arrivalPuck = defaultPuck
+            this.idlePuck = defaultPuck
         }
 
         /**
          * Apply [LocationPuck2D] or [LocationPuck3D] to location puck in free drive state
+         * when in the [NavigationCameraState.FOLLOWING]
          * @param freeDrivePuck [LocationPuck] to be used in free drive state
          */
         fun freeDrivePuck(freeDrivePuck: LocationPuck): Builder = apply {
@@ -121,6 +144,7 @@ class LocationPuckOptions private constructor(
 
         /**
          * Apply [LocationPuck2D] or [LocationPuck3D] to location puck in destination preview state
+         * when in the [NavigationCameraState.FOLLOWING]
          * @param destinationPreviewPuck [LocationPuck] to be used in destination preview state
          */
         fun destinationPreviewPuck(destinationPreviewPuck: LocationPuck): Builder = apply {
@@ -129,6 +153,7 @@ class LocationPuckOptions private constructor(
 
         /**
          * Apply [LocationPuck2D] or [LocationPuck3D] to location puck in route preview state
+         * when in the [NavigationCameraState.FOLLOWING]
          * @param routePreviewPuck [LocationPuck] to be used in route preview state
          */
         fun routePreviewPuck(routePreviewPuck: LocationPuck): Builder = apply {
@@ -137,6 +162,7 @@ class LocationPuckOptions private constructor(
 
         /**
          * Apply [LocationPuck2D] or [LocationPuck3D] to location puck in active navigation state
+         * when in the [NavigationCameraState.FOLLOWING]
          * @param activeNavigationPuck [LocationPuck] to be used in active navigation state
          */
         fun activeNavigationPuck(activeNavigationPuck: LocationPuck): Builder = apply {
@@ -145,10 +171,21 @@ class LocationPuckOptions private constructor(
 
         /**
          * Apply [LocationPuck2D] or [LocationPuck3D] to location puck in arrival state
+         * when in the [NavigationCameraState.FOLLOWING]
          * @param arrivalPuck [LocationPuck] to be used in arrival state
          */
         fun arrivalPuck(arrivalPuck: LocationPuck): Builder = apply {
             this.arrivalPuck = arrivalPuck
+        }
+
+        /**
+         * Apply [LocationPuck2D] or [LocationPuck3D] to location puck for all navigation states when
+         * in the [NavigationCameraState.IDLE] or the [NavigationCameraState.OVERVIEW].
+         * @param idlePuck [LocationPuck] to be used when in the [NavigationCameraState.IDLE]
+         * or [NavigationCameraState.OVERVIEW]
+         */
+        fun idlePuck(idlePuck: LocationPuck): Builder = apply {
+            this.idlePuck = idlePuck
         }
 
         /**
@@ -163,14 +200,14 @@ class LocationPuckOptions private constructor(
                 destinationPreviewPuck,
                 routePreviewPuck,
                 activeNavigationPuck,
-                arrivalPuck
+                arrivalPuck,
+                idlePuck
             )
         }
 
         companion object {
             /**
-             * Provides access to [LocationPuck2D] more suited for active navigation and arrival
-             * use cases.
+             * Provides access to [LocationPuck2D] more suited for the [NavigationCameraState.FOLLOWING].
              */
             fun navigationPuck(context: Context): LocationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
@@ -180,8 +217,8 @@ class LocationPuckOptions private constructor(
             )
 
             /**
-             * Provides access to [LocationPuck2D] more suited for free drive,
-             * destination preview and route preview use cases.
+             * Provides access to [LocationPuck2D] more suited for the [NavigationCameraState.IDLE]
+             * and [NavigationCameraState.OVERVIEW].
              */
             fun regularPuck(context: Context): LocationPuck = LocationPuck2D(
                 topImage = ContextCompat.getDrawable(
