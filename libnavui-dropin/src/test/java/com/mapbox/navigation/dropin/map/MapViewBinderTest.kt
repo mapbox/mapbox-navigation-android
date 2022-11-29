@@ -36,6 +36,7 @@ import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.dropin.util.TestingUtil.findComponent
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
 import com.mapbox.navigation.ui.maps.internal.ui.BuildingHighlightComponent
@@ -165,7 +166,7 @@ class MapViewBinderTest {
         navContext.applyStyleCustomization {
             locationPuckOptions = LocationPuckOptions
                 .Builder(ctx)
-                .freeDrivePuck(
+                .defaultPuck(
                     LocationPuck2D(
                         bearingImage = ctx.getDrawable(android.R.drawable.arrow_down_float)
                     )
@@ -180,12 +181,46 @@ class MapViewBinderTest {
     }
 
     @Test
-    fun `bind should reload LocationPuckComponent on navigation state change`() {
+    @Suppress("MaxLineLength")
+    fun `bind should reload LocationPuckComponent on navigation state change when camera mode is Following`() {
+        store.updateState {
+            it.copy(
+                navigation = NavigationState.DestinationPreview,
+                camera = it.camera.copy(cameraMode = TargetCameraMode.Following)
+            )
+        }
+        navContext.applyStyleCustomization {
+            locationPuckOptions = LocationPuckOptions
+                .Builder(ctx)
+                .routePreviewPuck(
+                    LocationPuck2D(
+                        bearingImage = ctx.getDrawable(android.R.drawable.arrow_down_float)
+                    )
+                )
+                .build()
+        }
         val components = sut.bind(FrameLayout(ctx))
         components.onAttached(mapboxNavigation)
 
         val firstComponent = components.findComponent { it is LocationPuckComponent }
         store.updateState { it.copy(navigation = NavigationState.RoutePreview) }
+        val secondComponent = components.findComponent { it is LocationPuckComponent }
+
+        assertNotNull(firstComponent)
+        assertNotNull(secondComponent)
+        assertNotEquals(secondComponent, firstComponent)
+    }
+
+    @Test
+    fun `bind should reload LocationPuckComponent on camera mode change`() {
+        store.updateState { it.copy(camera = it.camera.copy(cameraMode = TargetCameraMode.Idle)) }
+        val components = sut.bind(FrameLayout(ctx))
+        components.onAttached(mapboxNavigation)
+
+        val firstComponent = components.findComponent { it is LocationPuckComponent }
+        store.updateState {
+            it.copy(camera = it.camera.copy(cameraMode = TargetCameraMode.Following))
+        }
         val secondComponent = components.findComponent { it is LocationPuckComponent }
 
         assertNotNull(firstComponent)

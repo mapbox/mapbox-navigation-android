@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.Px
 import androidx.constraintlayout.widget.Guideline
 import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.EmptyBinder
@@ -35,8 +36,12 @@ import com.mapbox.navigation.dropin.roadname.RoadNameCoordinator
 import com.mapbox.navigation.dropin.speedlimit.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.tripprogress.TripProgressBinder
 import com.mapbox.navigation.dropin.tripsession.TripSessionComponent
+import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.internal.ui.BuildingHighlightComponent
+import com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponent
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 internal fun NavigationViewContext.poiNameComponent(
     viewGroup: ViewGroup
@@ -218,6 +223,32 @@ internal fun NavigationViewContext.buildingHighlightComponent(
             }
         }
     }
+
+internal fun NavigationViewContext.locationPuckComponent(
+    mapView: MapView
+): MapboxNavigationObserver {
+    val puckFlow = combine(
+        store.select { it.navigation },
+        store.select { it.camera.cameraMode },
+        styles.locationPuckOptions
+    ) { navigationState, cameraMode, options ->
+        if (cameraMode == TargetCameraMode.Following) {
+            when (navigationState) {
+                NavigationState.FreeDrive -> options.freeDrivePuck
+                NavigationState.DestinationPreview -> options.destinationPreviewPuck
+                NavigationState.RoutePreview -> options.routePreviewPuck
+                NavigationState.ActiveNavigation -> options.activeNavigationPuck
+                NavigationState.Arrival -> options.arrivalPuck
+            }
+        } else {
+            options.idlePuck
+        }
+    }.distinctUntilChanged()
+
+    return reloadOnChange(puckFlow) { puck ->
+        LocationPuckComponent(mapView.location, puck, locationProvider)
+    }
+}
 
 internal fun NavigationViewContext.analyticsComponent() =
     AnalyticsComponent()
