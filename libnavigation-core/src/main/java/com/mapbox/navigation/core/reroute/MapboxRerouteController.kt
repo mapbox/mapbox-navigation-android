@@ -189,13 +189,13 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     @MainThread
     override fun interrupt() {
         if (state == RerouteState.FetchingRoute) {
-            val id = requestId
-            checkNotNull(id)
-            directionsSession.cancelRouteRequest(id)
-            logD(
-                "Route request interrupted",
-                LOG_CATEGORY
-            )
+            requestId?.also { id ->
+                directionsSession.cancelRouteRequest(id)
+                logD(
+                    "Route request interrupted",
+                    LOG_CATEGORY
+                )
+            }
         }
     }
 
