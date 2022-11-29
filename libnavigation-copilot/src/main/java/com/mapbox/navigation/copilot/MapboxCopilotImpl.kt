@@ -205,10 +205,10 @@ internal class MapboxCopilotImpl(
     private fun startRecordingHistory(
         historyRecordingSessionState: HistoryRecordingSessionState
     ) {
+        copilotHistoryRecorder.startRecording()
         currentHistoryRecordingSessionState = historyRecordingSessionState
         startSessionTime = System.currentTimeMillis()
         startedAt = currentUtcTime()
-        copilotHistoryRecorder.startRecording()
         driveId = historyRecordingSessionState.sessionId
         driveMode = when (historyRecordingSessionState) {
             is ActiveGuidance -> "active-guidance"
