@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.core.RouteProgressDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
+import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.CancellationException
@@ -37,7 +38,7 @@ internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val routeRefresh: RouteRefresh,
     private val routeProgressDataProvider: RouteProgressDataProvider,
-    private val evDataHolder: EVDataHolder,
+    private val evRefreshDataProvider: EVRefreshDataProvider,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
     private val localDateProvider: () -> Date,
 ) {
@@ -235,7 +236,7 @@ internal class RouteRefreshController(
             routeProgressData.legIndex,
             routeProgressData.routeGeometryIndex,
             routeProgressData.legGeometryIndex,
-            evDataHolder.currentData(route.routeOptions.unrecognizedJsonProperties)
+            HashMap(evRefreshDataProvider.get(route.routeOptions))
         )
         return when (val result = requestRouteRefresh(route, routeRefreshRequestData)) {
             is RouteRefreshResult.Fail -> {

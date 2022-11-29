@@ -336,19 +336,16 @@ class RouterWrapperTests {
     }
 
     @Test
-    fun `route refresh set right params for non-ev route`() {
+    fun `route refresh set right params`() {
         mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
-            val evRouterOptions = provideDefaultRouteOptions()
-                .toBuilder()
-                .unrecognizedProperties(mapOf("engine" to "non-electric"))
-                .build()
+            val routeOptions = provideDefaultRouteOptions()
             val route = NavigationRoute.create(
                 DirectionsResponse.builder()
                     .code("200")
                     .uuid(UUID)
                     .routes(listOf(createDirectionsRoute(routeIndex = "0")))
                     .build(),
-                evRouterOptions,
+                routeOptions,
                 Offboard
             ).first()
 
@@ -368,60 +365,11 @@ class RouterWrapperTests {
                 0,
                 legIndex,
                 RoutingProfile(
-                    evRouterOptions.profile().mapToRoutingMode(),
-                    evRouterOptions.user()
+                    routeOptions.profile().mapToRoutingMode(),
+                    routeOptions.user()
                 ),
                 routeGeometryIndex,
-                hashMapOf<String, String>()
-            )
-
-            verify(exactly = 1) {
-                router.getRouteRefresh(
-                    expectedRefreshOptions,
-                    any()
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `route refresh set right params for ev route`() {
-        mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
-            val evRouterOptions = provideDefaultRouteOptions()
-                .toBuilder()
-                .unrecognizedProperties(mapOf("engine" to "electric"))
-                .build()
-            val route = NavigationRoute.create(
-                DirectionsResponse.builder()
-                    .code("200")
-                    .uuid(UUID)
-                    .routes(listOf(createDirectionsRoute(routeIndex = "0")))
-                    .build(),
-                evRouterOptions,
-                Offboard
-            ).first()
-
-            val legIndex = 12
-            val routeGeometryIndex = 23
-            val legGeometryIndex = 19
-            val requestData = RouteRefreshRequestData(
-                legIndex,
-                routeGeometryIndex,
-                legGeometryIndex,
-                evData
-            )
-            routerWrapper.getRouteRefresh(route, requestData, routerRefreshCallback)
-
-            val expectedRefreshOptions = RouteRefreshOptions(
-                UUID,
-                0,
-                legIndex,
-                RoutingProfile(
-                    evRouterOptions.profile().mapToRoutingMode(),
-                    evRouterOptions.user()
-                ),
-                routeGeometryIndex,
-                hashMapOf("engine" to "electric", "aaa" to "bbb")
+                HashMap(evData)
             )
 
             verify(exactly = 1) {

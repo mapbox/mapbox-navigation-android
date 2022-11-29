@@ -1766,7 +1766,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.onEVDataUpdated(data)
 
         verify(exactly = 1) {
-            evDataHolder.updateData(data)
+            evDynamicDataHolder.updateData(data)
         }
     }
 

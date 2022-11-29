@@ -201,8 +201,7 @@ class RouterWrapper(
             routeRefreshRequestData.legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
             routeRefreshRequestData.routeGeometryIndex,
-            hashMapOf<String, String>()
-                .addEvData(routeOptions, routeRefreshRequestData.experimentalProperties)
+            HashMap(routeRefreshRequestData.experimentalProperties),
         )
 
         return router.getRouteRefresh(
@@ -329,18 +328,5 @@ class RouterWrapper(
 
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
-    }
-}
-
-private const val KEY_ENGINE = "engine"
-private const val VALUE_ELECTRIC = "electric"
-
-private fun HashMap<String, String>.addEvData(
-    originalRouteOptions: RouteOptions,
-    currentEvData: Map<String, String>
-): HashMap<String, String> = apply {
-    if (originalRouteOptions.getUnrecognizedProperty(KEY_ENGINE)?.asString == VALUE_ELECTRIC) {
-        put(KEY_ENGINE, VALUE_ELECTRIC)
-        putAll(currentEvData)
     }
 }
