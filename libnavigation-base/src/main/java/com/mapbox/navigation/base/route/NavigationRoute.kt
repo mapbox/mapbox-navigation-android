@@ -18,7 +18,6 @@ import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.route.Waypoint
-import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
@@ -296,7 +295,21 @@ class NavigationRoute internal constructor(
      */
     val upcomingRoadObjects = nativeRoute.routeInfo.alerts.toUpcomingRoadObjects()
 
-    internal val waypoints: List<Waypoint> by lazy { nativeRoute.waypoints.mapToSdk() }
+    /**
+     * Compatibility function to always access the valid [DirectionsWaypoint]s collection.
+     *
+     * Returns [DirectionsResponse.waypoints] or [DirectionsRoute.waypoints]
+     * depending on whether [RouteOptions.waypointsPerRoute] was set.
+     */
+    val waypoints: List<DirectionsWaypoint>? by lazy {
+        if (routeOptions.waypointsPerRoute() == true) {
+            directionsRoute.waypoints()
+        } else {
+            directionsResponse.waypoints()
+        }
+    }
+
+    internal val nativeWaypoints: List<Waypoint> by lazy { nativeRoute.waypoints.mapToSdk() }
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -315,6 +328,7 @@ class NavigationRoute internal constructor(
 
         if (id != other.id) return false
         if (directionsRoute != other.directionsRoute) return false
+        if (waypoints != other.waypoints) return false
 
         return true
     }
@@ -325,6 +339,7 @@ class NavigationRoute internal constructor(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + directionsRoute.hashCode()
+        result = 31 * result + waypoints.hashCode()
         return result
     }
 

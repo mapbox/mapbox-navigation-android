@@ -9,6 +9,7 @@ import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -31,6 +32,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefr
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
+import com.mapbox.navigation.instrumentation_tests.utils.toApproximateCoordinates
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -349,6 +351,53 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
     }
 
     @Test
+    fun ev_route_refresh_updates_waypoints_per_route() = sdkTest {
+        replaceOriginalResponseHandler(R.raw.ev_route_response_for_refresh_with_waypoints_per_route)
+        addRefreshRequestHandler(
+            R.raw.ev_route_refresh_response,
+            acceptedGeometryIndex = 0,
+            testUuid = "ev_route_response_for_refresh_with_waypoints_per_route"
+        )
+        val requestedRoutes = requestRoutes(
+            twoCoordinates,
+            electric = true,
+            waypointsPerRoute = true
+        )
+        val evData = mapOf(
+            KEY_ENERGY_CONSUMPTION_CURVE to "0,300;20,160;80,140;120,180",
+            KEY_EV_INITIAL_CHARGE to "17000",
+            KEY_EV_PRECONDITIONING_TIME to "10",
+            KEY_AUXILIARY_CONSUMPTION to "300"
+        )
+        mapboxNavigation.onEVDataUpdated(evData)
+
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+        mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
+        val updatedRoutes = waitUntilRefresh().navigationRoutes
+
+        assertEquals(
+            listOf(null, 8097, null),
+            requestedRoutes[0].waypoints?.extractChargeAtArrival()
+        )
+
+        assertEquals(
+            listOf(null, 7286, null),
+            updatedRoutes[0].waypoints?.extractChargeAtArrival()
+        )
+        assertEquals(updatedRoutes[0].directionsRoute.waypoints(), updatedRoutes[0].waypoints)
+        val tolerance = 0.00001
+        assertEquals(
+            updatedRoutes[0].internalWaypoints().map {
+                it.name to it.location.toApproximateCoordinates(tolerance)
+            },
+            updatedRoutes[0].waypoints?.map {
+                it.name() to it.location().toApproximateCoordinates(tolerance)
+            }
+        )
+    }
+
+    @Test
     fun ev_route_refresh_updates_ev_annotations_and_waypoints_for_truncated_current_leg() =
         sdkTest {
             val geometryIndex = 384
@@ -539,12 +588,14 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         electric: Boolean,
         minChargeAtDestination: Int,
         initialCharge: String,
+        waypointsPerRoute: Boolean?,
     ): RouteOptions {
         return RouteOptions.builder().applyDefaultNavigationOptions()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .alternatives(true)
             .enableRefresh(true)
             .coordinatesList(coordinates)
+            .waypointsPerRoute(waypointsPerRoute)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
             .apply {
                 if (electric) {
@@ -589,10 +640,17 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         coordinates: List<Point>,
         electric: Boolean,
         minChargeAtDestination: Int = 6000,
-        initialCharge: String = initialInitialCharge
+        initialCharge: String = initialInitialCharge,
+        waypointsPerRoute: Boolean? = null,
     ): List<NavigationRoute> {
         return mapboxNavigation.requestRoutes(
-            generateRouteOptions(coordinates, electric, minChargeAtDestination, initialCharge)
+            generateRouteOptions(
+                coordinates,
+                electric,
+                minChargeAtDestination,
+                initialCharge,
+                waypointsPerRoute
+            )
         )
             .getSuccessfulResultOrThrowException()
             .routes
@@ -640,7 +698,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         return MockDirectionsRefreshHandler(
             testUuid,
             readRawFileText(activity, fileId),
-            acceptedGeometryIndex = acceptedGeometryIndex
+            acceptedGeometryIndex = acceptedGeometryIndex,
         ).also {
             mockWebServerRule.requestHandlers.add(FailByRequestMockRequestHandler(it))
         }

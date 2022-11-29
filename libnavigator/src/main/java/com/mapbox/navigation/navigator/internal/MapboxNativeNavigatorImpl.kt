@@ -209,7 +209,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 .incidents(routeLeg.incidents())
                 .build()
         }
-        val refreshedWaypoints = route.directionsResponse.waypoints()
+        val refreshedWaypoints = route.waypoints
         val refreshRoute = DirectionsRouteRefresh.builder()
             .legs(refreshedLegs)
             .unrecognizedJsonProperties(

@@ -667,6 +667,7 @@ package com.mapbox.navigation.base.route {
     method public int getRouteIndex();
     method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
     method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
+    method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsWaypoint>? getWaypoints();
     property public final com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse;
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute;
     property public final String id;
@@ -674,6 +675,7 @@ package com.mapbox.navigation.base.route {
     property public final int routeIndex;
     property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects;
+    property public final java.util.List<com.mapbox.api.directions.v5.models.DirectionsWaypoint>? waypoints;
     field public static final com.mapbox.navigation.base.route.NavigationRoute.Companion Companion;
   }
 

@@ -18,4 +18,4 @@ fun com.mapbox.navigation.base.route.RouterOrigin.mapToNativeRouteOrigin(): Rout
         is com.mapbox.navigation.base.route.RouterOrigin.Custom -> RouterOrigin.CUSTOM
     }
 
-fun NavigationRoute.internalWaypoints(): List<Waypoint> = waypoints
+fun NavigationRoute.internalWaypoints(): List<Waypoint> = nativeWaypoints
