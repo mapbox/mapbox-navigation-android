@@ -5,6 +5,13 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+
+## androidauto-v0.17.0 - 30 November, 2022
+### Changelog
+[Changes between 0.16.0 and 0.17.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.16.0...androidauto-v0.17.0)
+
+#### Features
+#### Bug fixes and improvements
 - Added `MapboxCarMapLoader.getStyleExtension` to get access to the values set. [#6571](https://github.com/mapbox/mapbox-navigation-android/pull/6571)
 - Removed `@MapboxExperimental` from `MapboxCarMapObserver` implementations. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
 - Renamed `CarCompassSurfaceRenderer` to `CarCompassRenderer`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
@@ -17,6 +24,12 @@ Mapbox welcomes participation and contributions from everyone.
 - Made `NeedsLocationPermissionsScreen` internal in favor of `MapboxScreen.NEEDS_LOCATION_PERMISSION`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
 - Fixed race condition where `NavigationManager.updateTrip` can be called after `navigationEnded` is called. This is a likely cause to a crash seen. [#6661](https://github.com/mapbox/mapbox-navigation-android/pull/6661)
  
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.5.0))
+- Mapbox Navigation `v2.9.2` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.9.2))
+
+
 ## androidauto-v0.16.0 - 04 November, 2022
 ### Changelog
 [Changes between 0.15.0 and 0.16.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.15.0...androidauto-v0.16.0)
