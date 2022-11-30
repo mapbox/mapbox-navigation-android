@@ -61,7 +61,7 @@ object MapboxScreen {
     const val GEO_DEEPLINK = "MAPBOX_GEO_DEEPLINK"
 
     /**
-     * Gives the user an ability search for a destination with their voice.
+     * Gives the user an ability to search for a destination with their voice.
      */
     const val GEO_DEEPLINK_FEEDBACK = "MAPBOX_GEO_DEEPLINK_FEEDBACK"
 
