@@ -8,6 +8,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.Base64.getDecoder
 
+/**
+ * HistoryAttachmentsUtilsTest
+ *
+ * NOTE FOR FUTURE SECURITY AUDITS:
+ * The fakeAccessToken used below in the tests, although it seems legitimate it is a
+ * fake one manually generated so that the owner associated to is is copilot-test-owner.
+ */
 class HistoryAttachmentsUtilsTest {
 
     @Test
@@ -61,9 +68,8 @@ class HistoryAttachmentsUtilsTest {
             every { Base64.decode(any<String>(), any()) } answers {
                 getDecoder().decode(firstArg<String>())
             }
-            val accessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcye" +
-                "XA5Y3Z0Nmk2dzEifQ.cit1w8zhi00072yp9cvt6i6w1"
-            val owner = HistoryAttachmentsUtils.retrieveOwnerFrom(accessToken)
+            val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+            val owner = HistoryAttachmentsUtils.retrieveOwnerFrom(fakeAccessToken)
             assertEquals("copilot-test-owner", owner)
         }
     }
