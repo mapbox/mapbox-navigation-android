@@ -23,6 +23,5 @@ dependencies {
     implementation dependenciesList.androidXAnnotation
     implementation dependenciesList.coroutinesTestAndroid
     implementation dependenciesList.kotlinReflect
-    implementation dependenciesList.mapboxCommonNative
     implementation dependenciesList.mockk
 }

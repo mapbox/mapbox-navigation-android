@@ -39,7 +39,6 @@ import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
-import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
@@ -287,21 +286,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         suspendCancellableCoroutine { continuation ->
             navigator!!.changeLeg(legIndex) {
                 continuation.resume(it)
-            }
-        }
-
-    // Offline
-
-    /**
-     * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
-     *
-     * @param url the directions-based uri used when hitting the http service
-     * @return a JSON route object or [RouterError]
-     */
-    override suspend fun getRoute(url: String): Expected<RouterError, String> =
-        suspendCancellableCoroutine { continuation ->
-            router.getRoute(url) { expected, _ ->
-                continuation.resume(expected)
             }
         }
 

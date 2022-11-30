@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.navigator.internal.mapToDirectionsResponse
+import com.mapbox.navigator.GetRouteOptions
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
@@ -60,7 +61,11 @@ class RouterInterfaceAdapter(
             } ?: NativeRouterOrigin.CUSTOM
     }
 
-    override fun getRoute(directionsUri: String, callback: NativeRouterCallback): Long {
+    override fun getRoute(
+        directionsUri: String,
+        options: GetRouteOptions, // unused, falling back default timeout for now
+        callback: NativeRouterCallback
+    ): Long {
         var requestId = -1L
         requestId =
             router.getRoute(

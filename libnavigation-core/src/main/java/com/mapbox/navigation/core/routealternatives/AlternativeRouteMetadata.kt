@@ -15,8 +15,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
  * from the perspective of the primary route
  * @param infoFromFork information about the alternative route from the fork with the primary route, until the destination
  * @param infoFromStartOfPrimary summed up information about the alternative route by joining
- * @param alternativeId is an id of alternative route. New alternative routes which matches tracking alternatives have the same alternativeId.
  * the primary route's data until the deviation point with the alternative route's data from the deviation point
+ * @param alternativeId is an id of alternative route. New alternative routes which matches tracking alternatives have the same alternativeId.
  */
 class AlternativeRouteMetadata internal constructor(
     val navigationRoute: NavigationRoute,
@@ -24,6 +24,9 @@ class AlternativeRouteMetadata internal constructor(
     val forkIntersectionOfPrimaryRoute: AlternativeRouteIntersection,
     val infoFromFork: AlternativeRouteInfo,
     val infoFromStartOfPrimary: AlternativeRouteInfo,
+    @Deprecated(
+        message = "This value can change on each route reset and shouldn't be used."
+    )
     val alternativeId: Int,
 ) {
     /**

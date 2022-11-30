@@ -25,7 +25,6 @@ import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
-import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
@@ -110,16 +109,6 @@ interface MapboxNativeNavigator {
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
     suspend fun updateLegIndex(legIndex: Int): Boolean
-
-    // Offline
-
-    /**
-     * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
-     *
-     * @param url the directions-based uri used when hitting the http service
-     * @return a JSON route object or [RouterError]
-     */
-    suspend fun getRoute(url: String): Expected<RouterError, String>
 
     // EH
 

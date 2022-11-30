@@ -43,8 +43,8 @@ class DropInLocationViewModel : ViewModel() {
         override fun onAttached(mapboxNavigation: MapboxNavigation) {
             val locationEngine = mapboxNavigation.navigationOptions.locationEngine
             locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult) {
-                    result.lastLocation?.let {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    result?.lastLocation?.let {
                         navigationLocationProvider.changePosition(it, emptyList())
                         _locationLiveData.value = it
                     }

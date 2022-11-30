@@ -7,8 +7,12 @@ import android.util.Log
 
 internal class SystemLocationMocker(
     private val context: Context,
-    private val mockProviderName: String
-): LocationMocker {
+    private val mockProviderName: String = DEFAULT_PROVIDER_NAME
+) : LocationMocker {
+
+    companion object {
+        const val DEFAULT_PROVIDER_NAME = "gps"
+    }
 
     private val locationManager: LocationManager by lazy {
         (context.getSystemService(Context.LOCATION_SERVICE) as LocationManager)

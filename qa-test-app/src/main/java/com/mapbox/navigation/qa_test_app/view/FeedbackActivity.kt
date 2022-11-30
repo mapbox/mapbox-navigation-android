@@ -171,8 +171,8 @@ class FeedbackActivity : AppCompatActivity() {
         binding.mapView.getMapboxMap().loadStyleUri(NavigationStyles.NAVIGATION_DAY_STYLE) {
             mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
                 object : LocationEngineCallback<LocationEngineResult> {
-                    override fun onSuccess(result: LocationEngineResult) {
-                        result.lastLocation?.let {
+                    override fun onSuccess(result: LocationEngineResult?) {
+                        result?.lastLocation?.let {
                             updateCamera(it, emptyList())
                         }
                     }

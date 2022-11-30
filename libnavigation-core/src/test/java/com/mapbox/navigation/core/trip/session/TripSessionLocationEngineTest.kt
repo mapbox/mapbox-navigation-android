@@ -8,11 +8,13 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -21,6 +23,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class TripSessionLocationEngineTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)

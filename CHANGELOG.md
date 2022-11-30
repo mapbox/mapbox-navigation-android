@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Introduced `ReplayRouteSession` and `ReplayRouteSessionOptions`. When enabled the active route will be simulated. This will replay routes in a memory efficient way, so you can simulate long routes at high location frequencies. [#6636](https://github.com/mapbox/mapbox-navigation-android/pull/6636)
 - Added building highlight on arrival support to `NavigationView`. Added new customization options `ViewOptionsCustomization.enableBuildingHighlightOnArrival` and  `ViewOptionsCustomization.buildingHighlightOptions`. [#6651](https://github.com/mapbox/mapbox-navigation-android/pull/6651)
 - Added `ComponentInstaller` for the `BuildingHighlightComponent` that offers simplified integration of the `MapboxBuildingsApi` and `MapboxBuildingView`. [#6651](https://github.com/mapbox/mapbox-navigation-android/pull/6651)
+- Introduced parallelization of route requests made with `MapboxNavigation#requestRoutes`. Now, if an offboard route request fails or times out (the default timeout has been decreased from 10 seconds to 5 seconds), we're already in the process of calculating an onboard route to decrease the time needed to provide a usable route to the user, as long as we have the data cached or pre-downloaded to succeed with an onboard request. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
 #### Bug fixes and improvements
 - Fixed crash in `PermissionsLauncherFragment` occurring on device rotation. [#6635](https://github.com/mapbox/mapbox-navigation-android/pull/6635)
 - Fixed a rare `java.lang.IllegalArgumentException: The Path cannot loop back on itself.` exception when using `NavigationLocationProvider`. [#6641](https://github.com/mapbox/mapbox-navigation-android/pull/6641)
@@ -17,9 +18,51 @@ Mapbox welcomes participation and contributions from everyone.
 - Added minor optimization to vanishing route line calculations by checking if the incoming point equal to the previous point in order to avoid recalculation and re-rendering. [#6643](https://github.com/mapbox/mapbox-navigation-android/pull/6643)
 - Improved performance of `MapboxRouteLineApi#updateWithRouteProgress` function execution. [#6648](https://github.com/mapbox/mapbox-navigation-android/pull/6648)
 - Fixed a rare issue where the offset marking the traveled portion of the route would be ahead of the user location puck, especially around sharp maneuvers. [#6648](https://github.com/mapbox/mapbox-navigation-android/pull/6648)
-- Supported applying latest EV data provided via `MapboxNavigation#onEVDataUpdated` to EV reroute requests. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
 - Fixed an issue where reroute requests where not applying the latest EV data provided via `MapboxNavigation#onEVDataUpdated`. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
 - Added `NavigationRoute#waypoints` as the source of truth for `DirectionsWaypoint`s which can be common for all routes or route specific depending on `RouteOptions#waypointsPerRoute()` parameter. [#6555](https://github.com/mapbox/mapbox-navigation-android/pull/6555)
+- Improved behavior in tunnels and underground parking lots for `DeviceType#AUTOMOBILE` by preventing tunnel-induced location simulation while we're off-road and vice-versa preventing generation of off-road location samples in tunnels. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Improved fork detection in tunnels for `DeviceType#AUTOMOBILE`. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- :warning: Changed `NavigationRouteAlternativesObserver` to only return the latest generated set of possible alternative routes to prevent accumulation of routes. This decreases the applicable usages of `AlternativeRouteMetadata#alternativeId` as the ID will be rebuilt in most of the cases. Future releases will provide improved mechanism to help understand similarity of continuously delivered alternative routes. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Improved location generation on multi-level roads for `DeviceType#AUTOMOBILE`, especially focusing on avoiding snapping the user location to the incorrect level or inaccessible parallel road. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Fixed an issue where `NavigationRouteAlternativesObserver` would fire unnecessarily often with new sets of routes. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Optimized predictive resource caching and reduced peak memory and CPU consumption on very long and complex routes. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Fixed an issue for `DeviceType#AUTOMOBILE` where entering a tunnel just after exiting a previous one (in a short time frame) could lead to incorrect location simulation. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+
+#### Known issues :warning:
+This release adds copies of classes under `com.mapbox.android.core.location` and `com.mapbox.android.core.permissions` packages from `com.mapbox.mapboxsdk:mapbox-android-core` artifact directly into the binary. This means that if you explicitly define a dependency on `com.mapbox.mapboxsdk:mapbox-android-core` artifact you can run into a duplicate class error, for example:
+```
+Execution failed for task ':{module}:checkReleaseDuplicateClasses'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.CheckDuplicatesRunnable
+   > Duplicate class com.mapbox.android.core.location.LocationEngine found in modules jetified-common-23.2.0-rc.3-runtime (com.mapbox.common:common:23.2.0-rc.3) and jetified-mapbox-android-core-5.0.2-runtime (com.mapbox.mapboxsdk:mapbox-android-core:5.0.2)
+```
+If you do run into this error, make sure to remove the direct `com.mapbox.mapboxsdk:mapbox-android-core` dependency from your build script. If you're not defining the dependency directly, make sure that you're using compatible Mapbox dependencies or as a last resort exclude the artifact from any other transitive dependency that might be bringing it in, for example:
+```
+implementation(sdkDependency) {
+    exclude group: 'com.mapbox.mapboxsdk', module: 'mapbox-android-core'
+}
+```
+
+The copies of the classes currently come in with minor type incompatibilities but these will be resolved with the upcoming pre-releases, before the changes become stable. The incompatibilities you can run into require changes like:
+```diff
+   object : LocationEngineCallback<LocationEngineResult> {
+-      override fun onSuccess(result: LocationEngineResult) {
+-          result.lastLocation?.let {
++      override fun onSuccess(result: LocationEngineResult?) {
++          result?.lastLocation?.let {
+            // ...
+        }
+       // ...
+   }
+```
+```diff
+   object : PermissionsListener {
+-     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
++     override fun onExplanationNeeded(permissionsToExplain: List<String?>?) {
+           // ...
+       }
+       // ...
+   }
+```
 
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog

@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         locationPermissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
+    override fun onExplanationNeeded(permissionsToExplain: List<String?>?) {
         Toast.makeText(
             this,
             "This app needs location permission in order to show its functionality.",

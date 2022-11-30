@@ -7,8 +7,13 @@ import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
 
 internal class FusedLocationMocker(
-    appContext: Context
+    appContext: Context,
+    private val mockProviderName: String = DEFAULT_PROVIDER_NAME
 ) : LocationMocker {
+
+    companion object {
+        const val DEFAULT_PROVIDER_NAME = "fused"
+    }
 
     private val fusedLocationProviderClient = FusedLocationProviderClient(appContext)
 
@@ -36,5 +41,5 @@ internal class FusedLocationMocker(
         fusedLocationProviderClient.setMockLocation(location)
     }
 
-    override fun generateDefaultLocation(): Location = Location("fused")
+    override fun generateDefaultLocation(): Location = Location(mockProviderName)
 }

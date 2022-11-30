@@ -37,6 +37,9 @@ internal class TripSessionLocationEngine constructor(
 
     @SuppressLint("MissingPermission")
     fun startLocationUpdates(isReplayEnabled: Boolean, onRawLocationUpdate: (Location) -> Unit) {
+        logD(LOG_CATEGORY) {
+            "starting location updates for ${if (isReplayEnabled) "replay " else ""}location engine"
+        }
         this.onRawLocationUpdate = onRawLocationUpdate
         val locationEngine = if (isReplayEnabled) {
             replayLocationEngine
@@ -58,6 +61,9 @@ internal class TripSessionLocationEngine constructor(
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
+            logD(LOG_CATEGORY) {
+                "successful location engine callback $result"
+            }
             result?.locations?.lastOrNull()?.let {
                 logIfLocationIsNotFreshEnough(it)
                 onRawLocationUpdate(it)
