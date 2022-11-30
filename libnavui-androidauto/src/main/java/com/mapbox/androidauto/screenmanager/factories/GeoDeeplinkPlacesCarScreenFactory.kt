@@ -23,7 +23,7 @@ class GeoDeeplinkPlacesCarScreenFactory(
         return PlacesListOnMapScreen(
             SearchCarContext(mapboxCarContext),
             placesProvider,
-            listOf(CarFeedbackAction(MapboxScreen.FAVORITES_FEEDBACK))
+            listOf(CarFeedbackAction(MapboxScreen.GEO_DEEPLINK_FEEDBACK))
         )
     }
 }

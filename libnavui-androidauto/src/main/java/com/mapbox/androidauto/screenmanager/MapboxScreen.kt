@@ -61,6 +61,11 @@ object MapboxScreen {
     const val GEO_DEEPLINK = "MAPBOX_GEO_DEEPLINK"
 
     /**
+     * Gives the user an ability to search for a destination with their voice.
+     */
+    const val GEO_DEEPLINK_FEEDBACK = "MAPBOX_GEO_DEEPLINK_FEEDBACK"
+
+    /**
      * Gives the user an ability to select a navigation route.
      */
     const val ROUTE_PREVIEW = "MAPBOX_ROUTE_PREVIEW"
@@ -98,6 +103,7 @@ object MapboxScreen {
         FAVORITES,
         FAVORITES_FEEDBACK,
         GEO_DEEPLINK,
+        GEO_DEEPLINK_FEEDBACK,
         ROUTE_PREVIEW,
         ROUTE_PREVIEW_FEEDBACK,
         ACTIVE_GUIDANCE,

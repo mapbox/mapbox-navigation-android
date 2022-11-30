@@ -658,6 +658,7 @@ package com.mapbox.androidauto.screenmanager {
     field public static final String FREE_DRIVE = "MAPBOX_FREE_DRIVE";
     field public static final String FREE_DRIVE_FEEDBACK = "MAPBOX_FREE_DRIVE_FEEDBACK";
     field public static final String GEO_DEEPLINK = "MAPBOX_GEO_DEEPLINK";
+    field public static final String GEO_DEEPLINK_FEEDBACK = "MAPBOX_GEO_DEEPLINK_FEEDBACK";
     field public static final com.mapbox.androidauto.screenmanager.MapboxScreen INSTANCE;
     field public static final String NEEDS_LOCATION_PERMISSION = "MAPBOX_NEEDS_LOCATION_PERMISSION";
     field public static final String ROUTE_PREVIEW = "MAPBOX_ROUTE_PREVIEW";
@@ -667,7 +668,7 @@ package com.mapbox.androidauto.screenmanager {
     field public static final String SETTINGS = "MAPBOX_SETTINGS";
   }
 
-  @StringDef({com.mapbox.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION, com.mapbox.androidauto.screenmanager.MapboxScreen.SETTINGS, com.mapbox.androidauto.screenmanager.MapboxScreen.FREE_DRIVE, com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH, com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES, com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK, com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW, com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE, com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ARRIVAL}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MapboxScreen.Key {
+  @StringDef({com.mapbox.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION, com.mapbox.androidauto.screenmanager.MapboxScreen.SETTINGS, com.mapbox.androidauto.screenmanager.MapboxScreen.FREE_DRIVE, com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH, com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES, com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK, com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW, com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE, com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ARRIVAL}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MapboxScreen.Key {
   }
 
   public final class MapboxScreenEvent {
@@ -764,6 +765,12 @@ package com.mapbox.androidauto.screenmanager.factories {
   public final class GeoDeeplinkPlacesCarScreenFactory implements com.mapbox.androidauto.screenmanager.MapboxScreenFactory {
     ctor public GeoDeeplinkPlacesCarScreenFactory(com.mapbox.androidauto.MapboxCarContext mapboxCarContext);
     method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class GeoDeeplinkPlacesFeedbackScreenFactory extends com.mapbox.androidauto.feedback.core.CarFeedbackScreenFactory {
+    ctor public GeoDeeplinkPlacesFeedbackScreenFactory(com.mapbox.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public String getSourceName();
   }
 
   public final class NeedsLocationPermissionScreenFactory implements com.mapbox.androidauto.screenmanager.MapboxScreenFactory {
