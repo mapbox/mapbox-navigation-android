@@ -3,11 +3,9 @@ package com.mapbox.navigation.examples.androidauto.app
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.examples.androidauto.CarAppSyncComponent
 import com.mapbox.navigation.examples.androidauto.databinding.MapboxActivityNavigationViewBinding
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: MapboxActivityNavigationViewBinding
 
@@ -20,6 +18,6 @@ class MainActivity : AppCompatActivity() {
         // This allows to simulate your location
 //        binding.navigationView.api.routeReplayEnabled(true)
 
-        CarAppSyncComponent.getInstance().setNavigationView(binding.navigationView)
+        CarAppSyncComponent.getInstance().attachNavigationView(binding.navigationView)
     }
 }

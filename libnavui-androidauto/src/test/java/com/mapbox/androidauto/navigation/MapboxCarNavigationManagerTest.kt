@@ -45,6 +45,14 @@ class MapboxCarNavigationManagerTest {
     private val navigationManagerCallbackSlot = slot<NavigationManagerCallback>()
     private val navigationManager: NavigationManager = mockk(relaxed = true) {
         every { setNavigationManagerCallback(capture(navigationManagerCallbackSlot)) } just Runs
+        every { navigationStarted() } answers {
+            every { clearNavigationManagerCallback() } throws IllegalStateException()
+            every { updateTrip(any()) } just Runs
+        }
+        every { navigationEnded() } answers {
+            every { clearNavigationManagerCallback() } just Runs
+            every { updateTrip(any()) } throws IllegalStateException()
+        }
     }
     private val carContext: CarContext = mockk {
         every { getCarService(NavigationManager::class.java) } returns navigationManager
@@ -138,18 +146,20 @@ class MapboxCarNavigationManagerTest {
 
     @Test
     fun `RouteProgress should trigger updateTrip`() {
-        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
-        val progressObserverSlot = slot<RouteProgressObserver>()
-        every {
-            mapboxNavigation.registerRouteProgressObserver(capture(progressObserverSlot))
-        } just Runs
-        sut.onAttached(mapboxNavigation)
+        val tripSessionStateSlot = mutableListOf<TripSessionStateObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mapboxNavigationMock(
+            tripSessionStateSlot,
+            routeProgressObserverSlot
+        )
 
+        sut.onAttached(mapboxNavigation)
+        mapboxNavigation.startTripSession()
         val routeProgress = mockk<RouteProgress> {
             every { durationRemaining } returns 100.0
             every { distanceRemaining } returns 500.0f
         }
-        progressObserverSlot.captured.onRouteProgressChanged(routeProgress)
+        routeProgressObserverSlot.forEach { it.onRouteProgressChanged(routeProgress) }
 
         verify { navigationManager.updateTrip(any()) }
     }
@@ -191,5 +201,80 @@ class MapboxCarNavigationManagerTest {
         results.cancelAndJoin()
         assertEquals(1, resultsSlot.size)
         assertTrue(resultsSlot[0])
+    }
+
+    @Test
+    fun `updateTrip should not be called while detaching MapboxNavigation`() = coroutineRule.runBlockingTest {
+        val tripSessionStateSlot = mutableListOf<TripSessionStateObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mapboxNavigationMock(
+            tripSessionStateSlot,
+            routeProgressObserverSlot
+        )
+
+        mapboxNavigation.startTripSession()
+        sut.onAttached(mapboxNavigation)
+        routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+        sut.onDetached(mapboxNavigation)
+
+        verify(exactly = 1) { navigationManager.updateTrip(any()) }
+    }
+
+    @Test
+    fun `updateTrip will not happen when MapboxNavigation emits progress while stopped`() = coroutineRule.runBlockingTest {
+        val tripSessionStateSlot = mutableListOf<TripSessionStateObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mapboxNavigationMock(
+            tripSessionStateSlot,
+            routeProgressObserverSlot
+        )
+
+        mapboxNavigation.startTripSession()
+        sut.onAttached(mapboxNavigation)
+        routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+        mapboxNavigation.stopTripSession()
+        routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+        sut.onDetached(mapboxNavigation)
+
+        verify(exactly = 1) { navigationManager.updateTrip(any()) }
+    }
+
+    private fun mapboxNavigationMock(
+        tripSessionStateSlot: MutableList<TripSessionStateObserver>,
+        routeProgressObserverSlot: MutableList<RouteProgressObserver>
+    ): MapboxNavigation {
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
+            every { registerTripSessionStateObserver(any()) } answers {
+                tripSessionStateSlot.add(firstArg())
+                firstArg<TripSessionStateObserver>().onSessionStateChanged(getTripSessionState())
+            }
+            every { unregisterTripSessionStateObserver(any()) } answers {
+                tripSessionStateSlot.remove(firstArg())
+            }
+            every { registerRouteProgressObserver(any()) } answers {
+                routeProgressObserverSlot.add(firstArg())
+            }
+            every { unregisterRouteProgressObserver(any()) } answers {
+                routeProgressObserverSlot.remove(firstArg())
+            }
+            every { unregisterTripSessionStateObserver(any()) } answers {
+                // Correct ordering when unregistering the observer will make it so
+                // routeProgressObserverSlot is empty.
+                routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+                tripSessionStateSlot.remove(firstArg())
+            }
+            every { startTripSession() } answers {
+                every { getTripSessionState() } returns TripSessionState.STARTED
+                tripSessionStateSlot.forEach { it.onSessionStateChanged(TripSessionState.STARTED) }
+            }
+            every { stopTripSession() } answers {
+                every { getTripSessionState() } returns TripSessionState.STOPPED
+                tripSessionStateSlot.forEach { it.onSessionStateChanged(TripSessionState.STOPPED) }
+            }
+        }
+        tripSessionStateSlot.add { tripSessionState ->
+            every { mapboxNavigation.getTripSessionState() } returns tripSessionState
+        }
+        return mapboxNavigation
     }
 }
