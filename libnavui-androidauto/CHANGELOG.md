@@ -15,7 +15,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Renamed `RoadLabelRenderer` to `CarRoadLabelRenderer`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
 - Made `ActiveGuidanceScreen` internal in favor of `MapboxScreen.ACTIVE_GUIDANCE`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
 - Made `NeedsLocationPermissionsScreen` internal in favor of `MapboxScreen.NEEDS_LOCATION_PERMISSION`. [#6588](https://github.com/mapbox/mapbox-navigation-android/pull/6588)
-- Fixed race condition where `NavigationManager.updateTrip` can be called after `navigationEnded` is called. This is a likely cause to a crash seen. 
+- Fixed race condition where `NavigationManager.updateTrip` can be called after `navigationEnded` is called. This is a likely cause to a crash seen. [#6661](https://github.com/mapbox/mapbox-navigation-android/pull/6661)
  
 ## androidauto-v0.16.0 - 04 November, 2022
 ### Changelog
