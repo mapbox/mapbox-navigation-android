@@ -36,6 +36,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigator.GetRouteOptions
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterInterface
@@ -55,10 +56,14 @@ class RouterWrapper(
 
     override fun getRoute(routeOptions: RouteOptions, callback: NavigationRouterCallback): Long {
         val routeUrl = routeOptions.toUrl(accessToken).toString()
+        val requestOptions = GetRouteOptions(null) // using default timeout (5 seconds)
 
-        return router.getRoute(routeUrl) { result, origin ->
-            val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
-            logD("received result from route.getRoute for $urlWithoutToken", LOG_CATEGORY)
+        val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
+        logD(LOG_CATEGORY) { "requesting route for $urlWithoutToken" }
+        return router.getRoute(routeUrl, requestOptions) { result, origin ->
+            logD(LOG_CATEGORY) {
+                "received result from router.getRoute for $urlWithoutToken; origin: $origin"
+            }
             result.fold(
                 {
                     mainJobControl.scope.launch {

@@ -8,6 +8,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -63,6 +64,9 @@ class NavigationViewTest {
 
     @Before
     fun setUp() {
+        mockkStatic(LocationEngineProvider::class)
+        every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
+
         val controller = buildActivity(ComponentActivity::class.java).setup()
         activity = controller.get()
         windowInsetsListener = slot()

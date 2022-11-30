@@ -99,10 +99,10 @@ class FindRouteOnLongPress(
     private suspend fun LocationEngine.getLastLocation() =
         suspendCancellableCoroutine<Location> { cont ->
             getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult) {
-                    result.lastLocation?.also {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    result?.lastLocation?.also {
                         cont.resume(it)
-                    }
+                    } ?: cont.resumeWithException(IllegalArgumentException("result is null"))
                 }
 
                 override fun onFailure(exception: Exception) {

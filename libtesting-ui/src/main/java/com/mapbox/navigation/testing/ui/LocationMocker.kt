@@ -17,15 +17,15 @@ internal interface LocationMocker {
 internal object LocationMockerProvider {
 
     fun getLocationMocker(context: Context): LocationMocker {
-        val fusedClientClass = try {
+        val fusedLocationMocker = try {
             Class.forName("com.google.android.gms.location.FusedLocationProviderClient")
+            FusedLocationMocker(context)
         } catch (ex: Throwable) {
             null
         }
-        return if (fusedClientClass == null) {
-            SystemLocationMocker(context, "gps")
-        } else {
-            FusedLocationMocker(context)
-        }
+        return DualLocationMocker(
+            SystemLocationMocker(context),
+            fusedLocationMocker
+        )
     }
 }

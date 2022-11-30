@@ -275,12 +275,6 @@ License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Mapbox Android Telemetry Core (Mapbox Android Core Library).
-URL: [https://github.com/mapbox/mapbox-events-android](https://github.com/mapbox/mapbox-events-android)
-License: [MIT](https://mit-license.org)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Mapbox Annotations (Artifact that provides Mapbox module and plugin annotations).
 URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
@@ -1456,12 +1450,6 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 Mapbox Navigation uses portions of the Mapbox Android Gestures Library.
 URL: [https://github.com/mapbox/mapbox-gestures-android](https://github.com/mapbox/mapbox-gestures-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Mapbox Android Telemetry Core (Mapbox Android Core Library).
-URL: [https://github.com/mapbox/mapbox-events-android](https://github.com/mapbox/mapbox-events-android)
-License: [MIT](https://mit-license.org)
 
 ===========================================================================
 

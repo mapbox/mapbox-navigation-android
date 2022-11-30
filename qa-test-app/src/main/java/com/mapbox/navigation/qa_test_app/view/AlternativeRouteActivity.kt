@@ -198,8 +198,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         ) {
             mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
                 object : LocationEngineCallback<LocationEngineResult> {
-                    override fun onSuccess(result: LocationEngineResult) {
-                        result.lastLocation?.let {
+                    override fun onSuccess(result: LocationEngineResult?) {
+                        result?.lastLocation?.let {
                             navigationLocationProvider.changePosition(it)
                             updateCamera(it)
                         }

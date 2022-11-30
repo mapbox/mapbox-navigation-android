@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.internal.ui
 import android.content.Context
 import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -21,6 +22,7 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +51,8 @@ internal class RoadNameComponentTest {
     @Before
     fun setUp() {
         mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
+        mockkStatic(LocationEngineProvider::class)
+        every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
 
         val context: Context = ApplicationProvider.getApplicationContext()
         contract = TestContract()
@@ -65,6 +69,7 @@ internal class RoadNameComponentTest {
     @After
     fun tearDown() {
         unmockkAll()
+        unmockkStatic(LocationEngineProvider::class)
     }
 
     @Test

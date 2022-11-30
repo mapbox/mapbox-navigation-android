@@ -28,6 +28,7 @@ import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteInterfacesFromDirectionRequestResponse
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.GetRouteOptions
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
@@ -128,7 +129,7 @@ class RouterWrapperTests {
         every { ThreadController.DefaultDispatcher } returns coroutineRule.testDispatcher
 
         every { mapboxNativeNavigator.router } returns router
-        every { router.getRoute(any(), capture(getRouteSlot)) } returns 0L
+        every { router.getRoute(any(), any(), capture(getRouteSlot)) } returns 0L
         every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns 0L
 
         every { route.requestUuid() } returns UUID
@@ -165,10 +166,11 @@ class RouterWrapperTests {
     }
 
     @Test
-    fun `get route is called with expected url`() {
+    fun `get route is called with expected url and options`() {
         routerWrapper.getRoute(routerOptions, routerCallback)
+        val requestOptions = GetRouteOptions(null)
 
-        verify { router.getRoute(routeUrl, any()) }
+        verify { router.getRoute(routeUrl, requestOptions, any()) }
     }
 
     @Test
@@ -187,7 +189,7 @@ class RouterWrapperTests {
             )
         )
 
-        verify { router.getRoute(routeUrl, any()) }
+        verify { router.getRoute(routeUrl, any(), any()) }
         verify { routerCallback.onFailure(expected, routerOptions) }
     }
 
@@ -197,7 +199,7 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any()) }
+            verify { router.getRoute(routeUrl, any(), any()) }
 
             val expected = DirectionsResponse.fromJson(
                 testRouteFixtures.loadTwoLegRoute(),
@@ -214,7 +216,7 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccessEmptyRoutes, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any()) }
+            verify { router.getRoute(routeUrl, any(), any()) }
 
             val expected = RouterFailure(
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
@@ -242,7 +244,7 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccessErroneousValue, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any()) }
+            verify { router.getRoute(routeUrl, any(), any()) }
 
             val expected = RouterFailure(
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)

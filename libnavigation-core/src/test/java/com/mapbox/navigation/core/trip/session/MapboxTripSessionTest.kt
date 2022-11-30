@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.trip.session
 import android.content.Context
 import android.location.Location
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.ExpectedFactory
@@ -147,6 +148,8 @@ class MapboxTripSessionTest {
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
         mockkObject(RoadObjectFactory)
+        mockkStatic(LocationEngineProvider::class)
+        every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
         every { location.toFixLocation() } returns fixLocation
         every { fixLocation.toLocation() } returns location
         every { keyFixPoints.toLocations() } returns keyPoints
@@ -1663,6 +1666,7 @@ class MapboxTripSessionTest {
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
         unmockkObject(RoadObjectFactory)
+        unmockkStatic(LocationEngineProvider::class)
     }
 
     private fun mockLocation(): Location = mockk(relaxed = true)

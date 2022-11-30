@@ -21,6 +21,7 @@ import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
@@ -62,7 +63,9 @@ class ReplayRouteSessionTest {
 
     @Before
     fun setup() {
-        mockkStatic(PermissionsManager::class)
+        // todo this will have to be changed to `mockkStatic(PermissionsManager::class)`
+        // when upgrading to Common SDK v23.2.0
+        mockkObject(PermissionsManager)
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
         mockkStatic(LocationEngineProvider::class)
         every { LocationEngineProvider.getBestLocationEngine(any()) } returns bestLocationEngine

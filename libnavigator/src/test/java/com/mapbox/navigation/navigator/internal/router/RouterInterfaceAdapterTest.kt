@@ -64,7 +64,7 @@ class RouterInterfaceAdapterTest {
             provideNativeRouteCallbackWithSlots()
         val expectedNavigationRoute = provideNavigationRoute()
 
-        val receivedRequestId = routerInterface.getRoute(VALID_URL, nativeRouterCallback)
+        val receivedRequestId = routerInterface.getRoute(VALID_URL, mockk(), nativeRouterCallback)
         routerCallback.captured.onRoutesReady(
             listOf(expectedNavigationRoute),
             RouterOrigin.Onboard,
@@ -89,7 +89,7 @@ class RouterInterfaceAdapterTest {
         val (nativeRouterCallback, slotNativeRouterCallback, slotNativeRouterOrigin) =
             provideNativeRouteCallbackWithSlots()
 
-        val receivedRequestId = routerInterface.getRoute(VALID_URL, nativeRouterCallback)
+        val receivedRequestId = routerInterface.getRoute(VALID_URL, mockk(), nativeRouterCallback)
         routerCallback.captured.onRoutesReady(
             emptyList(),
             RouterOrigin.Offboard,
@@ -122,7 +122,7 @@ class RouterInterfaceAdapterTest {
             )
         )
 
-        val receivedRequestId = routerInterface.getRoute(VALID_URL, nativeRouterCallback)
+        val receivedRequestId = routerInterface.getRoute(VALID_URL, mockk(), nativeRouterCallback)
         routerCallback.captured.onFailure(
             routeFailureList,
             mockk()
@@ -153,7 +153,7 @@ class RouterInterfaceAdapterTest {
         val (nativeRouterCallback, slotNativeRouterCallback, slotNativeRouterOrigin) =
             provideNativeRouteCallbackWithSlots()
 
-        val receivedRequestId = routerInterface.getRoute(VALID_URL, nativeRouterCallback)
+        val receivedRequestId = routerInterface.getRoute(VALID_URL, mockk(), nativeRouterCallback)
         routerCallback.captured.onCanceled(
             mockk(),
             RouterOrigin.Offboard,
