@@ -37,7 +37,9 @@ class MapboxCarNavigationManager internal constructor(
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         val maneuverApi = maneuverApi ?: return@RouteProgressObserver
         val trip = CarManeuverMapper.from(routeProgress, maneuverApi)
-        navigationManager.updateTrip(trip)
+        if (mapboxNavigation?.getTripSessionState() == TripSessionState.STARTED) {
+            navigationManager.updateTrip(trip)
+        }
     }
 
     private val tripSessionStateObserver = TripSessionStateObserver { tripSessionState ->
