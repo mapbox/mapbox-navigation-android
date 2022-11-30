@@ -21,9 +21,11 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collect
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -45,6 +47,14 @@ class MapboxCarNavigationManagerTest {
     private val navigationManagerCallbackSlot = slot<NavigationManagerCallback>()
     private val navigationManager: NavigationManager = mockk(relaxed = true) {
         every { setNavigationManagerCallback(capture(navigationManagerCallbackSlot)) } just Runs
+        every { navigationStarted() } answers {
+            every { clearNavigationManagerCallback() } throws IllegalStateException()
+            every { updateTrip(any()) } just Runs
+        }
+        every { navigationEnded() } answers {
+            every { clearNavigationManagerCallback() } just Runs
+            every { updateTrip(any()) } throws IllegalStateException()
+        }
     }
     private val carContext: CarContext = mockk {
         every { getCarService(NavigationManager::class.java) } returns navigationManager
@@ -191,5 +201,45 @@ class MapboxCarNavigationManagerTest {
         results.cancelAndJoin()
         assertEquals(1, resultsSlot.size)
         assertTrue(resultsSlot[0])
+    }
+
+    @Test
+    fun `updateTrip should not be called while detaching MapboxNavigation`() = coroutineRule.runBlockingTest {
+        val tripSessionStateSlot = mutableListOf<TripSessionStateObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
+            every { registerTripSessionStateObserver(any()) } answers {
+                tripSessionStateSlot.add(firstArg())
+                firstArg<TripSessionStateObserver>()
+                    .onSessionStateChanged(TripSessionState.STARTED)
+            }
+            every { unregisterTripSessionStateObserver(any()) } answers {
+                tripSessionStateSlot.remove(firstArg())
+            }
+            every { registerRouteProgressObserver(any()) } answers {
+                routeProgressObserverSlot.add(firstArg())
+            }
+            every { unregisterRouteProgressObserver(any()) } answers {
+                routeProgressObserverSlot.remove(firstArg())
+            }
+            every { unregisterTripSessionStateObserver(any()) } answers {
+                // Correct ordering when unregistering the observer will make it so
+                // routeProgressObserverSlot is empty.
+                routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+                tripSessionStateSlot.remove(firstArg())
+            }
+            every { startTripSession() } answers {
+                tripSessionStateSlot.forEach { it.onSessionStateChanged(TripSessionState.STARTED) }
+            }
+            every { stopTripSession() } answers {
+                tripSessionStateSlot.forEach { it.onSessionStateChanged(TripSessionState.STOPPED) }
+            }
+        }
+
+        sut.onAttached(mapboxNavigation)
+        routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+        sut.onDetached(mapboxNavigation)
+
+        verify(exactly = 1) { navigationManager.updateTrip(any()) }
     }
 }

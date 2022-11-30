@@ -31,7 +31,7 @@ class CarAppSyncComponent private constructor() : MapboxNavigationObserver {
     private var navigationView: NavigationView? = null
     private var session: Session? = null
 
-    fun setNavigationView(navigationView: NavigationView) {
+    fun attachNavigationView(navigationView: NavigationView) {
         this.navigationView = navigationView
         navigationView.lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {

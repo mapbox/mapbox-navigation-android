@@ -85,15 +85,11 @@ class MapboxCarNavigationManager internal constructor(
         logAndroidAuto("MapboxNavigationManager onDetached")
         this.mapboxNavigation = null
         carTelemetry.onDetached(mapboxNavigation)
-        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
 
-        // clearNavigationManagerCallback() can't be called during active navigation.
-        // However, this callback lets AA stop the trip session which we don't want it to do if
-        // the user simply exited AA but is still navigating via the phone app. Since
-        // there is only one instance of MapboxNavigation allowing AA to stop the trip
-        // session when the MainCarSession is inactive but possibly the phone app. is
-        // actively navigating would cause unpredictable side effects.
+        // Tell android auto navigation stopped. Navigation can continue with mapbox navigation
+        // on another device.
         navigationManager.navigationEnded()
         navigationManager.clearNavigationManagerCallback()
     }
