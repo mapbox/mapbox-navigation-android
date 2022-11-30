@@ -8,12 +8,11 @@ import android.util.Base64
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.mapbox.common.UploadOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.CopilotOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.copilot.CopilotTestUtils.retrieveAttachments
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.copyToAndRemove
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -48,6 +47,13 @@ import org.junit.Test
 import java.io.File
 import java.util.Locale
 
+/**
+ * MapboxCopilotImplTest
+ *
+ * NOTE FOR FUTURE SECURITY AUDITS:
+ * The fakeAccessToken used below in the tests, although it seems legitimate it is a
+ * fake one manually generated so that the owner associated to is is copilot-test-owner.
+ */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxCopilotImplTest {
 
@@ -541,10 +547,8 @@ class MapboxCopilotImplTest {
         } returns mockedHistoryRecorder
         val userFeedbackCallback = slot<UserFeedbackCallback>()
         every { registerUserFeedbackCallback(capture(userFeedbackCallback)) } just Runs
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         mockkObject(HistoryUploadWorker)
         every {
@@ -606,10 +610,8 @@ class MapboxCopilotImplTest {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
         every { registerUserFeedbackCallback(any()) } just Runs
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         val copilotOptions = mockk<CopilotOptions>()
         every { copilotOptions.shouldSendHistoryOnlyWithFeedback } returns true
         every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
@@ -673,10 +675,8 @@ class MapboxCopilotImplTest {
         } returns mockedHistoryRecorder
         val userFeedbackCallback = slot<UserFeedbackCallback>()
         every { registerUserFeedbackCallback(capture(userFeedbackCallback)) } just Runs
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         val copilotOptions = mockk<CopilotOptions>()
         every { copilotOptions.shouldSendHistoryOnlyWithFeedback } returns true
         every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
@@ -888,10 +888,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         mockkObject(HistoryUploadWorker)
         every {
@@ -950,10 +948,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         mockkObject(HistoryUploadWorker)
         every {
@@ -1002,10 +998,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedUploadOptions = slot<UploadOptions>()
         mockkObject(HistoryUploadWorker)
@@ -1053,6 +1047,66 @@ class MapboxCopilotImplTest {
     }
 
     @Test
+    fun `AttachmentMetadata created is set to startedAt`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
+        prepareUploadMockks()
+        val mockedUploadOptions = slot<UploadOptions>()
+        mockkObject(HistoryUploadWorker)
+        every {
+            HistoryUploadWorker.uploadHistory(
+                any(),
+                any(),
+                capture(mockedUploadOptions),
+                any(),
+            )
+        } just Runs
+        val saveHistoryCallback = slot<SaveHistoryCallback>()
+        every { mockedHistoryRecorder.stopRecording(capture(saveHistoryCallback)) } answers {
+            saveHistoryCallback.captured.onSaved("path/to/history/file")
+        }
+        val startedAt = "2022-05-12T17:47:42.353Z"
+        every {
+            HistoryAttachmentsUtils.utcTimeNow(eq("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"), eq(Locale.US))
+        } returns startedAt
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val routesObserver = slot<RoutesObserver>()
+        every {
+            mockedMapboxNavigation.registerRoutesObserver(capture(routesObserver))
+        } just Runs
+        val mockedNavigationRoute = mockk<NavigationRoute>(relaxed = true)
+        val mockedNavigationRoutes = listOf(mockedNavigationRoute)
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val mockedHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+        val mockedRoutesResult = mockk<RoutesUpdatedResult>()
+        every { mockedRoutesResult.navigationRoutes } returns mockedNavigationRoutes
+
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            mockedHistoryRecordingSessionState
+        )
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockedHistoryRecordingSessionState
+        )
+
+        val attachmentsMetadata = mockedUploadOptions.captured.metadata
+        val attachments = retrieveAttachments(attachmentsMetadata)
+        assertEquals(startedAt, attachments[0].created)
+    }
+
+    @Test
     fun `AttachmentMetadata sessionId - debug appMode`() {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
         val mockedContext = mockk<Context>(relaxed = true)
@@ -1074,10 +1128,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.navigationOptions.applicationContext
         } returns mockedContext
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedSessionId = slot<String>()
         mockkObject(HistoryUploadWorker)
@@ -1154,10 +1206,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.navigationOptions.applicationContext
         } returns mockedContext
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedSessionId = slot<String>()
         mockkObject(HistoryUploadWorker)
@@ -1220,10 +1270,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedSessionId = slot<String>()
         mockkObject(HistoryUploadWorker)
@@ -1280,10 +1328,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedSessionId = slot<String>()
         mockkObject(HistoryUploadWorker)
@@ -1340,10 +1386,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedSessionId = slot<String>()
         mockkObject(HistoryUploadWorker)
@@ -1404,10 +1448,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedUploadOptions = slot<UploadOptions>()
         mockkObject(HistoryUploadWorker)
@@ -1472,10 +1514,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedUploadOptions = slot<UploadOptions>()
         mockkObject(HistoryUploadWorker)
@@ -1545,10 +1585,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedUploadOptions = slot<UploadOptions>()
         mockkObject(HistoryUploadWorker)
@@ -1603,10 +1641,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         val mockedUploadOptions = slot<UploadOptions>()
         mockkObject(HistoryUploadWorker)
@@ -1659,10 +1695,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         prepareUploadMockks()
         every { HistoryAttachmentsUtils.retrieveIsDebug() } returns false
         val mockedUploadOptions = slot<UploadOptions>()
@@ -1707,7 +1741,7 @@ class MapboxCopilotImplTest {
 
         assertTrue(
             mockedUploadOptions.captured.url == "https://events.mapbox.com" +
-                "/attachments/v1?access_token=$accessToken",
+                "/attachments/v1?access_token=$fakeAccessToken",
         )
     }
 
@@ -1730,10 +1764,8 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.navigationOptions.applicationContext
         } returns mockedContext
-        val accessToken =
-            "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ." +
-                "cit1w8zhi00072yp9cvt6i6w1"
-        every { mockedMapboxNavigation.navigationOptions.accessToken } returns accessToken
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
         val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
@@ -1783,7 +1815,7 @@ class MapboxCopilotImplTest {
 
         assertTrue(
             mockedUploadOptions.captured.url == "https://api-events-staging.tilestream.net/" +
-                "attachments/v1?access_token=$accessToken",
+                "attachments/v1?access_token=$fakeAccessToken",
         )
     }
 
@@ -2320,12 +2352,6 @@ class MapboxCopilotImplTest {
         verify(exactly = 0) {
             mockedHistoryRecorder.pushHistory(SEARCH_RESULT_USED_EVENT_NAME, any())
         }
-    }
-
-    private fun retrieveAttachments(metadata: String): List<AttachmentMetadata> {
-        val gson = Gson()
-        val itemType = object : TypeToken<List<AttachmentMetadata>>() {}.type
-        return gson.fromJson(metadata, itemType)
     }
 
     private fun prepareBasicMockks(): MapboxNavigation {

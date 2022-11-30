@@ -44,9 +44,11 @@ internal class HistoryUploadWorker(
         val drive = buildNavigationSessionFrom(workerParams.inputData)
         val filePath = workerParams.inputData.getString(HISTORY_FILE_PATH)!!
         val file = File(filePath)
+        val startedAt = workerParams.inputData.getString(STARTED_AT)!!
         val uploadSessionId = workerParams.inputData.getString(UPLOAD_SESSION_ID)!!
         val metadata = AttachmentMetadata(
             name = file.name,
+            created = startedAt,
             fileId = "",
             format = GZ,
             type = ZIP,

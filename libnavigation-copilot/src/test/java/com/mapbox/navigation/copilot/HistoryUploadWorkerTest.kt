@@ -12,6 +12,7 @@ import com.mapbox.common.UploadState
 import com.mapbox.common.UploadStatus
 import com.mapbox.common.UploadStatusCallback
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.copilot.CopilotTestUtils.retrieveAttachments
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.copyToAndRemove
 import com.mapbox.navigation.copilot.internal.PushStatus
 import com.mapbox.navigation.copilot.internal.PushStatusObserver
@@ -73,6 +74,42 @@ class HistoryUploadWorkerTest {
         verify(exactly = 1) {
             mockedPushStatusObserver.onPushStatusChanged(ofType<PushStatus.Failed>())
         }
+    }
+
+    @Test
+    fun `AttachmentMetadata created is set to startedAt`() = runBlocking {
+        mockkStatic("com.mapbox.navigation.utils.internal.LoggerProviderKt")
+        every { logD(msg = any(), category = any()) } just Runs
+        val mockedContext = mockk<Context>(relaxed = true)
+        val mockedWorkerParams = mockk<WorkerParameters>(relaxed = true)
+        val startedAt = "2022-05-12T17:47:42.353Z"
+        every {
+            mockedWorkerParams.inputData.getString("started_at")
+        } returns startedAt
+        val mockedUploadServiceInterface = prepareUploadMockks()
+        val mockedUploadOptions = slot<UploadOptions>()
+        val mockedUploadStatusCallback = slot<UploadStatusCallback>()
+        val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
+        every { mockedUploadStatus.state } returns UploadState.FINISHED
+        every { mockedUploadStatus.httpResult?.value?.code } returns 204L
+        val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
+        MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
+        every {
+            mockedUploadServiceInterface.upload(
+                capture(mockedUploadOptions),
+                capture(mockedUploadStatusCallback),
+            )
+        } answers {
+            mockedUploadStatusCallback.captured.run(mockedUploadStatus)
+            1L
+        }
+        val historyUploadWorker = HistoryUploadWorker(mockedContext, mockedWorkerParams)
+
+        historyUploadWorker.doWork()
+
+        val attachmentsMetadata = mockedUploadOptions.captured.metadata
+        val attachments = retrieveAttachments(attachmentsMetadata)
+        assertEquals(startedAt, attachments[0].created)
     }
 
     @Test

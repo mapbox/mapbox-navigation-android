@@ -312,6 +312,7 @@ internal class MapboxCopilotImpl(
         val sessionId = generateSessionId(copilotMetadata, owner)
         return AttachmentMetadata(
             name = filename,
+            created = startedAt,
             fileId = "",
             format = GZ,
             type = ZIP,
