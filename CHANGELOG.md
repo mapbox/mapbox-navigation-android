@@ -21,6 +21,24 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where reroute requests where not applying the latest EV data provided via `MapboxNavigation#onEVDataUpdated`. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
 - Added `NavigationRoute#waypoints` as the source of truth for `DirectionsWaypoint`s which can be common for all routes or route specific depending on `RouteOptions#waypointsPerRoute()` parameter. [#6555](https://github.com/mapbox/mapbox-navigation-android/pull/6555)
 
+## Mapbox Navigation SDK 2.9.3 - 01 December, 2022
+### Changelog
+[Changes between v2.9.2 and v2.9.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.2...v2.9.3)
+
+#### Features
+#### Bug fixes and improvements
+- Updated `HistoryUploadWorker` attachments metadata to include the `created` field with the same value as `startedAt`. [#6660](https://github.com/mapbox/mapbox-navigation-android/pull/6660)
+- Updated `MapboxCopilotImpl` to call `startRecording` as soon as `onShouldStartRecording` is called. [#6655](https://github.com/mapbox/mapbox-navigation-android/pull/6655)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
+- Mapbox Navigation Native `v119.0.4`
+- Mapbox Core Common `v23.1.1`
+- Mapbox Java `v6.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
 ## Mapbox Navigation SDK 2.9.2 - 18 November, 2022
 ### Changelog
 [Changes between v2.9.1 and v2.9.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.1...v2.9.2)
