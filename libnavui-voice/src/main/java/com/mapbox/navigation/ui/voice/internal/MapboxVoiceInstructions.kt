@@ -11,9 +11,6 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 
 /**
@@ -23,18 +20,22 @@ import kotlinx.coroutines.flow.mapLatest
 class MapboxVoiceInstructions {
 
     private val voiceInstructionsFlow =
-        MutableStateFlow<State>(MapboxVoiceInstructionsState(true, null))
+        MutableStateFlow(MapboxVoiceInstructionsState(true, null))
     private val routesFlow = MutableStateFlow<List<NavigationRoute>>(emptyList())
-    private val tripSessionStateFlow = MutableStateFlow(TripSessionState.STOPPED)
 
     private val voiceInstructionsObserver = VoiceInstructionsObserver {
         voiceInstructionsFlow.value = MapboxVoiceInstructionsState(true, it)
     }
     private val routesObserver = RoutesObserver {
         routesFlow.value = it.navigationRoutes
+        if (it.navigationRoutes.isEmpty()) {
+            voiceInstructionsFlow.value = MapboxVoiceInstructionsState()
+        }
     }
     private val tripSessionStateObserver = TripSessionStateObserver {
-        tripSessionStateFlow.value = it
+        if (it == TripSessionState.STOPPED) {
+            voiceInstructionsFlow.value = MapboxVoiceInstructionsState()
+        }
     }
 
     fun registerObservers(mapboxNavigation: MapboxNavigation) {
@@ -51,38 +52,16 @@ class MapboxVoiceInstructions {
         resetFlows()
     }
 
-    fun voiceInstructions(): Flow<State> {
-        return tripSessionStateFlow
-            .flatMapLatest { tripSessionState ->
-                if (tripSessionState == TripSessionState.STARTED) {
-                    routesUpdatedResultToVoiceInstructions()
-                } else {
-                    flowOf(MapboxVoiceInstructionsState(false, null))
-                }
-            }
-    }
+    fun voiceInstructions(): Flow<State> = voiceInstructionsFlow
 
     fun voiceLanguage(): Flow<String?> {
         return routesFlow
             .mapLatest { it.firstOrNull()?.directionsRoute?.voiceLanguage() }
     }
 
-    private fun routesUpdatedResultToVoiceInstructions(): Flow<State> {
-        return routesFlow
-            .distinctUntilChangedBy { it.isEmpty() }
-            .flatMapLatest { routes ->
-                if (routes.isNotEmpty()) {
-                    voiceInstructionsFlow
-                } else {
-                    flowOf(MapboxVoiceInstructionsState(false, null))
-                }
-            }
-    }
-
     private fun resetFlows() {
         voiceInstructionsFlow.value = MapboxVoiceInstructionsState(true, null)
         routesFlow.value = emptyList()
-        tripSessionStateFlow.value = TripSessionState.STOPPED
     }
 
     interface State {

@@ -17,7 +17,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -30,7 +32,7 @@ class MapboxVoiceInstructionsTest {
     val coroutineRule = MainCoroutineRule()
 
     private val mapboxNavigation = mockk<MapboxNavigation>(relaxUnitFun = true)
-    private val carAppVoiceInstructions = MapboxVoiceInstructions()
+    private val sut = MapboxVoiceInstructions()
 
     @Test
     fun `should emit voice instruction`() = coroutineRule.runBlockingTest {
@@ -53,8 +55,8 @@ class MapboxVoiceInstructionsTest {
             every { announcement() } returns "Left on Broadway"
         }
 
-        carAppVoiceInstructions.registerObservers(mapboxNavigation)
-        val flow = carAppVoiceInstructions.voiceInstructions()
+        sut.registerObservers(mapboxNavigation)
+        val flow = sut.voiceInstructions()
         val initialInstruction = flow.first()
         observerSlot.captured.onNewVoiceInstructions(voiceInstructions)
         val updatedInstruction = flow.first()
@@ -90,10 +92,10 @@ class MapboxVoiceInstructionsTest {
             mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
         } just Runs
 
-        val flow = carAppVoiceInstructions.voiceInstructions()
+        val flow = sut.voiceInstructions()
         val initialAnnouncement = flow.first().voiceInstructions?.announcement()
 
-        carAppVoiceInstructions.registerObservers(mapboxNavigation)
+        sut.registerObservers(mapboxNavigation)
 
         observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
         val firstAnnouncement = flow.first().voiceInstructions?.announcement()
@@ -121,7 +123,7 @@ class MapboxVoiceInstructionsTest {
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
 
-        val state = carAppVoiceInstructions.voiceInstructions().first()
+        val state = sut.voiceInstructions().first()
 
         assertNull(state.voiceInstructions?.announcement())
     }
@@ -134,7 +136,7 @@ class MapboxVoiceInstructionsTest {
             )
         }
 
-        val state = carAppVoiceInstructions.voiceInstructions().first()
+        val state = sut.voiceInstructions().first()
 
         assertNull(state.voiceInstructions?.announcement())
     }
@@ -152,9 +154,9 @@ class MapboxVoiceInstructionsTest {
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
 
-        val flow = carAppVoiceInstructions.voiceLanguage()
+        val flow = sut.voiceLanguage()
         val initialInstruction = flow.first()
-        carAppVoiceInstructions.registerObservers(mapboxNavigation)
+        sut.registerObservers(mapboxNavigation)
         val updatedInstruction = flow.first()
 
         // routesFlow() on start sends empty list to disable sound button  in FreeDrive
@@ -171,7 +173,7 @@ class MapboxVoiceInstructionsTest {
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
 
-        assertNull(carAppVoiceInstructions.voiceLanguage().first())
+        assertNull(sut.voiceLanguage().first())
     }
 
     @Test
@@ -179,8 +181,54 @@ class MapboxVoiceInstructionsTest {
         coroutineRule.runBlockingTest {
             every { mapboxNavigation.registerRoutesObserver(any()) } just Runs
 
-            assertNull(carAppVoiceInstructions.voiceLanguage().first())
+            assertNull(sut.voiceLanguage().first())
         }
+
+    @Test
+    fun `should reset voiceInstructions when empty routes are set`() = runBlockingTest {
+        val firstVoiceInstructions = mockk<VoiceInstructions>()
+        val routesObserver = slot<RoutesObserver>()
+        val instructionsObserver = slot<VoiceInstructionsObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture((routesObserver))) } returns Unit
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(instructionsObserver))
+        } returns Unit
+        sut.registerObservers(mapboxNavigation)
+
+        instructionsObserver.captured.onNewVoiceInstructions(firstVoiceInstructions)
+        val firstState = sut.voiceInstructions().first()
+        routesObserver.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns emptyList()
+            }
+        )
+        val secondState = sut.voiceInstructions().first()
+
+        assertNotNull(firstState.voiceInstructions)
+        assertNull(secondState.voiceInstructions)
+    }
+
+    @Test
+    fun `should reset voiceInstructions when TripSession is STOPPED`() = runBlockingTest {
+        val firstVoiceInstructions = mockk<VoiceInstructions>()
+        val instructionsObserver = slot<VoiceInstructionsObserver>()
+        val tripSessionObserver = slot<TripSessionStateObserver>()
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(instructionsObserver))
+        } returns Unit
+        every {
+            mapboxNavigation.registerTripSessionStateObserver(capture(tripSessionObserver))
+        } returns Unit
+        sut.registerObservers(mapboxNavigation)
+
+        instructionsObserver.captured.onNewVoiceInstructions(firstVoiceInstructions)
+        val firstState = sut.voiceInstructions().first()
+        tripSessionObserver.captured.onSessionStateChanged(TripSessionState.STOPPED)
+        val secondState = sut.voiceInstructions().first()
+
+        assertNotNull(firstState.voiceInstructions)
+        assertNull(secondState.voiceInstructions)
+    }
 
     private fun createRoute(voiceLanguage: String): NavigationRoute {
         return mockk {
