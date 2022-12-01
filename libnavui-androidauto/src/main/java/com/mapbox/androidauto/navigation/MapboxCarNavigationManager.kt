@@ -108,6 +108,7 @@ class MapboxCarNavigationManager internal constructor(
                             "MapboxNavigation.stopTripSession in order to stop navigation."
                     )
                     navigationManager.navigationStarted()
+                    navigationManager.updateTrip(trip)
                 }
             }
         }

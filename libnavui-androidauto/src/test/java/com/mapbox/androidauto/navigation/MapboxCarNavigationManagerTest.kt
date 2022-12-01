@@ -226,8 +226,10 @@ class MapboxCarNavigationManagerTest {
         val expectedErrorMessage = "MapboxCarNavigationManager updateTrip failed"
         verifyOrder {
             navigationManager.navigationStarted()
+            navigationManager.updateTrip(any())
             AndroidAutoLog.logAndroidAutoFailure(expectedErrorMessage, any())
             navigationManager.navigationStarted()
+            navigationManager.updateTrip(any())
         }
     }
 
