@@ -22,7 +22,6 @@ class MapboxVoiceInstructions {
     private val voiceInstructionsFlow =
         MutableStateFlow(MapboxVoiceInstructionsState(true, null))
     private val routesFlow = MutableStateFlow<List<NavigationRoute>>(emptyList())
-    private val tripSessionStateFlow = MutableStateFlow(TripSessionState.STOPPED)
 
     private val voiceInstructionsObserver = VoiceInstructionsObserver {
         voiceInstructionsFlow.value = MapboxVoiceInstructionsState(true, it)
@@ -34,7 +33,6 @@ class MapboxVoiceInstructions {
         }
     }
     private val tripSessionStateObserver = TripSessionStateObserver {
-        tripSessionStateFlow.value = it
         if (it == TripSessionState.STOPPED) {
             voiceInstructionsFlow.value = MapboxVoiceInstructionsState()
         }
@@ -64,7 +62,6 @@ class MapboxVoiceInstructions {
     private fun resetFlows() {
         voiceInstructionsFlow.value = MapboxVoiceInstructionsState(true, null)
         routesFlow.value = emptyList()
-        tripSessionStateFlow.value = TripSessionState.STOPPED
     }
 
     interface State {
