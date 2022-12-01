@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.10.0-beta.2 - 01 December, 2022
+### Changelog
+[Changes between v2.10.0-beta.1 and v2.10.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-beta.1...v2.10.0-beta.2)
+
+#### Features
 - Introduced `ReplayRouteSession` and `ReplayRouteSessionOptions`. When enabled the active route will be simulated. This will replay routes in a memory efficient way, so you can simulate long routes at high location frequencies. [#6636](https://github.com/mapbox/mapbox-navigation-android/pull/6636)
 - Added building highlight on arrival support to `NavigationView`. Added new customization options `ViewOptionsCustomization.enableBuildingHighlightOnArrival` and  `ViewOptionsCustomization.buildingHighlightOptions`. [#6651](https://github.com/mapbox/mapbox-navigation-android/pull/6651)
 - Added `ComponentInstaller` for the `BuildingHighlightComponent` that offers simplified integration of the `MapboxBuildingsApi` and `MapboxBuildingView`. [#6651](https://github.com/mapbox/mapbox-navigation-android/pull/6651)
@@ -64,6 +71,14 @@ The copies of the classes currently come in with minor type incompatibilities bu
        // ...
    }
 ```
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0-rc.1))
+- Mapbox Navigation Native `v122.0.0`
+- Mapbox Core Common `v23.2.0-rc.3`
+- Mapbox Java `v6.10.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.3))
+
 
 ## Mapbox Navigation SDK 2.9.3 - 01 December, 2022
 ### Changelog
