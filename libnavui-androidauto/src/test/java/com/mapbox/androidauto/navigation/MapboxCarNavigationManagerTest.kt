@@ -3,6 +3,7 @@ package com.mapbox.androidauto.navigation
 import androidx.car.app.CarContext
 import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
+import com.mapbox.androidauto.internal.AndroidAutoLog
 import com.mapbox.androidauto.navigation.maneuver.CarManeuverMapper
 import com.mapbox.androidauto.testing.CarAppTestRule
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -21,6 +22,7 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
@@ -46,12 +48,14 @@ class MapboxCarNavigationManagerTest {
     private val navigationManager: NavigationManager = mockk(relaxed = true) {
         every { setNavigationManagerCallback(capture(navigationManagerCallbackSlot)) } just Runs
         every { navigationStarted() } answers {
-            every { clearNavigationManagerCallback() } throws IllegalStateException()
+            every {
+                clearNavigationManagerCallback()
+            } throws IllegalStateException("Removing callback while navigating")
             every { updateTrip(any()) } just Runs
         }
         every { navigationEnded() } answers {
             every { clearNavigationManagerCallback() } just Runs
-            every { updateTrip(any()) } throws IllegalStateException()
+            every { updateTrip(any()) } throws IllegalStateException("Navigation is not started")
         }
     }
     private val carContext: CarContext = mockk {
@@ -201,6 +205,30 @@ class MapboxCarNavigationManagerTest {
         results.cancelAndJoin()
         assertEquals(1, resultsSlot.size)
         assertTrue(resultsSlot[0])
+    }
+
+    @Test
+    fun `updateTrip throws IllegalStateException because navigation is not started`() {
+        val tripSessionStateSlot = mutableListOf<TripSessionStateObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mapboxNavigationMock(
+            tripSessionStateSlot,
+            routeProgressObserverSlot
+        )
+
+        mapboxNavigation.startTripSession()
+        sut.onAttached(mapboxNavigation)
+        navigationManager.navigationEnded()
+        routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+        sut.onDetached(mapboxNavigation)
+
+        // Restart navigationStarted when the error is thrown.
+        val expectedErrorMessage = "MapboxCarNavigationManager updateTrip failed"
+        verifyOrder {
+            navigationManager.navigationStarted()
+            AndroidAutoLog.logAndroidAutoFailure(expectedErrorMessage, any())
+            navigationManager.navigationStarted()
+        }
     }
 
     @Test

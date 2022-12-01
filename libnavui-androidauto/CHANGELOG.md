@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed issue when `NavigationManager.updateTrip` crashes because navigation is not started https://issuetracker.google.com/u/0/issues/260968395. [#6673](https://github.com/mapbox/mapbox-navigation-android/pull/6673)
 
 ## androidauto-v0.17.0 - 30 November, 2022
 ### Changelog

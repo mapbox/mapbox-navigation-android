@@ -3,7 +3,9 @@ package com.mapbox.androidauto.navigation
 import androidx.car.app.CarContext
 import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
+import androidx.car.app.navigation.model.Trip
 import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.androidauto.navigation.maneuver.CarManeuverMapper
 import com.mapbox.androidauto.telemetry.MapboxCarTelemetry
 import com.mapbox.navigation.core.MapboxNavigation
@@ -37,13 +39,11 @@ class MapboxCarNavigationManager internal constructor(
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         val maneuverApi = maneuverApi ?: return@RouteProgressObserver
         val trip = CarManeuverMapper.from(routeProgress, maneuverApi)
-        if (mapboxNavigation?.getTripSessionState() == TripSessionState.STARTED) {
-            navigationManager.updateTrip(trip)
-        }
+        onUpdateTrip(trip)
     }
 
     private val tripSessionStateObserver = TripSessionStateObserver { tripSessionState ->
-        logAndroidAuto("MapboxNavigationManager tripSessionStateObserver state: $tripSessionState")
+        logAndroidAuto("$LOG_CATEGORY tripSessionStateObserver state: $tripSessionState")
         when (tripSessionState) {
             TripSessionState.STARTED -> navigationManager.navigationStarted()
             TripSessionState.STOPPED -> navigationManager.navigationEnded()
@@ -52,7 +52,7 @@ class MapboxCarNavigationManager internal constructor(
 
     private val navigationManagerCallback = object : NavigationManagerCallback {
         override fun onStopNavigation() {
-            logAndroidAuto("MapboxNavigationManager onStopNavigation")
+            logAndroidAuto("$LOG_CATEGORY onStopNavigation")
             super.onStopNavigation()
             mapboxNavigation?.stopTripSession()
         }
@@ -71,7 +71,7 @@ class MapboxCarNavigationManager internal constructor(
     val autoDriveEnabledFlow: StateFlow<Boolean> = _autoDriveEnabled
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        logAndroidAuto("MapboxNavigationManager onAttached")
+        logAndroidAuto("$LOG_CATEGORY onAttached")
         this.mapboxNavigation = mapboxNavigation
         carTelemetry.onAttached(mapboxNavigation)
         val distanceFormatter = MapboxDistanceFormatter(
@@ -84,7 +84,7 @@ class MapboxCarNavigationManager internal constructor(
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        logAndroidAuto("MapboxNavigationManager onDetached")
+        logAndroidAuto("$LOG_CATEGORY onDetached")
         this.mapboxNavigation = null
         carTelemetry.onDetached(mapboxNavigation)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -94,5 +94,27 @@ class MapboxCarNavigationManager internal constructor(
         // on another device.
         navigationManager.navigationEnded()
         navigationManager.clearNavigationManagerCallback()
+    }
+
+    private fun onUpdateTrip(trip: Trip) {
+        if (mapboxNavigation?.getTripSessionState() == TripSessionState.STARTED) {
+            // There is no way to know if NavigationManager isNavigating and it will crash if false
+            // https://issuetracker.google.com/u/0/issues/260968395
+            try { navigationManager.updateTrip(trip) } catch (e: IllegalStateException) {
+                logAndroidAutoFailure("$LOG_CATEGORY updateTrip failed", e)
+                if (e.message == UPDATE_TRIP_NAVIGATION_NOT_STARTED) {
+                    logAndroidAuto(
+                        "$LOG_CATEGORY calling NavigationManager.navigationStarted(). Use " +
+                            "MapboxNavigation.stopTripSession in order to stop navigation."
+                    )
+                    navigationManager.navigationStarted()
+                }
+            }
+        }
+    }
+
+    private companion object {
+        private const val LOG_CATEGORY = "MapboxCarNavigationManager"
+        private const val UPDATE_TRIP_NAVIGATION_NOT_STARTED = "Navigation is not started"
     }
 }
