@@ -9,11 +9,13 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
  * @param primaryRouteLineData the data of the primary route line
  * @param alternativeRouteLinesData the data of the alternative route lines
  * @param waypointsSource the feature collection for the origin and destination icons
+ * @param routeLineMaskingLayerDynamicData the data of the masking line
  */
 class RouteSetValue internal constructor(
     val primaryRouteLineData: RouteLineData,
     val alternativeRouteLinesData: List<RouteLineData>,
-    val waypointsSource: FeatureCollection
+    val waypointsSource: FeatureCollection,
+    val routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null
 ) {
 
     /**
@@ -22,7 +24,8 @@ class RouteSetValue internal constructor(
     fun toMutableValue() = MutableRouteSetValue(
         primaryRouteLineData,
         alternativeRouteLinesData,
-        waypointsSource
+        waypointsSource,
+        routeLineMaskingLayerDynamicData
     )
 
     /**
@@ -31,11 +34,13 @@ class RouteSetValue internal constructor(
      * @param primaryRouteLineData the data of the primary route line
      * @param alternativeRouteLinesData the data of the alternative route lines
      * @param waypointsSource the feature collection for the origin and destination icons
+     * @param routeLineMaskingLayerDynamicData the data of the masking line
      */
     class MutableRouteSetValue internal constructor(
         var primaryRouteLineData: RouteLineData,
         var alternativeRouteLinesData: List<RouteLineData>,
-        var waypointsSource: FeatureCollection
+        var waypointsSource: FeatureCollection,
+        var routeLineMaskingLayerDynamicData: RouteLineDynamicData?
     ) {
 
         /**
@@ -44,7 +49,8 @@ class RouteSetValue internal constructor(
         fun toImmutableValue() = RouteSetValue(
             primaryRouteLineData,
             alternativeRouteLinesData,
-            waypointsSource
+            waypointsSource,
+            routeLineMaskingLayerDynamicData
         )
     }
 }

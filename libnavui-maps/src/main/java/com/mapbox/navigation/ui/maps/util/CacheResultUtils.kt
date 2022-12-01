@@ -19,6 +19,11 @@ internal object CacheResultUtils {
         override fun invoke(f: (P1, P2) -> R) = f(p1, p2)
     }
 
+    data class CacheResultKey3<out P1, P2, P3, R>(val p1: P1, val p2: P2, val p3: P3) :
+        CacheResultCall<(P1, P2, P3) -> R, R> {
+        override fun invoke(f: (P1, P2, P3) -> R) = f(p1, p2, p3)
+    }
+
     /**
      * Specialized cache key that can be used for managing results of processing related to a route.
      *
@@ -96,6 +101,19 @@ internal object CacheResultUtils {
                     cache
                 )
             override fun invoke(p1: P1, p2: P2) = handler(CacheResultKey2(p1, p2))
+        }
+    }
+
+    fun <P1, P2, P3, R> ((P1, P2, P3) -> R).cacheResult(
+        cache: LruCache<CacheResultKey3<P1, P2, P3, R>, R>
+    ): (P1, P2, P3) -> R {
+        return object : (P1, P2, P3) -> R {
+            private val handler =
+                CacheResultHandler<((P1, P2, P3) -> R), CacheResultKey3<P1, P2, P3, R>, R>(
+                    this@cacheResult,
+                    cache
+                )
+            override fun invoke(p1: P1, p2: P2, p3: P3) = handler(CacheResultKey3(p1, p2, p3))
         }
     }
 

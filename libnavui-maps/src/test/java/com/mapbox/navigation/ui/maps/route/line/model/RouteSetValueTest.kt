@@ -25,6 +25,7 @@ class RouteSetValueTest {
                 )
             ),
             mockk(),
+            mockk()
         )
 
         val result = original.toMutableValue()
@@ -32,6 +33,10 @@ class RouteSetValueTest {
         assertEquals(original.primaryRouteLineData, result.primaryRouteLineData)
         assertEquals(original.alternativeRouteLinesData, result.alternativeRouteLinesData)
         assertEquals(original.waypointsSource, result.waypointsSource)
+        assertEquals(
+            original.routeLineMaskingLayerDynamicData,
+            result.routeLineMaskingLayerDynamicData
+        )
     }
 
     @Test
@@ -52,6 +57,7 @@ class RouteSetValueTest {
                 )
             ),
             mockk(),
+            mockk()
         )
         val replacedPrimaryRouteData = RouteLineData(
             mockk(),
@@ -68,15 +74,18 @@ class RouteSetValueTest {
             )
         )
         val replacedWaypointsSource = mockk<FeatureCollection>()
+        val replacementMaskingData = mockk<RouteLineDynamicData>()
         val mutable = original.toMutableValue()
 
         mutable.primaryRouteLineData = replacedPrimaryRouteData
         mutable.alternativeRouteLinesData = replacedAlternativesRouteData
         mutable.waypointsSource = replacedWaypointsSource
+        mutable.routeLineMaskingLayerDynamicData = replacementMaskingData
         val result = mutable.toImmutableValue()
 
         assertEquals(replacedPrimaryRouteData, result.primaryRouteLineData)
         assertEquals(replacedAlternativesRouteData, result.alternativeRouteLinesData)
         assertEquals(replacedWaypointsSource, result.waypointsSource)
+        assertEquals(replacementMaskingData, result.routeLineMaskingLayerDynamicData)
     }
 }

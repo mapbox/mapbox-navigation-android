@@ -206,4 +206,24 @@ object RouteLayerConstants {
     internal const val LAYER_GROUP_3_MAIN = "mapbox-layerGroup-3-main"
     internal const val LAYER_GROUP_3_TRAFFIC = "mapbox-layerGroup-3-traffic"
     internal const val LAYER_GROUP_3_RESTRICTED = "mapbox-layerGroup-3-restricted"
+
+    /*
+    When a line on the map overlaps itself it appears as though the later part of the line
+    is on top of the earlier part of the line. For multi-leg routes this gives the appearance
+    the inactive leg(s) appearing on top of the active leg.  Customer feedback indicated this
+    was unsatisfactory. The masking layers were created to address this issue and give the
+    opposite of the default appearance. The end result is the active route leg appears
+    above inactive leg(s) when a route overlaps itself.
+
+    The masking layers share the same source as the primary route line. They are placed above
+    the primary route line layers. The implementation will set the inactive route legs to transparent
+    so the primary route line layers are visible.  The active leg section of the masking layers
+    are opaque thus masking the the primary route line layers beneath.
+     */
+    internal const val MASKING_LAYER_TRAIL_CASING = "mapbox-masking-layer-trailCasing"
+    internal const val MASKING_LAYER_TRAIL = "mapbox-masking-layer-trail"
+    internal const val MASKING_LAYER_CASING = "mapbox-masking-layer-casing"
+    internal const val MASKING_LAYER_MAIN = "mapbox-masking-layer-main"
+    internal const val MASKING_LAYER_TRAFFIC = "mapbox-masking-layer-traffic"
+    internal const val MASKING_LAYER_RESTRICTED = "mapbox-masking-layer-restricted"
 }

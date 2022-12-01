@@ -45,6 +45,12 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LOW_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MODERATE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.SEVERE_CONGESTION_VALUE
@@ -54,6 +60,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_I
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
@@ -200,7 +207,10 @@ class MapboxRouteLineUtilsTest {
     fun getRestrictedSectionExpressionData() {
         val route = loadNavigationRoute("route-with-restrictions.json")
 
-        val result = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         assertEquals(5, result.size)
         assertTrue(result[1].isInRestrictedSection)
@@ -216,7 +226,10 @@ class MapboxRouteLineUtilsTest {
             "0.4677574367125704, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, " +
             "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadNavigationRoute("route-with-restrictions.json")
-        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         val expression = MapboxRouteLineUtils.getRestrictedLineExpression(
             0.2,
@@ -238,7 +251,10 @@ class MapboxRouteLineUtilsTest {
             "0.4677574367125704, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, " +
             "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadNavigationRoute("route-with-restrictions.json")
-        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         val expression = MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
             expData,
@@ -269,7 +285,10 @@ class MapboxRouteLineUtilsTest {
         val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.2, " +
             "[rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadNavigationRoute("short_route.json")
-        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         val expression = MapboxRouteLineUtils.getRestrictedLineExpression(
             0.2,
@@ -330,6 +349,12 @@ class MapboxRouteLineUtilsTest {
             every { styleLayerExists(LAYER_GROUP_3_RESTRICTED) } returns true
             every { styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
             every { styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL) } returns true
+            every { styleLayerExists(MASKING_LAYER_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
+            every { styleLayerExists(MASKING_LAYER_RESTRICTED) } returns true
 
             every {
                 styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
@@ -362,6 +387,11 @@ class MapboxRouteLineUtilsTest {
         verify { style.styleLayerExists(LAYER_GROUP_3_RESTRICTED) }
         verify { style.styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) }
         verify { style.styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) }
+        verify { style.styleLayerExists(MASKING_LAYER_TRAIL_CASING) }
+        verify { style.styleLayerExists(MASKING_LAYER_TRAIL) }
+        verify { style.styleLayerExists(MASKING_LAYER_CASING) }
+        verify { style.styleLayerExists(MASKING_LAYER_MAIN) }
+        verify { style.styleLayerExists(MASKING_LAYER_TRAFFIC) }
     }
 
     @Test
@@ -394,6 +424,12 @@ class MapboxRouteLineUtilsTest {
             every { styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
             every { styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
             every { styleSourceExists(WAYPOINT_SOURCE_ID) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL) } returns true
+            every { styleLayerExists(MASKING_LAYER_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
+            every { styleLayerExists(MASKING_LAYER_RESTRICTED) } returns true
         }
 
         val result = MapboxRouteLineUtils.layersAreInitialized(style, options)
@@ -417,6 +453,11 @@ class MapboxRouteLineUtilsTest {
         verify { style.styleLayerExists(LAYER_GROUP_3_CASING) }
         verify { style.styleLayerExists(LAYER_GROUP_3_MAIN) }
         verify { style.styleLayerExists(LAYER_GROUP_3_TRAFFIC) }
+        verify { style.styleLayerExists(MASKING_LAYER_TRAIL_CASING) }
+        verify { style.styleLayerExists(MASKING_LAYER_TRAIL) }
+        verify { style.styleLayerExists(MASKING_LAYER_CASING) }
+        verify { style.styleLayerExists(MASKING_LAYER_MAIN) }
+        verify { style.styleLayerExists(MASKING_LAYER_TRAFFIC) }
         verify(exactly = 0) {
             style.styleLayerExists(LAYER_GROUP_1_RESTRICTED)
         }
@@ -455,9 +496,13 @@ class MapboxRouteLineUtilsTest {
             every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
             every { styleLayerExists(LAYER_GROUP_3_RESTRICTED) } returns true
             every { styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
-            every {
-                styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
-            } returns true
+            every { styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL) } returns true
+            every { styleLayerExists(MASKING_LAYER_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
+            every { styleLayerExists(MASKING_LAYER_RESTRICTED) } returns true
             every { styleSourceExists(WAYPOINT_SOURCE_ID) } returns false
         }
 
@@ -891,7 +936,10 @@ class MapboxRouteLineUtilsTest {
     fun getRouteLineTrafficExpressionDataWithRestrictedSections() {
         val route = loadNavigationRoute("route-with-restrictions.json")
 
-        val trafficExpressionData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val trafficExpressionData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         assertEquals(0.0, trafficExpressionData[0].offset, 0.0)
         assertFalse(trafficExpressionData[0].isInRestrictedSection)
@@ -1494,28 +1542,13 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun routeHasRestrictions_whenHasRestrictions() {
-        val route = loadNavigationRoute("route-with-restrictions.json")
-
-        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
-
-        assertTrue(result)
-    }
-
-    @Test
-    fun routeHasRestrictions_whenNotHasRestrictions() {
-        val route = loadNavigationRoute("motorway-with-road-classes-multi-leg.json")
-
-        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
-
-        assertFalse(result)
-    }
-
-    @Test
     fun getRouteRestrictedSectionsExpressionData_multiLegRoute() {
         val route = loadNavigationRoute("two-leg-route-with-restrictions.json")
 
-        val result = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         assertEquals(7, result.size)
         assertTrue(result[1].isInRestrictedSection)
@@ -1941,7 +1974,10 @@ class MapboxRouteLineUtilsTest {
     fun `extractRouteRestrictionData with restriction at end of route`() {
         val route = loadNavigationRoute("route-with-restrictions-at-end.json")
 
-        val result = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         assertEquals(3, result.size)
         assertEquals(0.0, result[0].offset, 0.0)
@@ -1958,7 +1994,10 @@ class MapboxRouteLineUtilsTest {
             "[rgba, 0.0, 0.0, 0.0, 0.0], 0.9963424099457971, " +
             "[rgba, 0.0, 255.0, 255.0, 1.0], 1.0, [rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadNavigationRoute("route-with-restrictions-at-end.json")
-        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         val result = MapboxRouteLineUtils.getRestrictedLineExpression(
             0.0,
@@ -1974,7 +2013,10 @@ class MapboxRouteLineUtilsTest {
     fun `extractRouteRestrictionData with restriction at start of route`() {
         val route = loadNavigationRoute("route-with-restrictions-at-start.json")
 
-        val result = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         assertEquals(2, result.size)
         assertEquals(0.0, result[0].offset, 0.0)
@@ -1986,12 +2028,66 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun `extractRouteRestrictionData when RouteLineGranularDistances null`() {
+        val route = loadNavigationRoute("route-with-restrictions-at-start.json")
+
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+        ) { null }
+
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `extractRouteRestrictionData when leg distances array size less than route leg size`() {
+        val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
+        val granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!
+        val updatedDistances = RouteLineGranularDistances(
+            granularDistances.completeDistance,
+            granularDistances.routeDistances,
+            arrayOf(granularDistances.legsDistances.first()),
+            granularDistances.stepsDistances
+        )
+
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route
+        ) { updatedDistances }
+
+        assertEquals(5, result.size)
+    }
+
+    @Test
+    fun `extractRouteRestrictionData when step intersection geometry index not found in leg distances array`() {
+        val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
+        val granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!
+        val updatedLegDistances = granularDistances.legsDistances[1]
+            .drop(granularDistances.legsDistances[1].size - 1)
+            .toTypedArray()
+
+        val updatedDistances = RouteLineGranularDistances(
+            granularDistances.completeDistance,
+            granularDistances.routeDistances,
+            arrayOf(granularDistances.legsDistances.first(), updatedLegDistances),
+            granularDistances.stepsDistances
+        )
+
+        val result = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route
+        ) { updatedDistances }
+
+        assertEquals(6, result.size)
+    }
+
+    @Test
     fun `getRestrictedLineExpression with restriction across two legs`() {
         val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
             "[rgba, 0.0, 0.0, 0.0, 0.0], 0.3956457979751531, " +
             "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5540039481345271, [rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
-        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         val result = MapboxRouteLineUtils.getRestrictedLineExpression(
             vanishingPointOffset = 0.0,
@@ -2004,28 +2100,25 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun routeHasRestrictions_when_routeNull() {
-        val result = MapboxRouteLineUtils.routeHasRestrictions(null)
+    fun getMaskingLayerDynamicData() {
+        val expectedExpression = "[literal, [0.0, 0.1]]"
+        val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
-        assertFalse(result)
+        val result = MapboxRouteLineUtils.getMaskingLayerDynamicData(route, .1)!!
+
+        assertEquals(
+            expectedExpression,
+            result.baseExpressionProvider.generateExpression().toString()
+        )
     }
 
     @Test
-    fun routeHasRestrictions() {
-        val route = loadNavigationRoute("route-with-restrictions-at-start.json")
-
-        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
-
-        assertTrue(result)
-    }
-
-    @Test
-    fun routeHasRestrictions_whenNoRestrictions() {
+    fun getMaskingLayerDynamicData_whenSingleLegRoute() {
         val route = loadNavigationRoute("short_route.json")
 
-        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
+        val result = MapboxRouteLineUtils.getMaskingLayerDynamicData(route, .1)
 
-        assertFalse(result)
+        assertNull(result)
     }
 
     @Test

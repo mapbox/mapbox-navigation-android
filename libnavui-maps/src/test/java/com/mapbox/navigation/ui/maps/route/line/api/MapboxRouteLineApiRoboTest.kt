@@ -84,6 +84,9 @@ class MapboxRouteLineApiRoboTest {
     private val multiLegRouteTwoLegs by lazy {
         TestRoute(fileName = "multileg-route-two-legs.json")
     }
+    private val multiLegRouteWithOverlap by lazy {
+        TestRoute(fileName = "multileg_route_with_overlap.json")
+    }
 
     @Before
     fun setUp() {
@@ -121,6 +124,9 @@ class MapboxRouteLineApiRoboTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
         val expectedWaypointFeature1 =
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
+        val expectedMaskingExpression =
+            "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 1.0, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+
         val route = loadRoute("short_route.json")
         val routes = listOf(RouteLine(route, null))
 
@@ -159,6 +165,94 @@ class MapboxRouteLineApiRoboTest {
         assertEquals(
             expectedWaypointFeature1,
             result.value!!.waypointsSource.features()!![1].geometry().toString()
+        )
+        assertEquals(
+            expectedMaskingExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedMaskingExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.baseExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedMaskingExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.casingExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedMaskingExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider!!
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedMaskingExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionProvider!!
+                .generateExpression().toString()
+        )
+    }
+
+    @Test
+    fun setRoutes_maskingLayerExpressionsWithMultiLegRoute() = coroutineRule.runBlockingTest {
+        val colors = RouteLineColorResources.Builder()
+            .routeLowCongestionColor(Color.GRAY)
+            .routeUnknownCongestionColor(Color.LTGRAY)
+            .routeDefaultColor(Color.BLUE)
+            .routeLineTraveledColor(Color.RED)
+            .routeLineTraveledCasingColor(Color.MAGENTA)
+            .inActiveRouteLegsColor(Color.YELLOW)
+            .build()
+        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(resources)
+            .withVanishingRouteLineEnabled(true)
+            .styleInactiveRouteLegsIndependently(true)
+            .build()
+        val api = MapboxRouteLineApi(options)
+
+        val expectedMaskingTrafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0," +
+            " 0.0], 0.0, [rgba, 136.0, 136.0, 136.0, 1.0], 0.48220037017458817, [rgba, 204.0," +
+            " 204.0, 204.0, 1.0], 0.48481010101499833, [rgba, 136.0, 136.0, 136.0, 1.0]," +
+            " 0.49040955817278464, [rgba, 204.0, 204.0, 204.0, 1.0], 0.49222381941898674," +
+            " [rgba, 136.0, 136.0, 136.0, 1.0], 0.4978029744948492, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedMaskingBaseExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
+            " 0.0, [rgba, 0.0, 0.0, 255.0, 1.0], 0.4978029744948492, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedMaskingCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0," +
+            " 0.0], 0.0, [rgba, 47.0, 122.0, 198.0, 1.0], 0.4978029744948492, [rgba, 0.0, 0.0," +
+            " 0.0, 0.0]]"
+        val expectedMaskingTrailExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
+            " 0.0, [rgba, 255.0, 0.0, 0.0, 1.0], 0.4978029744948492, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedMaskingTrailCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0," +
+            " 0.0], 0.0, [rgba, 255.0, 0.0, 255.0, 1.0], 0.4978029744948492, [rgba, 0.0, 0.0," +
+            " 0.0, 0.0]]"
+
+        val result = api.setNavigationRoutes(listOf(multiLegRouteWithOverlap.navigationRoute))
+
+        assertEquals(
+            expectedMaskingTrafficExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedMaskingBaseExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.baseExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedMaskingCasingExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.casingExpressionProvider
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedMaskingTrailExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider!!
+                .generateExpression().toString()
+        )
+        assertEquals(
+            expectedMaskingTrailCasingExpression,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionProvider!!
+                .generateExpression().toString()
         )
     }
 
@@ -927,7 +1021,7 @@ class MapboxRouteLineApiRoboTest {
         )
         val api = MapboxRouteLineApi(options)
 
-        val result = api.alternativelyStyleSegmentsNotInLeg(1, segments)
+        val result = api.alternativelyStyleSegmentsNotInLeg(1, segments, Color.YELLOW)
 
         assertEquals(12, result.size)
         assertEquals(-256, result.first().segmentColor)
