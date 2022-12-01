@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.10.0-beta.1 - 01 December, 2022
+### Changelog
+[Changes between v2.10.0-alpha.3 and v2.10.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-alpha.3...v2.10.0-beta.1)
+
+#### Features
 - Introduced `ReplayRouteSession` and `ReplayRouteSessionOptions`. When enabled the active route will be simulated. This will replay routes in a memory efficient way, so you can simulate long routes at high location frequencies. [#6636](https://github.com/mapbox/mapbox-navigation-android/pull/6636)
 - Added building highlight on arrival support to `NavigationView`. Added new customization options `ViewOptionsCustomization.enableBuildingHighlightOnArrival` and  `ViewOptionsCustomization.buildingHighlightOptions`. [#6651](https://github.com/mapbox/mapbox-navigation-android/pull/6651)
 - Added `ComponentInstaller` for the `BuildingHighlightComponent` that offers simplified integration of the `MapboxBuildingsApi` and `MapboxBuildingView`. [#6651](https://github.com/mapbox/mapbox-navigation-android/pull/6651)
@@ -20,6 +27,15 @@ Mapbox welcomes participation and contributions from everyone.
 - Supported applying latest EV data provided via `MapboxNavigation#onEVDataUpdated` to EV reroute requests. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
 - Fixed an issue where reroute requests where not applying the latest EV data provided via `MapboxNavigation#onEVDataUpdated`. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
 - Added `NavigationRoute#waypoints` as the source of truth for `DirectionsWaypoint`s which can be common for all routes or route specific depending on `RouteOptions#waypointsPerRoute()` parameter. [#6555](https://github.com/mapbox/mapbox-navigation-android/pull/6555)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0-beta.1))
+- Mapbox Navigation Native `v121.0.0`
+- Mapbox Core Common `v23.2.0-beta.1`
+- Mapbox Java `v6.10.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.2))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
 
 ## Mapbox Navigation SDK 2.9.3 - 01 December, 2022
 ### Changelog
