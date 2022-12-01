@@ -17,6 +17,10 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  * @param formatter formats the speed limit data into a string for displaying in the UI
  * @param processor an instance of a [SpeedLimitProcessor]
  */
+@Deprecated(
+    message = "This API is incapable of formatting and returning user's current speed.",
+    replaceWith = ReplaceWith("MapboxSpeedInfoApi", imports = arrayOf("MapboxSpeedInfoApi"))
+)
 class MapboxSpeedLimitApi internal constructor(
     var formatter: ValueFormatter<UpdateSpeedLimitValue, String>,
     private val processor: SpeedLimitProcessor

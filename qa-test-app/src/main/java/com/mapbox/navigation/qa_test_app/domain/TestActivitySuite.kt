@@ -23,6 +23,7 @@ import com.mapbox.navigation.qa_test_app.view.RouteNumericTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.RoutesPreviewActivity
+import com.mapbox.navigation.qa_test_app.view.SpeedInfoActivity
 import com.mapbox.navigation.qa_test_app.view.StatusActivity
 import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
 import com.mapbox.navigation.qa_test_app.view.TripOverviewActivity
@@ -226,6 +227,12 @@ object TestActivitySuite {
             R.string.drop_in_buttons_activity_description
         ) { activity ->
             activity.startActivity<RoutesPreviewActivity>()
+        },
+        TestActivityDescription(
+            "Speed Info",
+            R.string.speed_info_activity_description
+        ) { activity ->
+            activity.startActivity<SpeedInfoActivity>()
         },
     )
 

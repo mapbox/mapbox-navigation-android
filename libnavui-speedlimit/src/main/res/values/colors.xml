@@ -3,5 +3,9 @@
     <color name="mapbox_speed_limit_text_color">@color/colorOnSurface</color>
     <color name="mapbox_speed_limit_view_background">@color/colorSurface</color>
     <color name="mapbox_speed_limit_view_mutcd_border">@android:color/black</color>
-    <color name="mapbox_speed_limit_view_vienna_border">#EE0000</color>
+    <color name="mapbox_speed_limit_view_vienna_border">#BE3C30</color>
+
+    <color name="mapbox_speed_info_background_color">@color/colorSurface</color>
+    <color name="mapbox_speed_info_border_color">#CDD0D0</color>
+    <color name="mapbox_current_speed_color">#BE3C30</color>
 </resources>

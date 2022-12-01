@@ -10,6 +10,13 @@ import kotlin.math.roundToInt
 /**
  * Formats speed limit data to a string for displaying to a user.
  */
+@Deprecated(
+    message = "This formatter is incapable of formatting user's current speed.",
+    replaceWith = ReplaceWith(
+        expression = "PostedAndCurrentSpeedFormatter",
+        imports = arrayOf("PostedAndCurrentSpeedFormatter")
+    )
+)
 class SpeedLimitFormatter(
     context: Context
 ) : ValueFormatter<UpdateSpeedLimitValue, String> {

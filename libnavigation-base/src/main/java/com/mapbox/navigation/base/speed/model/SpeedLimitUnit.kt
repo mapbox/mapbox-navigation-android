@@ -3,6 +3,10 @@ package com.mapbox.navigation.base.speed.model
 /**
  * Defines Speed Limit Unit
  */
+@Deprecated(
+    message = "SpeedLimitUnit is incapable of specifying current speed unit.",
+    replaceWith = ReplaceWith("SpeedUnit", imports = arrayOf("SpeedUnit"))
+)
 enum class SpeedLimitUnit {
     /**
      * Speed limit in kilometers per hour

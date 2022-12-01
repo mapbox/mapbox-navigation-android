@@ -6,4 +6,37 @@
         <item name="speedLimitBackgroundColor">@color/mapbox_speed_limit_view_background</item>
         <item name="speedLimitViennaBorderColor">@color/mapbox_speed_limit_view_vienna_border</item>
     </style>
+
+    <style name="MapboxSpeedInfoMutcdLegendStyle">
+        <item name="textAllCaps">true</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="MapboxSpeedInfoMutcdUnitStyle">
+        <item name="android:maxLines">1</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="MapboxSpeedInfoPostedSpeedMutcdStyle">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="MapboxSpeedInfoCurrentSpeedMutcdStyle">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">@color/mapbox_current_speed_color</item>
+    </style>
+
+    <style name="MapboxSpeedInfoPostedSpeedViennaStyle">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="MapboxSpeedInfoCurrentSpeedViennaStyle">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">@color/mapbox_current_speed_color</item>
+    </style>
 </resources>

@@ -28,6 +28,10 @@ import com.mapbox.navigation.ui.utils.internal.extensions.spToPixel
  * A view component intended to consume data produced by the [MapboxSpeedLimitApi].
  */
 @UiThread
+@Deprecated(
+    message = "This view is incapable of rendering user's current speed.",
+    replaceWith = ReplaceWith("MapboxSpeedInfoView", imports = arrayOf("MapboxSpeedInfoView"))
+)
 class MapboxSpeedLimitView : AppCompatTextView {
 
     private var speedLimitBackgroundColor: Int = 0

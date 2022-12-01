@@ -18,11 +18,16 @@ package com.mapbox.navigation.ui.speedlimit {
 
 package com.mapbox.navigation.ui.speedlimit.api {
 
-  public final class MapboxSpeedLimitApi {
-    ctor public MapboxSpeedLimitApi(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter);
-    method public com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> getFormatter();
-    method public void setFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String>);
-    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue> updateSpeedLimit(com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit);
+  public final class MapboxSpeedInfoApi {
+    ctor public MapboxSpeedInfoApi();
+    method public com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue updatePostedAndCurrentSpeed(com.mapbox.navigation.core.trip.session.LocationMatcherResult locationMatcherResult, com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions, com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.SpeedData,java.lang.Integer> formatter = com.mapbox.navigation.ui.speedlimit.model.PostedAndCurrentSpeedFormatter());
+  }
+
+  @Deprecated public final class MapboxSpeedLimitApi {
+    ctor @Deprecated public MapboxSpeedLimitApi(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter);
+    method @Deprecated public com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> getFormatter();
+    method @Deprecated public void setFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String>);
+    method @Deprecated public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue> updateSpeedLimit(com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit);
     property public final com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter;
   }
 
@@ -30,28 +35,79 @@ package com.mapbox.navigation.ui.speedlimit.api {
 
 package com.mapbox.navigation.ui.speedlimit.model {
 
-  public final class SpeedLimitFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> {
-    ctor public SpeedLimitFormatter(android.content.Context context);
-    method public String format(com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue update);
+  public enum CurrentSpeedDirection {
+    enum_constant public static final com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection BOTTOM;
+    enum_constant public static final com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection END;
+    enum_constant public static final com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection START;
+    enum_constant public static final com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection TOP;
   }
 
-  public final class UpdateSpeedLimitError {
-    method public String getErrorMessage();
-    method public Throwable? getThrowable();
+  public final class MapboxSpeedInfoOptions {
+    method public com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection getCurrentSpeedDirection();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign? getRenderWithSpeedSign();
+    method public boolean getShowLegend();
+    method public boolean getShowSpeedWhenUnavailable();
+    method public boolean getShowUnit();
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection currentSpeedDirection;
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign? renderWithSpeedSign;
+    property public final boolean showLegend;
+    property public final boolean showSpeedWhenUnavailable;
+    property public final boolean showUnit;
+  }
+
+  public static final class MapboxSpeedInfoOptions.Builder {
+    ctor public MapboxSpeedInfoOptions.Builder();
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions build();
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder currentSpeedDirection(com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection currentSpeedDirection);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder renderWithSpeedSign(com.mapbox.navigation.base.speed.model.SpeedLimitSign? renderWithSpeedSign);
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder showLegend(boolean showLegend);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder showSpeedWhenUnavailable(boolean showSpeedWhenUnavailable);
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder showUnit(boolean showUnit);
+  }
+
+  public final class PostedAndCurrentSpeedFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.SpeedData,java.lang.Integer> {
+    ctor public PostedAndCurrentSpeedFormatter();
+    method public Integer format(com.mapbox.navigation.ui.speedlimit.model.SpeedData update);
+  }
+
+  public final class SpeedData {
+    method public com.mapbox.navigation.base.speed.model.SpeedUnit getFromUnit();
+    method public double getSpeed();
+    method public com.mapbox.navigation.base.formatter.UnitType getToUnit();
+    property public final com.mapbox.navigation.base.speed.model.SpeedUnit fromUnit;
+    property public final double speed;
+    property public final com.mapbox.navigation.base.formatter.UnitType toUnit;
+  }
+
+  public final class SpeedInfoValue {
+    method public int getCurrentSpeed();
+    method public Integer? getPostedSpeed();
+    method public com.mapbox.navigation.base.speed.model.SpeedUnit getPostedSpeedUnit();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign? getSpeedSignConvention();
+    property public final int currentSpeed;
+    property public final Integer? postedSpeed;
+    property public final com.mapbox.navigation.base.speed.model.SpeedUnit postedSpeedUnit;
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign? speedSignConvention;
+  }
+
+  @Deprecated public final class SpeedLimitFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> {
+    ctor @Deprecated public SpeedLimitFormatter(android.content.Context context);
+    method @Deprecated public String format(com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue update);
+  }
+
+  @Deprecated public final class UpdateSpeedLimitError {
+    method @Deprecated public String getErrorMessage();
+    method @Deprecated public Throwable? getThrowable();
     property public final String errorMessage;
     property public final Throwable? throwable;
   }
 
-  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class UpdateSpeedLimitErrorFactory {
-    method public static com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError buildSpeedLimitError(String errorMessage, Throwable? throwable);
-    field public static final com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitErrorFactory INSTANCE;
-  }
-
-  public final class UpdateSpeedLimitValue {
-    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign getSignFormat();
-    method public int getSpeedKPH();
-    method public com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> getSpeedLimitFormatter();
-    method public com.mapbox.navigation.base.speed.model.SpeedLimitUnit getSpeedUnit();
+  @Deprecated public final class UpdateSpeedLimitValue {
+    method @Deprecated public com.mapbox.navigation.base.speed.model.SpeedLimitSign getSignFormat();
+    method @Deprecated public int getSpeedKPH();
+    method @Deprecated public com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> getSpeedLimitFormatter();
+    method @Deprecated public com.mapbox.navigation.base.speed.model.SpeedLimitUnit getSpeedUnit();
     property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign signFormat;
     property public final int speedKPH;
     property public final com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> speedLimitFormatter;
@@ -62,12 +118,43 @@ package com.mapbox.navigation.ui.speedlimit.model {
 
 package com.mapbox.navigation.ui.speedlimit.view {
 
-  @UiThread public final class MapboxSpeedLimitView extends androidx.appcompat.widget.AppCompatTextView {
-    ctor public MapboxSpeedLimitView(android.content.Context context);
-    ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs);
-    ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue> expected);
-    method public void updateStyle(@StyleRes int styleResource);
+  @UiThread public final class MapboxSpeedInfoView extends android.widget.FrameLayout {
+    ctor public MapboxSpeedInfoView(android.content.Context context);
+    ctor public MapboxSpeedInfoView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSpeedInfoView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void applyOptions(com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions speedInfoOptions);
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoCurrentSpeedMutcd();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoCurrentSpeedVienna();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoLegendTextMutcd();
+    method public androidx.constraintlayout.widget.ConstraintLayout getSpeedInfoMutcdLayout();
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions getSpeedInfoOptions();
+    method public androidx.constraintlayout.widget.ConstraintLayout getSpeedInfoPostedSpeedLayoutMutcd();
+    method public androidx.constraintlayout.widget.ConstraintLayout getSpeedInfoPostedSpeedLayoutVienna();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoPostedSpeedMutcd();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoPostedSpeedVienna();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoUnitTextMutcd();
+    method public androidx.constraintlayout.widget.ConstraintLayout getSpeedInfoViennaLayout();
+    method public void render(com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue speedInfo);
+    method public void setSpeedInfoOptions(com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions);
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoCurrentSpeedMutcd;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoCurrentSpeedVienna;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoLegendTextMutcd;
+    property public final androidx.constraintlayout.widget.ConstraintLayout speedInfoMutcdLayout;
+    property public final com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions speedInfoOptions;
+    property public final androidx.constraintlayout.widget.ConstraintLayout speedInfoPostedSpeedLayoutMutcd;
+    property public final androidx.constraintlayout.widget.ConstraintLayout speedInfoPostedSpeedLayoutVienna;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoPostedSpeedMutcd;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoPostedSpeedVienna;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoUnitTextMutcd;
+    property public final androidx.constraintlayout.widget.ConstraintLayout speedInfoViennaLayout;
+  }
+
+  @Deprecated @UiThread public final class MapboxSpeedLimitView extends androidx.appcompat.widget.AppCompatTextView {
+    ctor @Deprecated public MapboxSpeedLimitView(android.content.Context context);
+    ctor @Deprecated public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor @Deprecated public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method @Deprecated public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue> expected);
+    method @Deprecated public void updateStyle(@StyleRes int styleResource);
   }
 
 }

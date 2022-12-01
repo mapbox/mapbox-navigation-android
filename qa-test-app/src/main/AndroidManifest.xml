@@ -77,6 +77,8 @@
         <activity android:name=".view.DropInButtonsActivity" />
 
         <activity android:name=".view.RoutesPreviewActivity" />
+        <activity android:name=".view.SpeedInfoActivity"
+            android:theme="@style/Theme.Fullscreen" />
     </application>
 
 </manifest>

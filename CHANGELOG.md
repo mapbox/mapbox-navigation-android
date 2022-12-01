@@ -4,6 +4,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Introduced `MapboxSpeedInfoApi` and `MapboxSpeedInfoView`. The combination of API and View can be used to render posted and current speed limit at user's current location. [#6687](https://github.com/mapbox/mapbox-navigation-android/pull/6687)
+- :warning: Deprecated `MapboxSpeedLimitApi` and `MapboxSpeedLimitView`. [#6687](https://github.com/mapbox/mapbox-navigation-android/pull/6687)
 #### Bug fixes and improvements
 - Fixed `BannerInstructions` issue where the banner instruction might have been removed from `RouteProgress` at some point around a edge's leg. [#6684](https://github.com/mapbox/mapbox-navigation-android/pull/6684)
 
