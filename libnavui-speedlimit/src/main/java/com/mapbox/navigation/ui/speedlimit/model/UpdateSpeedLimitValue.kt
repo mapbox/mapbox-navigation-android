@@ -12,6 +12,13 @@ import com.mapbox.navigation.ui.base.formatter.ValueFormatter
  * @property speedLimitFormatter ValueFormatter<UpdateSpeedLimitValue, String>
  * @constructor
  */
+@Deprecated(
+    message = "This data object is being deprecated.",
+    replaceWith = ReplaceWith(
+        expression = "SpeedInfoValue",
+        imports = arrayOf("SpeedInfoValue")
+    )
+)
 class UpdateSpeedLimitValue internal constructor(
     val speedKPH: Int,
     val speedUnit: SpeedLimitUnit,
