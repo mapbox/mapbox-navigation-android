@@ -6,6 +6,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
@@ -36,6 +37,7 @@ import kotlin.math.abs
  * @param waypointLayerIconOffset the list of offset values for waypoint icons
  * @param waypointLayerIconAnchor the anchor value, the default is [IconAnchor.CENTER]
  * @param iconPitchAlignment the pitch alignment value used for waypoint icons. The default is [IconPitchAlignment.MAP]
+ * @param enableSharedCache enables the shared cache feature of the Maps SDK
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
@@ -53,7 +55,8 @@ class MapboxRouteLineOptions private constructor(
         RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO,
     val waypointLayerIconOffset: List<Double> = listOf(0.0, 0.0),
     val waypointLayerIconAnchor: IconAnchor = IconAnchor.CENTER,
-    val iconPitchAlignment: IconPitchAlignment = IconPitchAlignment.MAP
+    val iconPitchAlignment: IconPitchAlignment = IconPitchAlignment.MAP,
+    val enableSharedCache: Boolean
 ) {
 
     /**
@@ -77,7 +80,8 @@ class MapboxRouteLineOptions private constructor(
             vanishingRouteLineUpdateIntervalNano,
             waypointLayerIconOffset,
             waypointLayerIconAnchor,
-            iconPitchAlignment
+            iconPitchAlignment,
+            enableSharedCache
         )
     }
 
@@ -108,6 +112,7 @@ class MapboxRouteLineOptions private constructor(
         if (waypointLayerIconOffset != other.waypointLayerIconOffset) return false
         if (waypointLayerIconAnchor != other.waypointLayerIconAnchor) return false
         if (iconPitchAlignment != other.iconPitchAlignment) return false
+        if (enableSharedCache != other.enableSharedCache) return false
 
         return true
     }
@@ -130,6 +135,7 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (waypointLayerIconOffset.hashCode())
         result = 31 * result + (waypointLayerIconAnchor.hashCode())
         result = 31 * result + (iconPitchAlignment.hashCode())
+        result = 31 * result + (enableSharedCache.hashCode())
         return result
     }
 
@@ -150,7 +156,8 @@ class MapboxRouteLineOptions private constructor(
             "vanishingRouteLineUpdateIntervalNano=$vanishingRouteLineUpdateIntervalNano," +
             "waypointLayerIconOffset=$waypointLayerIconOffset," +
             "waypointLayerIconAnchor=$waypointLayerIconAnchor," +
-            "iconPitchAlignment=$iconPitchAlignment" +
+            "iconPitchAlignment=$iconPitchAlignment," +
+            "enableSharedCache=$enableSharedCache" +
             ")"
     }
 
@@ -175,6 +182,7 @@ class MapboxRouteLineOptions private constructor(
      * @param vanishingRouteLineUpdateIntervalNano can be used to decrease the frequency of the vanishing route
      * line updates improving the performance at the expense of visual appearance of the vanishing point on the line during navigation.
      * @param iconPitchAlignment the pitch alignment value used for waypoint icons. The default is [IconPitchAlignment.MAP]
+     * @param enableSharedCache enables the shared cache feature of the Maps SDK
      */
     class Builder internal constructor(
         private val context: Context,
@@ -190,7 +198,8 @@ class MapboxRouteLineOptions private constructor(
         private var vanishingRouteLineUpdateIntervalNano: Long,
         private var iconOffset: List<Double>,
         private var iconAnchor: IconAnchor,
-        private var iconPitchAlignment: IconPitchAlignment
+        private var iconPitchAlignment: IconPitchAlignment,
+        private var enableSharedCache: Boolean
     ) {
 
         /**
@@ -212,7 +221,8 @@ class MapboxRouteLineOptions private constructor(
             RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO,
             listOf(0.0, 0.0),
             IconAnchor.CENTER,
-            IconPitchAlignment.MAP
+            IconPitchAlignment.MAP,
+            false
         )
 
         /**
@@ -364,6 +374,16 @@ class MapboxRouteLineOptions private constructor(
             apply { this.iconPitchAlignment = iconPitchAlignment }
 
         /**
+         * If true enables the shared Map cache.
+         *
+         * @param enableCache false by default
+         * @return the builder
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun enableSharedCache(enableCache: Boolean): Builder =
+            apply { this.enableSharedCache = enableCache }
+
+        /**
          * @return an instance of [MapboxRouteLineOptions]
          */
         fun build(): MapboxRouteLineOptions {
@@ -401,7 +421,8 @@ class MapboxRouteLineOptions private constructor(
                 vanishingRouteLineUpdateIntervalNano,
                 iconOffset,
                 iconAnchor,
-                iconPitchAlignment
+                iconPitchAlignment,
+                enableSharedCache
             )
         }
     }
