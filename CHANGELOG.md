@@ -30,6 +30,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.9.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 
+- Fixed issues in `ReplayRouteSession`. The routes observer was never unregistered. Alternative route selection resets replay to the beginning. DropInUi changing portrait and landscape modes resets replay to the beginning. [#6675](https://github.com/mapbox/mapbox-navigation-android/pull/6675)
 
 ## Mapbox Navigation SDK 2.10.0-beta.2 - 01 December, 2022
 ### Changelog

@@ -10,6 +10,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
@@ -17,6 +19,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.just
@@ -47,9 +50,13 @@ class ReplayRouteSessionTest {
     private val options: NavigationOptions = mockk {
         every { applicationContext } returns context
     }
+    private val routesObserver = slot<RoutesObserver>()
+    private val routeProgressObserver = slot<RouteProgressObserver>()
     private val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
         every { mapboxReplayer } returns replayer
         every { navigationOptions } returns options
+        every { registerRoutesObserver(capture(routesObserver)) } just runs
+        every { registerRouteProgressObserver(capture(routeProgressObserver)) } just runs
     }
     private val bestLocationEngine: LocationEngine = mockk {
         every { getLastLocation(any()) } just runs
@@ -166,8 +173,6 @@ class ReplayRouteSessionTest {
 
     @Test
     fun `onAttached - should push the initial batch of events`() {
-        val routesObserver = slot<RoutesObserver>()
-        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
         sut.setOptions(
             ReplayRouteSessionOptions.Builder()
                 .decodeMinDistance(1.0)
@@ -175,7 +180,7 @@ class ReplayRouteSessionTest {
         )
 
         sut.onAttached(mapboxNavigation)
-        routesObserver.captured.onRoutesChanged(mockActiveNavigationRoutes())
+        routeProgressObserver.captured.onRouteProgressChanged(mockRouteProgress())
 
         val pushedEvents = slot<List<ReplayEventBase>>()
         verify { replayer.pushEvents(capture(pushedEvents)) }
@@ -193,7 +198,7 @@ class ReplayRouteSessionTest {
             replayEventsObserver.captured.replayEvents(firstArg())
             replayer
         }
-        val routesUpdatedResult = mockActiveNavigationRoutes()
+        val routeProgress = mockRouteProgress()
 
         sut.setOptions(
             ReplayRouteSessionOptions.Builder()
@@ -201,35 +206,24 @@ class ReplayRouteSessionTest {
                 .build()
         )
         sut.onAttached(mapboxNavigation)
-        routesObserver.captured.onRoutesChanged(routesUpdatedResult)
+        routeProgressObserver.captured.onRouteProgressChanged(routeProgress)
 
         // Verify every point in the geometry was simulated
         val pushedPoints = pushedEvents.flatten().toList().map {
             val location = (it as ReplayEventUpdateLocation).location
             Point.fromLngLat(location.lon, location.lat)
         }
-        val geometry = routesUpdatedResult.navigationRoutes.first().directionsRoute.geometry()!!
+        val geometry = routeProgress.navigationRoute.directionsRoute.geometry()!!
         val geometryPoints = PolylineUtils.decode(geometry, 6)
-        assertTrue(pushedPoints.size > geometryPoints.size)
+        assertTrue(
+            "${pushedPoints.size} > ${geometryPoints.size}",
+            pushedPoints.size > geometryPoints.size
+        )
         assertTrue(
             geometryPoints.all { lhs ->
                 pushedPoints.firstOrNull { rhs -> lhs.equals(rhs) } != null
             }
         )
-    }
-
-    @Test
-    fun `onAttached - should request gps location when resetLocationEnabled is true`() {
-        every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
-        sut.setOptions(ReplayRouteSessionOptions.Builder().locationResetEnabled(true).build())
-        sut.onAttached(mapboxNavigation)
-
-        verifyOrder {
-            mapboxNavigation.stopTripSession()
-            mapboxNavigation.startReplayTripSession()
-            bestLocationEngine.getLastLocation(any())
-            replayer.play()
-        }
     }
 
     @Test
@@ -242,6 +236,9 @@ class ReplayRouteSessionTest {
 
         sut.setOptions(ReplayRouteSessionOptions.Builder().locationResetEnabled(true).build())
         sut.onAttached(mapboxNavigation)
+        routesObserver.captured.onRoutesChanged(
+            mockk { every { navigationRoutes } returns emptyList() }
+        )
         locationCallbackSlot.captured.onSuccess(
             mockk {
                 every { lastLocation } returns mockk(relaxed = true) {
@@ -263,21 +260,159 @@ class ReplayRouteSessionTest {
         assertEquals(-2.0, capturedLocation.location.lon, 0.0)
     }
 
-    private fun mockActiveNavigationRoutes(): RoutesUpdatedResult = mockk {
+    @Test
+    fun `onAttached registered listeners should be unregistered onDetached`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val routesObserver = slot<RoutesObserver>()
+        val replayEventsObserver = slot<ReplayEventsObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { replayer.registerObserver(capture(replayEventsObserver)) } just runs
+
+        sut.onAttached(mapboxNavigation)
+        sut.onDetached(mapboxNavigation)
+
+        verifyOrder {
+            mapboxNavigation.registerRouteProgressObserver(any())
+            mapboxNavigation.registerRoutesObserver(any())
+            replayer.registerObserver(any())
+            mapboxNavigation.unregisterRoutesObserver(routesObserver.captured)
+            mapboxNavigation.unregisterRouteProgressObserver(progressObserver.captured)
+            replayer.unregisterObserver(replayEventsObserver.captured)
+        }
+    }
+
+    @Test
+    fun `onAttached - should skip to the current routeProgress distanceTraveled`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val routesObserver = slot<RoutesObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
+        val activeRoutes = mockActiveRoutesUpdatedResult()
+        val primaryRoute = activeRoutes.navigationRoutes.first()
+
+        sut.onAttached(mapboxNavigation)
+        routesObserver.captured.onRoutesChanged(activeRoutes)
+        progressObserver.captured.onRouteProgressChanged(
+            mockk {
+                every { navigationRoute } returns primaryRoute
+                every { currentRouteGeometryIndex } returns 15
+            }
+        )
+
+        val pushedEvents = slot<List<ReplayEventBase>>()
+        verify { replayer.pushEvents(capture(pushedEvents)) }
+        verifySkipToIndex(pushedEvents.captured, primaryRoute, 15)
+    }
+
+    @Test
+    fun `onAttached - should skip to short routeProgress currentRouteGeometryIndex`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val routesObserver = slot<RoutesObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
+        val activeRoutes = mockActiveRoutesUpdatedResult()
+        val primaryRoute = activeRoutes.navigationRoutes.first()
+
+        sut.onAttached(mapboxNavigation)
+        routesObserver.captured.onRoutesChanged(activeRoutes)
+        progressObserver.captured.onRouteProgressChanged(
+            mockk {
+                every { navigationRoute } returns primaryRoute
+                every { currentRouteGeometryIndex } returns 12
+            }
+        )
+
+        val pushedEvents = slot<List<ReplayEventBase>>()
+        verify { replayer.pushEvents(capture(pushedEvents)) }
+        verifySkipToIndex(pushedEvents.captured, primaryRoute, 12)
+    }
+
+    @Test
+    fun `onRouteProgress - will change to new route when the route changes`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val routesObserver = slot<RoutesObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
+        val firstRoutesUpdatedResult = mockActiveRoutesUpdatedResult()
+        val firstRoute = firstRoutesUpdatedResult.navigationRoutes.first()
+        every { firstRoute.id } returns "test-first-route-id"
+        val firstRouteProgress = mockk<RouteProgress> {
+            every { navigationRoute } returns firstRoute
+            every { currentRouteGeometryIndex } returns 12
+        }
+        val secondRoutesUpdatedResult = mockActiveRoutesUpdatedResult()
+        val secondRoute = secondRoutesUpdatedResult.navigationRoutes.first()
+        every { secondRoute.id } returns "test-second-route-id"
+        val secondRouteProgress = mockk<RouteProgress> {
+            every { navigationRoute } returns secondRoute
+            every { currentRouteGeometryIndex } returns 13
+        }
+
+        sut.onAttached(mapboxNavigation)
+        routesObserver.captured.onRoutesChanged(firstRoutesUpdatedResult)
+        progressObserver.captured.onRouteProgressChanged(firstRouteProgress)
+        progressObserver.captured.onRouteProgressChanged(firstRouteProgress)
+        progressObserver.captured.onRouteProgressChanged(firstRouteProgress)
+        routesObserver.captured.onRoutesChanged(secondRoutesUpdatedResult)
+        progressObserver.captured.onRouteProgressChanged(secondRouteProgress)
+
+        verify(exactly = 2) {
+            replayer.clearEvents()
+            replayer.pushEvents(any())
+        }
+        verifyOrder {
+            replayer.clearEvents()
+            replayer.play()
+            replayer.pushEvents(any())
+            replayer.clearEvents()
+            replayer.play()
+            replayer.pushEvents(any())
+        }
+    }
+
+    private fun verifySkipToIndex(
+        pushedEvents: List<ReplayEventBase>,
+        primaryRoute: NavigationRoute,
+        currentRouteGeometryIndex: Int
+    ) {
+        val geometry = primaryRoute.directionsRoute.geometry()!!
+        val fullRoute = PolylineUtils.decode(geometry, 6)
+        val expected = fullRoute[currentRouteGeometryIndex]
+        val firstReplayLocation = (pushedEvents.first() as ReplayEventUpdateLocation).location
+        val firstReplayPoint = Point.fromLngLat(firstReplayLocation.lon, firstReplayLocation.lat)
+
+        assertEquals(expected, firstReplayPoint)
+    }
+
+    private fun mockActiveRoutesUpdatedResult(): RoutesUpdatedResult = mockk {
+        every { navigationRoutes } returns listOf(mockNavigationRoute())
+    }
+
+    private fun mockRouteProgress(): RouteProgress = mockk {
+        every { navigationRoute } returns mockNavigationRoute()
+        every { currentRouteGeometryIndex } returns 0
+    }
+
+    private fun mockNavigationRoute(): NavigationRoute = mockk {
         val geometry = "_kmbgAppafhFwXaOuC}ApAoEbNqe@jAaEhEcOtAwEdAoD`DaLnCiJ|M_e@`Je[rAyEnEgO" +
             "tGiUxByHlDjBp@^zKdG`Ah@`HtDx@d@rGlDl@\\pAp@dAl@p@^nItEpQvJfAh@fDjB`D`Br@`@nKpFbDhB" +
             "~KlGtDvBvAwE|EqPzFeSvHaXtA{ElAiE|@_D"
-        every { navigationRoutes } returns listOf(
-            mockk {
-                every { id } returns "test-navigation-route-id"
-                every { routeOptions }
-                every { directionsRoute } returns mockk {
-                    every { routeOptions() } returns mockk {
-                        every { geometries() } returns "polyline6"
-                        every { geometry() } returns geometry
-                    }
-                }
+        every { id } returns "test-navigation-route-id"
+        every { routeOptions }
+        every { directionsRoute } returns mockk {
+            every { routeOptions() } returns mockk {
+                every { geometries() } returns "polyline6"
+                every { geometry() } returns geometry
             }
-        )
+        }
     }
 }

@@ -94,4 +94,15 @@ class ReplayPolylineDecodeStream(
         }
         return points
     }
+
+    /**
+     * Skip the next [count] points of the geometry. Less points are skipped if there are less than
+     * [count] points left in the iterator.
+     *
+     * @param count the number of points to skip.
+     */
+    fun skip(count: Int) {
+        var skipped = 0
+        while (skipped++ <= count && hasNext()) { next() }
+    }
 }
