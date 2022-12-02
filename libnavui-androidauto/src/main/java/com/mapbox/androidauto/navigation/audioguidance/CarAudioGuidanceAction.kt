@@ -9,7 +9,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.action.MapboxActionProvider
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -18,26 +17,12 @@ import kotlinx.coroutines.launch
 /**
  * This class creates an action that can control audio guidance.
  */
-class CarAudioGuidanceUi : MapboxActionProvider {
-    /**
-     * Android auto action for enabling and disabling the car navigation.
-     * Attach this to the screen while navigating.
-     */
-    private fun buildSoundButtonAction(screen: Screen): Action {
-        val audioGuidance = MapboxAudioGuidance.getRegisteredInstance()
-        val state = audioGuidance.stateFlow().value
-        return if (!state.isMuted) {
-            buildIconAction(screen, R.drawable.mapbox_car_ic_volume_on) {
-                audioGuidance.mute()
-            }
-        } else {
-            buildIconAction(screen, R.drawable.mapbox_car_ic_volume_off) {
-                audioGuidance.unmute()
-            }
-        }
-    }
+class CarAudioGuidanceAction {
 
-    override fun getAction(screen: Screen): Action {
+    /**
+     * Build the [Action].
+     */
+    fun getAction(screen: Screen): Action {
         screen.lifecycle.apply {
             coroutineScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -51,6 +36,20 @@ class CarAudioGuidanceUi : MapboxActionProvider {
         }
 
         return buildSoundButtonAction(screen)
+    }
+
+    private fun buildSoundButtonAction(screen: Screen): Action {
+        val audioGuidance = MapboxAudioGuidance.getRegisteredInstance()
+        val state = audioGuidance.stateFlow().value
+        return if (!state.isMuted) {
+            buildIconAction(screen, R.drawable.mapbox_car_ic_volume_on) {
+                audioGuidance.mute()
+            }
+        } else {
+            buildIconAction(screen, R.drawable.mapbox_car_ic_volume_off) {
+                audioGuidance.unmute()
+            }
+        }
     }
 
     private fun buildIconAction(

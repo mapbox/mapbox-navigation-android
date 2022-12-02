@@ -17,22 +17,14 @@ class FreeDriveActionStrip(
      */
     fun builder() = ActionStrip.Builder()
         .addAction(buildSettingsAction())
-        .addAction(buildFreeDriveFeedbackAction())
+        .addAction(buildFeedbackAction())
         .addAction(buildSearchAction())
         .addAction(buildFavoritesAction())
 
-    private fun buildFreeDriveFeedbackAction() = Action.Builder()
-        .setIcon(
-            CarIcon.Builder(
-                IconCompat.createWithResource(screen.carContext, R.drawable.mapbox_car_ic_feedback)
-            ).build()
-        )
-        .setOnClickListener {
-            MapboxScreenManager.push(MapboxScreen.FREE_DRIVE_FEEDBACK)
-        }
-        .build()
-
-    private fun buildSettingsAction() = Action.Builder()
+    /**
+     * Action to open settings screen.
+     */
+    fun buildSettingsAction() = Action.Builder()
         .setIcon(
             CarIcon.Builder(
                 IconCompat.createWithResource(
@@ -46,7 +38,24 @@ class FreeDriveActionStrip(
         }
         .build()
 
-    private fun buildSearchAction() = Action.Builder()
+    /**
+     * Action to provide feedback for the free drive state.
+     */
+    fun buildFeedbackAction() = Action.Builder()
+        .setIcon(
+            CarIcon.Builder(
+                IconCompat.createWithResource(screen.carContext, R.drawable.mapbox_car_ic_feedback)
+            ).build()
+        )
+        .setOnClickListener {
+            MapboxScreenManager.push(MapboxScreen.FREE_DRIVE_FEEDBACK)
+        }
+        .build()
+
+    /**
+     * Action to open search screen.
+     */
+    fun buildSearchAction() = Action.Builder()
         .setIcon(
             CarIcon.Builder(
                 IconCompat.createWithResource(
@@ -60,7 +69,10 @@ class FreeDriveActionStrip(
         }
         .build()
 
-    private fun buildFavoritesAction() = Action.Builder()
+    /**
+     * Action to open favorite places screen.
+     */
+    fun buildFavoritesAction() = Action.Builder()
         .setTitle(screen.carContext.resources.getString(R.string.car_action_search_favorites))
         .setOnClickListener {
             MapboxScreenManager.push(MapboxScreen.FAVORITES)

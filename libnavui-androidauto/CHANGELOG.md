@@ -4,7 +4,10 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added customizable `ActionStrip`s for `MapboxScreen`s with `MapboxScreenActionStripProvider` found in the `MapboxCarOptions`. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
 #### Bug fixes and improvements
+- Renamed `CarAudioGuidanceUi` to `CarAudioGuidanceAction`. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
+- Deleted `MapboxActionProvider` interface in favor of `MapboxScreenActionStripProvider`. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
 
 ## androidauto-v0.17.1 - 02 December, 2022
 ### Changelog

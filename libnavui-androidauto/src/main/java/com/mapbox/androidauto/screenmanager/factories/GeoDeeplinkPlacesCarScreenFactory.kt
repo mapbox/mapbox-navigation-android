@@ -3,7 +3,6 @@ package com.mapbox.androidauto.screenmanager.factories
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import com.mapbox.androidauto.MapboxCarContext
-import com.mapbox.androidauto.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.placeslistonmap.PlacesListOnMapScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenFactory
@@ -23,7 +22,7 @@ class GeoDeeplinkPlacesCarScreenFactory(
         return PlacesListOnMapScreen(
             SearchCarContext(mapboxCarContext),
             placesProvider,
-            listOf(CarFeedbackAction(MapboxScreen.GEO_DEEPLINK_FEEDBACK))
+            MapboxScreen.GEO_DEEPLINK
         )
     }
 }

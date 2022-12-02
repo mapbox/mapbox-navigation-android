@@ -16,6 +16,8 @@ import com.mapbox.androidauto.navigation.CarNavigationCamera
 import com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelRenderer
 import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.preview.CarRouteLineRenderer
+import com.mapbox.androidauto.screenmanager.MapboxScreen
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
  * When the app is launched from Android Auto
@@ -59,10 +61,14 @@ internal class FreeDriveCarScreen @UiThread constructor(
         })
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
         return NavigationTemplate.Builder()
             .setBackgroundColor(CarColor.PRIMARY)
-            .setActionStrip(FreeDriveActionStrip(this).builder().build())
+            .setActionStrip(
+                mapboxCarContext.options.actionStripProvider
+                    .getActionStrip(this, MapboxScreen.FREE_DRIVE)
+            )
             .setMapActionStrip(mapActionStripBuilder.build())
             .build()
     }
