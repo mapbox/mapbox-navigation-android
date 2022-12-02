@@ -25,6 +25,7 @@ class CustomizedViewModel : ViewModel() {
     val enableScalebar = MutableLiveData(false)
     val enableBuildingHighlight = MutableLiveData(true)
     val enableBuildingHighlightCustomization = MutableLiveData(false)
+    val navigationPuck = MutableLiveData("--")
 
     // Action Buttons
     val actionsShowCompassButton = MutableLiveData(false)

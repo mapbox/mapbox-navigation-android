@@ -8,6 +8,7 @@ import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder
+import com.mapbox.navigation.ui.utils.internal.extensions.withBlurEffect
 
 /**
  * Gives options to specify either [LocationPuck2D] or [LocationPuck3D] references to the location
@@ -212,8 +213,12 @@ class LocationPuckOptions private constructor(
             fun navigationPuck(context: Context): LocationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     context,
-                    R.drawable.mapbox_navigation_puck_icon,
-                )
+                    R.drawable.mapbox_navigation_puck_icon2,
+                ),
+                shadowImage = ContextCompat.getDrawable(
+                    context,
+                    R.drawable.mapbox_navigation_puck_icon2_shadow,
+                )?.withBlurEffect(context, 7.5f)
             )
 
             /**
