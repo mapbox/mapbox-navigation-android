@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Fixed issue when `NavigationManager.updateTrip` crashes because navigation is not started https://issuetracker.google.com/u/0/issues/260968395. [#6673](https://github.com/mapbox/mapbox-navigation-android/pull/6673)
+- Fixed AAOS Google Play release issue. Previously the AndroidManifest was specific to AA. Now you must specify the `meta-data` type depending on whether you are using AA or AAOS. [#6679](https://github.com/mapbox/mapbox-navigation-android/pull/6679)
 
 ## androidauto-v0.17.0 - 30 November, 2022
 ### Changelog

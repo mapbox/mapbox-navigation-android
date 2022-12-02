@@ -20,6 +20,11 @@
             </intent-filter>
         </activity>
 
+        <!-- For AAOS use <meta-data android:name="com.android.automotive" -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
         <service
             android:name=".car.MainCarAppService"
             android:exported="true"
