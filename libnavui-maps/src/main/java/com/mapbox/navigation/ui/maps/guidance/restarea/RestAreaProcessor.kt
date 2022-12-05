@@ -3,14 +3,15 @@ package com.mapbox.navigation.ui.maps.guidance.restarea
 import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
 import com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
@@ -65,14 +66,8 @@ internal object RestAreaProcessor {
     }
 
     private fun restStopHasGuideMap(routeProgress: RouteProgress): RestAreaResult {
-        val upcomingRestStop = routeProgress.getFirstUpcomingRoadObject(
-            RoadObjectType.REST_STOP
-        )
-        val upcomingGuideMapUrl = upcomingRestStop?.let { restStop ->
-            (restStop.roadObject as RestStop).guideMapUri
-        }
-        return upcomingGuideMapUrl?.let {
-            RestAreaResult.RestAreaMapAvailable(it)
+        return routeProgress.getUpcomingRestStopOnCurrentStep()?.guideMapUri?.let { uri ->
+            RestAreaResult.RestAreaMapAvailable(uri)
         } ?: RestAreaResult.RestAreaMapUnavailable
     }
 
@@ -116,18 +111,31 @@ internal object RestAreaProcessor {
         )
     }
 
-    private fun RouteProgress.getFirstUpcomingRoadObject(
-        @RoadObjectType.Type type: Int
-    ): UpcomingRoadObject? {
-        return this.upcomingRoadObjects.firstOrNull {
-            if (it.roadObject.objectType == type) {
+    private fun RouteProgress.getUpcomingRestStopOnCurrentStep(): RestStop? {
+        val upcomingRestStop = getFirstUpcomingRestStop() ?: return null
+        val upcomingRestStopLocation = upcomingRestStop.location.shape as? Point ?: return null
+
+        val currentStep = currentLegProgress?.currentStepProgress?.step
+        val isUpcomingRestStopAtCurrentStep =
+            !currentStep?.getRestStopsMatchingLocation(upcomingRestStopLocation).isNullOrEmpty()
+
+        return if (isUpcomingRestStopAtCurrentStep) upcomingRestStop else null
+    }
+
+    private fun RouteProgress.getFirstUpcomingRestStop(): RestStop? =
+        this.upcomingRoadObjects.firstOrNull {
+            if (it.roadObject.objectType == RoadObjectType.REST_STOP) {
                 val distanceToStart = it.distanceToStart
                 distanceToStart != null && distanceToStart > 0
             } else {
                 false
             }
-        }
-    }
+        }?.roadObject as? RestStop
+
+    private fun LegStep?.getRestStopsMatchingLocation(point: Point) =
+        this?.intersections()
+            ?.filter { it.location() == point }
+            ?.mapNotNull { it.restStop() }
 
     private fun processSvg(
         svg: ByteArray,

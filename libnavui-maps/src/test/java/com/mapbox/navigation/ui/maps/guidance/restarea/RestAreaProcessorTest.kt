@@ -3,21 +3,47 @@ package com.mapbox.navigation.ui.maps.guidance.restarea
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
+import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.RestStop
+import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory.createValue
 import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
+import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.buildRoadObject
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.buildUpcomingRoadObject
+import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
+import com.mapbox.navigator.Amenity
+import com.mapbox.navigator.AmenityType
+import com.mapbox.navigator.GraphPosition
+import com.mapbox.navigator.MatchedRoadObjectLocation
+import com.mapbox.navigator.Position
+import com.mapbox.navigator.RoadObject
+import com.mapbox.navigator.RoadObjectMetadata
+import com.mapbox.navigator.RoadObjectProvider
+import com.mapbox.navigator.RoadObjectType
+import com.mapbox.navigator.ServiceAreaInfo
+import com.mapbox.navigator.ServiceAreaType
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.Date
+import java.util.*
 
 class RestAreaProcessorTest {
 
@@ -202,6 +228,162 @@ class RestAreaProcessorTest {
         unmockkObject(SvgUtil)
     }
 
+    @Test
+    @Suppress("MaxLineLength")
+    fun `process CheckUpcomingRestStop should return SAPA map url if upcoming rest stop is on current step`() {
+        val restAreaLocation = Point.fromLngLat(1.0, 2.0)
+        val restAreaMapUri = "http://example.com/rest-area-map/1.png"
+        val nativeRestAreaObject = nativeRestAreaObjectWith(
+            name = "rest-area-1",
+            location = restAreaLocation,
+            mapUri = restAreaMapUri
+        )
+
+        val routeProgress = routeProgressWith(
+            currentLegStep = legStepWith(
+                intersections = listOf(
+                    StepIntersection.builder()
+                        .rawLocation(restAreaLocation.coordinates().toDoubleArray())
+                        .restStop(
+                            RestStop.builder()
+                                .type("rest_area")
+                                .name("my rest area")
+                                .build()
+                        )
+                        .build()
+                )
+            ),
+            upcomingRoadObjects = listOf<UpcomingRoadObject>(
+                buildUpcomingRoadObject(
+                    roadObject = buildRoadObject(nativeRestAreaObject),
+                    distanceToStart = 1.0,
+                    distanceInfo = null
+                )
+            )
+        )
+
+        val result = RestAreaProcessor.process(
+            RestAreaAction.CheckUpcomingRestStop(routeProgress)
+        ) as? RestAreaResult.RestAreaMapAvailable
+
+        assertNotNull("expected RestAreaResult.RestAreaMapAvailable", result)
+        assertEquals(restAreaMapUri, result?.sapaMapUrl)
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `process CheckUpcomingRestStop should NOT return SAPA map url if upcoming rest stop is NOT on current step`() {
+        val restAreaLocation = Point.fromLngLat(1.0, 2.0)
+        val restAreaMapUri = "http://example.com/rest-area-map/1.png"
+        val nativeRestAreaObject = nativeRestAreaObjectWith(
+            name = "rest-area-1",
+            location = restAreaLocation,
+            mapUri = restAreaMapUri
+        )
+
+        val routeProgress = routeProgressWith(
+            currentLegStep = legStepWith(
+                intersections = listOf(
+                    StepIntersection.builder()
+                        .rawLocation(
+                            Point.fromLngLat(0.0, 0.0)
+                                .coordinates()
+                                .toDoubleArray()
+                        )
+                        .build()
+                )
+            ),
+            upcomingRoadObjects = listOf<UpcomingRoadObject>(
+                buildUpcomingRoadObject(
+                    roadObject = buildRoadObject(nativeRestAreaObject),
+                    distanceToStart = 1.0,
+                    distanceInfo = null
+                )
+            )
+        )
+
+        val result = RestAreaProcessor.process(
+            RestAreaAction.CheckUpcomingRestStop(routeProgress)
+        )
+
+        assertTrue(
+            "expected RestAreaResult.RestAreaMapUnavailable",
+            result is RestAreaResult.RestAreaMapUnavailable
+        )
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    private fun routeProgressWith(
+        currentLegStep: LegStep,
+        upcomingRoadObjects: List<UpcomingRoadObject>
+    ): RouteProgress = buildRouteProgressObject(
+        route = mockk(),
+        bannerInstructions = null,
+        voiceInstructions = null,
+        currentState = RouteProgressState.TRACKING,
+        currentLegProgress = mockk<RouteLegProgress> {
+            every { legIndex } returns 0
+            every { routeLeg } returns null
+            every { distanceTraveled } returns 0f
+            every { distanceRemaining } returns 100f
+            every { durationRemaining } returns 123.0
+            every { fractionTraveled } returns 0.1f
+            every { currentStepProgress } returns mockk<RouteStepProgress> {
+                every { step } returns currentLegStep
+            }
+            every { upcomingStep } returns null
+            every { geometryIndex } returns 0
+        },
+        upcomingStepPoints = null,
+        inTunnel = false,
+        distanceRemaining = 100f,
+        distanceTraveled = 10f,
+        durationRemaining = 123.0,
+        fractionTraveled = 0.1f,
+        remainingWaypoints = 0,
+        upcomingRoadObjects = upcomingRoadObjects,
+        stale = false,
+        alternativeRouteId = null,
+        currentRouteGeometryIndex = 0
+    )
+
+    private fun nativeRestAreaObjectWith(name: String, location: Point, mapUri: String) =
+        RoadObject(
+            name,
+            0.0,
+            MatchedRoadObjectLocation(
+                NativeStub.MatchedPointLocation(
+                    Position(
+                        GraphPosition(1, 0.0),
+                        location
+                    )
+                )
+            ),
+            RoadObjectType.SERVICE_AREA,
+            RoadObjectProvider.MAPBOX,
+            RoadObjectMetadata(
+                ServiceAreaInfo(
+                    ServiceAreaType.REST_AREA,
+                    name,
+                    listOf(
+                        Amenity(AmenityType.GAS_STATION, "Get GAS", "FuelItUp")
+                    ),
+                    mapUri
+                )
+            ),
+            true
+        )
+
+    private fun legStepWith(intersections: List<StepIntersection>): LegStep =
+        LegStep.builder()
+            .distance(100.0)
+            .duration(123.0)
+            .mode("driving")
+            .maneuver(mockk())
+            .weight(1.0)
+            .intersections(intersections)
+            .build()
+
     private fun getComponentGuidanceViewType(): BannerComponents {
         return BannerComponents.builder()
             .type(BannerComponents.GUIDANCE_VIEW)
@@ -252,5 +434,13 @@ class RestAreaProcessorTest {
             transferredBytes,
             contentType
         )
+    }
+
+    object NativeStub {
+        class MatchedPointLocation(
+            private val pos: Position
+        ) : com.mapbox.navigator.MatchedPointLocation(0) {
+            override fun getPosition(): Position = pos
+        }
     }
 }

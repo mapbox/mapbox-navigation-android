@@ -47,6 +47,7 @@
     <string name="route_preivew_activity_description" translatable="false">Example of how to use routes privew</string>
     <string name="drop_in_buttons_activity_description" translatable="false">Screen for viewing SDK buttons.</string>
     <string name="speed_info_activity_description" translatable="false">Example of how to use Mapbox SpeedInfo View</string>
+    <string name="rest_area_activity_description" translatable="false">Demonstrates the use of Rest Area API</string>
 
     <string-array name="drop_in_info_panel_overrides" translatable="false">
         <item>--</item>
@@ -75,5 +76,9 @@
         <item>DRIVING</item>
         <item>WALKING</item>
         <item>CYCLING</item>
+    </string-array>
+    <string-array name="rest_area_routes" translatable="false">
+        <item>SAPA_TOKYO_SHORT</item>
+        <item>SAPA_TOKYO_LONG</item>
     </string-array>
 </resources>
