@@ -32,7 +32,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val routeOptionsUpdater: RouteOptionsUpdater,
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
-    private val internalRerouteOptionsAdapter: RerouteOptionsAdapter,
+    private val compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter,
 ) : NavigationRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
@@ -56,8 +56,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         threadController,
         MapboxRerouteOptionsAdapter(evDynamicDataHolder)
     )
-
-    private var externalRerouteOptionsAdapter: RerouteOptionsAdapter? = null
 
     override var state: RerouteState = RerouteState.Idle
         private set(value) {
@@ -166,11 +164,9 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
                     is RouteOptionsUpdater.RouteOptionsResult.Success -> {
-                        val modifiedRerouteOption = internalRerouteOptionsAdapter.onRouteOptions(
+                        val modifiedRerouteOption = compositeRerouteOptionsAdapter.onRouteOptions(
                             routeOptionsResult.routeOptions
-                        ).run {
-                            externalRerouteOptionsAdapter?.onRouteOptions(this) ?: this
-                        }
+                        )
                         request(callback, modifiedRerouteOption)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
@@ -253,6 +249,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     }
 
     internal fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
-        this.externalRerouteOptionsAdapter = rerouteOptionsAdapter
+        compositeRerouteOptionsAdapter.externalOptionsAdapter = rerouteOptionsAdapter
     }
 }
