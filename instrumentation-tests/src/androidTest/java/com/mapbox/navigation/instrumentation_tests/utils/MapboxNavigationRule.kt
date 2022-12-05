@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.utils
 
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
@@ -10,11 +11,15 @@ import org.junit.runner.Description
  * After each test run ensures that [MapboxNavigation] is destroyed.
  */
 class MapboxNavigationRule : TestWatcher() {
-    override fun starting(description: Description?) {
-        check(MapboxNavigationProvider.isCreated().not())
+    override fun starting(description: Description) {
+        runOnMainSync {
+            check(MapboxNavigationProvider.isCreated().not())
+        }
     }
 
-    override fun finished(description: Description?) {
-        MapboxNavigationProvider.destroy()
+    override fun finished(description: Description) {
+        runOnMainSync {
+            MapboxNavigationProvider.destroy()
+        }
     }
 }
