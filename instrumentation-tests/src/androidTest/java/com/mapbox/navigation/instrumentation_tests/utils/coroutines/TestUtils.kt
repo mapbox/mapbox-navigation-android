@@ -116,6 +116,11 @@ private suspend fun MapboxNavigation.waitForRoutesUpdate(
         .first()
 }
 
+suspend fun MapboxNavigation.resetTripSessionAndWaitForResult() =
+    suspendCancellableCoroutine<Unit> { cont ->
+        resetTripSession { cont.resume(Unit) }
+    }
+
 inline fun <T> withLogOnTimeout(message: String, body: () -> T): T {
     try {
         return body()
