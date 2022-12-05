@@ -179,7 +179,7 @@ internal class MapboxTripSession(
             this@MapboxTripSession.primaryRoute = newPrimaryRoute
             roadObjects = newPrimaryRoute?.upcomingRoadObjects ?: emptyList()
             isOffRoute = false
-            invalidateLatestInstructions()
+            invalidateLatestInstructions(bannerInstructionEvent.latestInstructionWrapper)
             routeProgress = null
         }.mapValue {
             it.alternatives
@@ -588,9 +588,10 @@ internal class MapboxTripSession(
         var legIndexUpdated = false
         updateLegIndexJob = mainJobController.scope.launch {
             try {
+                val latestInstructionWrapper = bannerInstructionEvent.latestInstructionWrapper
                 legIndexUpdated = navigator.updateLegIndex(legIndex)
                 if (legIndexUpdated) {
-                    invalidateLatestInstructions()
+                    invalidateLatestInstructions(latestInstructionWrapper)
                 }
             } finally {
                 callback.onLegIndexUpdatedCallback(legIndexUpdated)
@@ -698,8 +699,14 @@ internal class MapboxTripSession(
         }
     }
 
-    private fun invalidateLatestInstructions() {
-        bannerInstructionEvent.invalidateLatestBannerInstructions()
+    /**
+     * Invalidate latest banner instruction. To get the latest banner instruction wrapper call
+     * [BannerInstructionEvent.latestInstructionWrapper]
+     */
+    private fun invalidateLatestInstructions(
+        latestInstructionWrapper: BannerInstructionEvent.LatestInstructionWrapper?
+    ) {
+        bannerInstructionEvent.invalidateLatestBannerInstructions(latestInstructionWrapper)
         lastVoiceInstruction = null
     }
 
