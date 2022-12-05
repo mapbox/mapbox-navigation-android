@@ -17,7 +17,6 @@ import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.NavigationStatus
-import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.RoadObjectMatcher
@@ -57,12 +56,7 @@ interface MapboxNativeNavigator {
         router: RouterInterface,
     )
 
-    /**
-     * Reset the navigator state with the same configuration. The location becomes unknown,
-     * but the [NavigatorConfig] stays the same. This can be used to transport the
-     * navigator to a new location.
-     */
-    fun resetRideSession()
+    suspend fun resetRideSession()
 
     // Route following
 

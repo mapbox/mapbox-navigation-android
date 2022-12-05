@@ -125,6 +125,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.ConfigHandle
@@ -638,11 +639,38 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     /**
      * Reset the session with the same configuration. The location becomes unknown,
-     * but the [NavigationOptions] stay the same. This can be used to transport the
-     * navigator to a new location.
+     * but the [NavigationOptions] stay the same.
+     *
+     * Call this function before significant change of location, e.g. when restarting
+     * navigation simulation, or before resetting location to not real (simulated)
+     * position without recreation of [MapboxNavigation].
      */
+    @Deprecated(message = "use a function withe the callback instead")
     fun resetTripSession() {
-        navigator.resetRideSession()
+        resetTripSession {
+            // no-op
+        }
+    }
+
+    /**
+     * Reset the session with the same configuration. The location becomes unknown,
+     * but the [NavigationOptions] stay the same.
+     *
+     * Call this function before significant change of location, e.g. when restarting
+     * navigation simulation, or before resetting location to not real (simulated)
+     * position without recreation of [MapboxNavigation].
+     */
+    fun resetTripSession(callback: TripSessionResetCallback) {
+        logD(LOG_CATEGORY) {
+            "Resetting trip session"
+        }
+        mainJobController.scope.launch(Dispatchers.Main.immediate) {
+            navigator.resetRideSession()
+            logI(LOG_CATEGORY) {
+                "Trip session reset"
+            }
+            callback.onTripSessionReset()
+        }
     }
 
     /**

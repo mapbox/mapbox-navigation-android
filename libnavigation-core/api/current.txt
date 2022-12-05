@@ -65,7 +65,8 @@ package com.mapbox.navigation.core {
     method public void requestRoadGraphDataUpdate(com.mapbox.navigation.core.RoadGraphDataUpdateCallback callback);
     method @Deprecated public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterCallback routesRequestCallback);
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.NavigationRouterCallback callback);
-    method public void resetTripSession();
+    method @Deprecated public void resetTripSession();
+    method public void resetTripSession(com.mapbox.navigation.core.TripSessionResetCallback callback);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
@@ -151,6 +152,10 @@ package com.mapbox.navigation.core {
   public final class RoutesSetSuccess {
     method public java.util.Map<java.lang.String,com.mapbox.navigation.core.RoutesSetError> getIgnoredAlternatives();
     property public final java.util.Map<java.lang.String,com.mapbox.navigation.core.RoutesSetError> ignoredAlternatives;
+  }
+
+  public fun interface TripSessionResetCallback {
+    method public void onTripSessionReset();
   }
 
 }
@@ -777,13 +782,13 @@ package com.mapbox.navigation.core.routealternatives {
   }
 
   public final class AlternativeRouteMetadata {
-    method public int getAlternativeId();
+    method @Deprecated public int getAlternativeId();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection getForkIntersectionOfAlternativeRoute();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection getForkIntersectionOfPrimaryRoute();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo getInfoFromFork();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo getInfoFromStartOfPrimary();
     method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
-    property public final int alternativeId;
+    property @Deprecated public final int alternativeId;
     property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection forkIntersectionOfAlternativeRoute;
     property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteIntersection forkIntersectionOfPrimaryRoute;
     property public final com.mapbox.navigation.core.routealternatives.AlternativeRouteInfo infoFromFork;
@@ -825,6 +830,9 @@ package com.mapbox.navigation.core.routealternatives {
 }
 
 package com.mapbox.navigation.core.routeoptions {
+
+  public final class RouteOptionsExKt {
+  }
 
   public final class RouteOptionsUpdater {
     ctor public RouteOptionsUpdater();

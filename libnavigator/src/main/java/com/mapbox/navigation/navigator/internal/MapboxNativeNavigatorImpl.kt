@@ -121,8 +121,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         }
     }
 
-    override fun resetRideSession() {
-        navigator!!.resetRideSession()
+    override suspend fun resetRideSession() = suspendCancellableCoroutine<Unit> {
+        navigator!!.reset {
+            it.resume(Unit)
+        }
     }
 
     /**

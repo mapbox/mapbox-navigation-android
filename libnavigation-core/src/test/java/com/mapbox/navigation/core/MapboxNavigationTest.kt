@@ -333,7 +333,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { navigator.resetRideSession() }
+        coVerify(exactly = 1) { navigator.resetRideSession() }
     }
 
     @Test
@@ -770,7 +770,16 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.resetTripSession()
 
-        verify { navigator.resetRideSession() }
+        coVerify { navigator.resetRideSession() }
+    }
+
+    @Test
+    fun `resetTripSession should reset the navigator and call back`() {
+        createMapboxNavigation()
+        val callback = mockk<TripSessionResetCallback>(relaxUnitFun = true)
+        mapboxNavigation.resetTripSession(callback)
+
+        verify { callback.onTripSessionReset() }
     }
 
     @Test
