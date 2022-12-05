@@ -29,6 +29,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import io.mockk.verifySequence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -380,6 +381,29 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
+    }
+
+    @Test
+    fun `deliver failure synchronously when options update fails`() =
+        coroutineRule.runBlockingTest {
+            mockRouteOptionsResult(errorFromResult)
+            addRerouteStateObserver()
+
+            pauseDispatcher {
+                rerouteController.reroute(routeCallback)
+
+                verifySequence {
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                    primaryRerouteObserver.onRerouteStateChanged(ofType<RerouteState.Failed>())
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                }
+            }
+        }
+
+    @Test
+    fun `interrupt while no reroute running shouldn't crash`() {
+        rerouteController.interrupt()
     }
 
     @Test

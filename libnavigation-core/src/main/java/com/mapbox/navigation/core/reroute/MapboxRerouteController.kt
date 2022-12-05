@@ -20,6 +20,7 @@ import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -174,13 +175,11 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                         request(callback, modifiedRerouteOption)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
-                        mainJobController.scope.launch {
-                            state = RerouteState.Failed(
-                                message = "Cannot combine route options",
-                                throwable = routeOptionsResult.error
-                            )
-                            state = RerouteState.Idle
-                        }
+                        state = RerouteState.Failed(
+                            message = "Cannot combine route options",
+                            throwable = routeOptionsResult.error
+                        )
+                        state = RerouteState.Idle
                     }
                 }
             }
@@ -191,10 +190,11 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         if (state == RerouteState.FetchingRoute) {
             requestId?.also { id ->
                 directionsSession.cancelRouteRequest(id)
-                logD(
-                    "Route request interrupted",
-                    LOG_CATEGORY
-                )
+                logD(LOG_CATEGORY) {
+                    "Route request interrupted"
+                }
+            } ?: logW(LOG_CATEGORY) {
+                "Tried interrupting but there's no ongoing request"
             }
         }
     }
