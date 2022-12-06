@@ -2,10 +2,16 @@ package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.internal.route.refreshRoute
+import com.mapbox.navigation.base.internal.route.update
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
+import com.mapbox.navigation.testing.factories.createRouteLeg
+import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -42,12 +48,27 @@ class ReplayProgressObserverTest {
     fun `should push events once per route leg`() {
         every { replayRouteMapper.mapRouteLegGeometry(any()) } returns mockEventsForShortRoute()
 
-        val mockRouteLeg = mockk<RouteLeg>()
+        val testRoute = createNavigationRoutes()[0]
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(mockRouteLeg, mockDistanceTraveled = 10.0f)
+            mockValidRouteProgressWithRoute(testRoute, 0, mockDistanceTraveled = 10.0f)
         )
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(mockRouteLeg, mockDistanceTraveled = 50.0f)
+            mockValidRouteProgressWithRoute(testRoute, 0, mockDistanceTraveled = 50.0f)
+        )
+        val refreshedRoute = testRoute.update(
+            directionsRouteBlock = {
+                this.toBuilder()
+                    .legs(this.legs()?.map {
+                        it.toBuilder()
+                            .annotation(createRouteLegAnnotation(congestionNumeric = listOf(25, 84))).build() })
+                    .build()
+            },
+            directionsResponseBlock = {
+                this
+            }
+        )
+        replayProgressObserver.onRouteProgressChanged(
+            mockValidRouteProgressWithRoute(refreshedRoute, 0, mockDistanceTraveled = 55.0f)
         )
 
         verify(exactly = 1) {
@@ -167,6 +188,19 @@ class ReplayProgressObserverTest {
         every { currentLegProgress } returns mockk {
             every { routeLeg } returns mockRouteLeg
             every { distanceTraveled } returns mockDistanceTraveled
+        }
+    }
+
+    private fun mockValidRouteProgressWithRoute(
+        route: NavigationRoute,
+        currentLegIndex: Int,
+        mockDistanceTraveled: Float
+    ): RouteProgress = mockk {
+        every { navigationRoute } returns route
+        every { currentLegProgress } returns mockk {
+            every { routeLeg } returns route.directionsRoute.legs()!![currentLegIndex]
+            every { distanceTraveled } returns mockDistanceTraveled
+            every { legIndex } returns currentLegIndex
         }
     }
 
