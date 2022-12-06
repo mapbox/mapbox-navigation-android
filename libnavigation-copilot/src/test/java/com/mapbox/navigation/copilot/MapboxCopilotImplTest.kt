@@ -6,12 +6,13 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.util.Base64
 import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.mapbox.common.UploadOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.CopilotOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.copilot.CopilotTestUtils.prepareLifecycleOwnerMockk
 import com.mapbox.navigation.copilot.CopilotTestUtils.retrieveAttachments
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.copyToAndRemove
 import com.mapbox.navigation.core.MapboxNavigation
@@ -65,8 +66,8 @@ class MapboxCopilotImplTest {
     @Test
     fun `registerUserFeedbackCallback is called when start`() {
         val mockedMapboxNavigation = prepareBasicMockks()
-        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
         prepareLifecycleOwnerMockk()
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
 
         mapboxCopilot.start()
 
@@ -74,10 +75,22 @@ class MapboxCopilotImplTest {
     }
 
     @Test
-    fun `foregroundBackgroundLifecycleObserver is added when start`() {
+    fun `foregroundBackgroundLifecycleObserver is added to MapboxNavigationApp's LifecycleOwner when start if MapboxNavigationApp is setup`() {
         val mockedMapboxNavigation = prepareBasicMockks()
-        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
         val mockedProcessLifecycleOwner = prepareLifecycleOwnerMockk()
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
+
+        mapboxCopilot.start()
+
+        val lifecycle = mockedProcessLifecycleOwner.lifecycle
+        verify(exactly = 1) { lifecycle.addObserver(any()) }
+    }
+
+    @Test
+    fun `foregroundBackgroundLifecycleObserver is added to ProcessLifecycleOwner when start if MapboxNavigationApp is not setup`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val mockedProcessLifecycleOwner = prepareProcessLifecycleOwnerMockk()
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
 
         mapboxCopilot.start()
 
@@ -88,8 +101,8 @@ class MapboxCopilotImplTest {
     @Test
     fun `registerHistoryRecordingStateChangeObserver is called when start`() {
         val mockedMapboxNavigation = prepareBasicMockks()
-        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
         prepareLifecycleOwnerMockk()
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
 
         mapboxCopilot.start()
 
@@ -307,9 +320,33 @@ class MapboxCopilotImplTest {
     }
 
     @Test
-    fun `foregroundBackgroundLifecycleObserver is removed when stop`() {
+    fun `foregroundBackgroundLifecycleObserver is removed from MapboxNavigationApp's LifecycleOwner when stop if MapboxNavigationApp is setup`() {
         val mockedMapboxNavigation = prepareBasicMockks()
         val mockedProcessLifecycleOwner = prepareLifecycleOwnerMockk()
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val activeGuidanceHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            activeGuidanceHistoryRecordingSessionState
+        )
+
+        mapboxCopilot.stop()
+
+        val lifecycle = mockedProcessLifecycleOwner.lifecycle
+        verify(exactly = 1) { lifecycle.removeObserver(any()) }
+    }
+
+    @Test
+    fun `foregroundBackgroundLifecycleObserver is removed from ProcessLifecycleOwner when stop if MapboxNavigationApp is not setup`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val mockedProcessLifecycleOwner = prepareProcessLifecycleOwnerMockk()
         val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
         every {
             mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
@@ -1829,8 +1866,6 @@ class MapboxCopilotImplTest {
         } returns mockedHistoryRecorder
         val userFeedbackCallback = slot<UserFeedbackCallback>()
         every { registerUserFeedbackCallback(capture(userFeedbackCallback)) } just Runs
-        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
-        mapboxCopilot.start()
         val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
         every {
             mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
@@ -1843,6 +1878,7 @@ class MapboxCopilotImplTest {
         } just Runs
         val mockedNavigationRoute = mockk<NavigationRoute>(relaxed = true)
         val mockedNavigationRoutes = listOf(mockedNavigationRoute)
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
         mapboxCopilot.start()
         val mockedHistoryRecordingSessionState =
             mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
@@ -1889,6 +1925,30 @@ class MapboxCopilotImplTest {
 
         verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(DRIVE_ENDS_EVENT_NAME, any())
+        }
+    }
+
+    @Test
+    fun `events are not pushed if MapboxCopilot is not started`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val mapboxCopilot = MapboxCopilotImpl(mockedMapboxNavigation)
+        val searchResults =
+            SearchResults("mapbox", "https://mapbox.com", null, null, "?query=test1", null)
+        mapboxCopilot.push(SearchResultsEvent(searchResults))
+        val expectedEventJson = """
+            {"provider":"mapbox","request":"https://mapbox.com","searchQuery":"?query\u003dtest1"}
+        """.trimIndent()
+
+        verify(exactly = 0) {
+            mockedHistoryRecorder.pushHistory(
+                SEARCH_RESULTS_EVENT_NAME,
+                expectedEventJson,
+            )
         }
     }
 
@@ -2381,13 +2441,13 @@ class MapboxCopilotImplTest {
         return mockedMapboxNavigation
     }
 
-    private fun prepareLifecycleOwnerMockk(): LifecycleOwner {
+    private fun prepareProcessLifecycleOwnerMockk(): ProcessLifecycleOwner {
         mockkStatic(MapboxNavigationApp::class)
-        val mockedLifecycleOwner = mockk<LifecycleOwner>(relaxed = true)
-        val mockedLifecycle = mockk<Lifecycle>(relaxed = true)
-        every { mockedLifecycleOwner.lifecycle } returns mockedLifecycle
-        every { MapboxNavigationApp.lifecycleOwner } returns mockedLifecycleOwner
-        return mockedLifecycleOwner
+        every { MapboxNavigationApp.isSetup() } returns false
+        mockkStatic(ProcessLifecycleOwner::class)
+        val mockedProcessLifecycleOwner = mockk<ProcessLifecycleOwner>(relaxed = true)
+        every { ProcessLifecycleOwner.get() } returns mockedProcessLifecycleOwner
+        return mockedProcessLifecycleOwner
     }
 
     private fun prepareUploadMockks() {
