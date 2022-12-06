@@ -6,6 +6,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 - Fixed `BannerInstructions` issue where the banner instruction might have been removed from `RouteProgress` at some point around a edge's leg. [#6684](https://github.com/mapbox/mapbox-navigation-android/pull/6684)
+- Fixed `VoiceInstructions` issue where the voice instruction might have been removed from `RouteProgress` at some point around a edge's leg. [#6689](https://github.com/mapbox/mapbox-navigation-android/pull/6689)
 
 ## Mapbox Navigation SDK 2.10.0-beta.2 - 01 December, 2022
 ### Changelog
