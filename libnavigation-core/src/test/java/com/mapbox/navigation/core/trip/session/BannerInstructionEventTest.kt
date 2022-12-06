@@ -96,9 +96,31 @@ class BannerInstructionEventTest {
         val anyBannerInstructions: BannerInstructions = mockk()
         bannerInstructionEvent.isOccurring(anyBannerInstructions, 0)
 
-        bannerInstructionEvent.invalidateLatestBannerInstructions()
+        bannerInstructionEvent
+            .invalidateLatestBannerInstructions(bannerInstructionEvent.latestInstructionWrapper)
 
         assertNull(bannerInstructionEvent.latestBannerInstructions)
         assertNull(bannerInstructionEvent.latestInstructionIndex)
+        assertNull(bannerInstructionEvent.latestInstructionWrapper)
+    }
+
+    @Test
+    fun invalidateNonExistingLatestBannerInstructions() {
+        val bannerInstructionEvent = BannerInstructionEvent()
+        val anyBannerInstructions: BannerInstructions = mockk()
+        bannerInstructionEvent.isOccurring(anyBannerInstructions, 0)
+
+        bannerInstructionEvent
+            .invalidateLatestBannerInstructions(mockk())
+
+        assertEquals(
+            BannerInstructionEvent.LatestInstructionWrapper(0, anyBannerInstructions),
+            bannerInstructionEvent.latestInstructionWrapper
+        )
+        assertEquals(
+            anyBannerInstructions,
+            bannerInstructionEvent.latestBannerInstructions
+        )
+        assertEquals(0, bannerInstructionEvent.latestInstructionIndex,)
     }
 }
