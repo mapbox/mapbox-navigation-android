@@ -368,12 +368,13 @@ internal class MapboxTripSession(
                 )
             }
             val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
+            val latestBannerInstructionsWrapper = bannerInstructionEvent.latestInstructionWrapper
             val routeProgress = getRouteProgressFrom(
                 tripStatus.route,
                 tripStatus.navigationStatus,
                 remainingWaypoints,
-                bannerInstructionEvent.latestBannerInstructions,
-                bannerInstructionEvent.latestInstructionIndex,
+                latestBannerInstructionsWrapper?.latestBannerInstructions,
+                latestBannerInstructionsWrapper?.latestInstructionIndex,
                 lastVoiceInstruction
             ).also {
                 if (it == null) {
