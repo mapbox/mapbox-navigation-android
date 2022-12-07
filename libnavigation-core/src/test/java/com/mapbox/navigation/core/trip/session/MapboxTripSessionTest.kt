@@ -45,6 +45,7 @@ import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -115,6 +116,7 @@ class MapboxTripSessionTest {
     private val navigationStatus: NavigationStatus = mockk(relaxed = true)
     private val routeProgress: RouteProgress = mockk()
     private val threadController = spyk<ThreadController>()
+    private val bannerInstructionEvent = spyk(BannerInstructionEvent())
 
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
@@ -133,10 +135,12 @@ class MapboxTripSessionTest {
         mockkObject(MapboxNativeNavigatorImpl)
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        mockkObject(BannerInstructionEvent.Companion)
         every { location.toFixLocation() } returns fixLocation
         every { fixLocation.toLocation() } returns location
         every { keyFixPoints.toLocations() } returns keyPoints
         every { threadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { BannerInstructionEvent.invoke() } returns bannerInstructionEvent
         navigationOptions = NavigationOptions.Builder(context).build()
         tripSession = buildTripSession()
 
@@ -1427,11 +1431,44 @@ class MapboxTripSessionTest {
             }
         }
 
+    /*
+        navigator.updateLegIndex(legIndex) might force invoking NavigatorObserver and one adds
+        new latest banner instructions to BannerInstructionEvent. That's why requires pre-save
+        latest banner instructions to remove legacy instructions only
+     */
+    @Test
+    fun `updateLegIndex latest banner and voice instructions pre-save to later clean up them`() =
+        coroutineRule.runBlockingTest {
+            val idx = -1
+            val mockLatestInstructionWrapper =
+                mockk<BannerInstructionEvent.LatestInstructionWrapper>()
+            every {
+                bannerInstructionEvent.latestInstructionWrapper
+            } returns mockLatestInstructionWrapper
+            coEvery { navigator.updateLegIndex(idx) } coAnswers {
+                true
+            }
+            val mockVoiceInstruction = mockk<VoiceInstructions>()
+
+            tripSession.lastVoiceInstruction = mockVoiceInstruction
+            tripSession.updateLegIndex(idx, mockk(relaxUnitFun = true))
+
+            coVerifyOrder {
+                bannerInstructionEvent.latestInstructionWrapper
+                navigator.updateLegIndex(idx)
+                bannerInstructionEvent
+                    .invalidateLatestBannerInstructions(mockLatestInstructionWrapper)
+                tripSession.lastVoiceInstruction = null
+            }
+            assertNull(tripSession.lastVoiceInstruction)
+        }
+
     @After
     fun cleanUp() {
         unmockkObject(MapboxNativeNavigatorImpl)
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        unmockkObject(BannerInstructionEvent.Companion)
     }
 
     private fun mockLocation(): Location = mockk(relaxed = true)
