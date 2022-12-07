@@ -345,6 +345,11 @@ internal class MapboxTripSession(
                     "state: ${status.routeState}",
                 LOG_CATEGORY
             )
+            logD(
+                "navigatorObserver#onStatus; banner instruction: [${status.bannerInstruction}]," +
+                    " voice instruction: [${status.voiceInstruction}]",
+                LOG_CATEGORY
+            )
 
             val tripStatus = status.getTripStatusFrom(primaryRoute)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
@@ -594,12 +599,21 @@ internal class MapboxTripSession(
         var legIndexUpdated = false
         updateLegIndexJob = mainJobController.scope.launch {
             try {
+                fun msg(state: String) =
+                    "update to new leg $state. Leg index: $legIndex, route id: ${primaryRoute?.id}"
+                logD(msg("started"), LOG_CATEGORY)
                 val latestInstructionWrapper = bannerInstructionEvent.latestInstructionWrapper
                 val lastVoiceInstruction = lastVoiceInstruction
                 legIndexUpdated = navigator.updateLegIndex(legIndex)
                 if (legIndexUpdated) {
                     invalidateLatestInstructions(latestInstructionWrapper, lastVoiceInstruction)
                 }
+                logD(
+                    msg("finished")+" (is leg updated: $legIndexUpdated; " +
+                        "latestInstructionWrapper: [$latestInstructionWrapper]; " +
+                        "lastVoiceInstruction: [$lastVoiceInstruction])",
+                    LOG_CATEGORY
+                )
             } finally {
                 callback.onLegIndexUpdatedCallback(legIndexUpdated)
             }
