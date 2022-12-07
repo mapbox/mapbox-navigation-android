@@ -26,8 +26,7 @@ class ReplayProgressObserver @JvmOverloads constructor(
     private val replayRouteMapper: ReplayRouteMapper = ReplayRouteMapper()
 ) : RouteProgressObserver {
 
-    private var lastRouteId: String? = null
-    private var currentLegIndex: Int? = null
+    private var currentLegIdentifier: RouteLegIdentifier? = null
 
     /**
      * @param options allow you to control the driver and car behavior.
@@ -48,13 +47,9 @@ class ReplayProgressObserver @JvmOverloads constructor(
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         val currentLegProgress = routeProgress.currentLegProgress
         val routeProgressRouteLeg = currentLegProgress?.routeLeg
-        val routeId = routeProgress.navigationRoute.id
-        val legIndex = currentLegProgress?.legIndex
-        if ((this.lastRouteId != routeId || this.currentLegIndex != legIndex) &&
-            currentLegProgress != null
-        ) {
-            this.lastRouteId = routeId
-            this.currentLegIndex = legIndex
+        val legIdentifier = routeProgress.getCurrentRouteLegIdentifier()
+        if (currentLegIdentifier != legIdentifier && currentLegProgress != null) {
+            currentLegIdentifier = legIdentifier
             onRouteLegChanged(routeProgressRouteLeg, currentLegProgress.distanceTraveled)
         }
     }
@@ -100,4 +95,13 @@ class ReplayProgressObserver @JvmOverloads constructor(
         }
         return index
     }
+}
+
+private data class RouteLegIdentifier(
+    val routeId: String,
+    val legIndex: Int
+)
+
+private fun RouteProgress.getCurrentRouteLegIdentifier(): RouteLegIdentifier? {
+    return currentLegProgress?.let { RouteLegIdentifier(this.navigationRoute.id, it.legIndex) }
 }

@@ -59,15 +59,16 @@ class ReplayProgressObserverTest {
         val refreshedRoute = testRoute.update(
             directionsRouteBlock = {
                 this.toBuilder()
-                    .legs(this.legs()?.map {
-                        it.toBuilder()
-                            .annotation(
-                                createRouteLegAnnotation(
-                                    congestionNumeric = listOf(25, 84)
+                    .legs(
+                        this.legs()?.map {
+                            it.toBuilder()
+                                .annotation(
+                                    createRouteLegAnnotation(
+                                        congestionNumeric = listOf(25, 84)
+                                    )
                                 )
-                            )
-                            .build()
-                    }
+                                .build()
+                        }
                     )
                     .build()
             },
