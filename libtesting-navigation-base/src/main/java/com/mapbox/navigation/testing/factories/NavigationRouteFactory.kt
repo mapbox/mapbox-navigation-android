@@ -22,8 +22,8 @@ fun createNavigationRoute(
         response = createDirectionsResponse(
             routes = listOf(directionsRoute)
         ),
-        routesInfoMapper = { _ -> routeInfo },
-        waypointsMapper = { _ -> waypoints }
+        routesInfoMapper = { routeInfo },
+        waypointsMapper = { waypoints }
     ).first()
 }
 
@@ -31,8 +31,8 @@ fun createNavigationRoutes(
     response: DirectionsResponse = createDirectionsResponse(),
     options: RouteOptions = response.routes().first().routeOptions()!!,
     routerOrigin: RouterOrigin = RouterOrigin.Offboard,
-    routesInfoMapper: (DirectionsRoute) -> RouteInfo = { _ -> createRouteInfo() },
-    waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { _ -> createWaypoints() }
+    routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
+    waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { createWaypoints() }
 ): List<NavigationRoute> {
     val parser = TestSDKRouteParser(
         routesInfoMapper = routesInfoMapper,
@@ -47,8 +47,8 @@ fun createNavigationRoutes(
 }
 
 class TestSDKRouteParser(
-    private val routesInfoMapper: (DirectionsRoute) -> RouteInfo = { _ -> createRouteInfo() },
-    private val waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { _ -> createWaypoints() }
+    private val routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
+    private val waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { createWaypoints() }
 ) : SDKRouteParser {
     override fun parseDirectionsResponse(
         response: String,
@@ -70,8 +70,8 @@ fun createRouteInterfacesFromDirectionRequestResponse(
     requestUri: String,
     response: String,
     routerOrigin: RouterOrigin = RouterOrigin.Offboard,
-    routesInfoMapper: (DirectionsRoute) -> RouteInfo = { _ -> createRouteInfo() },
-    waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { _ -> createWaypoints() }
+    routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
+    waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { createWaypoints() }
 ): List<RouteInterface> {
     return DirectionsResponse.fromJson(response).routes()
         .map { directionsRoute ->
