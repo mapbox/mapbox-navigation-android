@@ -611,9 +611,12 @@ internal class MapboxTripSession(
                 }
                 logD(
                     LOG_CATEGORY,
-                    msg("finished", "(is leg updated: $legIndexUpdated; " +
-                        "latestInstructionWrapper: [$latestInstructionWrapper]; " +
-                        "lastVoiceInstruction: [$lastVoiceInstruction])")
+                    msg(
+                        "finished",
+                        "(is leg updated: $legIndexUpdated; " +
+                            "latestInstructionWrapper: [$latestInstructionWrapper]; " +
+                            "lastVoiceInstruction: [$lastVoiceInstruction])"
+                    )
                 )
             } finally {
                 callback.onLegIndexUpdatedCallback(legIndexUpdated)
