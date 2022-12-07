@@ -347,7 +347,7 @@ internal class MapboxTripSession(
             )
             logD(LOG_CATEGORY) {
                 "navigatorObserver#onStatus; banner instruction: [${status.bannerInstruction}]," +
-                    " voice instruction: [${status.voiceInstruction}]",
+                    " voice instruction: [${status.voiceInstruction}]"
             }
 
             val tripStatus = status.getTripStatusFrom(primaryRoute)
