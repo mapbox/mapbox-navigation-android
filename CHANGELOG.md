@@ -5,6 +5,8 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6717](https://github.com/mapbox/mapbox-navigation-android/pull/6717)
+- Fixed an issue where `RouteProgress#VoiceInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6717](https://github.com/mapbox/mapbox-navigation-android/pull/6717)
 
 ## Mapbox Navigation SDK 2.9.4 - 08 December, 2022
 ### Changelog
