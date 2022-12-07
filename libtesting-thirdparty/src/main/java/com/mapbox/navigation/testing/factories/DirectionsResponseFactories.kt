@@ -23,7 +23,7 @@ import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.Point
 
 fun createDirectionsResponse(
-    uuid: String = "testUUID",
+    uuid: String? = "testUUID",
     routes: List<DirectionsRoute> = listOf(createDirectionsRoute()),
     unrecognizedProperties: Map<String, JsonElement>? = null,
 ): DirectionsResponse {

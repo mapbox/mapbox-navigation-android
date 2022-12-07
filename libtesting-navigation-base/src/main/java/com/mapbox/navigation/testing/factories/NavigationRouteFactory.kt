@@ -20,10 +20,11 @@ fun createNavigationRoute(
 ): NavigationRoute {
     return createNavigationRoutes(
         response = createDirectionsResponse(
-            routes = listOf(directionsRoute)
+            routes = listOf(directionsRoute),
+            uuid = directionsRoute.requestUuid()
         ),
         routesInfoMapper = { routeInfo },
-        waypointsMapper = { waypoints }
+        waypointsMapper = { waypoints },
     ).first()
 }
 
