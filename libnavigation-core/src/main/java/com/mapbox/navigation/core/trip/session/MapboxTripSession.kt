@@ -179,7 +179,10 @@ internal class MapboxTripSession(
             this@MapboxTripSession.primaryRoute = newPrimaryRoute
             roadObjects = newPrimaryRoute?.upcomingRoadObjects ?: emptyList()
             isOffRoute = false
-            invalidateLatestInstructions(bannerInstructionEvent.latestInstructionWrapper)
+            invalidateLatestInstructions(
+                bannerInstructionEvent.latestInstructionWrapper,
+                lastVoiceInstruction
+            )
             routeProgress = null
         }.mapValue {
             it.alternatives
@@ -204,7 +207,9 @@ internal class MapboxTripSession(
     private val fallbackVersionsObservers = CopyOnWriteArraySet<FallbackVersionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
-    private var lastVoiceInstruction: VoiceInstructions? = null
+
+    @VisibleForTesting
+    internal var lastVoiceInstruction: VoiceInstructions? = null
 
     private var state: TripSessionState = TripSessionState.STOPPED
         set(value) {
@@ -590,9 +595,10 @@ internal class MapboxTripSession(
         updateLegIndexJob = mainJobController.scope.launch {
             try {
                 val latestInstructionWrapper = bannerInstructionEvent.latestInstructionWrapper
+                val lastVoiceInstruction = lastVoiceInstruction
                 legIndexUpdated = navigator.updateLegIndex(legIndex)
                 if (legIndexUpdated) {
-                    invalidateLatestInstructions(latestInstructionWrapper)
+                    invalidateLatestInstructions(latestInstructionWrapper, lastVoiceInstruction)
                 }
             } finally {
                 callback.onLegIndexUpdatedCallback(legIndexUpdated)
@@ -701,14 +707,18 @@ internal class MapboxTripSession(
     }
 
     /**
-     * Invalidate latest banner instruction. To get the latest banner instruction wrapper call
-     * [BannerInstructionEvent.latestInstructionWrapper]
+     * Invalidate latest banner and voice instruction. To get the latest banner instruction wrapper call
+     * [BannerInstructionEvent.latestInstructionWrapper], to get the latest voice instruction
+     * call [lastVoiceInstruction]
      */
     private fun invalidateLatestInstructions(
-        latestInstructionWrapper: BannerInstructionEvent.LatestInstructionWrapper?
+        latestInstructionWrapper: BannerInstructionEvent.LatestInstructionWrapper?,
+        voiceInstruction: VoiceInstructions?,
     ) {
         bannerInstructionEvent.invalidateLatestBannerInstructions(latestInstructionWrapper)
-        lastVoiceInstruction = null
+        if (lastVoiceInstruction == voiceInstruction) {
+            lastVoiceInstruction = null
+        }
     }
 
     private fun checkBannerInstructionEvent(
