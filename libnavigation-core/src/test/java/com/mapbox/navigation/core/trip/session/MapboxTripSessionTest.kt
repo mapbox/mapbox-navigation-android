@@ -1437,7 +1437,7 @@ class MapboxTripSessionTest {
         latest banner instructions to remove legacy instructions only
      */
     @Test
-    fun `updateLegIndex latest banner instructions pre-save to later clen up them`() =
+    fun `updateLegIndex latest banner and voice instructions pre-save to later clean up them`() =
         coroutineRule.runBlockingTest {
             val idx = -1
             val mockLatestInstructionWrapper =
@@ -1448,7 +1448,9 @@ class MapboxTripSessionTest {
             coEvery { navigator.updateLegIndex(idx) } coAnswers {
                 true
             }
+            val mockVoiceInstruction = mockk<VoiceInstructions>()
 
+            tripSession.lastVoiceInstruction = mockVoiceInstruction
             tripSession.updateLegIndex(idx, mockk(relaxUnitFun = true))
 
             coVerifyOrder {
@@ -1456,7 +1458,9 @@ class MapboxTripSessionTest {
                 navigator.updateLegIndex(idx)
                 bannerInstructionEvent
                     .invalidateLatestBannerInstructions(mockLatestInstructionWrapper)
+                tripSession.lastVoiceInstruction = null
             }
+            assertNull(tripSession.lastVoiceInstruction)
         }
 
     @After
