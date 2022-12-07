@@ -18,39 +18,26 @@ fun createNavigationRoute(
     routeInfo: RouteInfo = RouteInfo(emptyList()),
     waypoints: List<Waypoint> = createWaypoints()
 ): NavigationRoute {
-    return com.mapbox.navigation.base.internal.route.createNavigationRoute(
-        directionsRoute,
-        object : SDKRouteParser {
-            override fun parseDirectionsResponse(
-                response: String,
-                request: String,
-                routerOrigin: RouterOrigin
-            ): Expected<String, List<RouteInterface>> {
-                return ExpectedFactory.createValue(
-                    listOf(
-                        createRouteInterface(
-                            responseUUID = directionsRoute.requestUuid() ?: "null",
-                            routeIndex = directionsRoute.routeIndex()!!.toInt(),
-                            responseJson = response,
-                            routerOrigin = routerOrigin.mapToNativeRouteOrigin(),
-                            requestURI = directionsRoute.routeOptions()!!.toUrl("pk.*test_token*")
-                                .toString(),
-                            routeInfo = routeInfo,
-                            waypoints = waypoints,
-                        ),
-                    )
-                )
-            }
-        }
-    )
+    return createNavigationRoutes(
+        response = createDirectionsResponse(
+            routes = listOf(directionsRoute)
+        ),
+        routesInfoMapper = { _ -> routeInfo },
+        waypointsMapper = { _ -> waypoints }
+    ).first()
 }
 
 fun createNavigationRoutes(
     response: DirectionsResponse = createDirectionsResponse(),
     options: RouteOptions = response.routes().first().routeOptions()!!,
     routerOrigin: RouterOrigin = RouterOrigin.Offboard,
+    routesInfoMapper: (DirectionsRoute) -> RouteInfo = { _ -> createRouteInfo() },
+    waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { _ -> createWaypoints() }
 ): List<NavigationRoute> {
-    val parser = TestSDKRouteParser()
+    val parser = TestSDKRouteParser(
+        routesInfoMapper = routesInfoMapper,
+        waypointsMapper = waypointsMapper
+    )
     return com.mapbox.navigation.base.internal.route.createNavigationRoutes(
         response,
         options,
@@ -59,7 +46,10 @@ fun createNavigationRoutes(
     )
 }
 
-class TestSDKRouteParser : SDKRouteParser {
+class TestSDKRouteParser(
+    private val routesInfoMapper: (DirectionsRoute) -> RouteInfo = { _ -> createRouteInfo() },
+    private val waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { _ -> createWaypoints() }
+) : SDKRouteParser {
     override fun parseDirectionsResponse(
         response: String,
         request: String,
@@ -68,7 +58,9 @@ class TestSDKRouteParser : SDKRouteParser {
         val result = createRouteInterfacesFromDirectionRequestResponse(
             requestUri = request,
             response = response,
-            routerOrigin = routerOrigin
+            routerOrigin = routerOrigin,
+            routesInfoMapper = routesInfoMapper,
+            waypointsMapper = waypointsMapper
         )
         return ExpectedFactory.createValue(result)
     }
@@ -77,7 +69,9 @@ class TestSDKRouteParser : SDKRouteParser {
 fun createRouteInterfacesFromDirectionRequestResponse(
     requestUri: String,
     response: String,
-    routerOrigin: RouterOrigin = RouterOrigin.Offboard
+    routerOrigin: RouterOrigin = RouterOrigin.Offboard,
+    routesInfoMapper: (DirectionsRoute) -> RouteInfo = { _ -> createRouteInfo() },
+    waypointsMapper: (DirectionsRoute) -> List<Waypoint> = { _ -> createWaypoints() }
 ): List<RouteInterface> {
     return DirectionsResponse.fromJson(response).routes()
         .map { directionsRoute ->
@@ -86,8 +80,11 @@ fun createRouteInterfacesFromDirectionRequestResponse(
                 routeIndex = directionsRoute.routeIndex()!!.toInt(),
                 responseJson = response,
                 routerOrigin = routerOrigin.mapToNativeRouteOrigin(),
-                requestURI = requestUri
+                requestURI = requestUri,
+                routeInfo = routesInfoMapper(directionsRoute),
+                waypoints = waypointsMapper(directionsRoute)
             )
         }
 }
 
+fun createRouteInfo() = RouteInfo(emptyList())
