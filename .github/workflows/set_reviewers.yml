@@ -27,4 +27,4 @@ jobs:
 
       - name: execute py script
         run: |
-          python3 scripts/set_reviewers.py
+          python3 scripts/reviewers/set_reviewers.py
