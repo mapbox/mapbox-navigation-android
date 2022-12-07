@@ -16,9 +16,11 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
+import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.MockKAnnotations
 import io.mockk.clearMocks
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.just
@@ -81,12 +83,18 @@ class MapboxRerouteControllerTest {
     @MockK
     private lateinit var compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter
 
+    @MockK
+    private lateinit var threadController: ThreadController
+
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
     @Before
     fun setup() {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
+        every { threadController.getMainScopeAndRootJob() } answers {
+            JobControl(mockk(), coroutineRule.createTestScope())
+        }
         every {
             directionsSession.getPrimaryRouteOptions()
         } returns MapboxJavaObjectsFactory.routeOptions()
@@ -99,7 +107,7 @@ class MapboxRerouteControllerTest {
                 tripSession,
                 routeOptionsUpdater,
                 rerouteOptions,
-                ThreadController(),
+                threadController,
                 compositeRerouteOptionsAdapter
             )
         )
@@ -137,7 +145,7 @@ class MapboxRerouteControllerTest {
         } returns 1L
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+        routeRequestCallback.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
 
         verify(exactly = 2) {
             tripSession.locationMatcherResult
@@ -151,7 +159,7 @@ class MapboxRerouteControllerTest {
     }
 
     @Test
-    fun reroute_success() {
+    fun reroute_success() = coroutineRule.runBlockingTest {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
         val routes = listOf(
@@ -308,7 +316,7 @@ class MapboxRerouteControllerTest {
     }
 
     @Test
-    fun reroute_calls_interrupt_if_currently_fetching() {
+    fun reroute_calls_interrupt_if_currently_fetching() = coroutineRule.runBlockingTest {
         mockRouteOptionsResult(successFromResult)
         val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
@@ -320,7 +328,7 @@ class MapboxRerouteControllerTest {
         rerouteController.reroute(routeCallback)
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+        routeRequestCallback.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
 
         verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
     }
@@ -337,7 +345,7 @@ class MapboxRerouteControllerTest {
         } returns 1L
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+        routeRequestCallback.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
 
         verify(exactly = 0) { directionsSession.cancelAll() }
         verify(exactly = 0) { directionsSession.cancelRouteRequest(any()) }
@@ -382,6 +390,83 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
     }
+
+    @Test
+    fun interrupt_route_request_with_pending_callback() = coroutineRule.runBlockingTest {
+        mockRouteOptionsResult(successFromResult)
+        addRerouteStateObserver()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        rerouteController.reroute(routeCallback)
+        rerouteController.interrupt()
+
+        routeRequestCallback.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
+
+        coVerify(exactly = 0) { routeCallback.onNewRoutes(any()) }
+    }
+
+    @Test
+    fun cancelling_scope_changes_state_to_interrupted() = coroutineRule.runBlockingTest {
+        mockRouteOptionsResult(successFromResult)
+        addRerouteStateObserver()
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        rerouteController.reroute(routeCallback)
+        // we don't invoke onCancel callback here
+        rerouteController.interrupt()
+
+        verifyOrder {
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+        }
+    }
+
+    @Test
+    fun interrupting_request_changes_state_to_interrupted_only_once() =
+        coroutineRule.runBlockingTest {
+            mockRouteOptionsResult(successFromResult)
+            addRerouteStateObserver()
+            val routeRequestCallback = slot<NavigationRouterCallback>()
+            every {
+                directionsSession.requestRoutes(
+                    routeOptionsFromSuccessResult,
+                    capture(routeRequestCallback)
+                )
+            } returns 1L
+            every {
+                directionsSession.cancelRouteRequest(1L)
+            } answers {
+                routeRequestCallback.captured.onCanceled(
+                    MapboxJavaObjectsFactory.routeOptions(),
+                    mockk()
+                )
+            }
+
+            rerouteController.reroute(routeCallback)
+            rerouteController.interrupt()
+
+            verifyOrder {
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+            verify(exactly = 1) {
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
+            }
+        }
 
     @Test
     fun `deliver failure synchronously when options update fails`() =
@@ -477,7 +562,7 @@ class MapboxRerouteControllerTest {
             }
         }
 
-        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+        routeRequestCallback.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
     }
 
     @Test
@@ -523,7 +608,7 @@ class MapboxRerouteControllerTest {
             }
         }
 
-        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+        routeRequestCallback.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
     }
 
     @Test
@@ -556,7 +641,7 @@ class MapboxRerouteControllerTest {
         } returns 1L
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+        routeRequestCallback.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
 
         verify(exactly = 1) {
             compositeRerouteOptionsAdapter.onRouteOptions(routeOptionsFromSuccessResult)

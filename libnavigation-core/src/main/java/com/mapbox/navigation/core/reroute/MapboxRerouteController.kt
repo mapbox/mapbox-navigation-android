@@ -21,8 +21,12 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.coroutines.resume
 
 /**
  * Default implementation of [RerouteController]
@@ -41,6 +45,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
 
     private var requestId: Long? = null
+
+    private var rerouteJob: Job? = null
 
     constructor(
         directionsSession: DirectionsSession,
@@ -192,6 +198,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             } ?: logW(LOG_CATEGORY) {
                 "Tried interrupting but there's no ongoing request"
             }
+            rerouteJob?.cancel()
+            rerouteJob = null
         }
     }
 
@@ -214,41 +222,87 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         callback: NavigationRerouteController.RoutesCallback,
         routeOptions: RouteOptions
     ) {
-        requestId = directionsSession.requestRoutes(
-            routeOptions,
-            object : NavigationRouterCallback {
-                override fun onRoutesReady(
-                    routes: List<NavigationRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
+        rerouteJob = mainJobController.scope.launch {
+            val result = requestAsync(routeOptions)
+            when (result) {
+                is RouteRequestResult.Success -> {
                     mainJobController.scope.launch {
-                        state = RerouteState.RouteFetched(routerOrigin)
+                        state = RerouteState.RouteFetched(result.routerOrigin)
                         state = RerouteState.Idle
-                        callback.onNewRoutes(routes, routerOrigin)
                     }
+                    callback.onNewRoutes(result.routes, result.routerOrigin)
                 }
-
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions
-                ) {
+                is RouteRequestResult.Failure -> {
                     mainJobController.scope.launch {
-                        state = RerouteState.Failed("Route request failed", reasons = reasons)
+                        state = RerouteState.Failed(
+                            "Route request failed",
+                            reasons = result.reasons
+                        )
                         state = RerouteState.Idle
                     }
                 }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    mainJobController.scope.launch {
-                        state = RerouteState.Interrupted
-                        state = RerouteState.Idle
-                    }
-                }
+                is RouteRequestResult.Cancellation -> onRequestInterrupted()
             }
-        )
+        }
     }
 
     internal fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
         compositeRerouteOptionsAdapter.externalOptionsAdapter = rerouteOptionsAdapter
     }
+
+    private fun onRequestInterrupted() {
+        mainJobController.scope.launch {
+            state = RerouteState.Interrupted
+            state = RerouteState.Idle
+        }
+    }
+
+    private suspend fun requestAsync(routeOptions: RouteOptions): RouteRequestResult {
+        return suspendCancellableCoroutine { cont ->
+            cont.invokeOnCancellation { onRequestInterrupted() }
+            requestId = directionsSession.requestRoutes(
+                routeOptions,
+                object : NavigationRouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<NavigationRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        if (cont.isActive) {
+                            cont.resume(RouteRequestResult.Success(routes, routerOrigin))
+                        }
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions
+                    ) {
+                        if (cont.isActive) {
+                            cont.resume(RouteRequestResult.Failure(reasons))
+                        }
+                    }
+
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        if (cont.isActive) {
+                            cont.resume(RouteRequestResult.Cancellation)
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+private sealed class RouteRequestResult {
+
+    class Success(
+        val routes: List<NavigationRoute>,
+        val routerOrigin: RouterOrigin
+    ) : RouteRequestResult()
+
+    class Failure(val reasons: List<RouterFailure>) : RouteRequestResult()
+
+    object Cancellation : RouteRequestResult()
 }

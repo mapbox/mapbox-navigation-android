@@ -10,6 +10,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed `BannerInstructions` issue where the banner instruction might have been removed from `RouteProgress` at some point around a edge's leg. [#6684](https://github.com/mapbox/mapbox-navigation-android/pull/6684)
 - Added `MapboxNavigation#resetTripSession(callback)` and deprecated the counterpart without a callback. [#6685](https://github.com/mapbox/mapbox-navigation-android/pull/6685)
 - Fixed memory leak in `ReplayProgressObserver` which happened after route refresh. [#6691](https://github.com/mapbox/mapbox-navigation-android/pull/6691)
+- Fixed a rare issue where a reroute relative to old routes might have occurred after setting new routes. [#6693](https://github.com/mapbox/mapbox-navigation-android/pull/6693)
 
 ## Mapbox Navigation SDK 2.9.4 - 08 December, 2022
 ### Changelog
