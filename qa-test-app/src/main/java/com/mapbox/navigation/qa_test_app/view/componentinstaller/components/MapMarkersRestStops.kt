@@ -27,7 +27,7 @@ class MapMarkersRestStops(
         super.onAttached(mapboxNavigation)
 
         val icon = IconFactory(mapView.context).pinIconWithText(
-            "zzZ",
+            "REST\nSTOP",
             Color.parseColor("#00ccff")
         )
         val annotation = PointAnnotationOptions()

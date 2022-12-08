@@ -13,9 +13,10 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
@@ -27,8 +28,8 @@ import com.mapbox.navigation.qa_test_app.view.componentinstaller.components.MapM
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.components.MapMarkersRestStops
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.components.RestAreaGuideMap
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.components.SimpleFollowingCamera
-import com.mapbox.navigation.qa_test_app.view.util.observe
 import com.mapbox.navigation.ui.base.installer.installComponents
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.guidance.restarea.api.MapboxRestAreaApi
 import com.mapbox.navigation.ui.maps.locationPuck
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -42,7 +43,6 @@ import kotlinx.coroutines.launch
 class RestAreaActivity : AppCompatActivity() {
 
     private lateinit var binding: LayoutActivityRestAreaBinding
-    private lateinit var mapboxNavigation: MapboxNavigation
 
     private val mapboxMap: MapboxMap get() = binding.mapView.getMapboxMap()
 
@@ -50,6 +50,43 @@ class RestAreaActivity : AppCompatActivity() {
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private var started: Boolean = false
+
+    private val mapboxNavigation by requireMapboxNavigation(
+        onCreatedObserver = object : UIComponent() {
+            override fun onAttached(mapboxNavigation: MapboxNavigation) {
+                super.onAttached(mapboxNavigation)
+
+                mapboxNavigation.startTripSession()
+                mapboxReplayer.pushRealLocation(this@RestAreaActivity, 0.0)
+                mapboxReplayer.play()
+
+                mapboxNavigation.flowRoutesUpdated().observe { result ->
+                    if (result.navigationRoutes.isNotEmpty()) {
+                        startSimulation(result.navigationRoutes[0])
+                    } else {
+                        stopSimulation()
+                    }
+                }
+
+                mapboxNavigation.flowRouteProgress().observe { routeProgress ->
+                    replayProgressObserver.onRouteProgressChanged(routeProgress)
+                }
+            }
+
+            override fun onDetached(mapboxNavigation: MapboxNavigation) {
+                super.onDetached(mapboxNavigation)
+
+                mapboxReplayer.finish()
+            }
+        }
+    ) {
+        MapboxNavigationApp.setup(
+            NavigationOptions.Builder(this)
+                .accessToken(getMapboxRouteAccessToken(this))
+                .locationEngine(ReplayLocationEngine(mapboxReplayer))
+                .build()
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,13 +96,6 @@ class RestAreaActivity : AppCompatActivity() {
         initStyle()
         initNavigation()
         initControls()
-        initObservers()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapboxReplayer.finish()
-        mapboxNavigation.onDestroy()
     }
 
     private fun initStyle() {
@@ -73,17 +103,7 @@ class RestAreaActivity : AppCompatActivity() {
     }
 
     private fun initNavigation() {
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(this)
-                .accessToken(getMapboxRouteAccessToken(this))
-                .locationEngine(ReplayLocationEngine(mapboxReplayer))
-                .build()
-        )
-        mapboxNavigation.startTripSession()
-        mapboxReplayer.pushRealLocation(this, 0.0)
-        mapboxReplayer.play()
-
-        mapboxNavigation.installComponents(this) {
+        MapboxNavigationApp.installComponents(this) {
             locationPuck(binding.mapView)
             routeArrow(binding.mapView)
             routeLine(binding.mapView) {
@@ -117,20 +137,6 @@ class RestAreaActivity : AppCompatActivity() {
             }
             binding.startButton.text = if (started) "STOP" else "START"
             binding.spinnerRoutes.isEnabled = !started
-        }
-    }
-
-    private fun initObservers() {
-        mapboxNavigation.flowRoutesUpdated().observe(this) { result ->
-            if (result.navigationRoutes.isNotEmpty()) {
-                startSimulation(result.navigationRoutes[0])
-            } else {
-                stopSimulation()
-            }
-        }
-
-        mapboxNavigation.flowRouteProgress().observe(this) { routeProgress ->
-            replayProgressObserver.onRouteProgressChanged(routeProgress)
         }
     }
 
