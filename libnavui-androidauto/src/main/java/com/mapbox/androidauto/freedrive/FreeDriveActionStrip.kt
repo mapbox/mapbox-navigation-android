@@ -6,6 +6,7 @@ import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.androidauto.R
+import com.mapbox.androidauto.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 
@@ -41,21 +42,13 @@ class FreeDriveActionStrip(
     /**
      * Action to provide feedback for the free drive state.
      */
-    fun buildFeedbackAction() = Action.Builder()
-        .setIcon(
-            CarIcon.Builder(
-                IconCompat.createWithResource(screen.carContext, R.drawable.mapbox_car_ic_feedback)
-            ).build()
-        )
-        .setOnClickListener {
-            MapboxScreenManager.push(MapboxScreen.FREE_DRIVE_FEEDBACK)
-        }
-        .build()
+    fun buildFeedbackAction(): Action = CarFeedbackAction(MapboxScreen.FREE_DRIVE_FEEDBACK)
+        .getAction(screen)
 
     /**
      * Action to open search screen.
      */
-    fun buildSearchAction() = Action.Builder()
+    fun buildSearchAction(): Action = Action.Builder()
         .setIcon(
             CarIcon.Builder(
                 IconCompat.createWithResource(
@@ -72,7 +65,7 @@ class FreeDriveActionStrip(
     /**
      * Action to open favorite places screen.
      */
-    fun buildFavoritesAction() = Action.Builder()
+    fun buildFavoritesAction(): Action = Action.Builder()
         .setTitle(screen.carContext.resources.getString(R.string.car_action_search_favorites))
         .setOnClickListener {
             MapboxScreenManager.push(MapboxScreen.FAVORITES)
