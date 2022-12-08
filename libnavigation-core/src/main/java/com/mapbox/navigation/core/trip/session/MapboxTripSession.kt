@@ -97,6 +97,7 @@ internal class MapboxTripSession(
                 setRouteToNativeNavigator(routes, legIndex)
             }
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
+                isUpdatingRoute = false
                 NativeSetRouteValue(
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
                 )
