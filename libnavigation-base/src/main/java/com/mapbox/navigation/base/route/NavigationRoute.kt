@@ -29,6 +29,8 @@ import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.json.JSONArray
+import org.json.JSONObject
 import java.net.URL
 
 /**
@@ -206,6 +208,44 @@ class NavigationRoute internal constructor(
         }
 
         internal fun create(
+            directionsRoutes: List<DirectionsRoute>,
+            routeOptions: RouteOptions,
+            routerOrigin: RouterOrigin,
+            routeParser: SDKRouteParser = NativeRouteParserWrapper
+        ): List<NavigationRoute> {
+
+            val jsonArray = JSONArray()
+            directionsRoutes.forEach {
+                jsonArray.put(JSONObject(it.toJson()))
+            }
+            val directionsRoutesJson = JSONObject().also {
+                it.put("routes", jsonArray)
+            }.toString()
+
+            return create(
+                directionsRoutesJson,
+                routeOptions.toUrl("").toString(),
+                routerOrigin,
+                routeParser
+            )
+        }
+
+        private fun create(
+            directionsRoutesJson: String,
+            routeOptionsUrlString: String,
+            routerOrigin: RouterOrigin,
+            routeParser: SDKRouteParser = NativeRouteParserWrapper
+        ): List<NavigationRoute> {
+            return routeParser.parseDirectionsRoutes(
+                directionsRoutesJson,
+                routeOptionsUrlString,
+                routerOrigin
+            ).run {
+                create(this)
+            }
+        }
+
+        internal fun create(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
             routeParser: SDKRouteParser,
@@ -255,6 +295,19 @@ class NavigationRoute internal constructor(
                     routeOptions,
                     routeInterface
                 )
+            }.cache()
+        }
+
+        private fun create(
+            expected: Expected<String, List<RouteInterface>>
+        ): List<NavigationRoute> {
+            return expected.fold({ error ->
+                logE("NavigationRoute", "Failed to parse a route. Reason: $error")
+                listOf()
+            }, { value ->
+                value
+            }).map { routeInterface ->
+                routeInterface.toNavigationRoute()
             }.cache()
         }
     }
@@ -527,8 +580,10 @@ internal fun DirectionsRoute.toNavigationRoute(
 }
 
 internal fun RouteInterface.toNavigationRoute(): NavigationRoute {
+    val jsonObj = JSONObject(responseJson)
+    jsonObj.put("code", "Ok")
     return NavigationRoute(
-        directionsResponse = DirectionsResponse.fromJson(responseJson),
+        directionsResponse = DirectionsResponse.fromJson(jsonObj.toString()),
         routeOptions = RouteOptions.fromUrl(URL(requestUri)),
         routeIndex = routeIndex,
         nativeRoute = this

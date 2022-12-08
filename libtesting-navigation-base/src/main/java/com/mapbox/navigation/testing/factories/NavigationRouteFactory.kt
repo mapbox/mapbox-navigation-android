@@ -41,6 +41,14 @@ fun createNavigationRoute(
                     )
                 )
             }
+
+            override fun parseDirectionsRoutes(
+                directionsRoutes: String,
+                request: String,
+                routerOrigin: RouterOrigin
+            ): Expected<String, List<RouteInterface>> {
+                throw IllegalStateException("parseDirectionsRoutes is not supported yet")
+            }
         }
     )
 }
@@ -71,6 +79,14 @@ class TestSDKRouteParser : SDKRouteParser {
             routerOrigin = routerOrigin
         )
         return ExpectedFactory.createValue(result)
+    }
+
+    override fun parseDirectionsRoutes(
+        directionsRoutes: String,
+        request: String,
+        routerOrigin: RouterOrigin
+    ): Expected<String, List<RouteInterface>> {
+        throw IllegalStateException("parseDirectionsRoutes is not supported yet")
     }
 }
 
