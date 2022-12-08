@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Changed EH speedLimit behaviour: value is picked based on the date-time conditions using device’s system time and edge's location based timezone. [#6697](https://github.com/mapbox/mapbox-navigation-android/pull/6697)
 
 ## Mapbox Navigation SDK 2.9.3 - 01 December, 2022
 ### Changelog
