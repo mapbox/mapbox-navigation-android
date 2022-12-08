@@ -19,7 +19,8 @@ android {
 
 dependencies {
     api project(':libtesting-thirdparty')
-    implementation(project(':libnavigation-base'))
+    // testing modules should not transitively bring in project dependencies
+    compileOnly(project(':libnavigation-base'))
     implementation dependenciesList.junit
     implementation dependenciesList.mockk
 }
