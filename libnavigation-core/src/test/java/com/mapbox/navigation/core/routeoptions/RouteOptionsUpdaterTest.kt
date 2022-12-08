@@ -777,4 +777,96 @@ class RouteOptionsUpdaterTest {
             }
         }
     }
+
+    @RunWith(Parameterized::class)
+    class ApproachesTestParameterized(
+        private val description: String,
+        private val routeOptions: RouteOptions,
+        private val idxOfNextRequestedCoordinate: Int,
+        private val expectedApproachesList: List<String?>?
+    ) {
+
+        @get:Rule
+        val loggerRule = LoggingFrontendTestRule()
+
+        private lateinit var routeOptionsUpdater: RouteOptionsUpdater
+
+        companion object {
+            @JvmStatic
+            @Parameterized.Parameters(name = "{0}")
+            fun params() = listOf(
+                arrayOf(
+                    "empty approaches list correspond to null result list",
+                    provideRouteOptionsWithCoordinates().toBuilder()
+                        .approachesList(emptyList())
+                        .build(),
+                    2,
+                    null,
+                ),
+                arrayOf(
+                    "approaches list exist, index of next coordinate is 1, it has to become " +
+                        "null in the result list",
+                    provideRouteOptionsWithCoordinates().toBuilder()
+                        .approachesList(
+                            provideApproachesList(
+                                null,
+                                DirectionsCriteria.APPROACH_CURB,
+                                DirectionsCriteria.APPROACH_UNRESTRICTED,
+                                DirectionsCriteria.APPROACH_CURB,
+                            )
+                        )
+                        .build(),
+                    1,
+                    provideApproachesList(
+                        null,
+                        DirectionsCriteria.APPROACH_UNRESTRICTED,
+                        DirectionsCriteria.APPROACH_CURB,
+                    ),
+                ),
+            )
+
+            private fun provideApproachesList(vararg approaches: String?): List<String?> =
+                approaches.toList()
+        }
+
+        @Before
+        fun setup() {
+            routeOptionsUpdater = RouteOptionsUpdater()
+        }
+
+        @Test
+        fun testCases() {
+            mockkStatic(::indexOfNextRequestedCoordinate) {
+                val mockRemainingWaypoints = -1
+                val mockWaypoints = listOf(mockk<Waypoint>())
+                val routeProgress: RouteProgress = mockk(relaxed = true) {
+                    every { remainingWaypoints } returns mockRemainingWaypoints
+                    every { navigationRoute.internalWaypoints() } returns mockWaypoints
+                }
+                every {
+                    indexOfNextRequestedCoordinate(mockWaypoints, mockRemainingWaypoints)
+                } returns idxOfNextRequestedCoordinate
+
+                val updatedRouteOptions = routeOptionsUpdater.update(
+                    routeOptions,
+                    routeProgress,
+                    mockLocationMatcher()
+                ).let {
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    it as RouteOptionsUpdater.RouteOptionsResult.Success
+                }.routeOptions
+
+                assertEquals(expectedApproachesList, updatedRouteOptions.approachesList())
+            }
+        }
+
+        private fun mockLocationMatcher(): LocationMatcherResult = mockk {
+            every { enhancedLocation } returns mockk {
+                every { latitude } returns 1.1
+                every { longitude } returns 2.2
+                every { bearing } returns 3.3f
+                every { zLevel } returns 4
+            }
+        }
+    }
 }
