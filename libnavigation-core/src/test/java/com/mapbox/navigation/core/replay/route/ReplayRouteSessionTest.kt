@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.TripSessionResetCallback
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -57,6 +58,9 @@ class ReplayRouteSessionTest {
         every { navigationOptions } returns options
         every { registerRoutesObserver(capture(routesObserver)) } just runs
         every { registerRouteProgressObserver(capture(routeProgressObserver)) } just runs
+        every { resetTripSession(any()) } answers {
+            firstArg<TripSessionResetCallback>().onTripSessionReset()
+        }
     }
     private val bestLocationEngine: LocationEngine = mockk {
         every { getLastLocation(any()) } just runs
@@ -109,7 +113,7 @@ class ReplayRouteSessionTest {
 
         verifyOrder {
             replayer.clearEvents()
-            mapboxNavigation.resetTripSession()
+            mapboxNavigation.resetTripSession(any())
             replayer.play()
         }
     }
