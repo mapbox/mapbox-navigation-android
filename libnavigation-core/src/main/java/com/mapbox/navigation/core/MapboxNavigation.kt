@@ -143,6 +143,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.lang.reflect.Field
@@ -645,10 +646,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * navigation simulation, or before resetting location to not real (simulated)
      * position without recreation of [MapboxNavigation].
      */
-    @Deprecated(message = "use a function withe the callback instead")
+    @Deprecated(message = "use the overload with the callback instead")
     fun resetTripSession() {
-        resetTripSession {
-            // no-op
+        // using a blocking function to keep parity with the original implementation so that
+        // Nav Native is fully done with the reset when this function returns
+        runBlocking {
+            logD(LOG_CATEGORY) {
+                "Resetting trip session"
+            }
+            navigator.resetRideSession()
+            logI(LOG_CATEGORY) {
+                "Trip session reset"
+            }
         }
     }
 
