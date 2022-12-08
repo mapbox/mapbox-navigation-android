@@ -1,6 +1,9 @@
 package com.mapbox.navigation.copilot
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.copilot.MapboxCopilot.push
+import com.mapbox.navigation.copilot.MapboxCopilot.start
+import com.mapbox.navigation.copilot.MapboxCopilot.stop
 import com.mapbox.navigation.copilot.internal.PushStatusObserver
 import com.mapbox.navigation.core.DeveloperMetadataObserver
 import com.mapbox.navigation.core.MapboxNavigation
@@ -78,6 +81,9 @@ object MapboxCopilot : MapboxNavigationObserver {
      * @param mapboxNavigation instance that is being attached
      */
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        if (copilot != null) {
+            return
+        }
         copilot = MapboxCopilotImpl(mapboxNavigation).also { it.start() }
     }
 
