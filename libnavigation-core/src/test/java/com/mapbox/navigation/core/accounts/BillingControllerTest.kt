@@ -715,6 +715,46 @@ class BillingControllerTest {
         }
     }
 
+    @Test
+    fun `when active guidance completed and the same route set again, start new billing session`() {
+        sessionStateObserver.onNavigationSessionStateChanged(
+            NavigationSessionState.ActiveGuidance("2")
+        )
+
+        val originalWaypoints = mutableListOf(
+            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
+            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build(),
+        )
+        val originalRoute = mockk<NavigationRoute> {
+            every { waypoints } returns originalWaypoints
+        }
+        val routeProgress = mockk<RouteProgress> {
+            every { navigationRoute } returns originalRoute
+            every { remainingWaypoints } returns 0
+        }
+        every { tripSession.getRouteProgress() } returns routeProgress
+
+        billingController.onExternalRouteSet(originalRoute)
+
+        verifyOrder {
+            billingService.beginBillingSession(
+                accessToken,
+                "",
+                SessionSKUIdentifier.NAV2_SES_TRIP,
+                any(),
+                0
+            )
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.beginBillingSession(
+                accessToken,
+                "",
+                SessionSKUIdentifier.NAV2_SES_TRIP,
+                any(),
+                0
+            )
+        }
+    }
+
     /**
      * This is an edge case where we are not on the route (due to map-matching or anything else)
      * and remaining waypoints count is equal to all waypoints count.
