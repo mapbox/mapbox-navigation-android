@@ -18,7 +18,6 @@ import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -36,7 +35,6 @@ class BannerAndVoiceInstructionsTest : BaseTest<EmptyTestActivity>(EmptyTestActi
     }
 
     @Test
-    @Ignore("ignored due to NN-274")
     fun departure_banner_and_voice_instructions() = sdkTest {
         val testRoutes = testRoute().toNavigationRoutes()
         val mapboxNavigation = MapboxNavigationProvider.create(

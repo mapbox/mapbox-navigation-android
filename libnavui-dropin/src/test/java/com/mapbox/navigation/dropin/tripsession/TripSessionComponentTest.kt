@@ -54,9 +54,7 @@ class TripSessionComponentTest {
         testLifecycle = TestLifecycleOwner()
         sut = TripSessionComponent(testLifecycle.lifecycle, testStore)
 
-        // todo this will have to be changed to `mockkStatic(PermissionsManager::class)`
-        // when upgrading to Common SDK v23.2.0
-        mockkObject(PermissionsManager)
+        mockkStatic(PermissionsManager::class)
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
         mockkStatic(LocationEngineProvider::class)
         every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk {

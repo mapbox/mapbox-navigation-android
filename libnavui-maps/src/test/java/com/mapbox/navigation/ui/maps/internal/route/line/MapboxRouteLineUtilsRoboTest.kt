@@ -16,6 +16,7 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -57,9 +58,10 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.unmockkStatic
+import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -84,12 +86,15 @@ class MapboxRouteLineUtilsRoboTest {
 
     @After
     fun tearDown() {
+        unmockkAll()
         MapboxRouteLineUtils.trimRouteDataCacheToSize(0)
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun initializeLayers() {
+        mockkObject(GeoJsonSource)
+        every { GeoJsonSource.directSetterEnabled() } returns false
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)
@@ -513,7 +518,6 @@ class MapboxRouteLineUtilsRoboTest {
             LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[20].below
         )
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test

@@ -27,18 +27,7 @@ task verifyCommonSdkVersion(dependsOn: generateDependencyReportFile) {
             commonVersions.add(elements[elements.length - 1])
         }
 
-        // todo remove after upgrading to Common SDK v23.2.0
-        // this allowed for Maps SDK v10.10.0-rc.1 (with Common SDK v23.2.0-rc.3)
-        // but it also comes with GL-Native v10.10.0-rc.1 (with Common SDK v23.2.0-rc.2)
-        Set<String> allowedCombination = new HashSet<>()
-        allowedCombination.add("23.2.0-rc.2")
-        allowedCombination.add("23.2.0-rc.3")
-
-        if (commonVersions == allowedCombination) {
-            println(
-                    "Detected combination of Common SDK versions 23.2.0-rc.2 and 23.2.0-rc.3 which is allowed as a workaround."
-            )
-        } else if (commonVersions.size() > 1) {
+        if (commonVersions.size() > 1) {
             // verify that major and minor versions are consistent
             String mismatchArea = null
 
