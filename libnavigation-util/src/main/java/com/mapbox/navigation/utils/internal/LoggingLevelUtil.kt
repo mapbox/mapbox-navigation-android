@@ -2,8 +2,8 @@ package com.mapbox.navigation.utils.internal
 
 import com.mapbox.common.LoggingLevel
 
-fun LoggingLevel?.atLeast(loggingLevel: LoggingLevel): Boolean {
-    return toPriority(this) >= toPriority(loggingLevel)
+fun LoggingLevel?.accepts(loggingLevel: LoggingLevel): Boolean {
+    return toPriority(loggingLevel) >= toPriority(this)
 }
 
 private fun toPriority(loggingLevel: LoggingLevel?) = when (loggingLevel) {
