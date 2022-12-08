@@ -9,6 +9,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -17,6 +18,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.internal.logW
 import java.util.Collections
 
@@ -54,15 +56,29 @@ class ReplayRouteSession : MapboxNavigationObserver {
 
     private var options = ReplayRouteSessionOptions.Builder().build()
 
-    private lateinit var polylineDecodeStream: ReplayPolylineDecodeStream
     private lateinit var replayRouteMapper: ReplayRouteMapper
     private var mapboxNavigation: MapboxNavigation? = null
     private var lastLocationEvent: ReplayEventUpdateLocation? = null
-    private var routesObserver: RoutesObserver? = null
-    private var currentRouteId: String? = null
+    private var polylineDecodeStream: ReplayPolylineDecodeStream? = null
+    private var currentRoute: NavigationRoute? = null
+
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        if (currentRoute?.id != routeProgress.navigationRoute.id) {
+            currentRoute = routeProgress.navigationRoute
+            onRouteChanged(routeProgress)
+        }
+    }
+
+    private val routesObserver = RoutesObserver { result ->
+        if (result.navigationRoutes.isEmpty()) {
+            mapboxNavigation?.resetReplayLocation()
+            currentRoute = null
+            polylineDecodeStream = null
+        }
+    }
 
     private val replayEventsObserver = ReplayEventsObserver { events ->
-        if (isLastEventPlayed(events)) {
+        if (currentRoute != null && isLastEventPlayed(events)) {
             pushMorePoints()
         }
     }
@@ -92,45 +108,44 @@ class ReplayRouteSession : MapboxNavigationObserver {
         this.mapboxNavigation = mapboxNavigation
         mapboxNavigation.stopTripSession()
         mapboxNavigation.startReplayTripSession()
-
-        routesObserver = RoutesObserver { result ->
-            if (result.navigationRoutes.isEmpty()) {
-                currentRouteId = null
-                mapboxNavigation.resetReplayLocation()
-            } else if (result.navigationRoutes.first().id != currentRouteId) {
-                onRouteChanged(result.navigationRoutes.first())
-            }
-        }.also { mapboxNavigation.registerRoutesObserver(it) }
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.mapboxReplayer.registerObserver(replayEventsObserver)
-        mapboxNavigation.resetReplayLocation()
+        mapboxNavigation.mapboxReplayer.play()
     }
 
     private fun MapboxNavigation.resetReplayLocation() {
         mapboxReplayer.clearEvents()
-        resetTripSession()
-        if (options.locationResetEnabled) {
-            val context = navigationOptions.applicationContext
-            if (PermissionsManager.areLocationPermissionsGranted(context)) {
-                pushRealLocation(context)
-            } else {
-                logW(LOG_CATEGORY) {
-                    "Location permission have not been accepted. If this is intentional, disable" +
-                        " this warning with ReplayRouteSessionOptions.locationResetEnabled."
+        resetTripSession {
+            if (options.locationResetEnabled) {
+                val context = navigationOptions.applicationContext
+                if (PermissionsManager.areLocationPermissionsGranted(context)) {
+                    pushRealLocation(context)
+                } else {
+                    logW(LOG_CATEGORY) {
+                        "Location permissions have not been accepted. If this is intentional, " +
+                            "disable this warning with " +
+                            "ReplayRouteSessionOptions.locationResetEnabled."
+                    }
                 }
             }
+            mapboxReplayer.play()
         }
-        mapboxReplayer.play()
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        this.mapboxNavigation = null
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.mapboxReplayer.unregisterObserver(replayEventsObserver)
         mapboxNavigation.mapboxReplayer.stop()
         mapboxNavigation.mapboxReplayer.clearEvents()
         mapboxNavigation.stopTripSession()
+        this.mapboxNavigation = null
+        this.currentRoute = null
     }
 
-    private fun onRouteChanged(navigationRoute: NavigationRoute) {
+    private fun onRouteChanged(routeProgress: RouteProgress) {
+        val navigationRoute = routeProgress.navigationRoute
         val mapboxReplayer = mapboxNavigation?.mapboxReplayer ?: return
         mapboxReplayer.clearEvents()
         mapboxReplayer.play()
@@ -144,9 +159,12 @@ class ReplayRouteSession : MapboxNavigationObserver {
             }
             return
         }
-        currentRouteId = navigationRoute.id
         polylineDecodeStream = ReplayPolylineDecodeStream(geometry, 6)
-        mapboxNavigation?.resetTripSession()
+
+        // Skip up to the current geometry index. There is some imprecision here because the
+        // distance traveled is not equal to a route index.
+        polylineDecodeStream?.skip(routeProgress.currentRouteGeometryIndex)
+
         pushMorePoints()
     }
 
@@ -158,7 +176,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
     }
 
     private fun pushMorePoints() {
-        val nextPoints = polylineDecodeStream.decode(options.decodeMinDistance)
+        val nextPoints = polylineDecodeStream?.decode(options.decodeMinDistance) ?: return
         val nextReplayLocations = replayRouteMapper.mapPointList(nextPoints)
         lastLocationEvent = nextReplayLocations.lastOrNull { it is ReplayEventUpdateLocation }
             as? ReplayEventUpdateLocation
