@@ -47,7 +47,7 @@ fun logD(msg: String, category: String? = null) {
  * As an example, this is how the logs would look like `D/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 inline fun logD(category: String? = null, lazyMsg: () -> String) {
-    if (logLevel().atLeast(LoggingLevel.DEBUG)) {
+    if (logLevel().accepts(LoggingLevel.DEBUG)) {
         logD(lazyMsg(), category)
     }
 }
@@ -69,7 +69,7 @@ fun logI(msg: String, category: String? = null) {
  * As an example, this is how the logs would look like `I/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 inline fun logI(category: String? = null, lazyMsg: () -> String) {
-    if (logLevel().atLeast(LoggingLevel.INFO)) {
+    if (logLevel().accepts(LoggingLevel.INFO)) {
         logI(lazyMsg(), category)
     }
 }
@@ -91,7 +91,7 @@ fun logW(msg: String, category: String? = null) {
  * As an example, this is how the logs would look like `W/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 inline fun logW(category: String? = null, lazyMsg: () -> String) {
-    if (logLevel().atLeast(LoggingLevel.WARNING)) {
+    if (logLevel().accepts(LoggingLevel.WARNING)) {
         logW(lazyMsg(), category)
     }
 }
@@ -113,7 +113,7 @@ fun logE(msg: String, category: String? = null) {
  * As an example, this is how the logs would look like `E/Mapbox: [nav-sdk] [ConnectivityHandler] NetworkStatus=ReachableViaWiFi`.
  */
 inline fun logE(category: String? = null, lazyMsg: () -> String) {
-    if (logLevel().atLeast(LoggingLevel.ERROR)) {
+    if (logLevel().accepts(LoggingLevel.ERROR)) {
         logE(lazyMsg(), category)
     }
 }
