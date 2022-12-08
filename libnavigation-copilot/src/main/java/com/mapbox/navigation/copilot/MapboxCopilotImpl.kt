@@ -3,6 +3,7 @@ package com.mapbox.navigation.copilot
 import android.content.pm.ApplicationInfo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.gson.Gson
 import com.mapbox.common.UploadOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -109,15 +110,20 @@ internal class MapboxCopilotImpl(
     }
     private var initRoute = false
     private lateinit var routesObserver: RoutesObserver
+    private val isMapboxNavigationAppSetup = MapboxNavigationApp.isSetup()
 
     /**
      * start
      */
     fun start() {
         registerUserFeedbackCallback(userFeedbackCallback)
-        MapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(
-            foregroundBackgroundLifecycleObserver
-        )
+        if (isMapboxNavigationAppSetup) {
+            MapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(
+                foregroundBackgroundLifecycleObserver
+            )
+        } else {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(foregroundBackgroundLifecycleObserver)
+        }
         mapboxNavigation.registerHistoryRecordingStateChangeObserver(
             historyRecordingStateChangeObserver
         )
@@ -128,9 +134,15 @@ internal class MapboxCopilotImpl(
      */
     fun stop() {
         unregisterUserFeedbackCallback(userFeedbackCallback)
-        MapboxNavigationApp.lifecycleOwner.lifecycle.removeObserver(
-            foregroundBackgroundLifecycleObserver
-        )
+        if (isMapboxNavigationAppSetup) {
+            MapboxNavigationApp.lifecycleOwner.lifecycle.removeObserver(
+                foregroundBackgroundLifecycleObserver
+            )
+        } else {
+            ProcessLifecycleOwner.get().lifecycle.removeObserver(
+                foregroundBackgroundLifecycleObserver
+            )
+        }
         mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(
             historyRecordingStateChangeObserver
         )

@@ -29,6 +29,7 @@ dependencies {
     implementation dependenciesList.coroutinesAndroid
 
     implementation dependenciesList.androidXWorkManager
+    implementation dependenciesList.androidXLifecycleProcess
 
     testImplementation project(':libtesting-utils')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
