@@ -26,7 +26,6 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -105,7 +104,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxRouteLineApi(routeLineOptions)
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val mapboxNavigation: MapboxNavigation by requireMapboxNavigation(
         onResumedObserver = object : MapboxNavigationObserver {
             override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -198,8 +196,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         ) {
             mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
                 object : LocationEngineCallback<LocationEngineResult> {
-                    override fun onSuccess(result: LocationEngineResult?) {
-                        result?.lastLocation?.let {
+                    override fun onSuccess(result: LocationEngineResult) {
+                        result.lastLocation?.let {
                             navigationLocationProvider.changePosition(it)
                             updateCamera(it)
                         }

@@ -16,7 +16,6 @@ import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
@@ -56,9 +55,7 @@ class LocationPermissionComponentTest {
 
     @Before
     fun setup() {
-        // todo this will have to be changed to `mockkStatic(PermissionsManager::class)`
-        // when upgrading to Common SDK v23.2.0
-        mockkObject(PermissionsManager)
+        mockkStatic(PermissionsManager::class)
         mockkStatic(Lifecycle::class)
     }
 

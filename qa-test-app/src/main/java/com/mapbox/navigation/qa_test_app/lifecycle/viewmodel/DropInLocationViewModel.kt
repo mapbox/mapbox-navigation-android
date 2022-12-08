@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -17,7 +16,6 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.utils.internal.logE
 
 @SuppressLint("MissingPermission")
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DropInLocationViewModel : ViewModel() {
 
     val navigationLocationProvider = NavigationLocationProvider()
@@ -43,8 +41,8 @@ class DropInLocationViewModel : ViewModel() {
         override fun onAttached(mapboxNavigation: MapboxNavigation) {
             val locationEngine = mapboxNavigation.navigationOptions.locationEngine
             locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult?) {
-                    result?.lastLocation?.let {
+                override fun onSuccess(result: LocationEngineResult) {
+                    result.lastLocation?.let {
                         navigationLocationProvider.changePosition(it, emptyList())
                         _locationLiveData.value = it
                     }
