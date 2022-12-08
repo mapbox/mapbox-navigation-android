@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.StepIntersection
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -28,7 +29,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlig
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
-import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -64,6 +65,7 @@ import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal object MapboxRouteLineUtils {
 
     private const val LOG_CATEGORY = "MapboxRouteLineUtils"
@@ -1066,14 +1068,23 @@ internal object MapboxRouteLineUtils {
         style: Style,
         layerSource: String,
         tolerance: Double,
-        useLineMetrics: Boolean
+        useLineMetrics: Boolean,
+        enableSharedCache: Boolean
     ) {
         if (!style.styleSourceExists(layerSource)) {
-            geoJsonSource(layerSource) {
-                maxzoom(16)
-                lineMetrics(useLineMetrics)
-                tolerance(tolerance)
-            }.bindTo(style)
+            style.addStyleSource(
+                layerSource,
+                Value(
+                    hashMapOf(
+                        "type" to Value("geojson"),
+                        "data" to Value(""),
+                        "sharedCache" to Value(enableSharedCache),
+                        "maxzoom" to Value(16),
+                        "lineMetrics" to Value(useLineMetrics),
+                        "tolerance" to Value(tolerance)
+                    )
+                )
+            )
         }
     }
 
@@ -1092,25 +1103,29 @@ internal object MapboxRouteLineUtils {
             style,
             RouteLayerConstants.WAYPOINT_SOURCE_ID,
             options.tolerance,
-            useLineMetrics = false
+            useLineMetrics = false,
+            enableSharedCache = false
         )
         addSource(
             style,
             RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             options.tolerance,
-            useLineMetrics = true
+            useLineMetrics = true,
+            enableSharedCache = options.shareLineGeometrySources
         )
         addSource(
             style,
             RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             options.tolerance,
-            useLineMetrics = true
+            useLineMetrics = true,
+            enableSharedCache = options.shareLineGeometrySources
         )
         addSource(
             style,
             RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             options.tolerance,
-            useLineMetrics = true
+            useLineMetrics = true,
+            enableSharedCache = options.shareLineGeometrySources
         )
 
         if (!style.styleLayerExists(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)) {

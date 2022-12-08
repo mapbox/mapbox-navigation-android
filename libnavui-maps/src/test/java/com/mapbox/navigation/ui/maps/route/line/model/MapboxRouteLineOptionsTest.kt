@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -152,6 +153,17 @@ class MapboxRouteLineOptionsTest {
         assertEquals(IconPitchAlignment.AUTO, options.iconPitchAlignment)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun enableSharedCache() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .shareLineGeometrySources(true)
+            .build()
+
+        assertTrue(options.shareLineGeometrySources)
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
@@ -172,6 +184,7 @@ class MapboxRouteLineOptionsTest {
             .waypointLayerIconOffset(listOf(3.0, 4.4))
             .waypointLayerIconAnchor(IconAnchor.BOTTOM)
             .iconPitchAlignment(IconPitchAlignment.AUTO)
+            .shareLineGeometrySources(true)
             .build()
             .toBuilder(ctx)
             .build()
@@ -191,5 +204,6 @@ class MapboxRouteLineOptionsTest {
         assertEquals(2, options.waypointLayerIconOffset.size)
         assertEquals(IconAnchor.BOTTOM, options.waypointLayerIconAnchor)
         assertEquals(IconPitchAlignment.AUTO, options.iconPitchAlignment)
+        assertTrue(options.shareLineGeometrySources)
     }
 }

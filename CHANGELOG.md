@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added `MapboxNavigation#resetTripSession(callback)` and deprecated the counterpart without a callback. [#6685](https://github.com/mapbox/mapbox-navigation-android/pull/6685)
 - Fixed memory leak in `ReplayProgressObserver` which happened after route refresh. [#6691](https://github.com/mapbox/mapbox-navigation-android/pull/6691)
 - Fixed a rare issue where a reroute relative to old routes might have occurred after setting new routes. [#6693](https://github.com/mapbox/mapbox-navigation-android/pull/6693)
+- Added experimental `MapboxRouteLineOptions#shareLineGeometrySources` option to enable route line's GeoJson source data sharing between multiple instances of the map. [#6680](https://github.com/mapbox/mapbox-navigation-android/pull/6680)
 
 ## Mapbox Navigation SDK 2.9.4 - 08 December, 2022
 ### Changelog
