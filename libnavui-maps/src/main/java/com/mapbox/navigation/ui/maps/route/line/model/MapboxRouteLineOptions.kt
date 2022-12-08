@@ -9,6 +9,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
 import kotlin.math.abs
 
@@ -37,8 +38,12 @@ import kotlin.math.abs
  * @param waypointLayerIconOffset the list of offset values for waypoint icons
  * @param waypointLayerIconAnchor the anchor value, the default is [IconAnchor.CENTER]
  * @param iconPitchAlignment the pitch alignment value used for waypoint icons. The default is [IconPitchAlignment.MAP]
- * @param enableSharedCache enables the shared cache feature of the Maps SDK
+ * @param shareLineGeometrySources enable route line's GeoJson source data sharing between multiple instances of the map.
+ * If this option is enabled for multiple instances of [MapboxRouteLineView]s that are used to draw route lines on multiple maps at the same time,
+ * they will all share the GeoJson source to optimize execution time of updates and decrease the memory footprint.
+ * **Enable only for instances that should share the geometry of the lines**, leave disabled for instances that should draw geometries distinct from other instances.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
     val routeStyleDescriptors: List<RouteStyleDescriptor>,
@@ -56,7 +61,8 @@ class MapboxRouteLineOptions private constructor(
     val waypointLayerIconOffset: List<Double> = listOf(0.0, 0.0),
     val waypointLayerIconAnchor: IconAnchor = IconAnchor.CENTER,
     val iconPitchAlignment: IconPitchAlignment = IconPitchAlignment.MAP,
-    val enableSharedCache: Boolean
+    @ExperimentalPreviewMapboxNavigationAPI
+    val shareLineGeometrySources: Boolean
 ) {
 
     /**
@@ -81,7 +87,7 @@ class MapboxRouteLineOptions private constructor(
             waypointLayerIconOffset,
             waypointLayerIconAnchor,
             iconPitchAlignment,
-            enableSharedCache
+            shareLineGeometrySources
         )
     }
 
@@ -112,7 +118,7 @@ class MapboxRouteLineOptions private constructor(
         if (waypointLayerIconOffset != other.waypointLayerIconOffset) return false
         if (waypointLayerIconAnchor != other.waypointLayerIconAnchor) return false
         if (iconPitchAlignment != other.iconPitchAlignment) return false
-        if (enableSharedCache != other.enableSharedCache) return false
+        if (shareLineGeometrySources != other.shareLineGeometrySources) return false
 
         return true
     }
@@ -135,13 +141,11 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (waypointLayerIconOffset.hashCode())
         result = 31 * result + (waypointLayerIconAnchor.hashCode())
         result = 31 * result + (iconPitchAlignment.hashCode())
-        result = 31 * result + (enableSharedCache.hashCode())
+        result = 31 * result + (shareLineGeometrySources.hashCode())
         return result
     }
 
-    /**
-     * Returns a string representation of the object.
-     */
+
     override fun toString(): String {
         return "MapboxRouteLineOptions(resourceProvider=$resourceProvider, " +
             "originIcon=$originIcon, " +
@@ -157,7 +161,7 @@ class MapboxRouteLineOptions private constructor(
             "waypointLayerIconOffset=$waypointLayerIconOffset," +
             "waypointLayerIconAnchor=$waypointLayerIconAnchor," +
             "iconPitchAlignment=$iconPitchAlignment," +
-            "enableSharedCache=$enableSharedCache" +
+            "shareLineGeometrySources=$shareLineGeometrySources" +
             ")"
     }
 
@@ -182,7 +186,10 @@ class MapboxRouteLineOptions private constructor(
      * @param vanishingRouteLineUpdateIntervalNano can be used to decrease the frequency of the vanishing route
      * line updates improving the performance at the expense of visual appearance of the vanishing point on the line during navigation.
      * @param iconPitchAlignment the pitch alignment value used for waypoint icons. The default is [IconPitchAlignment.MAP]
-     * @param enableSharedCache enables the shared cache feature of the Maps SDK
+     * @param shareLineGeometrySources enables route line's GeoJson source data sharing between multiple instances of the map.
+     * If this option is enabled for multiple instances of [MapboxRouteLineView]s that are used to draw route lines on multiple maps at the same time,
+     * they will all share the GeoJson source to optimize execution time of updates and decrease the memory footprint.
+     * **Enable only for instances that should share the geometry of the lines**, leave disabled for instances that should draw geometries distinct from other instances.
      */
     class Builder internal constructor(
         private val context: Context,
@@ -199,7 +206,7 @@ class MapboxRouteLineOptions private constructor(
         private var iconOffset: List<Double>,
         private var iconAnchor: IconAnchor,
         private var iconPitchAlignment: IconPitchAlignment,
-        private var enableSharedCache: Boolean
+        private var shareLineGeometrySources: Boolean
     ) {
 
         /**
@@ -374,14 +381,17 @@ class MapboxRouteLineOptions private constructor(
             apply { this.iconPitchAlignment = iconPitchAlignment }
 
         /**
-         * If true enables the shared Map cache.
+         * Enable route line's GeoJson source data sharing between multiple instances of the map.
+         * If this option is enabled for multiple instances of [MapboxRouteLineView]s that are used to draw route lines on multiple maps at the same time,
+         * they will all share the GeoJson source to optimize execution time of updates and decrease the memory footprint.
+         * **Enable only for instances that should share the geometry of the lines**, leave disabled for instances that should draw geometries distinct from other instances.
          *
-         * @param enableCache false by default
+         * @param shareLineGeometrySources false by default
          * @return the builder
          */
         @ExperimentalPreviewMapboxNavigationAPI
-        fun enableSharedCache(enableCache: Boolean): Builder =
-            apply { this.enableSharedCache = enableCache }
+        fun shareLineGeometrySources(shareLineGeometrySources: Boolean): Builder =
+            apply { this.shareLineGeometrySources = shareLineGeometrySources }
 
         /**
          * @return an instance of [MapboxRouteLineOptions]
@@ -422,7 +432,7 @@ class MapboxRouteLineOptions private constructor(
                 iconOffset,
                 iconAnchor,
                 iconPitchAlignment,
-                enableSharedCache
+                shareLineGeometrySources
             )
         }
     }

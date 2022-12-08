@@ -29,6 +29,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlig
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -64,6 +65,7 @@ import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal object MapboxRouteLineUtils {
 
     private const val LOG_CATEGORY = "MapboxRouteLineUtils"
@@ -1102,28 +1104,28 @@ internal object MapboxRouteLineUtils {
             RouteLayerConstants.WAYPOINT_SOURCE_ID,
             options.tolerance,
             useLineMetrics = false,
-            options.enableSharedCache
+            options.shareLineGeometrySources
         )
         addSource(
             style,
             RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
-            enableSharedCache = options.enableSharedCache
+            enableSharedCache = options.shareLineGeometrySources
         )
         addSource(
             style,
             RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
-            enableSharedCache = options.enableSharedCache
+            enableSharedCache = options.shareLineGeometrySources
         )
         addSource(
             style,
             RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
-            enableSharedCache = options.enableSharedCache
+            enableSharedCache = options.shareLineGeometrySources
         )
 
         if (!style.styleLayerExists(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)) {

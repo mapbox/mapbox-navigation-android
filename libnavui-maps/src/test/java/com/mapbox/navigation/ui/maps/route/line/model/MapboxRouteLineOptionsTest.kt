@@ -157,10 +157,10 @@ class MapboxRouteLineOptionsTest {
     @Test
     fun enableSharedCache() {
         val options = MapboxRouteLineOptions.Builder(ctx)
-            .enableSharedCache(true)
+            .shareLineGeometrySources(true)
             .build()
 
-        assertTrue(options.enableSharedCache)
+        assertTrue(options.shareLineGeometrySources)
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -184,7 +184,7 @@ class MapboxRouteLineOptionsTest {
             .waypointLayerIconOffset(listOf(3.0, 4.4))
             .waypointLayerIconAnchor(IconAnchor.BOTTOM)
             .iconPitchAlignment(IconPitchAlignment.AUTO)
-            .enableSharedCache(true)
+            .shareLineGeometrySources(true)
             .build()
             .toBuilder(ctx)
             .build()
@@ -204,6 +204,6 @@ class MapboxRouteLineOptionsTest {
         assertEquals(2, options.waypointLayerIconOffset.size)
         assertEquals(IconAnchor.BOTTOM, options.waypointLayerIconAnchor)
         assertEquals(IconPitchAlignment.AUTO, options.iconPitchAlignment)
-        assertTrue(options.enableSharedCache)
+        assertTrue(options.shareLineGeometrySources)
     }
 }
