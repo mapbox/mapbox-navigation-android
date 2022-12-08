@@ -1,8 +1,10 @@
 import datetime
 import unittest
 
-from scripts.reviewers.set_reviewers_defs import get_changed_modules, parse_users, get_current_reviews, get_fresh_pulls, \
-    sort_users, get_owners_of_changes, get_reviewers
+import responses
+
+from scripts.reviewers.set_reviewers_defs import get_changed_modules, parse_users, get_current_reviews, \
+    get_fresh_pulls, sort_users, get_owners_of_changes, get_reviewers, get_done_reviews
 
 
 class SetReviewersDefsTest(unittest.TestCase):
@@ -61,6 +63,35 @@ class SetReviewersDefsTest(unittest.TestCase):
             {'created_at': '2022-11-27T00:00:00Z', 'closed_at': None},
         ]
         self.assertEqual(actual_fresh_pulls, expected_fresh_pulls)
+
+    @responses.activate
+    def test_get_done_reviews(self):
+        prs_url = 'https://api.github.com/repos/mapbox/mapbox-navigation-android/pulls'
+        headers = {}
+        users = [
+            {'login': 'user1', 'done_reviews': 0},
+            {'login': 'user2', 'done_reviews': 0}
+        ]
+        fresh_pulls = [
+            {'number': 1},
+            {'number': 2},
+        ]
+        reviews_1 = [
+            {'state': 'APPROVED', 'user': {'login': 'user1'}},
+            {'state': 'APPROVED', 'user': {'login': 'user5'}},
+        ]
+        reviews_2 = [
+            {'state': 'APPROVED', 'user': {'login': 'user1'}},
+            {'state': 'APPROVED', 'user': {'login': 'user2'}},
+        ]
+        responses.add(responses.GET, prs_url + '/1/reviews', json=reviews_1)
+        responses.add(responses.GET, prs_url + '/2/reviews', json=reviews_2)
+        expected_reviews = [
+            {'login': 'user1', 'done_reviews': 2},
+            {'login': 'user2', 'done_reviews': 1}
+        ]
+        actual_done_reviews = get_done_reviews(prs_url, headers, users, fresh_pulls)
+        self.assertEqual(actual_done_reviews, expected_reviews)
 
     def test_sort_users(self):
         users = [
