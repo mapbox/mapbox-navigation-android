@@ -10,6 +10,9 @@ import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.SessionSKUIdentifier
 import com.mapbox.common.UserSKUIdentifier
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.extensions.isEVChargingWaypoint
+import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -275,10 +278,10 @@ internal class BillingController(
     fun onExternalRouteSet(navigationRoute: NavigationRoute) {
         val runningSessionSkuId = getRunningOrPausedSessionSkuId()
         if (runningSessionSkuId == SessionSKUIdentifier.NAV2_SES_TRIP) {
-            val currentRemainingWaypoints = getRemainingWaypointsOnRoute(
+            val currentRemainingWaypoints = getRemainingNonEVWaypointsOnRoute(
                 tripSession.getRouteProgress()
             )
-            val newWaypoints = getWaypointsOnRoute(navigationRoute)
+            val newWaypoints = getNonEVWaypointsOnRoute(navigationRoute) { 1 }
 
             if (!waypointsWithinRange(currentRemainingWaypoints, newWaypoints)) {
                 val wasSessionPaused = billingService.getSessionStatus(
@@ -381,32 +384,33 @@ internal class BillingController(
      * Returns a list of remaining [Point]s that mark ends of legs on the route from the current [RouteProgress],
      * ignoring origin.
      */
-    private fun getRemainingWaypointsOnRoute(routeProgress: RouteProgress?): List<Point>? {
-        return routeProgress?.navigationRoute?.let { route ->
-            val waypoints = route.waypoints
-            waypoints?.drop(
-                (waypoints.size - routeProgress.remainingWaypoints).coerceAtLeast(1)
-            )?.map {
-                it.location()
-            }
+    private fun getRemainingNonEVWaypointsOnRoute(routeProgress: RouteProgress?): List<Point>? {
+        if (routeProgress == null) return null
+        return getNonEVWaypointsOnRoute(routeProgress.navigationRoute) {
+            (size - routeProgress.remainingWaypoints).coerceAtLeast(1)
         }
     }
 
     /**
-     * Returns a list of [Point]s that mark ends of legs on the route,
-     * ignoring origin.
+     * Returns a list of [Point]s that mark ends of legs on the route
+     * and removes first n elements depending on the result of [dropCountProvider].
      */
-    private fun getWaypointsOnRoute(navigationRoute: NavigationRoute): List<Point>? {
-        return navigationRoute.waypoints?.drop(1)?.map {
-            it.location()
-        }
+    private fun getNonEVWaypointsOnRoute(
+        navigationRoute: NavigationRoute,
+        dropCountProvider: List<Waypoint>.() -> Int
+    ): List<Point> {
+        val waypoints = navigationRoute.internalWaypoints()
+        return waypoints
+            .drop(waypoints.dropCountProvider())
+            .filterNot { it.isEVChargingWaypoint() }
+            .map { it.location }
     }
 
     private fun waypointsWithinRange(
         first: List<Point>?,
         second: List<Point>?
     ): Boolean {
-        if (first == null || second == null || first.size != second.size) {
+        if (first.isNullOrEmpty() || second.isNullOrEmpty() || first.size != second.size) {
             return false
         }
 
@@ -436,5 +440,3 @@ internal class BillingController(
         }
     }
 }
-
-private data class Waypoint(val index: Int, val point: Point)

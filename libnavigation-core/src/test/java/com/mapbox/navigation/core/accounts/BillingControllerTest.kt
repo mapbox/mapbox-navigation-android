@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.accounts
 
-import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.common.BillingServiceError
 import com.mapbox.common.BillingServiceErrorCode
 import com.mapbox.common.BillingServiceInterface
@@ -8,6 +7,9 @@ import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.OnBillingServiceError
 import com.mapbox.common.SessionSKUIdentifier
 import com.mapbox.common.UserSKUIdentifier
+import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -438,11 +440,15 @@ class BillingControllerTest {
         )
 
         val originalWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build()
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.0, 0.0)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            },
         )
         val originalRoute = mockk<NavigationRoute> {
-            every { waypoints } returns originalWaypoints
+            every { internalWaypoints() } returns originalWaypoints
         }
         val routeProgress = mockk<RouteProgress> {
             every { navigationRoute } returns originalRoute
@@ -451,11 +457,15 @@ class BillingControllerTest {
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val newWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.1, 0.1)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(2.0, 2.0)).build()
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.1, 0.1)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(2.0, 2.0)
+            },
         )
         val newRoute = mockk<NavigationRoute> {
-            every { waypoints } returns newWaypoints
+            every { internalWaypoints() } returns newWaypoints
         }
 
         billingController.onExternalRouteSet(newRoute)
@@ -486,11 +496,15 @@ class BillingControllerTest {
         )
 
         val originalWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build()
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.0, 0.0)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            },
         )
         val originalRoute = mockk<NavigationRoute> {
-            every { waypoints } returns originalWaypoints
+            every { internalWaypoints() } returns originalWaypoints
         }
         val routeProgress = mockk<RouteProgress> {
             every { navigationRoute } returns originalRoute
@@ -499,12 +513,16 @@ class BillingControllerTest {
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val newWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.1, 0.1)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.1, 0.1)
+            },
             // less than 100 meters from original
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0005, 1.0005)).build()
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0005, 1.0005)
+            },
         )
         val newRoute = mockk<NavigationRoute> {
-            every { waypoints } returns newWaypoints
+            every { internalWaypoints() } returns newWaypoints
         }
 
         billingController.onExternalRouteSet(newRoute)
@@ -530,11 +548,15 @@ class BillingControllerTest {
         )
 
         val originalWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build()
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.0, 0.0)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            },
         )
         val originalRoute = mockk<NavigationRoute> {
-            every { waypoints } returns originalWaypoints
+            every { internalWaypoints() } returns originalWaypoints
         }
         val routeProgress = mockk<RouteProgress> {
             every { navigationRoute } returns originalRoute
@@ -543,12 +565,18 @@ class BillingControllerTest {
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val newWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.1, 0.1)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.1, 1.1)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.1, 0.1)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.1, 1.1)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            },
         )
         val newRoute = mockk<NavigationRoute> {
-            every { waypoints } returns newWaypoints
+            every { internalWaypoints() } returns newWaypoints
         }
 
         billingController.onExternalRouteSet(newRoute)
@@ -579,12 +607,18 @@ class BillingControllerTest {
         )
 
         val originalWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.5, 0.5)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.0, 0.0)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.5, 0.5)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            },
         )
         val originalRoute = mockk<NavigationRoute> {
-            every { waypoints } returns originalWaypoints
+            every { internalWaypoints() } returns originalWaypoints
         }
         val routeProgress = mockk<RouteProgress> {
             every { navigationRoute } returns originalRoute
@@ -593,12 +627,16 @@ class BillingControllerTest {
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val newWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.7, 0.7)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.7, 0.7)
+            },
             // less than 100 meters from original
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0005, 1.0005)).build()
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0005, 1.0005)
+            },
         )
         val newRoute = mockk<NavigationRoute> {
-            every { waypoints } returns newWaypoints
+            every { internalWaypoints() } returns newWaypoints
         }
 
         billingController.onExternalRouteSet(newRoute)
@@ -629,12 +667,18 @@ class BillingControllerTest {
         )
 
         val originalWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.5, 0.5)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.0, 0.0)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.5, 0.5)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            }
         )
         val originalRoute = mockk<NavigationRoute> {
-            every { waypoints } returns originalWaypoints
+            every { internalWaypoints() } returns originalWaypoints
         }
         val routeProgress = mockk<RouteProgress> {
             every { navigationRoute } returns originalRoute
@@ -643,12 +687,16 @@ class BillingControllerTest {
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val newWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.7, 0.7)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.7, 0.7)
+            },
             // less than 100 meters from original
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0005, 1.0005)).build()
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0005, 1.0005)
+            }
         )
         val newRoute = mockk<NavigationRoute> {
-            every { waypoints } returns newWaypoints
+            every { internalWaypoints() } returns newWaypoints
         }
 
         billingController.onExternalRouteSet(newRoute)
@@ -674,11 +722,15 @@ class BillingControllerTest {
         )
 
         val originalWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.0, 0.0)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            },
         )
         val originalRoute = mockk<NavigationRoute> {
-            every { waypoints } returns originalWaypoints
+            every { internalWaypoints() } returns originalWaypoints
         }
         val routeProgress = mockk<RouteProgress> {
             every { navigationRoute } returns originalRoute
@@ -687,11 +739,15 @@ class BillingControllerTest {
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val newWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.1, 0.1)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(2.0, 2.0)).build()
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.1, 0.1)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(2.0, 2.0)
+            },
         )
         val newRoute = mockk<NavigationRoute> {
-            every { waypoints } returns newWaypoints
+            every { internalWaypoints() } returns newWaypoints
         }
 
         billingController.onExternalRouteSet(newRoute)
@@ -726,11 +782,15 @@ class BillingControllerTest {
         )
 
         val originalWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.0, 0.0)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            },
         )
         val originalRoute = mockk<NavigationRoute> {
-            every { waypoints } returns originalWaypoints
+            every { internalWaypoints() } returns originalWaypoints
         }
         val routeProgress = mockk<RouteProgress> {
             every { navigationRoute } returns originalRoute
@@ -739,11 +799,15 @@ class BillingControllerTest {
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val newWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.1, 0.1)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0005, 1.0005)).build()
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.1, 0.1)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0005, 1.0005)
+            },
         )
         val newRoute = mockk<NavigationRoute> {
-            every { waypoints } returns newWaypoints
+            every { internalWaypoints() } returns newWaypoints
         }
 
         billingController.onExternalRouteSet(newRoute)
@@ -773,11 +837,15 @@ class BillingControllerTest {
         every { navigationSession.state } returns NavigationSessionState.Idle
 
         val originalWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.0, 0.0)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(1.0, 1.0)).build(),
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.0, 0.0)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(1.0, 1.0)
+            },
         )
         val originalRoute = mockk<NavigationRoute> {
-            every { waypoints } returns originalWaypoints
+            every { internalWaypoints() } returns originalWaypoints
         }
         val routeProgress = mockk<RouteProgress> {
             every { navigationRoute } returns originalRoute
@@ -786,11 +854,15 @@ class BillingControllerTest {
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val newWaypoints = mutableListOf(
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(0.1, 0.1)).build(),
-            DirectionsWaypoint.builder().name("").rawLocation(doubleArrayOf(2.0, 2.0)).build()
+            mockk<Waypoint>(relaxed = true) {
+                every { location } returns Point.fromLngLat(0.1, 0.1)
+            },
+            mockk(relaxed = true) {
+                every { location } returns Point.fromLngLat(2.0, 2.0)
+            },
         )
         val newRoute = mockk<NavigationRoute> {
-            every { waypoints } returns newWaypoints
+            every { internalWaypoints() } returns newWaypoints
         }
 
         billingController.onExternalRouteSet(newRoute)

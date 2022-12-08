@@ -27,6 +27,11 @@ fun Waypoint.isLegWaypoint(): Boolean =
     }
 
 /**
+ * Return true if the waypoint corresponds to EV charging station. False otherwise.
+ */
+fun Waypoint.isEVChargingWaypoint(): Boolean = this.internalType == Waypoint.InternalType.EvCharging
+
+/**
  * Return the index of **next requested** coordinate. See [RouteOptions.coordinatesList]
  *
  * For instance, EV waypoints are not requested explicitly, so they are not taken into account.
