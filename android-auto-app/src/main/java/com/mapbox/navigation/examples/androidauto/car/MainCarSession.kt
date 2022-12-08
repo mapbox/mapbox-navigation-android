@@ -36,11 +36,11 @@ import com.mapbox.navigation.examples.androidauto.ReplayRouteTripSession
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MainCarSession : Session() {
 
     private val mapboxCarMapLoader = MapboxCarMapLoader()
     private val mapboxCarMap = MapboxCarMap().registerObserver(mapboxCarMapLoader)
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap)
         .prepareScreens()
         .customize {
