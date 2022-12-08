@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Renamed `CarAudioGuidanceUi` to `CarAudioGuidanceAction`. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
 - Deleted `MapboxActionProvider` interface in favor of `MapboxScreenActionStripProvider`. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
+- Fixed issue where `CarAudioGuidanceUi` would invalidate the screen so often that performance would be effected. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
 
 ## androidauto-v0.17.1 - 02 December, 2022
 ### Changelog
