@@ -145,7 +145,9 @@ class MapboxRouteLineOptions private constructor(
         return result
     }
 
-
+    /**
+     * Returns a string representation of the object.
+     */
     override fun toString(): String {
         return "MapboxRouteLineOptions(resourceProvider=$resourceProvider, " +
             "originIcon=$originIcon, " +

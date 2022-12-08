@@ -1104,7 +1104,7 @@ internal object MapboxRouteLineUtils {
             RouteLayerConstants.WAYPOINT_SOURCE_ID,
             options.tolerance,
             useLineMetrics = false,
-            options.shareLineGeometrySources
+            enableSharedCache = false
         )
         addSource(
             style,

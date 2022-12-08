@@ -17,6 +17,7 @@ import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
@@ -85,6 +86,7 @@ class MapboxRouteLineUtilsRoboTest {
         MapboxRouteLineUtils.trimRouteDataCacheToSize(0)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun initializeLayers() {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
@@ -94,6 +96,7 @@ class MapboxRouteLineUtilsRoboTest {
             .waypointLayerIconAnchor(IconAnchor.BOTTOM_RIGHT)
             .waypointLayerIconOffset(listOf(33.3, 44.4))
             .iconPitchAlignment(IconPitchAlignment.VIEWPORT)
+            .shareLineGeometrySources(true)
             .build()
         val waypointSourceValueSlots = mutableListOf<Value>()
         val primaryRouteSourceValueSlots = mutableListOf<Value>()
@@ -217,6 +220,11 @@ class MapboxRouteLineUtilsRoboTest {
             (waypointSourceValueSlots.last().contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
+        assertEquals(
+            false,
+            (waypointSourceValueSlots.last().contents as HashMap<String, Value>)
+            ["sharedCache"]!!.contents
+        )
 
         verify {
             style.addStyleSource(
@@ -248,6 +256,11 @@ class MapboxRouteLineUtilsRoboTest {
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
+        )
+        assertEquals(
+            true,
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)
+                ["sharedCache"]!!.contents
         )
 
         verify {
@@ -281,6 +294,11 @@ class MapboxRouteLineUtilsRoboTest {
             (alternativeRoute1SourceValueSlots.last().contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
+        assertEquals(
+            true,
+            (alternativeRoute1SourceValueSlots.last().contents as HashMap<String, Value>)
+                ["sharedCache"]!!.contents
+        )
 
         verify {
             style.addStyleSource(
@@ -312,6 +330,11 @@ class MapboxRouteLineUtilsRoboTest {
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (alternativeRoute2SourceValueSlots.last().contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
+        )
+        assertEquals(
+            true,
+            (alternativeRoute2SourceValueSlots.last().contents as HashMap<String, Value>)
+                ["sharedCache"]!!.contents
         )
 
         verify {
