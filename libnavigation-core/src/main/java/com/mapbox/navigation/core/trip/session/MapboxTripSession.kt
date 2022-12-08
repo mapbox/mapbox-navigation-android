@@ -90,6 +90,7 @@ internal class MapboxTripSession(
                 setRouteToNativeNavigator(routes, setRoutesInfo.legIndex)
             }
             is SetAlternativeRoutesInfo -> {
+                isUpdatingRoute = false
                 NativeSetRouteValue(
                     routes = routes,
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
