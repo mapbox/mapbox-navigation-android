@@ -10,7 +10,6 @@ import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.logI
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.isSameRoute
@@ -335,7 +334,6 @@ class MapboxNavigationViewportDataSource(
      * @see [getViewportData]
      */
     fun evaluate() {
-        logI("kyle_debug", "evaluate->viewportDataSourceUpdated")
         val cameraState = mapboxMap.cameraState
         updateFollowingData(cameraState)
         updateOverviewData(cameraState)

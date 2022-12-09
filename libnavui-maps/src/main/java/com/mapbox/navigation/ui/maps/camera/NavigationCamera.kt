@@ -155,7 +155,6 @@ class NavigationCamera(
     private val sourceUpdateObserver =
         ViewportDataSourceUpdateObserver {
                 viewportData ->
-            logI("kyle_debug", "viewportDataSourceUpdated->updateFrame")
             updateFrame(viewportData, instant = false)
         }
 
@@ -331,7 +330,6 @@ class NavigationCamera(
      * based on the latest data obtained with [ViewportDataSource.getViewportData].
      */
     fun resetFrame() {
-        logI("kyle_debug", "resetFrame->updateFrame")
         val viewportData = viewportDataSource.getViewportData()
         updateFrame(viewportData, instant = true)
     }
@@ -339,19 +337,17 @@ class NavigationCamera(
     private fun updateFrame(viewportData: ViewportData, instant: Boolean) {
         when (state) {
             FOLLOWING -> {
-                val startTime = SystemClock.elapsedRealtimeNanos()
-                startAnimation(
-                    stateTransition.updateFrameForFollowing(
-                        viewportData.cameraForFollowing,
-                        frameTransitionOptions
-                    ).apply {
-                        addListener(createFrameListener())
-                    },
-                    instant
-                )
-                val endTime = SystemClock.elapsedRealtimeNanos()
-                val deltaTime = (endTime - startTime) * 10e-9
-                logI("kyle_debug", "updateFrame $deltaTime")
+                perfLog("updateFrame") {
+                    startAnimation(
+                        stateTransition.updateFrameForFollowing(
+                            viewportData.cameraForFollowing,
+                            frameTransitionOptions
+                        ).apply {
+                            addListener(createFrameListener())
+                        },
+                        instant
+                    )
+                }
             }
             OVERVIEW -> {
                 startAnimation(
@@ -396,9 +392,13 @@ class NavigationCamera(
 
     private fun cancelAnimation() {
         runningAnimation?.let { set ->
-            set.cancel()
-            set.childAnimations.forEach {
-                cameraPlugin.unregisterAnimators(it as ValueAnimator)
+            perfLog("AnimatorSet.cancel") {
+                set.cancel()
+            }
+            perfLog("AnimatorSet.unregister ${set.childAnimations.size} children") {
+                set.childAnimations.forEach {
+                    cameraPlugin.unregisterAnimators(it as ValueAnimator)
+                }
             }
         }
         runningAnimation = null
@@ -409,7 +409,9 @@ class NavigationCamera(
         instant: Boolean,
         transitionEndListener: TransitionEndListener? = null,
     ) {
-        cancelAnimation()
+        perfLog("cancelAnimation") {
+            cancelAnimation()
+        }
         if (transitionEndListener != null) {
             transitionEndListeners.add(transitionEndListener)
         }
@@ -458,7 +460,6 @@ class NavigationCamera(
             finishAnimation(animation as AnimatorSet)
             transitionEndListeners.forEach { it.onTransitionEnd(isCanceled) }
             transitionEndListeners.clear()
-            logI("kyle_debug", "viewportDataSourceUpdated->onAnimationEnd")
             updateFrame(viewportDataSource.getViewportData(), instant = false)
         }
 
@@ -493,4 +494,12 @@ class NavigationCamera(
     private fun updateDebugger() {
         debugger?.cameraState = state
     }
+}
+
+inline fun perfLog(name: String, fn: () -> Unit) {
+    val startTime = SystemClock.elapsedRealtimeNanos()
+    fn.invoke()
+    val endTime = SystemClock.elapsedRealtimeNanos()
+    val deltaTime = (endTime - startTime) * 10e-6
+    logI("perfLog", "$name %.2f ms".format(deltaTime))
 }

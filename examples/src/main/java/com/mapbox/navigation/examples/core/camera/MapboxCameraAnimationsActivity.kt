@@ -23,7 +23,6 @@ import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.CircleLayer
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.maps.logI
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -128,7 +127,6 @@ class MapboxCameraAnimationsActivity :
         set(value) {
             field = value
             viewportDataSource.followingPadding = value
-            logI("kyle_debug", "followingEdgeInsets->evaluate")
             viewportDataSource.evaluate()
         }
 
@@ -186,7 +184,6 @@ class MapboxCameraAnimationsActivity :
             }
 
             if (locationMatcherResult.isTeleport) {
-                logI("kyle_debug", "onNewLocationMatcherResult->evaluate")
                 viewportDataSource.evaluate()
                 navigationCamera.resetFrame()
             }
@@ -195,7 +192,6 @@ class MapboxCameraAnimationsActivity :
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        logI("kyle_debug", "RouteProgressObserver->evaluate")
         viewportDataSource.evaluate()
 
         routeLineAPI?.updateWithRouteProgress(routeProgress) { result ->
@@ -223,7 +219,6 @@ class MapboxCameraAnimationsActivity :
             startSimulation(result.navigationRoutes[0])
             viewportDataSource.onRouteChanged(result.routes.first())
             viewportDataSource.overviewPadding = overviewEdgeInsets
-            logI("kyle_debug", "RoutesObserver->evaluate")
             viewportDataSource.evaluate()
             navigationCamera.requestNavigationCameraToOverview()
         } else {
@@ -351,7 +346,6 @@ class MapboxCameraAnimationsActivity :
                 followingEdgeInsets.bottom,
                 200.0 * pixelDensity
             )
-            logI("kyle_debug", "gravitateLeft->evaluate")
             viewportDataSource.evaluate()
         }
 
@@ -362,7 +356,6 @@ class MapboxCameraAnimationsActivity :
                 followingEdgeInsets.bottom,
                 20.0
             )
-            logI("kyle_debug", "gravitateRight->evaluate")
             viewportDataSource.evaluate()
         }
 
@@ -373,7 +366,6 @@ class MapboxCameraAnimationsActivity :
                 240.0 * pixelDensity,
                 followingEdgeInsets.right
             )
-            logI("kyle_debug", "gravitateTop->evaluate")
             viewportDataSource.evaluate()
         }
 
@@ -384,7 +376,6 @@ class MapboxCameraAnimationsActivity :
                 20.0,
                 followingEdgeInsets.right
             )
-            logI("kyle_debug", "gravitateBottom->evaluate")
             viewportDataSource.evaluate()
         }
     }
@@ -534,7 +525,6 @@ class MapboxCameraAnimationsActivity :
                     }
                     complexFollowingNorth = false
                 }
-                logI("kyle_debug", "animationType(${animationType})->evaluate")
                 viewportDataSource.evaluate()
                 if (animationType == AnimationType.Following) {
                     navigationCamera.requestNavigationCameraToFollowing()
@@ -551,7 +541,6 @@ class MapboxCameraAnimationsActivity :
             }
             AnimationType.Overview -> {
                 viewportDataSource.overviewPadding = overviewEdgeInsets
-                logI("kyle_debug", "animationType(${animationType})->evaluate")
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToOverview()
             }
@@ -588,14 +577,12 @@ class MapboxCameraAnimationsActivity :
                         viewportDataSource.followingBearingPropertyOverride(
                             TurfMeasurement.bearing(center, it)
                         )
-                        logI("kyle_debug", "animationType(${animationType})->evaluate")
                         viewportDataSource.evaluate()
                     }
                 } else {
                     lookAtPoint = null
                     viewportDataSource.additionalPointsToFrameForFollowing(emptyList())
                     viewportDataSource.followingBearingPropertyOverride(null)
-                    logI("kyle_debug", "animationType(${animationType})->evaluate")
                     viewportDataSource.evaluate()
                 }
             }
