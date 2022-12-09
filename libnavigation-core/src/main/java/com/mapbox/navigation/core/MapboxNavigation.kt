@@ -146,6 +146,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.lang.reflect.Field
 import java.util.Locale
+import java.util.concurrent.CountDownLatch
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
@@ -607,7 +608,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Start a replay trip session with [startReplayTripSession].
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    val mapboxReplayer: MapboxReplayer by lazy { tripSessionLocationEngine.mapboxReplayer }
+    val mapboxReplayer: MapboxReplayer by lazy {
+        getResultFromSDKLooperBlocking {
+            tripSessionLocationEngine.mapboxReplayer
+        }
+    }
 
     /**
      * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
@@ -682,7 +687,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @return true if the [MapboxNavigation] is running a foreground service else false
      */
     fun isRunningForegroundService(): Boolean {
-        return tripSession.isRunningWithForegroundService()
+        return getResultFromSDKLooperBlocking { tripSession.isRunningWithForegroundService() }
     }
 
     /**
@@ -695,7 +700,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see [registerTripSessionStateObserver]
      */
     fun getTripSessionState(): TripSessionState {
-        return tripSession.getState()
+        return getResultFromSDKLooperBlocking { tripSession.getState() }
     }
 
     /**
@@ -706,7 +711,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see [registerNavigationSessionStateObserver]
      */
     fun getNavigationSessionState(): NavigationSessionState {
-        return navigationSession.state
+        return getResultFromSDKLooperBlocking { navigationSession.state }
     }
 
     /**
@@ -715,7 +720,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @return current Z-Level.
      */
     fun getZLevel(): Int? {
-        return tripSession.zLevel
+        return getResultFromSDKLooperBlocking { tripSession.zLevel }
     }
 
     /**
@@ -805,7 +810,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeOptions: RouteOptions,
         callback: NavigationRouterCallback
     ): Long {
-        return directionsSession.requestRoutes(routeOptions, callback)
+        return getResultFromSDKLooperBlocking {
+            directionsSession.requestRoutes(routeOptions, callback)
+        }
     }
 
     /**
@@ -1102,7 +1109,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
     )
     fun getRoutes(): List<DirectionsRoute> {
-        return directionsSession.routes.toDirectionsRoutes()
+        return getResultFromSDKLooperBlocking {
+            directionsSession.routes.toDirectionsRoutes()
+        }
     }
 
     /**
@@ -1114,7 +1123,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @return a list of [NavigationRoute]s
      */
     fun getNavigationRoutes(): List<NavigationRoute> {
-        return directionsSession.routes
+        return getResultFromSDKLooperBlocking {
+            directionsSession.routes
+        }
     }
 
     /**
@@ -2133,8 +2144,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
     }
 
-    private fun runIfNotDestroyed(block: () -> Any?) {
-        when (isDestroyed) {
+    private fun <T> runIfNotDestroyed(block: () -> T): T {
+        return when (isDestroyed) {
             false -> {
                 block()
             }
@@ -2158,6 +2169,37 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 }
             }
         }
+    }
+
+    private fun <T> getResultFromSDKLooperBlocking(block: () -> T): T {
+        return if (navigationOptions.looper == Looper.myLooper()) {
+            block()
+        } else {
+            val latch = CountDownLatch(1)
+            var result: DispatchingResult<T> = DispatchingResult.Empty
+            handler.post {
+                result = try {
+                    val delegationResult2 = runIfNotDestroyed {
+                        block()
+                    }
+                    DispatchingResult.Success(delegationResult2)
+                } catch (t: Throwable) {
+                    DispatchingResult.Error(t)
+                }
+                latch.countDown()
+            }
+            latch.await()
+            return when (val result = result) {
+                DispatchingResult.Empty -> error("Internal error: result weren't set")
+                is DispatchingResult.Error -> throw Throwable("internal ", result.t)
+                is DispatchingResult.Success -> result.result
+            }
+        }
+    }
+    private sealed interface DispatchingResult<out T> {
+        data class Success<T>(val result: T): DispatchingResult<T>
+        data class Error<T>(val t: Throwable): DispatchingResult<T>
+        object Empty: DispatchingResult<Nothing>
     }
 
     private fun createChildScope() = threadController.getSDKScopeAndRootJob().scope

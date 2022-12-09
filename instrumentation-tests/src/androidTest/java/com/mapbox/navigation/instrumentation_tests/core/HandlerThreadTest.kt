@@ -74,12 +74,14 @@ class HandlerThreadTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     fun set_navigation_routes_successfully() = sdkTest {
         val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
         mapboxNavigation.setNavigationRoutesAsync(routes)
+        assertEquals(routes, mapboxNavigation.getNavigationRoutes())
         mapboxNavigation.startTripSession()
         mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
         var routeProgressEventsCount = 0
         mapboxNavigation.registerRouteProgressObserver {
             assertSDKThread()
             routeProgressEventsCount++
+            assertEquals(routes, mapboxNavigation.getNavigationRoutes())
         }
 
         mapboxNavigation.flowOnFinalDestinationArrival().first()
