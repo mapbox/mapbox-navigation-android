@@ -1842,8 +1842,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationSessionStateObserver: NavigationSessionStateObserver
     ) {
         runOnNavigationLooper {
-
-            threadController.assertSDKThread()
             navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
         }
     }
@@ -1857,8 +1855,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationSessionStateObserver: NavigationSessionStateObserver
     ) {
         runOnNavigationLooper {
-
-            threadController.assertSDKThread()
             navigationSession.unregisterNavigationSessionStateObserver(
                 navigationSessionStateObserver
             )
@@ -1875,8 +1871,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshStatesObserver: RouteRefreshStatesObserver
     ) {
         runOnNavigationLooper {
-
-            threadController.assertSDKThread()
             routeRefreshController.registerRouteRefreshStateObserver(routeRefreshStatesObserver)
         }
     }
@@ -1889,8 +1883,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeRefreshStatesObserver: RouteRefreshStatesObserver
     ) {
         runOnNavigationLooper {
-
-            threadController.assertSDKThread()
             routeRefreshController.unregisterRouteRefreshStateObserver(routeRefreshStatesObserver)
         }
     }
@@ -1904,8 +1896,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun registerDeveloperMetadataObserver(
         developerMetadataObserver: DeveloperMetadataObserver
     ) {
-        threadController.assertSDKThread()
-        developerMetadataAggregator.registerObserver(developerMetadataObserver)
+        runOnNavigationLooper {
+            developerMetadataAggregator.registerObserver(developerMetadataObserver)
+        }
     }
 
     /**
@@ -1917,7 +1910,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun unregisterDeveloperMetadataObserver(
         developerMetadataObserver: DeveloperMetadataObserver
     ) {
-        developerMetadataAggregator.unregisterObserver(developerMetadataObserver)
+        runOnNavigationLooper {
+            developerMetadataAggregator.unregisterObserver(developerMetadataObserver)
+        }
     }
 
     /**
@@ -1952,7 +1947,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun onEVDataUpdated(data: Map<String, String>) {
-        evDataHolder.updateData(data)
+        runOnNavigationLooper {
+            evDataHolder.updateData(data)
+        }
     }
 
     private fun createHistoryRecorderHandles(config: ConfigHandle) =

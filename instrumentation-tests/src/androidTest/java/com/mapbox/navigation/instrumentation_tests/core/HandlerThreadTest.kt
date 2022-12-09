@@ -71,7 +71,7 @@ class HandlerThreadTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     }
 
     @Test
-    fun set_navigation_routes_successfully() = sdkTest(dispatcher = sdkDispatcher) {
+    fun set_navigation_routes_successfully() = sdkTest {
         val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
         mapboxNavigation.setNavigationRoutesAsync(routes)
         mapboxNavigation.startTripSession()
