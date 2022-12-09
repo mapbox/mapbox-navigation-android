@@ -45,4 +45,9 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
     fun trip_session_resets_successfully() = sdkTest {
         mapboxNavigation.resetTripSessionAndWaitForResult()
     }
+
+    @Test
+    fun trip_session_resets_successfully_sync() = sdkTest {
+        mapboxNavigation.resetTripSession()
+    }
 }
