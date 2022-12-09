@@ -25,12 +25,14 @@ package com.mapbox.androidauto {
   public final class MapboxCarOptions {
     ctor public MapboxCarOptions();
     method public void applyCustomization(com.mapbox.androidauto.MapboxCarOptions.Customization customization);
+    method public com.mapbox.androidauto.action.MapboxScreenActionStripProvider getActionStripProvider();
     method public com.mapbox.androidauto.feedback.core.CarFeedbackOptions getCarFeedbackOptions();
     method public com.mapbox.androidauto.search.CarPlaceSearchOptions getCarPlaceSearchOptions();
     method public com.mapbox.androidauto.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
     method public com.mapbox.androidauto.notification.MapboxCarNotificationOptions getNotificationOptions();
     method public com.mapbox.androidauto.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.androidauto.navigation.speedlimit.SpeedLimitOptions> getSpeedLimitOptions();
+    property public final com.mapbox.androidauto.action.MapboxScreenActionStripProvider actionStripProvider;
     property public final com.mapbox.androidauto.feedback.core.CarFeedbackOptions carFeedbackOptions;
     property public final com.mapbox.androidauto.search.CarPlaceSearchOptions carPlaceSearchOptions;
     property public final com.mapbox.androidauto.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
@@ -41,18 +43,21 @@ package com.mapbox.androidauto {
 
   public static final class MapboxCarOptions.Customization {
     ctor public MapboxCarOptions.Customization();
+    method public com.mapbox.androidauto.action.MapboxScreenActionStripProvider? getActionsStripProvider();
     method public com.mapbox.androidauto.feedback.core.CarFeedbackOptions? getCarFeedbackOptions();
     method public com.mapbox.androidauto.feedback.core.CarFeedbackPollProvider? getFeedbackPollProvider();
     method public com.mapbox.androidauto.notification.MapboxCarNotificationOptions? getNotificationOptions();
     method public com.mapbox.androidauto.search.CarPlaceSearchOptions? getPlaceSearchOptions();
     method public com.mapbox.androidauto.preview.CarRouteOptionsInterceptor? getRouteOptionsInterceptor();
     method public com.mapbox.androidauto.navigation.speedlimit.SpeedLimitOptions? getSpeedLimitOptions();
+    method public void setActionsStripProvider(com.mapbox.androidauto.action.MapboxScreenActionStripProvider?);
     method public void setCarFeedbackOptions(com.mapbox.androidauto.feedback.core.CarFeedbackOptions?);
     method public void setFeedbackPollProvider(com.mapbox.androidauto.feedback.core.CarFeedbackPollProvider?);
     method public void setNotificationOptions(com.mapbox.androidauto.notification.MapboxCarNotificationOptions?);
     method public void setPlaceSearchOptions(com.mapbox.androidauto.search.CarPlaceSearchOptions?);
     method public void setRouteOptionsInterceptor(com.mapbox.androidauto.preview.CarRouteOptionsInterceptor?);
     method public void setSpeedLimitOptions(com.mapbox.androidauto.navigation.speedlimit.SpeedLimitOptions?);
+    property public final com.mapbox.androidauto.action.MapboxScreenActionStripProvider? actionsStripProvider;
     property public final com.mapbox.androidauto.feedback.core.CarFeedbackOptions? carFeedbackOptions;
     property public final com.mapbox.androidauto.feedback.core.CarFeedbackPollProvider? feedbackPollProvider;
     property public final com.mapbox.androidauto.notification.MapboxCarNotificationOptions? notificationOptions;
@@ -65,13 +70,20 @@ package com.mapbox.androidauto {
 
 package com.mapbox.androidauto.action {
 
-  public fun interface MapboxActionProvider {
-    method public androidx.car.app.model.Action getAction(androidx.car.app.Screen screen);
-  }
-
   public final class MapboxMapActionStrip {
     ctor public MapboxMapActionStrip(androidx.car.app.Screen screen, com.mapbox.androidauto.navigation.CarNavigationCamera carNavigationCamera);
     method public androidx.car.app.model.ActionStrip build();
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class MapboxScreenActionStripProvider {
+    ctor public MapboxScreenActionStripProvider();
+    method public androidx.car.app.model.ActionStrip getActionStrip(androidx.car.app.Screen screen, @com.mapbox.androidauto.screenmanager.MapboxScreen.Key String mapboxScreen);
+    method protected androidx.car.app.model.ActionStrip getActiveGuidance(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getFavorites(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getFreeDrive(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getGeoDeeplink(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getRoutePreview(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getSearch(androidx.car.app.Screen screen);
   }
 
 }
@@ -136,8 +148,8 @@ package com.mapbox.androidauto.feedback.core {
 
 package com.mapbox.androidauto.feedback.ui {
 
-  public final class CarFeedbackAction implements com.mapbox.androidauto.action.MapboxActionProvider {
-    ctor public CarFeedbackAction(String carFeedbackScreen);
+  public final class CarFeedbackAction {
+    ctor public CarFeedbackAction(@com.mapbox.androidauto.screenmanager.MapboxScreen.Key String carFeedbackScreen);
     method public androidx.car.app.model.Action getAction(androidx.car.app.Screen screen);
   }
 
@@ -203,6 +215,10 @@ package com.mapbox.androidauto.freedrive {
 
   public final class FreeDriveActionStrip {
     ctor public FreeDriveActionStrip(androidx.car.app.Screen screen);
+    method public androidx.car.app.model.Action buildFavoritesAction();
+    method public androidx.car.app.model.Action buildFeedbackAction();
+    method public androidx.car.app.model.Action buildSearchAction();
+    method public androidx.car.app.model.Action buildSettingsAction();
     method public androidx.car.app.model.ActionStrip.Builder builder();
   }
 
@@ -361,8 +377,8 @@ package com.mapbox.androidauto.navigation.audioguidance {
     method @UiThread public static void muteAudioGuidance(androidx.lifecycle.Lifecycle);
   }
 
-  public final class CarAudioGuidanceUi implements com.mapbox.androidauto.action.MapboxActionProvider {
-    ctor public CarAudioGuidanceUi();
+  public final class CarAudioGuidanceAction {
+    ctor public CarAudioGuidanceAction();
     method public androidx.car.app.model.Action getAction(androidx.car.app.Screen screen);
   }
 
@@ -668,7 +684,7 @@ package com.mapbox.androidauto.screenmanager {
     field public static final String SETTINGS = "MAPBOX_SETTINGS";
   }
 
-  @StringDef({com.mapbox.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION, com.mapbox.androidauto.screenmanager.MapboxScreen.SETTINGS, com.mapbox.androidauto.screenmanager.MapboxScreen.FREE_DRIVE, com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH, com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES, com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK, com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW, com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE, com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ARRIVAL}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MapboxScreen.Key {
+  @StringDef({com.mapbox.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION, com.mapbox.androidauto.screenmanager.MapboxScreen.SETTINGS, com.mapbox.androidauto.screenmanager.MapboxScreen.FREE_DRIVE, com.mapbox.androidauto.screenmanager.MapboxScreen.FREE_DRIVE_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH, com.mapbox.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES, com.mapbox.androidauto.screenmanager.MapboxScreen.FAVORITES_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK, com.mapbox.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW, com.mapbox.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE, com.mapbox.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK, com.mapbox.androidauto.screenmanager.MapboxScreen.ARRIVAL}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MapboxScreen.Key {
   }
 
   public final class MapboxScreenEvent {

@@ -91,13 +91,14 @@ object MapboxScreen {
     const val ARRIVAL = "MAPBOX_ARRIVAL"
 
     /**
-     * Retention policy for the OpenLRSideOfRoad
+     * [MapboxScreen] keys
      */
     @Retention(AnnotationRetention.BINARY)
     @StringDef(
         NEEDS_LOCATION_PERMISSION,
         SETTINGS,
         FREE_DRIVE,
+        FREE_DRIVE_FEEDBACK,
         SEARCH,
         SEARCH_FEEDBACK,
         FAVORITES,

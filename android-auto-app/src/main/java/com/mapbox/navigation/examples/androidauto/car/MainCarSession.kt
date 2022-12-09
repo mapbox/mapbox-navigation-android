@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import androidx.car.app.Screen
 import androidx.car.app.Session
+import androidx.car.app.model.ActionStrip
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -12,7 +13,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.androidauto.MapboxCarContext
+import com.mapbox.androidauto.action.MapboxScreenActionStripProvider
 import com.mapbox.androidauto.deeplink.GeoDeeplinkNavigateAction
+import com.mapbox.androidauto.freedrive.FreeDriveActionStrip
 import com.mapbox.androidauto.map.MapboxCarMapLoader
 import com.mapbox.androidauto.map.compass.CarCompassRenderer
 import com.mapbox.androidauto.map.logo.CarLogoRenderer
@@ -33,11 +36,27 @@ import com.mapbox.navigation.examples.androidauto.ReplayRouteTripSession
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MainCarSession : Session() {
 
     private val mapboxCarMapLoader = MapboxCarMapLoader()
     private val mapboxCarMap = MapboxCarMap().registerObserver(mapboxCarMapLoader)
-    private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap).prepareScreens()
+    private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap)
+        .prepareScreens()
+        .customize {
+            // Use the actionStripProvider to customize the screen actions.
+            actionsStripProvider = object : MapboxScreenActionStripProvider() {
+                override fun getFreeDrive(screen: Screen): ActionStrip {
+                    val actionsBuilder = FreeDriveActionStrip(screen)
+                    return ActionStrip.Builder()
+                        .addAction(actionsBuilder.buildSettingsAction())
+                        .addAction(actionsBuilder.buildFeedbackAction())
+                        .addAction(actionsBuilder.buildSearchAction())
+                        .addAction(actionsBuilder.buildFavoritesAction())
+                        .build()
+                }
+            }
+        }
     private val mapboxNavigation by requireMapboxNavigation()
 
     init {

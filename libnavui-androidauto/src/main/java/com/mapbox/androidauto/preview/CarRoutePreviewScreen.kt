@@ -4,7 +4,6 @@ import android.text.SpannableString
 import androidx.annotation.UiThread
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
-import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.DurationSpan
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
@@ -14,7 +13,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
 import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
@@ -34,6 +32,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
@@ -119,6 +118,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
         })
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
         val listBuilder = ItemList.Builder()
         navigationRoutes.forEach { navigationRoute ->
@@ -160,13 +160,8 @@ internal class CarRoutePreviewScreen @UiThread constructor(
             .setItemList(listBuilder.build())
             .setTitle(carContext.getString(R.string.car_action_preview_title))
             .setActionStrip(
-                ActionStrip.Builder()
-                    .addAction(
-                        CarFeedbackAction(
-                            MapboxScreen.ROUTE_PREVIEW_FEEDBACK
-                        ).getAction(this@CarRoutePreviewScreen)
-                    )
-                    .build()
+                mapboxCarContext.options.actionStripProvider
+                    .getActionStrip(this, MapboxScreen.ROUTE_PREVIEW)
             )
             .setHeaderAction(Action.BACK)
             .setNavigateAction(

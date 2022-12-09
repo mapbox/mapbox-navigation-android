@@ -3,7 +3,6 @@ package com.mapbox.androidauto.screenmanager.factories
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import com.mapbox.androidauto.MapboxCarContext
-import com.mapbox.androidauto.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.internal.search.FavoritesApi
 import com.mapbox.androidauto.placeslistonmap.PlacesListOnMapScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreen
@@ -24,7 +23,7 @@ class FavoritesScreenFactory(
         return PlacesListOnMapScreen(
             SearchCarContext(mapboxCarContext),
             placesProvider,
-            listOf(CarFeedbackAction(MapboxScreen.FAVORITES_FEEDBACK))
+            MapboxScreen.FAVORITES
         )
     }
 }

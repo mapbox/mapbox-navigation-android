@@ -5,24 +5,45 @@ import androidx.car.app.Screen
 import androidx.car.app.model.Action
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.action.MapboxActionProvider
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 /**
  * This class creates an action that can control audio guidance.
  */
-class CarAudioGuidanceUi : MapboxActionProvider {
+class CarAudioGuidanceAction {
+
     /**
-     * Android auto action for enabling and disabling the car navigation.
-     * Attach this to the screen while navigating.
+     * Build the [Action].
      */
+    fun getAction(screen: Screen): Action {
+        screen.invalidateOnceAfterStateChange()
+        return buildSoundButtonAction(screen)
+    }
+
+    // Actions are built but they are not destroyed, so the only way to know if an action is
+    // destroyed is if the Screen host is destroyed. For the AudioGuidanceAction, we also assume
+    // that there only needs to be one state change listener at a time.
+    private fun Screen.invalidateOnceAfterStateChange() {
+        invalidatorJob?.cancel()
+        invalidatorJob = lifecycle.coroutineScope.launch {
+            MapboxAudioGuidance.getRegisteredInstance().stateFlow()
+                .distinctUntilChanged { old, new ->
+                    old.isMuted == new.isMuted && old.isPlayable == new.isPlayable
+                }
+                .drop(1)
+                .take(1)
+                .collect { invalidate() }
+        }
+    }
+
     private fun buildSoundButtonAction(screen: Screen): Action {
         val audioGuidance = MapboxAudioGuidance.getRegisteredInstance()
         val state = audioGuidance.stateFlow().value
@@ -37,22 +58,6 @@ class CarAudioGuidanceUi : MapboxActionProvider {
         }
     }
 
-    override fun getAction(screen: Screen): Action {
-        screen.lifecycle.apply {
-            coroutineScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    MapboxAudioGuidance.getRegisteredInstance().stateFlow()
-                        .distinctUntilChanged { old, new ->
-                            old.isMuted == new.isMuted && old.isPlayable == new.isPlayable
-                        }
-                        .collect { screen.invalidate() }
-                }
-            }
-        }
-
-        return buildSoundButtonAction(screen)
-    }
-
     private fun buildIconAction(
         screen: Screen,
         @DrawableRes icon: Int,
@@ -65,4 +70,8 @@ class CarAudioGuidanceUi : MapboxActionProvider {
         )
         .setOnClickListener { onClick() }
         .build()
+
+    private companion object {
+        private var invalidatorJob: Job? = null
+    }
 }

@@ -5,7 +5,6 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
-import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.PlaceListNavigationTemplate
@@ -13,7 +12,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.action.MapboxActionProvider
 import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.androidauto.location.CarLocationRenderer
 import com.mapbox.androidauto.navigation.CarLocationsOverviewCamera
@@ -22,6 +20,7 @@ import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.search.PlaceRecord
 import com.mapbox.androidauto.search.SearchCarContext
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import kotlinx.coroutines.flow.collect
@@ -31,7 +30,7 @@ import kotlinx.coroutines.launch
 internal class PlacesListOnMapScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
     placesProvider: PlacesListOnMapProvider,
-    private val actionProviders: List<MapboxActionProvider>,
+    @MapboxScreen.Key private val mapboxScreenKey: String
 ) : Screen(searchCarContext.carContext) {
 
     @VisibleForTesting
@@ -81,18 +80,16 @@ internal class PlacesListOnMapScreen @UiThread constructor(
         })
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
         val placesItemList = placesListOnMapManager.currentItemList() ?: ItemList.Builder().build()
-        val actionStrip = ActionStrip.Builder().apply {
-            actionProviders.forEach {
-                this.addAction(it.getAction(this@PlacesListOnMapScreen))
-            }
-        }.build()
-
         return PlaceListNavigationTemplate.Builder()
             .setItemList(placesItemList)
             .setHeaderAction(Action.BACK)
-            .setActionStrip(actionStrip)
+            .setActionStrip(
+                searchCarContext.mapboxCarContext.options.actionStripProvider
+                    .getActionStrip(this, mapboxScreenKey)
+            )
             .build()
     }
 

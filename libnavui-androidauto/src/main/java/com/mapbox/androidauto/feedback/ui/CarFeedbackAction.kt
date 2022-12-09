@@ -5,14 +5,24 @@ import androidx.car.app.model.Action
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.action.MapboxActionProvider
+import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 
+/**
+ * Add an action button that represents feedback, when pressed the screen will be changed to
+ * [carFeedbackScreen]
+ *
+ * @param carFeedbackScreen [MapboxScreen.Key] used when the action is selected.
+ */
 class CarFeedbackAction(
+    @MapboxScreen.Key
     private val carFeedbackScreen: String,
-) : MapboxActionProvider {
+) {
 
-    override fun getAction(screen: Screen): Action {
+    /**
+     * Build the [Action].
+     */
+    fun getAction(screen: Screen): Action {
         return buildSnapshotAction(screen)
     }
 

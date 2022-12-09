@@ -1,22 +1,20 @@
 package com.mapbox.androidauto.navigation
 
 import androidx.car.app.Screen
-import androidx.car.app.model.Action
-import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.CarColor
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.MapboxCarContext
-import com.mapbox.androidauto.R
-import com.mapbox.androidauto.action.MapboxActionProvider
 import com.mapbox.androidauto.action.MapboxMapActionStrip
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.location.CarLocationRenderer
 import com.mapbox.androidauto.navigation.roadlabel.CarRoadLabelRenderer
 import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.androidauto.preview.CarRouteLineRenderer
+import com.mapbox.androidauto.screenmanager.MapboxScreen
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 
 /**
@@ -24,8 +22,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
  * for completing the route.
  */
 internal class ActiveGuidanceScreen constructor(
-    private val mapboxCarContext: MapboxCarContext,
-    private val actionProviders: List<MapboxActionProvider>,
+    private val mapboxCarContext: MapboxCarContext
 ) : Screen(mapboxCarContext.carContext) {
 
     val carRouteLineRenderer = CarRouteLineRenderer()
@@ -73,24 +70,15 @@ internal class ActiveGuidanceScreen constructor(
         })
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
         logAndroidAuto("ActiveGuidanceScreen onGetTemplate")
-        val actionStrip = ActionStrip.Builder().apply {
-            actionProviders.forEach {
-                this.addAction(it.getAction(this@ActiveGuidanceScreen))
-            }
-            this.addAction(
-                Action.Builder()
-                    .setTitle(carContext.getString(R.string.car_action_navigation_stop_button))
-                    .setOnClickListener {
-                        carArrivalTrigger.triggerArrival()
-                    }.build()
-            )
-        }.build()
-
         return NavigationTemplate.Builder()
             .setBackgroundColor(CarColor.PRIMARY)
-            .setActionStrip(actionStrip)
+            .setActionStrip(
+                mapboxCarContext.options.actionStripProvider
+                    .getActionStrip(this, MapboxScreen.ACTIVE_GUIDANCE)
+            )
             .setMapActionStrip(mapActionStripBuilder.build())
             .apply { navigationInfoProvider.setNavigationInfo(this) }
             .build()

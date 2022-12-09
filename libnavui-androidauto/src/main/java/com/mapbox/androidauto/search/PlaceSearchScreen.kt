@@ -5,7 +5,6 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
-import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
 import androidx.car.app.model.SearchTemplate
@@ -14,7 +13,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.R
-import com.mapbox.androidauto.feedback.ui.CarFeedbackAction
 import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
@@ -22,6 +20,7 @@ import com.mapbox.androidauto.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.preview.CarRoutePreviewRequestCallback
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.search.result.SearchSuggestion
@@ -77,6 +76,7 @@ internal class PlaceSearchScreen @UiThread constructor(
         })
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
         return SearchTemplate.Builder(
             object : SearchTemplate.SearchCallback {
@@ -91,13 +91,8 @@ internal class PlaceSearchScreen @UiThread constructor(
         )
             .setHeaderAction(Action.BACK)
             .setActionStrip(
-                ActionStrip.Builder()
-                    .addAction(
-                        CarFeedbackAction(
-                            MapboxScreen.SEARCH_FEEDBACK
-                        ).getAction(this@PlaceSearchScreen)
-                    )
-                    .build()
+                searchCarContext.mapboxCarContext.options.actionStripProvider
+                    .getActionStrip(this, MapboxScreen.SEARCH)
             )
             .setShowKeyboardByDefault(false)
             .setItemList(itemList)

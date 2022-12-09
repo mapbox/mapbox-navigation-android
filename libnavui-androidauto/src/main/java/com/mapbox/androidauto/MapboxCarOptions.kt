@@ -1,5 +1,6 @@
 package com.mapbox.androidauto
 
+import com.mapbox.androidauto.action.MapboxScreenActionStripProvider
 import com.mapbox.androidauto.feedback.core.CarFeedbackOptions
 import com.mapbox.androidauto.feedback.core.CarFeedbackPollProvider
 import com.mapbox.androidauto.feedback.ui.CarFeedbackOption
@@ -9,6 +10,7 @@ import com.mapbox.androidauto.notification.MapboxCarNotificationOptions
 import com.mapbox.androidauto.preview.CarRouteOptionsInterceptor
 import com.mapbox.androidauto.search.CarPlaceSearchOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,8 +57,16 @@ class MapboxCarOptions {
         private set
 
     /**
+     * @see MapboxScreenActionStripProvider
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    var actionStripProvider = MapboxScreenActionStripProvider()
+        private set
+
+    /**
      * Apply the desired customization.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun applyCustomization(customization: Customization) {
         customization.notificationOptions?.also { this.notificationOptions = it }
         customization.routeOptionsInterceptor?.also { this.routeOptionsInterceptor = it }
@@ -64,6 +74,7 @@ class MapboxCarOptions {
         customization.placeSearchOptions?.also { this.carPlaceSearchOptions = it }
         customization.carFeedbackOptions?.also { this.carFeedbackOptions = it }
         customization.feedbackPollProvider?.also { this.feedbackPollProvider = it }
+        customization.actionsStripProvider?.also { this.actionStripProvider = it }
     }
 
     /**
@@ -100,5 +111,11 @@ class MapboxCarOptions {
          * Modify the selectable [CarFeedbackOption].
          */
         var feedbackPollProvider: CarFeedbackPollProvider? = null
+
+        /**
+         * Modify the action buttons for any screen.
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        var actionsStripProvider: MapboxScreenActionStripProvider? = null
     }
 }
