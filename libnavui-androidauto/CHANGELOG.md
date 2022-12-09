@@ -4,11 +4,24 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## androidauto-v0.18.0 - 09 December, 2022
+### Changelog
+[Changes between 0.17.1 and 0.18.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.17.1...androidauto-v0.18.0)
+
+#### Features
 - Added customizable `ActionStrip`s for `MapboxScreen`s with `MapboxScreenActionStripProvider` found in the `MapboxCarOptions`. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
 #### Bug fixes and improvements
 - Renamed `CarAudioGuidanceUi` to `CarAudioGuidanceAction`. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
 - Deleted `MapboxActionProvider` interface in favor of `MapboxScreenActionStripProvider`. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
 - Fixed issue where `CarAudioGuidanceUi` would invalidate the screen so often that performance would be effected. [#6681](https://github.com/mapbox/mapbox-navigation-android/pull/6681)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.5.0))
+- Mapbox Navigation `v2.9.3` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.9.3))
+
 
 ## androidauto-v0.17.1 - 02 December, 2022
 ### Changelog
