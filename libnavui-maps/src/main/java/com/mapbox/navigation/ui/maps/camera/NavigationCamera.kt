@@ -3,9 +3,11 @@ package com.mapbox.navigation.ui.maps.camera
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.os.SystemClock
 import androidx.annotation.UiThread
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.logI
 import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
@@ -153,6 +155,7 @@ class NavigationCamera(
     private val sourceUpdateObserver =
         ViewportDataSourceUpdateObserver {
                 viewportData ->
+            logI("kyle_debug", "viewportDataSourceUpdated->updateFrame")
             updateFrame(viewportData, instant = false)
         }
 
@@ -328,6 +331,7 @@ class NavigationCamera(
      * based on the latest data obtained with [ViewportDataSource.getViewportData].
      */
     fun resetFrame() {
+        logI("kyle_debug", "resetFrame->updateFrame")
         val viewportData = viewportDataSource.getViewportData()
         updateFrame(viewportData, instant = true)
     }
@@ -335,6 +339,7 @@ class NavigationCamera(
     private fun updateFrame(viewportData: ViewportData, instant: Boolean) {
         when (state) {
             FOLLOWING -> {
+                val startTime = SystemClock.elapsedRealtimeNanos()
                 startAnimation(
                     stateTransition.updateFrameForFollowing(
                         viewportData.cameraForFollowing,
@@ -344,6 +349,9 @@ class NavigationCamera(
                     },
                     instant
                 )
+                val endTime = SystemClock.elapsedRealtimeNanos()
+                val deltaTime = (endTime - startTime) * 10e-9
+                logI("kyle_debug", "updateFrame $deltaTime")
             }
             OVERVIEW -> {
                 startAnimation(
@@ -450,6 +458,7 @@ class NavigationCamera(
             finishAnimation(animation as AnimatorSet)
             transitionEndListeners.forEach { it.onTransitionEnd(isCanceled) }
             transitionEndListeners.clear()
+            logI("kyle_debug", "viewportDataSourceUpdated->onAnimationEnd")
             updateFrame(viewportDataSource.getViewportData(), instant = false)
         }
 
