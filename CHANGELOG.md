@@ -13,16 +13,14 @@ Mapbox welcomes participation and contributions from everyone.
 ### Changelog
 [Changes between v2.10.0-beta.2 and v2.10.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-beta.2...v2.10.0-beta.3)
 
-#### Features
 #### Bug fixes and improvements
 - Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6684](https://github.com/mapbox/mapbox-navigation-android/pull/6684)
 - Fixed an issue where `RouteProgress#VoiceInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6689](https://github.com/mapbox/mapbox-navigation-android/pull/6689)
-- Fixed `BannerInstructions` issue where the banner instruction might have been removed from `RouteProgress` at some point around a edge's leg. [#6684](https://github.com/mapbox/mapbox-navigation-android/pull/6684)
 - Added `MapboxNavigation#resetTripSession(callback)` and deprecated the counterpart without a callback. [#6685](https://github.com/mapbox/mapbox-navigation-android/pull/6685)
 - Fixed memory leak in `ReplayProgressObserver` which happened after route refresh. [#6691](https://github.com/mapbox/mapbox-navigation-android/pull/6691)
 - Fixed a rare issue where a reroute relative to old routes might have occurred after setting new routes. [#6693](https://github.com/mapbox/mapbox-navigation-android/pull/6693)
 - Added experimental `MapboxRouteLineOptions#shareLineGeometrySources` option to enable route line's GeoJson source data sharing between multiple instances of the map. [#6680](https://github.com/mapbox/mapbox-navigation-android/pull/6680)
-- Fixed issues in `ReplayRouteSession`. The routes observer was never unregistered. Alternative route selection resets replay to the beginning. DropInUi changing portrait and landscape modes resets replay to the beginning. [#6675](https://github.com/mapbox/mapbox-navigation-android/pull/6675)
+- Fixed issues in `ReplayRouteSession`. The routes observer was never unregistered. Alternative route selection resets replay to the beginning. Drop-In Ui changing portrait and landscape modes resets replay to the beginning. [#6675](https://github.com/mapbox/mapbox-navigation-android/pull/6675)
 - Fixed an issue where first `BannerInstructions` of `RouteProgress` and `BannerInstructionsObserver` could have not been delivered after starting active guidance. [#6702](https://github.com/mapbox/mapbox-navigation-android/pull/6702)
 
 ### Mapbox dependencies
