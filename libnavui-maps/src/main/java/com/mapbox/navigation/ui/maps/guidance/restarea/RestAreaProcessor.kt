@@ -3,13 +3,11 @@ package com.mapbox.navigation.ui.maps.guidance.restarea
 import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
@@ -112,30 +110,17 @@ internal object RestAreaProcessor {
     }
 
     private fun RouteProgress.getUpcomingRestStopOnCurrentStep(): RestStop? {
-        val upcomingRestStop = getFirstUpcomingRestStop() ?: return null
-        val upcomingRestStopLocation = upcomingRestStop.location.shape as? Point ?: return null
-
-        val currentStep = currentLegProgress?.currentStepProgress?.step
-        val isUpcomingRestStopAtCurrentStep =
-            !currentStep?.getRestStopsMatchingLocation(upcomingRestStopLocation).isNullOrEmpty()
-
-        return if (isUpcomingRestStopAtCurrentStep) upcomingRestStop else null
-    }
-
-    private fun RouteProgress.getFirstUpcomingRestStop(): RestStop? =
-        this.upcomingRoadObjects.firstOrNull {
+        val currentStepDistanceRemaining =
+            currentLegProgress?.currentStepProgress?.distanceRemaining ?: return null
+        return this.upcomingRoadObjects.firstOrNull {
             if (it.roadObject.objectType == RoadObjectType.REST_STOP) {
                 val distanceToStart = it.distanceToStart
-                distanceToStart != null && distanceToStart > 0
+                distanceToStart != null && distanceToStart - currentStepDistanceRemaining <= 0
             } else {
                 false
             }
         }?.roadObject as? RestStop
-
-    private fun LegStep?.getRestStopsMatchingLocation(point: Point) =
-        this?.intersections()
-            ?.filter { it.location() == point }
-            ?.mapNotNull { it.restStop() }
+    }
 
     private fun processSvg(
         svg: ByteArray,

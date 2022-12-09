@@ -3,9 +3,6 @@ package com.mapbox.navigation.ui.maps.guidance.restarea
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
-import com.mapbox.api.directions.v5.models.LegStep
-import com.mapbox.api.directions.v5.models.RestStop
-import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory.createValue
 import com.mapbox.common.ResourceData
@@ -231,6 +228,14 @@ class RestAreaProcessorTest {
     @Test
     @Suppress("MaxLineLength")
     fun `process CheckUpcomingRestStop should return SAPA map url if upcoming rest stop is on current step`() {
+        // SETUP:
+        //                         (current progress)    (upcoming rest stop)
+        //                                 |                     |
+        //                   (step 2)      |                     |      (step 3)
+        //                       |---------x---------------------R---------|>
+        // step dist. remaining            {           1200m               }
+        // dist. to rest stop              {      1000m          }
+
         val restAreaLocation = Point.fromLngLat(1.0, 2.0)
         val restAreaMapUri = "http://example.com/rest-area-map/1.png"
         val nativeRestAreaObject = nativeRestAreaObjectWith(
@@ -240,23 +245,11 @@ class RestAreaProcessorTest {
         )
 
         val routeProgress = routeProgressWith(
-            currentLegStep = legStepWith(
-                intersections = listOf(
-                    StepIntersection.builder()
-                        .rawLocation(restAreaLocation.coordinates().toDoubleArray())
-                        .restStop(
-                            RestStop.builder()
-                                .type("rest_area")
-                                .name("my rest area")
-                                .build()
-                        )
-                        .build()
-                )
-            ),
+            currentStepDistanceRemaining = 1200f,
             upcomingRoadObjects = listOf<UpcomingRoadObject>(
                 buildUpcomingRoadObject(
                     roadObject = buildRoadObject(nativeRestAreaObject),
-                    distanceToStart = 1.0,
+                    distanceToStart = 1000.0,
                     distanceInfo = null
                 )
             )
@@ -273,6 +266,14 @@ class RestAreaProcessorTest {
     @Test
     @Suppress("MaxLineLength")
     fun `process CheckUpcomingRestStop should NOT return SAPA map url if upcoming rest stop is NOT on current step`() {
+        // SETUP:
+        //                         (current progress)    (upcoming rest stop)
+        //                                 |                     |
+        //                   (step 1)      |    (step 2)         |      (step 3)
+        //                       |---------x------|--------------R---------|>
+        // step dist. remaining            { 200m }
+        // dist. to rest stop              {        1200m        }
+
         val restAreaLocation = Point.fromLngLat(1.0, 2.0)
         val restAreaMapUri = "http://example.com/rest-area-map/1.png"
         val nativeRestAreaObject = nativeRestAreaObjectWith(
@@ -282,21 +283,11 @@ class RestAreaProcessorTest {
         )
 
         val routeProgress = routeProgressWith(
-            currentLegStep = legStepWith(
-                intersections = listOf(
-                    StepIntersection.builder()
-                        .rawLocation(
-                            Point.fromLngLat(0.0, 0.0)
-                                .coordinates()
-                                .toDoubleArray()
-                        )
-                        .build()
-                )
-            ),
+            currentStepDistanceRemaining = 200f,
             upcomingRoadObjects = listOf<UpcomingRoadObject>(
                 buildUpcomingRoadObject(
                     roadObject = buildRoadObject(nativeRestAreaObject),
-                    distanceToStart = 1.0,
+                    distanceToStart = 1200.0,
                     distanceInfo = null
                 )
             )
@@ -314,7 +305,7 @@ class RestAreaProcessorTest {
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun routeProgressWith(
-        currentLegStep: LegStep,
+        currentStepDistanceRemaining: Float,
         upcomingRoadObjects: List<UpcomingRoadObject>
     ): RouteProgress = buildRouteProgressObject(
         route = mockk(),
@@ -329,7 +320,8 @@ class RestAreaProcessorTest {
             every { durationRemaining } returns 123.0
             every { fractionTraveled } returns 0.1f
             every { currentStepProgress } returns mockk<RouteStepProgress> {
-                every { step } returns currentLegStep
+                every { step } returns mockk()
+                every { distanceRemaining } returns currentStepDistanceRemaining
             }
             every { upcomingStep } returns null
             every { geometryIndex } returns 0
@@ -373,16 +365,6 @@ class RestAreaProcessorTest {
             ),
             true
         )
-
-    private fun legStepWith(intersections: List<StepIntersection>): LegStep =
-        LegStep.builder()
-            .distance(100.0)
-            .duration(123.0)
-            .mode("driving")
-            .maneuver(mockk())
-            .weight(1.0)
-            .intersections(intersections)
-            .build()
 
     private fun getComponentGuidanceViewType(): BannerComponents {
         return BannerComponents.builder()
