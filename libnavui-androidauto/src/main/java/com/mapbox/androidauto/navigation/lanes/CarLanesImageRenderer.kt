@@ -7,7 +7,6 @@ import androidx.car.app.model.CarIcon
 import androidx.car.app.navigation.model.Step
 import com.mapbox.navigation.ui.maneuver.api.MapboxLaneIconsApi
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
-import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
  * This class generates a [CarLanesImage] needed for the lane guidance in android auto.
@@ -31,7 +30,7 @@ class CarLanesImageRenderer(
     fun renderLanesImage(
         lane: com.mapbox.navigation.ui.maneuver.model.Lane?
     ): CarLanesImage? {
-        return ifNonNull(lane) { laneGuidance ->
+        return lane?.let { laneGuidance ->
             val lanes = carLaneIconMapper.mapLanes(laneGuidance)
             val carIcon = carIcon(laneGuidance)
             CarLanesImage(lanes, carIcon)
