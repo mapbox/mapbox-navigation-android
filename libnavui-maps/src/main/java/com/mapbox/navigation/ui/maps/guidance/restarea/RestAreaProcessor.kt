@@ -10,7 +10,6 @@ import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
 import com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
@@ -65,14 +64,8 @@ internal object RestAreaProcessor {
     }
 
     private fun restStopHasGuideMap(routeProgress: RouteProgress): RestAreaResult {
-        val upcomingRestStop = routeProgress.getFirstUpcomingRoadObject(
-            RoadObjectType.REST_STOP
-        )
-        val upcomingGuideMapUrl = upcomingRestStop?.let { restStop ->
-            (restStop.roadObject as RestStop).guideMapUri
-        }
-        return upcomingGuideMapUrl?.let {
-            RestAreaResult.RestAreaMapAvailable(it)
+        return routeProgress.getUpcomingRestStopOnCurrentStep()?.guideMapUri?.let { uri ->
+            RestAreaResult.RestAreaMapAvailable(uri)
         } ?: RestAreaResult.RestAreaMapUnavailable
     }
 
@@ -116,17 +109,17 @@ internal object RestAreaProcessor {
         )
     }
 
-    private fun RouteProgress.getFirstUpcomingRoadObject(
-        @RoadObjectType.Type type: Int
-    ): UpcomingRoadObject? {
+    private fun RouteProgress.getUpcomingRestStopOnCurrentStep(): RestStop? {
+        val currentStepDistanceRemaining =
+            currentLegProgress?.currentStepProgress?.distanceRemaining ?: return null
         return this.upcomingRoadObjects.firstOrNull {
-            if (it.roadObject.objectType == type) {
+            if (it.roadObject.objectType == RoadObjectType.REST_STOP) {
                 val distanceToStart = it.distanceToStart
-                distanceToStart != null && distanceToStart > 0
+                distanceToStart != null && distanceToStart - currentStepDistanceRemaining <= 0
             } else {
                 false
             }
-        }
+        }?.roadObject as? RestStop
     }
 
     private fun processSvg(

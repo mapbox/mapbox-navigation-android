@@ -30,6 +30,7 @@ import com.mapbox.navigation.qa_test_app.view.TripOverviewActivity
 import com.mapbox.navigation.qa_test_app.view.UpcomingRoadObjectsActivity
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsActivity
 import com.mapbox.navigation.qa_test_app.view.componentinstaller.ComponentsAltActivity
+import com.mapbox.navigation.qa_test_app.view.componentinstaller.RestAreaActivity
 import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationViewCustomizedActivity
 import com.mapbox.navigation.qa_test_app.view.main.SelectDestinationDialogFragment
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
@@ -233,6 +234,13 @@ object TestActivitySuite {
             R.string.speed_info_activity_description
         ) { activity ->
             activity.startActivity<SpeedInfoActivity>()
+        },
+        TestActivityDescription(
+            "Rest Area Example",
+            R.string.rest_area_activity_description,
+            category = CATEGORY_COMPONENTS
+        ) { activity ->
+            activity.startActivity<RestAreaActivity>()
         },
     )
 
