@@ -1448,7 +1448,7 @@ class MapboxTripSessionTest {
         }
 
     @Test
-    fun `routeProgress updates not ignored while primary route is being refreshed`() =
+    fun `routeProgress updates ignored while primary route is being refreshed`() =
         coroutineRule.runBlockingTest {
             val primary = mockNavigationRoute()
             val alternative = mockNavigationRoute()
@@ -1468,6 +1468,12 @@ class MapboxTripSessionTest {
                 launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
                 runCurrent()
                 advanceTimeBy(delayTimeMillis = 50)
+                navigatorObserverImplSlot.captured.onStatus(
+                    navigationStatusOrigin,
+                    navigationStatus
+                )
+                verify(exactly = 0) { observer.onRouteProgressChanged(any()) }
+                advanceTimeBy(delayTimeMillis = 100)
                 navigatorObserverImplSlot.captured.onStatus(
                     navigationStatusOrigin,
                     navigationStatus

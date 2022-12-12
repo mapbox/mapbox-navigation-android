@@ -114,6 +114,7 @@ internal class MapboxTripSession(
             }
             is SetRoutes.RefreshRoutes -> {
                 if (routes.isNotEmpty()) {
+                    isUpdatingRoute = true
                     val primaryRoute = routes.first()
                     lateinit var refreshRouteResult: Expected<String, List<RouteAlternative>>
                     var lastSavedResultValue: Expected<String, List<RouteAlternative>>? = null
@@ -146,6 +147,7 @@ internal class MapboxTripSession(
                             "routes update (route IDs: ${routes.map { it.id }}) - refresh finished",
                             LOG_CATEGORY
                         )
+                        isUpdatingRoute = false
                     }
                 } else {
                     with("Cannot refresh route. Route can't be null") {
