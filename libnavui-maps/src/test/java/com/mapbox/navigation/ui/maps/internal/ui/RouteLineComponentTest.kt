@@ -413,6 +413,21 @@ class RouteLineComponentTest {
     }
 
     @Test
+    fun `onAttached should initialize route line layers on mapStyle load`() {
+        val lineApi = mockk<MapboxRouteLineApi>(relaxed = true)
+        val lineView = mockk<MapboxRouteLineView>(relaxed = true)
+        val onStyleLoadedCallback = slot<Style.OnStyleLoaded>()
+        val mapStyle = mockk<Style>()
+        val sut = RouteLineComponent(mockMap, mapPluginProvider, options, lineApi, lineView)
+        every { mockMap.getStyle(capture(onStyleLoadedCallback)) } returns Unit
+
+        sut.onAttached(mockMapboxNavigation)
+        onStyleLoadedCallback.captured.onStyleLoaded(mapStyle)
+
+        verify { lineView.initializeLayers(mapStyle) }
+    }
+
+    @Test
     fun `onDetached cancels route line API`() {
         val mockApi = mockk<MapboxRouteLineApi>(relaxed = true)
         val component = RouteLineComponent(mockMap, mapPluginProvider, options, mockApi)
