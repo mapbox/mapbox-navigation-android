@@ -49,7 +49,7 @@ class MapboxRerouteControllerTest {
 
     private lateinit var rerouteController: MapboxRerouteController
 
-    @MockK
+    @MockK(relaxUnitFun = true)
     private lateinit var directionsSession: DirectionsSession
 
     @MockK
@@ -317,25 +317,57 @@ class MapboxRerouteControllerTest {
 
     @Test
     fun reroute_calls_interrupt_if_currently_fetching() = coroutineRule.runBlockingTest {
-        mockRouteOptionsResult(successFromResult)
-        val routeRequestCallback = slot<NavigationRouterCallback>()
+        addRerouteStateObserver()
+        val routeOptions1 = MapboxJavaObjectsFactory.routeOptions(
+            coordinates = listOf(Point.fromLngLat(1.0, 2.0), Point.fromLngLat(3.0, 4.0))
+        )
+        val updaterSuccess1 = RouteOptionsUpdater.RouteOptionsResult.Success(routeOptions1)
+        val routeOptions2 = MapboxJavaObjectsFactory.routeOptions(
+            coordinates = listOf(Point.fromLngLat(1.5, 2.5), Point.fromLngLat(3.0, 4.0))
+        )
+        val updaterSuccess2 = RouteOptionsUpdater.RouteOptionsResult.Success(routeOptions2)
+        val routeRequestCallback1 = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
-                routeOptionsFromSuccessResult,
-                capture(routeRequestCallback)
+                routeOptions1,
+                capture(routeRequestCallback1)
             )
         } returns 1L
-        rerouteController.reroute(routeCallback)
+        val routeRequestCallback2 = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptions2,
+                capture(routeRequestCallback2)
+            )
+        } returns 2L
 
+        mockRouteOptionsResult(updaterSuccess1)
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
+        pauseDispatcher {
+            // this ensure that we don't run coroutines synchronously that could
+            // make the test pass even if state changes were scheduled back to the message queue
+            // in an incorrect order
+            mockRouteOptionsResult(updaterSuccess2)
+            rerouteController.reroute(routeCallback)
+            verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
+            routeRequestCallback1.captured.onCanceled(routeOptions1, mockk())
+        }
 
-        verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
+        routeRequestCallback2.captured.onRoutesReady(listOf(mockk(relaxed = true)), mockk())
+
+        verifyOrder {
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+            primaryRerouteObserver.onRerouteStateChanged(ofType<RerouteState.RouteFetched>())
+        }
     }
 
     @Test
     fun reroute_only_calls_interrupt_if_currently_fetching() {
         mockRouteOptionsResult(successFromResult)
+        addRerouteStateObserver()
         val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
@@ -349,6 +381,9 @@ class MapboxRerouteControllerTest {
 
         verify(exactly = 0) { directionsSession.cancelAll() }
         verify(exactly = 0) { directionsSession.cancelRouteRequest(any()) }
+        verify(exactly = 0) {
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
+        }
     }
 
     @Test

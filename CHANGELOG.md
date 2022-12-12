@@ -9,6 +9,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed approaches list update in `RouteOptionsUpdater`(uses for reroute). It was putting to the origin approach corresponding approach from legacy approach list. [#6540](https://github.com/mapbox/mapbox-navigation-android/pull/6540)
 - Updated the `MapboxRestAreaApi` logic to load a SAPA map only if the upcoming rest stop is at the current step of the route leg. [#6695](https://github.com/mapbox/mapbox-navigation-android/pull/6695)
+- Fixed an issue where `MapboxRerouteController` could deliver a delayed interruption state notifications. Now, the interruption state is always delivered synchronously, as soon as it's available. [#6718](https://github.com/mapbox/mapbox-navigation-android/pull/6718)
 
 ## Mapbox Navigation SDK 2.9.5 - 13 December, 2022
 ### Changelog

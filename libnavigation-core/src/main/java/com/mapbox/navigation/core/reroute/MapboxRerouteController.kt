@@ -20,9 +20,8 @@ import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
-import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.CopyOnWriteArraySet
@@ -43,8 +42,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
-
-    private var requestId: Long? = null
 
     private var rerouteJob: Job? = null
 
@@ -70,17 +67,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                 return
             }
             field = value
-            when (value) {
-                RerouteState.Idle,
-                RerouteState.Interrupted,
-                is RerouteState.Failed,
-                is RerouteState.RouteFetched -> {
-                    requestId = null
-                }
-                RerouteState.FetchingRoute -> {
-                    // no impl
-                }
-            }
             observers.forEach { it.onRerouteStateChanged(field) }
         }
 
@@ -189,18 +175,14 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
     @MainThread
     override fun interrupt() {
+        rerouteJob?.cancel()
+        rerouteJob = null
         if (state == RerouteState.FetchingRoute) {
-            requestId?.also { id ->
-                directionsSession.cancelRouteRequest(id)
-                logD(LOG_CATEGORY) {
-                    "Route request interrupted"
-                }
-            } ?: logW(LOG_CATEGORY) {
-                "Tried interrupting but there's no ongoing request"
+            logI(LOG_CATEGORY) {
+                "Request interrupted via controller"
             }
-            rerouteJob?.cancel()
-            rerouteJob = null
         }
+        onRequestInterrupted()
     }
 
     override fun registerRerouteStateObserver(
@@ -223,8 +205,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         routeOptions: RouteOptions
     ) {
         rerouteJob = mainJobController.scope.launch {
-            val result = requestAsync(routeOptions)
-            when (result) {
+            when (val result = requestAsync(routeOptions)) {
                 is RouteRequestResult.Success -> {
                     mainJobController.scope.launch {
                         state = RerouteState.RouteFetched(result.routerOrigin)
@@ -241,7 +222,12 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                         state = RerouteState.Idle
                     }
                 }
-                is RouteRequestResult.Cancellation -> onRequestInterrupted()
+                is RouteRequestResult.Cancellation -> {
+                    if (state == RerouteState.FetchingRoute) {
+                        logI("Request canceled via router")
+                    }
+                    onRequestInterrupted()
+                }
             }
         }
     }
@@ -251,7 +237,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     }
 
     private fun onRequestInterrupted() {
-        mainJobController.scope.launch {
+        if (state == RerouteState.FetchingRoute) {
             state = RerouteState.Interrupted
             state = RerouteState.Idle
         }
@@ -259,8 +245,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
     private suspend fun requestAsync(routeOptions: RouteOptions): RouteRequestResult {
         return suspendCancellableCoroutine { cont ->
-            cont.invokeOnCancellation { onRequestInterrupted() }
-            requestId = directionsSession.requestRoutes(
+            val requestId = directionsSession.requestRoutes(
                 routeOptions,
                 object : NavigationRouterCallback {
                     override fun onRoutesReady(
@@ -291,6 +276,9 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                     }
                 }
             )
+            cont.invokeOnCancellation {
+                directionsSession.cancelRouteRequest(requestId)
+            }
         }
     }
 }
