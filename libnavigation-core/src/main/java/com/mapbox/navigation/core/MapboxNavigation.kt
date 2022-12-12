@@ -60,6 +60,7 @@ import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.internal.utils.ModuleParams
 import com.mapbox.navigation.core.internal.utils.isInternalImplementation
+import com.mapbox.navigation.core.internal.utils.mapToReason
 import com.mapbox.navigation.core.internal.utils.paramsProvider
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
@@ -266,7 +267,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val routeRefreshController: RouteRefreshController
-    private var routeScope = createChildScope()
+    private var routeRefreshScope = createChildScope()
     private val arrivalProgressObserver: ArrivalProgressObserver
     private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
         navigationOptions.eHorizonOptions.length,
@@ -1015,8 +1016,21 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         setRoutesInfo: SetRoutes,
         callback: RoutesSetCallback? = null,
     ) {
-        rerouteController?.interrupt()
-        restartRouteScope()
+        logD(LOG_CATEGORY) {
+            "setting routes; reason: ${setRoutesInfo.mapToReason()}; IDs: ${routes.map { it.id }}"
+        }
+        when (setRoutesInfo) {
+            SetRoutes.CleanUp,
+            is SetRoutes.NewRoutes,
+            SetRoutes.Reroute -> {
+                rerouteController?.interrupt()
+            }
+            is SetRoutes.RefreshRoutes,
+            is SetRoutes.Alternatives -> {
+                // do not interrupt reroute when primary route has not changed
+            }
+        }
+        restartRouteRefreshScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 historyRecordingStateHandler.setRoutes(routes)
@@ -1870,7 +1884,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         latestLegIndex = null
         routeRefreshRequestDataProvider.onNewRoutes()
         if (result.navigationRoutes.isNotEmpty()) {
-            routeScope.launch {
+            routeRefreshScope.launch {
                 val refreshed = routeRefreshController.refresh(
                     result.navigationRoutes
                 )
@@ -1886,7 +1900,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         if (offRoute) {
             reroute()
         } else {
-            cancelReroute()
+            rerouteController?.interrupt()
         }
     }
 
@@ -1971,10 +1985,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
-    private fun cancelReroute() {
-        rerouteController?.interrupt()
-    }
-
     private inline fun <T> runInTelemetryContext(func: (MapboxNavigationTelemetry) -> T): T? {
         return if (TelemetryUtilsDelegate.getEventsCollectionState()) {
             func(MapboxNavigationTelemetry)
@@ -2049,9 +2059,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createChildScope() = threadController.getMainScopeAndRootJob().scope
 
-    private fun restartRouteScope() {
-        routeScope.cancel()
-        routeScope = createChildScope()
+    private fun restartRouteRefreshScope() {
+        routeRefreshScope.cancel()
+        routeRefreshScope = createChildScope()
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.internal.utils.initialLegIndex
+import com.mapbox.navigation.core.internal.utils.mapToReason
 import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
@@ -79,7 +80,7 @@ internal class MapboxTripSession(
         setRoutes: SetRoutes,
     ): NativeSetRouteResult {
         fun logMessage(suffix: String): () -> String = {
-            "routes update (reason: ${setRoutes::class.java.simpleName}, " +
+            "routes update (reason: ${setRoutes.mapToReason()}, " +
                 "route IDs: ${routes.map { it.id }}) $suffix"
         }
         logD(LOG_CATEGORY, logMessage("- starting"))
