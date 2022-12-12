@@ -119,7 +119,7 @@ class CameraLayoutObserverTest {
 
     @Test
     @Config(qualifiers = "land")
-    fun `landscape - should update left, bottom and right padding for all states except FreeDrive`() =
+    fun `landscape - should update left and bottom padding for all states except FreeDrive`() =
         coroutineRule.runBlockingTest {
             sut.onAttached(mockk())
 
@@ -134,7 +134,7 @@ class CameraLayoutObserverTest {
                 assertEquals("$s|top", action.padding.top, PADDING_V_LAND, 0.001)
                 assertNotEquals("$s|bottom", action.padding.bottom, PADDING_V_LAND, 0.001)
                 assertNotEquals("$s|left", action.padding.left, PADDING_H_LAND, 0.001)
-                assertNotEquals("$s|right", action.padding.right, PADDING_H_LAND, 0.001)
+                assertEquals("$s|right", action.padding.right, PADDING_H_LAND, 0.001)
             }
         }
 

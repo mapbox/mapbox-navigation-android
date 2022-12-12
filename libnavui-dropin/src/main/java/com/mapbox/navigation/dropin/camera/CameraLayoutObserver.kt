@@ -61,8 +61,6 @@ internal class CameraLayoutObserver(
     }
 
     private fun getLandscapePadding(): EdgeInsets {
-        val left = mapView.width.toDouble() - binding.infoPanelLayout.right.toDouble()
-        val right = mapView.width.toDouble() - binding.actionListLayout.left.toDouble()
         val bottom = mapView.height.toDouble() - binding.roadNameLayout.top.toDouble()
         return when (store.state.value.navigation) {
             is NavigationState.FreeDrive -> {
@@ -74,9 +72,9 @@ internal class CameraLayoutObserver(
             is NavigationState.Arrival -> {
                 EdgeInsets(
                     vPaddingLandscape,
-                    hPaddingLandscape + left,
+                    hPaddingLandscape + binding.infoPanelLayout.right.toDouble(),
                     bottom,
-                    right - hPaddingLandscape
+                    hPaddingLandscape
                 )
             }
         }
