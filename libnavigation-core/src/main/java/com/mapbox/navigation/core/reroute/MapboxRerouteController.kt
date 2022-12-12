@@ -207,20 +207,16 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         rerouteJob = mainJobController.scope.launch {
             when (val result = requestAsync(routeOptions)) {
                 is RouteRequestResult.Success -> {
-                    mainJobController.scope.launch {
-                        state = RerouteState.RouteFetched(result.routerOrigin)
-                        state = RerouteState.Idle
-                    }
+                    state = RerouteState.RouteFetched(result.routerOrigin)
+                    state = RerouteState.Idle
                     callback.onNewRoutes(result.routes, result.routerOrigin)
                 }
                 is RouteRequestResult.Failure -> {
-                    mainJobController.scope.launch {
-                        state = RerouteState.Failed(
-                            "Route request failed",
-                            reasons = result.reasons
-                        )
-                        state = RerouteState.Idle
-                    }
+                    state = RerouteState.Failed(
+                        "Route request failed",
+                        reasons = result.reasons
+                    )
+                    state = RerouteState.Idle
                 }
                 is RouteRequestResult.Cancellation -> {
                     if (state == RerouteState.FetchingRoute) {

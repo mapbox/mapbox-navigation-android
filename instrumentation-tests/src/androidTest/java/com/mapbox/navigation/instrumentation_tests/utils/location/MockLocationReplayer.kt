@@ -70,6 +70,13 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
             play()
         }
     }
+
+    fun stopAndClearEvents() {
+        mapboxReplayer?.run {
+            stop()
+            clearEvents()
+        }
+    }
 }
 
 fun Location.setUpLocation(event: ReplayEventUpdateLocation) {

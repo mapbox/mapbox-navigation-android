@@ -883,7 +883,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `setRoute pushes the route to the directions session`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
-        val route: NavigationRoute = mockk()
+        val route: NavigationRoute = mockk(relaxed = true)
         val processedRoute: NavigationRoute = mockk()
         val routeOptions = createRouteOptions()
         every { route.routeOptions } returns routeOptions
@@ -1005,7 +1005,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `requestRoutes doesn't pushes the route to the directions session automatically`() {
         createMapboxNavigation()
-        val routes = listOf(mockk<NavigationRoute>())
+        val routes = listOf(mockk<NavigationRoute>(relaxed = true))
         val options = mockk<RouteOptions>()
         val possibleInternalCallbackSlot = slot<NavigationRouterCallback>()
         val origin = mockk<RouterOrigin>()
@@ -1270,7 +1270,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `external route is first provided to the billing controller before directions session`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
-            val routes = listOf(mockk<NavigationRoute>())
+            val routes = listOf(mockk<NavigationRoute>(relaxed = true))
 
             mapboxNavigation.setNavigationRoutes(routes)
 
@@ -1322,8 +1322,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `set routes are processed in the correct order`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
 
-        val longRoutes = listOf<NavigationRoute>(mockk())
-        val shortRoutes = listOf<NavigationRoute>(mockk())
+        val longRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
+        val shortRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
         coEvery { tripSession.setRoutes(longRoutes, any()) } coAnswers {
             delay(100L)
             NativeSetRouteValue(longRoutes, emptyList())
@@ -1394,11 +1394,11 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
     @Test
-    fun `set route - immediately stops the reroute controller`() = coroutineRule.runBlockingTest {
+    fun `set route - new routes immediately interrupts reroute`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(rerouteController)
 
-        val shortRoutes = listOf<NavigationRoute>(mockk())
+        val shortRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
         coEvery { tripSession.setRoutes(shortRoutes, any()) } coAnswers {
             delay(50L)
             NativeSetRouteValue(shortRoutes, emptyList())
@@ -1411,11 +1411,107 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun `set route - clean up immediately interrupts reroute`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            mapboxNavigation.setRerouteController(rerouteController)
+            val initialRoutes = mutableListOf<NavigationRoute>(mockk(relaxed = true))
+            every { directionsSession.routes } returns initialRoutes
+            val updatedRoutes = emptyList<NavigationRoute>()
+
+            pauseDispatcher {
+                mapboxNavigation.setNavigationRoutes(updatedRoutes)
+                verify(exactly = 1) { rerouteController.interrupt() }
+            }
+        }
+
+    @Test
+    fun `set route - reroute immediately interrupts reroute`() =
+        coroutineRule.runBlockingTest {
+            val controller: NavigationRerouteController = mockk(relaxUnitFun = true)
+            val rerouteCallbackSlot = slot<NavigationRerouteController.RoutesCallback>()
+            every { controller.reroute(capture(rerouteCallbackSlot)) } just Runs
+            val observers = mutableListOf<OffRouteObserver>()
+            every { tripSession.registerOffRouteObserver(capture(observers)) } just Runs
+            val initialRoutes = mutableListOf<NavigationRoute>(mockk(relaxed = true))
+            every { directionsSession.routes } returns initialRoutes
+            val newRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
+            coEvery {
+                tripSession.setRoutes(newRoutes, any())
+            } returns NativeSetRouteValue(newRoutes, emptyList())
+            createMapboxNavigation()
+            mapboxNavigation.setRerouteController(controller)
+
+            observers.forEach {
+                it.onOffRouteStateChanged(true)
+            }
+            pauseDispatcher {
+                rerouteCallbackSlot.captured.onNewRoutes(newRoutes, RouterOrigin.Offboard)
+                verify(exactly = 1) { controller.interrupt() }
+            }
+        }
+
+    @Test
+    fun `set route - alternatives update does not interrupt reroute`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            mapboxNavigation.setRerouteController(rerouteController)
+            val initialRoutes = mutableListOf<NavigationRoute>(mockk(relaxed = true))
+            every { directionsSession.routes } returns initialRoutes
+            val alternativeRoute = mockk<NavigationRoute> {
+                every { id } returns "altId1"
+            }
+            val nativeAlternativeRoute = mockk<RouteAlternative> {
+                every { route.routeId } returns alternativeRoute.id
+            }
+            val updatedRoutes = initialRoutes + alternativeRoute
+            coEvery { tripSession.setRoutes(updatedRoutes, any()) } coAnswers {
+                delay(50L)
+                NativeSetRouteValue(updatedRoutes, listOf(nativeAlternativeRoute))
+            }
+
+            mapboxNavigation.setNavigationRoutes(updatedRoutes)
+
+            verify(exactly = 0) { rerouteController.interrupt() }
+        }
+
+    @Test
+    fun `set route - refresh update does not interrupt reroute`() =
+        coroutineRule.runBlockingTest {
+            val routeObserversSlot = mutableListOf<RoutesObserver>()
+            every {
+                directionsSession.registerRoutesObserver(capture(routeObserversSlot))
+            } just Runs
+            createMapboxNavigation()
+            mapboxNavigation.setRerouteController(rerouteController)
+            val initialRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
+            val routeProgressData = RouteProgressData(5, 12, 43)
+            val refreshedRoutes = listOf(mockk<NavigationRoute>(relaxed = true))
+            coEvery {
+                routeRefreshController.refresh(initialRoutes)
+            } returns RefreshedRouteInfo(refreshedRoutes, routeProgressData)
+
+            routeObserversSlot.forEach {
+                it.onRoutesChanged(
+                    RoutesUpdatedResult(initialRoutes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+                )
+            }
+
+            coVerify(exactly = 1) {
+                tripSession.setRoutes(
+                    refreshedRoutes,
+                    SetRoutes.RefreshRoutes(routeProgressData)
+                )
+            }
+            verify(exactly = 0) { rerouteController.interrupt() }
+        }
+
+    @Test
     fun `set route - correct order of actions, result applied to alternatives controller`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
-            val routes = listOf<NavigationRoute>(mockk())
-            val processedRoutes = listOf<NavigationRoute>(mockk())
+            val routes = listOf<NavigationRoute>(mockk(relaxed = true))
+            val processedRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
             val nativeAlternatives = listOf<RouteAlternative>(mockk())
             coEvery {
                 tripSession.setRoutes(
@@ -1486,7 +1582,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             every { directionsSession.initialLegIndex } returns 0
             every { tripSession.isRunningWithForegroundService() } returns true
             createMapboxNavigation()
-            val routes = listOf<NavigationRoute>(mockk())
+            val routes = listOf<NavigationRoute>(mockk(relaxed = true))
             coEvery {
                 tripSession.setRoutes(
                     routes,
@@ -1527,7 +1623,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         every { directionsSession.initialLegIndex } returns 0
         every { tripSession.isRunningWithForegroundService() } returns true
-        val routes = listOf<NavigationRoute>(mockk())
+        val routes = listOf<NavigationRoute>(mockk(relaxed = true))
         mapboxNavigation.startTripSession()
         mapboxNavigation.setNavigationRoutes(routes)
         mapboxNavigation.stopTripSession()
@@ -1554,7 +1650,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             every { tripSession.getState() } returns TripSessionState.STARTED
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
-            val refreshedRoutes = listOf(mockk<NavigationRoute>())
+            val refreshedRoutes = listOf(mockk<NavigationRoute>(relaxed = true))
             coEvery {
                 routeRefreshController.refresh(routes)
             } returns RefreshedRouteInfo(refreshedRoutes, routeProgressData)
@@ -1789,7 +1885,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun moveRoutesFromPreviewToNavigatorHasPreviewedRoutes() = coroutineRule.runBlockingTest {
-        val routes = listOf<NavigationRoute>(mockk())
+        val routes = listOf<NavigationRoute>(mockk(relaxed = true))
         createMapboxNavigation()
         every {
             routesPreviewController.getRoutesPreview()
