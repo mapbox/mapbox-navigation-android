@@ -9,6 +9,26 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed approaches list update in `RouteOptionsUpdater`(uses for reroute). It was putting to the origin approach corresponding approach from legacy approach list. [#6540](https://github.com/mapbox/mapbox-navigation-android/pull/6540)
 
+## Mapbox Navigation SDK 2.7.1 - 12 December, 2022
+### Changelog
+[Changes between v2.7.0 and v2.7.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.0...v2.7.1)
+
+#### Features
+
+#### Bug fixes and improvements
+- Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6684](https://github.com/mapbox/mapbox-navigation-android/pull/6684)
+- Fixed an issue where `RouteProgress#VoiceInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6689](https://github.com/mapbox/mapbox-navigation-android/pull/6689)
+- Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when setting alternative routes. [#6715](https://github.com/mapbox/mapbox-navigation-android/pull/6715)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.7.0))
+- Mapbox Navigation Native `v111.0.0`
+- Mapbox Core Common `v22.1.0`
+- Mapbox Java `v6.7.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
 ## Mapbox Navigation SDK 2.10.0-beta.3 - 08 December, 2022
 ### Changelog
 [Changes between v2.10.0-beta.2 and v2.10.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-beta.2...v2.10.0-beta.3)
