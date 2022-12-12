@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed incompatibility with nav sdk. [2.10.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.10.0-beta.3). Android Auto head unit will crash immediately. [#6714](https://github.com/mapbox/mapbox-navigation-android/pull/6714)
 
 ## androidauto-v0.18.0 - 09 December, 2022
 ### Changelog

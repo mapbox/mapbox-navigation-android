@@ -12,7 +12,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.internal.context.MapboxCarContextOwner
-import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.androidauto.internal.logAndroidAuto
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -103,14 +103,14 @@ class MapboxScreenManager internal constructor(
         val currentTop = screenStack.peek()
         if (screenManager.stackSize > 0 && screenManager.top == currentTop?.second) {
             if (screenKey == currentTop.first) {
-                logI(TAG) { "createScreen top is already set to $screenKey" }
+                logAndroidAuto("$TAG createScreen top is already set to $screenKey")
                 return screenManager.top
             }
         }
         val factory: MapboxScreenFactory = requireScreenFactory(screenKey)
         return factory.create(carContextOwner.carContext()).also { screen ->
             val event = MapboxScreenEvent(screenKey, MapboxScreenOperation.CREATED)
-            logI(TAG) { "createScreen Push ${screen.javaClass.simpleName}" }
+            logAndroidAuto("$TAG createScreen Push ${screen.javaClass.simpleName}")
             screenManager.push(screen)
             screenStack.push(Pair(screenKey, screen))
             screenKeyMutable.tryEmit(event)
@@ -137,7 +137,7 @@ class MapboxScreenManager internal constructor(
             screenStack.pop()
             screenManager.pop()
             val newTop = screenStack.peek()
-            logI(TAG) { "goBack to ${newTop?.first}." }
+            logAndroidAuto("$TAG goBack to ${newTop?.first}.")
             check(newTop != null && screenManager.top == newTop.second) {
                 "goBack needs the MapboxScreenManager and ScreenManager to have similar screen " +
                     "back-stacks. ScreenManager top is not equal to ${newTop?.first}."
@@ -147,10 +147,10 @@ class MapboxScreenManager internal constructor(
             )
             true
         } else {
-            logI(TAG) {
-                "goBack cannot remove the top because ${screenManager.top::class.simpleName} is " +
-                    "not the top of MapboxScreenManager."
-            }
+            logAndroidAuto(
+                "$TAG goBack cannot remove the top because " +
+                    "${screenManager.top::class.simpleName} is not the top of MapboxScreenManager."
+            )
             false
         }
     }
@@ -219,14 +219,14 @@ class MapboxScreenManager internal constructor(
 
     private fun onReplaceTop(key: String) {
         if (key == screenStack.peek()?.first) {
-            logI(TAG) { "replaceTop exit, the top is already set to $key" }
+            logAndroidAuto("$TAG replaceTop exit, the top is already set to $key")
             return
         }
         val factory: MapboxScreenFactory = requireScreenFactory(key)
         val screen = factory.create(carContextOwner.carContext())
         screenStack.push(Pair(key, screen))
         val screenManager = requireScreenManager()
-        logI(TAG) { "replaceTop $key remove ${screenManager.stackSize} screens" }
+        logAndroidAuto("$TAG replaceTop $key remove ${screenManager.stackSize} screens")
         screenManager.replaceTop(screen)
     }
 
@@ -243,13 +243,13 @@ class MapboxScreenManager internal constructor(
 
     private fun onPush(key: String) {
         if (key == screenStack.peek()?.first) {
-            logI(TAG) { "push exit, the top is already set to $key" }
+            logAndroidAuto("$TAG push exit, the top is already set to $key")
             return
         }
         val factory: MapboxScreenFactory = requireScreenFactory(key)
         val screen = factory.create(carContextOwner.carContext())
         screenStack.push(Pair(key, screen))
-        logI(TAG) { "Push $key on top of ${screenManager?.stackSize} screens" }
+        logAndroidAuto("$TAG Push $key on top of ${screenManager?.stackSize} screens")
         requireScreenManager().push(screen)
     }
 
