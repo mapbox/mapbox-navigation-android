@@ -66,6 +66,7 @@ import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRece
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameBackground
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoadNameTextAppearance
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultRoutePreviewButtonStyle
+import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedInfoOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitStyle
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultSpeedLimitTextAppearance
 import com.mapbox.navigation.dropin.ViewStyleCustomization.Companion.defaultStartNavigationButtonStyle
@@ -91,6 +92,8 @@ import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder.Companion.regularPuck
+import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
+import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoStyle
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.utils.internal.toPoint
 
@@ -149,6 +152,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         initDebugOptions()
         initActivityOptions()
         initGeneralOptions()
+        initSpeedLimitOptions()
         initMapOptions()
         initActionsOptions()
         initInfoPanelOptions()
@@ -225,6 +229,18 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
     //endregion
 
+    //region Speed limit
+
+    private fun initSpeedLimitOptions() {
+        bindSwitch(
+            menuBinding.toggleLegacySpeed,
+            viewModel.useLegacy,
+            ::toggleLegacySpeedLimit
+        )
+    }
+
+    //endregion
+
     //region General Options
 
     private fun initGeneralOptions() {
@@ -270,6 +286,16 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         )
     }
 
+    private fun toggleLegacySpeedLimit(enabled: Boolean) {
+        binding.navigationView.customizeViewBinders {
+            speedLimitBinder = if (enabled) {
+                legacySpeedLimitBinder()
+            } else {
+                defaultSpeedInfoBinder()
+            }
+        }
+    }
+
     private fun toggleShowManeuver(enabled: Boolean) {
         binding.navigationView.customizeViewOptions {
             showManeuver = enabled
@@ -301,6 +327,15 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 tripProgressStyle = R.style.MyCustomTripProgressStyle
                 speedLimitStyle = R.style.MyCustomSpeedLimitStyle
                 speedLimitTextAppearance = R.style.MyCustomSpeedLimitTextAppearance
+                speedInfoOptions = MapboxSpeedInfoOptions
+                    .Builder()
+                    .speedInfoStyle(
+                        SpeedInfoStyle().apply {
+                            postedSpeedMutcdTextAppearance = R.style.MyCustomPostedSpeedAppearance
+                            postedSpeedMutcdLayoutBackground = R.drawable.bg_custom_speed_info_mutcd
+                        }
+                    )
+                    .build()
                 destinationMarkerAnnotationOptions = PointAnnotationOptions().apply {
                     withIconImage(
                         ContextCompat.getDrawable(
@@ -329,6 +364,7 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
                 tripProgressStyle = defaultTripProgressStyle()
                 speedLimitStyle = defaultSpeedLimitStyle()
                 speedLimitTextAppearance = defaultSpeedLimitTextAppearance()
+                speedInfoOptions = defaultSpeedInfoOptions()
                 destinationMarkerAnnotationOptions =
                     defaultDestinationMarkerAnnotationOptions(context)
                 roadNameBackground = defaultRoadNameBackground()

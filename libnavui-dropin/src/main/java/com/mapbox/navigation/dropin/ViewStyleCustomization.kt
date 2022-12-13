@@ -26,6 +26,8 @@ import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
 import com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameView
 import com.mapbox.navigation.ui.maps.view.MapboxCameraModeButton
+import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
+import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedInfoView
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
@@ -92,18 +94,10 @@ class ViewStyleCustomization {
     var tripProgressStyle: Int? = null
 
     /**
-     * Provide custom [MapboxSpeedLimitView] style.
-     * Use [defaultSpeedLimitStyle] to reset to default.
+     * Provide options to style [MapboxSpeedInfoView] MUTCD and VIENNA configuration .
+     * Use [defaultSpeedInfoOptions] to reset to default.
      */
-    @StyleRes
-    var speedLimitStyle: Int? = null
-
-    /**
-     * Provide custom [MapboxSpeedLimitView] [TextAppearance].
-     * Use [defaultSpeedLimitTextAppearance] to reset to default.
-     */
-    @StyleRes
-    var speedLimitTextAppearance: Int? = null
+    var speedInfoOptions: MapboxSpeedInfoOptions? = null
 
     /**
      * Provide custom [MapboxRoadNameView] [TextAppearance].
@@ -182,6 +176,28 @@ class ViewStyleCustomization {
      */
     var locationPuckOptions: LocationPuckOptions? = null
 
+    /**
+     * Provide custom [MapboxSpeedLimitView] style.
+     * Use [defaultSpeedLimitStyle] to reset to default.
+     */
+    @StyleRes
+    @Deprecated(
+        message = "The parent MapboxSpeedLimitView is deprecated",
+        replaceWith = ReplaceWith("speedInfoOptions")
+    )
+    var speedLimitStyle: Int? = null
+
+    /**
+     * Provide custom [MapboxSpeedLimitView] [TextAppearance].
+     * Use [defaultSpeedLimitTextAppearance] to reset to default.
+     */
+    @StyleRes
+    @Deprecated(
+        message = "The parent MapboxSpeedLimitView is deprecated",
+        replaceWith = ReplaceWith("speedInfoOptions")
+    )
+    var speedLimitTextAppearance: Int? = null
+
     companion object {
         /**
          * Default info panel peek height in pixels.
@@ -239,18 +255,6 @@ class ViewStyleCustomization {
          */
         @StyleRes
         fun defaultTripProgressStyle(): Int = R.style.DropInStyleTripProgressView
-
-        /**
-         * Default [MapboxSpeedLimitView] style.
-         */
-        @StyleRes
-        fun defaultSpeedLimitStyle(): Int = R.style.DropInStyleSpeedLimit
-
-        /**
-         * Default [MapboxSpeedLimitView] [TextAppearance].
-         */
-        @StyleRes
-        fun defaultSpeedLimitTextAppearance(): Int = R.style.DropInSpeedLimitTextAppearance
 
         /**
          * Default [MapboxRoadNameView] [TextAppearance].
@@ -366,6 +370,32 @@ class ViewStyleCustomization {
          */
         fun defaultLocationPuckOptions(context: Context): LocationPuckOptions =
             LocationPuckOptions.Builder(context).build()
+
+        /**
+         * Default [MapboxSpeedInfoOptions]
+         */
+        fun defaultSpeedInfoOptions(): MapboxSpeedInfoOptions =
+            MapboxSpeedInfoOptions.Builder().build()
+
+        /**
+         * Default [MapboxSpeedLimitView] style.
+         */
+        @Deprecated(
+            message = "The parent MapboxSpeedLimitView is deprecated",
+            replaceWith = ReplaceWith("speedInfoOptions")
+        )
+        @StyleRes
+        fun defaultSpeedLimitStyle(): Int = R.style.DropInStyleSpeedLimit
+
+        /**
+         * Default [MapboxSpeedLimitView] [TextAppearance].
+         */
+        @Deprecated(
+            message = "The parent MapboxSpeedLimitView is deprecated",
+            replaceWith = ReplaceWith("speedInfoOptions")
+        )
+        @StyleRes
+        fun defaultSpeedLimitTextAppearance(): Int = R.style.DropInSpeedLimitTextAppearance
 
         private fun defaultMutcdProperties() = MapboxExitProperties.PropertiesMutcd(
             exitBackground = R.drawable.mapbox_dropin_exit_board_background,
