@@ -151,8 +151,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                 val origin = relevantAlternative.routerOrigin.mapToSdkRouteOrigin()
 
                 state = RerouteState.RouteFetched(origin)
-                callback.onNewRoutes(newList, origin)
                 state = RerouteState.Idle
+                callback.onNewRoutes(newList, origin)
                 return
             }
         }
