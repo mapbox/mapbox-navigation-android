@@ -1,0 +1,6 @@
+[
+  {
+    "type": "Bug fixes and improvements",
+    "title": "Fixed approaches list update in `RouteOptionsUpdater`(uses for reroute). It was putting to the origin approach corresponding approach from legacy approach list."
+  }
+]

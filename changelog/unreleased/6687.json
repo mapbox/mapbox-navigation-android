@@ -1,0 +1,10 @@
+[
+  {
+    "type": "Features",
+    "title": "Introduced `MapboxSpeedInfoApi` and `MapboxSpeedInfoView`. The combination of API and View can be used to render posted and current speed limit at user's current location."
+  },
+  {
+    "type": "Features",
+    "title": ":warning: Deprecated `MapboxSpeedLimitApi` and `MapboxSpeedLimitView`."
+  }
+]

@@ -1,0 +1,4 @@
+{
+  "type": "Bug fixes and improvements",
+  "title": "Updated the `MapboxRestAreaApi` logic to load a SAPA map only if the upcoming rest stop is at the current step of the route leg."
+}
