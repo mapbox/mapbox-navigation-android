@@ -9,6 +9,8 @@ import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.ViewStyleCustomization
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
+import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
+import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoStyle
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -58,6 +60,7 @@ class NavigationViewStylesTest {
         assertEquals(c.roadNameTextAppearance, sut.roadNameTextAppearance.value)
         assertEquals(c.arrivalTextAppearance, sut.arrivalTextAppearance.value)
         assertEquals(c.locationPuckOptions, sut.locationPuckOptions.value)
+        assertEquals(c.speedInfoOptions, sut.speedInfoOptions.value)
     }
 
     @Test
@@ -99,6 +102,21 @@ class NavigationViewStylesTest {
         roadNameBackground = android.R.drawable.spinner_background
         roadNameTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
         arrivalTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
+        speedInfoOptions = MapboxSpeedInfoOptions.Builder().speedInfoStyle(
+            SpeedInfoStyle().apply {
+                mutcdLayoutBackground = android.R.drawable.spinner_background
+                postedSpeedMutcdLayoutBackground = android.R.drawable.spinner_background
+                postedSpeedLegendTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
+                postedSpeedMutcdTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
+                postedSpeedUnitTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
+                currentSpeedMutcdTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
+
+                viennaLayoutBackground = android.R.drawable.spinner_background
+                postedSpeedViennaLayoutBackground = android.R.drawable.spinner_background
+                postedSpeedViennaTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
+                currentSpeedViennaTextAppearance = android.R.style.TextAppearance_DeviceDefault
+            }
+        ).build()
         locationPuckOptions = LocationPuckOptions
             .Builder(ctx)
             .freeDrivePuck(

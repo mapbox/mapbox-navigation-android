@@ -297,6 +297,32 @@
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
+            <!-- Speed limit customization -->
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:paddingVertical="10dp"
+                    android:text="Speed Limit" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleLegacySpeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Use Legacy Speed Limit"
+                    android:textAllCaps="true" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
             <!-- Actions Customization -->
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"

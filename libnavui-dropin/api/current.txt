@@ -61,7 +61,8 @@ package com.mapbox.navigation.dropin {
   }
 
   public final class ViewBinderCustomization {
-    ctor public ViewBinderCustomization();
+    ctor @Deprecated public ViewBinderCustomization();
+    method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? defaultSpeedInfoBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getActionButtonsBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getActionCameraModeButtonBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getActionCompassButtonBinder();
@@ -88,6 +89,7 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getRightFrameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getRoadNameBinder();
     method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? getSpeedLimitBinder();
+    method public com.mapbox.navigation.ui.base.lifecycle.UIBinder? legacySpeedLimitBinder();
     method public void setActionButtonsBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setActionCameraModeButtonBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
     method public void setActionCompassButtonBinder(com.mapbox.navigation.ui.base.lifecycle.UIBinder?);
@@ -253,8 +255,9 @@ package com.mapbox.navigation.dropin {
     method public Integer? getRoadNameBackground();
     method public Integer? getRoadNameTextAppearance();
     method public Integer? getRoutePreviewButtonStyle();
-    method public Integer? getSpeedLimitStyle();
-    method public Integer? getSpeedLimitTextAppearance();
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions? getSpeedInfoOptions();
+    method @Deprecated public Integer? getSpeedLimitStyle();
+    method @Deprecated public Integer? getSpeedLimitTextAppearance();
     method public Integer? getStartNavigationButtonStyle();
     method public Integer? getTripProgressStyle();
     method public void setArrivalTextAppearance(Integer?);
@@ -274,8 +277,9 @@ package com.mapbox.navigation.dropin {
     method public void setRoadNameBackground(Integer?);
     method public void setRoadNameTextAppearance(Integer?);
     method public void setRoutePreviewButtonStyle(Integer?);
-    method public void setSpeedLimitStyle(Integer?);
-    method public void setSpeedLimitTextAppearance(Integer?);
+    method public void setSpeedInfoOptions(com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions?);
+    method @Deprecated public void setSpeedLimitStyle(Integer?);
+    method @Deprecated public void setSpeedLimitTextAppearance(Integer?);
     method public void setStartNavigationButtonStyle(Integer?);
     method public void setTripProgressStyle(Integer?);
     property public final Integer? arrivalTextAppearance;
@@ -295,8 +299,9 @@ package com.mapbox.navigation.dropin {
     property public final Integer? roadNameBackground;
     property public final Integer? roadNameTextAppearance;
     property public final Integer? routePreviewButtonStyle;
-    property public final Integer? speedLimitStyle;
-    property public final Integer? speedLimitTextAppearance;
+    property public final com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions? speedInfoOptions;
+    property @Deprecated public final Integer? speedLimitStyle;
+    property @Deprecated public final Integer? speedLimitTextAppearance;
     property public final Integer? startNavigationButtonStyle;
     property public final Integer? tripProgressStyle;
     field public static final com.mapbox.navigation.dropin.ViewStyleCustomization.Companion Companion;
@@ -320,8 +325,9 @@ package com.mapbox.navigation.dropin {
     method @DrawableRes public int defaultRoadNameBackground();
     method @StyleRes public int defaultRoadNameTextAppearance();
     method @StyleRes public int defaultRoutePreviewButtonStyle();
-    method @StyleRes public int defaultSpeedLimitStyle();
-    method @StyleRes public int defaultSpeedLimitTextAppearance();
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions defaultSpeedInfoOptions();
+    method @Deprecated @StyleRes public int defaultSpeedLimitStyle();
+    method @Deprecated @StyleRes public int defaultSpeedLimitTextAppearance();
     method @StyleRes public int defaultStartNavigationButtonStyle();
     method @StyleRes public int defaultTripProgressStyle();
   }

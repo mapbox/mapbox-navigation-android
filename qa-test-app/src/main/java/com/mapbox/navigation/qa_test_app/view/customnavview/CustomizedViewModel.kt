@@ -10,6 +10,9 @@ class CustomizedViewModel : ViewModel() {
     // Activity
     val fullScreen = MutableLiveData(false)
 
+    // Speed Limit
+    val useLegacy = MutableLiveData(false)
+
     // General
     val showManeuver = MutableLiveData(true)
     val showSpeedLimit = MutableLiveData(true)
