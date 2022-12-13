@@ -58,7 +58,7 @@ class SpeedLimitCoordinatorTest {
     fun `should return default binder`() = runBlockingTest {
         coordinator.apply {
             val binders = mapboxNavigation.flowViewBinders().take(1).toList()
-            assertTrue(binders.first() is SpeedLimitViewBinder)
+            assertTrue(binders.first() is SpeedInfoViewBinder)
         }
     }
 

@@ -2,7 +2,17 @@
 package com.mapbox.navigation.ui.speedlimit {
 
   public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation speedInfo(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedInfoView speedInfoView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.speedlimit.SpeedInfoConfig,kotlin.Unit> config = {});
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation speedLimit(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView speedLimitView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.speedlimit.SpeedLimitConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SpeedInfoConfig {
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions getSpeedInfoOptions();
+    method public void setDistanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions);
+    method public void setSpeedInfoOptions(com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions);
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions;
+    property public final com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions speedInfoOptions;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SpeedLimitConfig {
@@ -48,12 +58,14 @@ package com.mapbox.navigation.ui.speedlimit.model {
     method public boolean getShowLegend();
     method public boolean getShowSpeedWhenUnavailable();
     method public boolean getShowUnit();
+    method public com.mapbox.navigation.ui.speedlimit.model.SpeedInfoStyle getSpeedInfoStyle();
     method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder toBuilder();
     property public final com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection currentSpeedDirection;
     property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign? renderWithSpeedSign;
     property public final boolean showLegend;
     property public final boolean showSpeedWhenUnavailable;
     property public final boolean showUnit;
+    property public final com.mapbox.navigation.ui.speedlimit.model.SpeedInfoStyle speedInfoStyle;
   }
 
   public static final class MapboxSpeedInfoOptions.Builder {
@@ -64,6 +76,7 @@ package com.mapbox.navigation.ui.speedlimit.model {
     method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder showLegend(boolean showLegend);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder showSpeedWhenUnavailable(boolean showSpeedWhenUnavailable);
     method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder showUnit(boolean showUnit);
+    method public com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions.Builder speedInfoStyle(com.mapbox.navigation.ui.speedlimit.model.SpeedInfoStyle speedInfoStyle);
   }
 
   public final class PostedAndCurrentSpeedFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.SpeedData,java.lang.Integer> {
@@ -78,6 +91,40 @@ package com.mapbox.navigation.ui.speedlimit.model {
     property public final com.mapbox.navigation.base.speed.model.SpeedUnit fromUnit;
     property public final double speed;
     property public final com.mapbox.navigation.base.formatter.UnitType toUnit;
+  }
+
+  public final class SpeedInfoStyle {
+    ctor public SpeedInfoStyle();
+    method public int getCurrentSpeedMutcdTextAppearance();
+    method public int getCurrentSpeedViennaTextAppearance();
+    method public int getMutcdLayoutBackground();
+    method public int getPostedSpeedLegendTextAppearance();
+    method public int getPostedSpeedMutcdLayoutBackground();
+    method public int getPostedSpeedMutcdTextAppearance();
+    method public int getPostedSpeedUnitTextAppearance();
+    method public int getPostedSpeedViennaLayoutBackground();
+    method public int getPostedSpeedViennaTextAppearance();
+    method public int getViennaLayoutBackground();
+    method public void setCurrentSpeedMutcdTextAppearance(int);
+    method public void setCurrentSpeedViennaTextAppearance(int);
+    method public void setMutcdLayoutBackground(int);
+    method public void setPostedSpeedLegendTextAppearance(int);
+    method public void setPostedSpeedMutcdLayoutBackground(int);
+    method public void setPostedSpeedMutcdTextAppearance(int);
+    method public void setPostedSpeedUnitTextAppearance(int);
+    method public void setPostedSpeedViennaLayoutBackground(int);
+    method public void setPostedSpeedViennaTextAppearance(int);
+    method public void setViennaLayoutBackground(int);
+    property public final int currentSpeedMutcdTextAppearance;
+    property public final int currentSpeedViennaTextAppearance;
+    property public final int mutcdLayoutBackground;
+    property public final int postedSpeedLegendTextAppearance;
+    property public final int postedSpeedMutcdLayoutBackground;
+    property public final int postedSpeedMutcdTextAppearance;
+    property public final int postedSpeedUnitTextAppearance;
+    property public final int postedSpeedViennaLayoutBackground;
+    property public final int postedSpeedViennaTextAppearance;
+    property public final int viennaLayoutBackground;
   }
 
   public final class SpeedInfoValue {

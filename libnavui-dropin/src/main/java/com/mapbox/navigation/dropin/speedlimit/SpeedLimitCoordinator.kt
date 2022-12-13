@@ -23,7 +23,7 @@ internal class SpeedLimitCoordinator(
             context.uiBinders.speedLimit
         ) { show, binder ->
             if (show) {
-                binder ?: SpeedLimitViewBinder(context)
+                binder ?: SpeedInfoViewBinder(context)
             } else {
                 EmptyBinder()
             }

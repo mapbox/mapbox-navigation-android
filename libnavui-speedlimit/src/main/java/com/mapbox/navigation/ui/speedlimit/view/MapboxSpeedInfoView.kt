@@ -20,7 +20,6 @@ import androidx.core.widget.TextViewCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.base.speed.model.SpeedUnit
-import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedInfoApi
 import com.mapbox.navigation.ui.speedlimit.databinding.MapboxSpeedInfoViewBinding
 import com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection
@@ -124,39 +123,7 @@ class MapboxSpeedInfoView : FrameLayout {
 
     init {
         applyOptions(speedInfoOptions)
-        speedInfoMutcdLayout.setBackgroundResource(R.drawable.background_mutcd_outer_layout)
-        speedInfoPostedSpeedLayoutMutcd.setBackgroundResource(
-            R.drawable.background_mutcd_posted_speed_limit
-        )
-        TextViewCompat.setTextAppearance(
-            speedInfoLegendTextMutcd,
-            R.style.MapboxSpeedInfoMutcdLegendStyle
-        )
-        TextViewCompat.setTextAppearance(
-            speedInfoPostedSpeedMutcd,
-            R.style.MapboxSpeedInfoPostedSpeedMutcdStyle
-        )
-        TextViewCompat.setTextAppearance(
-            speedInfoUnitTextMutcd,
-            R.style.MapboxSpeedInfoMutcdUnitStyle
-        )
-        TextViewCompat.setTextAppearance(
-            speedInfoCurrentSpeedMutcd,
-            R.style.MapboxSpeedInfoCurrentSpeedMutcdStyle
-        )
-
-        speedInfoViennaLayout.setBackgroundResource(R.drawable.background_vienna_outer_layout)
-        speedInfoPostedSpeedLayoutVienna.setBackgroundResource(
-            R.drawable.background_vienna_posted_speed_limit
-        )
-        TextViewCompat.setTextAppearance(
-            speedInfoPostedSpeedVienna,
-            R.style.MapboxSpeedInfoPostedSpeedViennaStyle
-        )
-        TextViewCompat.setTextAppearance(
-            speedInfoCurrentSpeedVienna,
-            R.style.MapboxSpeedInfoCurrentSpeedViennaStyle
-        )
+        updateStyles()
     }
 
     /**
@@ -200,6 +167,7 @@ class MapboxSpeedInfoView : FrameLayout {
      */
     fun applyOptions(speedInfoOptions: MapboxSpeedInfoOptions) {
         this.speedInfoOptions = speedInfoOptions
+        updateStyles()
         updateView()
     }
 
@@ -248,6 +216,46 @@ class MapboxSpeedInfoView : FrameLayout {
                 // No-op
             }
         }
+    }
+
+    private fun updateStyles() {
+        speedInfoMutcdLayout.setBackgroundResource(
+            speedInfoOptions.speedInfoStyle.mutcdLayoutBackground
+        )
+        speedInfoPostedSpeedLayoutMutcd.setBackgroundResource(
+            speedInfoOptions.speedInfoStyle.postedSpeedMutcdLayoutBackground
+        )
+        TextViewCompat.setTextAppearance(
+            speedInfoLegendTextMutcd,
+            speedInfoOptions.speedInfoStyle.postedSpeedLegendTextAppearance
+        )
+        TextViewCompat.setTextAppearance(
+            speedInfoPostedSpeedMutcd,
+            speedInfoOptions.speedInfoStyle.postedSpeedMutcdTextAppearance
+        )
+        TextViewCompat.setTextAppearance(
+            speedInfoUnitTextMutcd,
+            speedInfoOptions.speedInfoStyle.postedSpeedUnitTextAppearance
+        )
+        TextViewCompat.setTextAppearance(
+            speedInfoCurrentSpeedMutcd,
+            speedInfoOptions.speedInfoStyle.currentSpeedMutcdTextAppearance
+        )
+
+        speedInfoViennaLayout.setBackgroundResource(
+            speedInfoOptions.speedInfoStyle.viennaLayoutBackground
+        )
+        speedInfoPostedSpeedLayoutVienna.setBackgroundResource(
+            speedInfoOptions.speedInfoStyle.postedSpeedViennaLayoutBackground
+        )
+        TextViewCompat.setTextAppearance(
+            speedInfoPostedSpeedVienna,
+            speedInfoOptions.speedInfoStyle.postedSpeedViennaTextAppearance
+        )
+        TextViewCompat.setTextAppearance(
+            speedInfoCurrentSpeedVienna,
+            speedInfoOptions.speedInfoStyle.currentSpeedViennaTextAppearance
+        )
     }
 
     private fun updateView() {

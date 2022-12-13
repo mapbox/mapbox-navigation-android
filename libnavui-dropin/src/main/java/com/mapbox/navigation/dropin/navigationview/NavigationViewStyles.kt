@@ -5,6 +5,7 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.navigation.dropin.ViewStyleCustomization
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
+import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,10 +42,8 @@ internal class NavigationViewStyles(context: Context) {
     private var _startNavigationButtonStyle: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultStartNavigationButtonStyle())
 
-    private val _speedLimitStyle: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultSpeedLimitStyle())
-    private val _speedLimitTextAppearance: MutableStateFlow<Int> =
-        MutableStateFlow(ViewStyleCustomization.defaultSpeedLimitTextAppearance())
+    private val _speedInfoOptions: MutableStateFlow<MapboxSpeedInfoOptions> =
+        MutableStateFlow(ViewStyleCustomization.defaultSpeedInfoOptions())
     private val _roadNameBackground: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultRoadNameBackground())
     private val _roadNameTextAppearance: MutableStateFlow<Int> =
@@ -57,6 +56,14 @@ internal class NavigationViewStyles(context: Context) {
         MutableStateFlow(ViewStyleCustomization.defaultArrivalTextAppearance())
     private val _locationPuckOptions: MutableStateFlow<LocationPuckOptions> =
         MutableStateFlow(ViewStyleCustomization.defaultLocationPuckOptions(context))
+
+    @Deprecated(message = "The parent MapboxSpeedLimitView is deprecated")
+    private val _speedLimitStyle: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultSpeedLimitStyle())
+
+    @Deprecated(message = "The parent MapboxSpeedLimitView is deprecated")
+    private val _speedLimitTextAppearance: MutableStateFlow<Int> =
+        MutableStateFlow(ViewStyleCustomization.defaultSpeedLimitTextAppearance())
 
     val infoPanelPeekHeight: StateFlow<Int> = _infoPanelPeekHeight.asStateFlow()
     val infoPanelMarginStart: StateFlow<Int> = _infoPanelMarginStart.asStateFlow()
@@ -75,8 +82,7 @@ internal class NavigationViewStyles(context: Context) {
     val endNavigationButtonStyle: StateFlow<Int> = _endNavigationButtonStyle.asStateFlow()
     val startNavigationButtonStyle: StateFlow<Int> = _startNavigationButtonStyle.asStateFlow()
 
-    val speedLimitStyle: StateFlow<Int> = _speedLimitStyle.asStateFlow()
-    val speedLimitTextAppearance: StateFlow<Int> = _speedLimitTextAppearance.asStateFlow()
+    val speedInfoOptions: StateFlow<MapboxSpeedInfoOptions> = _speedInfoOptions.asStateFlow()
     val destinationMarkerAnnotationOptions: StateFlow<PointAnnotationOptions> =
         _destinationMarkerAnnotationOptions.asStateFlow()
     val roadNameBackground: StateFlow<Int> = _roadNameBackground.asStateFlow()
@@ -84,6 +90,18 @@ internal class NavigationViewStyles(context: Context) {
     val maneuverViewOptions: StateFlow<ManeuverViewOptions> = _maneuverViewOptions.asStateFlow()
     val arrivalTextAppearance: StateFlow<Int> = _arrivalTextAppearance.asStateFlow()
     val locationPuckOptions: StateFlow<LocationPuckOptions> = _locationPuckOptions.asStateFlow()
+
+    @Deprecated(
+        message = "The parent MapboxSpeedLimitView is deprecated",
+        replaceWith = ReplaceWith("speedInfoStyle")
+    )
+    val speedLimitStyle: StateFlow<Int> = _speedLimitStyle.asStateFlow()
+
+    @Deprecated(
+        message = "The parent MapboxSpeedLimitView is deprecated",
+        replaceWith = ReplaceWith("speedInfoStyle")
+    )
+    val speedLimitTextAppearance: StateFlow<Int> = _speedLimitTextAppearance.asStateFlow()
 
     fun applyCustomization(customization: ViewStyleCustomization) {
         customization.infoPanelPeekHeight?.also { _infoPanelPeekHeight.value = it }
@@ -104,9 +122,8 @@ internal class NavigationViewStyles(context: Context) {
         customization.endNavigationButtonStyle?.also { _endNavigationButtonStyle.value = it }
         customization.startNavigationButtonStyle?.also { _startNavigationButtonStyle.value = it }
 
-        customization.speedLimitStyle?.also { _speedLimitStyle.value = it }
+        customization.speedInfoOptions?.also { _speedInfoOptions.value = it }
         customization.maneuverViewOptions?.also { _maneuverViewOptions.value = it }
-        customization.speedLimitTextAppearance?.also { _speedLimitTextAppearance.value = it }
         customization.destinationMarkerAnnotationOptions?.also {
             _destinationMarkerAnnotationOptions.value = it
         }
@@ -114,5 +131,8 @@ internal class NavigationViewStyles(context: Context) {
         customization.roadNameTextAppearance?.also { _roadNameTextAppearance.value = it }
         customization.arrivalTextAppearance?.also { _arrivalTextAppearance.value = it }
         customization.locationPuckOptions?.also { _locationPuckOptions.value = it }
+
+        customization.speedLimitStyle?.also { _speedLimitStyle.value = it }
+        customization.speedLimitTextAppearance?.also { _speedLimitTextAppearance.value = it }
     }
 }
