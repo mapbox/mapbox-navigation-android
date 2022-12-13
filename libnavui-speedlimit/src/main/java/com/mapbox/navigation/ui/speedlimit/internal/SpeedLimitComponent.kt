@@ -10,6 +10,10 @@ import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@Deprecated(
+    message = "The component cannot render user's current speed",
+    replaceWith = ReplaceWith("SpeedInfoComponent", imports = arrayOf("SpeedInfoComponent"))
+)
 class SpeedLimitComponent(
     @StyleRes val style: Int,
     @StyleRes val textAppearance: Int,

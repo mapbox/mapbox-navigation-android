@@ -31,6 +31,18 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 - Introduced `MapboxSpeedInfoApi` and `MapboxSpeedInfoView`. The combination of API and View can be used to render posted and current speed limit at user's current location. [#6687](https://github.com/mapbox/mapbox-navigation-android/pull/6687)
 - :warning: Deprecated `MapboxSpeedLimitApi` and `MapboxSpeedLimitView`. [#6687](https://github.com/mapbox/mapbox-navigation-android/pull/6687)
+- Added support to use `MapboxSpeedInfoView` as default view to render posted and current speed in Drop-In UI. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - Introduced `ViewStyleCustomization.speedInfoOptions` to style the `MapboxSpeedInfoView` using Drop-In UI. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - Introduced `ViewBinderCustomization.legacySpeedLimitBinder()` and `ViewBinderCustomization.defaultSpeedInfoBinder` to facilitate the simple use of legacy `MapboxSpeedLimitView` and new `MapboxSpeedInfoView`. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - :warning: Deprecated `ViewStyleCustomization.setSpeedLimitStyle` and `ViewStyleCustomization.setSpeedLimitTextAppearance`. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  To use the legacy speed limit view, add the following code:
+```kotlin
+binding.navigationView.customizeViewBinders {
+    binding.navigationView.customizeViewBinders {
+        speedLimitBinder = legacySpeedLimitBinder()
+    }
+}
+```
 #### Bug fixes and improvements
 - Fixed approaches list update in `RouteOptionsUpdater`(uses for reroute). It was putting to the origin approach corresponding approach from legacy approach list. [#6540](https://github.com/mapbox/mapbox-navigation-android/pull/6540)
 - Updated the `MapboxRestAreaApi` logic to load a SAPA map only if the upcoming rest stop is at the current step of the route leg. [#6695](https://github.com/mapbox/mapbox-navigation-android/pull/6695)

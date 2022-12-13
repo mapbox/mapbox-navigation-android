@@ -68,7 +68,7 @@ internal class NavigationViewContext(
     )
 
     fun applyBinderCustomization(action: ViewBinderCustomization.() -> Unit) {
-        val customization = ViewBinderCustomization().apply(action)
+        val customization = ViewBinderCustomization(this).apply(action)
         uiBinders.applyCustomization(customization)
     }
 

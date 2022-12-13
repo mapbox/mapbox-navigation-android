@@ -5,14 +5,27 @@ import com.mapbox.navigation.dropin.actionbutton.ActionButtonDescription
 import com.mapbox.navigation.dropin.actionbutton.ActionButtonsBinder
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBinder
 import com.mapbox.navigation.dropin.map.MapViewBinder
+import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
+import com.mapbox.navigation.dropin.speedlimit.SpeedInfoViewBinder
+import com.mapbox.navigation.dropin.speedlimit.SpeedLimitViewBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
  * A class that allows you to define [UIBinder] for various different views used by the
  * [NavigationView]. If not specified, [NavigationView] uses the default [UIBinder] defined for
  * each of these views.
  */
-class ViewBinderCustomization {
+class ViewBinderCustomization internal constructor(private val navContext: NavigationViewContext?) {
+
+    /**
+     * constructor
+     */
+    @Deprecated(
+        message = "The constructor, if used, would return null when legacySpeedLimitBinder() and " +
+            "defaultSpeedLimitBinder() are invoked"
+    )
+    constructor() : this(null)
 
     /**
      * Customize the speed limit view by providing your own [UIBinder].
@@ -181,4 +194,24 @@ class ViewBinderCustomization {
      * Use [MapViewBinder.defaultBinder] to reset to default.
      */
     var mapViewBinder: MapViewBinder? = null
+
+    /**
+     * Invoke the function to use the legacy speed limit binder.
+     * @return UIBinder
+     */
+    fun legacySpeedLimitBinder(): UIBinder? {
+        return ifNonNull(navContext) {
+            SpeedLimitViewBinder(it)
+        }
+    }
+
+    /**
+     * Invoke the function to use the default speed limit binder.
+     * @return UIBinder
+     */
+    fun defaultSpeedInfoBinder(): UIBinder? {
+        return ifNonNull(navContext) {
+            SpeedInfoViewBinder(it)
+        }
+    }
 }

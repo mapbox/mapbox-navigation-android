@@ -13,6 +13,7 @@ import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedInfoView
  * Default value is true.
  * @param showLegend If set to true [MapboxSpeedInfoView] will render the text "Speed Limit" for
  * MUTCD convention. Default value is false.
+ * @param speedInfoStyle applies styles to [MapboxSpeedInfoView]
  * @param showSpeedWhenUnavailable If set to true [MapboxSpeedInfoView] will render the posted speed
  * with text "--". Default value is false.
  * @param renderWithSpeedSign [MapboxSpeedInfoView] will always render in Vienna convention if
@@ -28,6 +29,7 @@ import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedInfoView
 class MapboxSpeedInfoOptions private constructor(
     val showUnit: Boolean,
     val showLegend: Boolean,
+    val speedInfoStyle: SpeedInfoStyle,
     @ExperimentalPreviewMapboxNavigationAPI val showSpeedWhenUnavailable: Boolean,
     @ExperimentalPreviewMapboxNavigationAPI val renderWithSpeedSign: SpeedLimitSign?,
     val currentSpeedDirection: CurrentSpeedDirection,
@@ -41,6 +43,7 @@ class MapboxSpeedInfoOptions private constructor(
         return Builder()
             .showUnit(showUnit)
             .showLegend(showLegend)
+            .speedInfoStyle(speedInfoStyle)
             .showSpeedWhenUnavailable(showSpeedWhenUnavailable)
             .renderWithSpeedSign(renderWithSpeedSign)
             .currentSpeedDirection(currentSpeedDirection)
@@ -54,6 +57,7 @@ class MapboxSpeedInfoOptions private constructor(
         return "MapboxSpeedInfoOptions(" +
             "showUnit=$showUnit, " +
             "showLegend=$showLegend, " +
+            "speedInfoStyle=$speedInfoStyle, " +
             "showSpeedWhenUnavailable=$showSpeedWhenUnavailable, " +
             "renderWithSpeedSign=$renderWithSpeedSign, " +
             "currentSpeedDirection=$currentSpeedDirection" +
@@ -72,6 +76,7 @@ class MapboxSpeedInfoOptions private constructor(
 
         if (showUnit != other.showUnit) return false
         if (showLegend != other.showLegend) return false
+        if (speedInfoStyle != other.speedInfoStyle) return false
         if (showSpeedWhenUnavailable != other.showSpeedWhenUnavailable) return false
         if (renderWithSpeedSign != other.renderWithSpeedSign) return false
         if (currentSpeedDirection != other.currentSpeedDirection) return false
@@ -86,6 +91,7 @@ class MapboxSpeedInfoOptions private constructor(
     override fun hashCode(): Int {
         var result = showUnit.hashCode()
         result = 31 * result + showLegend.hashCode()
+        result = 31 * result + speedInfoStyle.hashCode()
         result = 31 * result + showSpeedWhenUnavailable.hashCode()
         result = 31 * result + renderWithSpeedSign.hashCode()
         result = 31 * result + currentSpeedDirection.hashCode()
@@ -98,6 +104,7 @@ class MapboxSpeedInfoOptions private constructor(
     class Builder {
         private var showUnit: Boolean = true
         private var showLegend: Boolean = false
+        private var speedInfoStyle: SpeedInfoStyle = SpeedInfoStyle()
         private var showSpeedWhenUnavailable: Boolean = false
         private var renderWithSpeedSign: SpeedLimitSign? = null
         private var currentSpeedDirection: CurrentSpeedDirection = CurrentSpeedDirection.BOTTOM
@@ -116,6 +123,14 @@ class MapboxSpeedInfoOptions private constructor(
          */
         fun showLegend(showLegend: Boolean): Builder = apply {
             this.showLegend = showLegend
+        }
+
+        /**
+         * Apply the value to apply styles to [MapboxSpeedInfoView].
+         * @param speedInfoStyle set to apply your custom styles.
+         */
+        fun speedInfoStyle(speedInfoStyle: SpeedInfoStyle): Builder = apply {
+            this.speedInfoStyle = speedInfoStyle
         }
 
         /**
@@ -159,6 +174,7 @@ class MapboxSpeedInfoOptions private constructor(
             return MapboxSpeedInfoOptions(
                 showUnit,
                 showLegend,
+                speedInfoStyle,
                 showSpeedWhenUnavailable,
                 renderWithSpeedSign,
                 currentSpeedDirection

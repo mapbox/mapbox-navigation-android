@@ -86,7 +86,7 @@ internal class NavigationViewBinderTest {
         sut.applyCustomization(customization())
 
         sut.applyCustomization(
-            ViewBinderCustomization().apply {
+            ViewBinderCustomization(mockk()).apply {
                 speedLimitBinder = UIBinder.USE_DEFAULT
                 maneuverBinder = UIBinder.USE_DEFAULT
                 roadNameBinder = UIBinder.USE_DEFAULT
@@ -153,7 +153,7 @@ internal class NavigationViewBinderTest {
         assertTrue(sut.mapViewBinder.value is MapboxMapViewBinder)
     }
 
-    private fun customization() = ViewBinderCustomization().apply {
+    private fun customization() = ViewBinderCustomization(mockk()).apply {
         speedLimitBinder = EmptyBinder()
         maneuverBinder = EmptyBinder()
         roadNameBinder = EmptyBinder()

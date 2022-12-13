@@ -41,6 +41,11 @@
         <item name="android:textSize">10sp</item>
     </style>
 
+    <style name="MyCustomPostedSpeedAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
     <style name="MyCustomTurnIconManeuver" parent="MapboxStyleTurnIconManeuver">
         <item name="maneuverTurnIconColor">@color/maneuver_turn_icon_color</item>
         <item name="maneuverTurnIconShadowColor">@color/maneuver_turn_icon_shadow_color</item>

@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.speedlimit.model
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.testing.BuilderTest
+import io.mockk.mockk
 import kotlin.reflect.KClass
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -16,6 +17,7 @@ class MapboxSpeedInfoOptionsTest :
             .Builder()
             .showLegend(true)
             .showUnit(false)
+            .speedInfoStyle(mockk())
             .showSpeedWhenUnavailable(true)
             .renderWithSpeedSign(SpeedLimitSign.VIENNA)
             .currentSpeedDirection(CurrentSpeedDirection.END)
