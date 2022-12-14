@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -147,7 +148,8 @@ internal constructor(
                         .filter { it.voiceInstructions != lastPlayedInstructions }
                         .flatMapConcat {
                             lastPlayedInstructions = it.voiceInstructions
-                            audioGuidance.speak(it.voiceInstructions)
+                            val announcement = audioGuidance.speak(it.voiceInstructions)
+                            flowOf(announcement)
                         }
                         .map { speechAnnouncement ->
                             internalStateFlow.updateAndGet {
