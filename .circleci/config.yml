@@ -38,6 +38,7 @@ workflows:
               only:
                 - main
                 - release-v.*
+                - vv-NAVAND-779-let-sdk-work-on-backroud-thread-2
       - release:
           filters:
             tags:

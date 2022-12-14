@@ -52,6 +52,6 @@ def getSnapshotVersion(String version) {
         if (!isPreRelease) {
             minor += 1
         }
-        return "${major}.${minor}.0-SNAPSHOT"
+        return "${major}.${minor}.0-sdk-background-2-SNAPSHOT"
     }
 }
