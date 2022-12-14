@@ -3,25 +3,17 @@ package com.mapbox.navigation.core.directions.session
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.internal.utils.mapToReason
 
 internal interface DirectionsSession : RouteRefresh {
 
-    /**
-     * Routes that were fetched from [Router] or set manually.
-     * On [routes] change notify registered [RoutesObserver]
-     *
-     * @see [registerRoutesObserver]
-     */
+    val routesUpdatedResult: RoutesUpdatedResult?
     val routes: List<NavigationRoute>
 
     val initialLegIndex: Int
 
-    fun setRoutes(
-        routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutes,
-    )
+    fun setRoutes(routes: DirectionsSessionRoutes)
 
     /**
      * Provide route options for current primary route.
@@ -70,4 +62,17 @@ internal interface DirectionsSession : RouteRefresh {
      * Interrupts the route-fetching request
      */
     fun shutdown()
+}
+
+internal data class DirectionsSessionRoutes(
+    val acceptedRoutes: List<NavigationRoute>,
+    val ignoredRoutes: List<IgnoredRoute>,
+    val setRoutesInfo: SetRoutes,
+) {
+
+    fun toRoutesUpdatedResult(): RoutesUpdatedResult = RoutesUpdatedResult(
+        acceptedRoutes,
+        ignoredRoutes,
+        setRoutesInfo.mapToReason()
+    )
 }

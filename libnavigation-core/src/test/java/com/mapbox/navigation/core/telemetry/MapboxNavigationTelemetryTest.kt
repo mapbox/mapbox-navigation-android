@@ -30,7 +30,6 @@ import com.mapbox.navigation.core.accounts.BillingServiceProvider
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
 import com.mapbox.navigation.core.internal.telemetry.UserFeedback
@@ -53,6 +52,7 @@ import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
 import com.mapbox.navigation.core.telemetry.events.PhoneState
 import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
+import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.testutil.ifCaptured
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
@@ -547,7 +547,7 @@ class MapboxNavigationTelemetryTest {
 
         baseInitialization()
         routesObserverSlot.ifCaptured {
-            onRoutesChanged(RoutesUpdatedResult(emptyList(), ""))
+            onRoutesChanged(createRoutesUpdatedResult(emptyList(), ""))
         }
         updateRouteProgress()
 
@@ -1256,7 +1256,7 @@ class MapboxNavigationTelemetryTest {
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
     ) {
         routesObserverSlot.ifCaptured {
-            onRoutesChanged(RoutesUpdatedResult(listOf(route), reason))
+            onRoutesChanged(createRoutesUpdatedResult(listOf(route), reason))
         }
     }
 

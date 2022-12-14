@@ -9,8 +9,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -74,7 +74,7 @@ class MapboxNavigationExtensionsTest {
         every { navigation.unregisterRoutesObserver(any()) } just Runs
         val mockRoute1 = mockk<NavigationRoute>(relaxed = true)
         val mockRoute2 = mockk<NavigationRoute>(relaxed = true)
-        var actual = RoutesUpdatedResult(
+        var actual = createRoutesUpdatedResult(
             listOf(mockRoute1),
             RoutesExtra.ROUTES_UPDATE_REASON_NEW
         )
@@ -82,7 +82,7 @@ class MapboxNavigationExtensionsTest {
         val flow = navigation.flowRoutesUpdated().onEach { actual = it }
         val job = coroutineRule.coroutineScope.launch { flow.collect() }
         advanceUntilIdle()
-        val expected = RoutesUpdatedResult(
+        val expected = createRoutesUpdatedResult(
             listOf(mockRoute2),
             RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
         )

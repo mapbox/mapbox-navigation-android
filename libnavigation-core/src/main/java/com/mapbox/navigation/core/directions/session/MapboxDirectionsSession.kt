@@ -10,16 +10,14 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.internal.utils.initialLegIndex
-import com.mapbox.navigation.core.internal.utils.mapToReason
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * Default implementation of [DirectionsSession].
  *
  * @property router route fetcher. Usually Onboard, Offboard or Hybrid
- * @property routes a list of [DirectionsRoute]. Fetched from [Router] or might be set manually
+ * @property routesUpdatedResult info of last routes update. Fetched from [Router] or might be set manually
  */
 internal class MapboxDirectionsSession(
     private val router: NavigationRouterV2,
@@ -27,22 +25,9 @@ internal class MapboxDirectionsSession(
 
     private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
 
-    /**
-     * Routes that were fetched from [Router] or set manually.
-     * On [routes] change notify registered [RoutesObserver]
-     *
-     * @see [registerRoutesObserver]
-     */
-    override var routes: List<NavigationRoute> = emptyList()
-        private set(value) {
-            field = value
-            routesInitialized = true
-        }
-
-    private var routesInitialized = false
-
-    @RoutesExtra.RoutesUpdateReason
-    private var routesUpdateReason: String = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+    override var routesUpdatedResult: RoutesUpdatedResult? = null
+    override val routes: List<NavigationRoute>
+        get() = routesUpdatedResult?.navigationRoutes ?: emptyList()
 
     override var initialLegIndex = DEFAULT_INITIAL_LEG_INDEX
         private set
@@ -51,24 +36,19 @@ internal class MapboxDirectionsSession(
         internal const val DEFAULT_INITIAL_LEG_INDEX = 0
     }
 
-    override fun setRoutes(
-        routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutes,
-    ) {
-        this.initialLegIndex = setRoutesInfo.initialLegIndex()
-        if (routesInitialized && this.routes.isEmpty() && routes.isEmpty()) {
+    override fun setRoutes(routes: DirectionsSessionRoutes) {
+        this.initialLegIndex = routes.setRoutesInfo.initialLegIndex()
+        if (
+            routesUpdatedResult?.navigationRoutes?.isEmpty() == true &&
+            routes.acceptedRoutes.isEmpty()
+        ) {
             return
         }
-        RouteCompatibilityCache.setDirectionsSessionResult(routes)
-        this.routes = routes
-        this.routesUpdateReason = setRoutesInfo.mapToReason()
+        RouteCompatibilityCache.setDirectionsSessionResult(routes.acceptedRoutes)
+
+        val result = routes.toRoutesUpdatedResult().also { routesUpdatedResult = it }
         routesObservers.forEach {
-            it.onRoutesChanged(
-                RoutesUpdatedResult(
-                    routes,
-                    routesUpdateReason
-                )
-            )
+            it.onRoutesChanged(result)
         }
     }
 
@@ -76,7 +56,7 @@ internal class MapboxDirectionsSession(
      * Provide route options for current primary route.
      */
     override fun getPrimaryRouteOptions(): RouteOptions? =
-        routes.firstOrNull()?.routeOptions
+        routesUpdatedResult?.navigationRoutes?.firstOrNull()?.routeOptions
 
     /**
      * Interrupts a route-fetching request if one is in progress.
@@ -129,13 +109,11 @@ internal class MapboxDirectionsSession(
     }
 
     /**
-     * Registers [RoutesObserver]. Updated on each change of [routes]
+     * Registers [RoutesObserver]. Updated on each change of [routesUpdatedResult]
      */
     override fun registerRoutesObserver(routesObserver: RoutesObserver) {
         routesObservers.add(routesObserver)
-        if (routesInitialized) {
-            routesObserver.onRoutesChanged(RoutesUpdatedResult(routes, routesUpdateReason))
-        }
+        routesUpdatedResult?.let { routesObserver.onRoutesChanged(it) }
     }
 
     /**

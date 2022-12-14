@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreviewController
@@ -29,6 +30,7 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerP
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import com.mapbox.navigation.core.trip.session.NavigationSession
@@ -308,6 +310,10 @@ internal open class MapboxNavigationBaseTest {
             directionsSession
         }
         // TODO Needed for telemetry - Free Drive (empty list) for now
+        every { directionsSession.routesUpdatedResult } returns createRoutesUpdatedResult(
+            emptyList(),
+            RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+        )
         every { directionsSession.routes } returns emptyList()
     }
 
