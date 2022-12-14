@@ -84,6 +84,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .copilotOptions(
                 CopilotOptions.Builder().shouldSendHistoryOnlyWithFeedback(true).build()
             )
+            .looper(mockk())
     }
 
     @Test

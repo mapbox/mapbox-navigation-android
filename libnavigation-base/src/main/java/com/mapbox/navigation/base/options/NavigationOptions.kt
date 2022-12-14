@@ -95,6 +95,7 @@ private constructor(
         eventsAppMetadata(eventsAppMetadata)
         enableSensors(enableSensors)
         copilotOptions(copilotOptions)
+        looper(looper)
     }
 
     /**
@@ -126,6 +127,7 @@ private constructor(
         if (eventsAppMetadata != other.eventsAppMetadata) return false
         if (enableSensors != other.enableSensors) return false
         if (copilotOptions != other.copilotOptions) return false
+        if (looper != other.looper) return false
 
         return true
     }
@@ -154,6 +156,7 @@ private constructor(
         result = 31 * result + eventsAppMetadata.hashCode()
         result = 31 * result + enableSensors.hashCode()
         result = 31 * result + copilotOptions.hashCode()
+        result = 31 * result + looper.hashCode()
         return result
     }
 
@@ -181,7 +184,8 @@ private constructor(
             "historyRecorderOptions=$historyRecorderOptions, " +
             "eventsAppMetadata=$eventsAppMetadata, " +
             "enableSensors=$enableSensors, " +
-            "copilotOptions=$copilotOptions" +
+            "copilotOptions=$copilotOptions," +
+            "looper=$looper" +
             ")"
     }
 

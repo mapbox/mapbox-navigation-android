@@ -93,7 +93,7 @@ class MapboxRerouteControllerTest {
     @Before
     fun setup() {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
-        every { threadController.getMainScopeAndRootJob() } answers {
+        every { threadController.getSDKScopeAndRootJob(any()) } answers {
             JobControl(mockk(), coroutineRule.createTestScope())
         }
         every {
