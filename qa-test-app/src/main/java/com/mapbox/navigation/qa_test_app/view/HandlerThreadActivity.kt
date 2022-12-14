@@ -24,6 +24,7 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -80,6 +81,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.concurrent.CountDownLatch
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class HandlerThreadActivity : AppCompatActivity() {
 
     /* ----- Layout binding reference ----- */
@@ -306,14 +308,13 @@ class HandlerThreadActivity : AppCompatActivity() {
             enabled = true
         }
 
-        val waitForCreation = CountDownLatch(1)
-
         sdkThread = HandlerThread("handler thread")
         sdkThread.start()
 
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
+                .looper(sdkThread.looper)
                 .build()
         )
         // initialize Mapbox Navigation
