@@ -44,6 +44,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param eventsAppMetadata [EventsAppMetadata] information (optional)
  * @param enableSensors enables sensors for current position calculation (optional)
  * @param copilotOptions defines options for Copilot
+ * @param looper defines a looper for callbacks and internal work
  */
 class NavigationOptions
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -332,6 +333,9 @@ private constructor(
         fun copilotOptions(copilotOptions: CopilotOptions): Builder =
             apply { this.copilotOptions = copilotOptions }
 
+        /**
+         * Defines custom lopper for callbacks and internal work
+         */
         @ExperimentalPreviewMapboxNavigationAPI
         fun looper(looper: Looper): Builder =
             apply { this.looper = looper }
