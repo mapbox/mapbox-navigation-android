@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
-import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
@@ -53,7 +53,7 @@ class NavigationSessionTest {
         val navigationSession = NavigationSession()
         routes.add(route)
         navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
@@ -103,7 +103,7 @@ class NavigationSessionTest {
 
         routes.add(route)
         navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
@@ -154,7 +154,7 @@ class NavigationSessionTest {
 
         routes.add(route)
         navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
@@ -249,7 +249,7 @@ class NavigationSessionTest {
 
         routes.add(route)
         navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
@@ -282,12 +282,12 @@ class NavigationSessionTest {
             }
         )
         navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         routes.clear()
         navigationSession.onRoutesChanged(
-            RoutesUpdatedResult(emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+            createRoutesUpdatedResult(emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
         )
         val two = navigationSessionStateSlots[1].sessionId
 

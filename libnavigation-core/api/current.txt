@@ -181,6 +181,13 @@ package com.mapbox.navigation.core.arrival {
 
 package com.mapbox.navigation.core.directions.session {
 
+  public final class IgnoredRoute {
+    method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
+    method public String getReason();
+    property public final com.mapbox.navigation.base.route.NavigationRoute navigationRoute;
+    property public final String reason;
+  }
+
   public final class RoutesExtra {
     field public static final com.mapbox.navigation.core.directions.session.RoutesExtra INSTANCE;
     field public static final String ROUTES_UPDATE_REASON_ALTERNATIVE = "ROUTES_UPDATE_REASON_ALTERNATIVE";
@@ -198,9 +205,11 @@ package com.mapbox.navigation.core.directions.session {
   }
 
   public final class RoutesUpdatedResult {
+    method public java.util.List<com.mapbox.navigation.core.directions.session.IgnoredRoute> getIgnoredRoutes();
     method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getNavigationRoutes();
     method public String getReason();
     method @Deprecated public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
+    property public final java.util.List<com.mapbox.navigation.core.directions.session.IgnoredRoute> ignoredRoutes;
     property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes;
     property public final String reason;
     property @Deprecated public final java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> routes;

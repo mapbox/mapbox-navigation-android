@@ -52,6 +52,7 @@ import com.mapbox.navigation.core.directions.LegacyRouterAdapter
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
@@ -1037,18 +1038,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
                 when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
                     is NativeSetRouteValue -> {
-                        val (acceptedAlternatives, ignoredAlternatives) = routes
-                            .drop(1)
-                            .partition { passedRoute ->
-                                processedRoutes.nativeAlternatives.any { processedRoute ->
-                                    processedRoute.route.routeId == passedRoute.id
-                                }
-                            }
-                        directionsSession.setRoutes(processedRoutes.routes, setRoutesInfo)
+                        val directionsSessionRoutes = Utils.createDirectionsSessionRoutes(
+                            routes,
+                            processedRoutes,
+                            setRoutesInfo
+                        )
+                        directionsSession.setRoutes(directionsSessionRoutes)
                         routesSetResult = ExpectedFactory.createValue(
                             RoutesSetSuccess(
-                                ignoredAlternatives.associate {
-                                    it.id to RoutesSetError("invalid alternative")
+                                directionsSessionRoutes.ignoredRoutes.associate {
+                                    it.navigationRoute.id to RoutesSetError("invalid alternative")
                                 }
                             )
                         )

@@ -28,10 +28,13 @@ fun interface RoutesObserver {
  * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance'.
  *
  * @param navigationRoutes list of currently maintained routes
+ * @param ignoredRoutes list of alternative routes that were ignored
+ *  because they are invalid for navigation. See [IgnoredRoute] for details.
  * @param reason why the routes have been updated (re-route, refresh route, and etc.)
  */
 class RoutesUpdatedResult internal constructor(
     val navigationRoutes: List<NavigationRoute>,
+    val ignoredRoutes: List<IgnoredRoute>,
     @RoutesExtra.RoutesUpdateReason val reason: String,
 ) {
     /**
@@ -47,4 +50,47 @@ class RoutesUpdatedResult internal constructor(
         )
     )
     val routes: List<DirectionsRoute> by lazy { navigationRoutes.toDirectionsRoutes() }
+}
+
+/**
+ * Model class that contains info about ignored routes.
+ *
+ * @param navigationRoute route that was ignored because it is invalid for navigation
+ * @param reason reason why the route was ignored
+ */
+class IgnoredRoute internal constructor(
+    val navigationRoute: NavigationRoute,
+    val reason: String,
+) {
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "IgnoredRoute(navigationRoute=$navigationRoute, reason='$reason')"
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as IgnoredRoute
+
+        if (navigationRoute != other.navigationRoute) return false
+        if (reason != other.reason) return false
+
+        return true
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = navigationRoute.hashCode()
+        result = 31 * result + reason.hashCode()
+        return result
+    }
 }

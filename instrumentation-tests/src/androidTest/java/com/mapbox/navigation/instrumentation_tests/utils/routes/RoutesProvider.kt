@@ -56,6 +56,7 @@ object RoutesProvider {
     // first alternative is valid
     // second alternative is invalid because of absence of intersections
     // third alternative is invalid because it doesn't have a fork point from primary route
+    // fourth alternative is invalid because it doesn't have common points with primary route
     fun dc_short_with_invalid_alternatives(context: Context): MockRoute {
         val jsonResponse = readRawFileText(context, R.raw.route_response_dc_short_with_invalid_alternatives)
         val coordinates = listOf(

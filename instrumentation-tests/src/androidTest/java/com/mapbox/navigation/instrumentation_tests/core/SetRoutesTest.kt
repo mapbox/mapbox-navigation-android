@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.RoutesSetError
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
@@ -32,6 +33,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+
+    private val invalidRouteReason = "Route is invalid for navigation"
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = 38.894721
@@ -78,9 +81,10 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         val result = mapboxNavigation.setNavigationRoutesAsync(routes)
         result.run {
             assertTrue(this.isValue)
-            assertEquals(2, this.value!!.ignoredAlternatives.size)
+            assertEquals(3, this.value!!.ignoredAlternatives.size)
             assertNotNull(this.value!!.ignoredAlternatives[routes[2].id])
             assertNotNull(this.value!!.ignoredAlternatives[routes[3].id])
+            assertNotNull(this.value!!.ignoredAlternatives[routes[4].id])
         }
     }
 
@@ -146,5 +150,30 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             Assert.fail("observer shouldn't be notified")
         }
         delay(TimeUnit.SECONDS.toMillis(3))
+    }
+
+    @Test
+    fun routes_observer_receives_only_valid_alternatives() = sdkTest {
+        val mockRoute = RoutesProvider.dc_short_with_invalid_alternatives(activity)
+        val routes = NavigationRoute.create(
+            mockRoute.routeResponse,
+            RouteOptions.builder()
+                .coordinatesList(mockRoute.routeWaypoints)
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .build(),
+            RouterOrigin.Custom()
+        )
+
+        mapboxNavigation.setNavigationRoutes(routes)
+
+        val actual = suspendCoroutine<RoutesUpdatedResult> { continuation ->
+            mapboxNavigation.registerRoutesObserver {
+                continuation.resume(it)
+            }
+        }
+        assertEquals(routes.take(2), actual.navigationRoutes)
+        assertEquals(routes.drop(2), actual.ignoredRoutes.map { it.navigationRoute })
+        assertTrue(actual.ignoredRoutes.all { it.reason == invalidRouteReason })
+        assertEquals(RoutesExtra.ROUTES_UPDATE_REASON_NEW, actual.reason)
     }
 }

@@ -39,6 +39,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where a refresh of the routes or a change in alternatives that occurred while user was off-route would call `RerouteController#interrupt` and interrupt the potentially ongoing reroute process without recovery. [#6719](https://github.com/mapbox/mapbox-navigation-android/pull/6719)
 - Improved OpenLR matching rate. Updates take lowest FRC to next point into account during path generation. [#6750](https://github.com/mapbox/mapbox-navigation-android/pull/6750)
 - Fixed an issue where `MapboxBuildingsApi` would fail to highlight buildings. [#6749](https://github.com/mapbox/mapbox-navigation-android/pull/6749)
+- Extended `RoutesUpdatedResult` with `ignoredRoutes` property: it contains routes that were passed by the user but were ignored by the Nav SDK because they are invalid for navigation. [#6745](https://github.com/mapbox/mapbox-navigation-android/pull/6745)
+- :warning: Changed `RoutesObserver` behavior: now only valid alternative routes will be delivered in `RoutesUpdatedResult#navigationRoutes` and `RoutesUpdatedResult#routes`. [#6745](https://github.com/mapbox/mapbox-navigation-android/pull/6745)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
