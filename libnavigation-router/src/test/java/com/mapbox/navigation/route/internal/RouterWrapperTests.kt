@@ -24,6 +24,7 @@ import com.mapbox.navigation.route.internal.util.TestRouteFixtures
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.TestThreadController
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteInterfacesFromDirectionRequestResponse
@@ -150,7 +151,7 @@ class RouterWrapperTests {
         routerWrapper = RouterWrapper(
             accessToken,
             mapboxNativeNavigator.router,
-            ThreadController(),
+            TestThreadController(),
         )
     }
 

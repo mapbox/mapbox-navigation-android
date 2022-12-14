@@ -15,7 +15,7 @@ import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.core.trip.service.MapboxTripService
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.AndroidThreadController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -23,8 +23,8 @@ import kotlinx.coroutines.launch
 
 internal class TripServiceActivity : AppCompatActivity() {
 
-    private val threadController = ThreadController()
-    private var mainJobController = threadController.getMainScopeAndRootJob()
+    private val threadController = AndroidThreadController()
+    private var mainJobController = threadController.getSDKScopeAndRootJob()
     private lateinit var tripNotification: TripNotification
     private lateinit var mapboxTripService: MapboxTripService
     private var textUpdateJob: Job = Job()
@@ -87,8 +87,7 @@ internal class TripServiceActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopService()
-        threadController.cancelAllNonUICoroutines()
-        threadController.cancelAllUICoroutines()
+        threadController.cancelSDKScope()
     }
 
     private fun changeText() {

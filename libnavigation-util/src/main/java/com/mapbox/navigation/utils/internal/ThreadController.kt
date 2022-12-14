@@ -1,11 +1,15 @@
 package com.mapbox.navigation.utils.internal
 
+import android.os.Handler
+import android.os.Looper
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainCoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
@@ -44,61 +48,115 @@ fun Exception.ifChannelException(action: () -> Unit) {
 
 data class JobControl(val job: Job, val scope: CoroutineScope)
 
-class ThreadController {
+interface ThreadController {
 
     companion object {
+        /***
+         * Static duplicate of [ThreadController.getIODispatcher] for cases when it's
+         * not convenient to access an instance of [ThreadController]
+         */
         val IODispatcher: CoroutineDispatcher = Dispatchers.IO
+
+        /***
+         * Static duplicate of [ThreadController.getIODispatcher] for cases when it's
+         * not convenient to access an instance of [ThreadController]
+         */
         val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+    }
+
+    /***
+     * Throws an exception if the SDK shouldn't be used from current thread.
+     */
+    fun assertSDKThread()
+
+    /***
+     * Deprecated version of [createChildSDKScope]
+     */
+    @Deprecated(
+        replaceWith = ReplaceWith("createChildSDKScope()"),
+        message = "JobControl doesn't make much sense as coroutine context already keeps link to its job."
+    )
+    fun getSDKScopeAndRootJob(immediate: Boolean = false): JobControl
+
+    /***
+     * Creates a new scope, which is child of the root scope [ThreadController] keeps internally.
+     * Cancellations or failure of the child scopes created with [createChildSDKScope] doesn't affect other child scopes.
+     * @param immediate specifies if child scope will use immediate dispatcher. It's similar to the difference between [Dispatchers.Main] and [MainCoroutineDispatcher.immediate].
+     * @see cancelSDKScope
+     */
+    fun createChildSDKScope(immediate: Boolean = false): CoroutineScope
+
+    /***
+     * Cancels all scopes which were created using [createChildSDKScope] by the same [ThreadController] instance.
+     * @see createChildSDKScope
+     */
+    fun cancelSDKScope()
+
+    /***
+     * @return dispatcher that should be used for IO related operations: read from disk, waiting for network, etc.
+     */
+    fun getIODispatcher(): CoroutineDispatcher
+
+    /***
+     * @return dispatcher that should be used for CPU intensive operations: json serialization, geometry decoding, etc.
+     */
+    fun getComputationDispatcher(): CoroutineDispatcher
+}
+
+/***
+ * Implementation of [ThreadController] for Android.
+ * It expects that the SDK creates new instance of [AndroidThreadController] on during the SDK creation
+ * and remembers the thread from which the SDK was created. Let's refer this thread as the SDK thread.
+ * Scopes created by [createChildSDKScope] will schedule work to the SDK thread.
+ * [assertSDKThread] verifies that current thread is SDK thread.
+ */
+class AndroidThreadController constructor(
+    private val sdkLooper: Looper = Looper.myLooper()
+        ?: error(
+            "You can't create the SDK from a thread which doesn't have prepared looper. " +
+                "Make sure you created the Navigation SDK from the main thread " +
+                "or you setup looper by calling Looper.prepare on a worker thread."
+        ),
+): ThreadController {
+
+    private val sdkDispatcher: MainCoroutineDispatcher = if (sdkLooper == Looper.getMainLooper()) {
+        Dispatchers.Main
+    } else {
+        Handler(sdkLooper).asCoroutineDispatcher("mapbox navigation SDK dispatcher")
     }
 
     internal var ioRootJob = SupervisorJob()
     internal var mainRootJob = SupervisorJob()
 
-    /**
-     * This method cancels all coroutines that are children of io and navigator jobs.
-     * The call affects all coroutines that where started via ThreadController.ioScope.launch() and
-     * ThreadController.navigatorScope.launch().
-     * It is basically a kill switch for all non-UI scoped coroutines.
-     */
-    fun cancelAllNonUICoroutines() {
-        ioRootJob.cancelChildren()
+    override fun assertSDKThread() {
+        require(Looper.myLooper() == sdkLooper) {
+            "Current lopper doesn't match the same the SDK were created from. " +
+                "You should call the SDK's methods from the thread were the SDK was created."
+        }
     }
 
-    /**
-     * This method cancels all coroutines that are children of this job. The call affects
-     * all coroutines that where started via ThreadController.mainScope.launch(). It is basically
-     * a kill switch for all UI scoped coroutines.
-     */
-    fun cancelAllUICoroutines() {
+    override fun cancelSDKScope() {
         mainRootJob.cancelChildren()
     }
 
-    /**
-     * This method creates a [Job] object that is a child of the [ioRootJob]. Using
-     * this job a [CoroutineScope] is created. The return object is the [JobControl] data class. This
-     * data class contains both the new [Job] object and the [CoroutineScope] that uses the [Job] object.
-     * This construct allows the caller to cancel all coroutines created from the returned [CoroutineScope].
-     * Example:
-     * val jobController:JobController = ThreadController.getIOScopeAndRootJob()
-     * val job_1 = jobController.ioScope.launch{ doSomethingUsefull_1()}
-     * val job_2 = jobController.ioScope.launch{ doSomethingUsefull_2()}
-     * val job_3 = jobController.ioScope.launch{ doSomethingUsefull_3()}
-     * val job_4 = jobController.ioScope.launch{ doSomethingUsefull_4()}
-     *
-     * The code launches four coroutines. Each one becomes a parent of ThreadController.job
-     * To cancel all coroutines: jobController.job.cancel()
-     * To cancel a specific coroutine: job_1.cancel(), etc.
-     */
-    fun getIOScopeAndRootJob(): JobControl {
-        val parentJob = SupervisorJob(ioRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + IODispatcher))
+    override fun getIODispatcher(): CoroutineDispatcher {
+        return ThreadController.IODispatcher
     }
 
-    /**
-     * Same as [getIOScopeAndRootJob], but using the MainThread dispatcher.
-     */
-    fun getMainScopeAndRootJob(): JobControl {
-        val parentJob = SupervisorJob(mainRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main))
+    override fun getComputationDispatcher(): CoroutineDispatcher {
+        return ThreadController.DefaultDispatcher
     }
+
+    override fun getSDKScopeAndRootJob(immediate: Boolean): JobControl {
+        val parentJob = SupervisorJob(mainRootJob)
+        return JobControl(parentJob, CoroutineScope(parentJob + getDispatcher(immediate)))
+    }
+
+    override fun createChildSDKScope(immediate: Boolean): CoroutineScope {
+        val parentJob = SupervisorJob(mainRootJob)
+        return CoroutineScope(parentJob + getDispatcher(immediate))
+    }
+
+    private fun getDispatcher(immediate: Boolean) =
+        if (immediate) sdkDispatcher.immediate else sdkDispatcher
 }

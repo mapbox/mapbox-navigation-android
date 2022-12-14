@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.options
 
 import android.content.Context
+import android.os.Looper
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -67,6 +68,7 @@ private constructor(
     val enableSensors: Boolean,
     @ExperimentalPreviewMapboxNavigationAPI
     val copilotOptions: CopilotOptions,
+    val looper: Looper,
 ) {
 
     /**
@@ -216,6 +218,7 @@ private constructor(
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
+        private var looper: Looper = Looper.getMainLooper()
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -329,6 +332,10 @@ private constructor(
         fun copilotOptions(copilotOptions: CopilotOptions): Builder =
             apply { this.copilotOptions = copilotOptions }
 
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun looper(looper: Looper): Builder =
+            apply { this.looper = looper }
+
         /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
@@ -355,6 +362,7 @@ private constructor(
                 eventsAppMetadata = eventsAppMetadata,
                 enableSensors = enableSensors,
                 copilotOptions = copilotOptions,
+                looper = looper,
             )
         }
     }

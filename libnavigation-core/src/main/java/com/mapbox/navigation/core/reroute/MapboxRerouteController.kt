@@ -41,7 +41,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
 
-    private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
+    private val mainJobController: JobControl = threadController.getSDKScopeAndRootJob()
 
     private var rerouteJob: Job? = null
 

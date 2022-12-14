@@ -96,7 +96,7 @@ internal class MapboxTripService(
 
     private val serviceStarted = AtomicBoolean(false)
 
-    private val mainJobController = threadController.getMainScopeAndRootJob()
+    private val mainJobController = threadController.getSDKScopeAndRootJob()
     private var allowedNotificationTime = 0L
     private var notificationJob: Job? = null
 

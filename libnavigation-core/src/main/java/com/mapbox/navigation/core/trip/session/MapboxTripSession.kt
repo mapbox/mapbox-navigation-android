@@ -194,7 +194,7 @@ internal class MapboxTripSession(
         }
     }
 
-    private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
+    private val mainJobController: JobControl = threadController.getSDKScopeAndRootJob()
 
     private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
     private val routeProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
@@ -302,6 +302,7 @@ internal class MapboxTripSession(
             tripService.startService()
         }
         tripSessionLocationEngine.startLocationUpdates(withReplayEnabled) {
+            // this may happen on on the sdk thread
             updateRawLocation(it)
         }
         state = TripSessionState.STARTED
@@ -314,9 +315,9 @@ internal class MapboxTripSession(
                 "location ($locationHash) elapsed time: ${rawLocation.elapsedRealtimeNanos}",
             LOG_CATEGORY
         )
-        this.rawLocation = rawLocation
-        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
         mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            this@MapboxTripSession.rawLocation = rawLocation
+            locationObservers.forEach { it.onNewRawLocation(rawLocation) }
             logD(
                 "updateRawLocation; notify navigator for ($locationHash) - start",
                 LOG_CATEGORY
@@ -339,6 +340,7 @@ internal class MapboxTripSession(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
+            threadController.assertSDKThread()
             logD(
                 "navigatorObserver#onStatus; " +
                     "fixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}, " +

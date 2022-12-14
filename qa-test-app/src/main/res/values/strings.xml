@@ -48,6 +48,7 @@
     <string name="drop_in_buttons_activity_description" translatable="false">Screen for viewing SDK buttons.</string>
     <string name="speed_info_activity_description" translatable="false">Example of how to use Mapbox SpeedInfo View</string>
     <string name="rest_area_activity_description" translatable="false">Demonstrates the use of Rest Area API</string>
+    <string name="handler_thread_description" translatable="false">Navigation activity where SDK\'s core works on a handler thread instead of the main.</string>
 
     <string-array name="drop_in_info_panel_overrides" translatable="false">
         <item>--</item>

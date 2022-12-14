@@ -17,27 +17,14 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.suspendCoroutine
 
+@RunWith(RobolectricTestRunner::class)
 class ThreadControllerTest {
 
-    private val threadController = ThreadController()
-
-    @Test
-    fun jobCountValidationNonUIScope() {
-        val maxCoroutines = 100
-        val jobControl = threadController.getIOScopeAndRootJob()
-        repeat(maxCoroutines) {
-            jobControl.scope.launch {
-                suspendCoroutine {
-                    // do nothing. Just not to finish a coroutine
-                }
-            }
-        }
-        assertTrue(jobControl.job.children.count() == maxCoroutines)
-        jobControl.job.cancel()
-        assertTrue(jobControl.job.isCancelled)
-    }
+    private val threadController = AndroidThreadController()
 
     @Test
     fun monitorChannelWithException_callsOnCancellation_whenChannelClosed() {
@@ -86,37 +73,13 @@ class ThreadControllerTest {
     }
 
     @Test
-    fun checksCancelAllNonUICoroutines() {
-        val mockedIORootJob: CompletableJob = mockk(relaxed = true)
-        threadController.ioRootJob = mockedIORootJob
-
-        threadController.cancelAllNonUICoroutines()
-
-        verify { mockedIORootJob.cancelChildren() }
-    }
-
-    @Test
     fun checksCancelAllUICoroutines() {
         val mockedMainRootJob: CompletableJob = mockk(relaxed = true)
         threadController.mainRootJob = mockedMainRootJob
 
-        threadController.cancelAllUICoroutines()
+        threadController.cancelSDKScope()
 
         verify { mockedMainRootJob.cancelChildren() }
-    }
-
-    @Test
-    fun checksGetIOScopeAndRootJob() {
-        val ioRootJob = SupervisorJob()
-        threadController.ioRootJob = ioRootJob
-
-        val ioJobController = threadController.getIOScopeAndRootJob()
-
-        assertEquals(ioRootJob.children.first(), ioJobController.job)
-        assertEquals(
-            CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(),
-            ioJobController.scope.toString()
-        )
     }
 
     @Test
@@ -124,7 +87,7 @@ class ThreadControllerTest {
         val mainRootJob = SupervisorJob()
         threadController.mainRootJob = mainRootJob
 
-        val mainJobController = threadController.getMainScopeAndRootJob()
+        val mainJobController = threadController.getSDKScopeAndRootJob()
 
         assertEquals(mainRootJob.children.first(), mainJobController.job)
         assertEquals(

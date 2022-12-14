@@ -52,7 +52,7 @@ class RouterWrapper(
     private val threadController: ThreadController,
 ) : NavigationRouterV2, InternalRouter {
 
-    private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
+    private val mainJobControl by lazy { threadController.getSDKScopeAndRootJob() }
 
     override fun getRoute(routeOptions: RouteOptions, callback: NavigationRouterCallback): Long {
         val routeUrl = routeOptions.toUrl(accessToken).toString()

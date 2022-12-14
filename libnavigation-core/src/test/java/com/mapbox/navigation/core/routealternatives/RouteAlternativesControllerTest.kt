@@ -13,6 +13,7 @@ import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.testing.TestThreadController
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
@@ -67,7 +68,7 @@ class RouteAlternativesControllerTest {
         options,
         navigator,
         tripSession,
-        ThreadController(),
+        TestThreadController(),
     )
 
     @Before
