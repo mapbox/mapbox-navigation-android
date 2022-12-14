@@ -90,6 +90,12 @@ class RouteLineComponent(
         mapPlugins.gestures.addOnMapClickListener(onMapClickListener)
         mapPlugins.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
 
+        mapboxMap.getStyle {
+            // initialize route line layers to ensure they exist before
+            // both RouteLineComponent and RouteArrowComponent start rendering
+            routeLineView.initializeLayers(it)
+        }
+
         coroutineScope.launch {
             mapboxNavigation.flowRouteProgress().collect { routeProgress ->
                 ifNonNull(mapboxMap.getStyle()) { style ->

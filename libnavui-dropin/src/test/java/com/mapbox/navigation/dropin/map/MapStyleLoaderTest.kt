@@ -7,20 +7,15 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.dropin.navigationview.NavigationViewOptions
 import com.mapbox.navigation.ui.maps.NavigationStyles
-import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkConstructor
 import io.mockk.slot
-import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -33,8 +28,6 @@ internal class MapStyleLoaderTest {
 
     private lateinit var mapStyleUriDayFlow: MutableStateFlow<String>
     private lateinit var mapStyleUriNightFlow: MutableStateFlow<String>
-    private lateinit var routeLineView: MapboxRouteLineView
-    private lateinit var mockRouteLineOptions: MapboxRouteLineOptions
 
     lateinit var sut: MapStyleLoader
 
@@ -42,12 +35,6 @@ internal class MapStyleLoaderTest {
 
     @Before
     fun setUp() {
-        mockkConstructor(MapboxRouteLineView::class)
-        mockRouteLineOptions = mockk(relaxed = true)
-        routeLineView = mockk(relaxed = true) {
-            every { initializeLayers(any()) } returns Unit
-        }
-
         mapStyleUriDayFlow = MutableStateFlow(NavigationStyles.NAVIGATION_DAY_STYLE)
         mapStyleUriNightFlow = MutableStateFlow(NavigationStyles.NAVIGATION_NIGHT_STYLE)
 
@@ -59,16 +46,10 @@ internal class MapStyleLoaderTest {
         val options = mockk<NavigationViewOptions> {
             every { mapStyleUriDay } returns mapStyleUriDayFlow
             every { mapStyleUriNight } returns mapStyleUriNightFlow
-            every { routeLineOptions } returns MutableStateFlow(mockRouteLineOptions)
         }
 
         sut = MapStyleLoader(context, options)
         sut.mapboxMap = mapboxMap
-    }
-
-    @After
-    fun cleanUp() {
-        unmockkAll()
     }
 
     @Test
@@ -108,23 +89,10 @@ internal class MapStyleLoaderTest {
         givenNightModeEnabled(false)
         val loadedStyle = mockk<Style>()
         every { mapboxMap.getStyle() } returns loadedStyle
-        every { anyConstructed<MapboxRouteLineView>().initializeLayers(loadedStyle) } returns Unit
 
         listenerSlot.captured.onStyleLoaded(mockk())
 
         assertEquals(loadedStyle, sut.loadedMapStyle.value)
-    }
-
-    @Test
-    fun `OnStyleLoadedListener should initialize route line layers`() {
-        givenNightModeEnabled(false)
-        val loadedStyle = mockk<Style>()
-        every { mapboxMap.getStyle() } returns loadedStyle
-        every { anyConstructed<MapboxRouteLineView>().initializeLayers(loadedStyle) } returns Unit
-
-        listenerSlot.captured.onStyleLoaded(mockk())
-
-        verify { anyConstructed<MapboxRouteLineView>().initializeLayers(loadedStyle) }
     }
 
     private fun givenNightModeEnabled(enabled: Boolean) {

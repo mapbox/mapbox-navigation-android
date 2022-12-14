@@ -6,7 +6,6 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.dropin.navigationview.NavigationViewOptions
-import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
@@ -86,10 +85,6 @@ internal class MapStyleLoader(
     }
 
     private val onStyleLoadedListener = OnStyleLoadedListener {
-        _loadedMapStyle.value = mapboxMap?.getStyle()?.also {
-            // initialize route line layers to ensure they exist before
-            // both RouteLineComponent and RouteArrowComponent start rendering
-            MapboxRouteLineView(options.routeLineOptions.value).initializeLayers(it)
-        }
+        _loadedMapStyle.value = mapboxMap?.getStyle()
     }
 }
