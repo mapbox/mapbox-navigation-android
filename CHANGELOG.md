@@ -21,6 +21,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6717](https://github.com/mapbox/mapbox-navigation-android/pull/6717)
 - Fixed an issue where `RouteProgress#VoiceInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6717](https://github.com/mapbox/mapbox-navigation-android/pull/6717)
 - Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when setting alternative routes. [#6721](https://github.com/mapbox/mapbox-navigation-android/pull/6721)
+- Added support for conditional speed limits E-horizon objects depending on time off day. [#6697](https://github.com/mapbox/mapbox-navigation-android/pull/6697)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -84,6 +85,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Added experimental `MapboxRouteLineOptions#shareLineGeometrySources` option to enable route line's GeoJson source data sharing between multiple instances of the map. [#6680](https://github.com/mapbox/mapbox-navigation-android/pull/6680)
 - Fixed issues in `ReplayRouteSession`. The routes observer was never unregistered. Alternative route selection resets replay to the beginning. Drop-In Ui changing portrait and landscape modes resets replay to the beginning. [#6675](https://github.com/mapbox/mapbox-navigation-android/pull/6675)
 - Fixed an issue where first `BannerInstructions` of `RouteProgress` and `BannerInstructionsObserver` could have not been delivered after starting active guidance. [#6702](https://github.com/mapbox/mapbox-navigation-android/pull/6702)
+- Added support for conditional speed limits E-horizon objects depending on time off day. [#6702](https://github.com/mapbox/mapbox-navigation-android/pull/6702)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
