@@ -5,6 +5,7 @@ import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
@@ -585,6 +586,7 @@ class MapboxTripSessionNoSetupTest {
         }
 }
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 private fun buildTripSession(
     nativeNavigator: MapboxNativeNavigator = createNativeNavigatorMock(),
     locationEngine: LocationEngine = TestLocationEngine.create(),
@@ -592,6 +594,7 @@ private fun buildTripSession(
 ): MapboxTripSession {
     val navigationOptions = NavigationOptions.Builder(context)
         .locationEngine(locationEngine)
+        .looper(mockk())
         .build()
 
     val tripService: TripService = mockk(relaxUnitFun = true) {

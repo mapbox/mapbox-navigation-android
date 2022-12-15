@@ -223,7 +223,7 @@ private constructor(
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
-        private var looper: Looper = Looper.getMainLooper()
+        private var looper: Looper? = null
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -370,7 +370,7 @@ private constructor(
                 eventsAppMetadata = eventsAppMetadata,
                 enableSensors = enableSensors,
                 copilotOptions = copilotOptions,
-                looper = looper,
+                looper = looper ?: Looper.getMainLooper(),
             )
         }
     }
