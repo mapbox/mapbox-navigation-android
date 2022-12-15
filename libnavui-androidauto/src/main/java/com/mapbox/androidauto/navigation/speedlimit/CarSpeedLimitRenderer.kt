@@ -5,6 +5,7 @@ import android.location.Location
 import androidx.annotation.VisibleForTesting
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.MapboxCarOptions
+import com.mapbox.androidauto.internal.RendererUtils
 import com.mapbox.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.EdgeInsets
@@ -119,7 +120,8 @@ internal constructor(
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {
-        speedLimitWidget?.setTranslation(-edgeInsets.right.toFloat(), -edgeInsets.bottom.toFloat())
+        logAndroidAuto("CarSpeedLimitRenderer onVisibleAreaChanged $visibleArea $edgeInsets")
+        speedLimitWidget?.updateBitmap(RendererUtils.EMPTY_BITMAP)
     }
 
     private companion object {

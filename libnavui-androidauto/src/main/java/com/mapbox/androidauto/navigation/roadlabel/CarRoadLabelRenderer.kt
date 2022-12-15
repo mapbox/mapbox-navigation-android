@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Rect
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
+import com.mapbox.androidauto.internal.RendererUtils
 import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
 import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.internal.logAndroidAuto
@@ -43,7 +44,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
         logAndroidAuto("RoadLabelSurfaceLayer carMapSurface loaded")
         super.onAttached(mapboxCarMapSurface)
         val roadLabelWidget = BitmapWidget(
-            EMPTY_BITMAP,
+            RendererUtils.EMPTY_BITMAP,
             WidgetPosition(WidgetPosition.Horizontal.CENTER, WidgetPosition.Vertical.BOTTOM),
             marginY = 10f,
         ).also { roadLabelWidget = it }
@@ -54,7 +55,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
                 val options = roadLabelOptions(carContext)
                 val bitmap = roadLabelBitmapRenderer
                     .render(carContext.resources, road, shields, options)
-                roadLabelWidget.updateBitmap(bitmap ?: EMPTY_BITMAP)
+                roadLabelWidget.updateBitmap(bitmap ?: RendererUtils.EMPTY_BITMAP)
             }
         }.also { roadNameObserver = it }
         styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached {
@@ -64,7 +65,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
                 roadNameObserver.currentShields,
                 roadLabelOptions(carContext)
             )
-            roadLabelWidget.updateBitmap(bitmap ?: EMPTY_BITMAP)
+            roadLabelWidget.updateBitmap(bitmap ?: RendererUtils.EMPTY_BITMAP)
         }
 
         mapUserStyleObserver.onAttached(mapboxCarMapSurface)
@@ -107,9 +108,5 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
             .roundedLabelColor(Color.WHITE)
             .textColor(Color.BLACK)
             .build()
-
-        private val EMPTY_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888).apply {
-            eraseColor(Color.TRANSPARENT)
-        }
     }
 }

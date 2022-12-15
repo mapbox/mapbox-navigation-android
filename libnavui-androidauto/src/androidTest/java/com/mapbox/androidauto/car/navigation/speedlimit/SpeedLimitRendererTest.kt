@@ -6,11 +6,16 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
 import com.mapbox.androidauto.navigation.speedlimit.SpeedLimitWidget
 import com.mapbox.androidauto.testing.BitmapTestUtil
+import com.mapbox.androidauto.testing.MemoryTestRule
+import com.mapbox.maps.MapboxExperimental
+import com.mapbox.navigation.base.speed.model.SpeedLimitSign
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
 
+@OptIn(MapboxExperimental::class)
 @RunWith(AndroidJUnit4ClassRunner::class)
 @SmallTest
 class SpeedLimitRendererTest {
@@ -18,6 +23,10 @@ class SpeedLimitRendererTest {
     @Rule
     @JvmField
     val testName = TestName()
+
+    @Rule
+    @JvmField
+    val memoryTestRule = MemoryTestRule()
 
     @get:Rule
     val permissionsRule: GrantPermissionRule = GrantPermissionRule.grant(
@@ -30,18 +39,35 @@ class SpeedLimitRendererTest {
         "test_speed_limit_images"
     )
 
+    @After
+    fun teardown() {
+        println("memory used %.2f MB".format(memoryTestRule.memoryUsedMB))
+    }
+
     @Test
     fun speed_limit_120_speed_150_mutcd() {
-        val bitmap =
-            SpeedLimitWidget.drawMutcdSpeedLimitSign(speedLimit = 120, speed = 150, warn = true)
-        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
+        val sut = SpeedLimitWidget()
+        sut.update(
+            speedLimit = 120,
+            speed = 150,
+            signFormat = SpeedLimitSign.MUTCD,
+            threshold = 0
+        )
+
+        bitmapUtils.assertBitmapsSimilar(testName, sut.bitmap!!)
     }
 
     @Test
     fun speed_limit_120_speed_90_mutcd() {
-        val bitmap =
-            SpeedLimitWidget.drawMutcdSpeedLimitSign(speedLimit = 120, speed = 90, warn = false)
-        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
+        val sut = SpeedLimitWidget()
+        sut.update(
+            speedLimit = 120,
+            speed = 90,
+            signFormat = SpeedLimitSign.MUTCD,
+            threshold = 50
+        )
+
+        bitmapUtils.assertBitmapsSimilar(testName, sut.bitmap!!)
     }
 
     @Test
@@ -109,6 +135,13 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_unknown_speed_5_vienna() {
+        val bitmap =
+            SpeedLimitWidget.drawViennaSpeedLimitSign(speedLimit = null, speed = 5, warn = false)
+        bitmapUtils.assertBitmapsSimilar(testName, bitmap)
+    }
+
+    @Test
+    fun multiple_calls_() {
         val bitmap =
             SpeedLimitWidget.drawViennaSpeedLimitSign(speedLimit = null, speed = 5, warn = false)
         bitmapUtils.assertBitmapsSimilar(testName, bitmap)

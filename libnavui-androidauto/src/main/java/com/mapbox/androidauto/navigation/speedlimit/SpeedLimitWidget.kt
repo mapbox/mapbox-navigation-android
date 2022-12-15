@@ -7,6 +7,9 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import androidx.annotation.ColorInt
+import androidx.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting.PRIVATE
+import com.mapbox.androidauto.internal.RendererUtils.EMPTY_BITMAP
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.renderer.widget.BitmapWidget
@@ -18,7 +21,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
  */
 @MapboxExperimental
 class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD) : BitmapWidget(
-    drawSpeedLimitSign(speedLimit = null, speed = 0, initialSignFormat, warn = false),
+    EMPTY_BITMAP,
     WidgetPosition(WidgetPosition.Horizontal.RIGHT, WidgetPosition.Vertical.BOTTOM),
     marginX = 14f,
     marginY = 30f,
@@ -28,6 +31,13 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
     private var lastSpeed = 0
     private var lastSignFormat = initialSignFormat
     private var lastWarn = false
+
+    @VisibleForTesting(otherwise = PRIVATE)
+    var bitmap: Bitmap? = null
+
+    init {
+        bitmap = drawSpeedLimitSign(speedLimit = null, speed = 0, initialSignFormat, warn = false)
+    }
 
     fun update(speedLimit: Int?, speed: Int, signFormat: SpeedLimitSign?, threshold: Int) {
         val newSignFormat = signFormat ?: lastSignFormat
@@ -44,7 +54,9 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
         lastSignFormat = newSignFormat
         lastWarn = warn
 
-        updateBitmap(drawSpeedLimitSign(speedLimit, speed, newSignFormat, warn))
+        bitmap = drawSpeedLimitSign(speedLimit, speed, newSignFormat, warn).also {
+            updateBitmap(it)
+        }
     }
 
     fun update(signFormat: SpeedLimitSign?, threshold: Int) {
@@ -56,7 +68,9 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
         lastSignFormat = newSignFormat
         lastWarn = warn
 
-        updateBitmap(drawSpeedLimitSign(speedLimit, speed, newSignFormat, warn))
+        bitmap = drawSpeedLimitSign(speedLimit, speed, newSignFormat, warn).also {
+            updateBitmap(it)
+        }
     }
 
     internal companion object {

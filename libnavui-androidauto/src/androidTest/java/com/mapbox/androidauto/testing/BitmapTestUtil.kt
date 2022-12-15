@@ -246,6 +246,7 @@ class BitmapTestUtil(
         }
         val resolver = context.contentResolver
         val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        println("Writing bitmap to $uri")
         return resolver.openOutputStream(uri!!)!!
     }
 
