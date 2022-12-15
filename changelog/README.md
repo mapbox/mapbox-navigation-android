@@ -2,38 +2,30 @@
 
 To avoid merge conflicts in the CHANGELOG.md file we accepted the multi-file running changelog strategy.
 
-To follow this strategy you should create a `changelog/unreleased/${PR_NUMBER}.json` file for every PR like:
+To follow this strategy you should create a `.md` file for every PR. Choose a directory:
 
-```
-[
-  {
-    "type": "Features",
-    "title": "Description of changes"
-  }
-]
-```
+- `changelog/unreleased/features` for **Features** changes
+- `changelog/unreleased/bugfixes` for **Bug fixes and improvements** changes
+- `changelog/unreleased/issues` for **Known issues :warning:** changes
+- `changelog/unreleased` for other changes
 
-`type` it is a header of changes in the `CHANGELOG.md`. `title` it is a text of changes
+You can use anything that allow .md format in changelog files.
 
 If you have implemented some features or bugfixes you should describe all of them:
 
 ```
-[
-  {
-    "type": "Features",
-    "title": "Description of changes 1"
-  },
-  {
-    "type": "Bug fixes and improvements",
-    "title": "Description of changes 2"
-  }
-]
+- Description of changes in md format
+- Description of changes in md format also
 ```
+
+You can choose any name for your changelog files because the GitHub action will rename files in
+`changelog/unreleased/features` and `changelog/unreleased/bugfixes` directories to `${PR_NUMBER}.md` when you open a PR.
 
 Every release the release train app will:
 
 * collect all files from `changelog/unreleased`
 * assemble the changelog with versions of dependencies like:
+
 ```
 ## Mapbox Navigation SDK 1.1.1 - 13 December, 2022
 ### Changelog
@@ -47,6 +39,12 @@ Every release the release train app will:
 - Bugfix 3 [#3456](https://github.com/mapbox/mapbox-navigation-android/pull/3456)
 - Bugfix 4 [#4567](https://github.com/mapbox/mapbox-navigation-android/pull/4567)
 
+#### Known issues :warning:
+- Issue 1
+- Issue 2
+
+Some other changes
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
@@ -55,5 +53,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 ```
+
 * write the changelog to the `CHANGELOG.md` file
 * delete all files from `changelog/unreleased`
