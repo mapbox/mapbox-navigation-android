@@ -198,6 +198,7 @@ class MapboxRouteLineApi(
     private var primaryRoute: NavigationRoute? = null
     private val routes: MutableList<NavigationRoute> = mutableListOf()
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
+    private var restrictedExpressionData: List<ExtractedRouteRestrictionData> = listOf()
     private var lastIndexUpdateTimeNano: Long = 0
     private var lastPointUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
@@ -470,14 +471,6 @@ class MapboxRouteLineApi(
                     val workingRouteLineExpressionData =
                         alternativelyStyleSegmentsNotInLeg(activeLegIndex, routeLineExpressionData)
 
-                    val restrictedExpressionData: List<ExtractedRouteRestrictionData>? =
-                        if (routeLineOptions.displayRestrictedRoadSections &&
-                            MapboxRouteLineUtils.routeHasRestrictions(primaryRoute)
-                        ) {
-                            extractRouteRestrictionData(route)
-                        } else {
-                            null
-                        }
                     routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
                         point,
                         granularDistances,
@@ -631,28 +624,22 @@ class MapboxRouteLineApi(
                 )
             }
 
-            val restrictedLineExpressionProvider =
-                ifNonNull(primaryRoute) { route ->
-                    if (
-                        routeLineOptions.displayRestrictedRoadSections &&
-                        MapboxRouteLineUtils.routeHasRestrictions(primaryRoute)
-                    ) {
-                        {
-                            val routeData = extractRouteRestrictionData(route)
-                            MapboxRouteLineUtils.getRestrictedLineExpression(
-                                offset,
-                                activeLegIndex,
-                                routeLineOptions
-                                    .resourceProvider
-                                    .routeLineColorResources
-                                    .restrictedRoadColor,
-                                routeData
-                            )
-                        }
-                    } else {
-                        null
+            val restrictedLineExpressionProvider = when (restrictedExpressionData.isEmpty()) {
+                true -> null
+                false -> {
+                    {
+                        MapboxRouteLineUtils.getRestrictedLineExpression(
+                            offset,
+                            activeLegIndex,
+                            routeLineOptions
+                                .resourceProvider
+                                .routeLineColorResources
+                                .restrictedRoadColor,
+                            restrictedExpressionData
+                        )
                     }
                 }
+            }
 
             val alternativesProvider = {
                 throw UnsupportedOperationException(
@@ -869,15 +856,11 @@ class MapboxRouteLineApi(
                             )
                         }
 
-                        val restrictedLineExpressionProvider = if (
-                            routeLineOptions.displayRestrictedRoadSections &&
-                            MapboxRouteLineUtils.routeHasRestrictions(primaryRoute)
-                        ) {
-                            ifNonNull(primaryRoute) { route ->
+                        val restrictedLineExpressionProvider =
+                            ifNonNull(restrictedExpressionData) { routeData ->
                                 {
-                                    val extractedRouteData = extractRouteRestrictionData(route)
                                     getRestrictedLineExpressionProducer(
-                                        extractedRouteData,
+                                        routeData,
                                         0.0,
                                         legIndexToHighlight,
                                         routeLineOptions
@@ -886,9 +869,6 @@ class MapboxRouteLineApi(
                                     )
                                 }
                             }
-                        } else {
-                            null
-                        }
 
                         val alternativesProvider = {
                             throw UnsupportedOperationException(
@@ -1153,6 +1133,12 @@ class MapboxRouteLineApi(
                     granularDistancesProvider(it)
                 }
             }
+
+            restrictedExpressionData = if (routeLineOptions.displayRestrictedRoadSections) {
+                extractRouteRestrictionData(routes.first())
+            } else {
+                listOf()
+            }
         }
     }
 
@@ -1264,9 +1250,8 @@ class MapboxRouteLineApi(
         val primaryRouteRestrictedSectionsExpressionDef = jobControl.scope.async {
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 if (routeLineOptions.displayRestrictedRoadSections) {
-                    val extractedRouteData = extractRouteRestrictionData(this)
                     getRestrictedLineExpressionProducer(
-                        extractedRouteData,
+                        restrictedExpressionData,
                         vanishingPointOffset = 0.0,
                         activeLegIndex = activeLegIndex,
                         routeLineOptions.resourceProvider.routeLineColorResources

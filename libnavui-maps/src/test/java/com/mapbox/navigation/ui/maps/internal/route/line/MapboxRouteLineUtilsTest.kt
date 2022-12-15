@@ -1494,24 +1494,6 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun routeHasRestrictions_whenHasRestrictions() {
-        val route = loadNavigationRoute("route-with-restrictions.json")
-
-        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
-
-        assertTrue(result)
-    }
-
-    @Test
-    fun routeHasRestrictions_whenNotHasRestrictions() {
-        val route = loadNavigationRoute("motorway-with-road-classes-multi-leg.json")
-
-        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
-
-        assertFalse(result)
-    }
-
-    @Test
     fun getRouteRestrictedSectionsExpressionData_multiLegRoute() {
         val route = loadNavigationRoute("two-leg-route-with-restrictions.json")
 
@@ -2001,31 +1983,6 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(expectedExpression, result.toString())
-    }
-
-    @Test
-    fun routeHasRestrictions_when_routeNull() {
-        val result = MapboxRouteLineUtils.routeHasRestrictions(null)
-
-        assertFalse(result)
-    }
-
-    @Test
-    fun routeHasRestrictions() {
-        val route = loadNavigationRoute("route-with-restrictions-at-start.json")
-
-        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
-
-        assertTrue(result)
-    }
-
-    @Test
-    fun routeHasRestrictions_whenNoRestrictions() {
-        val route = loadNavigationRoute("short_route.json")
-
-        val result = MapboxRouteLineUtils.routeHasRestrictions(route)
-
-        assertFalse(result)
     }
 
     private fun <T> listElementsAreEqual(

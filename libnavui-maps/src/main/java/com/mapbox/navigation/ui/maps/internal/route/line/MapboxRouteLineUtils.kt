@@ -79,11 +79,6 @@ internal object MapboxRouteLineUtils {
             >,
         List<ExtractedRouteData>> by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
 
-    private val extractRouteRestrictionDataCache: LruCache<
-        CacheResultUtils.CacheResultKeyRoute<
-            List<ExtractedRouteRestrictionData>>, List<ExtractedRouteRestrictionData>>
-        by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
-
     private val granularDistancesCache: LruCache<
         CacheResultUtils.CacheResultKeyRoute<
             RouteLineGranularDistances?>, RouteLineGranularDistances?>
@@ -588,7 +583,7 @@ internal object MapboxRouteLineUtils {
                 }
             }
             itemsToReturn
-        }.cacheRouteResult(extractRouteRestrictionDataCache)
+        }
 
     /**
      * Filters the [RouteLeg] for intersections that are designated as restricted. If there are
@@ -620,12 +615,6 @@ internal object MapboxRouteLineUtils {
                 this
             }
         }
-    }
-
-    internal fun routeHasRestrictions(route: NavigationRoute?): Boolean {
-        return ifNonNull(route) {
-            extractRouteRestrictionData(it).isNotEmpty()
-        } == true
     }
 
     /**
@@ -1536,7 +1525,6 @@ internal object MapboxRouteLineUtils {
 
     internal fun trimRouteDataCacheToSize(size: Int) {
         extractRouteDataCache.trimToSize(size)
-        extractRouteRestrictionDataCache.trimToSize(size)
         granularDistancesCache.trimToSize(size)
     }
 
