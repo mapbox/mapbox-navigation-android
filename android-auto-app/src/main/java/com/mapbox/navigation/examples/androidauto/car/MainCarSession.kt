@@ -30,9 +30,9 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
+import com.mapbox.navigation.core.replay.route.ReplayRouteSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.examples.androidauto.CarAppSyncComponent
-import com.mapbox.navigation.examples.androidauto.ReplayRouteTripSession
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -58,6 +58,7 @@ class MainCarSession : Session() {
             }
         }
     private val mapboxNavigation by requireMapboxNavigation()
+    private val replayRouteSession = ReplayRouteSession()
 
     init {
         // Decide how you want the car and app to interact. In this example, the car and app
@@ -161,9 +162,9 @@ class MainCarSession : Session() {
         }
 
         if (isAutoDriveEnabled) {
-            MapboxNavigationApp.registerObserver(ReplayRouteTripSession)
+            MapboxNavigationApp.registerObserver(replayRouteSession)
         } else {
-            MapboxNavigationApp.unregisterObserver(ReplayRouteTripSession)
+            MapboxNavigationApp.unregisterObserver(replayRouteSession)
             if (mapboxNavigation.getTripSessionState() != TripSessionState.STARTED) {
                 mapboxNavigation.startTripSession()
             }
