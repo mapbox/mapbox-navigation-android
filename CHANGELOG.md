@@ -12,6 +12,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where `MapboxRerouteController` could deliver a delayed interruption state notifications. Now, the interruption state is always delivered synchronously, as soon as it's available. [#6718](https://github.com/mapbox/mapbox-navigation-android/pull/6718)
 - Fixed the `NavigationView` issue where route arrows are being rendered above navigation puck after device rotation. [#6747](https://github.com/mapbox/mapbox-navigation-android/pull/6747)
 - Fixed an issue where a refresh of the routes or a change in alternatives that occurred while user was off-route would call `RerouteController#interrupt` and interrupt the potentially ongoing reroute process without recovery. [#6719](https://github.com/mapbox/mapbox-navigation-android/pull/6719)
+- Improved OpenLR matching rate. Updates take lowest FRC to next point into account during path generation. [#6750](https://github.com/mapbox/mapbox-navigation-android/pull/6750)
 
 ## Mapbox Navigation SDK 2.9.5 - 13 December, 2022
 ### Changelog
