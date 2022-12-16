@@ -84,11 +84,6 @@ class CarAppSyncComponent private constructor() : MapboxNavigationObserver {
             }
         }
 
-        override fun onDestinationPreview() {
-            logI(LOG_TAG, "updateCarAppState onDestinationPreview")
-            MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
-        }
-
         override fun onRoutePreview() {
             logI(LOG_TAG, "updateCarAppState onRoutePreview")
             MapboxScreenManager.replaceTop(MapboxScreen.ROUTE_PREVIEW)
