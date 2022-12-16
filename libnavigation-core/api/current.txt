@@ -596,6 +596,7 @@ package com.mapbox.navigation.core.replay.route {
     method public String getEncodedPath();
     method public boolean hasNext();
     method public com.mapbox.geojson.Point next();
+    method public void skip(int count);
     property public final com.mapbox.geojson.Point? current;
     property public final String encodedPath;
   }
@@ -605,6 +606,9 @@ package com.mapbox.navigation.core.replay.route {
     ctor public ReplayProgressObserver(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer);
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method @UiThread public com.mapbox.navigation.core.replay.route.ReplayProgressObserver updateOptions(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options);
+  }
+
+  public final class ReplayProgressObserverKt {
   }
 
   public final class ReplayRouteMapper {
