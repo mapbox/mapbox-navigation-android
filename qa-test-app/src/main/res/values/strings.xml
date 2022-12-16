@@ -77,6 +77,13 @@
         <item>WALKING</item>
         <item>CYCLING</item>
     </string-array>
+    <string-array name="drop_in_puck" translatable="false">
+        <item>--</item>
+        <item>NAV_PUCK_2A</item>
+        <item>NAV_PUCK_2B</item>
+        <item>LEGACY</item>
+        <item>QUACK_QUACK</item>
+    </string-array>
     <string-array name="rest_area_routes" translatable="false">
         <item>SAPA_TOKYO_SHORT</item>
         <item>SAPA_TOKYO_LONG</item>

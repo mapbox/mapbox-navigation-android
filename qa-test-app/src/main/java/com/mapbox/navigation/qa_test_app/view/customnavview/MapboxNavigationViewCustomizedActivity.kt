@@ -1,5 +1,6 @@
 package com.mapbox.navigation.qa_test_app.view.customnavview
 
+import android.content.Context
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -22,8 +23,11 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
@@ -86,6 +90,7 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions
+import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder.Companion.regularPuck
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.utils.internal.toPoint
 
@@ -443,6 +448,26 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.enableBuildingHighlightCustomization,
             ::toggleBuildingHighlightCustomization
         )
+
+        bindSpinner(
+            menuBinding.spinnerNavPuck,
+            viewModel.navigationPuck,
+            ::toggleNavigationPuck
+        )
+    }
+
+    private fun toggleNavigationPuck(name: String) {
+        val context = this
+        binding.navigationView.customizeViewStyles {
+            locationPuckOptions = if (name == "--") {
+                LocationPuckOptions.Builder(context).build()
+            } else {
+                LocationPuckOptions.Builder(context)
+                    .defaultPuck(NavPuck.valueOf(name).getLocationPuck(context))
+                    .idlePuck(regularPuck(context))
+                    .build()
+            }
+        }
     }
 
     private fun toggleCustomMap(enabled: Boolean) {
@@ -1071,4 +1096,40 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
         onBackPressedDispatcher.addCallback(owner = this, enabled = false) {
             binding.navigationView.api.startFreeDrive()
         }
+
+    private enum class NavPuck(
+        val getLocationPuck: (context: Context) -> LocationPuck
+    ) {
+        NAV_PUCK_2A({ context ->
+            LocationPuck2D(
+                bearingImage = ContextCompat.getDrawable(
+                    context,
+                    R.drawable.mapbox_navigation_puck_icon2a,
+                )
+            )
+        }),
+        NAV_PUCK_2B({ context ->
+            LocationPuck2D(
+                bearingImage = ContextCompat.getDrawable(
+                    context,
+                    R.drawable.mapbox_navigation_puck_icon2b,
+                )
+            )
+        }),
+        LEGACY({ context ->
+            LocationPuck2D(
+                bearingImage = ContextCompat.getDrawable(
+                    context,
+                    com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon,
+                )
+            )
+        }),
+        QUACK_QUACK({
+            LocationPuck3D(
+                modelUri = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Embedded/Duck.gltf", // ktlint-disable
+                modelScaleExpression = literal(listOf(30, 30, 30)).toJson(),
+                modelRotation = listOf(0f, 0f, -90f)
+            )
+        });
+    }
 }

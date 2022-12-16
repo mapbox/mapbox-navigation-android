@@ -9,6 +9,24 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed standalone `MapboxManeuverView` appearance when the app also integrates Drop-In UI. [#6810](https://github.com/mapbox/mapbox-navigation-android/pull/6810)
 - Each newly instantiated MapboxRouteArrowView class will initialize the layers with the provided options on the first render call. Previously this would only be done if the layers hadn't already been initialized.  [#6466](https://github.com/mapbox/mapbox-navigation-android/pull/6466)
 - Fixed an issue where the first voice instruction might have been played twice. [#6766](https://github.com/mapbox/mapbox-navigation-android/pull/6766)
+- :warning: Updated the `NavigationView` default navigation puck asset. [#6678](https://github.com/mapbox/mapbox-navigation-android/pull/6678)
+
+  Previous puck can be restored by injecting `LocationPuck2D` with the `bearingImage` set to `com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon` drawable:
+  ```kotlin
+  navigationView.customizeViewStyles {
+      locationPuckOptions = LocationPuckOptions.Builder(context)
+          .defaultPuck(
+              LocationPuck2D(
+                  bearingImage = ContextCompat.getDrawable(
+                      context,
+                      com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon,
+                  )
+              )
+          )
+          .idlePuck(regularPuck(context))
+          .build()
+  }
+  ```
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
