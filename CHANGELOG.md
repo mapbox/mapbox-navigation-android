@@ -4,6 +4,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+#### Bug fixes and improvements
+
+## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
+### Changelog
+[Changes between v2.10.0-beta.3 and v2.10.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-beta.3...v2.10.0-rc.1)
+
+#### Features
 - Introduced `MapboxSpeedInfoApi` and `MapboxSpeedInfoView`. The combination of API and View can be used to render posted and current speed limit at user's current location. [#6687](https://github.com/mapbox/mapbox-navigation-android/pull/6687)
 - :warning: Deprecated `MapboxSpeedLimitApi` and `MapboxSpeedLimitView`. [#6687](https://github.com/mapbox/mapbox-navigation-android/pull/6687)
 #### Bug fixes and improvements
@@ -14,6 +21,14 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where a refresh of the routes or a change in alternatives that occurred while user was off-route would call `RerouteController#interrupt` and interrupt the potentially ongoing reroute process without recovery. [#6719](https://github.com/mapbox/mapbox-navigation-android/pull/6719)
 - Improved OpenLR matching rate. Updates take lowest FRC to next point into account during path generation. [#6750](https://github.com/mapbox/mapbox-navigation-android/pull/6750)
 - Fixed an issue where `MapboxBuildingsApi` would fail to highlight buildings. [#6749](https://github.com/mapbox/mapbox-navigation-android/pull/6749)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0))
+- Mapbox Navigation Native `v123.1.0`
+- Mapbox Core Common `v23.2.1`
+- Mapbox Java `v6.10.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.3))
+
 
 ## Mapbox Navigation SDK 2.9.5 - 13 December, 2022
 ### Changelog
