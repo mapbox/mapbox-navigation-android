@@ -854,9 +854,15 @@ package com.mapbox.navigation.base.speed.model {
     enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedLimitSign VIENNA;
   }
 
-  public enum SpeedLimitUnit {
-    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedLimitUnit KILOMETRES_PER_HOUR;
-    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedLimitUnit MILES_PER_HOUR;
+  @Deprecated public enum SpeedLimitUnit {
+    enum_constant @Deprecated public static final com.mapbox.navigation.base.speed.model.SpeedLimitUnit KILOMETRES_PER_HOUR;
+    enum_constant @Deprecated public static final com.mapbox.navigation.base.speed.model.SpeedLimitUnit MILES_PER_HOUR;
+  }
+
+  public enum SpeedUnit {
+    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedUnit KILOMETERS_PER_HOUR;
+    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedUnit METERS_PER_SECOND;
+    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedUnit MILES_PER_HOUR;
   }
 
 }

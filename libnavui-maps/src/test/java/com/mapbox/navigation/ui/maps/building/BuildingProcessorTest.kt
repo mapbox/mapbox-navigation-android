@@ -1,7 +1,5 @@
 package com.mapbox.navigation.ui.maps.building
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
@@ -13,19 +11,21 @@ import com.mapbox.navigation.base.internal.utils.WaypointFactory
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.testing.factories.createRouteOptions
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BuildingProcessorTest {
 
     @Test
-    fun `map query on waypoint arrival with waypoint targets`() {
+    fun `map query on a regular waypoint arrival with waypoint targets`() {
         val waypoints = listOf(
             provideWaypoint(
                 Point.fromLngLat(-122.4192, 37.7627),
@@ -61,7 +61,7 @@ class BuildingProcessorTest {
     }
 
     @Test
-    fun `map query on waypoint arrival with some waypoint targets`() {
+    fun `map query on a EV waypoint arrival with waypoint targets`() {
         val waypoints = listOf(
             provideWaypoint(
                 Point.fromLngLat(-122.4192, 37.7627),
@@ -71,103 +71,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.REGULAR,
-                "",
-                null,
-            ),
-            provideWaypoint(
-                Point.fromLngLat(-122.4145, 37.7653),
-                Waypoint.REGULAR,
-                "",
-                Point.fromLngLat(-122.4146, 37.7655),
-            ),
-        )
-        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
-            every { legIndex } returns 0
-        }
-        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
-            every { currentLegProgress } returns mockRouteLegProgress
-            every { navigationRoute.internalWaypoints() } returns waypoints
-        }
-
-        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
-
-        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
-
-        assertEquals(waypoints[1].location, result.point)
-    }
-
-    @Test
-    fun `map query on waypoint arrival without waypoint targets`() {
-        val waypoints = listOf(
-            provideWaypoint(
-                Point.fromLngLat(-122.4192, 37.7627),
-                Waypoint.REGULAR,
-                "",
-                null,
-            ),
-            provideWaypoint(
-                Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.REGULAR,
-                "",
-                null,
-            ),
-            provideWaypoint(
-                Point.fromLngLat(-122.4145, 37.7653),
-                Waypoint.REGULAR,
-                "",
-                null,
-            ),
-        )
-        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
-            every { legIndex } returns 0
-        }
-        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
-            every { currentLegProgress } returns mockRouteLegProgress
-            every { navigationRoute.internalWaypoints() } returns waypoints
-        }
-        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
-
-        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
-
-        assertEquals(waypoints[1].location, result.point)
-    }
-
-    @Test
-    fun `map query on waypoint arrival without waypoint targets or coordinates`() {
-        val mockRouteOptions = mockk<RouteOptions>(relaxed = true) {
-            every { coordinatesList() } returns listOf()
-            every { waypointTargetsList() } returns null
-        }
-        val mockRoute = mockk<DirectionsRoute>(relaxed = true) {
-            every { routeOptions() } returns mockRouteOptions
-        }
-        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
-            every { legIndex } returns 0
-        }
-        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
-            every { currentLegProgress } returns mockRouteLegProgress
-            every { route } returns mockRoute
-        }
-        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
-
-        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
-
-        assertEquals(result.point, null)
-    }
-
-    @Test
-    fun `map query on final destination arrival with waypoint targets`() {
-        val waypoints = listOf(
-            provideWaypoint(
-                Point.fromLngLat(-122.4192, 37.7627),
-                Waypoint.REGULAR,
-                "",
-                Point.fromLngLat(-122.4192, 37.7627),
-            ),
-            provideWaypoint(
-                Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.REGULAR,
+                Waypoint.EV_CHARGING,
                 "",
                 Point.fromLngLat(-122.4183, 37.7653),
             ),
@@ -185,15 +89,282 @@ class BuildingProcessorTest {
             every { currentLegProgress } returns mockRouteLegProgress
             every { navigationRoute.internalWaypoints() } returns waypoints
         }
-        val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
 
-        val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
 
-        assertEquals(waypoints.last().target!!, result.point)
+        assertEquals(waypoints[1].target, result.point)
     }
 
     @Test
-    fun `map query on final destination arrival without waypoint targets`() {
+    fun `map query on waypoint arrival with some waypoint targets, all regular`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4146, 37.7655),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                    Point.fromLngLat(5.5, 6.6),
+                )
+            )
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a regular waypoint arrival with waypoint targets, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                Point.fromLngLat(-122.4183, 37.7652),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4146, 37.7655),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.5156, 37.8989),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.5157, 37.8990),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(waypoints[2].target, result.point)
+    }
+
+    @Test
+    fun `map query on a EV waypoint arrival with waypoint targets, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                Point.fromLngLat(-122.4183, 37.7652),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.EV_CHARGING,
+                "",
+                Point.fromLngLat(-122.4146, 37.7655),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.5156, 37.8989),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.5157, 37.8990),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(waypoints[2].target, result.point)
+    }
+
+    @Test
+    fun `map query on waypoint arrival with waypoint targets, has EV after`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4183, 37.7652),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.EV_CHARGING,
+                "",
+                Point.fromLngLat(-122.4146, 37.7655),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(waypoints[1].target, result.point)
+    }
+
+    @Test
+    fun `map query on waypoint arrival with some waypoint targets, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                Point.fromLngLat(-122.4183, 37.7652),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.5156, 37.8989),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.5157, 37.8990),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                    Point.fromLngLat(5.5, 6.6),
+                )
+            )
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on waypoint arrival with some waypoint targets, has EV after`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.EV_CHARGING,
+                "",
+                Point.fromLngLat(-122.4146, 37.7655),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.5156, 37.8989),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.5157, 37.8990),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                    Point.fromLngLat(5.5, 6.6),
+                )
+            )
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a regular waypoint arrival without waypoint targets, all regular`() {
         val waypoints = listOf(
             provideWaypoint(
                 Point.fromLngLat(-122.4192, 37.7627),
@@ -220,12 +391,600 @@ class BuildingProcessorTest {
         val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
             every { currentLegProgress } returns mockRouteLegProgress
             every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                    Point.fromLngLat(5.5, 6.6),
+                )
+            )
+        }
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a EV waypoint arrival without waypoint targets`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+        }
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(waypoints[1].location, result.point)
+    }
+
+    @Test
+    fun `map query on a regular waypoint arrival without waypoint targets, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.5156, 37.8989),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.5157, 37.8990),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                    Point.fromLngLat(5.5, 6.6),
+                )
+            )
+        }
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a regular waypoint arrival without waypoint targets, has EV after`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.EV_CHARGING,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.5156, 37.8989),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.5157, 37.8990),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                    Point.fromLngLat(5.5, 6.6),
+                )
+            )
+        }
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a waypoint arrival without waypoint targets or coordinates, all regular`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(emptyList())
+        }
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertNull(result.point)
+    }
+
+    @Test
+    fun `map query on a EV waypoint arrival without waypoint targets or coordinates`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(emptyList())
+        }
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertEquals(waypoints[1].location, result.point)
+    }
+
+    @Test
+    fun `map query on a waypoint arrival, no waypoint targets or coordinates, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(emptyList())
+        }
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertNull(result.point)
+    }
+
+    @Test
+    fun `map query on a waypoint arrival without waypoint targets or coordinates, has EV after`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.EV_CHARGING,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(emptyList())
+        }
+        val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnWaypoint(mockAction)
+
+        assertNull(result.point)
+    }
+
+    @Test
+    fun `map query on final destination arrival with waypoint targets`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4183, 37.7653),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
         }
         val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
 
         val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
 
-        assertEquals(waypoints.last().location, result.point)
+        assertEquals(waypoints[1].target!!, result.point)
+    }
+
+    @Test
+    fun `map query on final destination arrival with some waypoint targets, all regular`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                )
+            )
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a final destination arrival with waypoint targets, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                Point.fromLngLat(-122.4183, 37.7652),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4146, 37.7655),
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
+
+        assertEquals(waypoints[2].target, result.point)
+    }
+
+    @Test
+    fun `map query on final destination arrival with some waypoint targets, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                Point.fromLngLat(-122.4192, 37.7627),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                Point.fromLngLat(-122.4183, 37.7652),
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                )
+            )
+        }
+
+        val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a final destination arrival without waypoint targets, all regular`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                )
+            )
+        }
+        val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a final destination arrival without waypoint targets, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                )
+            )
+        }
+        val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
+
+        assertEquals(Point.fromLngLat(3.3, 4.4), result.point)
+    }
+
+    @Test
+    fun `map query on a final destination without waypoint targets or coordinates, all regular`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 0
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(emptyList())
+        }
+        val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
+
+        assertNull(result.point)
+    }
+
+    @Test
+    fun `map query on final destination, no waypoint targets or coordinates, has EV before`() {
+        val waypoints = listOf(
+            provideWaypoint(
+                Point.fromLngLat(-122.4192, 37.7627),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4182, 37.7651),
+                Waypoint.EV_CHARGING,
+                "",
+                null,
+            ),
+            provideWaypoint(
+                Point.fromLngLat(-122.4145, 37.7653),
+                Waypoint.REGULAR,
+                "",
+                null,
+            ),
+        )
+        val mockRouteLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { legIndex } returns 1
+        }
+        val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockRouteLegProgress
+            every { navigationRoute.internalWaypoints() } returns waypoints
+            every { navigationRoute.routeOptions } returns createRouteOptions(emptyList())
+        }
+        val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
+
+        val result = BuildingProcessor.queryBuildingOnFinalDestination(mockAction)
+
+        assertNull(result.point)
     }
 
     @Test
