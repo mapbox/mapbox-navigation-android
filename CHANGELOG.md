@@ -5,6 +5,24 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- :warning: Updated the `NavigationView` default navigation puck asset. [#6678](https://github.com/mapbox/mapbox-navigation-android/pull/6678)
+
+  Previous puck can be restored by injecting `LocationPuck2D` with the `bearingImage` set to `com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon` drawable:
+  ```kotlin
+  navigationView.customizeViewStyles {
+      locationPuckOptions = LocationPuckOptions.Builder(context)
+          .defaultPuck(
+              LocationPuck2D(
+                  bearingImage = ContextCompat.getDrawable(
+                      context,
+                      com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon,
+                  )
+              )
+          )
+          .idlePuck(regularPuck(context))
+          .build()
+  }
+  ```
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
