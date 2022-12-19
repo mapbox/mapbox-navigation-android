@@ -23,6 +23,7 @@ import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
+import com.mapbox.navigation.core.reroute.NavigationRerouteControllerV2
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routerefresh.RefreshedRouteInfo
@@ -39,8 +40,10 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
+import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
@@ -463,7 +466,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun offroute_lead_to_reroute() {
+    fun  `offroute lead to reroute`() {
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(rerouteController)
         val observers = mutableListOf<OffRouteObserver>()
@@ -477,6 +480,40 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(ordering = Ordering.ORDERED) {
             tripSession.registerOffRouteObserver(any())
             rerouteController.reroute(any())
+        }
+    }
+
+    @Test
+    fun `offroute leads to reroute using controller v2`() {
+        createMapboxNavigation()
+        val testRoutes = createNavigationRoutes(
+            response = createDirectionsResponse(
+                routes = listOf(
+                    createDirectionsRoute(),
+                    createDirectionsRoute()
+                )
+            )
+        )
+        every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+            every { routeAlternativeId } returns testRoutes[1].id
+        }
+        every { directionsSession.routes } returns testRoutes
+        val rerouteController = mockk<NavigationRerouteControllerV2>(relaxed = true)
+        mapboxNavigation.setRerouteController(rerouteController)
+
+        val observers = mutableListOf<OffRouteObserver>()
+        verify { tripSession.registerOffRouteObserver(capture(observers)) }
+        observers.forEach {
+            it.onOffRouteStateChanged(true)
+        }
+
+        verify(exactly = 1) {
+            rerouteController.reroute(
+                match {
+                      it.routes == testRoutes && it.detectedAlternative == testRoutes[1]
+                },
+                any()
+            )
         }
     }
 
@@ -1733,7 +1770,22 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val navigationRerouteController: NavigationRerouteController = mockk(relaxed = true)
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(navigationRerouteController)
-        assertEquals(navigationRerouteController, mapboxNavigation.getRerouteController())
+        mapboxNavigation.getRerouteController()
+            ?.reroute(mockk(), mockk())
+        verify {
+            navigationRerouteController.reroute(any<NavigationRerouteController.RoutesCallback>())
+        }
+    }
+
+    @Test
+    fun `set navigation reroute controller v2`() = coroutineRule.runBlockingTest {
+        val navigationRerouteController: NavigationRerouteControllerV2 = mockk(relaxed = true)
+        createMapboxNavigation()
+        mapboxNavigation.setRerouteController(navigationRerouteController)
+        mapboxNavigation.getRerouteController()?.reroute(mockk(), mockk())
+        verify {
+            navigationRerouteController.reroute(any(), any())
+        }
     }
 
     @Test

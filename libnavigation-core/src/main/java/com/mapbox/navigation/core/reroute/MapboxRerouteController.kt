@@ -4,6 +4,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.routerOrigin
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.options.RerouteOptions
@@ -30,6 +31,7 @@ import kotlin.coroutines.resume
 /**
  * Default implementation of [RerouteController]
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapboxRerouteController @VisibleForTesting constructor(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
@@ -37,7 +39,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
     private val compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter,
-) : NavigationRerouteController {
+) : NavigationRerouteControllerV2 {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
 
@@ -112,35 +114,36 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         }
     }
 
-    override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
+    override fun reroute(
+        params: RerouteParameters,
+        callback: NavigationRerouteController.RoutesCallback
+    ) {
         interrupt()
         state = RerouteState.FetchingRoute
         logD("Fetching route", LOG_CATEGORY)
 
         ifNonNull(
-            directionsSession.routes,
-            tripSession.getRouteProgress()?.routeAlternativeId,
-        ) { routes, routeAlternativeId ->
-            val relevantAlternative = routes.find { it.id == routeAlternativeId }
-            if (relevantAlternative != null) {
-                val newList = mutableListOf(relevantAlternative).apply {
-                    addAll(
-                        routes.toMutableList().apply {
-                            removeFirst()
-                            remove(relevantAlternative)
-                        }
-                    )
-                }
+            params.routes,
+            params.detectedAlternative,
+        ) { routes, relevantAlternative ->
 
-                logD("Reroute switch to alternative", LOG_CATEGORY)
-
-                val origin = relevantAlternative.routerOrigin.mapToSdkRouteOrigin()
-
-                state = RerouteState.RouteFetched(origin)
-                callback.onNewRoutes(newList, origin)
-                state = RerouteState.Idle
-                return
+            val newList = mutableListOf(relevantAlternative).apply {
+                addAll(
+                    routes.toMutableList().apply {
+                        removeFirst()
+                        remove(relevantAlternative)
+                    }
+                )
             }
+
+            logD("Reroute switch to alternative", LOG_CATEGORY)
+
+            val origin = relevantAlternative.routerOrigin.mapToSdkRouteOrigin()
+
+            state = RerouteState.RouteFetched(origin)
+            callback.onNewRoutes(newList, origin)
+            state = RerouteState.Idle
+            return
         }
 
         val routeOptions = directionsSession.getPrimaryRouteOptions()
@@ -171,6 +174,20 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                     }
                 }
             }
+    }
+
+    override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
+        val routes = directionsSession.routes
+        val routeProgress = tripSession.getRouteProgress()
+        reroute(
+            RerouteParameters(
+                detectedAlternative = routes.firstOrNull {
+                    it.id == routeProgress?.routeAlternativeId
+                },
+                routes = routes
+            ),
+            callback
+        )
     }
 
     @MainThread

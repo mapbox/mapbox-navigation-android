@@ -71,8 +71,11 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
+import com.mapbox.navigation.core.reroute.NavigationRerouteControllerV2
+import com.mapbox.navigation.core.reroute.NavigationRerouteControllerV2Adapter
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
+import com.mapbox.navigation.core.reroute.RerouteParameters
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
@@ -237,6 +240,7 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @UiThread
 class MapboxNavigation @VisibleForTesting internal constructor(
     val navigationOptions: NavigationOptions,
@@ -328,8 +332,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Reroute controller, by default uses [defaultRerouteController].
      */
-    private var rerouteController: NavigationRerouteController?
-    private val defaultRerouteController: NavigationRerouteController
+    private var rerouteController: NavigationRerouteControllerV2?
+    private val defaultRerouteController: NavigationRerouteControllerV2
 
     /**
      * [NavigationVersionSwitchObserver] is notified when navigation switches tiles version.
@@ -1400,6 +1404,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         rerouteController: NavigationRerouteController? = defaultRerouteController
     ) {
         val oldController = this.rerouteController
+        this.rerouteController = rerouteController?.let { NavigationRerouteControllerV2Adapter(it) }
+        if (oldController?.state == RerouteState.FetchingRoute) {
+            oldController.interrupt()
+            reroute()
+        }
+    }
+
+    @JvmOverloads
+    fun setRerouteController(
+        rerouteController: NavigationRerouteControllerV2?
+    ) {
+        val oldController = this.rerouteController
         this.rerouteController = rerouteController
         if (oldController?.state == RerouteState.FetchingRoute) {
             oldController.interrupt()
@@ -1423,7 +1439,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @see setRerouteController
      */
-    fun getRerouteController(): NavigationRerouteController? = rerouteController
+    fun getRerouteController(): NavigationRerouteControllerV2? = rerouteController
 
     /**
      * Registers [ArrivalObserver]. Monitor arrival at stops and destinations. For more control
@@ -1977,7 +1993,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun reroute() {
-        rerouteController?.reroute { routes, _ ->
+        val routeProgress = tripSession.getRouteProgress()
+        rerouteController?.reroute(RerouteParameters(
+            directionsSession.routes.firstOrNull { it.id == routeProgress?.routeAlternativeId },
+            directionsSession.routes
+        )) { routes, _ ->
             internalSetNavigationRoutes(
                 routes,
                 SetRoutes.Reroute
