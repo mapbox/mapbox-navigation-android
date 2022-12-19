@@ -50,6 +50,37 @@ class RoutesUpdatedResult internal constructor(
         )
     )
     val routes: List<DirectionsRoute> by lazy { navigationRoutes.toDirectionsRoutes() }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RoutesUpdatedResult
+
+        if (navigationRoutes != other.navigationRoutes) return false
+        if (reason != other.reason) return false
+
+        return true
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = navigationRoutes.hashCode()
+        result = 31 * result + reason.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "RoutesUpdatedResult(navigationRoutes=$navigationRoutes, reason='$reason')"
+    }
 }
 
 /**
