@@ -1,6 +1,7 @@
 name: Set reviewers
 on:
   pull_request:
+    types: [ synchronize ]
 jobs:
   process:
     permissions:
