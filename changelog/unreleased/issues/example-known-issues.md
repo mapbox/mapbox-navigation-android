@@ -1,1 +1,1 @@
-It is an example of known issues
+- It is an example of known issues
