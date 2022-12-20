@@ -1439,7 +1439,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @see setRerouteController
      */
-    fun getRerouteController(): NavigationRerouteControllerV2? = rerouteController
+    fun getRerouteController(): NavigationRerouteController? = rerouteController
 
     /**
      * Registers [ArrivalObserver]. Monitor arrival at stops and destinations. For more control

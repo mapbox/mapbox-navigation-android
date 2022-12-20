@@ -1771,7 +1771,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(navigationRerouteController)
         mapboxNavigation.getRerouteController()
-            ?.reroute(mockk(), mockk())
+            ?.reroute(mockk<NavigationRerouteController.RoutesCallback>())
         verify {
             navigationRerouteController.reroute(any<NavigationRerouteController.RoutesCallback>())
         }
@@ -1782,9 +1782,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val navigationRerouteController: NavigationRerouteControllerV2 = mockk(relaxed = true)
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(navigationRerouteController)
-        mapboxNavigation.getRerouteController()?.reroute(mockk(), mockk())
+        mapboxNavigation.getRerouteController()?.reroute(mockk<NavigationRerouteController.RoutesCallback>())
         verify {
-            navigationRerouteController.reroute(any(), any())
+            navigationRerouteController.reroute(any<NavigationRerouteController.RoutesCallback>())
         }
     }
 
