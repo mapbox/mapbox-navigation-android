@@ -32,4 +32,3 @@ if renamed_features_count + renamed_bugfixes_count > 0:
     repository = git.Repo('.')
     repository.git.add('changelog/unreleased')
     repository.index.commit('Rename changelog files')
-    repository.remotes.origin.push().raise_if_error()
