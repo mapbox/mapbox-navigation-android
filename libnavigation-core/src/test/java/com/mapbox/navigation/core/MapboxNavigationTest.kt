@@ -466,7 +466,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun  `offroute lead to reroute`() {
+    fun `offroute lead to reroute`() {
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(rerouteController)
         val observers = mutableListOf<OffRouteObserver>()
@@ -510,7 +510,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 1) {
             rerouteController.reroute(
                 match {
-                      it.routes == testRoutes && it.detectedAlternative == testRoutes[1]
+                    it.routes == testRoutes && it.detectedAlternative == testRoutes[1]
                 },
                 any()
             )
@@ -1782,7 +1782,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val navigationRerouteController: NavigationRerouteControllerV2 = mockk(relaxed = true)
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(navigationRerouteController)
-        mapboxNavigation.getRerouteController()?.reroute(mockk<NavigationRerouteController.RoutesCallback>())
+        mapboxNavigation.getRerouteController()
+            ?.reroute(mockk<NavigationRerouteController.RoutesCallback>())
         verify {
             navigationRerouteController.reroute(any<NavigationRerouteController.RoutesCallback>())
         }
