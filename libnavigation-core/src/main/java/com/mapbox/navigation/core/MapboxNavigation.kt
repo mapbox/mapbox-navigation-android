@@ -430,7 +430,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ),
             historyRecorderHandles.composite,
         )
-        val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
+        val result = navigationOptions.router ?: MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(
                 ModuleParams.NavigationRouter(
                     accessToken

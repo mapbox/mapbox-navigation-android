@@ -7,6 +7,7 @@ import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 
@@ -67,6 +68,7 @@ private constructor(
     val enableSensors: Boolean,
     @ExperimentalPreviewMapboxNavigationAPI
     val copilotOptions: CopilotOptions,
+    val router: NavigationRouterV2?
 ) {
 
     /**
@@ -92,6 +94,7 @@ private constructor(
         eventsAppMetadata(eventsAppMetadata)
         enableSensors(enableSensors)
         copilotOptions(copilotOptions)
+        router(router)
     }
 
     /**
@@ -123,6 +126,7 @@ private constructor(
         if (eventsAppMetadata != other.eventsAppMetadata) return false
         if (enableSensors != other.enableSensors) return false
         if (copilotOptions != other.copilotOptions) return false
+        if (router != other.router) return false
 
         return true
     }
@@ -151,6 +155,7 @@ private constructor(
         result = 31 * result + eventsAppMetadata.hashCode()
         result = 31 * result + enableSensors.hashCode()
         result = 31 * result + copilotOptions.hashCode()
+        result = 31 * result + router.hashCode()
         return result
     }
 
@@ -178,7 +183,8 @@ private constructor(
             "historyRecorderOptions=$historyRecorderOptions, " +
             "eventsAppMetadata=$eventsAppMetadata, " +
             "enableSensors=$enableSensors, " +
-            "copilotOptions=$copilotOptions" +
+            "copilotOptions=$copilotOptions, " +
+            "router=$router" +
             ")"
     }
 
@@ -213,6 +219,7 @@ private constructor(
             HistoryRecorderOptions.Builder().build()
         private var eventsAppMetadata: EventsAppMetadata? = null
         private var enableSensors: Boolean = false
+        private var router: NavigationRouterV2? = null
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
@@ -329,6 +336,9 @@ private constructor(
         fun copilotOptions(copilotOptions: CopilotOptions): Builder =
             apply { this.copilotOptions = copilotOptions }
 
+        fun router(router: NavigationRouterV2?): Builder =
+            apply { this.router = router }
+
         /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
@@ -355,6 +365,7 @@ private constructor(
                 eventsAppMetadata = eventsAppMetadata,
                 enableSensors = enableSensors,
                 copilotOptions = copilotOptions,
+                router = router
             )
         }
     }
