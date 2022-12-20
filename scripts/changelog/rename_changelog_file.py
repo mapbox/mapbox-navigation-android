@@ -34,6 +34,7 @@ if renamed_features_count + renamed_bugfixes_count > 0:
     repository.git.add('changelog/unreleased')
     repository.index.commit('Rename changelog files')
     config = open('.git/config', 'r').read()
+    print(config)
     updated_config = config.replace('git@github.com:mapbox/mapbox-navigation-android.git',
                                     'https://x-access-token:' + token + '@github.com/mapbox/test-nav-sdk')
     open('.git/config', 'w').write(updated_config)
