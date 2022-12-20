@@ -4,6 +4,7 @@ import androidx.annotation.UiThread
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -20,7 +21,8 @@ interface NavigationRerouteController : RerouteController {
      * an off-route event.
      *
      * In case you need the latest [RouteProgress] in your reroute logic,
-     * the SDK guarantees that [RouteProgressObserver.onRouteProgressChanged] is called before [reroute].
+     * the SDK guarantees that [RouteProgress] with [RouteProgressState.OFF_ROUTE] arrives earlier at [RouteProgressObserver.onRouteProgressChanged]
+     * than [reroute] is called.
      *
      * @see [OffRouteObserver]
      */
