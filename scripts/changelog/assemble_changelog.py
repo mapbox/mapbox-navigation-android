@@ -7,7 +7,11 @@ def get_changes(path):
     changes = ''
     files = os.listdir(path)
     for file in files:
-        changes += open(path + file, 'r').read() + '\n'
+        pr_number = file.partition('.')[0]
+        for line in open(path + file, 'r').readlines():
+            line = line.replace('\n', '')
+            if line.strip():
+                changes += line + ' [#' + pr_number + '](https://github.com/mapbox/mapbox-navigation-android/pull/' + pr_number + ')' + '\n'
     return changes.strip()
 
 
