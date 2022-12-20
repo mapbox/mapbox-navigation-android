@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
@@ -20,6 +21,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.reroute.NavigationRerouteController
+import com.mapbox.navigation.core.reroute.NavigationRerouteControllerV2
+import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteParameters
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
@@ -48,6 +53,7 @@ import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
@@ -208,6 +214,61 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
             check(newWaypoints[1] == mockRoute.routeWaypoints.last())
         }
     }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun reroute_to_alternative_with_custom_reroute_controller() =
+        sdkTest {
+            val mapboxNavigation = createMapboxNavigation()
+            val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
+
+            val rerouteParametersDefered = CompletableDeferred<RerouteParameters>()
+            mapboxNavigation.setRerouteController(object : NavigationRerouteControllerV2 {
+                override fun reroute(
+                    params: RerouteParameters,
+                    callback: NavigationRerouteController.RoutesCallback
+                ) {
+                    rerouteParametersDefered.complete(params)
+                }
+                override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
+                }
+                override fun reroute(routesCallback: RerouteController.RoutesCallback) {
+                }
+                override val state = RerouteState.Idle
+                override fun interrupt() {
+                }
+                override fun registerRerouteStateObserver(
+                    rerouteStateObserver: RerouteController.RerouteStateObserver
+                ): Boolean {
+                    return false
+                }
+                override fun unregisterRerouteStateObserver(
+                    rerouteStateObserver: RerouteController.RerouteStateObserver
+                ): Boolean {
+                    return false
+                }
+            })
+            val origin = routes.first().routeOptions.coordinatesList().first()
+            mockLocationUpdatesRule.pushLocationUpdate {
+                latitude = origin.latitude()
+                longitude = origin.longitude()
+            }
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutes(routes)
+            mapboxNavigation.routesUpdates().first { it.navigationRoutes == routes }
+
+            mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
+
+            val rerouteParameters = rerouteParametersDefered.await()
+            assertEquals(
+                routes[1],
+                rerouteParameters.detectedAlternative
+            )
+            assertEquals(
+                routes,
+                rerouteParameters.routes
+            )
+        }
 
     @Test
     fun reroute_is_cancelled_when_the_user_returns_to_route() = sdkTest {
