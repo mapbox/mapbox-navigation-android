@@ -240,7 +240,6 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @UiThread
 class MapboxNavigation @VisibleForTesting internal constructor(
     val navigationOptions: NavigationOptions,
@@ -332,7 +331,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Reroute controller, by default uses [defaultRerouteController].
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private var rerouteController: NavigationRerouteControllerV2?
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val defaultRerouteController: NavigationRerouteControllerV2
 
     /**
@@ -1015,6 +1017,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         CacheHandleWrapper.requestRoadGraphDataUpdate(navigator.cache, callback)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
         setRoutesInfo: SetRoutes,
@@ -1399,19 +1402,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Pass `null` to disable automatic reroute.
      * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @JvmOverloads
     fun setRerouteController(
         rerouteController: NavigationRerouteController? = defaultRerouteController
     ) {
-        val oldController = this.rerouteController
-        this.rerouteController = rerouteController?.let { NavigationRerouteControllerV2Adapter(it) }
-        if (oldController?.state == RerouteState.FetchingRoute) {
-            oldController.interrupt()
-            reroute()
-        }
+        setRerouteController(
+            rerouteController?.let { NavigationRerouteControllerV2Adapter(it) }
+        )
     }
 
-    @JvmOverloads
+    @ExperimentalPreviewMapboxNavigationAPI
     fun setRerouteController(
         rerouteController: NavigationRerouteControllerV2?
     ) {
@@ -1912,6 +1913,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
         if (offRoute) {
             reroute()
@@ -1992,6 +1994,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun reroute() {
         rerouteController?.reroute(
             RerouteParameters.create(
