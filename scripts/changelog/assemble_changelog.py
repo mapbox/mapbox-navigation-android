@@ -22,9 +22,7 @@ changelog = '#### Features\n' + features + '\n\n' + \
 open('changelog/unreleased/CHANGELOG.md', 'w').write(changelog)
 
 repository = git.Repo('.')
-repository.git.add('changelog/unreleased/CHANGELOG.md')
-for diff in repository.index.diff(None):
-    print(diff.a_path)
+repository.git.add('changelog/unreleased')
 if len(repository.index.diff(None)) > 0:
     repository.index.commit('Assemble changelog file [skip actions]')
     repository.remotes.origin.push().raise_if_error()
