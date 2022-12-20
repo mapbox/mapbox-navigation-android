@@ -11,7 +11,7 @@ To follow this strategy you should create a `.md` file for every PR. Choose a di
 
 You can use anything that allow .md format in changelog files.
 
-If you have implemented some features or bugfixes you should describe all of them:
+If you have implemented several features or bugfixes you should describe all of them:
 
 ```
 - Description of changes in md format
@@ -21,16 +21,12 @@ If you have implemented some features or bugfixes you should describe all of the
 You can choose any name for your changelog files because the GitHub action will rename files in
 `changelog/unreleased/features` and `changelog/unreleased/bugfixes` directories to `${PR_NUMBER}.md` when you open a PR.
 
-Every release the release train app will:
+Every push to the main or release branch Assemble changelog GitHub action will be executed:
 
 * collect all files from `changelog/unreleased`
-* assemble the changelog with versions of dependencies like:
+* assemble the changelog like:
 
 ```
-## Mapbox Navigation SDK 1.1.1 - 13 December, 2022
-### Changelog
-[Changes between v1.1.0 and v1.1.1](https://github.com/mapbox/mapbox-navigation-android/compare/v1.1.0...v1.1.1)
-
 #### Features
 - Feature 1 [#1234](https://github.com/mapbox/mapbox-navigation-android/pull/1234)
 - Feature 2 [#2345](https://github.com/mapbox/mapbox-navigation-android/pull/2345)
@@ -44,15 +40,6 @@ Every release the release train app will:
 - Issue 2
 
 Some other changes
-
-### Mapbox dependencies
-This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
-- Mapbox Navigation Native `v115.0.1`
-- Mapbox Core Common `v23.0.0`
-- Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
-- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 ```
 
-* write the changelog to the `CHANGELOG.md` file
-* delete all files from `changelog/unreleased`
+* write the changelog to the `changelog/unreleased/CHANGELOG.md` file
