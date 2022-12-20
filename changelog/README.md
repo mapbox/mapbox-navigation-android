@@ -7,7 +7,7 @@ To follow this strategy you should create a `.md` file for every PR. Choose a di
 - `changelog/unreleased/features` for **Features** changes
 - `changelog/unreleased/bugfixes` for **Bug fixes and improvements** changes
 - `changelog/unreleased/issues` for **Known issues :warning:** changes
-- `changelog/unreleased` for other changes
+- `changelog/unreleased/other` for other changes
 
 You can use anything that allow .md format in changelog files.
 

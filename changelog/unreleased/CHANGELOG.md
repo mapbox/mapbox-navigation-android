@@ -8,4 +8,16 @@
 - Updated the `MapboxRestAreaApi` logic to load a SAPA map only if the upcoming rest stop is at the current step of the route leg. [#6695](https://github.com/mapbox/mapbox-navigation-android/pull/6695)
 
 #### Known issues :warning:
-- It is an example of known issues [#example-known-issues](https://github.com/mapbox/mapbox-navigation-android/pull/example-known-issues)
+- It is an example of known issues
+
+#### Other changes
+You can write here anything in .md format
+
+```
+For example some code
+```
+
+<details>
+<summary>Feel free</summary>
+to use md features
+</details>
