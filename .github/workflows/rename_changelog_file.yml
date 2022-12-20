@@ -27,4 +27,5 @@ jobs:
 
       - name: execute py script
         run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           python3 scripts/changelog/rename_changelog_file.py
