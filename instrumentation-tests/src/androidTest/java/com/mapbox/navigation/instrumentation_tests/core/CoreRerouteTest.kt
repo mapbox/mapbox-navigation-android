@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
@@ -463,14 +464,17 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
             mapboxNavigation.registerRouteProgressObserver {
                 latestRouteProgress = it
             }
-            val alternativeIdFromTheLatestRouteProgressDuringReroute =
-                CompletableDeferred<String?>()
+            val navigationStateDuringReroute =
+                CompletableDeferred<NavigationStateDuringReroute>()
             mapboxNavigation.setRerouteController(object : NavigationRerouteController {
                 override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
-                    alternativeIdFromTheLatestRouteProgressDuringReroute
-                        .complete(latestRouteProgress?.routeAlternativeId)
+                    navigationStateDuringReroute.complete(
+                        NavigationStateDuringReroute(
+                            latestRouteProgress,
+                            mapboxNavigation.getNavigationRoutes()
+                        )
+                    )
                 }
-
                 override fun reroute(routesCallback: RerouteController.RoutesCallback) {
                 }
                 override val state: RerouteState = RerouteState.Idle
@@ -498,9 +502,14 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
             mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
 
+            val state = navigationStateDuringReroute.await()
             assertEquals(
                 routes[1].id,
-                alternativeIdFromTheLatestRouteProgressDuringReroute.await()
+                state.latestRouteProgress?.routeAlternativeId
+            )
+            assertEquals(
+                routes,
+                state.routes
             )
         }
 
@@ -598,3 +607,8 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         )
     }
 }
+
+private data class NavigationStateDuringReroute(
+    val latestRouteProgress: RouteProgress?,
+    val routes: List<NavigationRoute>,
+)
