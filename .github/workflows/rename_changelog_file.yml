@@ -30,3 +30,4 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           python3 scripts/changelog/rename_changelog_file.py
+          git push
