@@ -4,6 +4,7 @@ import re
 import git
 
 pr_number = os.environ['PR_NUMBER']
+token = os.environ['GITHUB_TOKEN']
 
 pattern = re.compile("^\d*.md")
 
@@ -32,3 +33,8 @@ if renamed_features_count + renamed_bugfixes_count > 0:
     repository = git.Repo('.')
     repository.git.add('changelog/unreleased')
     repository.index.commit('Rename changelog files')
+    config = open('.git/config', 'r').read()
+    updated_config = config.replace('git@github.com:mapbox/mapbox-navigation-android.git',
+                                    'https://x-access-token:' + token + '@github.com/mapbox/test-nav-sdk')
+    open('.git/config', 'w').write(updated_config)
+    repository.remotes.origin.push().raise_if_error()
