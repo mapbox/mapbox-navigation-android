@@ -23,6 +23,7 @@ Mapbox welcomes participation and contributions from everyone.
           .build()
   }
   ```
+- Added guarantees that route progress with `RouteProgress#currentState == OFF_ROUTE` arrives earlier than `NavigationRerouteController#reroute` is called. [#6764](https://github.com/mapbox/mapbox-navigation-android/pull/6764)
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
