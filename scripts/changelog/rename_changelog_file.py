@@ -35,6 +35,6 @@ if renamed_features_count + renamed_bugfixes_count > 0:
     repository.index.commit('Rename changelog files')
     config = open('.git/config', 'r').read()
     updated_config = config.replace('https://github.com/mapbox/mapbox-navigation-android',
-                                    'https://x-access-token:' + token + '@github.com/mapbox/test-nav-sdk')
+                                    'https://x-access-token:' + token + '@github.com/mapbox/mapbox-navigation-android')
     open('.git/config', 'w').write(updated_config)
     repository.remotes.origin.push().raise_if_error()
