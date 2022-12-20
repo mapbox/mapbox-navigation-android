@@ -1993,11 +1993,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun reroute() {
-        val routeProgress = tripSession.getRouteProgress()
         rerouteController?.reroute(
-            RerouteParameters(
-                directionsSession.routes.firstOrNull { it.id == routeProgress?.routeAlternativeId },
-                directionsSession.routes
+            RerouteParameters.create(
+                directionsSession.routes,
+                tripSession.getRouteProgress()?.routeAlternativeId
             )
         ) { routes, _ ->
             internalSetNavigationRoutes(

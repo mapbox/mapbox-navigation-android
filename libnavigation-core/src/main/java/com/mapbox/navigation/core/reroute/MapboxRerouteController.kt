@@ -177,14 +177,10 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     }
 
     override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
-        val routes = directionsSession.routes
-        val routeProgress = tripSession.getRouteProgress()
         reroute(
-            RerouteParameters(
-                detectedAlternative = routes.firstOrNull {
-                    it.id == routeProgress?.routeAlternativeId
-                },
-                routes = routes
+            RerouteParameters.create(
+                directionsSession.routes,
+                tripSession.getRouteProgress()?.routeAlternativeId
             ),
             callback
         )

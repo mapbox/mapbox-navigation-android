@@ -29,21 +29,14 @@ interface NavigationRerouteControllerV2 : NavigationRerouteController {
 class RerouteParameters internal constructor(
     val detectedAlternative: NavigationRoute?,
     val routes: List<NavigationRoute>,
-)
-
-@ExperimentalPreviewMapboxNavigationAPI
-internal class NavigationRerouteControllerV2Adapter(
-    private val oldReroute: NavigationRerouteController
-) : NavigationRerouteController by oldReroute, NavigationRerouteControllerV2 {
-
-    override fun reroute(
-        params: RerouteParameters,
-        callback: NavigationRerouteController.RoutesCallback
-    ) {
-        oldReroute.reroute(callback)
-    }
-
-    override fun reroute(routesCallback: RerouteController.RoutesCallback) {
-        oldReroute.reroute(routesCallback)
+) {
+    companion object {
+        internal fun create(
+            routes: List<NavigationRoute>,
+            detectedAlternativeId: String?
+        ): RerouteParameters = RerouteParameters(
+            routes.firstOrNull { it.id == detectedAlternativeId },
+            routes
+        )
     }
 }
