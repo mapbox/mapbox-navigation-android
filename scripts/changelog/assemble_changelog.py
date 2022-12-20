@@ -19,10 +19,11 @@ changelog = '#### Features\n' + features + '\n\n' + \
             '#### Bug fixes and improvements\n' + bugfixes + '\n\n' + \
             '#### Known issues :warning:\n' + issues
 
-open('changelog/unreleased/CHANGELOG.md', 'w').write(changelog)
+old_changelog = open('changelog/unreleased/CHANGELOG.md', 'r').read()
 
-repository = git.Repo('.')
-repository.git.add('changelog/unreleased')
-if len(repository.index.diff(None)) > 0:
+if changelog != old_changelog:
+    open('changelog/unreleased/CHANGELOG.md', 'w').write(changelog)
+    repository = git.Repo('.')
+    repository.git.add('changelog/unreleased')
     repository.index.commit('Assemble changelog file [skip actions]')
     repository.remotes.origin.push().raise_if_error()
