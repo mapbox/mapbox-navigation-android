@@ -4,11 +4,12 @@ on:
     branches:
       - main
       - release-v**
+      - NAVSDK-646
 jobs:
   process:
     permissions:
       pull-requests: write
-      contents: read
+      contents: write
     runs-on: ubuntu-20.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
