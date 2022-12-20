@@ -8,7 +8,7 @@ interface NavigationRerouteControllerV2 : NavigationRerouteController {
     fun reroute(params: RerouteParameters, callback: NavigationRerouteController.RoutesCallback)
 }
 
-class RerouteParameters(
+class RerouteParameters internal constructor(
     val detectedAlternative: NavigationRoute?,
     val routes: List<NavigationRoute>,
 )
