@@ -6,7 +6,7 @@ jobs:
   process:
     permissions:
       pull-requests: write
-      contents: read
+      contents: write
     runs-on: ubuntu-20.04
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
