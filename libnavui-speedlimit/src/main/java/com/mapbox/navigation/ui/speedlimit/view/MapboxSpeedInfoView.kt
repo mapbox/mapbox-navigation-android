@@ -121,6 +121,8 @@ class MapboxSpeedInfoView : FrameLayout {
      */
     val speedInfoCurrentSpeedVienna: AppCompatTextView = binding.currentSpeedVienna
 
+    internal var speedInfo: SpeedInfoValue? = null
+
     init {
         applyOptions(speedInfoOptions)
         updateStyles()
@@ -132,6 +134,7 @@ class MapboxSpeedInfoView : FrameLayout {
      * @param speedInfo SpeedInfoValue
      */
     fun render(speedInfo: SpeedInfoValue) {
+        this.speedInfo = speedInfo
         renderSpeedUnit(speedInfo.postedSpeedUnit)
         if (speedInfo.postedSpeed != null) {
             showMutcdOrVienna(speedInfo.speedSignConvention)

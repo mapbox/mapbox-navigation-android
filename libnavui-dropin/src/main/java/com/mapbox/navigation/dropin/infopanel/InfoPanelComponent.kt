@@ -23,7 +23,7 @@ internal class InfoPanelComponent(
 
         val navigationView = findNavigationView()
         combine(
-            context.infoPanelBehavior.slideOffset,
+            context.behavior.infoPanelBehavior.slideOffset,
             context.systemBarsInsets
         ) { slideOffset, insets ->
             slideOffset to insets

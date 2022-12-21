@@ -52,7 +52,7 @@ class RoadNameCoordinatorTest {
         }
     }
     private val context = mockk<NavigationViewContext>(relaxed = true) {
-        every { infoPanelBehavior } returns mockk {
+        every { behavior.infoPanelBehavior } returns mockk {
             every { bottomSheetState } returns bottomSheetFlow
         }
         every { uiBinders } returns mockk {

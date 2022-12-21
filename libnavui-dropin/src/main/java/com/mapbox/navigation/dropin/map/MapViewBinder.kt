@@ -108,7 +108,7 @@ abstract class MapViewBinder : UIBinder {
 
     private fun routeLineComponent(lineOptions: MapboxRouteLineOptions, mapView: MapView) =
         RouteLineComponent(mapView.getMapboxMap(), mapView, lineOptions, contractProvider = {
-            RouteLineComponentContractImpl(context.store, context.mapClickBehavior)
+            RouteLineComponentContractImpl(context.store, context.behavior.mapClickBehavior)
         })
 
     private fun longPressMapComponent(navigationState: NavigationState, mapView: MapView) =

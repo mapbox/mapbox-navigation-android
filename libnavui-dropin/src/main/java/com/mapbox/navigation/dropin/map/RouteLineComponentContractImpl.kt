@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin.map
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.ClickBehavior
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.combine
 
 internal class RouteLineComponentContractImpl(
     private val store: Store,
-    private val mapClickBehavior: MapClickBehavior,
+    private val mapClickBehavior: ClickBehavior<Point>,
 ) : RouteLineComponentContract {
     override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
         when (store.state.value.navigation) {
@@ -48,6 +49,6 @@ internal class RouteLineComponentContractImpl(
     }
 
     override fun onMapClicked(point: Point) {
-        mapClickBehavior.onMapClicked(point)
+        mapClickBehavior.onClicked(point)
     }
 }
