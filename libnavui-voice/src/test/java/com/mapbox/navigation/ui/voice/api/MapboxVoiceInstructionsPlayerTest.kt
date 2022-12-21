@@ -633,6 +633,32 @@ class MapboxVoiceInstructionsPlayerTest {
         }
     }
 
+    @Test
+    fun `play is done after clear`() {
+        val anyLanguage = Locale.US.language
+        val mockedAnnouncement: SpeechAnnouncement = mockk(relaxed = true)
+        val mapboxVoiceInstructionsPlayer =
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyLanguage,
+                mockedPlayerOptions
+            )
+        val mockedPlay: SpeechAnnouncement = mockedAnnouncement
+        val voiceInstructionsPlayerConsumer =
+            mockk<MapboxNavigationConsumer<SpeechAnnouncement>>(relaxed = true)
+
+        val requestSlotCallback = slot<AudioFocusRequestCallback>()
+        every {
+            mockedAudioFocusDelegate.requestFocus(any(), capture(requestSlotCallback))
+        } just Runs
+        mapboxVoiceInstructionsPlayer.play(mockedPlay, voiceInstructionsPlayerConsumer)
+        mapboxVoiceInstructionsPlayer.clear()
+
+        requestSlotCallback.captured.invoke(false)
+
+        verify(exactly = 0) { voiceInstructionsPlayerConsumer.accept(any()) }
+    }
+
     private fun given(
         audioFocusResult: Boolean,
         filePlayerCallbackAnswer: (VoiceInstructionsPlayerCallback) -> Unit,
