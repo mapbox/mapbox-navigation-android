@@ -9,10 +9,10 @@ internal class ManeuverComponentContractImpl(
 ) : ManeuverComponentContract {
 
     override fun onManeuverViewStateChanged(state: MapboxManeuverViewState) {
-        context.maneuverBehavior.updateBehavior(state)
+        context.behavior.maneuverBehavior.updateBehavior(state)
     }
 
     override fun onManeuverViewVisibilityChanged(isVisible: Boolean) {
-        context.maneuverBehavior.updateViewVisibility(isVisible)
+        context.behavior.maneuverBehavior.updateViewVisibility(isVisible)
     }
 }

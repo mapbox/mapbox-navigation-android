@@ -444,6 +444,7 @@ package com.mapbox.navigation.dropin.navigationview {
     method public void onRouteFetchSuccessful(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
     method public void onRouteFetching(long requestId);
     method public void onRoutePreview();
+    method public void onSpeedInfoClicked(com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue? speedInfo);
   }
 
 }
