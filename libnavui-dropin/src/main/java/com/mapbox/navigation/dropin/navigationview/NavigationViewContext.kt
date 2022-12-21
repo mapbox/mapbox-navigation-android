@@ -8,9 +8,6 @@ import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.dropin.ViewBinderCustomization
 import com.mapbox.navigation.dropin.ViewOptionsCustomization
 import com.mapbox.navigation.dropin.ViewStyleCustomization
-import com.mapbox.navigation.dropin.infopanel.InfoPanelBehavior
-import com.mapbox.navigation.dropin.maneuver.ManeuverBehavior
-import com.mapbox.navigation.dropin.map.MapClickBehavior
 import com.mapbox.navigation.dropin.map.MapStyleLoader
 import com.mapbox.navigation.dropin.map.MapViewOwner
 import com.mapbox.navigation.dropin.map.marker.MapMarkerFactory
@@ -45,17 +42,15 @@ internal class NavigationViewContext(
     val uiBinders = NavigationViewBinder()
     val styles = NavigationViewStyles(context)
     val options = NavigationViewOptions(context)
-    val maneuverBehavior = ManeuverBehavior()
-    val infoPanelBehavior = InfoPanelBehavior()
     val mapViewOwner = MapViewOwner()
     val mapStyleLoader = MapStyleLoader(context, options)
-    val mapClickBehavior = MapClickBehavior()
+    val behavior by lazy {
+        NavigationViewBehavior()
+    }
     val listenerRegistry by lazy {
         NavigationViewListenerRegistry(
             store,
-            maneuverBehavior,
-            infoPanelBehavior,
-            mapClickBehavior,
+            behavior,
             lifecycleOwner.lifecycleScope
         )
     }

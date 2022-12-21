@@ -2,9 +2,6 @@ package com.mapbox.navigation.dropin.navigationview
 
 import androidx.annotation.VisibleForTesting
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.mapbox.navigation.dropin.infopanel.InfoPanelBehavior
-import com.mapbox.navigation.dropin.maneuver.ManeuverBehavior
-import com.mapbox.navigation.dropin.map.MapClickBehavior
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
@@ -20,10 +17,8 @@ import kotlinx.coroutines.launch
 
 internal class NavigationViewListenerRegistry(
     private val store: Store,
-    private val maneuverSubscriber: ManeuverBehavior,
-    private val infoPanelSubscriber: InfoPanelBehavior,
-    private val mapClickSubscriber: MapClickBehavior,
-    private val coroutineScope: CoroutineScope
+    private val behavior: NavigationViewBehavior,
+    private val coroutineScope: CoroutineScope,
 ) {
     private var listeners = mutableMapOf<NavigationViewListener, Job>()
 
@@ -93,7 +88,8 @@ internal class NavigationViewListenerRegistry(
                 }
             }
             launch {
-                infoPanelSubscriber
+                behavior
+                    .infoPanelBehavior
                     .bottomSheetState
                     .filterNotNull()
                     .collect { behavior ->
@@ -107,11 +103,12 @@ internal class NavigationViewListenerRegistry(
                     }
             }
             launch {
-                infoPanelSubscriber.slideOffset.collect(listener::onInfoPanelSlide)
+                behavior.infoPanelBehavior.slideOffset.collect(listener::onInfoPanelSlide)
             }
             launch {
-                maneuverSubscriber
+                behavior
                     .maneuverBehavior
+                    .maneuverViewState
                     .collect { behavior ->
                         when (behavior) {
                             MapboxManeuverViewState.EXPANDED -> {
@@ -124,8 +121,12 @@ internal class NavigationViewListenerRegistry(
                     }
             }
 
-            mapClickSubscriber.mapClickBehavior
+            behavior.mapClickBehavior.onViewClicked
                 .onEach { listener.onMapClicked(it) }
+                .launchIn(scope = this)
+
+            behavior.speedInfoBehavior.onViewClicked
+                .onEach { listener.onSpeedInfoClicked(it) }
                 .launchIn(scope = this)
         }
     }

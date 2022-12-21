@@ -17,7 +17,7 @@ internal class ScalebarPlaceholderBinder(
         return ScalebarPlaceholderComponent(
             binding.scalebarPlaceholder,
             context.options.showMapScalebar,
-            context.maneuverBehavior.maneuverViewVisibility
+            context.behavior.maneuverBehavior.maneuverViewVisibility
         )
     }
 

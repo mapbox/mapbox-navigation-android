@@ -12,7 +12,7 @@ import org.junit.Test
 class ManeuverComponentContractImplTest {
 
     private val navigationViewContext: NavigationViewContext = mockk(relaxed = true) {
-        every { maneuverBehavior.updateBehavior(any()) } just Runs
+        every { behavior.maneuverBehavior.updateBehavior(any()) } just Runs
     }
     private val sut = ManeuverComponentContractImpl(navigationViewContext)
 
@@ -21,7 +21,10 @@ class ManeuverComponentContractImplTest {
         sut.onManeuverViewStateChanged(MapboxManeuverViewState.EXPANDED)
 
         verify {
-            navigationViewContext.maneuverBehavior.updateBehavior(MapboxManeuverViewState.EXPANDED)
+            navigationViewContext
+                .behavior
+                .maneuverBehavior
+                .updateBehavior(MapboxManeuverViewState.EXPANDED)
         }
     }
 
@@ -30,7 +33,7 @@ class ManeuverComponentContractImplTest {
         sut.onManeuverViewVisibilityChanged(true)
 
         verify {
-            navigationViewContext.maneuverBehavior.updateViewVisibility(true)
+            navigationViewContext.behavior.maneuverBehavior.updateViewVisibility(true)
         }
     }
 }
