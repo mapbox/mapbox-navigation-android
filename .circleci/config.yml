@@ -399,7 +399,7 @@ commands:
               --device model=oriole,version=33,locale=it,orientation=landscape \
               --use-orchestrator \
               --directories-to-pull=/sdcard/Download/mapbox_test \
-              --timeout 15m
+              --timeout 25m
 
   run-firebase-robo:
     parameters:
