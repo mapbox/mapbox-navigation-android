@@ -7,9 +7,6 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.dropin.infopanel.InfoPanelBehavior
-import com.mapbox.navigation.dropin.maneuver.ManeuverBehavior
-import com.mapbox.navigation.dropin.map.MapClickBehavior
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
@@ -18,14 +15,13 @@ import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState
-import io.mockk.every
+import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -38,29 +34,22 @@ class NavigationViewListenerRegistryTest {
 
     private lateinit var sut: NavigationViewListenerRegistry
     private lateinit var testStore: TestStore
-    private lateinit var maneuverBehaviorFlow: MutableStateFlow<MapboxManeuverViewState>
-    private lateinit var infoPanelBehavior: InfoPanelBehavior
-    private lateinit var mapClickBehavior: MapClickBehavior
+    private lateinit var navigationViewBehavior: NavigationViewBehavior
     private lateinit var testListener: NavigationViewListener
     private lateinit var slideOffsetFlow: MutableStateFlow<Float>
 
     @Before
     fun setUp() {
         testStore = TestStore()
-        infoPanelBehavior = InfoPanelBehavior()
-        mapClickBehavior = MapClickBehavior()
-        maneuverBehaviorFlow = MutableStateFlow(MapboxManeuverViewState.COLLAPSED)
+        navigationViewBehavior = NavigationViewBehavior()
+
         slideOffsetFlow = MutableStateFlow(-1f)
-        val mockManeuverBehavior = mockk<ManeuverBehavior> {
-            every { maneuverBehavior } returns maneuverBehaviorFlow.asStateFlow()
-        }
+
         testListener = spyk(object : NavigationViewListener() {})
 
         sut = NavigationViewListenerRegistry(
             testStore,
-            mockManeuverBehavior,
-            infoPanelBehavior,
-            mapClickBehavior,
+            navigationViewBehavior,
             coroutineRule.coroutineScope
         )
     }
@@ -251,7 +240,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
         val newState = BottomSheetBehavior.STATE_HIDDEN
 
-        infoPanelBehavior.updateBottomSheetState(newState)
+        navigationViewBehavior.infoPanelBehavior.updateBottomSheetState(newState)
 
         verify {
             testListener.onInfoPanelHidden()
@@ -263,7 +252,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
         val newState = BottomSheetBehavior.STATE_EXPANDED
 
-        infoPanelBehavior.updateBottomSheetState(newState)
+        navigationViewBehavior.infoPanelBehavior.updateBottomSheetState(newState)
 
         verify {
             testListener.onInfoPanelExpanded()
@@ -275,7 +264,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
         val newState = BottomSheetBehavior.STATE_COLLAPSED
 
-        infoPanelBehavior.updateBottomSheetState(newState)
+        navigationViewBehavior.infoPanelBehavior.updateBottomSheetState(newState)
 
         verify {
             testListener.onInfoPanelCollapsed()
@@ -287,7 +276,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
         val newState = BottomSheetBehavior.STATE_DRAGGING
 
-        infoPanelBehavior.updateBottomSheetState(newState)
+        navigationViewBehavior.infoPanelBehavior.updateBottomSheetState(newState)
 
         verify {
             testListener.onInfoPanelDragging()
@@ -299,7 +288,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
         val newState = BottomSheetBehavior.STATE_SETTLING
 
-        infoPanelBehavior.updateBottomSheetState(newState)
+        navigationViewBehavior.infoPanelBehavior.updateBottomSheetState(newState)
 
         verify {
             testListener.onInfoPanelSettling()
@@ -321,7 +310,7 @@ class NavigationViewListenerRegistryTest {
         sut.registerListener(testListener)
         val newState = MapboxManeuverViewState.EXPANDED
 
-        maneuverBehaviorFlow.value = newState
+        navigationViewBehavior.maneuverBehavior.updateBehavior(newState)
 
         verify {
             testListener.onManeuverExpanded()
@@ -332,9 +321,9 @@ class NavigationViewListenerRegistryTest {
     fun onManeuverCollapsed() {
         sut.registerListener(testListener)
         val expanded = MapboxManeuverViewState.EXPANDED
-        maneuverBehaviorFlow.value = expanded
+        navigationViewBehavior.maneuverBehavior.updateBehavior(expanded)
         val collapsed = MapboxManeuverViewState.COLLAPSED
-        maneuverBehaviorFlow.value = collapsed
+        navigationViewBehavior.maneuverBehavior.updateBehavior(collapsed)
 
         verify {
             testListener.onManeuverCollapsed()
@@ -345,7 +334,7 @@ class NavigationViewListenerRegistryTest {
     fun onMapClicked() {
         sut.registerListener(testListener)
         val point = mockk<Point>()
-        mapClickBehavior.onMapClicked(point)
+        navigationViewBehavior.mapClickBehavior.onClicked(point)
 
         verify { testListener.onMapClicked(point) }
     }
@@ -354,10 +343,19 @@ class NavigationViewListenerRegistryTest {
     fun onInfoPanelSlide() {
         sut.registerListener(testListener)
 
-        infoPanelBehavior.updateSlideOffset(0.6f)
+        navigationViewBehavior.infoPanelBehavior.updateSlideOffset(0.6f)
 
         verify {
             testListener.onInfoPanelSlide(0.6f)
         }
+    }
+
+    @Test
+    fun onSpeedInfoClicked() {
+        sut.registerListener(testListener)
+        val speedInfo = mockk<SpeedInfoValue>()
+        navigationViewBehavior.speedInfoBehavior.onClicked(speedInfo)
+
+        verify { testListener.onSpeedInfoClicked(speedInfo) }
     }
 }

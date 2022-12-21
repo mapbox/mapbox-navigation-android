@@ -12,7 +12,7 @@ class ManeuverBehaviorTest {
 
         sut.updateBehavior(MapboxManeuverViewState.EXPANDED)
 
-        assertEquals(MapboxManeuverViewState.EXPANDED, sut.maneuverBehavior.value)
+        assertEquals(MapboxManeuverViewState.EXPANDED, sut.maneuverViewState.value)
     }
 
     @Test

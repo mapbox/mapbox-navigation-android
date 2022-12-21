@@ -35,12 +35,12 @@ internal class InfoPanelCoordinator(
 
     private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
-            context.infoPanelBehavior.updateBottomSheetState(newState)
+            context.behavior.infoPanelBehavior.updateBottomSheetState(newState)
             updateGuidelinePosition()
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            context.infoPanelBehavior.updateSlideOffset(slideOffset)
+            context.behavior.infoPanelBehavior.updateSlideOffset(slideOffset)
             updateGuidelinePosition()
         }
     }
@@ -176,7 +176,7 @@ internal class InfoPanelCoordinator(
                 BottomSheetBehavior.STATE_HIDDEN -> -1.0f
                 else -> null
             }?.also { slideOffset ->
-                context.infoPanelBehavior.updateSlideOffset(slideOffset)
+                context.behavior.infoPanelBehavior.updateSlideOffset(slideOffset)
             }
         }
     }

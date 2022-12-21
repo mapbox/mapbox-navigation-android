@@ -30,7 +30,7 @@ internal class RoadNameCoordinator(
         super.onAttached(mapboxNavigation)
 
         coroutineScope.launch {
-            context.infoPanelBehavior.bottomSheetState
+            context.behavior.infoPanelBehavior.bottomSheetState
                 .filterNotNull()
                 .map { bottomSheetState ->
                     val isBottomSheetVisible = bottomSheetState != BottomSheetBehavior.STATE_HIDDEN

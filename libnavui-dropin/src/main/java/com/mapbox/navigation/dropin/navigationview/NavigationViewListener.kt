@@ -9,6 +9,8 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.dropin.NavigationView
+import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
+import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedInfoView
 
 /**
  * Interface definition for the NavigationView listener.
@@ -159,4 +161,11 @@ abstract class NavigationViewListener {
      * @param point The projected map coordinate the user clicked on.
      */
     open fun onMapClicked(point: Point) = Unit
+
+    /**
+     * Called when [MapboxSpeedInfoView] was clicked
+     *
+     * @param speedInfo [SpeedInfoValue] at the time user clicked on the view.
+     */
+    open fun onSpeedInfoClicked(speedInfo: SpeedInfoValue?) = Unit
 }
