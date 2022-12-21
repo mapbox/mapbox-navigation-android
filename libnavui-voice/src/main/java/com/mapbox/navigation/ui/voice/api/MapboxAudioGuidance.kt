@@ -14,7 +14,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
@@ -25,9 +24,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -123,7 +120,7 @@ internal constructor(
     /**
      * Top level flow that will switch based on the language and muted state.
      */
-    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun audioGuidanceFlow(
         mapboxNavigation: MapboxNavigation
     ): Flow<MapboxAudioGuidanceState> {
@@ -146,18 +143,15 @@ internal constructor(
                 } else {
                     voiceInstructions
                         .filter { it.voiceInstructions != lastPlayedInstructions }
-                        .flatMapConcat {
+                        .map {
                             lastPlayedInstructions = it.voiceInstructions
                             val announcement = audioGuidance.speak(it.voiceInstructions)
-                            flowOf(announcement)
-                        }
-                        .map { speechAnnouncement ->
-                            internalStateFlow.updateAndGet {
+                            internalStateFlow.updateAndGet { state ->
                                 MapboxAudioGuidanceState(
-                                    isPlayable = it.isPlayable,
-                                    isMuted = it.isMuted,
-                                    voiceInstructions = it.voiceInstructions,
-                                    speechAnnouncement = speechAnnouncement
+                                    isPlayable = state.isPlayable,
+                                    isMuted = state.isMuted,
+                                    voiceInstructions = state.voiceInstructions,
+                                    speechAnnouncement = announcement
                                 )
                             }
                         }
@@ -195,7 +189,10 @@ internal constructor(
          * Construct an instance without registering to [MapboxNavigationApp].
          */
         @JvmStatic
-        fun create() = MapboxAudioGuidance(MapboxAudioGuidanceServices(), Dispatchers.Main)
+        fun create() = MapboxAudioGuidance(
+            MapboxAudioGuidanceServices(),
+            Dispatchers.Main.immediate
+        )
 
         /**
          * Get the registered instance or create one and register it to [MapboxNavigationApp].
