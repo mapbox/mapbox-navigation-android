@@ -12,14 +12,18 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.reroute.NavigationRerouteController
+import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
@@ -48,6 +52,7 @@ import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
@@ -450,6 +455,64 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         )
     }
 
+    @Test
+    fun events_order_are_guaranteed_during_reroute_to_alternative_with_custom_reroute_controller() =
+        sdkTest {
+            val mapboxNavigation = createMapboxNavigation()
+            val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
+            var latestRouteProgress: RouteProgress? = null
+            mapboxNavigation.registerRouteProgressObserver {
+                latestRouteProgress = it
+            }
+            val navigationStateDuringReroute =
+                CompletableDeferred<NavigationStateDuringReroute>()
+            mapboxNavigation.setRerouteController(object : NavigationRerouteController {
+                override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
+                    navigationStateDuringReroute.complete(
+                        NavigationStateDuringReroute(
+                            latestRouteProgress,
+                            mapboxNavigation.getNavigationRoutes()
+                        )
+                    )
+                }
+                override fun reroute(routesCallback: RerouteController.RoutesCallback) {
+                }
+                override val state: RerouteState = RerouteState.Idle
+                override fun interrupt() {
+                }
+                override fun registerRerouteStateObserver(
+                    rerouteStateObserver: RerouteController.RerouteStateObserver
+                ): Boolean {
+                    return false
+                }
+                override fun unregisterRerouteStateObserver(
+                    rerouteStateObserver: RerouteController.RerouteStateObserver
+                ): Boolean {
+                    return false
+                }
+            })
+            val origin = routes.first().routeOptions.coordinatesList().first()
+            mockLocationUpdatesRule.pushLocationUpdate {
+                latitude = origin.latitude()
+                longitude = origin.longitude()
+            }
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutes(routes)
+            mapboxNavigation.routesUpdates().first { it.navigationRoutes == routes }
+
+            mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
+
+            val state = navigationStateDuringReroute.await()
+            assertEquals(
+                routes[1].id,
+                state.latestRouteProgress?.routeAlternativeId
+            )
+            assertEquals(
+                routes,
+                state.routes
+            )
+        }
+
     private fun createMapboxNavigation(customRefreshInterval: Long? = null): MapboxNavigation {
         var mapboxNavigation: MapboxNavigation? = null
 
@@ -544,3 +607,8 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         )
     }
 }
+
+private data class NavigationStateDuringReroute(
+    val latestRouteProgress: RouteProgress?,
+    val routes: List<NavigationRoute>,
+)
