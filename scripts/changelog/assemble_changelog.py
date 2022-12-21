@@ -8,13 +8,16 @@ def get_changes(path):
     files = os.listdir(path)
     for file in files:
         pr_number = file.partition('.')[0]
+        pr_changes = open(path + file, 'r').read()
         if path.endswith('bugfixes/') or path.endswith('features/'):
+            pr_link = ' [#' + pr_number + '](https://github.com/mapbox/mapbox-navigation-android/pull/' + pr_number + ')' + '\n'
+            lines_with_description = []
             for line in open(path + file, 'r').readlines():
-                line = line.replace('\n', '')
-                if line.strip():
-                    changes += line + ' [#' + pr_number + '](https://github.com/mapbox/mapbox-navigation-android/pull/' + pr_number + ')' + '\n'
-        else:
-            changes += open(path + file, 'r').read()
+                if line.startswith('- '):
+                    lines_with_description.append(line)
+            for line in lines_with_description:
+                pr_changes = pr_changes.replace(line, line.replace('\n', '') + pr_link)
+        changes += pr_changes
     return changes.strip()
 
 
