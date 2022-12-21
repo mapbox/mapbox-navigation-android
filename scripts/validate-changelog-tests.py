@@ -1,6 +1,8 @@
-import unittest
-import validate_changelog_utils
 import os
+import unittest
+
+import validate_changelog_utils
+
 
 class TestValidateChangelog(unittest.TestCase):
 
@@ -9,11 +11,11 @@ class TestValidateChangelog(unittest.TestCase):
         self.assertEqual(validate_changelog_utils.should_skip_changelog(json), False)
 
     def test_should_skip_changelog_no_skip_changelog_label(self):
-        json = { "labels": [{ "name": "some label" }] }
+        json = {"labels": [{"name": "some label"}]}
         self.assertEqual(validate_changelog_utils.should_skip_changelog(json), False)
 
     def test_should_skip_changelog_has_skip_changelog_label(self):
-        json = { "labels": [{"name": "some label"}, {"name": "skip changelog"}] }
+        json = {"labels": [{"name": "some label"}, {"name": "skip changelog"}]}
         self.assertEqual(validate_changelog_utils.should_skip_changelog(json), True)
 
     def test_check_has_changelog_diff_no_diff(self):
@@ -39,22 +41,14 @@ class TestValidateChangelog(unittest.TestCase):
 
     def test_check_has_changelog_diff_has_diff(self):
         diff = '''
-        Index: CHANGELOG.md
-        IDEA additional info:
-        Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-        <+>UTF-8
-        ===================================================================
-        diff --git a/CHANGELOG.md b/CHANGELOG.md
-        --- a/CHANGELOG.md	(revision d85b11703af7976027073a5e29ec51ffc2164b6e)
-        +++ b/CHANGELOG.md	(date 1659101554037)
-        @@ -6,6 +6,7 @@
-         #### Features
-         - Added first unreleased feature. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049)
-         - Added second unreleased feature. [#6048](https://github.com/mapbox/mapbox-navigation-android/pull/6048)
-        +- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)
-
-         #### Bug fixes and improvements
-         - Fixed first unreleased bug. [#6047](https://github.com/mapbox/mapbox-navigation-android/pull/6047)
+        diff --git a/changelog/unreleased/issues/example-known-issues.md b/changelog/unreleased/issues/example-known-issues.md
+        new file mode 100644
+        index 00000000000..c0505027151
+        --- /dev/null
+        +++ b/changelog/unreleased/issues/example-known-issues.md
+        @@ -0,0 +1 @@
+        +- It is an example of known issues
+        \ No newline at end of file
         Index: libnavigation-core/src/main/java/com/mapbox/navigation/core/TestClass.kt
         IDEA additional info:
         Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -79,17 +73,17 @@ class TestValidateChangelog(unittest.TestCase):
 
     def test_parse_contents_url_no_changelog(self):
         with self.assertRaises(Exception):
-            validate_changelog_utils.parse_contents_url([{ "filename": "not_changelog.md" }])
+            validate_changelog_utils.parse_contents_url([{"filename": "not_changelog.md"}])
 
     def test_parse_contents_url_has_changelog_no_url(self):
         with self.assertRaises(Exception):
-            validate_changelog_utils.parse_contents_url([{ "filename": "CHANGELOG.md" }])
+            validate_changelog_utils.parse_contents_url([{"filename": "CHANGELOG.md"}])
 
     def test_parse_contents_url_has_changelog_and_url(self):
         filename = "CHANGELOG.md"
         url = "my url"
-        actual = validate_changelog_utils.parse_contents_url([{ "filename": filename, "contents_url": url }])
-        self.assertEqual(actual, { filename : url })
+        actual = validate_changelog_utils.parse_contents_url([{"filename": filename, "contents_url": url}])
+        self.assertEqual(actual, {filename: url})
 
     def test_extract_added_lines_only_changelog_nothing_added(self):
         diff = '''diff --git a/CHANGELOG.md b/CHANGELOG.md
@@ -104,11 +98,12 @@ class TestValidateChangelog(unittest.TestCase):
          #### Bug fixes and improvements
          - Fixed first unreleased bug. [#6047](https://github.com/mapbox/mapbox-navigation-android/pull/6047)
         '''
-        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), { "CHANGELOG.md" : [] })
+        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), {"CHANGELOG.md": []})
 
     def test_extract_added_lines_only_changelog_has_added(self):
         expected = {
-            "CHANGELOG.md" : ['- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
+            "CHANGELOG.md": [
+                '- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
         }
         diff = '''diff --git a/CHANGELOG.md b/CHANGELOG.md
         --- a/CHANGELOG.md	(revision fca6af9072a1b6cb7263460f7c3270e48bffed07)
@@ -126,7 +121,8 @@ class TestValidateChangelog(unittest.TestCase):
 
     def test_extract_added_lines_only_changelog_has_added_with_blank_lines(self):
         expected = {
-            "CHANGELOG.md" : ['- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
+            "CHANGELOG.md": [
+                '- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
         }
         diff = '''diff --git a/CHANGELOG.md b/CHANGELOG.md
         --- a/CHANGELOG.md	(revision fca6af9072a1b6cb7263460f7c3270e48bffed07)
@@ -146,7 +142,8 @@ class TestValidateChangelog(unittest.TestCase):
 
     def test_extract_added_lines_only_changelog_with_path_has_added(self):
         expected = {
-            "libnavui-androidauto/CHANGELOG.md" : ['- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
+            "libnavui-androidauto/CHANGELOG.md": [
+                '- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
         }
         diff = '''diff --git a/libnavui-androidauto/CHANGELOG.md b/libnavui-androidauto/CHANGELOG.md
         --- a/libnavui-androidauto/CHANGELOG.md	(revision ee5039502306c1ea6449f57615a2ad0f7f23fd83)
@@ -164,8 +161,10 @@ class TestValidateChangelog(unittest.TestCase):
 
     def test_extract_added_lines_several_changelogs_in_a_row_has_added(self):
         expected = {
-            "libnavui-androidauto/CHANGELOG.md" : ['- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)'],
-            "CHANGELOG.md" : ['- Added fourth unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
+            "libnavui-androidauto/CHANGELOG.md": [
+                '- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)'],
+            "CHANGELOG.md": [
+                '- Added fourth unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
         }
         diff = '''diff --git a/CHANGELOG.md b/CHANGELOG.md
         --- a/CHANGELOG.md	(revision e53b37ad3a4540bdb0878b4679a174f9518134b0)
@@ -199,8 +198,10 @@ class TestValidateChangelog(unittest.TestCase):
 
     def test_extract_added_lines_several_changelogs_divided_has_added(self):
         expected = {
-            "libnavui-androidauto/CHANGELOG.md" : ['- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)'],
-            "CHANGELOG.md" : ['- Added fourth unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
+            "libnavui-androidauto/CHANGELOG.md": [
+                '- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)'],
+            "CHANGELOG.md": [
+                '- Added fourth unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
         }
         diff = '''diff --git a/CHANGELOG.md b/CHANGELOG.md
         --- a/CHANGELOG.md	(revision e53b37ad3a4540bdb0878b4679a174f9518134b0)
@@ -249,8 +250,9 @@ class TestValidateChangelog(unittest.TestCase):
 
     def test_extract_added_lines_several_changelogs_only_one_has_added(self):
         expected = {
-            "CHANGELOG.md" : [],
-            "libnavui-androidauto/CHANGELOG.md" : ['- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
+            "CHANGELOG.md": [],
+            "libnavui-androidauto/CHANGELOG.md": [
+                '- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)']
         }
         diff = '''
         Index: CHANGELOG.md
@@ -322,13 +324,12 @@ class TestValidateChangelog(unittest.TestCase):
         +    fun testMethod2(a: Int, b: Int) = a * 10 + b
          }
         '''
-        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), { "CHANGELOG.md" : [] })
+        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), {"CHANGELOG.md": []})
 
     def test_extract_added_lines_changelog_in_the_beginning_has_added(self):
         expected = {
-            "CHANGELOG.md" : [
-                '- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)',
-                '- Fixed third unreleased bug. [#6045](https://github.com/mapbox/mapbox-navigation-android/pull/6045)'
+            "changelog/unreleased/issues/example-known-issues.md": [
+                '- Updated the `MapboxRestAreaApi` logic to load a SAPA map only if the upcoming rest stop is at the current step of the route leg.'
             ]
         }
         diff = '''
@@ -337,22 +338,14 @@ class TestValidateChangelog(unittest.TestCase):
         Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
         <+>UTF-8
         ===================================================================
-        diff --git a/CHANGELOG.md b/CHANGELOG.md
-        --- a/CHANGELOG.md	(revision 3231aea607a4bc1edc8ee28cf695dfdb06399a30)
-        +++ b/CHANGELOG.md	(date 1659104161551)
-        @@ -6,10 +6,12 @@
-         #### Features
-         - Added first unreleased feature. [#6049](https://github.com/mapbox/mapbox-navigation-android/pull/6049)
-         - Added second unreleased feature. [#6048](https://github.com/mapbox/mapbox-navigation-android/pull/6048)
-        +- Added third unreleased feature. [#6050](https://github.com/mapbox/mapbox-navigation-android/pull/6050)
-
-         #### Bug fixes and improvements
-         - Fixed first unreleased bug. [#6047](https://github.com/mapbox/mapbox-navigation-android/pull/6047)
-         - Fixed second unreleased bug. [#6046](https://github.com/mapbox/mapbox-navigation-android/pull/6046)
-        +- Fixed third unreleased bug. [#6045](https://github.com/mapbox/mapbox-navigation-android/pull/6045)
-
-         ## Mapbox Navigation SDK 2.7.0-beta.1 - 14 July, 2022
-         ### Changelog
+        diff --git a/changelog/unreleased/issues/example-known-issues.md b/changelog/unreleased/issues/example-known-issues.md
+        new file mode 100644
+        index 00000000000..c0505027151
+        --- /dev/null
+        +++ b/changelog/unreleased/issues/example-known-issues.md
+        @@ -0,0 +1 @@
+        +- Updated the `MapboxRestAreaApi` logic to load a SAPA map only if the upcoming rest stop is at the current step of the route leg.
+        \ No newline at end of file
         Index: libnavigation-core/src/main/java/com/mapbox/navigation/core/TestClass.kt
         IDEA additional info:
         Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -400,11 +393,12 @@ class TestValidateChangelog(unittest.TestCase):
          ## Mapbox Navigation SDK 2.7.0-beta.1 - 14 July, 2022
          ### Changelog
         '''
-        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), { "CHANGELOG.md" : [] })
+        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), {"CHANGELOG.md": []})
 
     def test_extract_added_lines_changelog_in_the_end_has_added(self):
         expected = {
-            "CHANGELOG.md" : ['- Fixed third unreleased bug. [#6045](https://github.com/mapbox/mapbox-navigation-android/pull/6045)']
+            "CHANGELOG.md": [
+                '- Fixed third unreleased bug. [#6045](https://github.com/mapbox/mapbox-navigation-android/pull/6045)']
         }
         diff = '''
         Index: .circleci/config2.yml
@@ -480,11 +474,12 @@ class TestValidateChangelog(unittest.TestCase):
         @@ -1,0 +1,1 @@
         +Added line
         '''
-        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), { "CHANGELOG.md" : [] })
+        self.assertEqual(validate_changelog_utils.extract_added_lines(diff), {"CHANGELOG.md": []})
 
     def test_extract_added_lines_changelog_in_the_middle_has_added(self):
         expected = {
-            "CHANGELOG.md" : ['- Fixed third unreleased bug. [#6045](https://github.com/mapbox/mapbox-navigation-android/pull/6045)']
+            "CHANGELOG.md": [
+                '- Fixed third unreleased bug. [#6045](https://github.com/mapbox/mapbox-navigation-android/pull/6045)']
         }
         diff = '''
         Index: libnavigation-core/src/main/java/com/mapbox/navigation/core/TestClass.kt
@@ -560,5 +555,6 @@ class TestValidateChangelog(unittest.TestCase):
             data = f.read()
         return data
 
+
 if __name__ == "__main__":
-  unittest.main()
+    unittest.main()
