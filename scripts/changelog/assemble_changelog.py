@@ -5,6 +5,8 @@ import git
 
 def get_changes(path):
     changes = ''
+    if not os.path.isdir(path):
+        return ''
     files = os.listdir(path)
     for file in files:
         pr_number = file.partition('.')[0]
