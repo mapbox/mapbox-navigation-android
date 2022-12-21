@@ -10,6 +10,9 @@ pattern = re.compile("^\d*.md")
 
 
 def rename_files(path):
+    if not os.path.isdir(path):
+        return 0
+
     renamed_files_count = 0
     files = os.listdir(path)
 
