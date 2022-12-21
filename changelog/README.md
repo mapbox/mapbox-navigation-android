@@ -43,3 +43,36 @@ Some other changes
 ```
 
 * write the changelog to the `changelog/unreleased/CHANGELOG.md` file
+
+Every release the release train app will:
+
+* get changelog from `changelog/unreleased/CHANGELOG.md` file
+* add information about dependencies and compile changelog like:
+```
+## Mapbox Navigation SDK 1.1.1 - 13 December, 2022
+### Changelog
+[Changes between v1.1.0 and v1.1.1](https://github.com/mapbox/mapbox-navigation-android/compare/v1.1.0...v1.1.1)
+
+#### Features
+- Feature 1 [#1234](https://github.com/mapbox/mapbox-navigation-android/pull/1234)
+- Feature 2 [#2345](https://github.com/mapbox/mapbox-navigation-android/pull/2345)
+
+#### Bug fixes and improvements
+- Bugfix 3 [#3456](https://github.com/mapbox/mapbox-navigation-android/pull/3456)
+- Bugfix 4 [#4567](https://github.com/mapbox/mapbox-navigation-android/pull/4567)
+
+#### Known issues :warning:
+- Issue 1
+- Issue 2
+
+Some other changes
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
+- Mapbox Navigation Native `v115.0.1`
+- Mapbox Core Common `v23.0.0`
+- Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+```
+* delete all files in `changelog/unreleased` dir
