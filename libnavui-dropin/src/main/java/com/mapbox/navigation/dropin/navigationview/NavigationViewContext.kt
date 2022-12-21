@@ -14,6 +14,7 @@ import com.mapbox.navigation.dropin.map.MapClickBehavior
 import com.mapbox.navigation.dropin.map.MapStyleLoader
 import com.mapbox.navigation.dropin.map.MapViewOwner
 import com.mapbox.navigation.dropin.map.marker.MapMarkerFactory
+import com.mapbox.navigation.dropin.speedlimit.SpeedInfoBehavior
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
 import com.mapbox.navigation.ui.app.internal.SharedApp
@@ -50,12 +51,14 @@ internal class NavigationViewContext(
     val mapViewOwner = MapViewOwner()
     val mapStyleLoader = MapStyleLoader(context, options)
     val mapClickBehavior = MapClickBehavior()
+    val speedInfoBehavior = SpeedInfoBehavior()
     val listenerRegistry by lazy {
         NavigationViewListenerRegistry(
             store,
             maneuverBehavior,
             infoPanelBehavior,
             mapClickBehavior,
+            speedInfoBehavior,
             lifecycleOwner.lifecycleScope
         )
     }

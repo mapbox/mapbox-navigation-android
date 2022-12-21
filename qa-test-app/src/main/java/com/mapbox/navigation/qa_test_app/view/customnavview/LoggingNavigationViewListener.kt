@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
+import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
 import com.mapbox.navigation.utils.internal.logD
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -108,6 +109,10 @@ class LoggingNavigationViewListener(
 
     override fun onMapClicked(point: Point) {
         log("listener onMapClicked point = $point")
+    }
+
+    override fun onSpeedInfoClicked(speedInfo: SpeedInfoValue?) {
+        log("listener onSpeedInfoClicked speedInfo = $speedInfo")
     }
 
     private fun log(message: String) {

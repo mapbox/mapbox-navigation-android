@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBehavior
 import com.mapbox.navigation.dropin.maneuver.ManeuverBehavior
 import com.mapbox.navigation.dropin.map.MapClickBehavior
+import com.mapbox.navigation.dropin.speedlimit.SpeedInfoBehavior
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
@@ -18,6 +19,7 @@ import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverViewState
+import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -41,6 +43,7 @@ class NavigationViewListenerRegistryTest {
     private lateinit var maneuverBehaviorFlow: MutableStateFlow<MapboxManeuverViewState>
     private lateinit var infoPanelBehavior: InfoPanelBehavior
     private lateinit var mapClickBehavior: MapClickBehavior
+    private lateinit var speedInfoBehavior: SpeedInfoBehavior
     private lateinit var testListener: NavigationViewListener
     private lateinit var slideOffsetFlow: MutableStateFlow<Float>
 
@@ -49,6 +52,7 @@ class NavigationViewListenerRegistryTest {
         testStore = TestStore()
         infoPanelBehavior = InfoPanelBehavior()
         mapClickBehavior = MapClickBehavior()
+        speedInfoBehavior = SpeedInfoBehavior()
         maneuverBehaviorFlow = MutableStateFlow(MapboxManeuverViewState.COLLAPSED)
         slideOffsetFlow = MutableStateFlow(-1f)
         val mockManeuverBehavior = mockk<ManeuverBehavior> {
@@ -61,6 +65,7 @@ class NavigationViewListenerRegistryTest {
             mockManeuverBehavior,
             infoPanelBehavior,
             mapClickBehavior,
+            speedInfoBehavior,
             coroutineRule.coroutineScope
         )
     }
@@ -359,5 +364,14 @@ class NavigationViewListenerRegistryTest {
         verify {
             testListener.onInfoPanelSlide(0.6f)
         }
+    }
+
+    @Test
+    fun onSpeedInfoClicked() {
+        sut.registerListener(testListener)
+        val speedInfo = mockk<SpeedInfoValue>()
+        speedInfoBehavior.onSpeedInfoClicked(speedInfo)
+
+        verify { testListener.onSpeedInfoClicked(speedInfo) }
     }
 }

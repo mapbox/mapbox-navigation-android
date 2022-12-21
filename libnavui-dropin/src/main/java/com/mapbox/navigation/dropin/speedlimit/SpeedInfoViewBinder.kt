@@ -32,6 +32,9 @@ internal class SpeedInfoViewBinder(
                 speedInfoOptions = options,
                 speedInfoView = binding.speedInfoView,
                 distanceFormatterOptions = distanceFormatter,
+                contractProvider = {
+                    SpeedInfoComponentContractImpl(context.speedInfoBehavior)
+                }
             )
         }
     }

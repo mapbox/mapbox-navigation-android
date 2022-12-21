@@ -5,6 +5,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.dropin.infopanel.InfoPanelBehavior
 import com.mapbox.navigation.dropin.maneuver.ManeuverBehavior
 import com.mapbox.navigation.dropin.map.MapClickBehavior
+import com.mapbox.navigation.dropin.speedlimit.SpeedInfoBehavior
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
@@ -23,6 +24,7 @@ internal class NavigationViewListenerRegistry(
     private val maneuverSubscriber: ManeuverBehavior,
     private val infoPanelSubscriber: InfoPanelBehavior,
     private val mapClickSubscriber: MapClickBehavior,
+    private val speedInfoSubscriber: SpeedInfoBehavior,
     private val coroutineScope: CoroutineScope
 ) {
     private var listeners = mutableMapOf<NavigationViewListener, Job>()
@@ -126,6 +128,10 @@ internal class NavigationViewListenerRegistry(
 
             mapClickSubscriber.mapClickBehavior
                 .onEach { listener.onMapClicked(it) }
+                .launchIn(scope = this)
+
+            speedInfoSubscriber.speedInfoClickBehavior
+                .onEach { listener.onSpeedInfoClicked(it) }
                 .launchIn(scope = this)
         }
     }
