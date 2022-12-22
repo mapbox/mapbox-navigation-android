@@ -92,9 +92,11 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
                 abandonFocus()
             }
 
-            val currentAnnouncement = currentPlayCallback.announcement
-            val currentClientCallback = currentPlayCallback.consumer
-            currentClientCallback.accept(currentAnnouncement)
+            if (currentPlayCallback != null) {
+                val currentAnnouncement = currentPlayCallback.announcement
+                val currentClientCallback = currentPlayCallback.consumer
+                currentClientCallback.accept(currentAnnouncement)
+            }
             play()
         }
 
