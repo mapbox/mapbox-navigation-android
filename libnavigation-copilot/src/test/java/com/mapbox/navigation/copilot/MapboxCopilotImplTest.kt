@@ -2442,7 +2442,7 @@ class MapboxCopilotImplTest {
     }
 
     private fun prepareProcessLifecycleOwnerMockk(): ProcessLifecycleOwner {
-        mockkStatic(MapboxNavigationApp::class)
+        mockkObject(MapboxNavigationApp)
         every { MapboxNavigationApp.isSetup() } returns false
         mockkStatic(ProcessLifecycleOwner::class)
         val mockedProcessLifecycleOwner = mockk<ProcessLifecycleOwner>(relaxed = true)
