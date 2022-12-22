@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.voice.api
 
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -41,6 +42,7 @@ internal constructor(
 
     private var dataStoreOwner: NavigationDataStoreOwner? = null
     private var configOwner: NavigationConfigOwner? = null
+    private var audioGuidanceVoice: MapboxAudioGuidanceVoice? = null
     private var mutedStateFlow = MutableStateFlow(false)
     private val internalStateFlow = MutableStateFlow(MapboxAudioGuidanceState())
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
@@ -72,6 +74,7 @@ internal constructor(
      */
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxVoiceInstructions.unregisterObservers(mapboxNavigation)
+        audioGuidanceVoice?.destroy()
         job?.cancel()
         job = null
     }
@@ -160,15 +163,25 @@ internal constructor(
         }
     }
 
-    private fun MapboxNavigation.audioGuidanceVoice(): Flow<MapboxAudioGuidanceVoice> =
-        combine(
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun MapboxNavigation.audioGuidanceVoice(): Flow<MapboxAudioGuidanceVoice> {
+        var trigger: VoiceInstructionsDownloadTrigger? = null
+        return combine(
             mapboxVoiceInstructions.voiceLanguage(),
             configOwner!!.language(),
         ) { voiceLanguage, deviceLanguage -> voiceLanguage ?: deviceLanguage }
             .distinctUntilChanged()
             .map { language ->
-                audioGuidanceServices.mapboxAudioGuidanceVoice(this, language)
+                audioGuidanceVoice?.destroy()
+                trigger?.let { unregisterVoiceInstructionsTriggerObserver(it) }
+                audioGuidanceServices.mapboxAudioGuidanceVoice(this, language).also {
+                    audioGuidanceVoice = it
+                    trigger = VoiceInstructionsDownloadTrigger(it.mapboxSpeechApi).also {
+                        registerVoiceInstructionsTriggerObserver(it)
+                    }
+                }
             }
+    }
 
     private suspend fun restoreMutedState() {
         dataStoreOwner?.apply {

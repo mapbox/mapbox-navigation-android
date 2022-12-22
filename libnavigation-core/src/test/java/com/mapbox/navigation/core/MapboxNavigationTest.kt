@@ -39,6 +39,7 @@ import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
@@ -2016,6 +2017,42 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coVerifyOrder {
             tripSession.setRoutes(routes, any())
             routesPreviewController.previewNavigationRoutes(emptyList())
+        }
+    }
+
+    @Test
+    fun registerVoiceInstructionsTriggerObserver() {
+        val observer = TestVoiceInstructionsTriggerObserver()
+        createMapboxNavigation()
+
+        mapboxNavigation.registerVoiceInstructionsTriggerObserver(observer)
+
+        verify(exactly = 1) {
+            directionsSession.registerRoutesObserver(observer)
+            tripSession.registerRouteProgressObserver(observer)
+        }
+    }
+
+    @Test
+    fun unregisterVoiceInstructionsTriggerObserver() {
+        val observer = TestVoiceInstructionsTriggerObserver()
+        createMapboxNavigation()
+        mapboxNavigation.registerVoiceInstructionsTriggerObserver(observer)
+
+        mapboxNavigation.unregisterVoiceInstructionsTriggerObserver(observer)
+
+        verify(exactly = 1) {
+            directionsSession.unregisterRoutesObserver(observer)
+            tripSession.unregisterRouteProgressObserver(observer)
+        }
+    }
+
+    private class TestVoiceInstructionsTriggerObserver : RoutesObserver, RouteProgressObserver {
+
+        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        }
+
+        override fun onRoutesChanged(result: RoutesUpdatedResult) {
         }
     }
 

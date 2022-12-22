@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.voice
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.ui.utils.internal.configuration.NavigationConfigOwner
+import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructions
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructionsState
@@ -33,6 +34,8 @@ class TestMapboxAudioGuidanceServices(
         every { voiceLanguage() } returns voiceLanguageFlow
     }
 
+    private val mapboxSpeechApi = mockk<MapboxSpeechApi>(relaxed = true)
+
     private val mapboxAudioGuidanceVoice = mockk<MapboxAudioGuidanceVoice> {
         coEvery { speak(any()) } coAnswers {
             val voiceInstructions = firstArg<VoiceInstructions?>()
@@ -48,6 +51,7 @@ class TestMapboxAudioGuidanceServices(
             }
             speechAnnouncement
         }
+        every { mapboxSpeechApi } returns this@TestMapboxAudioGuidanceServices.mapboxSpeechApi
     }
 
     private val testCarAppDataStoreOwner = TestCarAppDataStoreOwner()

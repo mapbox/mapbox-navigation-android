@@ -16,7 +16,7 @@ import kotlin.coroutines.resume
  * @param mapboxVoiceInstructionsPlayer stream of [VoiceInstructions].
  */
 class MapboxAudioGuidanceVoice(
-    private val mapboxSpeechApi: MapboxSpeechApi,
+    internal val mapboxSpeechApi: MapboxSpeechApi,
     private val mapboxVoiceInstructionsPlayer: MapboxVoiceInstructionsPlayer
 ) {
     /**
@@ -41,10 +41,14 @@ class MapboxAudioGuidanceVoice(
         }
     }
 
+    fun destroy() {
+        mapboxSpeechApi.destroy()
+    }
+
     private suspend fun MapboxSpeechApi.generate(
         instructions: VoiceInstructions
     ): SpeechAnnouncement = suspendCancellableCoroutine { cont ->
-        generate(instructions) { value ->
+        generatePredownloaded(instructions) { value ->
             val announcement = value.value?.announcement ?: value.error!!.fallback
             cont.resume(announcement)
         }

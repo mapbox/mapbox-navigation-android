@@ -4,6 +4,7 @@ import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
@@ -40,6 +41,9 @@ class MapboxSpeechApi @JvmOverloads constructor(
      * Given [VoiceInstructions] the method will try to generate the
      * voice instruction [SpeechAnnouncement] including the synthesized speech mp3 file
      * from Mapbox's API Voice.
+     * NOTE: this method will try downloading an mp3 file from server. If you use voice instructions
+     * predownloading (see [VoiceInstructionsDownloadTrigger]), invoke [generatePredownloaded]
+     * instead of this method in your [VoiceInstructionsObserver].
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
      * @param consumer is a [SpeechValue] including the announcement to be played when the
      * announcement is ready or a [SpeechError] including the error information and a fallback
@@ -51,7 +55,30 @@ class MapboxSpeechApi @JvmOverloads constructor(
         consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
     ) {
         mainJobController.scope.launch {
-            retrieveVoiceFile(voiceInstruction, consumer)
+            retrieveVoiceFile(voiceInstruction, consumer, onlyCache = false)
+        }
+    }
+
+    /**
+     * Given [VoiceInstructions] the method will try to generate the
+     * voice instruction [SpeechAnnouncement] including the synthesized speech mp3 file
+     * from Mapbox's API Voice.
+     * NOTE: this method will NOT try downloading an mp3 file from server. It will either use
+     * an already predownloaded file or an onboard speech synthesizer. Only invoke this method
+     * if you use voice instructions predownloading (see [VoiceInstructionsDownloadTrigger]),
+     * otherwise invoke [generatePredownloaded] in your [VoiceInstructionsObserver].
+     * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
+     * @param consumer is a [SpeechValue] including the announcement to be played when the
+     * announcement is ready or a [SpeechError] including the error information and a fallback
+     * with the raw announcement (without file) that can be played with a text-to-speech engine.
+     * @see [cancel]
+     */
+    fun generatePredownloaded(
+        voiceInstruction: VoiceInstructions,
+        consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
+    ) {
+        mainJobController.scope.launch {
+            retrieveVoiceFile(voiceInstruction, consumer, onlyCache = true)
         }
     }
 
@@ -75,12 +102,23 @@ class MapboxSpeechApi @JvmOverloads constructor(
         voiceAPI.clean(announcement)
     }
 
+    internal fun predownload(instructions: List<VoiceInstructions>) {
+        mainJobController.scope.launch {
+            voiceAPI.predownload(instructions)
+        }
+    }
+
+    internal fun destroy() {
+        voiceAPI.destroy()
+    }
+
     @Throws(IllegalStateException::class)
     private suspend fun retrieveVoiceFile(
         voiceInstruction: VoiceInstructions,
-        consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
+        consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>,
+        onlyCache: Boolean
     ) {
-        when (val result = voiceAPI.retrieveVoiceFile(voiceInstruction)) {
+        when (val result = voiceAPI.retrieveVoiceFile(voiceInstruction, onlyCache)) {
             is VoiceState.VoiceFile -> {
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()

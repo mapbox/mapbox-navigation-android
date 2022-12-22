@@ -22,6 +22,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -60,6 +61,7 @@ import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
+import com.mapbox.navigation.ui.voice.api.VoiceInstructionsDownloadTrigger
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
@@ -201,9 +203,14 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private val voiceInstructionsDownloadTrigger by lazy {
+        VoiceInstructionsDownloadTrigger(speechApi)
+    }
+
     private val voiceInstructionsObserver =
         VoiceInstructionsObserver { voiceInstructions -> // The data obtained must be used to generate the synthesized speech mp3 file.
-            speechApi.generate(
+            speechApi.generatePredownloaded(
                 voiceInstructions,
                 speechCallback
             )
@@ -384,11 +391,13 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         init()
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onStart() {
         super.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
+            mapboxNavigation.registerVoiceInstructionsTriggerObserver(voiceInstructionsDownloadTrigger)
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
             mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
@@ -396,16 +405,19 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         ResourceLoaderFactory.getInstance().registerObserver(resourceLoadObserver)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onStop() {
         super.onStop()
         ResourceLoaderFactory.getInstance().unregisterObserver(resourceLoadObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.registerVoiceInstructionsTriggerObserver(voiceInstructionsDownloadTrigger)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onDestroy() {
         super.onDestroy()
         routeLineApi.cancel()
@@ -413,6 +425,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
         speechApi.cancel()
+        voiceInstructionsDownloadTrigger.destroy()
         voiceInstructionsPlayer.shutdown()
     }
 

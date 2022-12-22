@@ -91,7 +91,7 @@ class MapboxSpeechApiTest {
         val mockedInstructionFile: File = mockk()
         val mockedVoiceApi: MapboxVoiceApi = mockk()
         coEvery {
-            mockedVoiceApi.retrieveVoiceFile(any())
+            mockedVoiceApi.retrieveVoiceFile(any(), false)
         } returns VoiceState.VoiceFile(mockedInstructionFile)
         val options = MapboxSpeechApiOptions.Builder().build()
         every {
@@ -114,6 +114,50 @@ class MapboxSpeechApiTest {
     }
 
     @Test
+    fun `generate predownloaded voice file onAvailable`() = coroutineRule.runBlockingTest {
+        val aMockedContext: Context = mockk(relaxed = true)
+        val anyAccessToken = "pk.123"
+        val anyLanguage = Locale.US.language
+        val mockedVoiceInstructions: VoiceInstructions = mockk()
+        val anAnnouncement = "Turn right onto Frederick Road, Maryland 3 55."
+        val aSsmlAnnouncement = """
+            <speak>
+                <amazon:effect name="drc">
+                    <prosody rate="1.08">Turn right onto Frederick Road, Maryland 3 55.</prosody>
+                </amazon:effect>
+            </speak>
+        """.trimIndent()
+        every { mockedVoiceInstructions.announcement() } returns anAnnouncement
+        every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
+        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> = mockk()
+        val speechValueSlot = slot<Expected<SpeechError, SpeechValue>>()
+        every { speechConsumer.accept(capture(speechValueSlot)) } just Runs
+        val mockedInstructionFile: File = mockk()
+        val mockedVoiceApi: MapboxVoiceApi = mockk()
+        coEvery {
+            mockedVoiceApi.retrieveVoiceFile(any(), true)
+        } returns VoiceState.VoiceFile(mockedInstructionFile)
+        val options = MapboxSpeechApiOptions.Builder().build()
+        every {
+            VoiceApiProvider.retrieveMapboxVoiceApi(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                options
+            )
+        } returns mockedVoiceApi
+        val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
+
+        mapboxSpeechApi.generatePredownloaded(mockedVoiceInstructions, speechConsumer)
+
+        verify(exactly = 1) {
+            speechConsumer.accept(
+                speechValueSlot.captured
+            )
+        }
+    }
+
+    @Test
     fun `generate voice file onError`() = coroutineRule.runBlockingTest {
         val voiceInstructions = Fixtures.ssmlInstructions()
         val speechErrorCapture = slot<Expected<SpeechError, SpeechValue>>()
@@ -122,7 +166,7 @@ class MapboxSpeechApiTest {
         }
         val mockedVoiceApi = mockk<MapboxVoiceApi> {
             coEvery {
-                retrieveVoiceFile(voiceInstructions)
+                retrieveVoiceFile(voiceInstructions, false)
             } returns VoiceState.VoiceError("Some error message")
         }
         every {
@@ -153,7 +197,7 @@ class MapboxSpeechApiTest {
         }
         val mockedVoiceApi = mockk<MapboxVoiceApi> {
             coEvery {
-                retrieveVoiceFile(voiceInstructions)
+                retrieveVoiceFile(voiceInstructions, false)
             } returns VoiceState.VoiceError("Some error message")
         }
         every {
@@ -190,5 +234,18 @@ class MapboxSpeechApiTest {
         verify(exactly = 1) {
             mockedVoiceApi.clean(anyAnnouncement)
         }
+    }
+
+    @Test
+    fun destroy() {
+        val mockedVoiceApi = mockk<MapboxVoiceApi>(relaxed = true)
+        every {
+            VoiceApiProvider.retrieveMapboxVoiceApi(any(), any(), any(), any())
+        } returns mockedVoiceApi
+
+        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        sut.destroy()
+
+        verify { mockedVoiceApi.destroy() }
     }
 }
