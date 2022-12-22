@@ -1,12 +1,12 @@
 package com.mapbox.navigation.copilot
 
 import androidx.annotation.Keep
-import com.mapbox.common.TelemetrySystemUtils
+import com.mapbox.navigation.copilot.DateUtils.obtainCurrentDate
 
 @Keep
 internal data class AttachmentMetadata(
     val name: String,
-    val created: String = TelemetrySystemUtils.obtainCurrentDate(),
+    val created: String = obtainCurrentDate(),
     val fileId: String,
     val format: String,
     val type: String,
