@@ -116,9 +116,15 @@ def check_contains_pr_link(added_lines_by_file):
 def check_version_section(content, added_lines):
     lines = content.split("\n")
     versions = group_by_versions(lines)
+    print("[ddlog] versions:")
+    print(versions)
     unreleased_group = extract_unreleased_group(versions)
+    print("[ddlog] unreleased:")
+    print(unreleased_group)
     stable_versions = extract_stable_versions(versions)
 
+    print("[ddlog] added_lines:")
+    print(added_lines)
     for added_line in added_lines:
         if added_line not in unreleased_group:
             raise Exception("\"" + added_line + "\" should be placed in 'Unreleased' section")
