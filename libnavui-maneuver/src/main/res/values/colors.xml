@@ -8,7 +8,7 @@
   <color name="mapbox_main_maneuver_background_color">@color/colorSecondary</color>
   <color name="mapbox_sub_maneuver_background_color">@color/colorSecondaryVariant</color>
   <color name="mapbox_upcoming_maneuver_background_color">@color/colorSecondaryVariant</color>
-  <color name="mapbox_exit_text_color">@android:color/black</color>
+  <color name="mapbox_exit_text_color">@color/colorOnSurface</color>
   <color name="mapbox_exit_background_color">@color/colorSurface</color>
   <color name="mapbox_exit_background_border_color">@color/colorOnSurface</color>
   <color name="mapbox_exit_drawable_color">@color/colorOnSurface</color>
