@@ -16,8 +16,10 @@ import kotlin.math.roundToInt
  */
 object MapboxDistanceUtil {
 
-    private const val smallDistanceUpperThresholdInMeters = 400.0
-    private const val mediumDistanceUpperThresholdInMeters = 10000.0
+    private const val SMALL_DISTANCE_LOWER_BOUND_IN_MILES = 0.1
+    private const val MEDIUM_DISTANCE_LOWER_BOUND_IN_MILES = 10.0
+    private const val SMALL_DISTANCE_UPPER_THRESHOLD_IN_METERS = 400.0
+    private const val MEDIUM_DISTANCE_UPPER_THRESHOLD_IN_METERS = 10000.0
 
     /**
      * This will recalculate and format a distance based on the parameters inputted. The value
@@ -37,31 +39,35 @@ object MapboxDistanceUtil {
         context: Context,
         locale: Locale
     ): FormattedDistanceData {
-        return when (distanceInMeters) {
-            !in 0.0..Double.MAX_VALUE -> {
-                formatDistanceAndSuffixForSmallUnit(
-                    0.0,
-                    roundingIncrement,
-                    unitType,
-                    context,
-                    locale
-                )
-            }
-            in 0.0..smallDistanceUpperThresholdInMeters -> {
-                formatDistanceAndSuffixForSmallUnit(
-                    distanceInMeters,
-                    roundingIncrement,
-                    unitType,
-                    context,
-                    locale
-                )
-            }
-            in smallDistanceUpperThresholdInMeters..mediumDistanceUpperThresholdInMeters -> {
-                formatDistanceAndSuffixForLargeUnit(distanceInMeters, 1, unitType, context, locale)
-            }
-            else -> {
-                formatDistanceAndSuffixForLargeUnit(distanceInMeters, 0, unitType, context, locale)
-            }
+        return when (getFormattingRange(distanceInMeters, unitType)) {
+            FormattingRange.INVALID -> formatDistanceAndSuffixForSmallUnit(
+                0.0,
+                roundingIncrement,
+                unitType,
+                context,
+                locale
+            )
+            FormattingRange.SMALL -> formatDistanceAndSuffixForSmallUnit(
+                distanceInMeters,
+                roundingIncrement,
+                unitType,
+                context,
+                locale
+            )
+            FormattingRange.MEDIUM -> formatDistanceAndSuffixForLargeUnit(
+                distanceInMeters,
+                1,
+                unitType,
+                context,
+                locale
+            )
+            FormattingRange.LARGE -> formatDistanceAndSuffixForLargeUnit(
+                distanceInMeters,
+                0,
+                unitType,
+                context,
+                locale
+            )
         }
     }
 
@@ -104,17 +110,17 @@ object MapboxDistanceUtil {
         roundingIncrement: Int,
         unitType: UnitType
     ): Double {
-        return when (distanceInMeters) {
-            !in 0.0..Double.MAX_VALUE -> {
+        return when (getFormattingRange(distanceInMeters, unitType)) {
+            FormattingRange.INVALID -> {
                 roundSmallDistance(distanceInMeters, roundingIncrement, unitType).toDouble()
             }
-            in 0.0..smallDistanceUpperThresholdInMeters -> {
+            FormattingRange.SMALL -> {
                 roundSmallDistance(distanceInMeters, roundingIncrement, unitType).toDouble()
             }
-            in smallDistanceUpperThresholdInMeters..mediumDistanceUpperThresholdInMeters -> {
+            FormattingRange.MEDIUM -> {
                 roundLargeDistance(distanceInMeters, unitType)
             }
-            else -> {
+            FormattingRange.LARGE -> {
                 roundLargeDistance(distanceInMeters, unitType)
             }
         }
@@ -233,5 +239,43 @@ object MapboxDistanceUtil {
             it.setLocale(locale)
         }
         return this.createConfigurationContext(config).resources
+    }
+
+    private enum class FormattingRange { INVALID, SMALL, MEDIUM, LARGE }
+
+    private fun getFormattingRange(
+        distanceInMeters: Double,
+        unitType: UnitType
+    ): FormattingRange {
+        if (distanceInMeters !in 0.0..Double.MAX_VALUE) {
+            return FormattingRange.INVALID
+        }
+        return when (unitType) {
+            UnitType.METRIC -> metricRange(distanceInMeters)
+            UnitType.IMPERIAL -> {
+                val distanceInMiles = TurfConversion.convertLength(
+                    distanceInMeters,
+                    TurfConstants.UNIT_METERS,
+                    getLargeTurfUnitType(unitType)
+                )
+                imperialRange(distanceInMiles)
+            }
+        }
+    }
+
+    private fun metricRange(distance: Double): FormattingRange = when (distance) {
+        in 0.0..SMALL_DISTANCE_UPPER_THRESHOLD_IN_METERS -> FormattingRange.SMALL
+        in SMALL_DISTANCE_UPPER_THRESHOLD_IN_METERS..MEDIUM_DISTANCE_UPPER_THRESHOLD_IN_METERS ->
+            FormattingRange.MEDIUM
+        else -> FormattingRange.LARGE
+    }
+
+    private fun imperialRange(distance: Double): FormattingRange {
+        return when (distance) {
+            in 0.0..SMALL_DISTANCE_LOWER_BOUND_IN_MILES -> FormattingRange.SMALL
+            in SMALL_DISTANCE_LOWER_BOUND_IN_MILES..MEDIUM_DISTANCE_LOWER_BOUND_IN_MILES ->
+                FormattingRange.MEDIUM
+            else -> FormattingRange.LARGE
+        }
     }
 }
