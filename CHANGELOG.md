@@ -25,6 +25,9 @@ Mapbox welcomes participation and contributions from everyone.
   ```
 - Added guarantees that route progress with `RouteProgress#currentState == OFF_ROUTE` arrives earlier than `NavigationRerouteController#reroute` is called. [#6764](https://github.com/mapbox/mapbox-navigation-android/pull/6764)
 - Fixed a rare `java.lang.NullPointerException: Attempt to read from field 'SpeechAnnouncement PlayCallback.announcement' on a null object reference` crash in `PlayCallback.getAnnouncement`. [#6760](https://github.com/mapbox/mapbox-navigation-android/pull/6760)
+- Introduced `VoiceInstructionsDownloadTrigger` `MapboxSpeechAPI#generatePredownloaded` to use predownloaded voice instructions instead of downloading them on demand. Example usage can be found in the examples directory ( see `MapboxVoiceActivity`). [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)   
+- Enabled voice instructions predownloading for those who use `MapboxAudioGuidance`. [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)
+- Fixed an issue where with low connectivity voice instruction might have been played too late for those who use `MapboxAudioGuidance`. If you use `MapboxSpeechAPI` directly, switch to voice instructions predownloading as described above if you encounter said issue. [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)  
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog

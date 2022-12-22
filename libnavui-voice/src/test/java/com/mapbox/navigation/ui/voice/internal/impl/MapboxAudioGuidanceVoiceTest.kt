@@ -56,7 +56,7 @@ class MapboxAudioGuidanceVoiceTest {
 
     @Test
     fun `should play fallback when speech api fails`() = coroutineRule.runBlockingTest {
-        every { speechApi.generate(any(), any()) } answers {
+        every { speechApi.generatePredownloaded(any(), any()) } answers {
             val consumer = secondArg<MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>>()
             val error = mockk<SpeechError> {
                 every { fallback } returns mockk {
@@ -75,8 +75,15 @@ class MapboxAudioGuidanceVoiceTest {
         }
     }
 
+    @Test
+    fun destroy() {
+        carAppAudioGuidanceVoice.destroy()
+
+        verify { speechApi.destroy() }
+    }
+
     private fun mockSuccessfulSpeechApi() {
-        every { speechApi.generate(any(), any()) } answers {
+        every { speechApi.generatePredownloaded(any(), any()) } answers {
             val announcementArg = firstArg<VoiceInstructions>().announcement()
             val speechValue = mockk<SpeechValue> {
                 every { announcement } returns mockk {

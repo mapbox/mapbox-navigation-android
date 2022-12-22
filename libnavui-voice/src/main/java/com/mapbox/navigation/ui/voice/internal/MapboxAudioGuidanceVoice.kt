@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.flowOf
  * @param mapboxVoiceInstructionsPlayer stream of [VoiceInstructions].
  */
 class MapboxAudioGuidanceVoice(
-    private val mapboxSpeechApi: MapboxSpeechApi,
+    internal val mapboxSpeechApi: MapboxSpeechApi,
     private val mapboxVoiceInstructionsPlayer: MapboxVoiceInstructionsPlayer
 ) {
     fun speak(voiceInstructions: VoiceInstructions?): Flow<SpeechAnnouncement?> {
@@ -34,6 +34,10 @@ class MapboxAudioGuidanceVoice(
             mapboxVoiceInstructionsPlayer.clear()
             flowOf(null)
         }
+    }
+
+    fun destroy() {
+        mapboxSpeechApi.destroy()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -51,7 +55,7 @@ class MapboxAudioGuidanceVoice(
                         }
                     }
                 }
-            mapboxSpeechApi.generate(voiceInstructions, speechCallback)
+            mapboxSpeechApi.generatePredownloaded(voiceInstructions, speechCallback)
             awaitClose {
                 mapboxSpeechApi.cancel()
                 mapboxVoiceInstructionsPlayer.clear()

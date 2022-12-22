@@ -64,6 +64,7 @@ package com.mapbox.navigation.ui.voice.api {
     method public void cancel();
     method public void clean(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement);
     method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.voice.model.SpeechError,com.mapbox.navigation.ui.voice.model.SpeechValue>> consumer);
+    method public void generatePredownloaded(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.voice.model.SpeechError,com.mapbox.navigation.ui.voice.model.SpeechValue>> consumer);
   }
 
   @UiThread public final class MapboxVoiceInstructionsPlayer {
@@ -82,6 +83,20 @@ package com.mapbox.navigation.ui.voice.api {
     method public void shutdown();
     method public void updateLanguage(String language);
     method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void volume(com.mapbox.navigation.ui.voice.model.SpeechVolume state) throws java.lang.IllegalArgumentException;
+  }
+
+  public final class VoiceInstructionsDownloadTrigger implements com.mapbox.navigation.core.trip.session.RouteProgressObserver com.mapbox.navigation.core.directions.session.RoutesObserver {
+    ctor public VoiceInstructionsDownloadTrigger(com.mapbox.navigation.ui.voice.api.MapboxSpeechApi speechApi);
+    ctor public VoiceInstructionsDownloadTrigger(int observableTime, double timePercentageToTriggerAfter, com.mapbox.navigation.ui.voice.api.MapboxSpeechApi speechApi);
+    method public void destroy();
+    method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public void onRoutesChanged(com.mapbox.navigation.core.directions.session.RoutesUpdatedResult result);
+    field public static final com.mapbox.navigation.ui.voice.api.VoiceInstructionsDownloadTrigger.Companion Companion;
+    field public static final int DEFAULT_OBSERVABLE_TIME_SECONDS = 180; // 0xb4
+    field public static final double DEFAULT_TIME_PERCENTAGE_TO_TRIGGER_AFTER = 0.5;
+  }
+
+  public static final class VoiceInstructionsDownloadTrigger.Companion {
   }
 
   public abstract sealed class VoiceInstructionsPlayerAttributes {

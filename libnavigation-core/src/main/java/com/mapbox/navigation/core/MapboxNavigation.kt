@@ -1284,6 +1284,26 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
+     * Subscribes voice instructions trigger observer for all the necessary updates.
+     */
+    fun <T> registerVoiceInstructionsTriggerObserver(
+        observer: T
+    ) where T : RoutesObserver, T : RouteProgressObserver {
+        registerRoutesObserver(observer)
+        registerRouteProgressObserver(observer)
+    }
+
+    /**
+     * Unsubscribes voice instructions trigger observer from all the updates it was subsribed for.
+     */
+    fun <T> unregisterVoiceInstructionsTriggerObserver(
+        observer: T
+    ) where T : RoutesObserver, T : RouteProgressObserver {
+        unregisterRoutesObserver(observer)
+        unregisterRouteProgressObserver(observer)
+    }
+
+    /**
      * Unregisters [RoutesObserver].
      */
     fun unregisterRoutesObserver(routesObserver: RoutesObserver) {
