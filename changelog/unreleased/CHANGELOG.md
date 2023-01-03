@@ -2,7 +2,6 @@
 
 
 #### Bug fixes and improvements
-- Added guarantees that route progress with `RouteProgress#currentState == OFF_ROUTE` arrives earlier than `NavigationRerouteController#reroute` is called. [#6764](https://github.com/mapbox/mapbox-navigation-android/pull/6764)
 - :warning: Updated the `NavigationView` default navigation puck asset. [#6678](https://github.com/mapbox/mapbox-navigation-android/pull/6678)
 
   Previous puck can be restored by injecting `LocationPuck2D` with the `bearingImage` set to `com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon` drawable:
@@ -20,7 +19,7 @@
           .idlePuck(regularPuck(context))
           .build()
   }
-  ```
+  ```- Added guarantees that route progress with `RouteProgress#currentState == OFF_ROUTE` arrives earlier than `NavigationRerouteController#reroute` is called. [#6764](https://github.com/mapbox/mapbox-navigation-android/pull/6764)
 
 #### Known issues :warning:
 
