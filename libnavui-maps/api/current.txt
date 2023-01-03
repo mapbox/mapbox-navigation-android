@@ -1017,7 +1017,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void renderClearRouteLineValue(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue> clearRouteLineValue);
     method public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> routeDrawData);
     method public void renderRouteLineUpdate(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> update);
-    method public void setOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions);
+    method @Deprecated public void setOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions);
     method public void showAlternativeRoutes(com.mapbox.maps.Style style);
     method public void showOriginAndDestinationPoints(com.mapbox.maps.Style style);
     method public void showPrimaryRoute(com.mapbox.maps.Style style);

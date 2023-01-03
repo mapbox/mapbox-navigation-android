@@ -403,7 +403,7 @@ class RouteArrowUtilsTest {
             every { removeStyleImage(ARROW_HEAD_ICON) } returns mockk()
         }
 
-        RouteArrowUtils.removeLayers(style)
+        RouteArrowUtils.removeLayersAndSources(style)
 
         verifySequence {
             style.removeStyleImage(ARROW_HEAD_ICON_CASING)
