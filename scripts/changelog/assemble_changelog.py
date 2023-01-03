@@ -19,6 +19,8 @@ def get_changes(path):
                     lines_with_description.append(line)
             for line in lines_with_description:
                 pr_changes = pr_changes.replace(line, line.replace('\n', '') + pr_link)
+        if not pr_changes.endswith('\n'):
+            pr_changes += '\n'
         changes += pr_changes
     return changes.strip()
 
