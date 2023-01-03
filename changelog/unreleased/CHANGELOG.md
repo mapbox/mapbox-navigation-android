@@ -19,7 +19,8 @@
           .idlePuck(regularPuck(context))
           .build()
   }
-  ```- Added guarantees that route progress with `RouteProgress#currentState == OFF_ROUTE` arrives earlier than `NavigationRerouteController#reroute` is called. [#6764](https://github.com/mapbox/mapbox-navigation-android/pull/6764)
+  ```- one more bugfix [#0000](https://github.com/mapbox/mapbox-navigation-android/pull/0000)
+- Added guarantees that route progress with `RouteProgress#currentState == OFF_ROUTE` arrives earlier than `NavigationRerouteController#reroute` is called. [#6764](https://github.com/mapbox/mapbox-navigation-android/pull/6764)
 
 #### Known issues :warning:
 
