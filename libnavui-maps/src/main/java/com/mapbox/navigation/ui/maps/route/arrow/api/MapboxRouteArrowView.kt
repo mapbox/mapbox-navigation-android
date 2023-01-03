@@ -12,7 +12,9 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSourceAs
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils.initializeLayers
+import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils.layersAreInitialized
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue
@@ -31,9 +33,15 @@ import com.mapbox.navigation.utils.internal.logE
  * See [Style.addPersistentStyleLayer].
  *
  * @param options the options used for determining the rendering appearance and/or behavior.
+ *
+ * If you're recreating the the [MapboxRouteArrowView] instance, for example to change the
+ * [RouteArrowOptions], make sure that your first interaction restores the state and re-applies
+ * the options by calling [MapboxRouteArrowApi.redraw] and passing the result to [MapboxRouteArrowView.render].
  */
 @UiThread
 class MapboxRouteArrowView(private val options: RouteArrowOptions) {
+
+    private var rebuildLayersOnFirstRender: Boolean = true
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxRouteArrowView"
@@ -47,7 +55,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
      * @param visibilityChange a state containing data for applying the view side effects.
      */
     fun render(style: Style, visibilityChange: ArrowVisibilityChangeValue) {
-        initializeLayers(style, options)
+        rebuildSourcesAndLayersIfNeeded(style)
 
         visibilityChange.layerVisibilityModifications.forEach {
             updateLayerVisibility(style, it.first, it.second)
@@ -65,7 +73,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
         style: Style,
         expectedValue: Expected<InvalidPointError, UpdateManeuverArrowValue>
     ) {
-        initializeLayers(style, options)
+        rebuildSourcesAndLayersIfNeeded(style)
 
         expectedValue.onError {
             logE(it.errorMessage, LOG_CATEGORY)
@@ -90,7 +98,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
      * @param arrowAdded a state containing data for applying the view side effects.
      */
     fun render(style: Style, arrowAdded: ArrowAddedValue) {
-        initializeLayers(style, options)
+        rebuildSourcesAndLayersIfNeeded(style)
 
         updateSource(
             style,
@@ -128,7 +136,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
      * @param state a state containing data for applying the view side effects.
      */
     fun render(style: Style, state: RemoveArrowValue) {
-        initializeLayers(style, options)
+        rebuildSourcesAndLayersIfNeeded(style)
 
         updateSource(
             style,
@@ -149,7 +157,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
      * @param state a state containing data for applying the view side effects.
      */
     fun render(style: Style, state: ClearArrowsValue) {
-        initializeLayers(style, options)
+        rebuildSourcesAndLayersIfNeeded(style)
 
         updateSource(
             style,
@@ -194,6 +202,18 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     private fun updateSource(style: Style, sourceId: String, featureCollection: FeatureCollection) {
         if (style.styleSourceExists(sourceId)) {
             style.getSourceAs<GeoJsonSource>(sourceId)?.featureCollection(featureCollection)
+        }
+    }
+
+    private fun rebuildLayersAndSources(style: Style, options: RouteArrowOptions) {
+        RouteArrowUtils.removeLayersAndSources(style)
+        initializeLayers(style, options)
+    }
+
+    private fun rebuildSourcesAndLayersIfNeeded(style: Style) {
+        if (rebuildLayersOnFirstRender || !layersAreInitialized(style)) {
+            rebuildLayersOnFirstRender = false
+            rebuildLayersAndSources(style, options)
         }
     }
 }

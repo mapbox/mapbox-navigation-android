@@ -49,7 +49,7 @@ class RouteArrowComponentTest {
             every { intrinsicHeight } returns 24
             every { intrinsicWidth } returns 24
         }
-        every { RouteArrowUtils.removeLayers(any()) } just Runs
+        every { RouteArrowUtils.removeLayersAndSources(any()) } just Runs
     }
 
     @After
@@ -136,7 +136,6 @@ class RouteArrowComponentTest {
         sut.onDetached(mockMapboxNavigation)
 
         verify { mockView.render(mockStyle, clearValue) }
-        verify { RouteArrowUtils.removeLayers(mockStyle) }
     }
 
     private fun mockMapWithStyleLoaded(style: Style): MapboxMap = mockk {
