@@ -2,6 +2,8 @@
 
 To avoid merge conflicts in the CHANGELOG.md file we accepted the multi-file running changelog strategy.
 
+*This strategy works for the libnavui-androidauto project too. It works in the `libnavui-androidauto/changelog` directory*
+
 To follow this strategy you should create a `.md` file for every PR. Choose a directory:
 
 - `changelog/unreleased/features` for **Features** changes
