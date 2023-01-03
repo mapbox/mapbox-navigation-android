@@ -32,8 +32,12 @@ def rename_files(path):
 renamed_bugfixes_count = rename_files('changelog/unreleased/bugfixes/')
 renamed_features_count = rename_files('changelog/unreleased/features/')
 
-if renamed_features_count + renamed_bugfixes_count > 0:
+auto_renamed_bugfixes_count = rename_files('libnavui-androidauto/changelog/unreleased/bugfixes/')
+auto_renamed_features_count = rename_files('libnavui-androidauto/changelog/unreleased/features/')
+
+if renamed_features_count + renamed_bugfixes_count + auto_renamed_bugfixes_count + auto_renamed_features_count > 0:
     repository = git.Repo('.')
     repository.git.add('changelog/unreleased')
+    repository.git.add('libnavui-androidauto/changelog/unreleased')
     repository.index.commit('Rename changelog files')
     repository.remotes.origin.push().raise_if_error()

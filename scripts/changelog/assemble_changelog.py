@@ -41,3 +41,18 @@ if changelog != old_changelog:
     repository.git.add('changelog/unreleased')
     repository.index.commit('Assemble changelog file [skip actions]')
     repository.remotes.origin.push().raise_if_error()
+
+auto_bugfixes = get_changes('libnavui-androidauto/changelog/unreleased/bugfixes/')
+auto_features = get_changes('libnavui-androidauto/changelog/unreleased/features/')
+
+auto_changelog = '#### Features\n' + auto_features + '\n\n' + \
+            '#### Bug fixes and improvements\n' + auto_bugfixes
+
+auto_old_changelog = open('libnavui-androidauto/changelog/unreleased/CHANGELOG.md', 'r').read()
+
+if auto_changelog != auto_old_changelog:
+    open('libnavui-androidauto/changelog/unreleased/CHANGELOG.md', 'w').write(auto_changelog)
+    repository = git.Repo('.')
+    repository.git.add('libnavui-androidauto/changelog/unreleased')
+    repository.index.commit('Assemble auto changelog file [skip actions]')
+    repository.remotes.origin.push().raise_if_error()
