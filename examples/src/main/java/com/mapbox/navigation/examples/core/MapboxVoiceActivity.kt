@@ -397,7 +397,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
-            mapboxNavigation.registerVoiceInstructionsTriggerObserver(voiceInstructionsDownloadTrigger)
+            voiceInstructionsDownloadTrigger.onAttached(mapboxNavigation)
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
             mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
@@ -410,7 +410,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onStop()
         ResourceLoaderFactory.getInstance().unregisterObserver(resourceLoadObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.registerVoiceInstructionsTriggerObserver(voiceInstructionsDownloadTrigger)
+        voiceInstructionsDownloadTrigger.onDetached(mapboxNavigation)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)

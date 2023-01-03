@@ -6,6 +6,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -13,8 +15,9 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 /**
  * Class that is responsible for listening to relevant updates and triggering
  * voice instructions predownloading when needed.
- * Register and unregister with [MapboxNavigation.registerVoiceInstructionsTriggerObserver] and
- * [MapboxNavigation.unregisterVoiceInstructionsTriggerObserver].
+ * Register and unregister with [MapboxNavigationApp.registerObserver]
+ * and [MapboxNavigationApp.unregisterObserver]
+ * or invoke [onAttached] and [onDetached] manually if you are not using [MapboxNavigationApp].
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class VoiceInstructionsDownloadTrigger internal constructor(
@@ -23,7 +26,7 @@ class VoiceInstructionsDownloadTrigger internal constructor(
     private val speechApi: MapboxSpeechApi,
     private val nextVoiceInstructionsProvider: NextVoiceInstructionsProvider,
     private val timeProvider: Time,
-) : RouteProgressObserver, RoutesObserver {
+) : MapboxNavigationObserver {
 
     /**
      * Creates [VoiceInstructionsDownloadTrigger] with default
@@ -60,6 +63,10 @@ class VoiceInstructionsDownloadTrigger internal constructor(
         Time.SystemImpl
     )
 
+    private val routesObserver = RoutesObserver { onRoutesChanged(it) }
+
+    private val routeProgressObserver = RouteProgressObserver { onRouteProgressChanged(it) }
+
     private val ignoredRouteUpdateReasons = setOf(
         RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
         RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE,
@@ -68,9 +75,22 @@ class VoiceInstructionsDownloadTrigger internal constructor(
     private var lastDownloadTime: Long = 0
 
     /**
-     * See [RoutesObserver.onRoutesChanged].
+     * See [MapboxNavigationObserver.onAttached].
      */
-    override fun onRoutesChanged(result: RoutesUpdatedResult) {
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+    }
+
+    /**
+     * See [MapboxNavigationObserver.onDetached].
+     */
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+    }
+
+    private fun onRoutesChanged(result: RoutesUpdatedResult) {
         if (result.reason in ignoredRouteUpdateReasons) {
             return
         }
@@ -89,10 +109,7 @@ class VoiceInstructionsDownloadTrigger internal constructor(
         }
     }
 
-    /**
-     * See [RouteProgressObserver.onRouteProgressChanged].
-     */
-    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+    private fun onRouteProgressChanged(routeProgress: RouteProgress) {
         if (shouldDownloadBasedOnTime()) {
             val legIndex = routeProgress.currentLegProgress?.legIndex
             val currentStepProgress = routeProgress.currentLegProgress?.currentStepProgress

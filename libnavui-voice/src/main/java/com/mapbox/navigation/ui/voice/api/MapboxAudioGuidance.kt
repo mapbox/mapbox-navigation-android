@@ -173,11 +173,11 @@ internal constructor(
             .distinctUntilChanged()
             .map { language ->
                 audioGuidanceVoice?.destroy()
-                trigger?.let { unregisterVoiceInstructionsTriggerObserver(it) }
+                trigger?.onDetached(this)
                 audioGuidanceServices.mapboxAudioGuidanceVoice(this, language).also {
                     audioGuidanceVoice = it
-                    trigger = VoiceInstructionsDownloadTrigger(it.mapboxSpeechApi).also {
-                        registerVoiceInstructionsTriggerObserver(it)
+                    trigger = VoiceInstructionsDownloadTrigger(it.mapboxSpeechApi).also { trigger ->
+                        trigger.onAttached(this)
                     }
                 }
             }

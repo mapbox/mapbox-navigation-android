@@ -5,12 +5,16 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.clearMocks
 import io.mockk.every
@@ -19,6 +23,7 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class VoiceInstructionsDownloadTriggerTest {
 
     private val observableTime = 100
@@ -54,9 +59,39 @@ class VoiceInstructionsDownloadTriggerTest {
     }
 
     @Test
+    fun onAttachedOnDetached() {
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val routesObserverSlot = mutableListOf<RoutesObserver>()
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+
+        sut.onAttached(mapboxNavigation)
+
+        verify(exactly = 1) {
+            mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
+            mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
+        }
+
+        sut.onDetached(mapboxNavigation)
+
+        verify(exactly = 1) {
+            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserverSlot.first())
+            mapboxNavigation.unregisterRoutesObserver(routesObserverSlot.first())
+        }
+
+        clearMocks(mapboxNavigation, answers = false)
+
+        sut.onAttached(mapboxNavigation)
+
+        verify(exactly = 1) {
+            mapboxNavigation.registerRouteProgressObserver(routeProgressObserverSlot.first())
+            mapboxNavigation.registerRoutesObserver(routesObserverSlot.first())
+        }
+    }
+
+    @Test
     fun `onRoutesChanged should trigger download for reason NEW`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
@@ -74,7 +109,7 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged should trigger download for reason REROUTE`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         )
 
@@ -92,7 +127,7 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged should not trigger download for reason REFRESH`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
         )
 
@@ -102,7 +137,7 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged should not trigger download for reason ALTERNATIVE`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE)
         )
 
@@ -112,7 +147,7 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged should not trigger download for reason CLEANUP`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
         )
 
@@ -122,12 +157,12 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged should trigger download even if timeout did not pass`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         clearMocks(speechAPI, answers = false)
 
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
@@ -137,35 +172,35 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged download should remember last download time`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         clearMocks(speechAPI, answers = false)
 
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
         verify(exactly = 0) { speechAPI.predownload(any()) }
 
         every { timeProvider.seconds() } returns currentTimeSeconds + 51
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
         verify(exactly = 1) { speechAPI.predownload(any()) }
     }
 
     @Test
     fun `onRoutesChanged should not remember last download time when not triggered`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
         )
         clearMocks(speechAPI, answers = false)
 
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
         verify(exactly = 1) { speechAPI.predownload(any()) }
     }
 
     @Test
     fun `onRoutesChanged should not trigger download if steps are null`() {
         val route = validRoute(listOf(validLeg().toBuilder().steps(null).build()))
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
@@ -175,7 +210,7 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged should not trigger download if steps are empty`() {
         val route = validRoute(listOf(validLeg().toBuilder().steps(emptyList()).build()))
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
@@ -185,7 +220,7 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged should not trigger download if legs are null`() {
         val route = validRoute(null)
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
@@ -195,7 +230,7 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRoutesChanged should not trigger download if legs are empty`() {
         val route = validRoute(emptyList())
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
@@ -204,7 +239,7 @@ class VoiceInstructionsDownloadTriggerTest {
 
     @Test
     fun `onRoutesChanged should not trigger download if routes are empty`() {
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
@@ -214,13 +249,13 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRouteProgressChanged should not trigger if timeout did not pass`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         clearMocks(speechAPI, answers = false)
         every { timeProvider.seconds() } returns currentTimeSeconds + 49
 
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
 
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
@@ -228,39 +263,39 @@ class VoiceInstructionsDownloadTriggerTest {
     @Test
     fun `onRouteProgressChanged should trigger if timeout passed`() {
         val route = validRoute()
-        sut.onRoutesChanged(
+        onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
         clearMocks(speechAPI, answers = false)
         every { timeProvider.seconds() } returns currentTimeSeconds + 51
 
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
 
         verify(exactly = 1) { speechAPI.predownload(any()) }
     }
 
     @Test
     fun `onRouteProgressChanged should remember last download time if triggered`() {
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
         clearMocks(speechAPI, answers = false)
 
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
 
         verify(exactly = 0) { speechAPI.predownload(any()) }
 
         every { timeProvider.seconds() } returns currentTimeSeconds + 51
 
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
 
         verify(exactly = 1) { speechAPI.predownload(any()) }
     }
 
     @Test
     fun `onRouteProgressChanged should not remember last download time if not triggered`() {
-        sut.onRouteProgressChanged(validRouteProgress(null))
+        onRouteProgressChanged(validRouteProgress(null))
         clearMocks(speechAPI, answers = false)
 
-        sut.onRouteProgressChanged(validRouteProgress())
+        onRouteProgressChanged(validRouteProgress())
 
         verify(exactly = 1) { speechAPI.predownload(any()) }
     }
@@ -269,7 +304,7 @@ class VoiceInstructionsDownloadTriggerTest {
     fun `onRouteProgressChanged should trigger download`() {
         val routeProgress = validRouteProgress()
 
-        sut.onRouteProgressChanged(routeProgress)
+        onRouteProgressChanged(routeProgress)
 
         val expectedData = RouteProgressData(
             routeProgress.route,
@@ -286,7 +321,7 @@ class VoiceInstructionsDownloadTriggerTest {
     fun `onRouteProgressChanged should not trigger download if leg progress is null`() {
         val routeProgress = validRouteProgress(null)
 
-        sut.onRouteProgressChanged(routeProgress)
+        onRouteProgressChanged(routeProgress)
 
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
@@ -295,7 +330,7 @@ class VoiceInstructionsDownloadTriggerTest {
     fun `onRouteProgressChanged should not trigger download if step progress is null`() {
         val routeProgress = validRouteProgress(validLegProgress(null))
 
-        sut.onRouteProgressChanged(routeProgress)
+        onRouteProgressChanged(routeProgress)
 
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
@@ -360,5 +395,25 @@ class VoiceInstructionsDownloadTriggerTest {
         every { stepIndex } returns this@VoiceInstructionsDownloadTriggerTest.stepIndex
         every { distanceRemaining } returns stepDistanceRemaining
         every { durationRemaining } returns stepDurationRemaining
+    }
+
+    private fun onRoutesChanged(result: RoutesUpdatedResult) {
+        val routesObserverSlot = mutableListOf<RoutesObserver>()
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        sut.onAttached(mapboxNavigation)
+        verify {
+            mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
+        }
+        routesObserverSlot.first().onRoutesChanged(result)
+    }
+
+    private fun onRouteProgressChanged(progress: RouteProgress) {
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        sut.onAttached(mapboxNavigation)
+        verify {
+            mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
+        }
+        routeProgressObserverSlot.first().onRouteProgressChanged(progress)
     }
 }

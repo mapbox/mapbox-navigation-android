@@ -2020,33 +2020,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
     }
 
-    @Test
-    fun registerVoiceInstructionsTriggerObserver() {
-        val observer = TestVoiceInstructionsTriggerObserver()
-        createMapboxNavigation()
-
-        mapboxNavigation.registerVoiceInstructionsTriggerObserver(observer)
-
-        verify(exactly = 1) {
-            directionsSession.registerRoutesObserver(observer)
-            tripSession.registerRouteProgressObserver(observer)
-        }
-    }
-
-    @Test
-    fun unregisterVoiceInstructionsTriggerObserver() {
-        val observer = TestVoiceInstructionsTriggerObserver()
-        createMapboxNavigation()
-        mapboxNavigation.registerVoiceInstructionsTriggerObserver(observer)
-
-        mapboxNavigation.unregisterVoiceInstructionsTriggerObserver(observer)
-
-        verify(exactly = 1) {
-            directionsSession.unregisterRoutesObserver(observer)
-            tripSession.unregisterRouteProgressObserver(observer)
-        }
-    }
-
     private class TestVoiceInstructionsTriggerObserver : RoutesObserver, RouteProgressObserver {
 
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {

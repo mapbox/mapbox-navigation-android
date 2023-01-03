@@ -3,6 +3,8 @@ package com.mapbox.navigation.ui.voice.api
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.voice.TestMapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.TestMapboxAudioGuidanceServices.Companion.SPEECH_ANNOUNCEMENT_DELAY_MS
@@ -296,7 +298,8 @@ class MapboxAudioGuidanceTest {
 
     @Test
     fun `triggers are registered and unregistered`() = coroutineRule.runBlockingTest {
-        val triggerSlot = mutableListOf<VoiceInstructionsDownloadTrigger>()
+        val routesObserverSlot = mutableListOf<RoutesObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
         carAppAudioGuidance.onAttached(mapboxNavigation)
         clearMocks(mapboxNavigation, answers = false)
 
@@ -304,19 +307,20 @@ class MapboxAudioGuidanceTest {
         delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
 
         verify(exactly = 1) {
-            mapboxNavigation.registerVoiceInstructionsTriggerObserver(capture(triggerSlot))
+            mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
+            mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
         }
 
         testMapboxAudioGuidanceServices.emitVoiceLanguage("fr")
         delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
 
         verify(exactly = 1) {
-            mapboxNavigation.unregisterVoiceInstructionsTriggerObserver(triggerSlot.first())
+            mapboxNavigation.unregisterRoutesObserver(routesObserverSlot.first())
+            mapboxNavigation.registerRouteProgressObserver(routeProgressObserverSlot.first())
         }
         verify(exactly = 2) {
-            mapboxNavigation.registerVoiceInstructionsTriggerObserver(
-                any<VoiceInstructionsDownloadTrigger>()
-            )
+            mapboxNavigation.registerRoutesObserver(any())
+            mapboxNavigation.registerRouteProgressObserver(any())
         }
 
         carAppAudioGuidance.onDetached(mapboxNavigation)
