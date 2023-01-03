@@ -24,8 +24,10 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.MalformedURLException
 import java.net.URL
+import kotlin.coroutines.resume
 
 internal class MapboxSpeechLoader(
     private val accessToken: String,
@@ -35,7 +37,6 @@ internal class MapboxSpeechLoader(
     private val resourceLoader: ResourceLoader,
 ) {
 
-    private val currentRequests = mutableSetOf<Long>()
     private val downloadedInstructions = mutableSetOf<TypeAndAnnouncement>()
     private val downloadedInstructionsLock = Any()
     private val defaultScope = InternalJobControlFactory.createDefaultScopeJobControl().scope
@@ -60,8 +61,8 @@ internal class MapboxSpeechLoader(
     }
 
     fun triggerDownload(voiceInstructions: List<VoiceInstructions>) {
-        defaultScope.launch {
-            voiceInstructions.forEach { voiceInstruction ->
+        voiceInstructions.forEach { voiceInstruction ->
+            defaultScope.launch {
                 val typeAndAnnouncement = VoiceInstructionsParser.parse(voiceInstruction).value
                 if (typeAndAnnouncement != null && !hasTypeAndAnnouncement(typeAndAnnouncement)) {
                     predownload(typeAndAnnouncement)
@@ -72,7 +73,6 @@ internal class MapboxSpeechLoader(
 
     fun cancel() {
         defaultScope.cancel()
-        currentRequests.forEach { resourceLoader.cancel(it) }
     }
 
     private fun hasTypeAndAnnouncement(typeAndAnnouncement: TypeAndAnnouncement): Boolean {
@@ -81,20 +81,21 @@ internal class MapboxSpeechLoader(
         }
     }
 
-    private fun predownload(typeAndAnnouncement: TypeAndAnnouncement) {
+    private suspend fun predownload(typeAndAnnouncement: TypeAndAnnouncement) {
         try {
-            val request = createRequest(typeAndAnnouncement)
-            var id: Long? = null
-            id = resourceLoader.load(request) { result ->
-                id?.let { currentRequests.remove(it) }
-                // tilestore thread
-                if (result.isValue) {
-                    synchronized(downloadedInstructionsLock) {
-                        downloadedInstructions.add(typeAndAnnouncement)
+            suspendCancellableCoroutine { cont ->
+                val request = createRequest(typeAndAnnouncement)
+                val id = resourceLoader.load(request) { result ->
+                    // tilestore thread
+                    if (result.isValue) {
+                        synchronized(downloadedInstructionsLock) {
+                            downloadedInstructions.add(typeAndAnnouncement)
+                        }
                     }
+                    cont.resume(Unit)
                 }
+                cont.invokeOnCancellation { resourceLoader.cancel(id) }
             }
-            currentRequests.add(id)
         } catch (ex: Throwable) {
             logE("Failed to download instruction '$typeAndAnnouncement': ${ex.localizedMessage}")
         }

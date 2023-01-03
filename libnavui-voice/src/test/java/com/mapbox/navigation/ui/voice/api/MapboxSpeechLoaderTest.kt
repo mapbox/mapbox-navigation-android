@@ -11,6 +11,7 @@ import com.mapbox.common.ResourceLoadFlags
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
@@ -47,6 +48,8 @@ internal class MapboxSpeechLoaderTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
     private var accessToken = "access_token"
     private val language = "en"
     private val apiOptions = MapboxSpeechApiOptions.Builder()
