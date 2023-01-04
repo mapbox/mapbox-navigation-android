@@ -1,20 +1,24 @@
 import re
 
-changelog_diff_regex = "^([\s]*)diff --git a(.*)\/CHANGELOG.md b(.*)\/CHANGELOG.md"
+changelog_diff_regex = "^([\s]*)diff --git a/changelog/unreleased/(features|bugfixes|issues|other)/(.*).md b/changelog/unreleased/(features|bugfixes|issues|other)/(.*).md"
 changelog_diff_filename_regex = re.compile("([\s]*)diff --git a\/(.*) b\/(.*)")
 changelog_filename = "CHANGELOG.md"
 any_diff_substring = "diff --git"
 diff_file_start_regex = "^([\s]*)\@\@(.*)\@\@"
 pr_link_regex = "\[#\d+]\(https:\/\/github\.com\/mapbox\/mapbox-navigation-android\/pull\/\d+\)"
 
+
 def is_line_added(line):
     return line.strip().startswith('+')
+
 
 def is_line_not_blank(line):
     return len(line.strip()) > 0
 
+
 def remove_plus(line):
     return line.strip()[1:]
+
 
 def group_by_versions(lines):
     groups = {}
@@ -33,11 +37,13 @@ def group_by_versions(lines):
         groups[group_name] = group
     return groups
 
+
 def extract_unreleased_group(versions):
     for version in versions.keys():
         if 'Unreleased' in version:
             return versions[version]
     raise Exception("No 'Unreleased' section in CHANGELOG")
+
 
 def extract_stable_versions(versions):
     str_before_version = "Mapbox Navigation SDK "
@@ -57,6 +63,7 @@ def extract_stable_versions(versions):
             stable_versions[version_name] = versions[version]
     return stable_versions
 
+
 def should_skip_changelog(response_json):
     if "labels" in response_json:
         pr_labels = response_json["labels"]
@@ -65,10 +72,13 @@ def should_skip_changelog(response_json):
                 return True
     return False
 
+
 def check_has_changelog_diff(diff):
     changelog_diff_matches = re.search(changelog_diff_regex, diff, re.MULTILINE)
     if not changelog_diff_matches:
-        raise Exception("Add a non-empty changelog entry in a CHANGELOG.md or add a `skip changelog` label if not applicable.")
+        raise Exception(
+            "Add a non-empty changelog file in changelog/unreleased/${type of changes} or add a `skip changelog` label if not applicable.")
+
 
 def parse_contents_url(files_response_json):
     content_urls = {}
@@ -79,6 +89,7 @@ def parse_contents_url(files_response_json):
     if len(content_urls) == 0:
         raise Exception("No CHANGELOG.md file in PR files")
     return content_urls
+
 
 def extract_added_lines(whole_diff):
     added_lines = {}
@@ -101,36 +112,16 @@ def extract_added_lines(whole_diff):
         diff_searchable = diff_starting_at_changelog[first_changelog_diff_index:last_reachable_index]
 
         diff_lines = diff_searchable.split('\n')
-        added_lines[filename] = list(filter(is_line_not_blank, map(remove_plus, list(filter(is_line_added, diff_lines)))))
+        added_lines[filename] = list(
+            filter(is_line_not_blank, map(remove_plus, list(filter(is_line_added, diff_lines)))))
         diff = diff[last_reachable_index:]
     return added_lines
 
-def check_contains_pr_link(added_lines_by_file):
-    for filename in added_lines_by_file:
-        for added_line in added_lines_by_file[filename]:
-            if len(added_line.strip()) > 0:
-                pr_link_matches = re.search(pr_link_regex, added_line)
-                if not pr_link_matches:
-                    raise Exception("The changelog entry \"" + added_line + "\"  in \"" + filename + "\" should contain a link to the original PR that matches `" + pr_link_regex + "`")
-
-def check_version_section(content, added_lines):
-    lines = content.split("\n")
-    versions = group_by_versions(lines)
-    unreleased_group = extract_unreleased_group(versions)
-    stable_versions = extract_stable_versions(versions)
-
-    for added_line in added_lines:
-        if added_line not in unreleased_group:
-            raise Exception("\"" + added_line + "\" should be placed in 'Unreleased' section")
-
-        for stable_version in stable_versions:
-            if added_line in stable_versions[stable_version]:
-                raise Exception("The changelog entry \"" + added_line + "\" is already contained in " + stable_version + " changelog.")
 
 def check_for_duplications(added_lines):
     unique_added_lines = set()
     for added_line in added_lines:
         if added_line in unique_added_lines:
-            raise Exception("\"" + added_line + "\" is added more than once" )
+            raise Exception("\"" + added_line + "\" is added more than once")
         else:
             unique_added_lines.add(added_line)
