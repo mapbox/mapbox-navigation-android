@@ -315,7 +315,9 @@ internal class RoutePreviewStateControllerTest {
 
     private fun mockMapboxNavigation(context: Context): MapboxNavigation {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
-            every { navigationOptions } returns NavigationOptions.Builder(context).build()
+            every { navigationOptions } returns NavigationOptions.Builder(context)
+                .locationEngine(mockk())
+                .build()
         }
         every { MapboxNavigationApp.current() } returns mapboxNavigation
         return mapboxNavigation
