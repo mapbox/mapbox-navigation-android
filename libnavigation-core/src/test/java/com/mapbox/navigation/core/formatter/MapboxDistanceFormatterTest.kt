@@ -141,9 +141,9 @@ class MapboxDistanceFormatterTest {
                 .unitType(UnitType.METRIC)
                 .roundingIncrement(INCREMENT_FIFTY)
                 .build()
-        ).formatDistance(400.5)
+        ).formatDistance(1200.5)
 
-        assertEquals("0.4 km", result.toString())
+        assertEquals("1.2 km", result.toString())
     }
 
     @Config(qualifiers = "en")

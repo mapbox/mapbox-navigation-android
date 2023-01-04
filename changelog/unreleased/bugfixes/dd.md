@@ -1,0 +1,1 @@
+- Supported displaying distances in yards for imperial UnitType in the UK locale.

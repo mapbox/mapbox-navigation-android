@@ -244,6 +244,7 @@ package com.mapbox.navigation.core.formatter {
   public final class MapboxDistanceUtil {
     method public com.mapbox.navigation.core.formatter.FormattedDistanceData formatDistance(double distanceInMeters, int roundingIncrement, com.mapbox.navigation.base.formatter.UnitType unitType, android.content.Context context, java.util.Locale locale);
     method public com.mapbox.navigation.core.formatter.FormattedDistanceData formatDistance(double distanceInMeters, int roundingIncrement, com.mapbox.navigation.base.formatter.UnitType unitType, android.content.Context context);
+    method public double formatDistance(double distanceInMeters, int roundingIncrement, com.mapbox.navigation.base.formatter.UnitType unitType, java.util.Locale locale);
     method public double formatDistance(double distanceInMeters, int roundingIncrement, com.mapbox.navigation.base.formatter.UnitType unitType);
     field public static final com.mapbox.navigation.core.formatter.MapboxDistanceUtil INSTANCE;
   }
