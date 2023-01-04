@@ -1,6 +1,15 @@
 // Signature format: 3.0
 package com.mapbox.navigation.core {
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class DeveloperMetadata {
+    method public String getCopilotSessionId();
+    property public final String copilotSessionId;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface DeveloperMetadataObserver {
+    method public void onDeveloperMetadataChanged(com.mapbox.navigation.core.DeveloperMetadata metadata);
+  }
+
   @UiThread public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void cancelRouteRequest(long requestId);
@@ -31,6 +40,7 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper provideFeedbackMetadataWrapper();
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerDeveloperMetadataObserver(com.mapbox.navigation.core.DeveloperMetadataObserver developerMetadataObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void registerNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);
@@ -68,6 +78,7 @@ package com.mapbox.navigation.core {
     method public void stopTripSession();
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterDeveloperMetadataObserver(com.mapbox.navigation.core.DeveloperMetadataObserver developerMetadataObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void unregisterNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);

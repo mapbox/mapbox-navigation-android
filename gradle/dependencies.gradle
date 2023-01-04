@@ -13,7 +13,7 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '111.0.0'
+      mapboxNavigatorVersion = '111.1.0'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
@@ -37,6 +37,7 @@ ext {
       androidXAnnotationVersion : '1.2.0',
       androidXFragmentVersion   : '1.4.0',
       androidXDataStore         : '1.0.0',
+      androidXWorkManager       : '2.7.1',
       cardViewVersion           : '1.0.0',
       recyclerViewVersion       : '1.1.0',
       materialDesignVersion     : '1.1.0',
@@ -133,11 +134,13 @@ ext {
       androidXFragment          : "androidx.fragment:fragment-ktx:${version.androidXFragmentVersion}",
       androidXArchCoreTesting   : "androidx.arch.core:core-testing:${version.androidXArchCoreVersion}",
       androidXDataStore         : "androidx.datastore:datastore-preferences:${version.androidXDataStore}",
+      androidXWorkManager       : "androidx.work:work-runtime-ktx:${version.androidXWorkManager}",
 
       // lifecycle
       androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",
       androidXLifecycleLivedata : "androidx.lifecycle:lifecycle-livedata-ktx:${version.androidXLifecycle}",
       androidXLifecycleViewmodel: "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.androidXLifecycle}",
+      androidXLifecycleProcess  : "androidx.lifecycle:lifecycle-process:${version.androidXLifecycle}",
       androidXLifecycleTesting  : "androidx.lifecycle:lifecycle-runtime-testing:${version.androidXLifecycle}",
 
       // square crew

@@ -35,6 +35,7 @@ import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
+import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
@@ -259,6 +260,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { historyRecordingStateHandler.unregisterAllStateChangeObservers() }
+    }
+
+    @Test
+    fun onDestroy_unregisters_DeveloperMetadataAggregator_observers() {
+        createMapboxNavigation()
+
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { developerMetadataAggregator.unregisterAllObservers() }
     }
 
     @Test
@@ -697,7 +707,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(), any(), capture(slot), any(), any(),
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -715,7 +725,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(), any(), capture(slot), any(), any(),
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -736,11 +746,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `verify incidents options null when no params set`() {
         threadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
-        every {
-            NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
-            )
-        } returns navigator
+        every { NavigatorLoader.createConfig(any(), capture(slot)) } returns mockk()
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
@@ -751,11 +757,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `verify incidents options non-null when graph set`() {
         threadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
-        every {
-            NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
-            )
-        } returns navigator
+        every { NavigatorLoader.createConfig(any(), capture(slot)) } returns mockk()
         val options = navigationOptions.toBuilder()
             .incidentsOptions(
                 IncidentsOptions.Builder()
@@ -774,11 +776,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `verify incidents options non-null when apiUrl set`() {
         threadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
-        every {
-            NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any(), any()
-            )
-        } returns navigator
+        every { NavigatorLoader.createConfig(any(), capture(slot)) } returns mockk()
         val options = navigationOptions.toBuilder()
             .incidentsOptions(
                 IncidentsOptions.Builder()
@@ -957,7 +955,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any(), any()
+                any(), any(), capture(slot), any(), any(),
             )
         } returns navigator
         val tilesVersion = "tilesVersion"
@@ -996,7 +994,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 capture(tileConfigSlot),
                 any(),
                 any(),
-                any(),
             )
         } just Runs
 
@@ -1029,7 +1026,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 any(),
                 any(),
                 capture(tileConfigSlot),
-                any(),
                 any(),
                 any(),
             )
@@ -1566,6 +1562,30 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify {
             historyRecordingStateHandler.unregisterStateChangeObserver(observer)
+        }
+    }
+
+    @Test
+    fun registerDeveloperMetadataObserver() {
+        val observer = mockk<DeveloperMetadataObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.registerDeveloperMetadataObserver(observer)
+
+        verify {
+            developerMetadataAggregator.registerObserver(observer)
+        }
+    }
+
+    @Test
+    fun unregisterDeveloperMetadataObserver() {
+        val observer = mockk<DeveloperMetadataObserver>(relaxed = true)
+        createMapboxNavigation()
+
+        mapboxNavigation.unregisterDeveloperMetadataObserver(observer)
+
+        verify {
+            developerMetadataAggregator.unregisterObserver(observer)
         }
     }
 }

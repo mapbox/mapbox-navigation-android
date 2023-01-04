@@ -1,14 +1,15 @@
 package com.mapbox.navigation.core.internal
 
 import com.mapbox.navigation.core.HistoryRecordingStateHandler
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HistoryRecordingStateHandlerTest {
 
     private val observer = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
@@ -16,8 +17,9 @@ class HistoryRecordingStateHandlerTest {
 
     @Before
     fun setUp() {
-        stateHandler = HistoryRecordingStateHandler(NavigationSessionState.Idle)
+        stateHandler = HistoryRecordingStateHandler()
         stateHandler.registerStateChangeObserver(observer)
+        clearMocks(observer, answers = false)
     }
 
     @Test
@@ -25,7 +27,7 @@ class HistoryRecordingStateHandlerTest {
         val observer1 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
         val observer2 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
         val observer3 = mockk<HistoryRecordingStateChangeObserver>(relaxUnitFun = true)
-        stateHandler = HistoryRecordingStateHandler(NavigationSessionState.Idle)
+        stateHandler = HistoryRecordingStateHandler()
 
         // no observers
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
@@ -37,8 +39,8 @@ class HistoryRecordingStateHandlerTest {
         stateHandler.setRoutes(listOf(mockk()))
 
         verify(exactly = 1) {
-            observer1.onShouldStopRecording(ofType<NavigationSessionState.FreeDrive>())
-            observer1.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
+            observer1.onShouldStopRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
+            observer1.onShouldStartRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
         }
         verifyNoInteractions(observer2, observer3)
 
@@ -50,12 +52,12 @@ class HistoryRecordingStateHandlerTest {
         stateHandler.setRoutes(emptyList())
 
         verify(exactly = 1) {
-            observer1.onShouldStopRecording(ofType<NavigationSessionState.ActiveGuidance>())
-            observer1.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
-            observer2.onShouldStopRecording(ofType<NavigationSessionState.ActiveGuidance>())
-            observer2.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
-            observer3.onShouldStopRecording(ofType<NavigationSessionState.ActiveGuidance>())
-            observer3.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+            observer1.onShouldStopRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
+            observer1.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
+            observer2.onShouldStopRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
+            observer2.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
+            observer3.onShouldStopRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
+            observer3.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
         }
 
         // 2 observers
@@ -65,10 +67,10 @@ class HistoryRecordingStateHandlerTest {
         stateHandler.setRoutes(listOf(mockk()))
 
         verify(exactly = 1) {
-            observer1.onShouldStopRecording(ofType<NavigationSessionState.FreeDrive>())
-            observer1.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
-            observer3.onShouldStopRecording(ofType<NavigationSessionState.FreeDrive>())
-            observer3.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
+            observer1.onShouldStopRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
+            observer1.onShouldStartRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
+            observer3.onShouldStopRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
+            observer3.onShouldStartRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
         }
         verifyNoInteractions(observer2)
 
@@ -133,13 +135,13 @@ class HistoryRecordingStateHandlerTest {
 
         stateHandler.setRoutes(listOf(mockk()))
 
-        val freeDrives = mutableListOf<NavigationSessionState.FreeDrive>()
+        val freeDrives = mutableListOf<HistoryRecordingSessionState.FreeDrive>()
         verify(exactly = 1) {
             observer.onShouldStartRecording(capture(freeDrives))
         }
         verify(exactly = 1) {
             observer.onShouldStopRecording(freeDrives[0])
-            observer.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
         }
     }
 
@@ -174,13 +176,13 @@ class HistoryRecordingStateHandlerTest {
 
         stateHandler.setRoutes(listOf(mockk()))
 
-        val freeDrives = mutableListOf<NavigationSessionState.FreeDrive>()
+        val freeDrives = mutableListOf<HistoryRecordingSessionState.FreeDrive>()
         verify(exactly = 1) {
             observer.onShouldStartRecording(capture(freeDrives))
         }
         verify(exactly = 1) {
             observer.onShouldStopRecording(freeDrives[0])
-            observer.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
         }
     }
 
@@ -206,13 +208,13 @@ class HistoryRecordingStateHandlerTest {
 
         stateHandler.setRoutes(listOf(mockk()))
 
-        val freeDrives = mutableListOf<NavigationSessionState.FreeDrive>()
+        val freeDrives = mutableListOf<HistoryRecordingSessionState.FreeDrive>()
         verify(exactly = 1) {
             observer.onShouldStartRecording(capture(freeDrives))
         }
         verify(exactly = 1) {
             observer.onShouldStopRecording(freeDrives[0])
-            observer.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
         }
     }
 
@@ -343,13 +345,13 @@ class HistoryRecordingStateHandlerTest {
 
         stateHandler.lastSetRoutesFailed()
 
-        val activeGuidances = mutableListOf<NavigationSessionState.ActiveGuidance>()
+        val activeGuidances = mutableListOf<HistoryRecordingSessionState.ActiveGuidance>()
         verify(exactly = 1) {
             observer.onShouldStartRecording(capture(activeGuidances))
         }
         verify(exactly = 1) {
             observer.onShouldCancelRecording(activeGuidances[0])
-            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
         }
     }
 
@@ -410,7 +412,7 @@ class HistoryRecordingStateHandlerTest {
             observer.onShouldCancelRecording(any())
         }
         verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
         }
     }
 
@@ -437,7 +439,7 @@ class HistoryRecordingStateHandlerTest {
             observer.onShouldCancelRecording(any())
         }
         verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
         }
     }
 
@@ -453,7 +455,7 @@ class HistoryRecordingStateHandlerTest {
             observer.onShouldCancelRecording(any())
         }
         verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
         }
     }
 
@@ -483,7 +485,7 @@ class HistoryRecordingStateHandlerTest {
             observer.onShouldCancelRecording(any())
         }
         verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
         }
     }
 
@@ -499,7 +501,7 @@ class HistoryRecordingStateHandlerTest {
             observer.onShouldCancelRecording(any())
         }
         verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
         }
     }
 
@@ -529,7 +531,7 @@ class HistoryRecordingStateHandlerTest {
             observer.onShouldCancelRecording(any())
         }
         verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.FreeDrive>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.FreeDrive>())
         }
     }
 
@@ -544,7 +546,7 @@ class HistoryRecordingStateHandlerTest {
             observer.onShouldCancelRecording(any())
         }
         verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
         }
     }
 
@@ -573,7 +575,7 @@ class HistoryRecordingStateHandlerTest {
             observer.onShouldCancelRecording(any())
         }
         verify(exactly = 1) {
-            observer.onShouldStartRecording(ofType<NavigationSessionState.ActiveGuidance>())
+            observer.onShouldStartRecording(ofType<HistoryRecordingSessionState.ActiveGuidance>())
         }
     }
 
@@ -590,7 +592,7 @@ class HistoryRecordingStateHandlerTest {
 
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
 
-        val freeDrives = mutableListOf<NavigationSessionState.FreeDrive>()
+        val freeDrives = mutableListOf<HistoryRecordingSessionState.FreeDrive>()
         verify(exactly = 1) {
             observer.onShouldStartRecording(capture(freeDrives))
         }
@@ -629,7 +631,7 @@ class HistoryRecordingStateHandlerTest {
 
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
 
-        val freeDrives = mutableListOf<NavigationSessionState.FreeDrive>()
+        val freeDrives = mutableListOf<HistoryRecordingSessionState.FreeDrive>()
         verify(exactly = 1) {
             observer.onShouldStartRecording(capture(freeDrives))
         }
@@ -669,7 +671,7 @@ class HistoryRecordingStateHandlerTest {
 
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
 
-        val freeDrives = mutableListOf<NavigationSessionState.FreeDrive>()
+        val freeDrives = mutableListOf<HistoryRecordingSessionState.FreeDrive>()
         verify(exactly = 1) {
             observer.onShouldStartRecording(capture(freeDrives))
         }
@@ -707,7 +709,7 @@ class HistoryRecordingStateHandlerTest {
 
         stateHandler.onSessionStateChanged(TripSessionState.STOPPED)
 
-        val activeGuidances = mutableListOf<NavigationSessionState.ActiveGuidance>()
+        val activeGuidances = mutableListOf<HistoryRecordingSessionState.ActiveGuidance>()
         verify(exactly = 1) {
             observer.onShouldStartRecording(capture(activeGuidances))
         }
@@ -731,15 +733,15 @@ class HistoryRecordingStateHandlerTest {
     @Test
     fun observerUnregistersItselfFromCallback() {
         val unregisteringObserver = object : HistoryRecordingStateChangeObserver {
-            override fun onShouldStartRecording(state: NavigationSessionState) {
+            override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
                 stateHandler.unregisterStateChangeObserver(this)
             }
 
-            override fun onShouldStopRecording(state: NavigationSessionState) { }
+            override fun onShouldStopRecording(state: HistoryRecordingSessionState) { }
 
-            override fun onShouldCancelRecording(state: NavigationSessionState) { }
+            override fun onShouldCancelRecording(state: HistoryRecordingSessionState) { }
         }
-        stateHandler = HistoryRecordingStateHandler(NavigationSessionState.Idle)
+        stateHandler = HistoryRecordingStateHandler()
         stateHandler.registerStateChangeObserver(unregisteringObserver)
         stateHandler.registerStateChangeObserver(observer)
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)

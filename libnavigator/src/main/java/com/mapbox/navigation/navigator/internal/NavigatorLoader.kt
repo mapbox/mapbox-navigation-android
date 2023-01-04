@@ -27,24 +27,38 @@ import com.mapbox.navigator.TilesConfig
  */
 object NavigatorLoader {
 
-    internal fun createNavigator(
+    fun createConfig(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
-        tilesConfig: TilesConfig,
-        historyDir: String?,
-        router: RouterInterface,
-    ): NativeComponents {
-        val config = ConfigFactory.build(
+    ): ConfigHandle =
+        ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            deviceProfile.customConfig
+            deviceProfile.customConfig,
         )
-        val historyRecorder = buildHistoryRecorder(historyDir, config)
-        val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
+
+    fun createHistoryRecorderHandles(
+        config: ConfigHandle,
+        historyDir: String?,
+        copilotHistoryDir: String?,
+    ): HistoryRecorderHandles {
+        val general = buildHistoryRecorder(historyDir, config)
+        val copilot = buildHistoryRecorder(copilotHistoryDir, config)
+        val composite = buildCompositeHistoryRecorder(general, copilot)
+        return HistoryRecorderHandles(general, copilot, composite)
+    }
+
+    internal fun createNavigator(
+        config: ConfigHandle,
+        historyRecorderComposite: HistoryRecorderHandle?,
+        tilesConfig: TilesConfig,
+        router: RouterInterface,
+    ): NativeComponents {
+        val cache = CacheFactory.build(tilesConfig, config, historyRecorderComposite)
         val navigator = Navigator(
             config,
             cache,
-            historyRecorder,
+            historyRecorderComposite,
             router,
         )
         val graphAccessor = GraphAccessor(cache)
@@ -52,26 +66,19 @@ object NavigatorLoader {
 
         return NativeComponents(
             navigator,
-            historyRecorder,
             graphAccessor,
             cache,
             roadObjectMatcher,
             router,
-            navigator.routeAlternativesController
+            navigator.routeAlternativesController,
         )
     }
 
     fun createNativeRouterInterface(
-        deviceProfile: DeviceProfile,
-        navigatorConfig: NavigatorConfig,
+        config: ConfigHandle,
         tilesConfig: TilesConfig,
         historyRecorder: HistoryRecorderHandle?,
     ): RouterInterface {
-        val config = ConfigFactory.build(
-            settingsProfile(deviceProfile),
-            navigatorConfig,
-            deviceProfile.customConfig
-        )
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
         return RouterFactory.build(
             RouterType.HYBRID,
@@ -99,6 +106,26 @@ object NavigatorLoader {
         }
     }
 
+    private fun buildCompositeHistoryRecorder(
+        historyRecorder: HistoryRecorderHandle?,
+        copilotHistoryRecorder: HistoryRecorderHandle?,
+    ): HistoryRecorderHandle? {
+        val filteredHistoryRecorders = listOfNotNull(historyRecorder, copilotHistoryRecorder)
+        return if (filteredHistoryRecorders.isNotEmpty()) {
+            val compositeHistoryRecorderHandle =
+                HistoryRecorderHandle.buildCompositeRecorder(filteredHistoryRecorders)
+            if (compositeHistoryRecorderHandle == null) {
+                logE(
+                    "Could not create composite history recorder to write events",
+                    "NavigatorLoader",
+                )
+            }
+            compositeHistoryRecorderHandle
+        } else {
+            null
+        }
+    }
+
     private fun settingsProfile(deviceProfile: DeviceProfile): SettingsProfile {
         return when (deviceProfile.deviceType) {
             DeviceType.HANDHELD -> {
@@ -111,9 +138,14 @@ object NavigatorLoader {
         }
     }
 
+    data class HistoryRecorderHandles(
+        val general: HistoryRecorderHandle?,
+        val copilot: HistoryRecorderHandle?,
+        val composite: HistoryRecorderHandle?,
+    )
+
     internal data class NativeComponents(
         val navigator: Navigator,
-        val historyRecorderHandle: HistoryRecorderHandle?,
         val graphAccessor: GraphAccessor,
         val cache: CacheHandle,
         val roadObjectMatcher: RoadObjectMatcher,
