@@ -42,7 +42,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
      * voice instruction [SpeechAnnouncement] including the synthesized speech mp3 file
      * from Mapbox's API Voice.
      * NOTE: this method will try downloading an mp3 file from server. If you use voice instructions
-     * predownloading (see [VoiceInstructionsDownloadTrigger]), invoke [generatePredownloaded]
+     * predownloading (see [VoiceInstructionsPrefetcher]), invoke [generatePredownloaded]
      * instead of this method in your [VoiceInstructionsObserver].
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
      * @param consumer is a [SpeechValue] including the announcement to be played when the
@@ -65,7 +65,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
      * from Mapbox's API Voice.
      * NOTE: this method will NOT try downloading an mp3 file from server. It will either use
      * an already predownloaded file or an onboard speech synthesizer. Only invoke this method
-     * if you use voice instructions predownloading (see [VoiceInstructionsDownloadTrigger]),
+     * if you use voice instructions predownloading (see [VoiceInstructionsPrefetcher]),
      * otherwise invoke [generatePredownloaded] in your [VoiceInstructionsObserver].
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
      * @param consumer is a [SpeechValue] including the announcement to be played when the

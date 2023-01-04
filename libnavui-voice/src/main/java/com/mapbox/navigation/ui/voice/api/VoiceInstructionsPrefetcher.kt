@@ -20,7 +20,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  * or invoke [onAttached] and [onDetached] manually if you are not using [MapboxNavigationApp].
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class VoiceInstructionsDownloadTrigger internal constructor(
+class VoiceInstructionsPrefetcher internal constructor(
     private val observableTime: Int,
     private val timePercentageToTriggerAfter: Double,
     private val speechApi: MapboxSpeechApi,
@@ -29,7 +29,7 @@ class VoiceInstructionsDownloadTrigger internal constructor(
 ) : MapboxNavigationObserver {
 
     /**
-     * Creates [VoiceInstructionsDownloadTrigger] with default
+     * Creates [VoiceInstructionsPrefetcher] with default
      * observableTime and timePercentageToTriggerAfter.
      * See [DEFAULT_OBSERVABLE_TIME_SECONDS] and [DEFAULT_TIME_PERCENTAGE_TO_TRIGGER_AFTER].
      *
@@ -42,7 +42,7 @@ class VoiceInstructionsDownloadTrigger internal constructor(
     )
 
     /**
-     * Creates [VoiceInstructionsDownloadTrigger] with custom
+     * Creates [VoiceInstructionsPrefetcher] with custom
      * observableTime and timePercentageToTriggerAfter.
      *
      * @param observableTime voice instructions will be predownloaded for `observableTime` seconds

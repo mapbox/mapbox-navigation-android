@@ -165,6 +165,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 - Changed distance formatting: now all the imperial distances down to 0.1 miles will be represented in miles, while the smaller ones - in feet. [#6775](https://github.com/mapbox/mapbox-navigation-android/pull/6775)
 - Introduced `VoiceInstructionsDownloadTrigger` `MapboxSpeechAPI#generatePredownloaded` to use predownloaded voice instructions instead of downloading them on demand. Example usage can be found in the examples directory ( see `MapboxVoiceActivity`). [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)
+- Introduced `VoiceInstructionsPrefetcher` `MapboxSpeechAPI#generatePredownloaded` to use predownloaded voice instructions instead of downloading them on demand. Example usage can be found in the examples directory ( see `MapboxVoiceActivity`). [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)
 - Enabled voice instructions predownloading for those who use `MapboxAudioGuidance`. [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)
 - Fixed an issue where with low connectivity voice instruction might have been played too late for those who use `MapboxAudioGuidance`. If you use `MapboxSpeechAPI` directly, switch to voice instructions predownloading as described above if you encounter said issue. [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)
 

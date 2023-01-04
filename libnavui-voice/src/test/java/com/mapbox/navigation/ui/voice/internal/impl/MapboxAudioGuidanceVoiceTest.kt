@@ -106,7 +106,7 @@ class MapboxAudioGuidanceVoiceTest {
 
     @Test
     fun destroy() {
-        carAppAudioGuidanceVoice.destroy()
+        sut.destroy()
 
         verify { speechApi.destroy() }
     }

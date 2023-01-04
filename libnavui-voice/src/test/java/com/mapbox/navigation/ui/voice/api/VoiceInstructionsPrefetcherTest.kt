@@ -24,7 +24,7 @@ import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class VoiceInstructionsDownloadTriggerTest {
+class VoiceInstructionsPrefetcherTest {
 
     private val observableTime = 100
     private val timePercentageToTriggerAfter = 0.5
@@ -42,7 +42,7 @@ class VoiceInstructionsDownloadTriggerTest {
         VoiceInstructions.builder().announcement("ann2").build()
     )
     private val currentTimeSeconds = 9988L
-    private val sut = VoiceInstructionsDownloadTrigger(
+    private val sut = VoiceInstructionsPrefetcher(
         observableTime,
         timePercentageToTriggerAfter,
         speechAPI,
@@ -387,12 +387,12 @@ class VoiceInstructionsDownloadTriggerTest {
     private fun validLegProgress(
         stepProgress: RouteStepProgress? = validStepProgress()
     ): RouteLegProgress = mockk {
-        every { legIndex } returns this@VoiceInstructionsDownloadTriggerTest.legIndex
+        every { legIndex } returns this@VoiceInstructionsPrefetcherTest.legIndex
         every { currentStepProgress } returns stepProgress
     }
 
     private fun validStepProgress(): RouteStepProgress = mockk {
-        every { stepIndex } returns this@VoiceInstructionsDownloadTriggerTest.stepIndex
+        every { stepIndex } returns this@VoiceInstructionsPrefetcherTest.stepIndex
         every { distanceRemaining } returns stepDistanceRemaining
         every { durationRemaining } returns stepDurationRemaining
     }

@@ -165,7 +165,7 @@ internal constructor(
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun MapboxNavigation.audioGuidanceVoice(): Flow<MapboxAudioGuidanceVoice> {
-        var trigger: VoiceInstructionsDownloadTrigger? = null
+        var trigger: VoiceInstructionsPrefetcher? = null
         return combine(
             mapboxVoiceInstructions.voiceLanguage(),
             configOwner!!.language(),
@@ -176,7 +176,7 @@ internal constructor(
                 trigger?.onDetached(this)
                 audioGuidanceServices.mapboxAudioGuidanceVoice(this, language).also {
                     audioGuidanceVoice = it
-                    trigger = VoiceInstructionsDownloadTrigger(it.mapboxSpeechApi).also { trigger ->
+                    trigger = VoiceInstructionsPrefetcher(it.mapboxSpeechApi).also { trigger ->
                         trigger.onAttached(this)
                     }
                 }
