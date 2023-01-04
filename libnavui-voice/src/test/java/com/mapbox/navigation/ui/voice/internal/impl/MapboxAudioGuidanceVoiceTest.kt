@@ -15,7 +15,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -27,28 +28,28 @@ class MapboxAudioGuidanceVoiceTest {
     val coroutineRule = MainCoroutineRule()
 
     private val speechApi = mockk<MapboxSpeechApi>(relaxUnitFun = true)
-    private val voiceInstructionsPlayer = mockk<MapboxVoiceInstructionsPlayer>(relaxUnitFun = true)
-    private val carAppAudioGuidanceVoice = MapboxAudioGuidanceVoice(
+    private val voiceInstructionsPlayer = mockk<MapboxVoiceInstructionsPlayer>(relaxed = true)
+    private val sut = MapboxAudioGuidanceVoice(
         speechApi,
         voiceInstructionsPlayer
     )
 
     @Test
-    fun `voice instruction should be played as SpeechAnnouncement`() = coroutineRule.runBlockingTest {
-        mockSuccessfulSpeechApi()
-        mockSuccessfulVoiceInstructionsPlayer()
+    fun `voice instruction should be played as SpeechAnnouncement`() =
+        coroutineRule.runBlockingTest {
+            mockSuccessfulSpeechApi()
+            mockSuccessfulVoiceInstructionsPlayer()
 
-        val voiceInstructions = mockk<VoiceInstructions> {
-            every { announcement() } returns "Turn right on Market"
-        }
-        carAppAudioGuidanceVoice.speak(voiceInstructions).collect { speechAnnouncement ->
+            val voiceInstructions = mockk<VoiceInstructions> {
+                every { announcement() } returns "Turn right on Market"
+            }
+            val speechAnnouncement = sut.speak(voiceInstructions)
             assertEquals("Turn right on Market", speechAnnouncement!!.announcement)
         }
-    }
 
     @Test
     fun `null should clean up the api and player`() = coroutineRule.runBlockingTest {
-        carAppAudioGuidanceVoice.speak(null).collect()
+        sut.speak(null)
 
         verify { speechApi.cancel() }
         verify { voiceInstructionsPlayer.clear() }
@@ -70,18 +71,44 @@ class MapboxAudioGuidanceVoiceTest {
         val voiceInstructions = mockk<VoiceInstructions> {
             every { announcement() } returns "This message fails"
         }
-        carAppAudioGuidanceVoice.speak(voiceInstructions).collect { speechAnnouncement ->
-            assertEquals("Turn right on Market", speechAnnouncement!!.announcement)
-        }
+        val speechAnnouncement = sut.speak(voiceInstructions)
+        assertEquals("Turn right on Market", speechAnnouncement!!.announcement)
     }
+
+    @Test
+    fun `should wait until previous instruction finishes playback before playing next one`() =
+        coroutineRule.runBlockingTest {
+            mockSuccessfulSpeechApi()
+            every { voiceInstructionsPlayer.play(any(), any()) } answers {
+                launch {
+                    val speechAnnouncement = firstArg<SpeechAnnouncement>()
+                    delay(1000) // simulate 1 second announcement playback duration
+                    secondArg<MapboxNavigationConsumer<SpeechAnnouncement>>()
+                        .accept(speechAnnouncement)
+                }
+                Unit
+            }
+
+            val played = mutableListOf<SpeechAnnouncement?>()
+            launch {
+                listOf(
+                    VoiceInstructions.builder().announcement("A").build(),
+                    VoiceInstructions.builder().announcement("B").build()
+                ).forEach {
+                    val announcement = sut.speak(it) // suspend until playback finishes
+                    played.add(announcement)
+                }
+            }
+            advanceTimeBy(1500) // advance time to 50% of announcement B playback time
+
+            assertEquals(1, played.size)
+        }
 
     private fun mockSuccessfulSpeechApi() {
         every { speechApi.generate(any(), any()) } answers {
             val announcementArg = firstArg<VoiceInstructions>().announcement()
             val speechValue = mockk<SpeechValue> {
-                every { announcement } returns mockk {
-                    every { announcement } returns announcementArg!!
-                }
+                every { announcement } returns SpeechAnnouncement.Builder(announcementArg!!).build()
             }
             val consumer = secondArg<MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>>()
             consumer.accept(ExpectedFactory.createValue(speechValue))

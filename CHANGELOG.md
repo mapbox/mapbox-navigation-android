@@ -8,6 +8,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue with `NavigationView` that caused info panel to shrink in landscape mode with a full screen theme. [#6811](https://github.com/mapbox/mapbox-navigation-android/pull/6811)
 - Fixed standalone `MapboxManeuverView` appearance when the app also integrates Drop-In UI. [#6810](https://github.com/mapbox/mapbox-navigation-android/pull/6810)
 - Each newly instantiated MapboxRouteArrowView class will initialize the layers with the provided options on the first render call. Previously this would only be done if the layers hadn't already been initialized.  [#6466](https://github.com/mapbox/mapbox-navigation-android/pull/6466)
+- Fixed an issue where the first voice instruction might have been played twice. [#6766](https://github.com/mapbox/mapbox-navigation-android/pull/6766)
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
