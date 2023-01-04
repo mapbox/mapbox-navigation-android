@@ -22,6 +22,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlin.math.roundToInt
@@ -49,6 +50,16 @@ internal constructor(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal var speedLimitWidget: SpeedLimitWidget? = null
 
+    private val speedLimitState = MutableStateFlow(
+        CarSpeedLimitState(
+            isVisible = false,
+            speedLimit = null,
+            speed = null,
+            signFormat = options.speedLimitOptions.value.forcedSignFormat,
+            threshold = options.speedLimitOptions.value.warningThreshold
+        )
+    )
+
     private var distanceFormatterOptions: DistanceFormatterOptions? = null
     private val navigationObserver = mapboxNavigationForward(this::onAttached, this::onDetached)
 
@@ -75,7 +86,30 @@ internal constructor(
         distanceFormatterOptions = null
     }
 
+    private fun onSpeedLimitStateChange(state: CarSpeedLimitState) {
+        logAndroidAuto("CarSpeedLimitRenderer onSpeedLimitStateChange $state")
+        if (!state.isVisible) {
+            speedLimitWidget?.updateBitmap(RendererUtils.EMPTY_BITMAP)
+            return
+        }
+
+        if (state.speed != null) {
+            speedLimitWidget?.update(
+                state.speedLimit,
+                state.speed,
+                state.signFormat,
+                state.threshold
+            )
+        } else {
+            speedLimitWidget?.update(
+                state.signFormat,
+                state.threshold
+            )
+        }
+    }
+
     private fun updateSpeed(locationMatcherResult: LocationMatcherResult) {
+        logAndroidAuto("CarSpeedLimitRenderer updateSpeed $locationMatcherResult")
         val speedKmph =
             locationMatcherResult.enhancedLocation.speed / METERS_IN_KILOMETER * SECONDS_IN_HOUR
         val speedLimitOptions = options.speedLimitOptions.value
@@ -89,11 +123,21 @@ internal constructor(
                         5 * (speedLimitKmph / KILOMETERS_IN_MILE / 5).roundToInt()
                     }
                 val speed = speedKmph / KILOMETERS_IN_MILE
-                speedLimitWidget?.update(speedLimit, speed.roundToInt(), signFormat, threshold)
+                speedLimitState.value = speedLimitState.value.copy(
+                    speedLimit = speedLimit,
+                    speed = speed.roundToInt(),
+                    signFormat = signFormat,
+                    threshold = threshold
+                )
             }
             UnitType.METRIC -> {
                 val speedLimit = locationMatcherResult.speedLimit?.speedKmph
-                speedLimitWidget?.update(speedLimit, speedKmph.roundToInt(), signFormat, threshold)
+                speedLimitState.value = speedLimitState.value.copy(
+                    speedLimit = speedLimit,
+                    speed = speedKmph.roundToInt(),
+                    signFormat = signFormat,
+                    threshold = threshold
+                )
             }
         }
     }
@@ -107,7 +151,17 @@ internal constructor(
         MapboxNavigationApp.registerObserver(navigationObserver)
         scope = MainScope()
         options.speedLimitOptions
-            .onEach { speedLimitWidget.update(it.forcedSignFormat, it.warningThreshold) }
+            .onEach {
+                speedLimitState.value = speedLimitState.value.copy(
+                    speedLimit = null,
+                    speed = null,
+                    signFormat = options.speedLimitOptions.value.forcedSignFormat,
+                    threshold = options.speedLimitOptions.value.warningThreshold
+                )
+            }
+            .launchIn(scope)
+        speedLimitState
+            .onEach { onSpeedLimitStateChange(it) }
             .launchIn(scope)
     }
 
@@ -121,7 +175,7 @@ internal constructor(
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {
         logAndroidAuto("CarSpeedLimitRenderer onVisibleAreaChanged $visibleArea $edgeInsets")
-        speedLimitWidget?.updateBitmap(RendererUtils.EMPTY_BITMAP)
+        speedLimitState.value = speedLimitState.value.copy(isVisible = edgeInsets.right == 0.0)
     }
 
     private companion object {
@@ -130,3 +184,11 @@ internal constructor(
         private const val SECONDS_IN_HOUR = 3600
     }
 }
+
+private data class CarSpeedLimitState(
+    val isVisible: Boolean,
+    val speedLimit: Int?,
+    val speed: Int?,
+    val signFormat: SpeedLimitSign?,
+    val threshold: Int
+)
