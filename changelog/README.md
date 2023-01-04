@@ -11,6 +11,9 @@ To follow this strategy you should create a `.md` file for every PR. Choose a di
 - `changelog/unreleased/issues` for **Known issues :warning:** changes
 - `changelog/unreleased/other` for other changes
 
+Or you can use the helper script to do it. Just call `python3 scripts/changelog/add_changelog.py -f "I have added something special"` to create a changelog file.
+Call `python3 scripts/changelog/add_changelog.py -h` to get more info.
+
 You can use anything that allow .md format in changelog files.
 
 If you have implemented several features or bugfixes you should describe all of them:
