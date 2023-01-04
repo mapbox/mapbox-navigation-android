@@ -1,0 +1,1 @@
+- Fixed an issue with `NavigationView` that caused info panel to shrink in landscape mode with a full screen theme.
