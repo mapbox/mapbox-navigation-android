@@ -1,5 +1,3 @@
-@file:Suppress("PrivatePropertyName", "MaxLineLength")
-
 package com.mapbox.navigation.dropin.camera
 
 import android.app.Service
@@ -9,19 +7,23 @@ import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
+import com.mapbox.navigation.dropin.infopanel.InfoPanelBehavior
+import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
+import com.mapbox.navigation.dropin.navigationview.NavigationViewModel
+import com.mapbox.navigation.dropin.testutil.TestLifecycleOwner
 import com.mapbox.navigation.dropin.util.TestStore
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -37,9 +39,12 @@ class CameraLayoutObserverTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
+
     private lateinit var store: TestStore
     private lateinit var binding: MapboxNavigationViewLayoutBinding
-    private lateinit var mapView: View
+    private lateinit var infoPanelBehavior: InfoPanelBehavior
     private lateinit var sut: CameraLayoutObserver
 
     @Before
@@ -50,110 +55,77 @@ class CameraLayoutObserverTest {
             FrameLayout(context)
         ).apply {
             // slightly modifying default layout to simulate layout changes
+            container.top = 100
+            container.bottom = 1100
+            container.right = 1000
             guidanceLayout.bottom = 100
-            roadNameLayout.top = 100
-            actionListLayout.left = 100
-            infoPanelLayout.right = 100
+            speedLimitLayout.right = 100
+            roadNameLayout.top = 900
+            actionListLayout.left = 900
+            infoPanelLayout.right = 500
         }
-        mapView = View(context)
         store = TestStore()
-        sut = CameraLayoutObserver(store, mapView, binding)
+        val navContext = NavigationViewContext(
+            context,
+            TestLifecycleOwner(),
+            NavigationViewModel(),
+        ) { store }
+        infoPanelBehavior = navContext.behavior.infoPanelBehavior
+        sut = CameraLayoutObserver(navContext, binding)
     }
 
     @Test
     @Config(qualifiers = "port")
-    fun `portrait - should update bottom padding for DestinationPreview, FreeDrive and RoutePreview state`() =
+    fun `portrait - should update camera paddings`() =
         coroutineRule.runBlockingTest {
             sut.onAttached(mockk())
 
-            triggerLayoutChangesAndVerifyDispatchedActions(
-                givenNavigationStates = listOf(
-                    NavigationState.DestinationPreview,
-                    NavigationState.FreeDrive,
-                    NavigationState.RoutePreview,
-                )
-            ) { state, action ->
-                assertEquals("$state|top", action.padding.top, PADDING_V_PORT, 0.001)
-                assertNotEquals("$state|bottom", action.padding.bottom, PADDING_V_PORT, 0.001)
-                assertEquals("$state|left", action.padding.left, PADDING_H_PORT, 0.001)
-                assertEquals("$state|right", action.padding.right, PADDING_H_PORT, 0.001)
-            }
-        }
-
-    @Test
-    @Config(qualifiers = "port")
-    fun `portrait - should update top and bottom padding for ActiveNavigation and Arrival state`() =
-        coroutineRule.runBlockingTest {
-            sut.onAttached(mockk())
-
-            triggerLayoutChangesAndVerifyDispatchedActions(
-                givenNavigationStates = listOf(
-                    NavigationState.ActiveNavigation,
-                    NavigationState.Arrival,
-                )
-            ) { s, action ->
-                assertNotEquals("$s|top", action.padding.top, PADDING_V_PORT, 0.001)
-                assertNotEquals("$s|bottom", action.padding.bottom, PADDING_V_PORT, 0.001)
-                assertEquals("$s|left", action.padding.left, PADDING_H_PORT, 0.001)
-                assertEquals("$s|right", action.padding.right, PADDING_H_PORT, 0.001)
-            }
-        }
-
-    @Test
-    @Config(qualifiers = "land")
-    fun `landscape - should update bottom padding for FreeDrive state`() =
-        coroutineRule.runBlockingTest {
-            sut.onAttached(mockk())
-
-            triggerLayoutChangesAndVerifyDispatchedActions(
-                givenNavigationStates = listOf(
-                    NavigationState.FreeDrive
-                )
-            ) { s, action ->
-                assertEquals("$s|top", action.padding.top, PADDING_V_LAND, 0.001)
-                assertNotEquals("$s|bottom", action.padding.bottom, PADDING_V_LAND, 0.001)
-                assertEquals("$s|left", action.padding.left, PADDING_H_LAND, 0.001)
-                assertEquals("$s|right", action.padding.right, PADDING_H_LAND, 0.001)
-            }
-        }
-
-    @Test
-    @Config(qualifiers = "land")
-    fun `landscape - should update left and bottom padding for all states except FreeDrive`() =
-        coroutineRule.runBlockingTest {
-            sut.onAttached(mockk())
-
-            triggerLayoutChangesAndVerifyDispatchedActions(
-                givenNavigationStates = listOf(
-                    NavigationState.DestinationPreview,
-                    NavigationState.RoutePreview,
-                    NavigationState.ActiveNavigation,
-                    NavigationState.Arrival,
-                )
-            ) { s, action ->
-                assertEquals("$s|top", action.padding.top, PADDING_V_LAND, 0.001)
-                assertNotEquals("$s|bottom", action.padding.bottom, PADDING_V_LAND, 0.001)
-                assertNotEquals("$s|left", action.padding.left, PADDING_H_LAND, 0.001)
-                assertEquals("$s|right", action.padding.right, PADDING_H_LAND, 0.001)
-            }
-        }
-
-    private suspend fun triggerLayoutChangesAndVerifyDispatchedActions(
-        givenNavigationStates: List<NavigationState>,
-        assertAction: (state: NavigationState, action: CameraAction.UpdatePadding) -> Unit
-    ) {
-        givenNavigationStates.forEachIndexed { index, navState ->
-            store.updateState { it.copy(navigation = navState) }
             binding.coordinatorLayout.triggerLayoutChange()
-            assertAction(navState, store.actions[index] as CameraAction.UpdatePadding)
+
+            val action = store.actions.last() as CameraAction.UpdatePadding
+            assertEquals("top", action.padding.top, 200 + paddingV, 0.001)
+            assertEquals("bottom", action.padding.bottom, 200 + paddingV, 0.001)
+            assertEquals("left", action.padding.left, 100 + paddingH, 0.001)
+            assertEquals("right", action.padding.right, 100 + paddingH, 0.001)
         }
-    }
+
+    @Test
+    @Config(qualifiers = "land")
+    fun `landscape - should update camera paddings when bottom sheet is collapsed`() =
+        coroutineRule.runBlockingTest {
+            sut.onAttached(mockk())
+
+            infoPanelBehavior.updateBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
+            binding.coordinatorLayout.triggerLayoutChange()
+
+            val action = store.actions.last() as CameraAction.UpdatePadding
+            assertEquals("top", action.padding.top, 100 + paddingV, 0.001)
+            assertEquals("bottom", action.padding.bottom, 200 + paddingV, 0.001)
+            assertEquals("left", action.padding.left, 500 + paddingH, 0.001)
+            assertEquals("right", action.padding.right, 100 + paddingH, 0.001)
+        }
+
+    @Test
+    @Config(qualifiers = "land")
+    fun `landscape - should update camera paddings when bottom sheet is hidden`() =
+        coroutineRule.runBlockingTest {
+            sut.onAttached(mockk())
+
+            infoPanelBehavior.updateBottomSheetState(BottomSheetBehavior.STATE_HIDDEN)
+            binding.coordinatorLayout.triggerLayoutChange()
+
+            val action = store.actions.last() as CameraAction.UpdatePadding
+            assertEquals("top", action.padding.top, 100 + paddingV, 0.001)
+            assertEquals("bottom", action.padding.bottom, 200 + paddingV, 0.001)
+            assertEquals("left", action.padding.left, 100 + paddingH, 0.001)
+            assertEquals("right", action.padding.right, 100 + paddingH, 0.001)
+        }
 
     private suspend fun View.triggerLayoutChange() = coroutineScope {
         launch {
             waitForLayoutChange()
         }
-        layout(left + 1, 0, 0, 0)
+        layout(0, 0, 1000, 1200)
         // this coroutine scope will wait for all launched coroutines to finish before returning
     }
 
@@ -176,16 +148,10 @@ class CameraLayoutObserverTest {
         })
     }
 
-    private val PADDING_V_PORT: Double
+    private val paddingV: Double
         get() = binding.root.resources
             .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_v).toDouble()
-    private val PADDING_H_PORT: Double
+    private val paddingH: Double
         get() = binding.root.resources
             .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_h).toDouble()
-    private val PADDING_V_LAND: Double
-        get() = binding.root.resources
-            .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_landscape_v).toDouble()
-    private val PADDING_H_LAND: Double
-        get() = binding.root.resources
-            .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_landscape_h).toDouble()
 }

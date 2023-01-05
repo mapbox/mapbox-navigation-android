@@ -1,0 +1,1 @@
+- Improved `NavigationView` camera paddings to prevent location puck from being hidden by speed info view with some routes.

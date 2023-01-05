@@ -2,18 +2,17 @@ package com.mapbox.navigation.dropin.camera
 
 import android.content.res.Configuration
 import android.view.View
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
-import com.mapbox.navigation.ui.app.internal.Store
+import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.app.internal.camera.CameraAction
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 
 internal class CameraLayoutObserver(
-    private val store: Store,
-    private val mapView: View,
+    private val context: NavigationViewContext,
     private val binding: MapboxNavigationViewLayoutBinding,
 ) : UIComponent() {
 
@@ -21,22 +20,15 @@ internal class CameraLayoutObserver(
         .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_v).toDouble()
     private val hPadding = binding.root.resources
         .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_h).toDouble()
-    private val vPaddingLandscape = binding.root.resources
-        .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_landscape_v).toDouble()
-    private val hPaddingLandscape = binding.root.resources
-        .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_landscape_h).toDouble()
 
     private val layoutListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-        val edgeInsets = when (deviceOrientation()) {
-            Configuration.ORIENTATION_LANDSCAPE -> getLandscapePadding()
-            else -> getPortraitPadding()
-        }
-        store.dispatch(CameraAction.UpdatePadding(edgeInsets))
+        updateCameraPadding()
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         binding.coordinatorLayout.addOnLayoutChangeListener(layoutListener)
+        context.behavior.infoPanelBehavior.bottomSheetState.observe { updateCameraPadding() }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -44,40 +36,34 @@ internal class CameraLayoutObserver(
         binding.coordinatorLayout.removeOnLayoutChangeListener(layoutListener)
     }
 
-    private fun getPortraitPadding(): EdgeInsets {
-        val top = binding.guidanceLayout.height.toDouble()
-        val bottom = mapView.height.toDouble() - binding.roadNameLayout.top.toDouble()
-        return when (store.state.value.navigation) {
-            is NavigationState.DestinationPreview,
-            is NavigationState.FreeDrive,
-            is NavigationState.RoutePreview -> {
-                EdgeInsets(vPadding, hPadding, bottom, hPadding)
-            }
-            is NavigationState.ActiveNavigation,
-            is NavigationState.Arrival -> {
-                EdgeInsets(vPadding + top, hPadding, bottom, hPadding)
-            }
+    private fun updateCameraPadding() {
+        val edgeInsets = when (deviceOrientation()) {
+            Configuration.ORIENTATION_LANDSCAPE -> getLandscapePadding()
+            else -> getPortraitPadding()
         }
+        context.store.dispatch(CameraAction.UpdatePadding(edgeInsets))
+    }
+
+    private fun getPortraitPadding(): EdgeInsets {
+        val top = binding.container.top + binding.guidanceLayout.height
+        val left = binding.speedLimitLayout.right
+        val bottom = binding.container.height - binding.roadNameLayout.top +
+            binding.coordinatorLayout.height - binding.container.bottom
+        val right = binding.container.width - binding.actionListLayout.left
+        return EdgeInsets(vPadding + top, hPadding + left, vPadding + bottom, hPadding + right)
     }
 
     private fun getLandscapePadding(): EdgeInsets {
-        val bottom = mapView.height.toDouble() - binding.roadNameLayout.top.toDouble()
-        return when (store.state.value.navigation) {
-            is NavigationState.FreeDrive -> {
-                EdgeInsets(vPaddingLandscape, hPaddingLandscape, bottom, hPaddingLandscape)
-            }
-            is NavigationState.DestinationPreview,
-            is NavigationState.RoutePreview,
-            is NavigationState.ActiveNavigation,
-            is NavigationState.Arrival -> {
-                EdgeInsets(
-                    vPaddingLandscape,
-                    hPaddingLandscape + binding.infoPanelLayout.right.toDouble(),
-                    bottom,
-                    hPaddingLandscape
-                )
-            }
-        }
+        val top = binding.container.top
+        val bottomSheetState = context.behavior.infoPanelBehavior.bottomSheetState.value
+        val isBottomSheetVisible =
+            bottomSheetState != null && bottomSheetState != BottomSheetBehavior.STATE_HIDDEN
+        val bottomSheetWidth = if (isBottomSheetVisible) binding.infoPanelLayout.right else 0
+        val left = maxOf(binding.speedLimitLayout.right, bottomSheetWidth)
+        val bottom = binding.container.height - binding.roadNameLayout.top +
+            binding.coordinatorLayout.height - binding.container.bottom
+        val right = binding.container.width - binding.actionListLayout.left
+        return EdgeInsets(vPadding + top, hPadding + left, vPadding + bottom, hPadding + right)
     }
 
     private fun deviceOrientation() = binding.root.resources.configuration.orientation
