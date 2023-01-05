@@ -1,9 +1,10 @@
 name: Rename changelog files
 on:
   pull_request:
-    types: [ opened, reopened, ready_for_review, synchronize ]
+    types: [ opened, reopened, ready_for_review, synchronize, labeled, unlabeled ]
 jobs:
   process:
+    if: github.event.pull_request.draft == false && contains(github.event.pull_request.labels.*.name, 'skip changelog') == false
     permissions:
       pull-requests: write
       contents: write
