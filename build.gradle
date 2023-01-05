@@ -29,6 +29,8 @@ buildscript {
     classpath pluginDependencies.dokka
     classpath pluginDependencies.firebaseCrashlytics
     classpath pluginDependencies.googleServices
+      classpath 'androidx.benchmark:benchmark-gradle-plugin:1.1.0-beta04'
+      classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20'
   }
 }
 
@@ -44,6 +46,7 @@ allprojects {
   repositories {
     google()
     mavenCentral()
+    mavenLocal()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication {

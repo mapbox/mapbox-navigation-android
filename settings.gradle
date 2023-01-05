@@ -30,3 +30,4 @@ include ':examples',
         ':libtesting-thirdparty',
         ':libtesting-navigation-base',
         ':libtesting-navigation-util'
+include ':benchmark'
