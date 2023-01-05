@@ -5,14 +5,24 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.ui.app.internal.Action
+import com.mapbox.navigation.ui.app.internal.State
 
 sealed class RoutePreviewAction : Action {
 
     /**
-     * The action is used to request and set routes based on [RouteOptions].
-     * @param options
+     * The action for fetching a route from the [State.location] to the [State.destination].
      */
-    data class FetchOptions(val options: RouteOptions) : RoutePreviewAction()
+    object FetchRoute : RoutePreviewAction()
+
+    /**
+     * Fetch Route and Show Route Preview.
+     */
+    object FetchRouteAndShowRoutePreview : RoutePreviewAction()
+
+    /**
+     * Fetch Route and Start Active Navigation.
+     */
+    object FetchRouteAndStartActiveNavigation : RoutePreviewAction()
 
     /**
      * The action informs that route request was successful and routes are ready to be used.

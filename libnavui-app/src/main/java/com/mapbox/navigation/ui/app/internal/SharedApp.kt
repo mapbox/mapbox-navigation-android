@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.app.internal
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.extensions.attachCreated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -14,39 +13,29 @@ import com.mapbox.navigation.ui.app.internal.controller.RoutePreviewStateControl
 import com.mapbox.navigation.ui.app.internal.controller.RouteStateController
 import com.mapbox.navigation.ui.app.internal.controller.StateResetController
 import com.mapbox.navigation.ui.app.internal.controller.TripSessionStarterStateController
+import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeContract
 import java.util.concurrent.atomic.AtomicBoolean
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 object SharedApp {
     private var isSetup = false
 
     val store = Store()
     val state get() = store.state.value
+    val routeOptionsProvider: RouteOptionsProvider = RouteOptionsProvider()
 
     private val ignoreTripSessionUpdates = AtomicBoolean(false)
 
-    /**
-     * These classes are accessible through MapboxNavigationApp.getObserver(..)
-     */
-    val navigationStateController = NavigationStateController(store)
-    val locationStateController = LocationStateController(store)
-    val tripSessionStarterStateController = TripSessionStarterStateController(store)
-    val audioGuidanceStateController = AudioGuidanceStateController(store)
-    val cameraStateController = CameraStateController(store)
-    val destinationStateController = DestinationStateController(store)
-    val routeStateController = RouteStateController(store)
-    val routePreviewStateController = RoutePreviewStateController(store)
     private val navigationObservers: Array<MapboxNavigationObserver> = arrayOf(
-        routeStateController,
-        cameraStateController,
-        locationStateController,
-        navigationStateController,
-        destinationStateController,
-        routePreviewStateController,
-        audioGuidanceStateController,
-        tripSessionStarterStateController,
+        RouteStateController(store),
+        CameraStateController(store),
+        LocationStateController(store),
+        NavigationStateController(store),
+        DestinationStateController(store),
+        RoutePreviewStateController(store, routeOptionsProvider),
+        AudioGuidanceStateController(store),
+        TripSessionStarterStateController(store),
     )
 
     @JvmOverloads
