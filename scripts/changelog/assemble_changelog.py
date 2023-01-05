@@ -1,5 +1,9 @@
-import argparse
 import os
+
+import requests
+
+pr_number = os.environ['PR_NUMBER']
+token = os.environ['GITHUB_TOKEN']
 
 
 def get_changes(path):
@@ -24,27 +28,42 @@ def get_changes(path):
     return changes.strip()
 
 
-parser = argparse.ArgumentParser(description='Assemble changelog')
-parser.add_argument('--auto', action='store_true', help='To assemble android auto changelog')
-args = parser.parse_args()
+bugfixes = get_changes('changelog/unreleased/bugfixes/')
+features = get_changes('changelog/unreleased/features/')
+issues = get_changes('changelog/unreleased/issues/')
+other = get_changes('changelog/unreleased/other/')
 
-if args.auto:
-    auto_bugfixes = get_changes('libnavui-androidauto/changelog/unreleased/bugfixes/')
-    auto_features = get_changes('libnavui-androidauto/changelog/unreleased/features/')
+changelog = '# Changelog\n' + \
+            '#### Features\n' + features + '\n\n' + \
+            '#### Bug fixes and improvements\n' + bugfixes + '\n\n' + \
+            '#### Known issues :warning:\n' + issues + '\n\n' + \
+            '#### Other changes\n' + other
 
-    auto_changelog = '#### Features\n' + auto_features + '\n\n' + \
-                     '#### Bug fixes and improvements\n' + auto_bugfixes
+auto_bugfixes = get_changes('libnavui-androidauto/changelog/unreleased/bugfixes/')
+auto_features = get_changes('libnavui-androidauto/changelog/unreleased/features/')
 
-    print(auto_changelog)
-else:
-    bugfixes = get_changes('changelog/unreleased/bugfixes/')
-    features = get_changes('changelog/unreleased/features/')
-    issues = get_changes('changelog/unreleased/issues/')
-    other = get_changes('changelog/unreleased/other/')
+auto_changelog = '# Android Auto Changelog\n' + \
+                 '#### Features\n' + auto_features + '\n\n' + \
+                 '#### Bug fixes and improvements\n' + auto_bugfixes
 
-    changelog = '#### Features\n' + features + '\n\n' + \
-                '#### Bug fixes and improvements\n' + bugfixes + '\n\n' + \
-                '#### Known issues :warning:\n' + issues + '\n\n' + \
-                '#### Other changes\n' + other
+pr_comments_url = 'https://api.github.com/repos/mapbox/mapbox-navigation-android/issues/' + pr_number + '/comments'
+headers = {"Authorization": "Bearer " + token}
+comments = requests.get(pr_comments_url, headers=headers).json()
 
-    print(changelog)
+
+def update_comment(title, content):
+    comment_with_changelog_id = None
+    for comment in comments:
+        if comment['body'].startswith(title):
+            comment_with_changelog_id = comment['id']
+
+    if comment_with_changelog_id:
+        comments_url = 'https://api.github.com/repos/mapbox/mapbox-navigation-android/issues/comments/'
+        comment_url = comments_url + str(comment_with_changelog_id)
+        requests.patch(comment_url, json={'body': content}, headers=headers)
+    else:
+        requests.post(pr_comments_url, json={'body': content}, headers=headers)
+
+
+update_comment('# Changelog', changelog)
+update_comment('# Android Auto Changelog', auto_changelog)
