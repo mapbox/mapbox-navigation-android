@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Ensure map-matching considers HOV-only roads as auto accessible. [#6785](https://github.com/mapbox/mapbox-navigation-android/pull/6785)
 
 ## Mapbox Navigation SDK 2.9.5 - 13 December, 2022
 ### Changelog
