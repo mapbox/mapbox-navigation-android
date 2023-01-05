@@ -27,4 +27,4 @@ jobs:
 
       - name: execute py script
         run: |
-          ./scripts/changelog/assemble_changelog.py
+          python3 scripts/changelog/assemble_changelog.py
