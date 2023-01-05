@@ -149,6 +149,8 @@ class MapboxRouteLineViewTest {
             every {
                 styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns true
+            every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
+            every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
         }
     }
 
@@ -169,6 +171,88 @@ class MapboxRouteLineViewTest {
             every {
                 setStyleSourceProperty(WAYPOINT_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createNone()
+            every { getSource(LAYER_GROUP_1_SOURCE_ID) } returns null
+            every { getSource(LAYER_GROUP_2_SOURCE_ID) } returns null
+            every { getSource(LAYER_GROUP_3_SOURCE_ID) } returns null
+            every { getSource(WAYPOINT_SOURCE_ID) } returns null
+            every {
+                removeStyleSource(LAYER_GROUP_1_SOURCE_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(LAYER_GROUP_2_SOURCE_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(LAYER_GROUP_3_SOURCE_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(WAYPOINT_SOURCE_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_TRAIL_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_TRAIL)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_MAIN)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_TRAFFIC)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_RESTRICTED)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_TRAIL_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_TRAIL)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_MAIN)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_TRAFFIC)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_RESTRICTED)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_TRAIL_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_TRAIL)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_MAIN)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_TRAFFIC)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_RESTRICTED)
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -176,6 +260,123 @@ class MapboxRouteLineViewTest {
         MapboxRouteLineView(options).initializeLayers(style)
 
         verify { MapboxRouteLineUtils.initializeLayers(style, options) }
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
+    fun initializeLayers_withOptions() {
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options2 = MapboxRouteLineOptions.Builder(ctx).withTolerance(59.0).build()
+        val style = mockk<Style> {
+            every {
+                setStyleSourceProperty(LAYER_GROUP_1_SOURCE_ID, any(), any())
+            } returns ExpectedFactory.createNone()
+            every {
+                setStyleSourceProperty(LAYER_GROUP_2_SOURCE_ID, any(), any())
+            } returns ExpectedFactory.createNone()
+            every {
+                setStyleSourceProperty(LAYER_GROUP_3_SOURCE_ID, any(), any())
+            } returns ExpectedFactory.createNone()
+            every {
+                setStyleSourceProperty(WAYPOINT_SOURCE_ID, any(), any())
+            } returns ExpectedFactory.createNone()
+            every { getSource(LAYER_GROUP_1_SOURCE_ID) } returns null
+            every { getSource(LAYER_GROUP_2_SOURCE_ID) } returns null
+            every { getSource(LAYER_GROUP_3_SOURCE_ID) } returns null
+            every { getSource(WAYPOINT_SOURCE_ID) } returns null
+            every {
+                removeStyleSource(LAYER_GROUP_1_SOURCE_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(LAYER_GROUP_2_SOURCE_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(LAYER_GROUP_3_SOURCE_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(WAYPOINT_SOURCE_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleSource(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_TRAIL_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_TRAIL)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_MAIN)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_TRAFFIC)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_1_RESTRICTED)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_TRAIL_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_TRAIL)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_MAIN)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_TRAFFIC)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_2_RESTRICTED)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_TRAIL_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_TRAIL)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_CASING)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_MAIN)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_TRAFFIC)
+            } returns ExpectedFactory.createNone()
+            every {
+                removeStyleLayer(LAYER_GROUP_3_RESTRICTED)
+            } returns ExpectedFactory.createNone()
+        }.also {
+            mockCheckForLayerInitialization(it)
+        }
+        val view = MapboxRouteLineView(options)
+
+        view.initializeLayers(style, options2)
+
+        verify { MapboxRouteLineUtils.removeLayersAndSources(style) }
+        verify { MapboxRouteLineUtils.initializeLayers(style, options2) }
+        verify { style.getSource(LAYER_GROUP_1_SOURCE_ID) }
+        verify { style.getSource(LAYER_GROUP_2_SOURCE_ID) }
+        verify { style.getSource(LAYER_GROUP_3_SOURCE_ID) }
+        verify { style.getSource(WAYPOINT_SOURCE_ID) }
+        assertEquals(view.options, options2)
         unmockkObject(MapboxRouteLineUtils)
     }
 
@@ -238,6 +439,66 @@ class MapboxRouteLineViewTest {
         verify { altRoute2Source.featureCollection(altRoutesFeatureCollection) }
         verify { wayPointSource.featureCollection(waypointsFeatureCollection) }
         verify { MapboxRouteLineUtils.initializeLayers(style, options) }
+        unmockkObject(MapboxRouteLineUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+    }
+
+    @Test
+    fun renderClearRouteLineValue_noInitializeRepeat() = coroutineRule.runBlockingTest {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val primaryRouteFeatureCollection =
+            FeatureCollection.fromFeatures(listOf(getEmptyFeature(UUID.randomUUID().toString())))
+        val altRoutesFeatureCollection =
+            FeatureCollection.fromFeatures(listOf(getEmptyFeature(UUID.randomUUID().toString())))
+        val waypointsFeatureCollection =
+            FeatureCollection.fromFeatures(listOf(getEmptyFeature(UUID.randomUUID().toString())))
+        val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
+        val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
+        val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
+        val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
+        val topLevelRouteLayer = StyleObjectInfo(
+            TOP_LEVEL_ROUTE_LINE_LAYER_ID,
+            "background"
+        )
+        val bottomLevelRouteLayer = StyleObjectInfo(
+            BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
+            "background"
+        )
+        val mainLayer = StyleObjectInfo(
+            LAYER_GROUP_1_MAIN,
+            "line"
+        )
+        val style = mockk<Style> {
+            every { getSource(LAYER_GROUP_1_SOURCE_ID) } returns primaryRouteSource
+            every { getSource(LAYER_GROUP_2_SOURCE_ID) } returns altRoute1Source
+            every { getSource(LAYER_GROUP_3_SOURCE_ID) } returns altRoute2Source
+            every { getSource(WAYPOINT_SOURCE_ID) } returns wayPointSource
+            every { styleLayers } returns listOf(
+                bottomLevelRouteLayer,
+                mainLayer,
+                topLevelRouteLayer
+            )
+        }.also {
+            mockCheckForLayerInitialization(it)
+        }
+
+        val state: Expected<RouteLineError, RouteLineClearValue> = ExpectedFactory.createValue(
+            RouteLineClearValue(
+                primaryRouteFeatureCollection,
+                listOf(altRoutesFeatureCollection, altRoutesFeatureCollection),
+                waypointsFeatureCollection
+            )
+        )
+
+        pauseDispatcher {
+            val view = MapboxRouteLineView(options)
+            view.renderClearRouteLineValue(style, state)
+            view.renderClearRouteLineValue(style, state)
+        }
+
+        verify(exactly = 1) { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
@@ -1095,6 +1356,7 @@ class MapboxRouteLineViewTest {
             view.renderRouteDrawData(style, state)
             view.renderRouteDrawData(style2, state2)
 
+            verify(exactly = 1) { MapboxRouteLineUtils.initializeLayers(style, options) }
             verify(exactly = 1) { style.moveStyleLayer(LAYER_GROUP_1_TRAIL_CASING, any()) }
             verify(exactly = 1) { style.moveStyleLayer(LAYER_GROUP_1_TRAIL, any()) }
             verify(exactly = 1) { style.moveStyleLayer(LAYER_GROUP_1_CASING, any()) }

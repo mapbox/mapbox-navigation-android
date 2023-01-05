@@ -1751,4 +1751,31 @@ internal object MapboxRouteLineUtils {
             .iconIgnorePlacement(true)
             .iconKeepUpright(true)
     }
+
+    internal fun removeLayersAndSources(style: Style) {
+        style.removeStyleSource(RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID)
+        style.removeStyleSource(RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID)
+        style.removeStyleSource(RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID)
+        style.removeStyleSource(RouteLayerConstants.WAYPOINT_SOURCE_ID)
+        style.removeStyleLayer(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+        style.removeStyleLayer(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_TRAIL)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_CASING)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_MAIN)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_TRAIL)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_CASING)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_MAIN)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_TRAIL)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_CASING)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_MAIN)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)
+    }
 }
