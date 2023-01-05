@@ -63,10 +63,11 @@ package com.mapbox.navigation.base.formatter {
     field public static final int INCREMENT_ONE_HUNDRED = 100; // 0x64
     field public static final int INCREMENT_TEN = 10; // 0xa
     field public static final int INCREMENT_TWENTY_FIVE = 25; // 0x19
+    field public static final int INCREMENT_UNDEFINED = -1; // 0xffffffff
     field public static final com.mapbox.navigation.base.formatter.Rounding INSTANCE;
   }
 
-  @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface Rounding.Increment {
+  @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_UNDEFINED, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface Rounding.Increment {
   }
 
   public enum UnitType {
