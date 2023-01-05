@@ -26,10 +26,8 @@ If you have implemented several features or bugfixes you should describe all of 
 You can choose any name for your changelog files because the GitHub action will rename files in
 `changelog/unreleased/features` and `changelog/unreleased/bugfixes` directories to `${PR_NUMBER}.md` when you open a PR.
 
-Every push to the main or release branch Assemble changelog GitHub action will be executed:
-
-* collect all files from `changelog/unreleased`
-* assemble the changelog like:
+To view the changelog for the current branch, run the command `python3 scripts/changelog/assemble_changelog.py`.
+This script will collect all the files in the `changelog/unreleased` directory and generate a changelog in the following format:
 
 ```
 #### Features
@@ -47,11 +45,11 @@ Every push to the main or release branch Assemble changelog GitHub action will b
 Some other changes
 ```
 
-* write the changelog to the `changelog/unreleased/CHANGELOG.md` file
+To view the changelog for the android auto project, run the command `python3 scripts/changelog/assemble_changelog.py --auto`.
 
 Every release the release train app will:
 
-* get changelog from `changelog/unreleased/CHANGELOG.md` file
+* assemble the changelog by the script `python3 scripts/changelog/assemble_changelog.py`
 * add information about dependencies and compile changelog like:
 ```
 ## Mapbox Navigation SDK 1.1.1 - 13 December, 2022

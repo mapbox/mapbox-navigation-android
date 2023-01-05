@@ -1,6 +1,5 @@
+import argparse
 import os
-
-import git
 
 
 def get_changes(path):
@@ -25,36 +24,27 @@ def get_changes(path):
     return changes.strip()
 
 
-bugfixes = get_changes('changelog/unreleased/bugfixes/')
-features = get_changes('changelog/unreleased/features/')
-issues = get_changes('changelog/unreleased/issues/')
-other = get_changes('changelog/unreleased/other/')
+parser = argparse.ArgumentParser(description='Assemble changelog')
+parser.add_argument('--auto', action='store_true', help='To assemble android auto changelog')
+args = parser.parse_args()
 
-changelog = '#### Features\n' + features + '\n\n' + \
-            '#### Bug fixes and improvements\n' + bugfixes + '\n\n' + \
-            '#### Known issues :warning:\n' + issues + '\n\n' + \
-            '#### Other changes\n' + other
+if args.auto:
+    auto_bugfixes = get_changes('libnavui-androidauto/changelog/unreleased/bugfixes/')
+    auto_features = get_changes('libnavui-androidauto/changelog/unreleased/features/')
 
-old_changelog = open('changelog/unreleased/CHANGELOG.md', 'r').read()
+    auto_changelog = '#### Features\n' + auto_features + '\n\n' + \
+                     '#### Bug fixes and improvements\n' + auto_bugfixes
 
-if changelog != old_changelog:
-    open('changelog/unreleased/CHANGELOG.md', 'w').write(changelog)
-    repository = git.Repo('.')
-    repository.git.add('changelog/unreleased')
-    repository.index.commit('Assemble changelog file [skip ci]')
-    repository.remotes.origin.push().raise_if_error()
+    print(auto_changelog)
+else:
+    bugfixes = get_changes('changelog/unreleased/bugfixes/')
+    features = get_changes('changelog/unreleased/features/')
+    issues = get_changes('changelog/unreleased/issues/')
+    other = get_changes('changelog/unreleased/other/')
 
-auto_bugfixes = get_changes('libnavui-androidauto/changelog/unreleased/bugfixes/')
-auto_features = get_changes('libnavui-androidauto/changelog/unreleased/features/')
+    changelog = '#### Features\n' + features + '\n\n' + \
+                '#### Bug fixes and improvements\n' + bugfixes + '\n\n' + \
+                '#### Known issues :warning:\n' + issues + '\n\n' + \
+                '#### Other changes\n' + other
 
-auto_changelog = '#### Features\n' + auto_features + '\n\n' + \
-            '#### Bug fixes and improvements\n' + auto_bugfixes
-
-auto_old_changelog = open('libnavui-androidauto/changelog/unreleased/CHANGELOG.md', 'r').read()
-
-if auto_changelog != auto_old_changelog:
-    open('libnavui-androidauto/changelog/unreleased/CHANGELOG.md', 'w').write(auto_changelog)
-    repository = git.Repo('.')
-    repository.git.add('libnavui-androidauto/changelog/unreleased')
-    repository.index.commit('Assemble auto changelog file [skip ci]')
-    repository.remotes.origin.push().raise_if_error()
+    print(changelog)
