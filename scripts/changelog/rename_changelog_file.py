@@ -1,7 +1,7 @@
 import os
 import re
+
 import git
-from pr_utils import *
 
 pr_number = os.environ['PR_NUMBER']
 token = os.environ['GITHUB_TOKEN']
@@ -28,15 +28,6 @@ def rename_files(path):
 
     return renamed_files_count
 
-
-pr = fetch_pull_request(pr_number, token)
-if is_draft(pr):
-    print("SKIP! Pull Request is a DRAFT.")
-    exit()
-
-if is_labeled(pr, "skip changelog"):
-    print("SKIP! Pull Request labeled 'skip changelog'.")
-    exit()
 
 renamed_bugfixes_count = rename_files('changelog/unreleased/bugfixes/')
 renamed_features_count = rename_files('changelog/unreleased/features/')
