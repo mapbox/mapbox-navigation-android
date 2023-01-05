@@ -8,7 +8,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
+import io.mockk.mockkStatic
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal object CopilotTestUtils {
@@ -20,7 +20,7 @@ internal object CopilotTestUtils {
     }
 
     fun prepareLifecycleOwnerMockk(): LifecycleOwner {
-        mockkObject(MapboxNavigationApp)
+        mockkStatic(MapboxNavigationApp::class)
         every { MapboxNavigationApp.isSetup() } returns true
         val mockedLifecycleOwner = mockk<LifecycleOwner>(relaxed = true)
         val mockedLifecycle = mockk<Lifecycle>(relaxed = true)
