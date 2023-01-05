@@ -2,20 +2,11 @@ package com.mapbox.navigation.dropin.extendablebutton
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.util.TestStore
-import com.mapbox.navigation.dropin.util.TestingUtil
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.app.internal.State
-import com.mapbox.navigation.ui.app.internal.destination.Destination
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
-import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -36,7 +27,6 @@ class StartNavigationButtonComponentTest {
 
     private lateinit var store: TestStore
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var routeOptionsProvider: RouteOptionsProvider
     private lateinit var button: MapboxExtendableButton
     private lateinit var sut: StartNavigationButtonComponent
 
@@ -45,64 +35,19 @@ class StartNavigationButtonComponentTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         store = spyk(TestStore())
         mapboxNavigation = mockk(relaxed = true)
-        routeOptionsProvider = mockk()
         button = spyk(MapboxExtendableButton(context))
 
-        sut = StartNavigationButtonComponent(store, routeOptionsProvider, button)
+        sut = StartNavigationButtonComponent(store, button)
     }
 
     @Test
-    fun `onClick startNavigation start ActiveNavigation`() = runBlockingTest {
-        val origPoint = Point.fromLngLat(1.0, 2.0)
-        val destPoint = Point.fromLngLat(2.0, 3.0)
-        store.setState(
-            State(
-                location = TestingUtil.makeLocationMatcherResult(
-                    origPoint.longitude(),
-                    origPoint.latitude(),
-                    0f
-                ),
-                destination = Destination(destPoint),
-                navigation = NavigationState.DestinationPreview,
-                previewRoutes = mockk<RoutePreviewState.Ready> {
-                    every { routes } returns mockk()
-                }
-            )
-        )
-
-        sut.onAttached(mockk())
+    @Suppress("MaxLineLength")
+    fun `onClick startNavigation should dispatch FetchRouteAndStartActiveNavigation action`() = runBlockingTest {
+        sut.onAttached(mapboxNavigation)
         button.performClick()
 
         verify {
-            store.dispatch(NavigationStateAction.Update(NavigationState.ActiveNavigation))
+            store.dispatch(RoutePreviewAction.FetchRouteAndStartActiveNavigation)
         }
     }
-
-    @Test
-    fun `onClick startNavigation should NOT FetchOptions when already in Ready state`() =
-        runBlockingTest {
-            val origPoint = Point.fromLngLat(1.0, 2.0)
-            val destPoint = Point.fromLngLat(2.0, 3.0)
-            store.setState(
-                State(
-                    location = TestingUtil.makeLocationMatcherResult(
-                        origPoint.longitude(),
-                        origPoint.latitude(),
-                        0f
-                    ),
-                    destination = Destination(destPoint),
-                    navigation = NavigationState.DestinationPreview,
-                    previewRoutes = mockk<RoutePreviewState.Ready> {
-                        every { routes } returns mockk()
-                    }
-                )
-            )
-
-            sut.onAttached(mockk())
-            button.performClick()
-
-            verify(exactly = 0) {
-                store.dispatch(ofType<RoutePreviewAction.FetchOptions>())
-            }
-        }
 }

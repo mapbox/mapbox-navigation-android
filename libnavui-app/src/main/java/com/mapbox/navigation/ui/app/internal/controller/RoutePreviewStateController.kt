@@ -1,30 +1,36 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
+import com.mapbox.navigation.ui.app.internal.extension.FetchRouteCancelled
+import com.mapbox.navigation.ui.app.internal.extension.FetchRouteError
 import com.mapbox.navigation.ui.app.internal.extension.actionsFlowable
+import com.mapbox.navigation.ui.app.internal.extension.dispatch
+import com.mapbox.navigation.ui.app.internal.extension.fetchRoute
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
+import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
+import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
+import com.mapbox.navigation.ui.app.internal.startActiveNavigation
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.toPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class RoutePreviewStateController(private val store: Store) : StateController() {
+class RoutePreviewStateController(
+    private val store: Store,
+    private val routeOptionsProvider: RouteOptionsProvider
+) : StateController() {
     init {
         store.register(this)
     }
@@ -35,9 +41,8 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
         super.onAttached(mapboxNavigation)
         this.mapboxNavigation = mapboxNavigation
 
-        coroutineScope.launch {
-            mapboxNavigation.fetchRouteSaga()
-        }
+        coroutineScope.launch { mapboxNavigation.fetchRouteSaga() }
+        coroutineScope.launch { fetchRouteAndMoveToNavigationStateSaga() }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -48,15 +53,18 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
     override fun process(state: State, action: Action): State {
         if (action is RoutePreviewAction && mapboxNavigation != null) {
             return state.copy(
-                previewRoutes = processRoutesAction(action)
+                previewRoutes = processRoutesAction(state.previewRoutes, action)
             )
         }
         return state
     }
 
-    private fun processRoutesAction(action: RoutePreviewAction): RoutePreviewState {
+    private fun processRoutesAction(
+        state: RoutePreviewState,
+        action: RoutePreviewAction
+    ): RoutePreviewState {
         return when (action) {
-            is RoutePreviewAction.FetchOptions -> {
+            is RoutePreviewAction.FetchRoute -> {
                 RoutePreviewState.Fetching(0)
             }
             is RoutePreviewAction.StartedFetchRequest -> {
@@ -75,18 +83,22 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
             is RoutePreviewAction.Failed -> {
                 RoutePreviewState.Failed(action.reasons, action.routeOptions)
             }
+            else -> state
         }
     }
 
+    // This SAGA is responsible for processing route fetch request.
+    // It uses MapboxNavigation.requestRoutes() and dispatches relevant 'progress' actions when
+    // request starts, cancels, fails or successfully finishes (StartedFetchRequest, Canceled, Failed, Ready)
     private suspend fun MapboxNavigation.fetchRouteSaga() {
         store.actionsFlowable()
             .filter {
-                it is RoutePreviewAction.FetchOptions ||
+                it is RoutePreviewAction.FetchRoute ||
                     it is DestinationAction.SetDestination
             }
             .map {
                 when (it) {
-                    is RoutePreviewAction.FetchOptions -> it.options
+                    is RoutePreviewAction.FetchRoute -> routeOptions(this)
                     else -> null
                 }
             }
@@ -109,48 +121,63 @@ class RoutePreviewStateController(private val store: Store) : StateController() 
             }
     }
 
-    private suspend fun MapboxNavigation.fetchRoute(
-        routeOptions: RouteOptions,
-        fetchStarted: (requestId: Long) -> Unit
-    ): List<NavigationRoute> {
-        return suspendCancellableCoroutine { cont ->
-            val requestId = requestRoutes(
-                routeOptions,
-                object : NavigationRouterCallback {
-                    override fun onRoutesReady(
-                        routes: List<NavigationRoute>,
-                        routerOrigin: RouterOrigin
-                    ) {
-                        cont.resume(routes)
+    // This SAGA dispatches FetchRoute action, awaits RoutePreviewState.Ready
+    // and updates NavigationState to either RoutePreview or ActiveNavigation state.
+    private suspend fun fetchRouteAndMoveToNavigationStateSaga() {
+        store.actionsFlowable()
+            .filter {
+                it is RoutePreviewAction.FetchRouteAndShowRoutePreview ||
+                    it is RoutePreviewAction.FetchRouteAndStartActiveNavigation ||
+                    it is NavigationStateAction.Update
+            }
+            .collectLatest {
+                when (it) {
+                    is RoutePreviewAction.FetchRouteAndShowRoutePreview -> {
+                        if (fetchRouteIfNeeded()) {
+                            store.dispatch(
+                                NavigationStateAction.Update(NavigationState.RoutePreview)
+                            )
+                        }
                     }
-
-                    override fun onFailure(
-                        reasons: List<RouterFailure>,
-                        routeOptions: RouteOptions
-                    ) {
-                        cont.resumeWithException(FetchRouteError(reasons, routeOptions))
-                    }
-
-                    override fun onCanceled(
-                        routeOptions: RouteOptions,
-                        routerOrigin: RouterOrigin
-                    ) {
-                        cont.cancel(FetchRouteCancelled(routeOptions, routerOrigin))
+                    is RoutePreviewAction.FetchRouteAndStartActiveNavigation -> {
+                        if (fetchRouteIfNeeded()) {
+                            val previewRoutes = store.state.value.previewRoutes
+                            if (previewRoutes is RoutePreviewState.Ready) {
+                                store.dispatch(startActiveNavigation(previewRoutes.routes))
+                            }
+                        }
                     }
                 }
-            )
-            fetchStarted(requestId)
-            cont.invokeOnCancellation { cancelRouteRequest(requestId) }
-        }
+            }
     }
 
-    private class FetchRouteError(
-        val reasons: List<RouterFailure>,
-        val routeOptions: RouteOptions
-    ) : Error()
+    private suspend fun fetchRouteIfNeeded(): Boolean {
+        val storeState = store.state.value
+        if (storeState.previewRoutes is RoutePreviewState.Ready) return true
+        if (storeState.previewRoutes is RoutePreviewState.Fetching) return false
 
-    private class FetchRouteCancelled(
-        val routeOptions: RouteOptions,
-        val routerOrigin: RouterOrigin
-    ) : Error()
+        return ifNonNull(
+            storeState.location?.enhancedLocation?.toPoint(),
+            storeState.destination?.point
+        ) { _, _ ->
+            store.dispatch(RoutePreviewAction.FetchRoute)
+            waitWhileFetching()
+            store.state.value.previewRoutes is RoutePreviewState.Ready
+        } ?: false
+    }
+
+    private suspend fun waitWhileFetching() {
+        store.select { it.previewRoutes }.takeWhile { it is RoutePreviewState.Fetching }.collect()
+    }
+
+    private fun routeOptions(mapboxNavigation: MapboxNavigation): RouteOptions? {
+        val state = store.state.value
+        return ifNonNull(state.location, state.destination) { location, destination ->
+            routeOptionsProvider.getOptions(
+                mapboxNavigation,
+                location.enhancedLocation.toPoint(),
+                destination.point
+            )
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.map.longpress
 
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
@@ -16,9 +15,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
-import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
-import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -46,7 +43,6 @@ internal class RoutePreviewLongPressMapComponentTest {
 
     private val enableOnMapLongClick = MutableStateFlow(value = true)
     private val mockGesturesPlugin: GesturesPlugin = mockk(relaxed = true)
-    private val mockRouteOptionsProvider = mockk<RouteOptionsProvider>()
     private val mockMapView: MapView = mockk {
         every { gestures } returns mockGesturesPlugin
     }
@@ -59,7 +55,6 @@ internal class RoutePreviewLongPressMapComponentTest {
         every { options } returns mockk(relaxed = true) {
             every { enableMapLongClickIntercept } returns enableOnMapLongClick.asStateFlow()
         }
-        every { routeOptionsProvider } returns mockRouteOptionsProvider
     }
 
     private val testStore = spyk(TestStore())
@@ -115,17 +110,12 @@ internal class RoutePreviewLongPressMapComponentTest {
         testStore.setState(State(location = locationMatcherResult))
         sut.onAttached(mockMapboxNavigation)
 
-        val origin = locationMatcherResult.enhancedLocation.toPoint()
         val clickPoint = Point.fromLngLat(11.0, 12.0)
-        val options = mockk<RouteOptions>()
-        every {
-            mockRouteOptionsProvider.getOptions(mockMapboxNavigation, origin, clickPoint)
-        } returns options
         slot.captured.onMapLongClick(clickPoint)
 
         verifyOrder {
             testStore.dispatch(DestinationAction.SetDestination(Destination(clickPoint)))
-            testStore.dispatch(RoutePreviewAction.FetchOptions(options))
+            testStore.dispatch(RoutePreviewAction.FetchRoute)
         }
     }
 
@@ -143,7 +133,7 @@ internal class RoutePreviewLongPressMapComponentTest {
 
         verify(exactly = 0) {
             testStore.dispatch(DestinationAction.SetDestination(Destination(clickPoint)))
-            testStore.dispatch(ofType<RoutePreviewAction.FetchOptions>())
+            testStore.dispatch(ofType<RoutePreviewAction.FetchRoute>())
         }
     }
 }

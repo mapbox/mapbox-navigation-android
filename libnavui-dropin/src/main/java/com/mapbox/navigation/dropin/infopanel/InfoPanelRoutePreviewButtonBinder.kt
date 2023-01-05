@@ -23,7 +23,7 @@ internal class InfoPanelRoutePreviewButtonBinder(
                 right = button.resources.getDimensionPixelSize(R.dimen.mapbox_infoPanel_paddingEnd)
             )
 
-            RoutePreviewButtonComponent(context.store, context.routeOptionsProvider, button)
+            RoutePreviewButtonComponent(context.store, button)
         }
     }
 }
