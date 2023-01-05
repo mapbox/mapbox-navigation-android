@@ -26,10 +26,10 @@ If you have implemented several features or bugfixes you should describe all of 
 You can choose any name for your changelog files because the GitHub action will rename files in
 `changelog/unreleased/features` and `changelog/unreleased/bugfixes` directories to `${PR_NUMBER}.md` when you open a PR.
 
-To view the changelog for the current branch, run the command `python3 scripts/changelog/assemble_changelog.py`.
-This script will collect all the files in the `changelog/unreleased` directory and generate a changelog in the following format:
+For every PR the script will generate and update a comment with a changelog for the current branch in the following format:
 
 ```
+# Changelog
 #### Features
 - Feature 1 [#1234](https://github.com/mapbox/mapbox-navigation-android/pull/1234)
 - Feature 2 [#2345](https://github.com/mapbox/mapbox-navigation-android/pull/2345)
@@ -45,11 +45,12 @@ This script will collect all the files in the `changelog/unreleased` directory a
 Some other changes
 ```
 
-To view the changelog for the android auto project, run the command `python3 scripts/changelog/assemble_changelog.py --auto`.
+The comment will be updated with every change.
+Also, a comment with a changelog will be generated and updated for the android auto project too.
 
 Every release the release train app will:
 
-* assemble the changelog by the script `python3 scripts/changelog/assemble_changelog.py`
+* assemble the changelog
 * add information about dependencies and compile changelog like:
 ```
 ## Mapbox Navigation SDK 1.1.1 - 13 December, 2022
