@@ -586,6 +586,10 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v23.1.0-rc.2`
 - Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+- Add ability to check when `NavigationOptions` are changing with `MapboxNavigationApp.isOptionsChanging`. [#6484](https://github.com/mapbox/mapbox-navigation-android/pull/6484)
+- Add ability to check when Lifecycle events are triggered by configuration changes with `MapboxNavigationApp.isConfigurationChanging`. [#6484](https://github.com/mapbox/mapbox-navigation-android/pull/6484)
+- Added ability to check when `NavigationOptions` are changing with `MapboxNavigationApp.isOptionsChanging`. [#6484](https://github.com/mapbox/mapbox-navigation-android/pull/6484)
+- Added ability to check when Lifecycle events are triggered by configuration changes with `MapboxNavigationApp.isConfigurationChanging`. [#6484](https://github.com/mapbox/mapbox-navigation-android/pull/6484)
 
 ## Mapbox Navigation SDK 2.9.0-beta.2 - 14 October, 2022
 ### Changelog

@@ -78,6 +78,25 @@ object MapboxNavigationApp {
     fun isSetup(): Boolean = mapboxNavigationAppDelegate.isSetup
 
     /**
+     * When calling [setup] multiple times, all registered [MapboxNavigationObserver] will be
+     * detached from the instance of [MapboxNavigation] that is being destroyed. This is needed for
+     * maintaining state across options changes. You do not need to clear the state when
+     * [isOptionsChanging] is true.
+     */
+    @UiThread
+    @JvmStatic
+    fun isOptionsChanging(): Boolean = mapboxNavigationAppDelegate.isOptionsChanging
+
+    /**
+     * When observing [MapboxNavigation] from a [Lifecycle], the [Lifecycle.Event] may be triggered
+     * because of a configuration change. This will help you know if the lifecycle events are
+     * triggered events like mobile device orientation changes.
+     */
+    @UiThread
+    @JvmStatic
+    fun isConfigurationChanging(): Boolean = mapboxNavigationAppDelegate.isConfigurationChanging()
+
+    /**
      * Call [MapboxNavigationApp.setup] to provide the application with [NavigationOptions].
      *
      * This call is a no-op if an attached activity is changing configurations

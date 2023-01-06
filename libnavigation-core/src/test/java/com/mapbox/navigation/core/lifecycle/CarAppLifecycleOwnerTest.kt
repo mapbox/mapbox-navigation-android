@@ -8,8 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
@@ -405,8 +404,8 @@ class CarAppLifecycleOwnerTest {
         val testLifecycleOwner = TestLifecycleOwner()
         carAppLifecycleOwner.attach(testLifecycleOwner)
 
-        testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-        testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+        testLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        testLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
@@ -422,10 +421,10 @@ class CarAppLifecycleOwnerTest {
         carAppLifecycleOwner.attach(testLifecycleOwnerA)
         carAppLifecycleOwner.attach(testLifecycleOwnerB)
 
-        testLifecycleOwnerA.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-        testLifecycleOwnerB.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-        testLifecycleOwnerA.lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        testLifecycleOwnerB.lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+        testLifecycleOwnerA.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        testLifecycleOwnerB.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        testLifecycleOwnerA.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        testLifecycleOwnerB.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
@@ -441,10 +440,10 @@ class CarAppLifecycleOwnerTest {
         carAppLifecycleOwner.attach(testLifecycleOwnerA)
         carAppLifecycleOwner.attach(testLifecycleOwnerB)
 
-        testLifecycleOwnerA.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-        testLifecycleOwnerB.lifecycleRegistry.currentState = Lifecycle.State.STARTED
-        testLifecycleOwnerA.lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        testLifecycleOwnerB.lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+        testLifecycleOwnerA.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        testLifecycleOwnerB.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        testLifecycleOwnerA.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        testLifecycleOwnerB.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
@@ -458,7 +457,7 @@ class CarAppLifecycleOwnerTest {
         val testLifecycleOwner = TestLifecycleOwner()
 
         carAppLifecycleOwner.attach(testLifecycleOwner)
-        testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+        testLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
         carAppLifecycleOwner.detach(testLifecycleOwner)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -466,13 +465,6 @@ class CarAppLifecycleOwnerTest {
         verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStop(any()) }
         verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
-    }
-
-    class TestLifecycleOwner : LifecycleOwner {
-        val lifecycleRegistry = LifecycleRegistry(this)
-            .also { it.currentState = Lifecycle.State.INITIALIZED }
-
-        override fun getLifecycle(): Lifecycle = lifecycleRegistry
     }
 
     private fun mockActivity(isChangingConfig: Boolean = false): FragmentActivity = mockk {
