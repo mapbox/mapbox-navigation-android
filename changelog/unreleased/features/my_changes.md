@@ -1,0 +1,1 @@
+- Introduced `ViewStyleCustomization.infoPanelGuidelineMaxPosPercent` that allows customization of the `NavigationView` InfoPanel bottom guideline maximum position. Increased default value to 50%.
