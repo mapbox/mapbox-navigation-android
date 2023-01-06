@@ -33,8 +33,7 @@ features = get_changes('changelog/unreleased/features/')
 issues = get_changes('changelog/unreleased/issues/')
 other = get_changes('changelog/unreleased/other/')
 
-changelog = '# Changelog\n' + \
-            '#### Features\n' + features + '\n\n' + \
+changelog = '#### Features\n' + features + '\n\n' + \
             '#### Bug fixes and improvements\n' + bugfixes + '\n\n' + \
             '#### Known issues :warning:\n' + issues + '\n\n' + \
             '#### Other changes\n' + other
@@ -42,28 +41,26 @@ changelog = '# Changelog\n' + \
 auto_bugfixes = get_changes('libnavui-androidauto/changelog/unreleased/bugfixes/')
 auto_features = get_changes('libnavui-androidauto/changelog/unreleased/features/')
 
-auto_changelog = '# Android Auto Changelog\n' + \
-                 '#### Features\n' + auto_features + '\n\n' + \
+auto_changelog = '#### Features\n' + auto_features + '\n\n' + \
                  '#### Bug fixes and improvements\n' + auto_bugfixes
 
 pr_comments_url = 'https://api.github.com/repos/mapbox/mapbox-navigation-android/issues/' + pr_number + '/comments'
 headers = {"Authorization": "Bearer " + token}
 comments = requests.get(pr_comments_url, headers=headers).json()
 
+full_changelog = '<details>\n<summary>Changelog</summary>\n\n' + \
+                 changelog + '</details>\n' + \
+                 '<details>\n<summary>Android Auto Changelog</summary>\n\n' + \
+                 auto_changelog + '</details>'
 
-def update_comment(title, content):
-    comment_with_changelog_id = None
-    for comment in comments:
-        if comment['body'].startswith(title):
-            comment_with_changelog_id = comment['id']
+comment_with_changelog_id = None
+for comment in comments:
+    if comment['body'].startswith('<details>\n<summary>Changelog</summary>\n'):
+        comment_with_changelog_id = comment['id']
 
-    if comment_with_changelog_id:
-        comments_url = 'https://api.github.com/repos/mapbox/mapbox-navigation-android/issues/comments/'
-        comment_url = comments_url + str(comment_with_changelog_id)
-        requests.patch(comment_url, json={'body': content}, headers=headers)
-    else:
-        requests.post(pr_comments_url, json={'body': content}, headers=headers)
-
-
-update_comment('# Changelog', changelog)
-update_comment('# Android Auto Changelog', auto_changelog)
+if comment_with_changelog_id:
+    comments_url = 'https://api.github.com/repos/mapbox/mapbox-navigation-android/issues/comments/'
+    comment_url = comments_url + str(comment_with_changelog_id)
+    requests.patch(comment_url, json={'body': full_changelog}, headers=headers)
+else:
+    requests.post(pr_comments_url, json={'body': full_changelog}, headers=headers)
