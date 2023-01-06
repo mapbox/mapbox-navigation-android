@@ -134,9 +134,9 @@ class RoutePreviewStateController(
                 when (it) {
                     is RoutePreviewAction.FetchRouteAndShowRoutePreview -> {
                         if (fetchRouteIfNeeded()) {
-                            store.dispatch(
-                                NavigationStateAction.Update(NavigationState.RoutePreview)
-                            )
+//                            store.dispatch(
+//                                NavigationStateAction.Update(NavigationState.RoutePreview)
+//                            )
                         }
                     }
                     is RoutePreviewAction.FetchRouteAndStartActiveNavigation -> {

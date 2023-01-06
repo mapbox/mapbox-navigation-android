@@ -39,7 +39,7 @@ internal class MapboxNavigationViewApi(
             checkDestination()
             checkPreviewRoutes()
 
-            store.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
+            //store.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
         }
 
     override fun startRoutePreview(
@@ -76,7 +76,7 @@ internal class MapboxNavigationViewApi(
             checkDestination()
             checkRoutes()
 
-            store.dispatch(NavigationStateAction.Update(NavigationState.Arrival))
+            //store.dispatch(NavigationStateAction.Update(NavigationState.Arrival))
         }
 
     override fun startArrival(

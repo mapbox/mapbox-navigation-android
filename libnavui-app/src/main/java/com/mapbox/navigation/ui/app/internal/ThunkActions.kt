@@ -79,5 +79,5 @@ private fun Store.setRoutes(routes: List<NavigationRoute>) {
 }
 
 private fun Store.setNavigationState(navState: NavigationState) {
-    dispatch(NavigationStateAction.Update(navState))
+    //dispatch(NavigationStateAction.Update(navState))
 }

@@ -47,15 +47,15 @@ internal class BackPressedComponent(
                 }
                 NavigationState.DestinationPreview -> {
                     store.dispatch(DestinationAction.SetDestination(null))
-                    store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
+//                    store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
                 }
                 NavigationState.RoutePreview -> {
                     store.dispatch(RoutePreviewAction.Ready(emptyList()))
-                    store.dispatch(NavigationStateAction.Update(NavigationState.DestinationPreview))
+//                    store.dispatch(NavigationStateAction.Update(NavigationState.DestinationPreview))
                 }
                 NavigationState.ActiveNavigation -> {
                     store.dispatch(RoutesAction.SetRoutes(emptyList()))
-                    store.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
+//                    store.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
                 }
                 NavigationState.Arrival -> {
                     store.dispatch(endNavigation())
