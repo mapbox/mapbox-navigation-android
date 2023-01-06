@@ -9,6 +9,7 @@ import android.graphics.RectF
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.PRIVATE
+import com.mapbox.androidauto.internal.RendererUtils
 import com.mapbox.androidauto.internal.RendererUtils.EMPTY_BITMAP
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.maps.MapboxExperimental
@@ -20,7 +21,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
  * Widget to display a speed limit sign on the map.
  */
 @MapboxExperimental
-class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD) : BitmapWidget(
+internal class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD) : BitmapWidget(
     EMPTY_BITMAP,
     WidgetPosition(WidgetPosition.Horizontal.RIGHT, WidgetPosition.Vertical.BOTTOM),
     marginX = 14f,
@@ -39,7 +40,29 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
         bitmap = drawSpeedLimitSign(speedLimit = null, speed = 0, initialSignFormat, warn = false)
     }
 
-    fun update(speedLimit: Int?, speed: Int, signFormat: SpeedLimitSign?, threshold: Int) {
+    fun update(state: CarSpeedLimit) {
+        logAndroidAuto("CarSpeedLimitRenderer onSpeedLimitStateChange $state")
+        if (!state.isVisible) {
+            updateBitmap(EMPTY_BITMAP)
+            return
+        }
+
+        if (state.speed != null) {
+            update(
+                state.speedLimit,
+                state.speed,
+                state.signFormat,
+                state.threshold
+            )
+        } else {
+            update(
+                state.signFormat,
+                state.threshold
+            )
+        }
+    }
+
+    private fun update(speedLimit: Int?, speed: Int, signFormat: SpeedLimitSign?, threshold: Int) {
         val newSignFormat = signFormat ?: lastSignFormat
         val warn = speedLimit != null && speed - threshold >= speedLimit
         if (lastSpeedLimit == speedLimit &&
@@ -59,7 +82,7 @@ class SpeedLimitWidget(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD)
         }
     }
 
-    fun update(signFormat: SpeedLimitSign?, threshold: Int) {
+    private fun update(signFormat: SpeedLimitSign?, threshold: Int) {
         val speedLimit = lastSpeedLimit
         val speed = lastSpeed
         val newSignFormat = signFormat ?: lastSignFormat

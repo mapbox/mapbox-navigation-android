@@ -51,7 +51,7 @@ internal constructor(
     internal var speedLimitWidget: SpeedLimitWidget? = null
 
     private val speedLimitState = MutableStateFlow(
-        CarSpeedLimitState(
+        CarSpeedLimit(
             isVisible = false,
             speedLimit = null,
             speed = null,
@@ -84,28 +84,6 @@ internal constructor(
     private fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         distanceFormatterOptions = null
-    }
-
-    private fun onSpeedLimitStateChange(state: CarSpeedLimitState) {
-        logAndroidAuto("CarSpeedLimitRenderer onSpeedLimitStateChange $state")
-        if (!state.isVisible) {
-            speedLimitWidget?.updateBitmap(RendererUtils.EMPTY_BITMAP)
-            return
-        }
-
-        if (state.speed != null) {
-            speedLimitWidget?.update(
-                state.speedLimit,
-                state.speed,
-                state.signFormat,
-                state.threshold
-            )
-        } else {
-            speedLimitWidget?.update(
-                state.signFormat,
-                state.threshold
-            )
-        }
     }
 
     private fun updateSpeed(locationMatcherResult: LocationMatcherResult) {
@@ -150,6 +128,8 @@ internal constructor(
         mapboxCarMapSurface.mapSurface.addWidget(speedLimitWidget)
         MapboxNavigationApp.registerObserver(navigationObserver)
         scope = MainScope()
+
+        // Update the speed limit whenever the options change.
         options.speedLimitOptions
             .onEach {
                 speedLimitState.value = speedLimitState.value.copy(
@@ -160,8 +140,9 @@ internal constructor(
                 )
             }
             .launchIn(scope)
-        speedLimitState
-            .onEach { onSpeedLimitStateChange(it) }
+
+        // Update the speed limit widget with changing speed limit sate
+        speedLimitState.onEach { speedLimitWidget.update(it) }
             .launchIn(scope)
     }
 
@@ -184,11 +165,3 @@ internal constructor(
         private const val SECONDS_IN_HOUR = 3600
     }
 }
-
-private data class CarSpeedLimitState(
-    val isVisible: Boolean,
-    val speedLimit: Int?,
-    val speed: Int?,
-    val signFormat: SpeedLimitSign?,
-    val threshold: Int
-)

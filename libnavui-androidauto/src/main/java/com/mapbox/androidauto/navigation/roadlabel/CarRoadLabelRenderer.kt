@@ -1,6 +1,5 @@
 package com.mapbox.androidauto.navigation.roadlabel
 
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import androidx.car.app.CarContext
