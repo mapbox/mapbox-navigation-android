@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin.permission
 
 import android.Manifest
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,13 +23,8 @@ internal class LocationPermissionComponent(
 
     private val componentActivityRef = WeakReference(componentActivity)
 
-    private val callback = ActivityResultCallback { permissions: Map<String, Boolean> ->
-        val accessFineLocation = permissions[FINE_LOCATION_PERMISSIONS]
-            ?: false
-        val accessCoarseLocation = permissions[COARSE_LOCATION_PERMISSIONS]
-            ?: false
-        val granted = accessFineLocation || accessCoarseLocation
-        store.dispatch(TripSessionStarterAction.OnLocationPermission(granted))
+    private val callback = ActivityResultCallback { _: Map<String, Boolean> ->
+        store.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
     }
 
     private val launcher = try {
@@ -61,7 +55,7 @@ internal class LocationPermissionComponent(
             // a coordinator and flowable binder. This issue was also difficult to reproduce on
             // all devices. Launching a coroutine to update the state is a temporary solution.
             coroutineScope.launch {
-                store.dispatch(TripSessionStarterAction.OnLocationPermission(true))
+                store.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
             }
         } else {
             val fragActivity = componentActivityRef.get() as? FragmentActivity
@@ -70,7 +64,7 @@ internal class LocationPermissionComponent(
             } else {
                 launcher?.launch(LOCATION_PERMISSIONS)
             }
-            notifyGrantedOnForegrounded(mapboxNavigation.navigationOptions.applicationContext)
+            notifyGrantedOnForegrounded()
         }
     }
 
@@ -80,17 +74,10 @@ internal class LocationPermissionComponent(
      * location permissions through the app settings or
      * when developers request location permissions themselves.
      */
-    private fun notifyGrantedOnForegrounded(applicationContext: Context) {
+    private fun notifyGrantedOnForegrounded() {
         coroutineScope.launch {
             componentActivityRef.get()?.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                if (!store.state.value.tripSession.isLocationPermissionGranted) {
-                    val isGranted = PermissionsManager.areLocationPermissionsGranted(
-                        applicationContext
-                    )
-                    if (isGranted) {
-                        store.dispatch(TripSessionStarterAction.OnLocationPermission(true))
-                    }
-                }
+                store.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
             }
         }
     }

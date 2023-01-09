@@ -1,7 +1,10 @@
 package com.mapbox.navigation.dropin.navigationview
 
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.NavigationViewApiErrorTypes
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.ui.app.internal.Reducer
@@ -19,7 +22,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.spyk
-import io.mockk.unmockkObject
+import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -54,6 +57,9 @@ class MapboxNavigationViewApiTest {
             }
         )
 
+        mockkObject(MapboxNavigationApp)
+        every { MapboxNavigationApp.current() } returns null
+
         mockkObject(MapboxAudioGuidance.Companion)
         every { MapboxAudioGuidance.getRegisteredInstance() } returns audioGuidance
 
@@ -62,7 +68,7 @@ class MapboxNavigationViewApiTest {
 
     @After
     fun cleanUp() {
-        unmockkObject(MapboxAudioGuidance.Companion)
+        unmockkAll()
     }
 
     @Test
@@ -325,14 +331,15 @@ class MapboxNavigationViewApiTest {
         assertEquals(NavigationViewApiErrorTypes.InvalidRoutesInfo, result.error?.type)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun `isReplayEnabled should return true when replay trip session is enabled `() {
+        val mapboxNavigation = mockk<MapboxNavigation>()
+        every { MapboxNavigationApp.current() } returns mapboxNavigation
+
+        every { mapboxNavigation.isReplayEnabled() } returns false
         assertFalse(sut.isReplayEnabled())
-        testStore.updateState {
-            it.copy(
-                tripSession = it.tripSession.copy(isReplayEnabled = true)
-            )
-        }
+        every { mapboxNavigation.isReplayEnabled() } returns true
         assertTrue(sut.isReplayEnabled())
     }
 

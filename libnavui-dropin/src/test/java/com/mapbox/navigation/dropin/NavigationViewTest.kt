@@ -25,7 +25,6 @@ import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
 import com.mapbox.navigation.dropin.permission.LocationPermissionComponent
 import com.mapbox.navigation.dropin.roadname.RoadNameCoordinator
 import com.mapbox.navigation.dropin.speedlimit.SpeedLimitCoordinator
-import com.mapbox.navigation.dropin.tripsession.TripSessionComponent
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.app.internal.SharedApp
 import io.mockk.CapturingSlot
@@ -110,7 +109,6 @@ class NavigationViewTest {
 
         verifyRegisteredObserver(AnalyticsComponent::class)
         verifyRegisteredObserver(LocationPermissionComponent::class)
-        verifyRegisteredObserver(TripSessionComponent::class)
         verifyRegisteredObserver(MapLayoutCoordinator::class)
         verifyRegisteredObserver(BackPressedComponent::class)
         verifyRegisteredObserver(ScalebarPlaceholderCoordinator::class)

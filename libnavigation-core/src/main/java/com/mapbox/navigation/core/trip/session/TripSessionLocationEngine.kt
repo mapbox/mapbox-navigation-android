@@ -31,6 +31,8 @@ internal class TripSessionLocationEngine constructor(
 ) {
 
     val mapboxReplayer: MapboxReplayer by lazy { MapboxReplayer() }
+    var isReplayEnabled = false
+        private set
 
     private val replayLocationEngine: LocationEngine by lazy {
         replayLocationEngineProvider.invoke(mapboxReplayer)
@@ -66,6 +68,7 @@ internal class TripSessionLocationEngine constructor(
         } else {
             navigationOptions.locationEngine
         }
+        this.isReplayEnabled = isReplayEnabled
         activeLocationEngine?.requestLocationUpdates(
             navigationOptions.locationEngineRequest,
             locationEngineCallback,
@@ -75,6 +78,7 @@ internal class TripSessionLocationEngine constructor(
     }
 
     fun stopLocationUpdates() {
+        isReplayEnabled = false
         onRawLocationUpdate = { }
         activeLocationEngine?.removeLocationUpdates(locationEngineCallback)
         activeLocationEngine = null

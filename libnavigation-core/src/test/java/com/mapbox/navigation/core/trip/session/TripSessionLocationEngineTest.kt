@@ -14,6 +14,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -142,6 +144,28 @@ class TripSessionLocationEngineTest {
             )
             replayLocationEngine.requestLocationUpdates(any(), any(), any())
         }
+    }
+
+    @Test
+    fun `isReplayEnabled is true after replay is enabled`() {
+        sut.startLocationUpdates(true, mockk())
+
+        assertTrue(sut.isReplayEnabled)
+    }
+
+    @Test
+    fun `isReplayEnabled is false when replay is disabled for location updates`() {
+        sut.startLocationUpdates(false, mockk())
+
+        assertFalse(sut.isReplayEnabled)
+    }
+
+    @Test
+    fun `isReplayEnabled is false after stopLocationUpdates`() {
+        sut.startLocationUpdates(true, mockk())
+        sut.stopLocationUpdates()
+
+        assertFalse(sut.isReplayEnabled)
     }
 
     private fun mockLocationEngine(): LocationEngine {

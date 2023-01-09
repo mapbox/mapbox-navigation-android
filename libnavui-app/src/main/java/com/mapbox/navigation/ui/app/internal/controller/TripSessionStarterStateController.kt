@@ -1,44 +1,45 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
 import android.annotation.SuppressLint
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.trip.MapboxTripStarter
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
-import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterState
 
 /**
  * The class is responsible to start and stop the `TripSession` for NavigationView.
- * @param store defines the current screen state
  */
 @SuppressLint("MissingPermission")
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class TripSessionStarterStateController(store: Store) : StateController() {
+
     init {
         store.register(this)
     }
 
+    private val tripStarter = MapboxTripStarter.getRegisteredInstance()
+
     override fun process(state: State, action: Action): State {
         if (action is TripSessionStarterAction) {
-            return state.copy(
-                tripSession = processTripSessionAction(state.tripSession, action)
-            )
+            processTripSessionAction(action)
         }
         return state
     }
 
     private fun processTripSessionAction(
-        state: TripSessionStarterState,
         action: TripSessionStarterAction
-    ): TripSessionStarterState {
-        return when (action) {
-            is TripSessionStarterAction.OnLocationPermission -> {
-                state.copy(isLocationPermissionGranted = action.granted)
+    ) {
+        when (action) {
+            is TripSessionStarterAction.RefreshLocationPermissions -> {
+                tripStarter.refreshLocationPermissions()
             }
             TripSessionStarterAction.EnableReplayTripSession -> {
-                state.copy(isReplayEnabled = true)
+                tripStarter.enableReplayRoute()
             }
             TripSessionStarterAction.EnableTripSession -> {
-                state.copy(isReplayEnabled = false)
+                tripStarter.enableMapMatching()
             }
         }
     }

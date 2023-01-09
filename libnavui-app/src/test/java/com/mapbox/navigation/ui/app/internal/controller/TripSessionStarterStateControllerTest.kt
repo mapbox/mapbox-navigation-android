@@ -1,12 +1,17 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.trip.MapboxTripStarter
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
-import com.mapbox.navigation.ui.app.testing.TestStore
-import io.mockk.spyk
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.Assert.assertEquals
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -17,33 +22,47 @@ class TripSessionStarterStateControllerTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private lateinit var testStore: TestStore
+    private lateinit var mapboxTripStarter: MapboxTripStarter
     private lateinit var sut: TripSessionStarterStateController
+    private val store: Store = mockk(relaxed = true)
 
     @Before
     fun setup() {
-        testStore = spyk(TestStore())
-        sut = TripSessionStarterStateController(testStore)
+        mapboxTripStarter = mockk(relaxed = true)
+
+        mockkObject(MapboxTripStarter.Companion)
+        every { MapboxTripStarter.getRegisteredInstance() } returns mapboxTripStarter
+        sut = TripSessionStarterStateController(store)
+    }
+
+    @After
+    fun teardown() {
+        unmockkAll()
+    }
+
+    @Test
+    fun `constructor will register to the store`() {
+        verify(exactly = 1) { store.register(sut) }
     }
 
     @Test
     fun `on OnLocationPermission action should update TripSessionStarterState`() {
-        testStore.dispatch(TripSessionStarterAction.OnLocationPermission(true))
+        sut.process(mockk(), TripSessionStarterAction.RefreshLocationPermissions)
 
-        assertEquals(true, testStore.state.value.tripSession.isLocationPermissionGranted)
+        verify(exactly = 1) { mapboxTripStarter.refreshLocationPermissions() }
     }
 
     @Test
     fun `on EnableReplayTripSession action should update TripSessionStarterState`() {
-        testStore.dispatch(TripSessionStarterAction.EnableReplayTripSession)
+        sut.process(mockk(), TripSessionStarterAction.EnableReplayTripSession)
 
-        assertEquals(true, testStore.state.value.tripSession.isReplayEnabled)
+        verify(exactly = 1) { mapboxTripStarter.enableReplayRoute() }
     }
 
     @Test
     fun `on EnableTripSession action should update TripSessionStarterState`() {
-        testStore.dispatch(TripSessionStarterAction.EnableTripSession)
+        sut.process(mockk(), TripSessionStarterAction.EnableTripSession)
 
-        assertEquals(false, testStore.state.value.tripSession.isReplayEnabled)
+        verify(exactly = 1) { mapboxTripStarter.enableMapMatching() }
     }
 }

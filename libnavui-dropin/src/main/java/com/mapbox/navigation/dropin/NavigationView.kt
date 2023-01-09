@@ -38,7 +38,6 @@ import com.mapbox.navigation.dropin.internal.extensions.scalebarPlaceholderCoord
 import com.mapbox.navigation.dropin.internal.extensions.speedLimitCoordinator
 import com.mapbox.navigation.dropin.internal.extensions.toComponentActivity
 import com.mapbox.navigation.dropin.internal.extensions.toViewModelStoreOwner
-import com.mapbox.navigation.dropin.internal.extensions.tripSessionComponent
 import com.mapbox.navigation.dropin.map.MapViewObserver
 import com.mapbox.navigation.dropin.navigationview.MapboxNavigationViewApi
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
@@ -131,7 +130,6 @@ class NavigationView @JvmOverloads constructor(
             attachCreated(
                 analyticsComponent(),
                 locationPermissionComponent(activity),
-                tripSessionComponent(),
                 mapLayoutCoordinator(binding),
                 backPressedComponent(activity),
                 scalebarPlaceholderCoordinator(binding.scalebarLayout),

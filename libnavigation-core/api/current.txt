@@ -32,6 +32,7 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
     method public Integer? getZLevel();
     method public boolean isDestroyed();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public boolean isReplayEnabled();
     method public boolean isRunningForegroundService();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void moveRoutesFromPreviewToNavigator() throws java.lang.IllegalArgumentException;
     method public void navigateNextRouteLeg(com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback callback);
@@ -1017,6 +1018,27 @@ package com.mapbox.navigation.core.telemetry.events {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FeedbackMetadataWrapper {
     method public com.mapbox.navigation.core.telemetry.events.FeedbackMetadata get();
+  }
+
+}
+
+package com.mapbox.navigation.core.trip {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxTripStarter implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public static com.mapbox.navigation.core.trip.MapboxTripStarter create();
+    method public com.mapbox.navigation.core.trip.MapboxTripStarter enableMapMatching();
+    method public com.mapbox.navigation.core.trip.MapboxTripStarter enableReplayRoute(com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions? options = null);
+    method public static com.mapbox.navigation.core.trip.MapboxTripStarter getRegisteredInstance();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions getReplayRouteSessionOptions();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public com.mapbox.navigation.core.trip.MapboxTripStarter refreshLocationPermissions();
+    field public static final com.mapbox.navigation.core.trip.MapboxTripStarter.Companion Companion;
+  }
+
+  public static final class MapboxTripStarter.Companion {
+    method public com.mapbox.navigation.core.trip.MapboxTripStarter create();
+    method public com.mapbox.navigation.core.trip.MapboxTripStarter getRegisteredInstance();
   }
 
 }

@@ -15,6 +15,7 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -25,12 +26,9 @@ import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType
 import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection
 import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.core.replay.ReplayLocationEngine
-import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.MapboxTripStarter
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -57,8 +55,6 @@ class RoadObjectsActivity : AppCompatActivity() {
         private const val TAG = "RoadObjectsActivity"
     }
 
-    private val replayRouteMapper = ReplayRouteMapper()
-    private val mapboxReplayer = MapboxReplayer()
     private val navigationLocationProvider = NavigationLocationProvider()
 
     private val binding: LayoutActivityRestStopBinding by lazy {
@@ -74,13 +70,16 @@ class RoadObjectsActivity : AppCompatActivity() {
     }
 
     private val mapboxNavigation: MapboxNavigation by lazy {
-        MapboxNavigationProvider.create(
+        MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(Utils.getMapboxSapaAccessToken(this))
-                .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
     }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private val mapboxTripStarter = MapboxTripStarter.create()
+        .enableReplayRoute()
 
     private val mapCamera: CameraAnimationsPlugin by lazy {
         binding.mapView.camera
@@ -121,6 +120,7 @@ class RoadObjectsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         initNavigation()
+        initReplayer()
         initStyle()
         initListeners()
     }
@@ -129,15 +129,15 @@ class RoadObjectsActivity : AppCompatActivity() {
         super.onStop()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onDestroy() {
         super.onDestroy()
+        mapboxTripStarter.onDetached(mapboxNavigation)
         routeLineApi.cancel()
         routeLineView.cancel()
-        mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }
 
@@ -150,10 +150,6 @@ class RoadObjectsActivity : AppCompatActivity() {
             routeLineApi.setRoutes(listOf(RouteLine(route, null))) {
                 routeLineView.renderRouteDrawData(style, it)
             }
-
-            val routeOrigin = Utils.getRouteOriginPoint(route)
-            val cameraOptions = CameraOptions.Builder().center(routeOrigin).zoom(15.0).build()
-            binding.mapView.getMapboxMap().setCamera(cameraOptions)
         }
     }
 
@@ -163,12 +159,16 @@ class RoadObjectsActivity : AppCompatActivity() {
             enabled = true
         }
         mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.setRoutes(listOf(getRoute()))
         mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
-        mapboxReplayer.pushRealLocation(this, 0.0)
-        mapboxReplayer.playbackSpeed(1.5)
-        mapboxReplayer.play()
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun initReplayer() {
+        mapboxTripStarter.onAttached(mapboxNavigation)
+        val routeOrigin = Utils.getRouteOriginPoint(getRoute())
+        mapboxNavigation.mapboxReplayer.pushEvents(
+            listOf(ReplayRouteMapper.mapToUpdateLocation(0.0, routeOrigin))
+        )
     }
 
     private val locationObserver: LocationObserver = object : LocationObserver {
@@ -202,19 +202,9 @@ class RoadObjectsActivity : AppCompatActivity() {
     private fun initListeners() {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-            mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
-            startSimulation(mapboxNavigation.getRoutes()[0])
+            mapboxNavigation.setRoutes(listOf(getRoute()))
         }
-    }
-
-    private fun startSimulation(route: DirectionsRoute) {
-        mapboxReplayer.stop()
-        mapboxReplayer.clearEvents()
-        val replayData = replayRouteMapper.mapDirectionsRouteGeometry(route)
-        mapboxReplayer.pushEvents(replayData)
-        mapboxReplayer.seekTo(replayData[0])
-        mapboxReplayer.play()
     }
 
     private val routesObserver = RoutesObserver {
@@ -341,8 +331,6 @@ class RoadObjectsActivity : AppCompatActivity() {
     ): String {
         return getString(stringResource, formatter.format(distance))
     }
-
-    private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private fun getRoute(): DirectionsRoute {
         val routeAsString = Utils.readRawFileText(this, R.raw.route_with_sapa)

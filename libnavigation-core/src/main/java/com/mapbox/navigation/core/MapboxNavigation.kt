@@ -594,6 +594,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     val mapboxReplayer: MapboxReplayer by lazy { tripSessionLocationEngine.mapboxReplayer }
 
     /**
+     * True when [startReplayTripSession] has been called.
+     * Will be false after [stopTripSession] is called.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun isReplayEnabled(): Boolean {
+        return tripSessionLocationEngine.isReplayEnabled
+    }
+
+    /**
      * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
      * or a `Free Drive` state otherwise.
      *
