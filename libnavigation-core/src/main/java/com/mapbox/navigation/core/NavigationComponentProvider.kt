@@ -2,7 +2,6 @@ package com.mapbox.navigation.core
 
 import android.content.Context
 import com.mapbox.navigation.base.internal.NavigationRouterV2
-import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
@@ -13,36 +12,35 @@ import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NavigationSession
-import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.ConfigHandle
+import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
 
 internal object NavigationComponentProvider {
+
     fun createDirectionsSession(
         router: NavigationRouterV2,
     ): DirectionsSession = MapboxDirectionsSession(router)
 
     fun createNativeNavigator(
-        deviceProfile: DeviceProfile,
-        navigatorConfig: NavigatorConfig,
+        config: ConfigHandle,
+        historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         accessToken: String,
-        routerInterface: RouterInterface,
+        router: RouterInterface,
     ): MapboxNativeNavigator = MapboxNativeNavigatorImpl.create(
-        deviceProfile,
-        navigatorConfig,
+        config,
+        historyRecorderComposite,
         tilesConfig,
-        historyDir,
         accessToken,
-        routerInterface,
+        router,
     )
 
     fun createTripService(
@@ -90,10 +88,17 @@ internal object NavigationComponentProvider {
         tripSession: TripSession
     ): ArrivalProgressObserver = ArrivalProgressObserver(tripSession)
 
-    fun createHistoryRecordingStateHandler(
-        initialState: NavigationSessionState
-    ): HistoryRecordingStateHandler = HistoryRecordingStateHandler(initialState)
-
     fun createCurrentIndicesProvider(): CurrentIndicesProvider =
         CurrentIndicesProvider()
+
+    fun createHistoryRecordingStateHandler(): HistoryRecordingStateHandler =
+        HistoryRecordingStateHandler()
+
+    fun createDeveloperMetadataAggregator(
+        historyRecordingStateHandler: HistoryRecordingStateHandler,
+    ): DeveloperMetadataAggregator = DeveloperMetadataAggregator(
+        historyRecordingStateHandler.currentCopilotSession().sessionId
+    ).also {
+        historyRecordingStateHandler.registerCopilotSessionObserver(it)
+    }
 }

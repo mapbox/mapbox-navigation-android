@@ -15,11 +15,11 @@ import com.mapbox.navigator.HistoryRecorderHandle
  */
 class MapboxHistoryRecorder internal constructor(
     navigationOptions: NavigationOptions,
+    internal var historyRecorderHandle: HistoryRecorderHandle? = null,
 ) {
+
     private val historyRecorderOptions = navigationOptions.historyRecorderOptions
     private val historyFiles = HistoryFiles(navigationOptions.applicationContext)
-
-    internal var historyRecorderHandle: HistoryRecorderHandle? = null
 
     /**
      * The file directory where the history files are stored.
@@ -31,7 +31,7 @@ class MapboxHistoryRecorder internal constructor(
      * @return absolute path to the directory with history files.
      *     returns null when there is no file directory
      */
-    fun fileDirectory(): String? = historyFiles.absolutePath(historyRecorderOptions)
+    fun fileDirectory(): String? = historyFiles.historyRecorderAbsolutePath(historyRecorderOptions)
 
     /**
      * Starts history recording session.
@@ -77,6 +77,8 @@ class MapboxHistoryRecorder internal constructor(
         historyRecorderHandle?.apply { pushHistory(eventType, eventJson) }
     }
 
+    internal fun copilotFileDirectory(): String? = historyFiles.copilotAbsolutePath()
+
     private fun checkRecorderInitialized() {
         if (historyRecorderHandle == null) {
             logW("The history recorder is not initialized", "MapboxHistoryRecorder")
@@ -88,6 +90,7 @@ class MapboxHistoryRecorder internal constructor(
  * Callback which called as a result of [MapboxHistoryRecorder.stopRecording]
  */
 fun interface SaveHistoryCallback {
+
     /**
      * @param filepath is null if [MapboxHistoryRecorder.stopRecording] called without any
      * events received or the navigator is not configured.

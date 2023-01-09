@@ -4,6 +4,7 @@ import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
@@ -41,8 +42,11 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param historyRecorderOptions defines configuration for recording navigation events
  * @param eventsAppMetadata [EventsAppMetadata] information (optional)
  * @param enableSensors enables sensors for current position calculation (optional)
+ * @param copilotOptions defines options for Copilot
  */
-class NavigationOptions private constructor(
+class NavigationOptions
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+private constructor(
     val applicationContext: Context,
     val accessToken: String?,
     val locationEngine: LocationEngine,
@@ -61,11 +65,14 @@ class NavigationOptions private constructor(
     val historyRecorderOptions: HistoryRecorderOptions,
     val eventsAppMetadata: EventsAppMetadata?,
     val enableSensors: Boolean,
+    @ExperimentalPreviewMapboxNavigationAPI
+    val copilotOptions: CopilotOptions,
 ) {
 
     /**
      * Get a builder to customize a subset of current options.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun toBuilder(): Builder = Builder(applicationContext).apply {
         accessToken(accessToken)
         locationEngine(locationEngine)
@@ -84,11 +91,13 @@ class NavigationOptions private constructor(
         historyRecorderOptions(historyRecorderOptions)
         eventsAppMetadata(eventsAppMetadata)
         enableSensors(enableSensors)
+        copilotOptions(copilotOptions)
     }
 
     /**
      * Regenerate whenever a change is made
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -113,6 +122,7 @@ class NavigationOptions private constructor(
         if (historyRecorderOptions != other.historyRecorderOptions) return false
         if (eventsAppMetadata != other.eventsAppMetadata) return false
         if (enableSensors != other.enableSensors) return false
+        if (copilotOptions != other.copilotOptions) return false
 
         return true
     }
@@ -120,6 +130,7 @@ class NavigationOptions private constructor(
     /**
      * Regenerate whenever a change is made
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun hashCode(): Int {
         var result = applicationContext.hashCode()
         result = 31 * result + accessToken.hashCode()
@@ -139,12 +150,14 @@ class NavigationOptions private constructor(
         result = 31 * result + historyRecorderOptions.hashCode()
         result = 31 * result + eventsAppMetadata.hashCode()
         result = 31 * result + enableSensors.hashCode()
+        result = 31 * result + copilotOptions.hashCode()
         return result
     }
 
     /**
      * Returns a string representation of the object.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun toString(): String {
         return "NavigationOptions(" +
             "applicationContext=$applicationContext, " +
@@ -164,7 +177,8 @@ class NavigationOptions private constructor(
             "incidentsOptions=$incidentsOptions, " +
             "historyRecorderOptions=$historyRecorderOptions, " +
             "eventsAppMetadata=$eventsAppMetadata, " +
-            "enableSensors=$enableSensors" +
+            "enableSensors=$enableSensors, " +
+            "copilotOptions=$copilotOptions" +
             ")"
     }
 
@@ -199,6 +213,9 @@ class NavigationOptions private constructor(
             HistoryRecorderOptions.Builder().build()
         private var eventsAppMetadata: EventsAppMetadata? = null
         private var enableSensors: Boolean = false
+
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -306,6 +323,13 @@ class NavigationOptions private constructor(
             apply { this.enableSensors = value }
 
         /**
+         * Defines configuration for Copilot
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun copilotOptions(copilotOptions: CopilotOptions): Builder =
+            apply { this.copilotOptions = copilotOptions }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -329,7 +353,8 @@ class NavigationOptions private constructor(
                 incidentsOptions = incidentsOptions,
                 historyRecorderOptions = historyRecorderOptions,
                 eventsAppMetadata = eventsAppMetadata,
-                enableSensors = enableSensors
+                enableSensors = enableSensors,
+                copilotOptions = copilotOptions,
             )
         }
     }

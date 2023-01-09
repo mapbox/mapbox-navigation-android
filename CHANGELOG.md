@@ -4,7 +4,9 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
+- Added public-preview Copilot feature. [#6791](https://github.com/mapbox/mapbox-navigation-android/pull/6791)
 #### Bug fixes and improvements
+- Ensure map-matching considers HOV-only roads as auto accessible. [#6791](https://github.com/mapbox/mapbox-navigation-android/pull/6791)
 
 ## Mapbox Navigation SDK 2.8.1 - 13 December, 2022
 ### Changelog

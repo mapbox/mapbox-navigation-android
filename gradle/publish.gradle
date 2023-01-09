@@ -53,6 +53,7 @@ def sdkNameMap = [:]
 sdkNameMap["libnavigation-android"] = "mobile-navigation-android"
 sdkNameMap["libnavigation-base"] = "mobile-navigation-base"
 sdkNameMap["libnavigation-core"] = "mobile-navigation-core"
+sdkNameMap["libnavigation-copilot"] = "mobile-navigation-copilot"
 sdkNameMap["libnavigation-metrics"] = "mobile-navigation-metrics"
 sdkNameMap["libnavigator"] = "mobile-navigation-navigator"
 sdkNameMap["libtrip-notification"] = "mobile-navigation-notification"

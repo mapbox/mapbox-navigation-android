@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
@@ -42,6 +43,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
 
     override fun getImplementationClass(): KClass<NavigationOptions> = NavigationOptions::class
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun getFilledUpBuilder(): NavigationOptions.Builder {
         val context = mockk<Context>(relaxed = true)
         val appContext = mockk<Context>(relaxed = true)
@@ -79,6 +81,9 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
                     .build()
             )
             .enableSensors(true)
+            .copilotOptions(
+                CopilotOptions.Builder().shouldSendHistoryOnlyWithFeedback(true).build()
+            )
     }
 
     @Test
