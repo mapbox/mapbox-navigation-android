@@ -1,13 +1,11 @@
 package com.mapbox.navigation.core.trip.service
 
-import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
@@ -34,17 +32,22 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @RunWith(AndroidJUnit4::class)
 class ArtificialDriverTest {
 
     @Test
     fun testFollowingRoute() = runBlocking<Unit>(Dispatchers.Main) {
-        getNativeNavigator { nativeNavigator ->
+        withNavigators { mapboxNavigation, nativeNavigator ->
+            mapboxNavigation.historyRecorder.startRecording()
             val testRoute = getTestRoute()
             val replayRouteMapper = ReplayRouteMapper()
-            val events = replayRouteMapper.mapDirectionsRouteGeometry(testRoute.directionsRoute).filterIsInstance<ReplayEventUpdateLocation>()
-            val setRoutesResult = nativeNavigator.setRoutes(testRoute, reason = SetRoutesReason.NEW_ROUTE)
+            val events = replayRouteMapper.mapDirectionsRouteGeometry(testRoute.directionsRoute)
+                .filterIsInstance<ReplayEventUpdateLocation>()
+            val setRoutesResult =
+                nativeNavigator.setRoutes(testRoute, reason = SetRoutesReason.NEW_ROUTE)
             assertTrue("result is $setRoutesResult", setRoutesResult.isValue)
             val statusesTracking = async<List<NavigationStatus>> {
                 nativeNavigator.collectStatuses(untilRouteState = RouteState.COMPLETE)
@@ -56,7 +59,16 @@ class ArtificialDriverTest {
             }
 
             val states = statusesTracking.await()
-            assertTrue(states.all { it.routeState == RouteState.TRACKING })
+            val historyFile = suspendCoroutine<String> { continuation ->
+                mapboxNavigation.historyRecorder.stopRecording {
+                    continuation.resume(it ?: "null")
+                }
+            }
+            val notTrackingStates = states.filter { it.routeState != RouteState.TRACKING }
+            assertTrue(
+                "not all states are tracking, see history file $historyFile: $notTrackingStates",
+                notTrackingStates.isEmpty()
+            )
         }
     }
 }
@@ -81,7 +93,6 @@ data class OnStatusUpdateParameters(
 fun MapboxNativeNavigator.statusUpdates(): Flow<OnStatusUpdateParameters> {
     return callbackFlow {
         val observer = NavigatorObserver { origin, status ->
-            Log.d("vadzim-debug", "$origin, $status")
             this.trySend(OnStatusUpdateParameters(origin, status))
         }
         addNavigatorObserver(observer)
@@ -91,21 +102,23 @@ fun MapboxNativeNavigator.statusUpdates(): Flow<OnStatusUpdateParameters> {
     }
 }
 
-private suspend fun getNativeNavigator(block: suspend (MapboxNativeNavigator) -> Unit) {
+private suspend fun withNavigators(block: suspend (MapboxNavigation, MapboxNativeNavigator) -> Unit) {
     val context = InstrumentationRegistry.getInstrumentation().targetContext
     val mapboxNavigation = MapboxNavigationProvider.create(
         NavigationOptions.Builder(context)
             .accessToken(context.getString(R.string.mapbox_access_token))
             .build()
     )
-    block(MapboxNativeNavigatorImpl)
+    block(mapboxNavigation, MapboxNativeNavigatorImpl)
     mapboxNavigation.onDestroy()
 }
 
 private fun getTestRoute(): NavigationRoute {
     val context = InstrumentationRegistry.getInstrumentation().targetContext
-    return DirectionsRoute.fromJson(
-        context.resources.openRawResource(R.raw.multileg_route)
-            .readBytes().decodeToString()
-    ).toNavigationRoute(RouterOrigin.Custom())
+    return NavigationRoute.create(
+        directionsResponseJson = context.resources.openRawResource(R.raw.test_long_route)
+            .readBytes().decodeToString(),
+        routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving/11.566744%2C48.143769%3B8.675521%2C50.119087?alternatives=false&geometries=polyline6&language=en&overview=full&steps=true&access_token=YOUR_MAPBOX_ACCESS_TOKEN",
+        routerOrigin = RouterOrigin.Custom()
+    ).first()
 }
