@@ -37,6 +37,7 @@ class NavigationViewStylesTest {
         assertEquals(c.infoPanelMarginStart, sut.infoPanelMarginStart.value)
         assertEquals(c.infoPanelMarginEnd, sut.infoPanelMarginEnd.value)
         assertEquals(c.infoPanelBackground, sut.infoPanelBackground.value)
+        assertEquals(c.infoPanelGuidelineMaxPosPercent, sut.infoPanelGuidelineMaxPosPercent.value)
         assertEquals(c.poiNameTextAppearance, sut.poiNameTextAppearance.value)
         assertEquals(c.tripProgressStyle, sut.tripProgressStyle.value)
         assertEquals(c.compassButtonStyle, sut.compassButtonStyle.value)
@@ -59,11 +60,29 @@ class NavigationViewStylesTest {
         assertEquals(c.locationPuckOptions, sut.locationPuckOptions.value)
     }
 
+    @Test
+    fun `applyCustomization should clamp infoPanelGuidelineMaxPosPercent value`() {
+        sut.applyCustomization(
+            ViewStyleCustomization().apply {
+                infoPanelGuidelineMaxPosPercent = -0.1f
+            }
+        )
+        assertEquals(0.0f, sut.infoPanelGuidelineMaxPosPercent.value)
+
+        sut.applyCustomization(
+            ViewStyleCustomization().apply {
+                infoPanelGuidelineMaxPosPercent = 1.1f
+            }
+        )
+        assertEquals(1.0f, sut.infoPanelGuidelineMaxPosPercent.value)
+    }
+
     private fun customization() = ViewStyleCustomization().apply {
         infoPanelPeekHeight = 1
         infoPanelMarginStart = 2
         infoPanelMarginEnd = 3
         infoPanelBackground = android.R.drawable.spinner_background
+        infoPanelGuidelineMaxPosPercent = 0.25f
         poiNameTextAppearance = android.R.style.TextAppearance_DeviceDefault_Large
         tripProgressStyle = R.style.MapboxStyleTripProgressView
         compassButtonStyle = R.style.MapboxStyleExtendableButton_Circle

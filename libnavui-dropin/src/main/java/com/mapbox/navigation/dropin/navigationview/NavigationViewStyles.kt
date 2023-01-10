@@ -19,6 +19,8 @@ internal class NavigationViewStyles(context: Context) {
         MutableStateFlow(ViewStyleCustomization.defaultInfoPanelMarginEnd())
     private val _infoPanelBackground: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultInfoPanelBackground())
+    private val _infoPanelGuidelineMaxPosPercent: MutableStateFlow<Float> =
+        MutableStateFlow(ViewStyleCustomization.defaultInfoPanelGuidelineMaxPosPercent())
     private val _poiNameTextAppearance: MutableStateFlow<Int> =
         MutableStateFlow(ViewStyleCustomization.defaultPoiNameTextAppearance())
     private val _tripProgressStyle: MutableStateFlow<Int> =
@@ -60,6 +62,8 @@ internal class NavigationViewStyles(context: Context) {
     val infoPanelMarginStart: StateFlow<Int> = _infoPanelMarginStart.asStateFlow()
     val infoPanelMarginEnd: StateFlow<Int> = _infoPanelMarginEnd.asStateFlow()
     val infoPanelBackground: StateFlow<Int> = _infoPanelBackground.asStateFlow()
+    val infoPanelGuidelineMaxPosPercent: StateFlow<Float> =
+        _infoPanelGuidelineMaxPosPercent.asStateFlow()
     val poiNameTextAppearance: StateFlow<Int> = _poiNameTextAppearance.asStateFlow()
     val tripProgressStyle: StateFlow<Int> = _tripProgressStyle.asStateFlow()
 
@@ -86,6 +90,9 @@ internal class NavigationViewStyles(context: Context) {
         customization.infoPanelMarginStart?.also { _infoPanelMarginStart.value = it }
         customization.infoPanelMarginEnd?.also { _infoPanelMarginEnd.value = it }
         customization.infoPanelBackground?.also { _infoPanelBackground.value = it }
+        customization.infoPanelGuidelineMaxPosPercent?.also {
+            _infoPanelGuidelineMaxPosPercent.value = it.coerceIn(0.0f, 1.0f)
+        }
         customization.poiNameTextAppearance?.also { _poiNameTextAppearance.value = it }
         customization.tripProgressStyle?.also { _tripProgressStyle.value = it }
 
