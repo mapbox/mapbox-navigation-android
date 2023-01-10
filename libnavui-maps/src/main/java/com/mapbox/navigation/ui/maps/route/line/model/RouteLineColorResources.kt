@@ -65,6 +65,17 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
  * - severeCongestionRange:   80..100
  * If the route response contains a congestion number 45, it would be treated as `unknown` because
  * it doesn't exist in any of the ranges specified.
+ *
+ * A note on visualizing route line colors: The route line is made up of several stacked line layers.
+ * The top most line layer is the traffic line followed by the main route line beneath it. By default both lines
+ * have the same width so the traffic line obscures the main line. Also the default route line color
+ * and the color used for unknown and low traffic congestion is the same.
+ *
+ * Be mindful of this if you change the default route line color because if the traffic data in the route
+ * is unknown the route line will appear as having the unknown traffic color rather than the default
+ * route line color. In this case consider also changing the unknown/low traffic color to match the
+ * default route line color or setting the traffic congestion color(s) to something like
+ * Color.Transparent if it fits your use case.
  */
 class RouteLineColorResources private constructor(
     val lowCongestionRange: IntRange,
