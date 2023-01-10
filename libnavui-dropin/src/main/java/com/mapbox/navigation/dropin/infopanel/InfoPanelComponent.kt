@@ -38,13 +38,12 @@ internal class InfoPanelComponent(
             }
         }
 
-        stylesFlow().observe { (background, marginLeft, marginRight) ->
-            layout.updateMargins(
-                left = marginLeft,
-                right = marginRight
-            )
-            layout.setBackgroundResource(background)
-        }
+        context.styles.infoPanelBackground.observe { layout.setBackgroundResource(it) }
+        context.styles.infoPanelMarginStart.observe { layout.updateMargins(left = it) }
+        context.styles.infoPanelMarginEnd.observe { layout.updateMargins(right = it) }
+
+        val parent = layout.parent as ViewGroup
+        context.systemBarsInsets.observe { parent.updateMargins(left = it.left, right = it.right) }
     }
 
     private fun findNavigationView(): NavigationView? {
@@ -53,16 +52,5 @@ internal class InfoPanelComponent(
             v = v.parent
         }
         return v as? NavigationView
-    }
-
-    private fun stylesFlow() = context.styles.let { styles ->
-        combine(
-            styles.infoPanelBackground,
-            styles.infoPanelMarginStart,
-            styles.infoPanelMarginEnd,
-            context.systemBarsInsets
-        ) { background, marginStart, marginEnd, insets ->
-            Triple(background, marginStart + insets.left, marginEnd + insets.right)
-        }
     }
 }
