@@ -76,11 +76,22 @@ import org.jetbrains.annotations.TestOnly
  * @param options resource options used rendering the route line on the map
  */
 @UiThread
-class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
+class MapboxRouteLineView(options: MapboxRouteLineOptions) {
 
     private companion object {
         private const val TAG = "MbxRouteLineView"
     }
+
+    /**
+     * Resource options used rendering the route line on the map
+     */
+    var options: MapboxRouteLineOptions = options
+        @Deprecated(
+            message = "Avoid using this setter as it will not correctly " +
+                "re-apply all mutated parameters."
+        )
+        set
+
     private val sourceToFeatureMap = mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
         Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
         Pair(MapboxRouteLineUtils.layerGroup2SourceKey, RouteLineFeatureId(null)),
@@ -127,7 +138,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     }
 
     /**
-     * Will initialize the route line related layers. Other calls in this class will initialize
+     * Initializes the route line related layers. Other calls in this class will initialize
      * the layers if they have not yet been initialized. If you have a use case for initializing
      * the layers in advance of any API calls this method may be used.
      *

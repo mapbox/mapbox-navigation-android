@@ -5,7 +5,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
-import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -44,7 +43,6 @@ class RouteArrowComponent(
         super.onDetached(mapboxNavigation)
         mapboxMap.getStyle()?.also { style ->
             routeArrowView.render(style, routeArrowApi.clearArrows())
-            RouteArrowUtils.removeLayers(style)
         }
     }
 }

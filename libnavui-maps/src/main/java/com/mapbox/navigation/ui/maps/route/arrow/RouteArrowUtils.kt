@@ -261,7 +261,7 @@ internal object RouteArrowUtils {
             style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
     }
 
-    internal fun removeLayers(style: Style) {
+    internal fun removeLayersAndSources(style: Style) {
         style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING)
         style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON)
         style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
