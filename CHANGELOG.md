@@ -31,6 +31,23 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where the first voice instruction might have been played twice. [#6766](https://github.com/mapbox/mapbox-navigation-android/pull/6766)
 - Changed distance formatting: now all the imperial distances down to 0.1 miles will be represented in miles, while the smaller ones - in feet. [#6775](https://github.com/mapbox/mapbox-navigation-android/pull/6775)
 
+## Mapbox Navigation SDK 2.7.2 - 10 January, 2023
+### Changelog
+[Changes between v2.7.1 and v2.7.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.1...v2.7.2)
+
+#### Features
+
+- Added public-preview Copilot feature.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.7.0))
+- Mapbox Navigation Native `v111.1.1`
+- Mapbox Core Common `v22.1.0`
+- Mapbox Java `v6.7.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
 [Changes between v2.10.0-beta.3 and v2.10.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-beta.3...v2.10.0-rc.1)
