@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.FloatRange
 import androidx.annotation.Px
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
@@ -63,6 +64,14 @@ class ViewStyleCustomization {
      */
     @DrawableRes
     var infoPanelBackground: Int? = null
+
+    /**
+     * Info panel guideline maximum position within its parent view.
+     * This value must be within 0.0f..1.0f range.
+     * Use [defaultInfoPanelGuidelineMaxPosPercent] to reset to default.
+     */
+    @FloatRange(from = 0.0, to = 1.0)
+    var infoPanelGuidelineMaxPosPercent: Float? = null
 
     /**
      * Provide custom [POINameComponent] [TextAppearance].
@@ -207,6 +216,12 @@ class ViewStyleCustomization {
          */
         @DrawableRes
         fun defaultInfoPanelBackground(): Int = R.drawable.mapbox_bg_info_panel
+
+        /**
+         * Default info panel guideline maximum position within its parent view.
+         */
+        @FloatRange(from = 0.0, to = 1.0)
+        fun defaultInfoPanelGuidelineMaxPosPercent(): Float = 0.5f
 
         /**
          * Default [PointAnnotationOptions] for showing destination marker.
