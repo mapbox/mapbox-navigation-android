@@ -85,6 +85,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.7.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 
+- Fixed an issue with `NavigationView` that caused info panel to shrink in landscape mode with a full screen theme. [#6811](https://github.com/mapbox/mapbox-navigation-android/pull/6811)
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
