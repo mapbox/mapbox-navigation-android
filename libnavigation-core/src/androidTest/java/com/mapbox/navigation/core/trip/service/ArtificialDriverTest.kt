@@ -64,18 +64,21 @@ class ArtificialDriverTest {
                 }
                 val notTrackingStates = states.filter { it.routeState != RouteState.TRACKING }
                 assertTrue(
-                    "not all states are tracking, see history file $historyFile: $notTrackingStates",
+                    "not all states are tracking, " +
+                        "see history file $historyFile: $notTrackingStates",
                     notTrackingStates.isEmpty()
                 )
             }
         }
+}
 
-    private fun createArtificialLocationUpdates(testRoute: NavigationRoute): List<ReplayEventUpdateLocation> {
-        val replayRouteMapper = ReplayRouteMapper()
-        return replayRouteMapper
-            .mapDirectionsRouteGeometry(testRoute.directionsRoute)
-            .filterIsInstance<ReplayEventUpdateLocation>()
-    }
+private fun createArtificialLocationUpdates(
+    testRoute: NavigationRoute
+): List<ReplayEventUpdateLocation> {
+    val replayRouteMapper = ReplayRouteMapper()
+    return replayRouteMapper
+        .mapDirectionsRouteGeometry(testRoute.directionsRoute)
+        .filterIsInstance<ReplayEventUpdateLocation>()
 }
 
 private suspend fun MapboxNativeNavigator.collectStatuses(
@@ -107,7 +110,9 @@ fun MapboxNativeNavigator.statusUpdates(): Flow<OnStatusUpdateParameters> {
     }
 }
 
-private suspend fun withNavigators(block: suspend (MapboxNavigation, MapboxNativeNavigator) -> Unit) {
+private suspend fun withNavigators(
+    block: suspend (MapboxNavigation, MapboxNativeNavigator) -> Unit
+) {
     val context = InstrumentationRegistry.getInstrumentation().targetContext
     val mapboxNavigation = MapboxNavigationProvider.create(
         NavigationOptions.Builder(context)
@@ -123,7 +128,14 @@ private fun getTestRoute(): NavigationRoute {
     return NavigationRoute.create(
         directionsResponseJson = context.resources.openRawResource(R.raw.test_long_route)
             .readBytes().decodeToString(),
-        routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving/11.566744%2C48.143769%3B8.675521%2C50.119087?alternatives=false&geometries=polyline6&language=en&overview=full&steps=true&access_token=YOUR_MAPBOX_ACCESS_TOKEN",
+        routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving/" +
+            "11.566744%2C48.143769%3B8.675521%2C50.119087" +
+            "?alternatives=false" +
+            "&geometries=polyline6" +
+            "&language=en" +
+            "&overview=full" +
+            "&steps=true" +
+            "&access_token=YOUR_MAPBOX_ACCESS_TOKEN",
         routerOrigin = RouterOrigin.Custom()
     ).first()
 }

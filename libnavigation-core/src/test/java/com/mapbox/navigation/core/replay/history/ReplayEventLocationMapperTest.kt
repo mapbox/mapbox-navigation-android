@@ -48,10 +48,7 @@ class ReplayEventLocationMapperTest {
 
         assertEquals(3000, androidLocation.time)
         assertEquals(3000000000, androidLocation.elapsedRealtimeNanos)
-
     }
-
-
 }
 
 private fun createTestEventLocation(
