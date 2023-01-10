@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.coroutines.resume
@@ -39,6 +40,7 @@ import kotlin.coroutines.suspendCoroutine
 class ArtificialDriverTest {
 
     @Test
+    @Ignore("test sometimes fails because of https://mapbox.atlassian.net/browse/NN-418")
     fun nativeNavigatorFollowsArtificialDriverWithoutReroutes() =
         runBlocking<Unit>(Dispatchers.Main) {
             withNavigators { mapboxNavigation, nativeNavigator ->
