@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.net.Uri
 import androidx.core.net.toUri
-import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.NetworkRestriction
@@ -21,8 +20,6 @@ import com.mapbox.navigation.ui.voice.testutils.Fixtures
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
-import io.mockk.CapturingSlot
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -30,6 +27,7 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -42,12 +40,13 @@ import java.net.URL
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-internal class MapboxSpeechLoaderTest {
+internal class MapboxSpeechProviderTest {
 
-    private lateinit var sut: MapboxSpeechLoader
+    private lateinit var sut: MapboxSpeechProvider
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
+
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
     private var accessToken = "access_token"
@@ -72,7 +71,7 @@ internal class MapboxSpeechLoaderTest {
 
         mockResourceLoader = mockk(relaxed = true)
 
-        sut = MapboxSpeechLoader(
+        sut = MapboxSpeechProvider(
             accessToken = accessToken,
             language = language,
             urlSkuTokenProvider = stubSkuTokenProvider,
@@ -103,7 +102,7 @@ internal class MapboxSpeechLoaderTest {
             1L
         }
 
-        sut.load(instructions, false)
+        sut.load(instructions)
 
         val loadRequest = requestCapture.captured
         val loadRequestUri = loadRequest.url.toUri()
@@ -129,7 +128,7 @@ internal class MapboxSpeechLoaderTest {
     }
 
     @Test
-    fun `load should disallow network for onlyCache = true`() = runBlocking {
+    fun `load should allow network`() = runBlocking {
         val instructions = Fixtures.ssmlInstructions()
         val requestCapture = slot<ResourceLoadRequest>()
         val callbackCapture = slot<ResourceLoadCallback>()
@@ -145,33 +144,7 @@ internal class MapboxSpeechLoaderTest {
             1L
         }
 
-        sut.load(instructions, true)
-
-        val loadRequest = requestCapture.captured
-        assertEquals(
-            NetworkRestriction.DISALLOW_ALL,
-            loadRequest.networkRestriction
-        )
-    }
-
-    @Test
-    fun `load should allow network for onlyCache = false`() = runBlocking {
-        val instructions = Fixtures.ssmlInstructions()
-        val requestCapture = slot<ResourceLoadRequest>()
-        val callbackCapture = slot<ResourceLoadCallback>()
-
-        val loadResult = Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND)
-        every {
-            mockResourceLoader.load(capture(requestCapture), capture(callbackCapture))
-        } answers {
-            callbackCapture.captured.onFinish(
-                requestCapture.captured,
-                ExpectedFactory.createValue(loadResult)
-            )
-            1L
-        }
-
-        sut.load(instructions, false)
+        sut.load(instructions)
 
         val loadRequest = requestCapture.captured
         assertEquals(
@@ -192,7 +165,7 @@ internal class MapboxSpeechLoaderTest {
             )
             givenResourceLoaderResponse(loadRequest, ExpectedFactory.createValue(loadResult))
 
-            val result = sut.load(instructions, false)
+            val result = sut.load(instructions)
 
             assertEquals(blob, result.value)
         }
@@ -209,7 +182,7 @@ internal class MapboxSpeechLoaderTest {
             )
             givenResourceLoaderResponse(loadRequest, ExpectedFactory.createValue(loadResult))
 
-            val result = sut.load(instructions, false)
+            val result = sut.load(instructions)
 
             assertEquals(expectedError, result.error!!.localizedMessage)
         }
@@ -226,7 +199,7 @@ internal class MapboxSpeechLoaderTest {
             )
             givenResourceLoaderResponse(loadRequest, ExpectedFactory.createValue(loadResult))
 
-            val result = sut.load(instructions, false)
+            val result = sut.load(instructions)
 
             assertEquals(expectedError, result.error!!.localizedMessage)
         }
@@ -243,174 +216,19 @@ internal class MapboxSpeechLoaderTest {
             )
             givenResourceLoaderResponse(loadRequest, ExpectedFactory.createValue(loadResult))
 
-            val result = sut.load(instructions, false)
+            val result = sut.load(instructions)
 
             assertEquals(expectedError, result.error!!.localizedMessage)
         }
 
     @Test
-    fun `trigger with empty list`() = coroutineRule.runBlockingTest {
-        sut.triggerDownload(emptyList())
+    fun `request is cancelled when scope is cancelled`() = coroutineRule.runBlockingTest {
+        val instructions = Fixtures.textInstructions()
+        val job = launch { sut.load(instructions) }
 
-        verify(exactly = 0) { mockResourceLoader.load(any(), any()) }
-    }
+        job.cancel()
 
-    @Test
-    fun `trigger with invalid instruction`() = coroutineRule.runBlockingTest {
-        sut.triggerDownload(listOf(VoiceInstructions.builder().build()))
-
-        verify(exactly = 0) { mockResourceLoader.load(any(), any()) }
-    }
-
-    @Test
-    fun `trigger with new instruction`() = coroutineRule.runBlockingTest {
-        val announcement = "turn up and down"
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement).build())
-        )
-
-        verify(exactly = 1) {
-            mockResourceLoader.load(
-                match { it.url.contains(UrlUtils.encodePathSegment(announcement)) },
-                any()
-            )
-        }
-    }
-
-    @Test
-    fun `trigger with same instruction of different type`() = coroutineRule.runBlockingTest {
-        val announcement = "turn up and down"
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement).build())
-        )
-        captureRequestCallback().onFinish(mockk(), ExpectedFactory.createValue(mockk()))
-        clearMocks(mockResourceLoader, answers = false)
-
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().announcement(announcement).build())
-        )
-        verify(exactly = 1) { mockResourceLoader.load(any(), any()) }
-    }
-
-    @Test
-    fun `trigger with existing instruction`() = coroutineRule.runBlockingTest {
-        val announcement = "turn up and down"
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement).build())
-        )
-        captureRequestCallback().onFinish(mockk(), ExpectedFactory.createValue(mockk()))
-        clearMocks(mockResourceLoader, answers = false)
-
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement).build())
-        )
-        verify(exactly = 0) { mockResourceLoader.load(any(), any()) }
-    }
-
-    @Test
-    fun `trigger with multiple new instructions`() = coroutineRule.runBlockingTest {
-        val announcement1 = "turn up and down"
-        val announcement2 = "dance and jump"
-        sut.triggerDownload(
-            listOf(
-                VoiceInstructions.builder().ssmlAnnouncement(announcement1).build(),
-                VoiceInstructions.builder().announcement(announcement2).build(),
-            )
-        )
-
-        verify(exactly = 1) {
-            mockResourceLoader.load(
-                match { it.url.contains(UrlUtils.encodePathSegment(announcement1)) },
-                any()
-            )
-            mockResourceLoader.load(
-                match { it.url.contains(UrlUtils.encodePathSegment(announcement2)) },
-                any()
-            )
-        }
-    }
-
-    @Test
-    fun `failed download does not save instruction`() = coroutineRule.runBlockingTest {
-        val announcement = "turn up and down"
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement).build())
-        )
-        captureRequestCallback().onFinish(mockk(), ExpectedFactory.createError(mockk()))
-        clearMocks(mockResourceLoader, answers = false)
-
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement).build())
-        )
-
-        verify(exactly = 1) { mockResourceLoader.load(any(), any()) }
-    }
-
-    @Test
-    fun `cancel with no active downloads`() = coroutineRule.runBlockingTest {
-        sut.cancel()
-
-        verify(exactly = 0) { mockResourceLoader.cancel(any()) }
-    }
-
-    @Test
-    fun `cancel with active downloads`() = coroutineRule.runBlockingTest {
-        val id1 = 10L
-        val id2 = 15L
-        val id3 = 20L
-        every { mockResourceLoader.load(any(), any()) } returnsMany listOf(id1, id2, id3)
-        val announcement1 = "turn up and down"
-        val announcement2 = "dance and jump"
-        val announcement3 = "stop and watch"
-        sut.triggerDownload(
-            listOf(
-                VoiceInstructions.builder().ssmlAnnouncement(announcement1).build(),
-                VoiceInstructions.builder().announcement(announcement2).build(),
-            )
-        )
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement3).build())
-        )
-
-        sut.cancel()
-
-        verify(exactly = 1) {
-            mockResourceLoader.cancel(id1)
-            mockResourceLoader.cancel(id2)
-            mockResourceLoader.cancel(id3)
-        }
-    }
-
-    @Test
-    fun `cancel with finished downloads`() = coroutineRule.runBlockingTest {
-        val id1 = 10L
-        val id2 = 15L
-        every { mockResourceLoader.load(any(), any()) } returnsMany listOf(id1, id2)
-        val announcement1 = "turn up and down"
-        val announcement2 = "dance and jump"
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement1).build())
-        )
-        val callback = captureRequestCallback()
-        sut.triggerDownload(
-            listOf(VoiceInstructions.builder().ssmlAnnouncement(announcement2).build())
-        )
-        callback.onFinish(mockk(), ExpectedFactory.createError(mockk()))
-
-        sut.cancel()
-
-        verify(exactly = 1) {
-            mockResourceLoader.cancel(id2)
-        }
-        verify(exactly = 0) {
-            mockResourceLoader.cancel(id1)
-        }
-    }
-
-    private fun captureRequestCallback(): ResourceLoadCallback {
-        val slot = CapturingSlot<ResourceLoadCallback>()
-        verify { mockResourceLoader.load(any(), capture(slot)) }
-        return slot.captured
+        verify(exactly = 1) { mockResourceLoader.cancel(any()) }
     }
 
     private fun givenResourceLoaderResponse(

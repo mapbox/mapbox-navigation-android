@@ -9,7 +9,6 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory.createError
 import com.mapbox.bindgen.ExpectedFactory.createValue
-import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadFlags
 import com.mapbox.common.ResourceLoadResult
@@ -20,16 +19,10 @@ import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
 import com.mapbox.navigation.ui.utils.internal.resource.load
 import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
-import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import com.mapbox.navigation.utils.internal.logE
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.MalformedURLException
 import java.net.URL
-import kotlin.coroutines.resume
 
-internal class MapboxSpeechLoader(
+internal class MapboxSpeechProvider(
     private val accessToken: String,
     private val language: String,
     private val urlSkuTokenProvider: UrlSkuTokenProvider,
@@ -37,67 +30,15 @@ internal class MapboxSpeechLoader(
     private val resourceLoader: ResourceLoader,
 ) {
 
-    private val downloadedInstructions = mutableSetOf<TypeAndAnnouncement>()
-    private val downloadedInstructionsLock = Any()
-    private val defaultScope = InternalJobControlFactory.createDefaultScopeJobControl().scope
-
-    suspend fun load(
-        voiceInstruction: VoiceInstructions,
-        onlyCache: Boolean
-    ): Expected<Throwable, ByteArray> {
+    suspend fun load(voiceInstruction: VoiceInstructions): Expected<Throwable, ByteArray> {
         return runCatching {
             val typeAndAnnouncement = VoiceInstructionsParser.parse(voiceInstruction)
                 .getValueOrElse { throw it }
-            val request = createRequest(typeAndAnnouncement).apply {
-                if (onlyCache) {
-                    networkRestriction = NetworkRestriction.DISALLOW_ALL
-                }
-            }
+            val request = createRequest(typeAndAnnouncement)
             val response = resourceLoader.load(request)
             return processResponse(response)
         }.getOrElse {
             createError(it)
-        }
-    }
-
-    fun triggerDownload(voiceInstructions: List<VoiceInstructions>) {
-        voiceInstructions.forEach { voiceInstruction ->
-            defaultScope.launch {
-                val typeAndAnnouncement = VoiceInstructionsParser.parse(voiceInstruction).value
-                if (typeAndAnnouncement != null && !hasTypeAndAnnouncement(typeAndAnnouncement)) {
-                    predownload(typeAndAnnouncement)
-                }
-            }
-        }
-    }
-
-    fun cancel() {
-        defaultScope.cancel()
-    }
-
-    private fun hasTypeAndAnnouncement(typeAndAnnouncement: TypeAndAnnouncement): Boolean {
-        synchronized(downloadedInstructionsLock) {
-            return typeAndAnnouncement in downloadedInstructions
-        }
-    }
-
-    private suspend fun predownload(typeAndAnnouncement: TypeAndAnnouncement) {
-        try {
-            suspendCancellableCoroutine { cont ->
-                val request = createRequest(typeAndAnnouncement)
-                val id = resourceLoader.load(request) { result ->
-                    // tilestore thread
-                    if (result.isValue) {
-                        synchronized(downloadedInstructionsLock) {
-                            downloadedInstructions.add(typeAndAnnouncement)
-                        }
-                    }
-                    cont.resume(Unit)
-                }
-                cont.invokeOnCancellation { resourceLoader.cancel(id) }
-            }
-        } catch (ex: Throwable) {
-            logE("Failed to download instruction '$typeAndAnnouncement': ${ex.localizedMessage}")
         }
     }
 
