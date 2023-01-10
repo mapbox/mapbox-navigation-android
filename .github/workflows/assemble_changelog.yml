@@ -1,9 +1,7 @@
 name: Assemble changelog
 on:
-  push:
-    branches:
-      - main
-      - release-v**
+  pull_request:
+    types: [ opened, synchronize ]
 jobs:
   process:
     permissions:
@@ -11,6 +9,7 @@ jobs:
       contents: write
     runs-on: ubuntu-20.04
     env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3

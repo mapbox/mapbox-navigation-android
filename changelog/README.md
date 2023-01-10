@@ -26,12 +26,10 @@ If you have implemented several features or bugfixes you should describe all of 
 You can choose any name for your changelog files because the GitHub action will rename files in
 `changelog/unreleased/features` and `changelog/unreleased/bugfixes` directories to `${PR_NUMBER}.md` when you open a PR.
 
-Every push to the main or release branch Assemble changelog GitHub action will be executed:
-
-* collect all files from `changelog/unreleased`
-* assemble the changelog like:
+For every PR the script will generate and update a comment with a changelog for the current branch in the following format:
 
 ```
+# Changelog
 #### Features
 - Feature 1 [#1234](https://github.com/mapbox/mapbox-navigation-android/pull/1234)
 - Feature 2 [#2345](https://github.com/mapbox/mapbox-navigation-android/pull/2345)
@@ -47,11 +45,12 @@ Every push to the main or release branch Assemble changelog GitHub action will b
 Some other changes
 ```
 
-* write the changelog to the `changelog/unreleased/CHANGELOG.md` file
+The comment will be updated with every change.
+Also, a comment with a changelog will be generated and updated for the android auto project too.
 
 Every release the release train app will:
 
-* get changelog from `changelog/unreleased/CHANGELOG.md` file
+* assemble the changelog
 * add information about dependencies and compile changelog like:
 ```
 ## Mapbox Navigation SDK 1.1.1 - 13 December, 2022
