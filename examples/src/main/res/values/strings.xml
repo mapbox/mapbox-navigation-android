@@ -11,7 +11,7 @@
     <string name="description_signboard" translatable="false">Demonstrates the use of signboard API.</string>
     <string name="title_junction" translatable="false">Junction Example</string>
     <string name="description_junction" translatable="false">Demonstrates the use of junction API.</string>
-    <string name="title_trip_progress" translatable="false">TripProgess Example</string>
+    <string name="title_trip_progress" translatable="false">TripProgress Example</string>
     <string name="description_trip_progress" translatable="false">Demonstrates the use of trip progress API.</string>
     <string name="title_maneuver" translatable="false">Maneuver Example</string>
     <string name="description_maneuver" translatable="false">Demonstrates the use of maneuver API.</string>
