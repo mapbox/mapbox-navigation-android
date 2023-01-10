@@ -82,6 +82,14 @@ internal class InfoPanelCoordinator(
             context.systemBarsInsets.collect { updateGuidelinePosition(systemBarsInsets = it) }
         }
         coroutineScope.launch {
+            context.styles.infoPanelGuidelineMaxPosPercent.collect {
+                updateGuidelinePosition(maxPosPercent = it)
+            }
+        }
+        coroutineScope.launch {
+            infoPanelTop.collect { updateGuidelinePosition(infoPanelTop = it) }
+        }
+        coroutineScope.launch {
             context.options.isInfoPanelHideable.collect { hideable ->
                 if (behavior.state != BottomSheetBehavior.STATE_HIDDEN) {
                     // To avoid incorrect layout positioning, we only allow `behavior.isHideable`
@@ -94,9 +102,6 @@ internal class InfoPanelCoordinator(
         }
         coroutineScope.launch {
             bottomSheetPeekHeight().collect { behavior.peekHeight = it }
-        }
-        coroutineScope.launch {
-            infoPanelTop.collect { updateGuidelinePosition(infoPanelTop = it) }
         }
     }
 
@@ -158,11 +163,14 @@ internal class InfoPanelCoordinator(
     private fun updateGuidelinePosition(
         systemBarsInsets: Insets = context.systemBarsInsets.value,
         infoPanelTop: Int = infoPanel.top,
+        maxPosPercent: Float = context.styles.infoPanelGuidelineMaxPosPercent.value
     ) {
         val parentHeight = (infoPanel.parent as ViewGroup).height
-        val maxPos = (parentHeight * GUIDELINE_MAX_POSITION_PERCENT).toInt()
-        val pos = parentHeight - infoPanelTop - systemBarsInsets.bottom
-        guidelineBottom.setGuidelineEnd(pos.coerceIn(0, maxPos))
+        val maxPos = (parentHeight * maxPosPercent).toInt() - systemBarsInsets.bottom
+        if (0 < maxPos) {
+            val pos = parentHeight - infoPanelTop - systemBarsInsets.bottom
+            guidelineBottom.setGuidelineEnd(pos.coerceIn(0, maxPos))
+        }
     }
 
     private fun resetSlideOffset(prevBottomSheetState: Int, bottomSheetState: Int) {
@@ -205,13 +213,5 @@ internal class InfoPanelCoordinator(
                 ViewCompat.offsetTopAndBottom(layout, (layout.parent as? View)?.height ?: 0)
             }
         }
-    }
-
-    private companion object {
-        /**
-         * Guideline bottom maximum position within its parent view.
-         * This value must be within 0.0f..1.0f range.
-         */
-        const val GUIDELINE_MAX_POSITION_PERCENT = 0.3f
     }
 }
