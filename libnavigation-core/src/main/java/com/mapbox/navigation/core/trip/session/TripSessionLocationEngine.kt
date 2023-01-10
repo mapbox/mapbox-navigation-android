@@ -24,42 +24,21 @@ import java.util.concurrent.TimeUnit
  * trip session is not using replay, use the [NavigationOptions.locationEngine].
  */
 internal class TripSessionLocationEngine constructor(
-    val navigationOptions: NavigationOptions
+    private val navigationOptions: NavigationOptions,
+    private val replayLocationEngineProvider: (MapboxReplayer) -> LocationEngine = {
+        ReplayLocationEngine(it)
+    }
 ) {
 
     val mapboxReplayer: MapboxReplayer by lazy { MapboxReplayer() }
 
-    private val replayLocationEngine: ReplayLocationEngine by lazy {
-        ReplayLocationEngine(mapboxReplayer)
+    private val replayLocationEngine: LocationEngine by lazy {
+        replayLocationEngineProvider.invoke(mapboxReplayer)
     }
-    private var locationEngine: LocationEngine = navigationOptions.locationEngine
+    private var activeLocationEngine: LocationEngine? = null
     private var onRawLocationUpdate: (Location) -> Unit = { }
 
-    @SuppressLint("MissingPermission")
-    fun startLocationUpdates(isReplayEnabled: Boolean, onRawLocationUpdate: (Location) -> Unit) {
-        logD(LOG_CATEGORY) {
-            "starting location updates for ${if (isReplayEnabled) "replay " else ""}location engine"
-        }
-        this.onRawLocationUpdate = onRawLocationUpdate
-        val locationEngine = if (isReplayEnabled) {
-            replayLocationEngine
-        } else {
-            navigationOptions.locationEngine
-        }
-        locationEngine.requestLocationUpdates(
-            navigationOptions.locationEngineRequest,
-            locationEngineCallback,
-            Looper.getMainLooper()
-        )
-        locationEngine.getLastLocation(locationEngineCallback)
-    }
-
-    fun stopLocationUpdates() {
-        onRawLocationUpdate = { }
-        locationEngine.removeLocationUpdates(locationEngineCallback)
-    }
-
-    private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
+    private val locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
             logD(LOG_CATEGORY) {
                 "successful location engine callback $result"
@@ -75,6 +54,32 @@ internal class TripSessionLocationEngine constructor(
         }
     }
 
+    @SuppressLint("MissingPermission")
+    fun startLocationUpdates(isReplayEnabled: Boolean, onRawLocationUpdate: (Location) -> Unit) {
+        logD(LOG_CATEGORY) {
+            "starting location updates for ${if (isReplayEnabled) "replay " else ""}location engine"
+        }
+        stopLocationUpdates()
+        this.onRawLocationUpdate = onRawLocationUpdate
+        activeLocationEngine = if (isReplayEnabled) {
+            replayLocationEngine
+        } else {
+            navigationOptions.locationEngine
+        }
+        activeLocationEngine?.requestLocationUpdates(
+            navigationOptions.locationEngineRequest,
+            locationEngineCallback,
+            Looper.getMainLooper()
+        )
+        activeLocationEngine?.getLastLocation(locationEngineCallback)
+    }
+
+    fun stopLocationUpdates() {
+        onRawLocationUpdate = { }
+        activeLocationEngine?.removeLocationUpdates(locationEngineCallback)
+        activeLocationEngine = null
+    }
+
     private fun logIfLocationIsNotFreshEnough(location: Location) {
         val currentTime = SystemClock.elapsedRealtimeNanos()
         val locationAgeNanoSeconds = currentTime - location.elapsedRealtimeNanos
@@ -88,7 +93,6 @@ internal class TripSessionLocationEngine constructor(
     }
 
     private companion object {
-
         private const val DELAYED_LOCATION_WARNING_THRESHOLD_MS = 500 // 0.5s
         private const val LOG_CATEGORY = "TripSessionLocationEngine"
     }

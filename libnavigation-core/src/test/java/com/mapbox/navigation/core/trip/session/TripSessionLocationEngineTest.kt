@@ -13,7 +13,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import org.junit.Before
+import io.mockk.verifyOrder
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,34 +27,21 @@ class TripSessionLocationEngineTest {
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
 
-    private val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
-    private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
-    private val locationEngineResult: LocationEngineResult = mockk(relaxUnitFun = true)
-    private val location: Location = mockk(relaxed = true)
-
     private val context: Context = ApplicationProvider.getApplicationContext()
+    private val deviceLocationEngine = mockLocationEngine()
+    private val replayLocationEngine = mockLocationEngine()
     private val navigationOptions = NavigationOptions.Builder(context)
-        .locationEngine(locationEngine)
+        .locationEngine(deviceLocationEngine)
         .build()
-    private val tripSessionLocationEngine = TripSessionLocationEngine(navigationOptions)
 
-    @Before
-    fun setup() {
-        every {
-            locationEngine.requestLocationUpdates(
-                any(),
-                capture(locationCallbackSlot),
-                any()
-            )
-        } answers {}
-        every { locationEngineResult.locations } returns listOf(location)
+    private val sut = TripSessionLocationEngine(navigationOptions) {
+        replayLocationEngine
     }
 
     @Test
     fun `should request location updates from navigation options when replay is disabled`() {
-        tripSessionLocationEngine.startLocationUpdates(false) {
-            // This test is not verifying the callback
-        }
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(false, onRawLocationUpdate)
 
         verify(exactly = 1) {
             navigationOptions.locationEngine.requestLocationUpdates(
@@ -67,12 +54,12 @@ class TripSessionLocationEngineTest {
 
     @Test
     fun `should stop location updates from navigation options when replay is disabled`() {
-        tripSessionLocationEngine.startLocationUpdates(false) {
-            // This test is not verifying the callback
-        }
-        tripSessionLocationEngine.stopLocationUpdates()
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(false, onRawLocationUpdate)
+        sut.stopLocationUpdates()
 
-        verify(exactly = 1) {
+        verifyOrder {
+            navigationOptions.locationEngine.requestLocationUpdates(any(), any(), any())
             navigationOptions.locationEngine.removeLocationUpdates(
                 any<LocationEngineCallback<LocationEngineResult>>()
             )
@@ -80,13 +67,96 @@ class TripSessionLocationEngineTest {
     }
 
     @Test
-    fun `should not request location updates from navigation options when replay is enabled`() {
-        tripSessionLocationEngine.startLocationUpdates(true) {
-            // This test is not verifying the callback
+    fun `should not request location updates from replay engine when replay is disabled`() {
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(false, onRawLocationUpdate)
+
+        verify(exactly = 0) {
+            replayLocationEngine.requestLocationUpdates(any(), any(), any())
         }
+    }
+
+    @Test
+    fun `should request location updates from replay engine when replay is enable`() {
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(true, onRawLocationUpdate)
+
+        verify(exactly = 1) {
+            replayLocationEngine.requestLocationUpdates(
+                any(),
+                any(),
+                Looper.getMainLooper()
+            )
+        }
+    }
+
+    @Test
+    fun `should stop location updates from replay engine when replay is enabled`() {
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(true, onRawLocationUpdate)
+        sut.stopLocationUpdates()
+
+        verifyOrder {
+            replayLocationEngine.requestLocationUpdates(any(), any(), any())
+            replayLocationEngine.removeLocationUpdates(
+                any<LocationEngineCallback<LocationEngineResult>>()
+            )
+        }
+    }
+
+    @Test
+    fun `should not request location updates from navigation options when replay is enabled`() {
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(true, onRawLocationUpdate)
 
         verify(exactly = 0) {
             navigationOptions.locationEngine.requestLocationUpdates(any(), any(), any())
         }
+    }
+
+    @Test
+    fun `should remove location updates from previous location engine`() {
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(true, onRawLocationUpdate)
+
+        verify(exactly = 0) {
+            navigationOptions.locationEngine.requestLocationUpdates(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `startLocationUpdates should remove updates from previous location engine`() {
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(true, onRawLocationUpdate)
+        sut.startLocationUpdates(false, onRawLocationUpdate)
+        sut.startLocationUpdates(true, onRawLocationUpdate)
+
+        verifyOrder {
+            replayLocationEngine.requestLocationUpdates(any(), any(), any())
+            replayLocationEngine.removeLocationUpdates(
+                any<LocationEngineCallback<LocationEngineResult>>()
+            )
+            navigationOptions.locationEngine.requestLocationUpdates(any(), any(), any())
+            navigationOptions.locationEngine.removeLocationUpdates(
+                any<LocationEngineCallback<LocationEngineResult>>()
+            )
+            replayLocationEngine.requestLocationUpdates(any(), any(), any())
+        }
+    }
+
+    private fun mockLocationEngine(): LocationEngine {
+        val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
+        val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
+        val locationEngineResult: LocationEngineResult = mockk(relaxUnitFun = true)
+        val location: Location = mockk(relaxed = true)
+        every {
+            locationEngine.requestLocationUpdates(
+                any(),
+                capture(locationCallbackSlot),
+                any()
+            )
+        } answers {}
+        every { locationEngineResult.locations } returns listOf(location)
+        return locationEngine
     }
 }

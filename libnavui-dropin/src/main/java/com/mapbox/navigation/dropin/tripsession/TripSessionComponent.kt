@@ -79,19 +79,13 @@ internal class TripSessionComponent(
     private fun startTripSession(mapboxNavigation: MapboxNavigation) {
         replayRouteTripSession?.onDetached(mapboxNavigation)
         replayRouteTripSession = null
-        mapboxNavigation.ensureTripSessionStarted()
+        mapboxNavigation.startTripSession()
     }
 
     private fun startReplayTripSession(mapboxNavigation: MapboxNavigation) {
         replayRouteTripSession?.onDetached(mapboxNavigation)
         replayRouteTripSession = ReplayRouteSession()
         replayRouteTripSession?.onAttached(mapboxNavigation)
-    }
-
-    private fun MapboxNavigation.ensureTripSessionStarted() {
-        if (getTripSessionState() != TripSessionState.STARTED) {
-            startTripSession()
-        }
     }
 
     private fun MapboxNavigation.ensureTripSessionStopped() {
