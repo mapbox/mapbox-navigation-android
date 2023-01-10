@@ -9,7 +9,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
-import com.mapbox.navigation.core.replay.mapToLocation
+import com.mapbox.navigation.core.replay.history.mapToLocation
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -39,37 +39,42 @@ import kotlin.coroutines.suspendCoroutine
 class ArtificialDriverTest {
 
     @Test
-    fun testFollowingRoute() = runBlocking<Unit>(Dispatchers.Main) {
-        withNavigators { mapboxNavigation, nativeNavigator ->
-            mapboxNavigation.historyRecorder.startRecording()
-            val testRoute = getTestRoute()
-            val replayRouteMapper = ReplayRouteMapper()
-            val events = replayRouteMapper.mapDirectionsRouteGeometry(testRoute.directionsRoute)
-                .filterIsInstance<ReplayEventUpdateLocation>()
-            val setRoutesResult =
-                nativeNavigator.setRoutes(testRoute, reason = SetRoutesReason.NEW_ROUTE)
-            assertTrue("result is $setRoutesResult", setRoutesResult.isValue)
-            val statusesTracking = async<List<NavigationStatus>> {
-                nativeNavigator.collectStatuses(untilRouteState = RouteState.COMPLETE)
-            }
-
-            for (event in events) {
-                val location = event.location.mapToLocation(event.eventTimestamp)
-                assertTrue(nativeNavigator.updateLocation(location.toFixLocation()))
-            }
-
-            val states = statusesTracking.await()
-            val historyFile = suspendCoroutine<String> { continuation ->
-                mapboxNavigation.historyRecorder.stopRecording {
-                    continuation.resume(it ?: "null")
+    fun nativeNavigatorFollowsArtificialDriverWithoutReroutes() =
+        runBlocking<Unit>(Dispatchers.Main) {
+            withNavigators { mapboxNavigation, nativeNavigator ->
+                mapboxNavigation.historyRecorder.startRecording()
+                val testRoute = getTestRoute()
+                val events = createArtificialLocationUpdates(testRoute)
+                val setRoutesResult =
+                    nativeNavigator.setRoutes(testRoute, reason = SetRoutesReason.NEW_ROUTE)
+                assertTrue("result is $setRoutesResult", setRoutesResult.isValue)
+                val statusesTracking = async<List<NavigationStatus>> {
+                    nativeNavigator.collectStatuses(untilRouteState = RouteState.COMPLETE)
                 }
+
+                for (location in events.map { it.location.mapToLocation() }) {
+                    assertTrue(nativeNavigator.updateLocation(location.toFixLocation()))
+                }
+
+                val states = statusesTracking.await()
+                val historyFile = suspendCoroutine<String> { continuation ->
+                    mapboxNavigation.historyRecorder.stopRecording {
+                        continuation.resume(it ?: "null")
+                    }
+                }
+                val notTrackingStates = states.filter { it.routeState != RouteState.TRACKING }
+                assertTrue(
+                    "not all states are tracking, see history file $historyFile: $notTrackingStates",
+                    notTrackingStates.isEmpty()
+                )
             }
-            val notTrackingStates = states.filter { it.routeState != RouteState.TRACKING }
-            assertTrue(
-                "not all states are tracking, see history file $historyFile: $notTrackingStates",
-                notTrackingStates.isEmpty()
-            )
         }
+
+    private fun createArtificialLocationUpdates(testRoute: NavigationRoute): List<ReplayEventUpdateLocation> {
+        val replayRouteMapper = ReplayRouteMapper()
+        return replayRouteMapper
+            .mapDirectionsRouteGeometry(testRoute.directionsRoute)
+            .filterIsInstance<ReplayEventUpdateLocation>()
     }
 }
 
