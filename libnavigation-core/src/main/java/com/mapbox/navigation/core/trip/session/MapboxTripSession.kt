@@ -267,6 +267,28 @@ internal class MapboxTripSession(
             }
         }
 
+    private val onRawLocationUpdate: (Location) -> Unit = { rawLocation ->
+        val locationHash = rawLocation.hashCode()
+        logD(
+            "updateRawLocation; system elapsed time: ${System.nanoTime()}; " +
+                "location ($locationHash) elapsed time: ${rawLocation.elapsedRealtimeNanos}",
+            LOG_CATEGORY
+        )
+        this.rawLocation = rawLocation
+        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
+        mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            logD(
+                "updateRawLocation; notify navigator for ($locationHash) - start",
+                LOG_CATEGORY
+            )
+            navigator.updateLocation(rawLocation.toFixLocation())
+            logD(
+                "updateRawLocation; notify navigator for ($locationHash) - end",
+                LOG_CATEGORY
+            )
+        }
+    }
+
     init {
         navigator.setNativeNavigatorRecreationObserver {
             if (fallbackVersionsObservers.isNotEmpty()) {
@@ -297,39 +319,14 @@ internal class MapboxTripSession(
      * Start MapboxTripSession
      */
     override fun start(withTripService: Boolean, withReplayEnabled: Boolean) {
-        if (state == TripSessionState.STARTED) {
-            return
+        if (state != TripSessionState.STARTED) {
+            navigator.addNavigatorObserver(navigatorObserver)
+            if (withTripService) {
+                tripService.startService()
+            }
+            state = TripSessionState.STARTED
         }
-        navigator.addNavigatorObserver(navigatorObserver)
-        if (withTripService) {
-            tripService.startService()
-        }
-        tripSessionLocationEngine.startLocationUpdates(withReplayEnabled) {
-            updateRawLocation(it)
-        }
-        state = TripSessionState.STARTED
-    }
-
-    private fun updateRawLocation(rawLocation: Location) {
-        val locationHash = rawLocation.hashCode()
-        logD(
-            "updateRawLocation; system elapsed time: ${System.nanoTime()}; " +
-                "location ($locationHash) elapsed time: ${rawLocation.elapsedRealtimeNanos}",
-            LOG_CATEGORY
-        )
-        this.rawLocation = rawLocation
-        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
-        mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            logD(
-                "updateRawLocation; notify navigator for ($locationHash) - start",
-                LOG_CATEGORY
-            )
-            navigator.updateLocation(rawLocation.toFixLocation())
-            logD(
-                "updateRawLocation; notify navigator for ($locationHash) - end",
-                LOG_CATEGORY
-            )
-        }
+        tripSessionLocationEngine.startLocationUpdates(withReplayEnabled, onRawLocationUpdate)
     }
 
     /**

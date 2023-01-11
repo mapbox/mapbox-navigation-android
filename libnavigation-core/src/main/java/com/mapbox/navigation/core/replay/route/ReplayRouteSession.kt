@@ -106,7 +106,6 @@ class ReplayRouteSession : MapboxNavigationObserver {
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         this.replayRouteMapper = ReplayRouteMapper(options.replayRouteOptions)
         this.mapboxNavigation = mapboxNavigation
-        mapboxNavigation.stopTripSession()
         mapboxNavigation.startReplayTripSession()
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
@@ -139,7 +138,6 @@ class ReplayRouteSession : MapboxNavigationObserver {
         mapboxNavigation.mapboxReplayer.unregisterObserver(replayEventsObserver)
         mapboxNavigation.mapboxReplayer.stop()
         mapboxNavigation.mapboxReplayer.clearEvents()
-        mapboxNavigation.stopTripSession()
         this.mapboxNavigation = null
         this.currentRoute = null
     }

@@ -238,16 +238,39 @@ class MapboxTripSessionTest {
     @Test
     fun startSessionWithTripServiceCallStartAgain() {
         tripSession.start(true)
-
         tripSession.start(false)
-
         every { tripService.hasServiceStarted() } returns true
-
         assertTrue(tripSession.isRunningWithForegroundService())
-        verify(exactly = 1) { tripService.startService() }
-        verify(exactly = 1) { tripSessionLocationEngine.startLocationUpdates(any(), any()) }
-
         tripSession.stop()
+
+        verifyOrder {
+            navigator.addNavigatorObserver(any())
+            tripService.startService()
+            tripSessionLocationEngine.startLocationUpdates(any(), any())
+            tripSessionLocationEngine.startLocationUpdates(any(), any())
+            navigator.removeNavigatorObserver(any())
+            tripSession.stop()
+            tripSessionLocationEngine.stopLocationUpdates()
+        }
+    }
+
+    @Test
+    fun startSessionWithReplayCallStartAgain() {
+        tripSession.start(true, withReplayEnabled = false)
+        tripSession.start(true, withReplayEnabled = true)
+        tripSession.start(true, withReplayEnabled = false)
+        tripSession.stop()
+
+        verifyOrder {
+            navigator.addNavigatorObserver(any())
+            tripService.startService()
+            tripSessionLocationEngine.startLocationUpdates(false, any())
+            tripSessionLocationEngine.startLocationUpdates(true, any())
+            tripSessionLocationEngine.startLocationUpdates(false, any())
+            navigator.removeNavigatorObserver(any())
+            tripSession.stop()
+            tripSessionLocationEngine.stopLocationUpdates()
+        }
     }
 
     @Test

@@ -114,7 +114,7 @@ class TripSessionComponentTest {
         }
 
     @Test
-    fun `EnableTripSession will restart a trip session when replay is enabled`() =
+    fun `EnableTripSession will not stopTripSession`() =
         runBlockingTest {
             testStore.setState(
                 State(
@@ -139,9 +139,9 @@ class TripSessionComponentTest {
 
             verifyOrder {
                 mapboxNavigation.startReplayTripSession()
-                mapboxNavigation.stopTripSession()
                 mapboxNavigation.startTripSession()
             }
+            verify(exactly = 0) { mapboxNavigation.stopTripSession() }
         }
 
     @Test

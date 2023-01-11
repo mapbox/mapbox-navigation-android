@@ -85,17 +85,6 @@ class ReplayRouteSessionTest {
     }
 
     @Test
-    fun `onAttached - should stop trip session and start replay session`() {
-        sut.onAttached(mapboxNavigation)
-
-        verifyOrder {
-            mapboxNavigation.stopTripSession()
-            mapboxNavigation.startReplayTripSession()
-            replayer.play()
-        }
-    }
-
-    @Test
     fun `onAttached - should reset trip session and replayer when navigation routes are cleared`() {
         val routesObserver = slot<RoutesObserver>()
         every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } returns Unit
@@ -139,13 +128,13 @@ class ReplayRouteSessionTest {
     }
 
     @Test
-    fun `onDetached - should stop trip session and replayer`() {
+    fun `onDetached - should stop and clear the replayer`() {
         sut.onDetached(mapboxNavigation)
 
         verifyOrder {
+            replayer.unregisterObserver(any())
             replayer.stop()
             replayer.clearEvents()
-            mapboxNavigation.stopTripSession()
         }
     }
 
@@ -251,7 +240,6 @@ class ReplayRouteSessionTest {
         )
 
         verifyOrder {
-            mapboxNavigation.stopTripSession()
             mapboxNavigation.startReplayTripSession()
             replayer.play()
             replayer.pushEvents(any())

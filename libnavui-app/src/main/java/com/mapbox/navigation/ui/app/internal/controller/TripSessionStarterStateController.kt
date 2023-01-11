@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
 import android.annotation.SuppressLint
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
@@ -12,7 +11,6 @@ import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterState
  * The class is responsible to start and stop the `TripSession` for NavigationView.
  * @param store defines the current screen state
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @SuppressLint("MissingPermission")
 class TripSessionStarterStateController(store: Store) : StateController() {
     init {
