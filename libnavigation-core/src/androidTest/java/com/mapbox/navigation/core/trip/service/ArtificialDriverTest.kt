@@ -121,8 +121,11 @@ private suspend fun withNavigators(
             .accessToken(context.getString(R.string.mapbox_access_token))
             .build()
     )
-    block(mapboxNavigation, MapboxNativeNavigatorImpl)
-    mapboxNavigation.onDestroy()
+    try {
+        block(mapboxNavigation, MapboxNativeNavigatorImpl)
+    } finally {
+        mapboxNavigation.onDestroy()
+    }
 }
 
 private fun getTestRoute(): NavigationRoute {
