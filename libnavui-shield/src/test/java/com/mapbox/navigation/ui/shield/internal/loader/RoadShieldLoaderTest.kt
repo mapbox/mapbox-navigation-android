@@ -1,9 +1,8 @@
-package com.mapbox.navigation.ui.shield
+package com.mapbox.navigation.ui.shield.internal.loader
 
 import com.mapbox.api.directions.v5.models.ShieldSprite
 import com.mapbox.api.directions.v5.models.ShieldSprites
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.ui.shield.internal.model.generateSpriteSheetUrl
 import com.mapbox.navigation.ui.shield.internal.model.getSpriteFrom
@@ -12,37 +11,43 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-class ShieldResultCacheTest {
+class RoadShieldLoaderTest {
 
-    @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    private lateinit var sut: RoadShieldLoader
 
-    private val shieldSpritesCache: ShieldSpritesCache = mockk()
-    private val shieldByteArrayCache: ShieldByteArrayCache = mockk()
-
-    private val cache = ShieldResultCache(shieldSpritesCache, shieldByteArrayCache)
+    private lateinit var spritesLoader: ResourceLoader<String, ShieldSprites>
+    private lateinit var imageLoader: ResourceLoader<String, ByteArray>
 
     @Before
     fun setup() {
+        spritesLoader = mockk()
+        imageLoader = mockk()
+        sut = RoadShieldLoader(spritesLoader, imageLoader)
+
         mockkStatic(RouteShieldToDownload.MapboxDesign::generateSpriteSheetUrl)
         mockkStatic(RouteShieldToDownload.MapboxDesign::getSpriteFrom)
     }
 
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
+
     @Test
     @Suppress("MaxLineLength")
-    fun `design shield - success`() = coroutineRule.runBlockingTest {
+    fun `design shield - success`() = runBlockingTest {
         val rawShieldJson =
             """
                 {"svg":"<svg xmlns=\"http://www.w3.org/2000/svg\" id=\"default-5\" width=\"114\" height=\"42\" viewBox=\"0 0 38 14\"><g><path d=\"M0,0 H38 V14 H0 Z\" fill=\"none\"/><path d=\"M3,1 H35 C35,1 37,1 37,3 V11 C37,11 37,13 35,13 H3 C3,13 1,13 1,11 V3 C1,3 1,1 3,1\" fill=\"none\" stroke=\"hsl(230, 18%, 13%)\" stroke-linejoin=\"round\" stroke-miterlimit=\"4px\" stroke-width=\"2\"/><path d=\"M3,1 H35 C35,1 37,1 37,3 V11 C37,11 37,13 35,13 H3 C3,13 1,13 1,11 V3 C1,3 1,1 3,1\" fill=\"hsl(0, 0%, 100%)\"/><path d=\"M0,4 H38 V10 H0 Z\" fill=\"none\" id=\"mapbox-text-placeholder\"/></g></svg>"}
@@ -66,10 +71,10 @@ class ShieldResultCacheTest {
             }
         }
         coEvery {
-            shieldSpritesCache.getOrRequest(spriteUrl)
+            spritesLoader.load(spriteUrl)
         } returns ExpectedFactory.createValue(shieldSprites)
         coEvery {
-            shieldByteArrayCache.getOrRequest(shieldUrl)
+            imageLoader.load(shieldUrl)
         } returns ExpectedFactory.createValue(rawShieldJson.toByteArray())
 
         val expectedShieldString =
@@ -82,13 +87,13 @@ class ShieldResultCacheTest {
             mapboxShield = toDownload.mapboxShield,
             shieldSprite = shieldSprite
         )
-        val result = cache.getOrRequest(toDownload)
+        val result = sut.load(toDownload)
 
         assertEquals(expected, result.value)
     }
 
     @Test
-    fun `design shield - failure - shield download failure`() = coroutineRule.runBlockingTest {
+    fun `design shield - failure - shield download failure`() = runBlockingTest {
         val shieldUrl = "shield-url"
         val spriteUrl = "sprite-url"
         val shieldSprites = mockk<ShieldSprites>()
@@ -107,26 +112,26 @@ class ShieldResultCacheTest {
             }
         }
         coEvery {
-            shieldSpritesCache.getOrRequest(spriteUrl)
+            spritesLoader.load(spriteUrl)
         } returns ExpectedFactory.createValue(shieldSprites)
         coEvery {
-            shieldByteArrayCache.getOrRequest(shieldUrl)
+            imageLoader.load(shieldUrl)
         } returns ExpectedFactory.createError("error")
 
         val expected = "error"
-        val result = cache.getOrRequest(toDownload)
+        val result = sut.load(toDownload)
 
         assertEquals(expected, result.error)
     }
 
     @Test
-    fun `design shield - failure - missing sprites`() = coroutineRule.runBlockingTest {
+    fun `design shield - failure - missing sprites`() = runBlockingTest {
         val spriteUrl = "sprite-url"
         val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
             every { generateSpriteSheetUrl() } returns spriteUrl
         }
         coEvery {
-            shieldSpritesCache.getOrRequest(spriteUrl)
+            spritesLoader.load(spriteUrl)
         } returns ExpectedFactory.createError("error")
 
         val expected = """
@@ -134,13 +139,13 @@ class ShieldResultCacheTest {
             url: $spriteUrl
             result: error
         """.trimIndent()
-        val result = cache.getOrRequest(toDownload)
+        val result = sut.load(toDownload)
 
         assertEquals(expected, result.error)
     }
 
     @Test
-    fun `design shield - failure - missing sprite`() = coroutineRule.runBlockingTest {
+    fun `design shield - failure - missing sprite`() = runBlockingTest {
         val spriteUrl = "sprite-url"
         val shieldSprites = mockk<ShieldSprites>()
         val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
@@ -151,17 +156,17 @@ class ShieldResultCacheTest {
             }
         }
         coEvery {
-            shieldSpritesCache.getOrRequest(spriteUrl)
+            spritesLoader.load(spriteUrl)
         } returns ExpectedFactory.createValue(shieldSprites)
 
         val expected = "Sprite not found for ${toDownload.mapboxShield.name()} in $shieldSprites."
-        val result = cache.getOrRequest(toDownload)
+        val result = sut.load(toDownload)
 
         assertEquals(expected, result.error)
     }
 
     @Test
-    fun `design shield - failure - missing placeholder`() = coroutineRule.runBlockingTest {
+    fun `design shield - failure - missing placeholder`() = runBlockingTest {
         val spriteUrl = "sprite-url"
         val shieldSprites = mockk<ShieldSprites>()
         val shieldSprite = mockk<ShieldSprite> {
@@ -174,17 +179,17 @@ class ShieldResultCacheTest {
             every { getSpriteFrom(shieldSprites) } returns shieldSprite
         }
         coEvery {
-            shieldSpritesCache.getOrRequest(spriteUrl)
+            spritesLoader.load(spriteUrl)
         } returns ExpectedFactory.createValue(shieldSprites)
 
         val expected = "Mapbox shield sprite placeholder was null or empty in: $shieldSprite"
-        val result = cache.getOrRequest(toDownload)
+        val result = sut.load(toDownload)
 
         assertEquals(expected, result.error)
     }
 
     @Test
-    fun `legacy shield - success`() = coroutineRule.runBlockingTest {
+    fun `legacy shield - success`() = runBlockingTest {
         val shieldByteArray = byteArrayOf()
         val shieldUrl = "shield-url"
         val toDownload = mockk<RouteShieldToDownload.MapboxLegacy> {
@@ -192,7 +197,7 @@ class ShieldResultCacheTest {
             every { url } returns shieldUrl.plus(".svg")
         }
         coEvery {
-            shieldByteArrayCache.getOrRequest(shieldUrl.plus(".svg"))
+            imageLoader.load(shieldUrl.plus(".svg"))
         } returns ExpectedFactory.createValue(shieldByteArray)
 
         val expected = RouteShield.MapboxLegacyShield(
@@ -200,30 +205,24 @@ class ShieldResultCacheTest {
             byteArray = shieldByteArray,
             initialUrl = shieldUrl
         )
-        val result = cache.getOrRequest(toDownload)
+        val result = sut.load(toDownload)
 
         assertEquals(expected, result.value)
     }
 
     @Test
-    fun `legacy shield - failure`() = coroutineRule.runBlockingTest {
+    fun `legacy shield - failure`() = runBlockingTest {
         val shieldUrl = "shield-url"
         val toDownload = mockk<RouteShieldToDownload.MapboxLegacy> {
             every { url } returns shieldUrl
         }
         coEvery {
-            shieldByteArrayCache.getOrRequest(shieldUrl)
+            imageLoader.load(shieldUrl)
         } returns ExpectedFactory.createError("error")
 
         val expected = "error"
-        val result = cache.getOrRequest(toDownload)
+        val result = sut.load(toDownload)
 
         assertEquals(expected, result.error)
-    }
-
-    @After
-    fun tearDown() {
-        unmockkStatic(RouteShieldToDownload.MapboxDesign::generateSpriteSheetUrl)
-        unmockkStatic(RouteShieldToDownload.MapboxDesign::getSpriteFrom)
     }
 }

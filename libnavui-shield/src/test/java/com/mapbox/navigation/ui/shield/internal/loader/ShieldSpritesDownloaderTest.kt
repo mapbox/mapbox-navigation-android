@@ -1,53 +1,56 @@
-package com.mapbox.navigation.ui.shield
+package com.mapbox.navigation.ui.shield.internal.loader
 
 import com.mapbox.api.directions.v5.models.ShieldSprites
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.shield.internal.RoadShieldDownloader
 import io.mockk.coEvery
 import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.mockk.unmockkAll
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ShieldSpritesCacheTest {
+class ShieldSpritesDownloaderTest {
 
-    @get:Rule
-    var coroutineRule = MainCoroutineRule()
-
-    private val cache = ShieldSpritesCache()
+    private lateinit var sut: ShieldSpritesDownloader
 
     @Before
     fun setup() {
         mockkObject(RoadShieldDownloader)
+        sut = ShieldSpritesDownloader()
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test
-    fun `download error`() = coroutineRule.runBlockingTest {
+    fun `download error`() = runBlockingTest {
         val argument = "url"
         coEvery {
             RoadShieldDownloader.download(argument)
         } returns ExpectedFactory.createError("error")
 
-        val result = cache.getOrRequest(argument)
+        val result = sut.load(argument)
 
         assertEquals("error", result.error)
     }
 
     @Test
-    fun `parsing error`() = coroutineRule.runBlockingTest {
+    fun `parsing error`() = runBlockingTest {
         val argument = "url"
         coEvery {
             RoadShieldDownloader.download(argument)
         } returns ExpectedFactory.createValue("wrong json".toByteArray())
 
-        val result = cache.getOrRequest(argument)
+        val result = sut.load(argument)
 
         assertTrue(
             result.error!!.startsWith("Error parsing shield sprites:")
@@ -55,7 +58,7 @@ class ShieldSpritesCacheTest {
     }
 
     @Test
-    fun `download success`() = coroutineRule.runBlockingTest {
+    fun `download success`() = runBlockingTest {
         val argument = "url"
         val expectedResult = ExpectedFactory.createValue<String, ByteArray>(
             """
@@ -86,13 +89,8 @@ class ShieldSpritesCacheTest {
             expectedResult
         }
 
-        val result = cache.getOrRequest(argument)
+        val result = sut.load(argument)
 
         assertEquals(ShieldSprites.fromJson(String(expectedResult.value!!)), result.value)
-    }
-
-    @After
-    fun tearDown() {
-        unmockkObject(RoadShieldDownloader)
     }
 }

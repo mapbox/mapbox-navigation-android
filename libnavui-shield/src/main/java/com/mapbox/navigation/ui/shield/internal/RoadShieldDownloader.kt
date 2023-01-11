@@ -1,8 +1,7 @@
-package com.mapbox.navigation.ui.shield
+package com.mapbox.navigation.ui.shield.internal
 
 import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory.createError
-import com.mapbox.bindgen.ExpectedFactory.createValue
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
@@ -21,19 +20,19 @@ internal object RoadShieldDownloader {
                 ResourceLoadStatus.AVAILABLE -> {
                     val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
                     if (blob.isNotEmpty()) {
-                        createValue(blob)
+                        ExpectedFactory.createValue(blob)
                     } else {
-                        createError("No data available.")
+                        ExpectedFactory.createError("No data available.")
                     }
                 }
                 ResourceLoadStatus.UNAUTHORIZED ->
-                    createError("Your token cannot access this resource.")
+                    ExpectedFactory.createError("Your token cannot access this resource.")
                 ResourceLoadStatus.NOT_FOUND ->
-                    createError("Resource is missing.")
+                    ExpectedFactory.createError("Resource is missing.")
                 else ->
-                    createError("Unknown error (status: ${responseData.status}).")
+                    ExpectedFactory.createError("Unknown error (status: ${responseData.status}).")
             }
-        } ?: createError(response.error?.message ?: "No data available.")
+        } ?: ExpectedFactory.createError(response.error?.message ?: "No data available.")
     }
 
     private suspend fun ResourceLoader.load(url: String) = load(ResourceLoadRequest(url))

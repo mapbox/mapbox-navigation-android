@@ -3,7 +3,9 @@ package com.mapbox.navigation.ui.shield
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.ui.shield.internal.loader.ResourceLoader
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
+import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldOrigin
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
@@ -67,7 +69,7 @@ import kotlin.coroutines.resume
  *             - If request fails: repeat step 1.
  */
 internal class RoadShieldContentManagerImpl(
-    private val shieldResultCache: ShieldResultCache = ShieldResultCache()
+    private val shieldLoader: ResourceLoader<RouteShieldToDownload, RouteShield>
 ) : RoadShieldContentManager {
     internal companion object {
         internal const val CANCELED_MESSAGE = "canceled"
@@ -116,11 +118,11 @@ internal class RoadShieldContentManagerImpl(
             mainJob.scope.launch {
                 when (toDownload) {
                     is RouteShieldToDownload.MapboxDesign -> {
-                        val mapboxDesignShieldResult = shieldResultCache.getOrRequest(toDownload)
+                        val mapboxDesignShieldResult = shieldLoader.load(toDownload)
                         resultMap[request] = if (mapboxDesignShieldResult.isError) {
                             val legacyFallback = toDownload.legacyFallback
                             if (legacyFallback != null) {
-                                shieldResultCache.getOrRequest(legacyFallback).fold(
+                                shieldLoader.load(legacyFallback).fold(
                                     { error ->
                                         ExpectedFactory.createError(
                                             RouteShieldError(
@@ -172,7 +174,7 @@ internal class RoadShieldContentManagerImpl(
                         }
                     }
                     is RouteShieldToDownload.MapboxLegacy -> {
-                        resultMap[request] = shieldResultCache.getOrRequest(toDownload).fold(
+                        resultMap[request] = shieldLoader.load(toDownload).fold(
                             { error ->
                                 ExpectedFactory.createError(
                                     RouteShieldError(

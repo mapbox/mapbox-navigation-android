@@ -1,5 +1,9 @@
 package com.mapbox.navigation.ui.shield
 
+import com.mapbox.navigation.ui.shield.internal.RoadShieldDownloader
+import com.mapbox.navigation.ui.shield.internal.loader.CachedResourceLoader
+import com.mapbox.navigation.ui.shield.internal.loader.RoadShieldLoader
+import com.mapbox.navigation.ui.shield.internal.loader.ShieldSpritesDownloader
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
 
 /**
@@ -7,8 +11,24 @@ import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
  * so that the same cache can be reused through the app processes life.
  */
 internal object RoadShieldContentManagerContainer : RoadShieldContentManager {
+    private const val SPRITES_CACHE_SIZE = 8 // entries
+    private const val IMAGES_CACHE_SIZE = 40 // entries
+
     private val contentManager: RoadShieldContentManager by lazy {
-        RoadShieldContentManagerImpl()
+        RoadShieldContentManagerImpl(
+            shieldLoader = CachedResourceLoader(
+                IMAGES_CACHE_SIZE,
+                RoadShieldLoader(
+                    spritesLoader = CachedResourceLoader(
+                        SPRITES_CACHE_SIZE,
+                        ShieldSpritesDownloader()
+                    ),
+                    imageLoader = { url ->
+                        RoadShieldDownloader.download(url)
+                    }
+                )
+            )
+        )
     }
 
     override suspend fun getShields(shieldsToDownload: List<RouteShieldToDownload>) =
