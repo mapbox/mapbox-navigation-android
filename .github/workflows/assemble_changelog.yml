@@ -1,0 +1,30 @@
+name: Assemble changelog
+on:
+  pull_request:
+    types: [ opened, synchronize ]
+jobs:
+  process:
+    permissions:
+      pull-requests: write
+      contents: write
+    runs-on: ubuntu-20.04
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{github.head_ref}}
+
+      - name: setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.7.7'
+
+      - name: install python packages
+        run: |
+          python3 -m pip install requests GitPython
+
+      - name: execute py script
+        run: |
+          python3 scripts/changelog/assemble_changelog.py
