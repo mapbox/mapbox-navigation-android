@@ -1,0 +1,1 @@
+-keepnames class com.mapbox.api.directions.v5.models.** {*;}
