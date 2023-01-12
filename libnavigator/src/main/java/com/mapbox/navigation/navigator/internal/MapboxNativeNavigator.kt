@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
@@ -27,6 +28,7 @@ import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
+import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TilesConfig
 
 /**
@@ -43,6 +45,7 @@ interface MapboxNativeNavigator {
         tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface,
+        eventsMetadataInterface: EventsMetadataInterface,
     ): MapboxNativeNavigator
 
     /**
@@ -54,6 +57,7 @@ interface MapboxNativeNavigator {
         tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface,
+        eventsMetadataInterface: EventsMetadataInterface,
     )
 
     suspend fun resetRideSession()
@@ -194,4 +198,9 @@ interface MapboxNativeNavigator {
     val experimental: Experimental
 
     val router: RouterInterface
+
+    /**
+     * Provide the Telemetry events interface instance.
+     */
+    val telemetry: Telemetry
 }

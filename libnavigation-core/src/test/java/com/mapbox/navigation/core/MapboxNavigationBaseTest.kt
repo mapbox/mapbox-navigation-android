@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
 import android.app.AlarmManager
+import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
@@ -30,7 +31,7 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.telemetry.NavigationTelemetry
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
@@ -55,6 +56,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkClass
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
@@ -82,7 +84,10 @@ internal open class MapboxNavigationBaseTest {
     val accessToken = "pk.1234"
     val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
     val cache: CacheHandle = mockk(relaxUnitFun = true)
-    val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
+    val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true) {
+        every { experimental } returns mockk()
+    }
+    val navigationTelemetry: NavigationTelemetry = mockk(relaxUnitFun = true)
     val tripService: TripService = mockk(relaxUnitFun = true)
     val tripSession: TripSession = mockk(relaxUnitFun = true)
     val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
@@ -107,7 +112,7 @@ internal open class MapboxNavigationBaseTest {
     val routesPreviewController = mockk<RoutesPreviewController>(relaxed = true)
     val routesCacheClearer = mockk<RoutesCacheClearer>(relaxed = true)
 
-    val applicationContext: Context = mockk(relaxed = true) {
+    val applicationContext: Application = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
         every {
             getSystemService(Context.NOTIFICATION_SERVICE)
@@ -116,7 +121,6 @@ internal open class MapboxNavigationBaseTest {
         every { packageManager } returns mockk(relaxed = true)
         every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
         every { filesDir } returns File("some/path")
-        every { navigator.experimental } returns mockk()
     }
 
     lateinit var mapboxNavigation: MapboxNavigation
@@ -230,6 +234,7 @@ internal open class MapboxNavigationBaseTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         } returns navigator
         mockkObject(TelemetryUtilsDelegate)
@@ -250,7 +255,7 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(CacheHandleWrapper)
         unmockkObject(RouteRefreshControllerProvider)
         unmockkObject(RouteAlternativesControllerProvider)
-        unmockkObject(MapboxNavigationTelemetry)
+        unmockkObject(NavigationTelemetry.Companion)
         unmockkObject(EventsServiceProvider)
         unmockkObject(TelemetryServiceProvider)
         unmockkObject(TelemetryUtilsDelegate)
@@ -263,6 +268,7 @@ internal open class MapboxNavigationBaseTest {
     private fun mockNativeNavigator() {
         every {
             NavigationComponentProvider.createNativeNavigator(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -340,20 +346,10 @@ internal open class MapboxNavigationBaseTest {
             TelemetryServiceProvider.provideTelemetryService(any())
         } returns mockk(relaxUnitFun = true)
 
-        mockkObject(MapboxNavigationTelemetry)
-        every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any()) } just runs
-        every { MapboxNavigationTelemetry.destroy(any()) } just runs
+        mockkObject(NavigationTelemetry.Companion)
         every {
-            MapboxNavigationTelemetry.postUserFeedback(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
-        } just runs
+            NavigationTelemetry(any(), any())
+        } returns navigationTelemetry
     }
 
     fun provideNavigationOptions() =

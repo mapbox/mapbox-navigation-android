@@ -9,7 +9,6 @@ import androidx.annotation.CallSuper
 import androidx.core.app.ServiceCompat
 import com.mapbox.navigation.core.internal.dump.MapboxDumpHandler
 import com.mapbox.navigation.core.internal.dump.MapboxDumpRegistry
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import java.io.FileDescriptor
 import java.io.PrintWriter
 
@@ -46,7 +45,6 @@ internal class NavigationNotificationService : Service() {
      * @return Int
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        MapboxNavigationTelemetry.setApplicationInstance(application)
         MapboxTripService.registerOneTimeNotificationDataObserver(notificationDataObserver)
         return START_STICKY
     }

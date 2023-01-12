@@ -6,27 +6,20 @@ import android.os.Build
 
 internal sealed class AudioTypeResolver {
 
-    private companion object {
-        private const val BLUETOOTH = "bluetooth"
-        private const val HEADPHONES = "headphones"
-        private const val SPEAKER = "speaker"
-        private const val UNKNOWN = "unknown"
-    }
-
     internal lateinit var chain: AudioTypeResolver
 
     open fun nextChain(chain: AudioTypeResolver) {
         this.chain = chain
     }
 
-    abstract fun obtainAudioType(context: Context): String
+    abstract fun obtainAudioType(context: Context): AudioTypeResolver
 
     class Bluetooth : AudioTypeResolver() {
-        override fun obtainAudioType(context: Context): String {
+        override fun obtainAudioType(context: Context): AudioTypeResolver {
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-                ?: return UNKNOWN
+                ?: return Unknown()
             return if (audioManager.isBluetoothScoOn) {
-                BLUETOOTH
+                this
             } else {
                 chain.obtainAudioType(context)
             }
@@ -34,9 +27,9 @@ internal sealed class AudioTypeResolver {
     }
 
     class Headphones : AudioTypeResolver() {
-        override fun obtainAudioType(context: Context): String {
+        override fun obtainAudioType(context: Context): AudioTypeResolver {
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-                ?: return UNKNOWN
+                ?: return Unknown()
             val isHeadphonesOn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
                 devices.isNotEmpty()
@@ -44,7 +37,7 @@ internal sealed class AudioTypeResolver {
                 audioManager.isWiredHeadsetOn
             }
             return if (isHeadphonesOn) {
-                HEADPHONES
+                this
             } else {
                 chain.obtainAudioType(context)
             }
@@ -52,11 +45,11 @@ internal sealed class AudioTypeResolver {
     }
 
     class Speaker : AudioTypeResolver() {
-        override fun obtainAudioType(context: Context): String {
+        override fun obtainAudioType(context: Context): AudioTypeResolver {
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-                ?: return UNKNOWN
+                ?: return Unknown()
             return if (audioManager.isSpeakerphoneOn) {
-                SPEAKER
+                this
             } else {
                 chain.obtainAudioType(context)
             }
@@ -67,6 +60,6 @@ internal sealed class AudioTypeResolver {
         override fun nextChain(chain: AudioTypeResolver) {
         }
 
-        override fun obtainAudioType(context: Context): String = UNKNOWN
+        override fun obtainAudioType(context: Context): AudioTypeResolver = this
     }
 }

@@ -57,7 +57,9 @@ import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.telemetry.CustomEvent
+import com.mapbox.navigation.core.internal.telemetry.TelemetryAndroidAutoInterface
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
+import com.mapbox.navigation.core.internal.telemetry.UserFeedbackSubscriber
 import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.internal.utils.ModuleParams
 import com.mapbox.navigation.core.internal.utils.isInternalImplementation
@@ -89,6 +91,9 @@ import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
+import com.mapbox.navigation.core.telemetry.ApplicationLifecycleMonitor
+import com.mapbox.navigation.core.telemetry.NavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
@@ -119,7 +124,6 @@ import com.mapbox.navigation.core.trip.session.eh.GraphAccessor
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.navigator.internal.router.RouterInterfaceAdapter
@@ -251,6 +255,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val mainJobController = threadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
     private var navigator: MapboxNativeNavigator
+    private var navigationTelemetry: NavigationTelemetry
+    internal val telemetryAndroidAutoInterface: TelemetryAndroidAutoInterface
+        get() = navigationTelemetry
+    internal val userFeedbackSubscriber: UserFeedbackSubscriber
+        get() = navigationTelemetry
     private var historyRecorderHandles: NavigatorLoader.HistoryRecorderHandles
     private val tripService: TripService
     private val tripSession: TripSession
@@ -464,6 +473,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             } else {
                 RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
             },
+            NavigationComponentProvider.createEventsMetadataInterface(
+                navigationOptions.applicationContext,
+                ApplicationLifecycleMonitor(navigationOptions.applicationContext),
+                navigationOptions.eventsAppMetadata
+            ),
         )
         assignHistoryRecorders()
         navigationSession = NavigationComponentProvider.createNavigationSession()
@@ -530,24 +544,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             arrivalProgressObserver
         )
 
+        navigationTelemetry = NavigationTelemetry(tripSession) { navigator.telemetry }
+
         ifNonNull(accessToken) { token ->
-            runInTelemetryContext { telemetry ->
-                logD(
-                    "MapboxMetricsReporter.init from MapboxNavigation main",
-                    telemetry.LOG_CATEGORY
-                )
-                MapboxMetricsReporter.init(
-                    navigationOptions.applicationContext,
-                    token,
-                    obtainUserAgent()
-                )
-                MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
-                telemetry.initialize(
-                    this,
-                    navigationOptions,
-                    MapboxMetricsReporter,
-                )
-            }
+            logD(
+                "MapboxMetricsReporter.init from MapboxNavigation main",
+                LOG_CATEGORY
+            )
+            MapboxMetricsReporter.init(
+                navigationOptions.applicationContext,
+                token,
+                obtainUserAgent()
+            )
+            MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
         }
 
         val routeOptionsProvider = RouteOptionsUpdater()
@@ -1242,9 +1251,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController.destroy()
         routesPreviewController.unregisterAllRoutesPreviewObservers()
-        runInTelemetryContext { telemetry ->
-            telemetry.destroy(this@MapboxNavigation)
-        }
         threadController.cancelAllNonUICoroutines()
         threadController.cancelAllUICoroutines()
         ifNonNull(reachabilityObserverId) {
@@ -1681,17 +1687,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         feedbackMetadata: FeedbackMetadata?,
         userFeedbackCallback: UserFeedbackCallback?,
     ) {
-        runInTelemetryContext { telemetry ->
-            telemetry.postUserFeedback(
-                feedbackType,
-                description,
-                feedbackSource,
-                screenshot,
-                feedbackSubType,
-                feedbackMetadata,
-                userFeedbackCallback,
-            )
-        }
+        navigationTelemetry.postUserFeedback(
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            feedbackMetadata,
+            userFeedbackCallback
+        )
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
@@ -1700,30 +1704,21 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         @CustomEvent.Type customEventType: String,
         customEventVersion: String,
     ) {
-        runInTelemetryContext { telemetry ->
-            telemetry.postCustomEvent(
-                payload = payload,
-                customEventType = customEventType,
-                customEventVersion = customEventVersion
-            )
-        }
+        navigationTelemetry.postCustomEvent(
+            customEventType,
+            customEventVersion,
+            payload,
+        )
     }
 
     /**
-     * Provides wrapper of [FeedbackMetadata]. [FeedbackMetadata] is used to send deferred
+     * Provides [FeedbackMetadata], that is used to send deferred
      * feedback attached to passed location. It contains data (like location, time) when method is
      * invoked.
-     *
-     * Note: method throws [IllegalStateException] if trips session is not
-     * started ([startTripSession]) or telemetry is disabled.
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper =
-        runInTelemetryContext { telemetry ->
-            telemetry.provideFeedbackMetadataWrapper()
-        } ?: throw java.lang.IllegalStateException(
-            "To get FeedbackMetadataWrapper Telemetry must be enabled"
-        )
+        navigationTelemetry.provideFeedbackMetadataWrapper()
 
     /**
      * Start observing alternatives routes for a trip session via [RouteAlternativesObserver].
@@ -2001,6 +1996,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 } else {
                     RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
                 },
+                NavigationComponentProvider.createEventsMetadataInterface(
+                    navigationOptions.applicationContext,
+                    ApplicationLifecycleMonitor(navigationOptions.applicationContext),
+                    navigationOptions.eventsAppMetadata
+                ),
             )
             assignHistoryRecorders()
 
@@ -2028,12 +2028,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
-    private inline fun <T> runInTelemetryContext(func: (MapboxNavigationTelemetry) -> T): T? {
-        return if (TelemetryUtilsDelegate.getEventsCollectionState()) {
-            func(MapboxNavigationTelemetry)
-        } else {
-            null
-        }
+    private fun cancelReroute() {
+        rerouteController?.interrupt()
     }
 
     private fun obtainUserAgent(): String {

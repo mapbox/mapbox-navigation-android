@@ -10,9 +10,15 @@ import com.mapbox.common.TelemetrySystemUtils
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
+import com.mapbox.navigation.core.internal.telemetry.event.AndroidAutoEvent
 import com.mapbox.navigation.core.telemetry.audio.AudioTypeChain
+import com.mapbox.navigation.core.telemetry.audio.AudioTypeResolver
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigator.AppMetadata
+import com.mapbox.navigator.AudioType
+import com.mapbox.navigator.OuterDeviceAction
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.floor
@@ -112,7 +118,7 @@ internal fun obtainScreenBrightness(context: Context): Int =
  * Provide audio type
  * @see [com.mapbox.navigation.core.telemetry.audio.AudioTypeResolver]
  */
-internal fun obtainAudioType(context: Context): String =
+internal fun obtainAudioType(context: Context): AudioTypeResolver =
     AudioTypeChain().setup().obtainAudioType(context)
 
 private fun calculateScreenBrightnessPercentage(screenBrightness: Int): Int =
@@ -129,3 +135,20 @@ internal fun navObtainUniversalTelemetryNavigationModeId(): String =
 
 internal fun navObtainUniversalTelemetryTripId(): String =
     TelemetrySystemUtils.obtainUniversalUniqueIdentifier()
+
+internal fun AndroidAutoEvent.mapToNative(): OuterDeviceAction =
+    when (this) {
+        AndroidAutoEvent.Connected -> OuterDeviceAction.CONNECTED
+        AndroidAutoEvent.Disconnected -> OuterDeviceAction.DISCONNECTED
+    }
+
+internal fun AudioTypeResolver.mapToNativeAudioType(): AudioType =
+    when (this) {
+        is AudioTypeResolver.Bluetooth -> AudioType.BLUETOOTH
+        is AudioTypeResolver.Headphones -> AudioType.HEADPHONES
+        is AudioTypeResolver.Speaker -> AudioType.SPEAKER
+        is AudioTypeResolver.Unknown -> AudioType.UNKNOWN
+    }
+
+internal fun EventsAppMetadata.mapToNative(): AppMetadata =
+    AppMetadata(this.name, this.version, this.userId, this.sessionId)
