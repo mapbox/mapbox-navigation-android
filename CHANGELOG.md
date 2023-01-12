@@ -31,6 +31,64 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where the first voice instruction might have been played twice. [#6766](https://github.com/mapbox/mapbox-navigation-android/pull/6766)
 - Changed distance formatting: now all the imperial distances down to 0.1 miles will be represented in miles, while the smaller ones - in feet. [#6775](https://github.com/mapbox/mapbox-navigation-android/pull/6775)
 
+## Mapbox Navigation SDK 2.10.0-rc.2 - 12 January, 2023
+### Changelog
+[Changes between v2.10.0-rc.1 and v2.10.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0-rc.1...v2.10.0-rc.2)
+
+#### Features
+- Added support to use `MapboxSpeedInfoView` as default view to render posted and current speed in Drop-In UI. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - Introduced `ViewStyleCustomization.speedInfoOptions` to style the `MapboxSpeedInfoView` using Drop-In UI. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - Introduced `ViewBinderCustomization.legacySpeedLimitBinder()` and `ViewBinderCustomization.defaultSpeedInfoBinder` to facilitate the simple use of legacy `MapboxSpeedLimitView` and new `MapboxSpeedInfoView`. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - :warning: Deprecated `ViewStyleCustomization.setSpeedLimitStyle` and `ViewStyleCustomization.setSpeedLimitTextAppearance`. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+    To use the legacy speed limit view, add the following code:
+  ```kotlin
+  binding.navigationView.customizeViewBinders {
+      binding.navigationView.customizeViewBinders {
+          speedLimitBinder = legacySpeedLimitBinder()
+      }
+  }
+  ```
+- Introduced `NavigationViewListener.onSpeedInfoClicked` that would be triggered when `MapboxSpeedInfoView` is clicked upon. [#6770](https://github.com/mapbox/mapbox-navigation-android/pull/6770)
+- Introduced `ViewStyleCustomization.infoPanelGuidelineMaxPosPercent` that allows customization of the `NavigationView` InfoPanel bottom guideline maximum position. Increased default value to 50%. [#6792](https://github.com/mapbox/mapbox-navigation-android/pull/6792)
+
+#### Bug fixes and improvements
+- Fixed an issue with `NavigationView` that caused info panel to shrink in landscape mode with a full screen theme. [#6811](https://github.com/mapbox/mapbox-navigation-android/pull/6811)
+- Fixed standalone `MapboxManeuverView` appearance when the app also integrates Drop-In UI. [#6810](https://github.com/mapbox/mapbox-navigation-android/pull/6810)
+- Each newly instantiated MapboxRouteArrowView class will initialize the layers with the provided options on the first render call. Previously this would only be done if the layers hadn't already been initialized.  [#6466](https://github.com/mapbox/mapbox-navigation-android/pull/6466)
+- Fixed an issue where the first voice instruction might have been played twice. [#6766](https://github.com/mapbox/mapbox-navigation-android/pull/6766)
+- :warning: Updated the `NavigationView` default navigation puck asset. [#6678](https://github.com/mapbox/mapbox-navigation-android/pull/6678)
+
+  Previous puck can be restored by injecting `LocationPuck2D` with the `bearingImage` set to `com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon` drawable:
+  ```kotlin
+  navigationView.customizeViewStyles {
+      locationPuckOptions = LocationPuckOptions.Builder(context)
+          .defaultPuck(
+              LocationPuck2D(
+                  bearingImage = ContextCompat.getDrawable(
+                      context,
+                      com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon,
+                  )
+              )
+          )
+          .idlePuck(regularPuck(context))
+          .build()
+  }
+  ```
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0))
+- Mapbox Navigation Native `v123.1.0`
+- Mapbox Core Common `v23.2.1`
+- Mapbox Java `v6.10.0-beta.3` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0-beta.3))
+
+
 ## Mapbox Navigation SDK 2.9.6 - 10 January, 2023
 ### Changelog
 [Changes between v2.9.5 and v2.9.6](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.5...v2.9.6)
