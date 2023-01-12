@@ -4,8 +4,11 @@ import android.content.pm.ApplicationInfo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.mapbox.api.directions.v5.DirectionsAdapterFactory
 import com.mapbox.common.UploadOptions
+import com.mapbox.geojson.Point
+import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.copyToAndRemove
@@ -397,7 +400,10 @@ internal class MapboxCopilotImpl(
 
     internal companion object {
 
-        internal val gson = Gson()
+        internal val gson = GsonBuilder()
+            .registerTypeAdapterFactory(DirectionsAdapterFactory.create())
+            .registerTypeAdapter(Point::class.java, PointAsCoordinatesTypeAdapter())
+            .create()
         internal const val GZ = "gz"
         internal const val ZIP = "zip"
         internal const val MEDIA_TYPE_ZIP = "application/zip"
