@@ -2020,15 +2020,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
     }
 
-    private class TestVoiceInstructionsTriggerObserver : RoutesObserver, RouteProgressObserver {
-
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        }
-
-        override fun onRoutesChanged(result: RoutesUpdatedResult) {
-        }
-    }
-
     private fun alternativeWithId(mockId: String): RouteAlternative {
         val mockedRoute = mockk<RouteInterface> {
             every { routeId } returns mockId

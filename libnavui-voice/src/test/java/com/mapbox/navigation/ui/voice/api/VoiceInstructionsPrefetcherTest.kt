@@ -43,9 +43,9 @@ class VoiceInstructionsPrefetcherTest {
     )
     private val currentTimeSeconds = 9988L
     private val sut = VoiceInstructionsPrefetcher(
+        speechAPI,
         observableTime,
         timePercentageToTriggerAfter,
-        speechAPI,
         nextVoiceInstructionsProvider,
         timeProvider,
     )
@@ -85,6 +85,7 @@ class VoiceInstructionsPrefetcherTest {
         verify(exactly = 1) {
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserverSlot.first())
             mapboxNavigation.registerRoutesObserver(routesObserverSlot.first())
+            speechAPI.destroy()
         }
     }
 
@@ -333,13 +334,6 @@ class VoiceInstructionsPrefetcherTest {
         onRouteProgressChanged(routeProgress)
 
         verify(exactly = 0) { speechAPI.predownload(any()) }
-    }
-
-    @Test
-    fun destroy() {
-        sut.destroy()
-
-        verify(exactly = 1) { speechAPI.destroy() }
     }
 
     private fun routesUpdatedResult(

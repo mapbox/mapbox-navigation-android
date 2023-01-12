@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice.api
 import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
@@ -37,6 +38,7 @@ import org.junit.Test
 import java.io.File
 import java.util.Locale
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @ExperimentalCoroutinesApi
 class MapboxSpeechApiTest {
 
@@ -374,7 +376,34 @@ class MapboxSpeechApiTest {
     }
 
     @Test
-    fun `clean existing instruction`() = coroutineRule.runBlockingTest {
+    fun `clean existing instruction with file`() = coroutineRule.runBlockingTest {
+        val instruction1 = VoiceInstructions.builder().announcement("turn up and down").build()
+        val instruction2 = VoiceInstructions.builder().announcement("dance and jump").build()
+        val file1 = mockk<File>(relaxed = true)
+        val file2 = mockk<File>(relaxed = true)
+        coEvery {
+            voiceAPI.retrieveVoiceFile(instruction1)
+        } returns VoiceState.VoiceFile(file1)
+        coEvery {
+            voiceAPI.retrieveVoiceFile(instruction2)
+        } returns VoiceState.VoiceFile(file2)
+        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        sut.predownload(listOf(instruction1, instruction2))
+        clearMocks(voiceAPI, answers = false)
+
+        sut.clean(SpeechAnnouncement.Builder("turn up and down").file(file1).build())
+
+        sut.predownload(listOf(instruction1, instruction2))
+        coVerify(exactly = 1) {
+            voiceAPI.retrieveVoiceFile(instruction1)
+        }
+        coVerify(exactly = 0) {
+            voiceAPI.retrieveVoiceFile(instruction2)
+        }
+    }
+
+    @Test
+    fun `clean existing instruction with no file`() = coroutineRule.runBlockingTest {
         val instruction1 = VoiceInstructions.builder().announcement("turn up and down").build()
         val instruction2 = VoiceInstructions.builder().announcement("dance and jump").build()
         coEvery {
@@ -387,10 +416,8 @@ class MapboxSpeechApiTest {
         sut.clean(SpeechAnnouncement.Builder("turn up and down").build())
 
         sut.predownload(listOf(instruction1, instruction2))
-        coVerify(exactly = 1) {
-            voiceAPI.retrieveVoiceFile(instruction1)
-        }
         coVerify(exactly = 0) {
+            voiceAPI.retrieveVoiceFile(instruction1)
             voiceAPI.retrieveVoiceFile(instruction2)
         }
     }
@@ -499,10 +526,15 @@ class MapboxSpeechApiTest {
 
         sut.destroy()
 
-        sut.predownload(listOf(instruction1, instruction2))
         coVerify(exactly = 1) {
             voiceAPI.clean(announcement1)
             voiceAPI.clean(announcement2)
+        }
+
+        sut.predownload(listOf(instruction1, instruction2))
+        coVerify(exactly = 1) {
+            voiceAPI.retrieveVoiceFile(instruction1)
+            voiceAPI.retrieveVoiceFile(instruction2)
         }
     }
 }

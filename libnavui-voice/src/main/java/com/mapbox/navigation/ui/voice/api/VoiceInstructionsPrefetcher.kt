@@ -21,46 +21,23 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class VoiceInstructionsPrefetcher internal constructor(
+    private val speechApi: MapboxSpeechApi,
     private val observableTime: Int,
     private val timePercentageToTriggerAfter: Double,
-    private val speechApi: MapboxSpeechApi,
-    private val nextVoiceInstructionsProvider: NextVoiceInstructionsProvider,
-    private val timeProvider: Time,
+    private val nextVoiceInstructionsProvider: NextVoiceInstructionsProvider =
+        TimeBasedNextVoiceInstructionsProvider(observableTime),
+    private val timeProvider: Time = Time.SystemImpl,
 ) : MapboxNavigationObserver {
 
     /**
-     * Creates [VoiceInstructionsPrefetcher] with default
-     * observableTime and timePercentageToTriggerAfter.
-     * See [DEFAULT_OBSERVABLE_TIME_SECONDS] and [DEFAULT_TIME_PERCENTAGE_TO_TRIGGER_AFTER].
+     * Creates [VoiceInstructionsPrefetcher.
      *
      * @param speechApi [MapboxSpeechApi] instances that's used to generate instructions
      */
     constructor(speechApi: MapboxSpeechApi) : this(
-        DEFAULT_OBSERVABLE_TIME_SECONDS,
-        DEFAULT_TIME_PERCENTAGE_TO_TRIGGER_AFTER,
-        speechApi
-    )
-
-    /**
-     * Creates [VoiceInstructionsPrefetcher] with custom
-     * observableTime and timePercentageToTriggerAfter.
-     *
-     * @param observableTime voice instructions will be predownloaded for `observableTime` seconds
-     *  of route ahead
-     * @param timePercentageToTriggerAfter voice instructions predownloading will not be triggered
-     *  if `timePercentageToTriggerAfter` seconds did not pass since last predownloading session
-     * @param speechApi [MapboxSpeechApi] instances that's used to generate instructions
-     */
-    constructor(
-        observableTime: Int,
-        timePercentageToTriggerAfter: Double,
-        speechApi: MapboxSpeechApi,
-    ) : this(
-        observableTime,
-        timePercentageToTriggerAfter,
         speechApi,
-        TimeBasedNextVoiceInstructionsProvider(observableTime),
-        Time.SystemImpl
+        DEFAULT_OBSERVABLE_TIME_SECONDS,
+        DEFAULT_TIME_PERCENTAGE_TO_TRIGGER_AFTER
     )
 
     private val routesObserver = RoutesObserver { onRoutesChanged(it) }
@@ -88,6 +65,7 @@ class VoiceInstructionsPrefetcher internal constructor(
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        speechApi.destroy()
     }
 
     private fun onRoutesChanged(result: RoutesUpdatedResult) {
@@ -132,14 +110,6 @@ class VoiceInstructionsPrefetcher internal constructor(
                 triggerDownload(progressData)
             }
         }
-    }
-
-    /**
-     * The method stops all work related to pre-downloading voice instructions and unregisters
-     * all related callbacks. It should be invoked from `Activity#onDestroy`.
-     */
-    fun destroy() {
-        speechApi.destroy()
     }
 
     private fun shouldDownloadBasedOnTime(): Boolean {

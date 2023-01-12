@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.voice.internal
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
@@ -41,10 +42,7 @@ class MapboxAudioGuidanceVoice(
         }
     }
 
-    fun destroy() {
-        mapboxSpeechApi.destroy()
-    }
-
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private suspend fun MapboxSpeechApi.generate(
         instructions: VoiceInstructions
     ): SpeechAnnouncement = suspendCancellableCoroutine { cont ->

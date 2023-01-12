@@ -64,7 +64,7 @@ package com.mapbox.navigation.ui.voice.api {
     method public void cancel();
     method public void clean(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement);
     method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.voice.model.SpeechError,com.mapbox.navigation.ui.voice.model.SpeechValue>> consumer);
-    method public void generatePredownloaded(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.voice.model.SpeechError,com.mapbox.navigation.ui.voice.model.SpeechValue>> consumer);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void generatePredownloaded(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.voice.model.SpeechError,com.mapbox.navigation.ui.voice.model.SpeechValue>> consumer);
   }
 
   @UiThread public final class MapboxVoiceInstructionsPlayer {
@@ -95,8 +95,6 @@ package com.mapbox.navigation.ui.voice.api {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class VoiceInstructionsPrefetcher implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     ctor public VoiceInstructionsPrefetcher(com.mapbox.navigation.ui.voice.api.MapboxSpeechApi speechApi);
-    ctor public VoiceInstructionsPrefetcher(int observableTime, double timePercentageToTriggerAfter, com.mapbox.navigation.ui.voice.api.MapboxSpeechApi speechApi);
-    method public void destroy();
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     field public static final com.mapbox.navigation.ui.voice.api.VoiceInstructionsPrefetcher.Companion Companion;

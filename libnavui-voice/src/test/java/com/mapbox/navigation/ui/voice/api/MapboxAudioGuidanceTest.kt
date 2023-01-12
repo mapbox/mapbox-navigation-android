@@ -280,23 +280,6 @@ class MapboxAudioGuidanceTest {
     }
 
     @Test
-    fun `previous voice guidance is destroyed`() = coroutineRule.runBlockingTest {
-        carAppAudioGuidance.onAttached(mapboxNavigation)
-
-        testMapboxAudioGuidanceServices.emitVoiceLanguage("ru")
-        delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
-        clearMocks(testMapboxAudioGuidanceServices.mapboxAudioGuidanceVoice, answers = false)
-
-        testMapboxAudioGuidanceServices.emitVoiceLanguage("fr")
-        delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
-
-        verify(exactly = 1) {
-            testMapboxAudioGuidanceServices.mapboxAudioGuidanceVoice.destroy()
-        }
-        carAppAudioGuidance.onDetached(mapboxNavigation)
-    }
-
-    @Test
     fun `triggers are registered and unregistered`() = coroutineRule.runBlockingTest {
         val routesObserverSlot = mutableListOf<RoutesObserver>()
         val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
@@ -327,22 +310,23 @@ class MapboxAudioGuidanceTest {
     }
 
     @Test
-    fun `onDetached destroys voice guidance when has one`() = coroutineRule.runBlockingTest {
+    fun `onDetached destroys trigger when has one`() = coroutineRule.runBlockingTest {
         carAppAudioGuidance.onAttached(mapboxNavigation)
 
         testMapboxAudioGuidanceServices.emitVoiceLanguage("ru")
         delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
-        clearMocks(testMapboxAudioGuidanceServices.mapboxAudioGuidanceVoice, answers = false)
+        val speechApi = testMapboxAudioGuidanceServices.mapboxAudioGuidanceVoice.mapboxSpeechApi
+        clearMocks(speechApi, answers = false)
 
         carAppAudioGuidance.onDetached(mapboxNavigation)
 
         verify(exactly = 1) {
-            testMapboxAudioGuidanceServices.mapboxAudioGuidanceVoice.destroy()
+            speechApi.destroy()
         }
     }
 
     @Test
-    fun `onDetached does not destroy voice guidance when does not have one`() {
+    fun `onDetached does not destroy voice guidance or trigger when does not have them`() {
         carAppAudioGuidance.onDetached(mapboxNavigation)
         // no crash
     }

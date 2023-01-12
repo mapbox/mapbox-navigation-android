@@ -42,7 +42,9 @@ internal constructor(
 
     private var dataStoreOwner: NavigationDataStoreOwner? = null
     private var configOwner: NavigationConfigOwner? = null
-    private var audioGuidanceVoice: MapboxAudioGuidanceVoice? = null
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private var trigger: VoiceInstructionsPrefetcher? = null
     private var mutedStateFlow = MutableStateFlow(false)
     private val internalStateFlow = MutableStateFlow(MapboxAudioGuidanceState())
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
@@ -72,9 +74,10 @@ internal constructor(
     /**
      * @see [MapboxNavigationApp]
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxVoiceInstructions.unregisterObservers(mapboxNavigation)
-        audioGuidanceVoice?.destroy()
+        trigger?.onDetached(mapboxNavigation)
         job?.cancel()
         job = null
     }
@@ -165,17 +168,14 @@ internal constructor(
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun MapboxNavigation.audioGuidanceVoice(): Flow<MapboxAudioGuidanceVoice> {
-        var trigger: VoiceInstructionsPrefetcher? = null
         return combine(
             mapboxVoiceInstructions.voiceLanguage(),
             configOwner!!.language(),
         ) { voiceLanguage, deviceLanguage -> voiceLanguage ?: deviceLanguage }
             .distinctUntilChanged()
             .map { language ->
-                audioGuidanceVoice?.destroy()
                 trigger?.onDetached(this)
                 audioGuidanceServices.mapboxAudioGuidanceVoice(this, language).also {
-                    audioGuidanceVoice = it
                     trigger = VoiceInstructionsPrefetcher(it.mapboxSpeechApi).also { trigger ->
                         trigger.onAttached(this)
                     }

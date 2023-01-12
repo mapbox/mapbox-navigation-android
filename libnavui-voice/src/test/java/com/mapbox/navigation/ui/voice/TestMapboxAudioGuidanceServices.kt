@@ -36,7 +36,7 @@ class TestMapboxAudioGuidanceServices(
 
     private val mapboxSpeechApi = mockk<MapboxSpeechApi>(relaxed = true)
 
-    val mapboxAudioGuidanceVoice = mockk<MapboxAudioGuidanceVoice> {
+    val mapboxAudioGuidanceVoice = mockk<MapboxAudioGuidanceVoice>(relaxed = true) {
         coEvery { speak(any()) } coAnswers {
             val voiceInstructions = firstArg<VoiceInstructions?>()
             val speechAnnouncement: SpeechAnnouncement? = voiceInstructions?.let {

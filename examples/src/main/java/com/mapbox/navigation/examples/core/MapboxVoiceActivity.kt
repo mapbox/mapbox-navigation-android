@@ -81,6 +81,7 @@ import java.util.Locale
  * attention to its usage. Long press anywhere on the map to set a destination and trigger
  * navigation.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private var isMuted: Boolean = false
@@ -203,7 +204,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val voiceInstructionsPrefetcher by lazy {
         VoiceInstructionsPrefetcher(speechApi)
     }
@@ -389,15 +389,14 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                 .build()
         )
         init()
+        voiceInstructionsPrefetcher.onAttached(mapboxNavigation)
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onStart() {
         super.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
-            voiceInstructionsPrefetcher.onAttached(mapboxNavigation)
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
             mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
@@ -405,19 +404,16 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         ResourceLoaderFactory.getInstance().registerObserver(resourceLoadObserver)
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onStop() {
         super.onStop()
         ResourceLoaderFactory.getInstance().unregisterObserver(resourceLoadObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        voiceInstructionsPrefetcher.onDetached(mapboxNavigation)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onDestroy() {
         super.onDestroy()
         routeLineApi.cancel()
@@ -425,7 +421,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
         speechApi.cancel()
-        voiceInstructionsPrefetcher.destroy()
+        voiceInstructionsPrefetcher.onDetached(mapboxNavigation)
         voiceInstructionsPlayer.shutdown()
     }
 

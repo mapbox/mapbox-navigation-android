@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice.internal.impl
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
@@ -21,6 +22,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @ExperimentalCoroutinesApi
 class MapboxAudioGuidanceVoiceTest {
 
@@ -103,13 +105,6 @@ class MapboxAudioGuidanceVoiceTest {
 
             assertEquals(1, played.size)
         }
-
-    @Test
-    fun destroy() {
-        sut.destroy()
-
-        verify { speechApi.destroy() }
-    }
 
     private fun mockSuccessfulSpeechApi() {
         every { speechApi.generatePredownloaded(any(), any()) } answers {
