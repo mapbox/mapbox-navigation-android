@@ -5,31 +5,6 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
-- :warning: Updated the `NavigationView` default navigation puck asset. [#6678](https://github.com/mapbox/mapbox-navigation-android/pull/6678)
-
-  Previous puck can be restored by injecting `LocationPuck2D` with the `bearingImage` set to `com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon` drawable:
-  ```kotlin
-  navigationView.customizeViewStyles {
-      locationPuckOptions = LocationPuckOptions.Builder(context)
-          .defaultPuck(
-              LocationPuck2D(
-                  bearingImage = ContextCompat.getDrawable(
-                      context,
-                      com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon,
-                  )
-              )
-          )
-          .idlePuck(regularPuck(context))
-          .build()
-  }
-  ```
-- Added guarantees that route progress with `RouteProgress#currentState == OFF_ROUTE` arrives earlier than `NavigationRerouteController#reroute` is called. [#6764](https://github.com/mapbox/mapbox-navigation-android/pull/6764)
-- Fixed a rare `java.lang.NullPointerException: Attempt to read from field 'SpeechAnnouncement PlayCallback.announcement' on a null object reference` crash in `PlayCallback.getAnnouncement`. [#6760](https://github.com/mapbox/mapbox-navigation-android/pull/6760)
-- Fixed standalone `MapboxManeuverView` appearance when the app also integrates Drop-In UI. [#6774](https://github.com/mapbox/mapbox-navigation-android/pull/6774)
-- Introduced `NavigationViewListener.onSpeedInfoClicked` that would be triggered when `MapboxSpeedInfoView` is clicked upon. [#6770](https://github.com/mapbox/mapbox-navigation-android/pull/6770)
-- Each newly instantiated MapboxRouteArrowView class will initialize the layers with the provided options on the first render call. Previously this would only be done if the layers hadn't already been initialized.  [#6466](https://github.com/mapbox/mapbox-navigation-android/pull/6466)
-- Fixed an issue where the first voice instruction might have been played twice. [#6766](https://github.com/mapbox/mapbox-navigation-android/pull/6766)
-- Changed distance formatting: now all the imperial distances down to 0.1 miles will be represented in miles, while the smaller ones - in feet. [#6775](https://github.com/mapbox/mapbox-navigation-android/pull/6775)
 
 ## Mapbox Navigation SDK 2.11.0-alpha.1 - 13 January, 2023
 ### Changelog
@@ -66,6 +41,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Added guarantees that route progress with `RouteProgress#currentState == OFF_ROUTE` arrives earlier than `NavigationRerouteController#reroute` is called. [#6764](https://github.com/mapbox/mapbox-navigation-android/pull/6764)
 - Introduced `NavigationViewListener.onSpeedInfoClicked` that would be triggered when `MapboxSpeedInfoView` is clicked upon. [#6770](https://github.com/mapbox/mapbox-navigation-android/pull/6770)
 - Fixed a rare `java.lang.NullPointerException: Attempt to read from field 'SpeechAnnouncement PlayCallback.announcement' on a null object reference` crash in `PlayCallback.getAnnouncement`. [#6760](https://github.com/mapbox/mapbox-navigation-android/pull/6760)
+- Changed distance formatting: now all the imperial distances down to 0.1 miles will be represented in miles, while the smaller ones - in feet. [#6775](https://github.com/mapbox/mapbox-navigation-android/pull/6775)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
