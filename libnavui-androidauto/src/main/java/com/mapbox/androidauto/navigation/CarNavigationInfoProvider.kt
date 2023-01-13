@@ -8,16 +8,20 @@ import androidx.car.app.navigation.model.TravelEstimate
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.androidauto.internal.logAndroidAuto
+import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi
+import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 import com.mapbox.navigation.ui.shield.model.RouteShield
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,9 +48,12 @@ internal constructor(
 
     private val mapUserStyleObserver = services.mapUserStyleObserver()
     private val routeProgressObserver = RouteProgressObserver(this::onRouteProgress)
+    private val bannerInstructionsObserver =
+        BannerInstructionsObserver(this::onNewBannerInstructions)
     private val navigationObserver = mapboxNavigationForward(this::onAttached, this::onDetached)
     private val _carNavigationInfo = MutableStateFlow(CarNavigationInfo())
     private var currentShields = emptyList<RouteShield>()
+    private var currentJunctionValue: JunctionValue? = null
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal var carContext: CarContext? = null
@@ -59,6 +66,9 @@ internal constructor(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal var maneuverApi: MapboxManeuverApi? = null
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal var junctionApi: MapboxJunctionApi? = null
 
     /**
      * Contains data that helps populate the [NavigationTemplate] with navigation data.
@@ -115,15 +125,21 @@ internal constructor(
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
         val carContext = carContext!!
         maneuverApi = services.maneuverApi(mapboxNavigation)
+        junctionApi = services.junctionApi(mapboxNavigation)
         navigationEtaMapper = services.carNavigationEtaMapper(carContext)
         navigationInfoMapper = services.carNavigationInfoMapper(carContext, mapboxNavigation)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver)
     }
 
     private fun onDetached(mapboxNavigation: MapboxNavigation) {
         maneuverApi!!.cancel()
+        junctionApi!!.cancelAll()
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
         maneuverApi = null
+        junctionApi = null
+        currentJunctionValue = null
         navigationEtaMapper = null
         navigationInfoMapper = null
         _carNavigationInfo.value = CarNavigationInfo()
@@ -131,7 +147,7 @@ internal constructor(
 
     private fun onRouteProgress(routeProgress: RouteProgress) {
         val expectedManeuvers = maneuverApi?.getManeuvers(routeProgress) ?: return
-        updateNavigationInfo(expectedManeuvers, currentShields, routeProgress)
+        updateNavigationInfo(expectedManeuvers, routeProgress)
 
         expectedManeuvers.onValue { maneuvers ->
             maneuverApi?.getRoadShields(
@@ -143,20 +159,28 @@ internal constructor(
                 val newShields = shieldResult.mapNotNull { it.value?.shield }
                 if (currentShields != newShields) {
                     currentShields = newShields
-                    updateNavigationInfo(expectedManeuvers, newShields, routeProgress)
+                    updateNavigationInfo(expectedManeuvers, routeProgress)
                 }
             }
         }
     }
 
+    private fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
+        junctionApi?.generateJunction(bannerInstructions) {
+            logAndroidAuto(
+                "CarNavigationInfoProvider junctionView: ${it.value ?: it.error?.errorMessage}"
+            )
+            currentJunctionValue = it.value
+        }
+    }
+
     private fun updateNavigationInfo(
         maneuvers: Expected<ManeuverError, List<Maneuver>>,
-        shields: List<RouteShield>,
         routeProgress: RouteProgress,
     ) {
         _carNavigationInfo.value = CarNavigationInfo(
             navigationInfo = navigationInfoMapper
-                ?.mapNavigationInfo(maneuvers, shields, routeProgress),
+                ?.mapNavigationInfo(maneuvers, currentShields, routeProgress, currentJunctionValue),
             destinationTravelEstimate = navigationEtaMapper
                 ?.getDestinationTravelEstimate(routeProgress)
         )

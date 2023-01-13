@@ -9,6 +9,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -37,11 +38,13 @@ class CarNavigationInfoProviderTest {
     private val carNavigationEtaMapper: CarNavigationEtaMapper = mockk(relaxed = true)
     private val carNavigationInfoMapper: CarNavigationInfoMapper = mockk(relaxed = true)
     private val maneuverApi: MapboxManeuverApi = mockk(relaxed = true)
+    private val junctionApi: MapboxJunctionApi = mockk(relaxed = true)
     private val serviceProvider: CarNavigationInfoServices = mockk {
         every { carNavigationEtaMapper(any()) } returns carNavigationEtaMapper
         every { carNavigationInfoMapper(any(), any()) } returns carNavigationInfoMapper
         every { maneuverApi(any()) } returns maneuverApi
         every { mapUserStyleObserver() } returns mockk(relaxed = true)
+        every { junctionApi(any()) } returns junctionApi
     }
 
     private val sut = CarNavigationInfoProvider(serviceProvider)
@@ -61,6 +64,7 @@ class CarNavigationInfoProviderTest {
         val observerSlot = slot<RouteProgressObserver>()
         val mapboxNavigation: MapboxNavigation = mockk {
             every { registerRouteProgressObserver(capture(observerSlot)) } just runs
+            every { registerBannerInstructionsObserver(any()) } just runs
         }
         val mapboxCarMapSurface: MapboxCarMapSurface = mockk(relaxed = true)
 
@@ -92,6 +96,7 @@ class CarNavigationInfoProviderTest {
         val observerSlot = slot<RouteProgressObserver>()
         val mapboxNavigation: MapboxNavigation = mockk {
             every { registerRouteProgressObserver(capture(observerSlot)) } just runs
+            every { registerBannerInstructionsObserver(any()) } just runs
         }
         val mapboxCarMapSurface: MapboxCarMapSurface = mockk(relaxed = true)
 

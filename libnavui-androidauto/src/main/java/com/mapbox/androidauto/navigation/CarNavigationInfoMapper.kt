@@ -2,9 +2,11 @@ package com.mapbox.androidauto.navigation
 
 import android.content.Context
 import android.text.SpannableStringBuilder
+import androidx.car.app.model.CarIcon
 import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.car.app.navigation.model.RoutingInfo
 import androidx.car.app.navigation.model.Step
+import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.androidauto.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.androidauto.navigation.lanes.useMapboxLaneGuidance
 import com.mapbox.androidauto.navigation.maneuver.CarManeuverIconRenderer
@@ -20,6 +22,7 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
 import com.mapbox.navigation.ui.maneuver.view.MapboxExitText
+import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 import com.mapbox.navigation.ui.shield.model.RouteShield
 
 /**
@@ -42,6 +45,7 @@ class CarNavigationInfoMapper(
         expectedManeuvers: Expected<ManeuverError, List<Maneuver>>,
         routeShields: List<RouteShield>,
         routeProgress: RouteProgress,
+        junctionValue: JunctionValue?
     ): NavigationTemplate.NavigationInfo? {
         val currentStepProgress = routeProgress.currentLegProgress?.currentStepProgress
         val distanceRemaining = currentStepProgress?.distanceRemaining ?: return null
@@ -78,7 +82,19 @@ class CarNavigationInfoMapper(
             RoutingInfo.Builder()
                 .setCurrentStep(step, stepDistance)
                 .withOptionalNextStep(maneuver, routeShields)
+                .withOptionalJunctionImage(junctionValue)
                 .build()
+        }
+    }
+
+    private fun RoutingInfo.Builder.withOptionalJunctionImage(
+        junctionValue: JunctionValue?
+    ) = apply {
+        junctionValue?.also {
+            val carIcon = CarIcon.Builder(
+                IconCompat.createWithBitmap(it.bitmap)
+            ).build()
+            setJunctionImage(carIcon)
         }
     }
 
