@@ -1,0 +1,1 @@
+- Ensure map-matching considers HOV-only roads as auto accessible.
