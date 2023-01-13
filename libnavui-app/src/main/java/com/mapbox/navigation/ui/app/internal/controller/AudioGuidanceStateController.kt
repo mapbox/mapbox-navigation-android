@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
@@ -13,7 +12,6 @@ import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
  * This class is responsible for playing voice instructions. Use the [AudioAction] to turning the
  * audio on or off.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class AudioGuidanceStateController(
     private val store: Store
 ) : StateController() {
