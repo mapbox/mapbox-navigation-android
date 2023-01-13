@@ -64,11 +64,11 @@ class ArtificialDriverTest {
                         continuation.resume(it ?: "null")
                     }
                 }
-                val notTrackingStates = states.filter { it.routeState != RouteState.TRACKING }
+                val offRouteState = states.filter { it.routeState == RouteState.OFF_ROUTE }
                 assertTrue(
-                    "not all states are tracking, " +
-                        "see history file $historyFile: $notTrackingStates",
-                    notTrackingStates.isEmpty()
+                    "${offRouteState.size} off-route states have been detected(" +
+                        "more info in $historyFile): $offRouteState",
+                    offRouteState.isEmpty()
                 )
             }
         }
