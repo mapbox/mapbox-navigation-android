@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.trip.model.eh
 
+import com.mapbox.navigation.base.internal.extensions.toMapboxShield
+import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.GantryDistanceInfo
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate
@@ -408,18 +410,20 @@ private fun FunctionalRoadClass.mapToRoadClass(): String {
     }
 }
 
-private fun mapNames(names: List<com.mapbox.navigator.RoadName>): List<RoadName> {
-    val namesNames = mutableListOf<RoadName>()
+private fun mapNames(names: List<com.mapbox.navigator.RoadName>): List<RoadComponent> {
+    val roadComponents = mutableListOf<RoadComponent>()
     names.forEach {
-        namesNames.add(it.mapToRoadName())
+        roadComponents.add(it.mapToRoadComponent())
     }
-    return namesNames.toList()
+    return roadComponents.toList()
 }
 
-private fun com.mapbox.navigator.RoadName.mapToRoadName(): RoadName {
-    return RoadName(
-        name,
-        shielded
+private fun com.mapbox.navigator.RoadName.mapToRoadComponent(): RoadComponent {
+    return RoadComponent(
+        text,
+        language,
+        shield.toMapboxShield(),
+        imageBaseUrl,
     )
 }
 

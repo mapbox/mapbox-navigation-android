@@ -8,12 +8,10 @@ import com.mapbox.bindgen.Value
 import com.mapbox.maps.Image
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
@@ -40,8 +38,6 @@ class RouteArrowUtilsRoboTest {
 
     @Test
     fun initializeLayers() {
-        mockkObject(GeoJsonSource)
-        every { GeoJsonSource.directSetterEnabled() } returns false
         val options = RouteArrowOptions.Builder(ctx).build()
         val shaftSourceValueSlots = mutableListOf<Value>()
         val headSourceValueSlots = mutableListOf<Value>()
@@ -176,8 +172,6 @@ class RouteArrowUtilsRoboTest {
 
     @Test
     fun initializeLayers_whenCustomAboveLayerConfigured() {
-        mockkObject(GeoJsonSource)
-        every { GeoJsonSource.directSetterEnabled() } returns false
         val options = RouteArrowOptions.Builder(ctx).withAboveLayerId("foobar").build()
         val shaftSourceValueSlots = mutableListOf<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
@@ -244,8 +238,6 @@ class RouteArrowUtilsRoboTest {
 
     @Test
     fun initializeLayers_whenAboveLayerNotExists() {
-        mockkObject(GeoJsonSource)
-        every { GeoJsonSource.directSetterEnabled() } returns false
         val mockImage = mockk<Image>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val shaftSourceValueSlots = mutableListOf<Value>()

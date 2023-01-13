@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.trip.model.eh
 
+import com.mapbox.navigation.base.road.model.RoadComponent
+
 /**
  * Edge metadata
  *
@@ -45,7 +47,7 @@ class EHorizonEdgeMetadata internal constructor(
     val bridge: Boolean,
     val tunnel: Boolean,
     val toll: Boolean,
-    val names: List<RoadName>,
+    val names: List<RoadComponent>,
     val laneCount: Byte?,
     val meanElevation: Double?,
     val curvature: Byte,
