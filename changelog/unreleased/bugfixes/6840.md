@@ -1,0 +1,1 @@
+- Improved `NavigationView` camera behavior to go back into overview state if routes change during route preview state.

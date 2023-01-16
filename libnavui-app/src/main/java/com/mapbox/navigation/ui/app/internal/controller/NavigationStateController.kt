@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowOnFinalDestinationArrival
 import com.mapbox.navigation.ui.app.internal.Action
@@ -16,7 +15,6 @@ import kotlinx.coroutines.launch
  * [NavigationStateAction] received.
  * @param store the default [NavigationState]
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class NavigationStateController(
     private val store: Store
 ) : StateController() {

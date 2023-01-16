@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
@@ -9,7 +8,6 @@ import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteStateController(private val store: Store) : StateController() {
     init {
         store.register(this)

@@ -1,12 +1,10 @@
 package com.mapbox.navigation.ui.app.internal.controller
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.app.internal.Action
 import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DestinationStateController(
     store: Store
 ) : StateController() {
