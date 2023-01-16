@@ -1,0 +1,1 @@
+- Removed `NavigationRoute#hasUnexpectedClosures` and added `RouteProgress#hasUnexpectedUpcomingClosures` instead that check whenever route has upcoming unexpected closures (the algorithm is not take into account closures that the puck already on)
