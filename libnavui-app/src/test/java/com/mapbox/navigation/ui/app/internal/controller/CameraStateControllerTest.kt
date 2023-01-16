@@ -126,7 +126,8 @@ class CameraStateControllerTest {
         testStore.dispatch(SetCameraMode(TargetCameraMode.Following))
         testStore.updateState { state ->
             state.copy(
-                navigation = NavigationState.RoutePreview, previewRoutes = RoutePreviewState.Empty,
+                navigation = NavigationState.RoutePreview,
+                previewRoutes = RoutePreviewState.Empty,
             )
         }
 
