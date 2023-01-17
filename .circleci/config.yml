@@ -37,7 +37,7 @@ workflows:
             branches:
               only:
                 - main
-                - release-v.*
+                - /release-v.*/
       - release:
           filters:
             tags:
