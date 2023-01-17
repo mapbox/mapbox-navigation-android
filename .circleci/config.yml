@@ -38,6 +38,8 @@ workflows:
               only:
                 - main
                 - /release-v.*/
+            tags:
+              only: publish-snapshot
       - release:
           filters:
             tags:
