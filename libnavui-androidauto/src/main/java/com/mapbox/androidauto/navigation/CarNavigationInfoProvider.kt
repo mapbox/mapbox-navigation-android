@@ -167,9 +167,6 @@ internal constructor(
 
     private fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
         junctionApi?.generateJunction(bannerInstructions) {
-            logAndroidAuto(
-                "CarNavigationInfoProvider junctionView: ${it.value ?: it.error?.errorMessage}"
-            )
             currentJunctionValue = it.value
         }
     }
