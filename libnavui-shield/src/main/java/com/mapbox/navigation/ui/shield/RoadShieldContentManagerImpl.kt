@@ -2,8 +2,9 @@ package com.mapbox.navigation.ui.shield
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.ui.shield.internal.loader.ResourceLoader
+import com.mapbox.bindgen.ExpectedFactory.createError
+import com.mapbox.bindgen.ExpectedFactory.createValue
+import com.mapbox.navigation.ui.shield.internal.loader.Loader
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
@@ -13,7 +14,7 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.resume
 
 /**
@@ -69,7 +70,7 @@ import kotlin.coroutines.resume
  *             - If request fails: repeat step 1.
  */
 internal class RoadShieldContentManagerImpl(
-    private val shieldLoader: ResourceLoader<RouteShieldToDownload, RouteShield>
+    private val shieldLoader: Loader<RouteShieldToDownload, RouteShield>
 ) : RoadShieldContentManager {
     internal companion object {
         internal const val CANCELED_MESSAGE = "canceled"
@@ -97,7 +98,7 @@ internal class RoadShieldContentManagerImpl(
             }
             returnList.addAll(
                 missingResults.map {
-                    ExpectedFactory.createError(
+                    createError(
                         RouteShieldError(it.toDownload.url, CANCELED_MESSAGE)
                     )
                 }
@@ -118,90 +119,103 @@ internal class RoadShieldContentManagerImpl(
             mainJob.scope.launch {
                 when (toDownload) {
                     is RouteShieldToDownload.MapboxDesign -> {
-                        val mapboxDesignShieldResult = shieldLoader.load(toDownload)
-                        resultMap[request] = if (mapboxDesignShieldResult.isError) {
-                            val legacyFallback = toDownload.legacyFallback
-                            if (legacyFallback != null) {
-                                shieldLoader.load(legacyFallback).fold(
-                                    { error ->
-                                        ExpectedFactory.createError(
-                                            RouteShieldError(
-                                                url = toDownload.url,
-                                                errorMessage = """
-                                                    |original request failed with:
-                                                    |url: ${toDownload.url}
-                                                    |error: ${mapboxDesignShieldResult.error}
-                                                    |
-                                                    |fallback request failed with:
-                                                    |url: ${legacyFallback.url}
-                                                    |error: $error
-                                                """.trimMargin()
-                                            )
-                                        )
-                                    },
-                                    { legacyShield ->
-                                        ExpectedFactory.createValue(
-                                            RouteShieldResult(
-                                                legacyShield,
-                                                RouteShieldOrigin(
-                                                    isFallback = true,
-                                                    originalUrl = toDownload.url,
-                                                    mapboxDesignShieldResult.error!!
-                                                )
-                                            )
-                                        )
-                                    }
-                                )
-                            } else {
-                                ExpectedFactory.createError(
-                                    RouteShieldError(
-                                        url = toDownload.url,
-                                        errorMessage = mapboxDesignShieldResult.error!!
-                                    )
-                                )
-                            }
-                        } else {
-                            ExpectedFactory.createValue(
-                                RouteShieldResult(
-                                    mapboxDesignShieldResult.value!!,
-                                    RouteShieldOrigin(
-                                        isFallback = false,
-                                        mapboxDesignShieldResult.value!!.url,
-                                        ""
-                                    )
-                                )
-                            )
-                        }
+                        resultMap[request] = loadDesignShield(toDownload)
                     }
                     is RouteShieldToDownload.MapboxLegacy -> {
-                        resultMap[request] = shieldLoader.load(toDownload).fold(
-                            { error ->
-                                ExpectedFactory.createError(
-                                    RouteShieldError(
-                                        url = toDownload.url,
-                                        errorMessage = error
-                                    )
-                                )
-                            },
-                            { legacyShield ->
-                                ExpectedFactory.createValue(
-                                    RouteShieldResult(
-                                        legacyShield,
-                                        RouteShieldOrigin(
-                                            isFallback = false,
-                                            originalUrl = toDownload.url,
-                                            originalErrorMessage = ""
-                                        )
-                                    )
-                                )
-                            }
-                        )
+                        resultMap[request] = loadLegacyShield(toDownload)
                     }
                 }
                 invalidate()
             }
             request
         }.toSet()
+    }
+
+    private suspend fun loadDesignShield(
+        toDownload: RouteShieldToDownload.MapboxDesign
+    ): Expected<RouteShieldError, RouteShieldResult> {
+        val mapboxDesignShieldResult = shieldLoader.load(toDownload)
+        return if (mapboxDesignShieldResult.isError) {
+            val legacyFallback = toDownload.legacyFallback
+            if (legacyFallback != null) {
+                shieldLoader.load(legacyFallback)
+                    .fold(
+                        { error ->
+                            createError(
+                                RouteShieldError(
+                                    toDownload.url,
+                                    """
+                                    |original request failed with:
+                                    |url: ${toDownload.url}
+                                    |error: ${mapboxDesignShieldResult.error?.localizedMessage}
+                                    |
+                                    |fallback request failed with:
+                                    |url: ${legacyFallback.url}
+                                    |error: ${error.localizedMessage}
+                                    """.trimMargin()
+                                )
+                            )
+                        },
+                        { legacyShield ->
+                            createValue(
+                                RouteShieldResult(
+                                    legacyShield,
+                                    RouteShieldOrigin(
+                                        true,
+                                        toDownload.url,
+                                        mapboxDesignShieldResult.error?.message ?: ""
+                                    )
+                                )
+                            )
+                        }
+                    )
+            } else {
+                createError(
+                    RouteShieldError(
+                        toDownload.url,
+                        mapboxDesignShieldResult.error?.message ?: ""
+                    )
+                )
+            }
+        } else {
+            createValue(
+                RouteShieldResult(
+                    mapboxDesignShieldResult.value!!,
+                    RouteShieldOrigin(
+                        false,
+                        mapboxDesignShieldResult.value!!.url,
+                        ""
+                    )
+                )
+            )
+        }
+    }
+
+    private suspend fun loadLegacyShield(
+        toDownload: RouteShieldToDownload.MapboxLegacy
+    ): Expected<RouteShieldError, RouteShieldResult> {
+        return shieldLoader.load(toDownload).fold(
+            { error ->
+                createError(
+                    RouteShieldError(
+                        toDownload.url,
+                        error.message ?: ""
+                    )
+                )
+            },
+            { legacyShield ->
+                createValue(
+                    RouteShieldResult(
+                        legacyShield,
+                        RouteShieldOrigin(
+                            false,
+                            toDownload.url,
+                            ""
+                        )
+                    )
+                )
+            }
+        )
     }
 
     private fun invalidate() {

@@ -101,7 +101,7 @@ internal class RoadShieldDownloaderTest {
 
             val result = sut.download(url)
 
-            assertEquals(expectedError, result.error)
+            assertEquals(expectedError, result.error?.message)
         }
 
     @Test
@@ -120,7 +120,7 @@ internal class RoadShieldDownloaderTest {
 
             val result = sut.download(url)
 
-            assertEquals(expectedError, result.error)
+            assertEquals(expectedError, result.error?.message)
         }
 
     @Test
@@ -138,7 +138,7 @@ internal class RoadShieldDownloaderTest {
 
         val result = sut.download(url)
 
-        assertEquals(expectedError, result.error)
+        assertEquals(expectedError, result.error?.message)
     }
 
     private fun givenResourceLoaderResponse(

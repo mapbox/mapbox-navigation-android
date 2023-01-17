@@ -17,9 +17,9 @@ class ResourceDownloaderTest {
 
     @Test
     fun `load should call download method and return its value`() = runBlockingTest {
-        val sut = object : ResourceDownloader<Int, String>() {
-            override suspend fun download(argument: Int): Expected<String, String> =
-                createValue("$argument")
+        val sut = object : Downloader<Int, String>() {
+            override suspend fun download(input: Int): Expected<Error, String> =
+                createValue("$input")
         }
         val r = sut.load(1234)
 
@@ -31,10 +31,10 @@ class ResourceDownloaderTest {
         runBlockingTest {
             val stateFlow = MutableStateFlow<String?>(null)
             val downloadCalls = mutableListOf<Int>()
-            val sut = object : ResourceDownloader<Int, String>() {
-                override suspend fun download(argument: Int): Expected<String, String> {
-                    downloadCalls.add(argument)
-                    val v = stateFlow.filter { it == "$argument" }.filterNotNull().first()
+            val sut = object : Downloader<Int, String>() {
+                override suspend fun download(input: Int): Expected<Error, String> {
+                    downloadCalls.add(input)
+                    val v = stateFlow.filter { it == "$input" }.filterNotNull().first()
                     return createValue(v)
                 }
             }
@@ -61,9 +61,9 @@ class ResourceDownloaderTest {
             // resource 2:                       {-- loading 2 --}
             //
             val stateFlow = MutableStateFlow<String?>(null)
-            val sut = object : ResourceDownloader<Int, String>() {
-                override suspend fun download(argument: Int): Expected<String, String> {
-                    val v = stateFlow.filter { it == "$argument" }.filterNotNull().first()
+            val sut = object : Downloader<Int, String>() {
+                override suspend fun download(input: Int): Expected<Error, String> {
+                    val v = stateFlow.filter { it == "$input" }.filterNotNull().first()
                     return createValue(v)
                 }
             }

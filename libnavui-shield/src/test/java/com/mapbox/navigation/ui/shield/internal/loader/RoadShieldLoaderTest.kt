@@ -27,8 +27,8 @@ class RoadShieldLoaderTest {
 
     private lateinit var sut: RoadShieldLoader
 
-    private lateinit var spritesLoader: ResourceLoader<String, ShieldSprites>
-    private lateinit var imageLoader: ResourceLoader<String, ByteArray>
+    private lateinit var spritesLoader: Loader<String, ShieldSprites>
+    private lateinit var imageLoader: Loader<String, ByteArray>
 
     @Before
     fun setup() {
@@ -116,12 +116,12 @@ class RoadShieldLoaderTest {
         } returns ExpectedFactory.createValue(shieldSprites)
         coEvery {
             imageLoader.load(shieldUrl)
-        } returns ExpectedFactory.createError("error")
+        } returns ExpectedFactory.createError(Error("error"))
 
         val expected = "error"
         val result = sut.load(toDownload)
 
-        assertEquals(expected, result.error)
+        assertEquals(expected, result.error?.message)
     }
 
     @Test
@@ -132,7 +132,7 @@ class RoadShieldLoaderTest {
         }
         coEvery {
             spritesLoader.load(spriteUrl)
-        } returns ExpectedFactory.createError("error")
+        } returns ExpectedFactory.createError(Error("error"))
 
         val expected = """
             Error when downloading image sprite.
@@ -141,7 +141,7 @@ class RoadShieldLoaderTest {
         """.trimIndent()
         val result = sut.load(toDownload)
 
-        assertEquals(expected, result.error)
+        assertEquals(expected, result.error?.message)
     }
 
     @Test
@@ -162,7 +162,7 @@ class RoadShieldLoaderTest {
         val expected = "Sprite not found for ${toDownload.mapboxShield.name()} in $shieldSprites."
         val result = sut.load(toDownload)
 
-        assertEquals(expected, result.error)
+        assertEquals(expected, result.error?.message)
     }
 
     @Test
@@ -185,7 +185,7 @@ class RoadShieldLoaderTest {
         val expected = "Mapbox shield sprite placeholder was null or empty in: $shieldSprite"
         val result = sut.load(toDownload)
 
-        assertEquals(expected, result.error)
+        assertEquals(expected, result.error?.message)
     }
 
     @Test
@@ -218,11 +218,11 @@ class RoadShieldLoaderTest {
         }
         coEvery {
             imageLoader.load(shieldUrl)
-        } returns ExpectedFactory.createError("error")
+        } returns ExpectedFactory.createError(Error("error"))
 
         val expected = "error"
         val result = sut.load(toDownload)
 
-        assertEquals(expected, result.error)
+        assertEquals(expected, result.error?.message)
     }
 }

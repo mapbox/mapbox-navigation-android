@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.models.ShieldSprite
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.shield.internal.loader.ResourceLoader
+import com.mapbox.navigation.ui.shield.internal.loader.Loader
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
@@ -30,7 +30,7 @@ class RoadShieldContentManagerImplTest {
     var coroutineRule = MainCoroutineRule()
 
     private lateinit var sut: RoadShieldContentManagerImpl
-    private lateinit var loader: ResourceLoader<RouteShieldToDownload, RouteShield>
+    private lateinit var loader: Loader<RouteShieldToDownload, RouteShield>
 
     @Before
     fun setUp() {
@@ -81,9 +81,11 @@ class RoadShieldContentManagerImplTest {
             } coAnswers {
                 try {
                     delay(1000L)
-                    ExpectedFactory.createError("error")
+                    ExpectedFactory.createError(Error("error"))
                 } catch (ex: CancellationException) {
-                    ExpectedFactory.createError(RoadShieldContentManagerImpl.CANCELED_MESSAGE)
+                    ExpectedFactory.createError(
+                        Error(RoadShieldContentManagerImpl.CANCELED_MESSAGE)
+                    )
                 }
             }
 
@@ -144,7 +146,7 @@ class RoadShieldContentManagerImplTest {
                 loader.load(toDownloadDesign)
             } coAnswers {
                 delay(1000L)
-                ExpectedFactory.createError("error")
+                ExpectedFactory.createError(Error("error"))
             }
 
             var result: List<Expected<RouteShieldError, RouteShieldResult>>? = null
@@ -205,7 +207,7 @@ class RoadShieldContentManagerImplTest {
                 loader.load(toDownloadDesign)
             } coAnswers {
                 delay(500L)
-                ExpectedFactory.createError("error")
+                ExpectedFactory.createError(Error("error"))
             }
 
             var result: List<Expected<RouteShieldError, RouteShieldResult>>? = null
@@ -253,7 +255,7 @@ class RoadShieldContentManagerImplTest {
             )
             coEvery {
                 loader.load(toDownloadDesign)
-            } returns ExpectedFactory.createError("error")
+            } returns ExpectedFactory.createError(Error("error"))
 
             val result = sut.getShields(listOf(toDownloadLegacy, toDownloadDesign))
 
@@ -288,7 +290,7 @@ class RoadShieldContentManagerImplTest {
             )
             coEvery {
                 loader.load(toDownload)
-            } returns ExpectedFactory.createError("error")
+            } returns ExpectedFactory.createError(Error("error"))
             coEvery {
                 loader.load(legacyToDownload)
             } returns ExpectedFactory.createValue(expectedLegacyShield)
@@ -322,10 +324,10 @@ class RoadShieldContentManagerImplTest {
             )
             coEvery {
                 loader.load(toDownload)
-            } returns ExpectedFactory.createError("error")
+            } returns ExpectedFactory.createError(Error("error"))
             coEvery {
                 loader.load(legacyToDownload)
-            } returns ExpectedFactory.createError("error_legacy")
+            } returns ExpectedFactory.createError(Error("error_legacy"))
 
             val result = sut.getShields(listOf(toDownload))
 
@@ -346,7 +348,7 @@ class RoadShieldContentManagerImplTest {
 
         coEvery {
             loader.load(toDownload)
-        } returns ExpectedFactory.createError("error")
+        } returns ExpectedFactory.createError(Error("error"))
 
         val result = sut.getShields(listOf(toDownload))
 
@@ -424,7 +426,7 @@ class RoadShieldContentManagerImplTest {
 
         coEvery {
             loader.load(toDownload)
-        } returns ExpectedFactory.createError("error")
+        } returns ExpectedFactory.createError(Error("error"))
 
         val result = sut.getShields(listOf(toDownload))
 

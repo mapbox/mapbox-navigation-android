@@ -36,11 +36,11 @@ class ShieldSpritesDownloaderTest {
         val argument = "url"
         coEvery {
             RoadShieldDownloader.download(argument)
-        } returns ExpectedFactory.createError("error")
+        } returns ExpectedFactory.createError(Error("error"))
 
         val result = sut.load(argument)
 
-        assertEquals("error", result.error)
+        assertEquals("error", result.error?.message)
     }
 
     @Test
@@ -53,14 +53,14 @@ class ShieldSpritesDownloaderTest {
         val result = sut.load(argument)
 
         assertTrue(
-            result.error!!.startsWith("Error parsing shield sprites:")
+            result.error!!.message!!.startsWith("Error parsing shield sprites:")
         )
     }
 
     @Test
     fun `download success`() = runBlockingTest {
         val argument = "url"
-        val expectedResult = ExpectedFactory.createValue<String, ByteArray>(
+        val expectedResult = ExpectedFactory.createValue<Error, ByteArray>(
             """
                 {
                   "turning-circle-outline": {

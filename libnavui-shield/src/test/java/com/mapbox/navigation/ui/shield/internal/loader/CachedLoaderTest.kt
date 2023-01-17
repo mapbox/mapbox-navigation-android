@@ -14,10 +14,10 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-class CachedResourceLoaderTest {
+class CachedLoaderTest {
 
-    private lateinit var loader: ResourceLoader<Int, String>
-    private lateinit var sut: CachedResourceLoader<Int, String>
+    private lateinit var loader: Loader<Int, String>
+    private lateinit var sut: CachedLoader<Int, String>
 
     @Before
     fun setUp() {
@@ -26,7 +26,7 @@ class CachedResourceLoaderTest {
                 createValue(firstArg<Int>().toString())
             }
         }
-        sut = CachedResourceLoader(2, loader)
+        sut = CachedLoader(2, loader)
     }
 
     @Test

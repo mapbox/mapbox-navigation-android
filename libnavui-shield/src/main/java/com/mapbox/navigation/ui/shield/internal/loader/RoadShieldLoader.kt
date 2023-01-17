@@ -10,40 +10,40 @@ import com.mapbox.navigation.ui.shield.internal.model.getSpriteFrom
 import com.mapbox.navigation.ui.shield.model.RouteShield
 
 internal class RoadShieldLoader(
-    private val spritesLoader: ResourceLoader<String, ShieldSprites>,
-    private val imageLoader: ResourceLoader<String, ByteArray>
-) : ResourceLoader<RouteShieldToDownload, RouteShield> {
+    private val spritesLoader: Loader<String, ShieldSprites>,
+    private val imageLoader: Loader<String, ByteArray>
+) : Loader<RouteShieldToDownload, RouteShield> {
 
-    override suspend fun load(argument: RouteShieldToDownload): Expected<String, RouteShield> {
-        return when (argument) {
-            is RouteShieldToDownload.MapboxDesign -> loadMapboxDesignShield(argument)
-            is RouteShieldToDownload.MapboxLegacy -> loadMapboxLegacyShield(argument)
+    override suspend fun load(input: RouteShieldToDownload): Expected<Error, RouteShield> {
+        return when (input) {
+            is RouteShieldToDownload.MapboxDesign -> loadMapboxDesignShield(input)
+            is RouteShieldToDownload.MapboxLegacy -> loadMapboxLegacyShield(input)
         }
     }
 
     private suspend fun loadMapboxDesignShield(
         toDownload: RouteShieldToDownload.MapboxDesign
-    ): Expected<String, RouteShield> {
+    ): Expected<Error, RouteShield> {
         val spriteUrl = toDownload.generateSpriteSheetUrl()
         val shieldSpritesResult = spritesLoader.load(spriteUrl)
         val shieldSprites = if (shieldSpritesResult.isValue) {
             shieldSpritesResult.value!!
         } else {
-            return ExpectedFactory.createError(
+            return createError(
                 """
                     Error when downloading image sprite.
                     url: $spriteUrl
-                    result: ${shieldSpritesResult.error!!}
+                    result: ${shieldSpritesResult.error?.message}
                 """.trimIndent()
             )
         }
         val sprite = toDownload.getSpriteFrom(shieldSprites)
-            ?: return ExpectedFactory.createError(
+            ?: return createError(
                 "Sprite not found for ${toDownload.mapboxShield.name()} in $shieldSprites."
             )
         val placeholder = sprite.spriteAttributes().placeholder()
         if (placeholder.isNullOrEmpty()) {
-            return ExpectedFactory.createError(
+            return createError(
                 """
                     Mapbox shield sprite placeholder was null or empty in: $sprite
                 """.trimIndent()
@@ -85,7 +85,7 @@ internal class RoadShieldLoader(
 
     private suspend fun loadMapboxLegacyShield(
         toDownload: RouteShieldToDownload.MapboxLegacy
-    ): Expected<String, RouteShield> {
+    ): Expected<Error, RouteShield> {
         val shieldUrl = toDownload.url
         return imageLoader.load(shieldUrl).mapValue { byteArray ->
             RouteShield.MapboxLegacyShield(
@@ -95,4 +95,7 @@ internal class RoadShieldLoader(
             )
         }
     }
+
+    private fun <V> createError(errorMessage: String): Expected<Error, V> =
+        ExpectedFactory.createError(Error(errorMessage))
 }

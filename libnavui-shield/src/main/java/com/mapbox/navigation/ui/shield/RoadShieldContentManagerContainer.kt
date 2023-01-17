@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.shield
 
 import com.mapbox.navigation.ui.shield.internal.RoadShieldDownloader
-import com.mapbox.navigation.ui.shield.internal.loader.CachedResourceLoader
+import com.mapbox.navigation.ui.shield.internal.loader.CachedLoader
 import com.mapbox.navigation.ui.shield.internal.loader.RoadShieldLoader
 import com.mapbox.navigation.ui.shield.internal.loader.ShieldSpritesDownloader
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
@@ -16,10 +16,10 @@ internal object RoadShieldContentManagerContainer : RoadShieldContentManager {
 
     private val contentManager: RoadShieldContentManager by lazy {
         RoadShieldContentManagerImpl(
-            shieldLoader = CachedResourceLoader(
+            shieldLoader = CachedLoader(
                 IMAGES_CACHE_SIZE,
                 RoadShieldLoader(
-                    spritesLoader = CachedResourceLoader(
+                    spritesLoader = CachedLoader(
                         SPRITES_CACHE_SIZE,
                         ShieldSpritesDownloader()
                     ),
