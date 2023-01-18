@@ -1,0 +1,160 @@
+{
+  "code": "Ok",
+  "route": {
+    "legs": [
+      {
+        "annotation": {
+          "maxspeed": [
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            }
+          ],
+          "congestion_numeric": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "speed": [
+            6.4,
+            7,
+            6.1,
+            4.7,
+            4.7,
+            10.3,
+            10.3,
+            12.2,
+            10,
+            8.1,
+            8.1,
+            8.1,
+            7.2,
+            7.2,
+            7.2,
+            10,
+            10,
+            8.1
+          ],
+          "distance": [
+            65.1,
+            64.5,
+            64.1,
+            52.1,
+            12.2,
+            9.3,
+            101.4,
+            11.7,
+            117.2,
+            109.3,
+            2.6,
+            10.5,
+            11.4,
+            99.5,
+            12.7,
+            10.4,
+            112,
+            10.8
+          ],
+          "duration": [
+            10.174,
+            9.235,
+            10.492,
+            11.001,
+            2.571,
+            2.915,
+            9.89,
+            0.979,
+            11.719,
+            13.538,
+            0.316,
+            1.309,
+            1.592,
+            13.832,
+            1.764,
+            1.054,
+            11.166,
+            1.354
+          ]
+        }
+      }
+    ]
+  }
+}
