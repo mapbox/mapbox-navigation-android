@@ -1745,7 +1745,7 @@ package com.mapbox.navigation.base.utils {
 package com.mapbox.navigation.base.utils.route {
 
   public final class NavigationRouteUtils {
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static suspend Object? hasUnexpectedClosures(com.mapbox.navigation.base.route.NavigationRoute, kotlin.coroutines.Continuation<? super java.lang.Boolean>);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static suspend Object? hasUnexpectedUpcomingClosures(com.mapbox.navigation.base.trip.model.RouteProgress, kotlin.coroutines.Continuation<? super java.lang.Boolean>);
   }
 
 }
