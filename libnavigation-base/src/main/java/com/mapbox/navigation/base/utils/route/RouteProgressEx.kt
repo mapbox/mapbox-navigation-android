@@ -8,7 +8,9 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -16,27 +18,47 @@ import kotlinx.coroutines.withContext
 private const val LOG_CATEGORY = "NavigationRouteUtils"
 
 /**
- * This function checks whether the [NavigationRoute] has unexpected closures, which could be a reason to re-route.
+ * This function checks whether the [NavigationRoute] has unexpected upcoming closures, which could be a reason to re-route.
  *
- * `true` is returned whenever there's any [RouteLeg.closures] outside of a direct region around a coordinate from [RouteOptions.coordinatesList]
+ * The algorithm does not take to account current closures, where the puck is on.
+ *
+ * `true` is returned whenever there's any upcoming [RouteLeg.closures] outside of a direct region around a coordinate from [RouteOptions.coordinatesList]
  * that was allowed for snapping to closures with [RouteOptions.snappingIncludeClosuresList] or [RouteOptions.snappingIncludeStaticClosuresList].
  * flags. Otherwise, `false` is returned.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-suspend fun NavigationRoute.hasUnexpectedClosures(): Boolean =
+suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
     withContext(Dispatchers.Default) {
-        val snappingResultList = directionsRoute.getSnappingResultList()
+        val snappingResultList = navigationRoute.directionsRoute.getSnappingResultList()
+
+        val routeProgressData = ifNonNull(
+            currentLegProgress,
+        ) { legProgress ->
+            RouteProgressData(legProgress.legIndex, legProgress.geometryIndex)
+        }
 
         var currentLegFirstWaypointIndex = 0
-        directionsRoute.legs()?.forEachIndexed { routeLegIndex, routeLeg ->
+        navigationRoute.directionsRoute.legs()?.forEachIndexed { routeLegIndex, routeLeg ->
 
             val legLastGeometryIndex by lazy {
-                directionsRoute.stepsGeometryToPoints(routeLeg).lastIndex
+                navigationRoute.directionsRoute.stepsGeometryToPoints(routeLeg).lastIndex
             }
 
             val silentWaypoints = routeLeg.silentWaypoints()
 
             routeLeg.closures()?.forEach { closure ->
+                if (routeProgressData != null) {
+                    if (routeProgressData.currentLegIndex > routeLegIndex) {
+                        // skipping passed legs
+                        return@forEach
+                    } else if (
+                        routeProgressData.currentLegIndex == routeLegIndex &&
+                        routeProgressData.currentGeometryLegIndex >= closure.geometryIndexStart()
+                    ) {
+                        // skipping current and passed closures on the current leg
+                        return@forEach
+                    }
+                }
                 val silentWaypointsInClosureRange = silentWaypoints.inGeometryRange(
                     closure.geometryIndexStart(),
                     closure.geometryIndexEnd()
@@ -49,9 +71,10 @@ suspend fun NavigationRoute.hasUnexpectedClosures(): Boolean =
                             snappingResultList.getOrNull(silentWaypointIndex) ?: false
                         if (!isSnapAllowed) {
                             logD(
-                                "Route with id [${this@hasUnexpectedClosures.id}] has closure " +
-                                    "at leg index $routeLegIndex, that overlaps silent (via) " +
-                                    "waypoint",
+                                "Route with id " +
+                                    "[${this@hasUnexpectedUpcomingClosures.navigationRoute.id}] " +
+                                    "has closure at leg index $routeLegIndex, that overlaps " +
+                                    "silent (via) waypoint",
                                 LOG_CATEGORY
                             )
                             return@withContext true
@@ -63,8 +86,9 @@ suspend fun NavigationRoute.hasUnexpectedClosures(): Boolean =
                     silentWaypointsInClosureRange.isEmpty()
                 ) {
                     logD(
-                        "Route with id [${this@hasUnexpectedClosures.id}] has closure at leg " +
-                            "index $routeLegIndex",
+                        "Route with id " +
+                            "[${this@hasUnexpectedUpcomingClosures.navigationRoute.id}] has " +
+                            "closure at leg index $routeLegIndex",
                     )
                     return@withContext true
                 }
@@ -72,8 +96,9 @@ suspend fun NavigationRoute.hasUnexpectedClosures(): Boolean =
                     snappingResultList.getOrNull(currentLegFirstWaypointIndex) != true
                 ) {
                     logD(
-                        "Route with id [${this@hasUnexpectedClosures.id}] has closure at the " +
-                            "start of the leg, leg index $routeLegIndex",
+                        "Route with id " +
+                            "[${this@hasUnexpectedUpcomingClosures.navigationRoute.id}] has " +
+                            "closure at the start of the leg, leg index $routeLegIndex",
                         LOG_CATEGORY
                     )
                     return@withContext true
@@ -84,8 +109,9 @@ suspend fun NavigationRoute.hasUnexpectedClosures(): Boolean =
                         ) != true
                 ) {
                     logD(
-                        "Route with id [${this@hasUnexpectedClosures.id}] has closure at " +
-                            "the end of the leg, leg index $routeLegIndex",
+                        "Route with id " +
+                            "[${this@hasUnexpectedUpcomingClosures.navigationRoute.id}] has " +
+                            "closure at the end of the leg, leg index $routeLegIndex",
                         LOG_CATEGORY
                     )
                     return@withContext true
@@ -97,6 +123,11 @@ suspend fun NavigationRoute.hasUnexpectedClosures(): Boolean =
 
         return@withContext false
     }
+
+private class RouteProgressData(
+    val currentLegIndex: Int,
+    val currentGeometryLegIndex: Int,
+)
 
 private fun DirectionsRoute.getSnappingResultList(): List<Boolean> {
     val snappingIncludeClosuresList = routeOptions()?.snappingIncludeClosuresList()
