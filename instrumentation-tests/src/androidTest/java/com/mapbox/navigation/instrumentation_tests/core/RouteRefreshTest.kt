@@ -1,9 +1,11 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
+import android.content.Context
 import android.location.Location
 import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -26,6 +28,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.coroutines.roadObjectsO
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
@@ -34,6 +37,8 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEnd
 import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
+import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -79,6 +84,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         Point.fromLngLat(-75.474061, 38.546280),
         Point.fromLngLat(-75.525486, 38.772959),
         Point.fromLngLat(-74.698765, 39.822911)
+    )
+    private val multilegCoordinates = listOf(
+        Point.fromLngLat(38.577764, -121.496066),
+        Point.fromLngLat(38.576795, -121.480256),
+        Point.fromLngLat(38.582195, -121.468458)
     )
 
     private lateinit var failByRequestRouteRefreshResponse: FailByRequestMockRequestHandler
@@ -424,7 +434,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 R.raw.route_response_route_refresh,
                 R.raw.route_response_route_refresh_truncated_first_leg,
                 "route_response_route_refresh",
-                acceptedGeometryIndex = 5
+                acceptedGeometryIndex = 3
             )
             val routeOptions = generateRouteOptions(twoCoordinates)
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
@@ -433,10 +443,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
             mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.startTripSession()
-            // corresponds to currentRouteGeometryIndex = 5
-            stayOnPosition(38.57622, -121.496731)
+            // corresponds to currentRouteGeometryIndex = 3
+            stayOnPosition(38.577344, -121.496248)
             mapboxNavigation.routeProgressUpdates()
-                .filter { it.currentRouteGeometryIndex == 5 }
+                .filter { it.currentRouteGeometryIndex == 3 }
                 .first()
             val refreshedRoutes = mapboxNavigation.routesUpdates()
                 .filter {
@@ -446,10 +456,76 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .navigationRoutes
 
             assertEquals(224.224, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-            assertEquals(169.582, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(172.175, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
 
             assertEquals(227.918, requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-            assertEquals(234.024, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(235.641, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+        }
+
+    @Test
+    fun route_refresh_updates_annotations_for_new_alternative_with_different_number_of_legs() =
+        sdkTest {
+            setupMockRequestHandlers(
+                multilegCoordinates,
+                R.raw.route_response_single_route_multileg,
+                R.raw.route_response_single_route_multileg_refreshed,
+                "route_response_single_route_multileg",
+                acceptedGeometryIndex = 70
+            )
+            mockWebServerRule.requestHandlers.add(
+                FailByRequestMockRequestHandler(
+                    MockDirectionsRefreshHandler(
+                        "route_response_single_route_multileg_alternative",
+                        readRawFileText(
+                            activity,
+                            R.raw.route_response_single_route_multileg_alternative_refreshed
+                        ),
+                        acceptedGeometryIndex = 11
+                    )
+                )
+            )
+            val routeOptions = generateRouteOptions(multilegCoordinates)
+            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            // alternative which was requested on the second leg of the original route,
+            // so the alternative has only one leg while the original route has two
+            val alternativeRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
+
+            mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
+            mapboxNavigation.startTripSession()
+
+            // corresponds to currentRouteGeometryIndex = 70 for primary route and 11 for alternative route
+            stayOnPosition(38.581798, -121.476146)
+            mapboxNavigation.routeProgressUpdates()
+                .filter {
+                    it.currentRouteGeometryIndex == 70
+                }
+                .first()
+
+            mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
+                requestedRoutes + alternativeRoute,
+                initialLegIndex = 1
+            )
+
+            val refreshedRoutes = mapboxNavigation.routesUpdates()
+                .filter {
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH
+                }
+                .first()
+                .navigationRoutes
+
+            assertEquals(
+                requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001
+            )
+
+            assertEquals(201.673, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+            assertEquals(202.881, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+
+            assertEquals(194.3, alternativeRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(187.126, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
         }
 
     @Test
@@ -712,6 +788,27 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     routeIndex = 1
                 )
             )
+        )
+    }
+
+    private fun alternativeForMultileg(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.route_response_single_route_multileg_alternative)
+        val coordinates = listOf(
+            Point.fromLngLat(38.577427, -121.478077),
+            Point.fromLngLat(38.582195, -121.468458)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+            emptyList()
         )
     }
 }

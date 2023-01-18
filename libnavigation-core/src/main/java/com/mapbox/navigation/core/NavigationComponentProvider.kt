@@ -110,8 +110,8 @@ internal object NavigationComponentProvider {
         scope = scope
     )
 
-    fun createRouteRefreshRequestDataProvider(): RouteProgressDataProvider =
-        RouteProgressDataProvider()
+    fun createRouteRefreshRequestDataProvider(): PrimaryRouteProgressDataProvider =
+        PrimaryRouteProgressDataProvider()
 
     fun createEVDynamicDataHolder(): EVDynamicDataHolder = EVDynamicDataHolder()
 

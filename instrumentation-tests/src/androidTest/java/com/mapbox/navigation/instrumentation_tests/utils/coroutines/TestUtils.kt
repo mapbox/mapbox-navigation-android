@@ -93,10 +93,11 @@ suspend fun MapboxNavigation.setNavigationRoutesAndAwaitError(
 }
 
 suspend fun MapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
-    routes: List<NavigationRoute>
+    routes: List<NavigationRoute>,
+    initialLegIndex: Int = 0,
 ) =
     withTimeout(MAX_TIME_TO_UPDATE_ROUTE) {
-        setNavigationRoutes(routes)
+        setNavigationRoutes(routes, initialLegIndex)
         waitForAlternativeRoute()
     }
 
