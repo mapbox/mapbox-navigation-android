@@ -56,7 +56,7 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
                         routeProgressData.currentLegIndex == routeLegIndex &&
                         routeProgressData.currentStepIndex >= closure.geometryIndexStart()
                     ) {
-                        // skipping current and passed closures on the **current** leg
+                        // skipping current and passed closures on the current leg
                         return@forEach
                     }
                 }
