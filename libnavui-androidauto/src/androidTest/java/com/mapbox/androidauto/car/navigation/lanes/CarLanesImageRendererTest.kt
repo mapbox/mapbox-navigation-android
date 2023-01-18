@@ -7,9 +7,11 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
 import com.mapbox.androidauto.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.androidauto.testing.BitmapTestUtil
+import com.mapbox.navigation.ui.maneuver.model.Lane
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
@@ -38,6 +40,25 @@ class CarLanesImageRendererTest {
         context = bitmapTestUtils.carDisplayContext(),
         background = Color.RED
     )
+
+    @Test
+    fun cache_test() {
+        val lane = mockk<Lane> {
+            every { allLanes } returns listOf(
+                mockk {
+                    every { drivingSide } returns "right"
+                    every { activeDirection } returns "uturn"
+                    every { isActive } returns true
+                    every { directions } returns listOf("uturn")
+                }
+            )
+        }
+        val img1 = carLanesImageGenerator.renderLanesImage(lane)
+        val img2 = carLanesImageGenerator.renderLanesImage(lane)
+
+        assertNotNull(img1)
+        assertSame(img1, img2)
+    }
 
     @Test
     fun one_lane_uturn() {
