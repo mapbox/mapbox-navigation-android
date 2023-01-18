@@ -14,11 +14,11 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class RouteProgressDataProviderTest {
+class PrimaryRouteProgressDataProviderTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
-    private val provider = RouteProgressDataProvider()
+    private val provider = PrimaryRouteProgressDataProvider()
     private val currentLegIndex = 9
     private val routeGeometryIndex = 44
     private val legGeometryIndex = 33

@@ -26,7 +26,7 @@ internal class RouteAlternativesController constructor(
     navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
     private val threadController: ThreadController
-) {
+) : AlternativeMetadataProvider {
 
     private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
 
@@ -142,7 +142,7 @@ internal class RouteAlternativesController constructor(
         observerProcessingJob?.cancel()
     }
 
-    fun getMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
+    override fun getMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
         return metadataMap[navigationRoute.id]
     }
 
