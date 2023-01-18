@@ -32,7 +32,7 @@ workflows:
     when:
       not: << pipeline.parameters.mapbox_navigation_native_upstream >>
     jobs:
-      - release-snapshot:
+      - release-snapshot
       - release:
           filters:
             tags:
