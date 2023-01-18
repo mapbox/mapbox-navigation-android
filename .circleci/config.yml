@@ -100,9 +100,12 @@ commands:
     steps:
       name:
       command: |
-        PR=$(curl -s $CIRCLE_PULL_REQUEST)
+        if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
+          PR=$(curl -s $CIRCLE_PULL_REQUEST)
+        fi
         if [[ $CIRCLE_BRANCH == main || $CIRCLE_BRANCH =~ release-v.* || $PR == *"mapbox/mapbox-navigation-android/labels/publish-snapshot"* ]]; then
           exit 0
+        fi
         else
           exit 1
         fi
