@@ -99,7 +99,7 @@ commands:
   check-snapshot-label:
     steps:
       - run:
-          name: 'Check snapshot label'
+          name: Check snapshot label
           command: |
             if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
               PR=$(curl -s $CIRCLE_PULL_REQUEST)
