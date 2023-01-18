@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.net.URL
 
-class NavigationRouteExTest {
+class RouteProgressExTest {
 
     @Test
     fun `update Navigation route`() {
