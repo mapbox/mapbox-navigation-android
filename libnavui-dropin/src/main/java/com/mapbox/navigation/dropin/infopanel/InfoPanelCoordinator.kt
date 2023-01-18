@@ -3,11 +3,11 @@ package com.mapbox.navigation.dropin.infopanel
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import androidx.constraintlayout.widget.Guideline
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.databinding.MapboxNavigationViewLayoutBinding
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
@@ -27,11 +27,10 @@ import kotlinx.coroutines.launch
  */
 internal class InfoPanelCoordinator(
     private val context: NavigationViewContext,
-    private val infoPanel: ViewGroup,
-    private val guidelineBottom: Guideline
-) : UICoordinator<ViewGroup>(infoPanel) {
+    private val binding: MapboxNavigationViewLayoutBinding,
+) : UICoordinator<ViewGroup>(binding.infoPanelLayout) {
     private val store = context.store
-    private val behavior = BottomSheetBehavior.from(infoPanel)
+    private val behavior = BottomSheetBehavior.from(binding.infoPanelLayout)
 
     private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -48,15 +47,15 @@ internal class InfoPanelCoordinator(
     @OptIn(ExperimentalCoroutinesApi::class)
     private val infoPanelTop = callbackFlow {
         val onGlobalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            trySend(infoPanel.top)
+            trySend(binding.infoPanelLayout.top)
         }
-        val viewTreeObserver = infoPanel.viewTreeObserver
+        val viewTreeObserver = binding.infoPanelLayout.viewTreeObserver
         viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener)
         awaitClose { viewTreeObserver.removeOnGlobalLayoutListener(onGlobalLayoutListener) }
     }.distinctUntilChanged()
 
     init {
-        infoPanel.addOnLayoutChangeListener(FixBottomSheetLayoutWhenHidden(infoPanel, behavior))
+        binding.infoPanelLayout.addOnLayoutChangeListener(FixBottomSheetLayoutWhenHidden())
         behavior.peekHeight = context.styles.infoPanelPeekHeight.value
         behavior.hide()
     }
@@ -64,6 +63,7 @@ internal class InfoPanelCoordinator(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
+        context.behavior.infoPanelBehavior.updateBottomSheetState(behavior.state)
         behavior.addBottomSheetCallback(updateGuideline)
         coroutineScope.launch {
             bottomSheetState().collect { state ->
@@ -79,7 +79,10 @@ internal class InfoPanelCoordinator(
             }
         }
         coroutineScope.launch {
-            context.systemBarsInsets.collect { updateGuidelinePosition(systemBarsInsets = it) }
+            context.systemBarsInsets.collect { insets ->
+                binding.container.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+                updateGuidelinePosition(systemBarsInsets = insets)
+            }
         }
         coroutineScope.launch {
             context.styles.infoPanelGuidelineMaxPosPercent.collect {
@@ -162,14 +165,14 @@ internal class InfoPanelCoordinator(
 
     private fun updateGuidelinePosition(
         systemBarsInsets: Insets = context.systemBarsInsets.value,
-        infoPanelTop: Int = infoPanel.top,
+        infoPanelTop: Int = binding.infoPanelLayout.top,
         maxPosPercent: Float = context.styles.infoPanelGuidelineMaxPosPercent.value
     ) {
-        val parentHeight = (infoPanel.parent as ViewGroup).height
+        val parentHeight = binding.coordinatorLayout.height
         val maxPos = (parentHeight * maxPosPercent).toInt() - systemBarsInsets.bottom
         if (0 < maxPos) {
             val pos = parentHeight - infoPanelTop - systemBarsInsets.bottom
-            guidelineBottom.setGuidelineEnd(pos.coerceIn(0, maxPos))
+            binding.guidelineBottom.setGuidelineEnd(pos.coerceIn(0, maxPos))
         }
     }
 
@@ -193,10 +196,7 @@ internal class InfoPanelCoordinator(
      * An OnLayoutChangeListener that ensures the bottom sheet is always laid out at the bottom of
      * the parent view when in STATE_HIDDEN.
      */
-    private class FixBottomSheetLayoutWhenHidden(
-        private val layout: ViewGroup,
-        private val behavior: BottomSheetBehavior<ViewGroup>
-    ) : View.OnLayoutChangeListener {
+    private inner class FixBottomSheetLayoutWhenHidden : View.OnLayoutChangeListener {
 
         override fun onLayoutChange(
             v: View?,
@@ -210,7 +210,10 @@ internal class InfoPanelCoordinator(
             oldBottom: Int
         ) {
             if (behavior.state == BottomSheetBehavior.STATE_HIDDEN) {
-                ViewCompat.offsetTopAndBottom(layout, (layout.parent as? View)?.height ?: 0)
+                ViewCompat.offsetTopAndBottom(
+                    binding.infoPanelLayout,
+                    binding.coordinatorLayout.height,
+                )
             }
         }
     }

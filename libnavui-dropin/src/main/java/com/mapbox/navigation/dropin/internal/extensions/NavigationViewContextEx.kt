@@ -5,7 +5,6 @@ package com.mapbox.navigation.dropin.internal.extensions
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.annotation.Px
-import androidx.constraintlayout.widget.Guideline
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.core.MapboxNavigation
@@ -269,9 +268,8 @@ internal fun NavigationViewContext.maneuverCoordinator(guidanceLayout: ViewGroup
     ManeuverCoordinator(this, guidanceLayout)
 
 internal fun NavigationViewContext.infoPanelCoordinator(
-    infoPanelLayout: ViewGroup,
-    guidelineBottom: Guideline
-) = InfoPanelCoordinator(this, infoPanelLayout, guidelineBottom)
+    binding: MapboxNavigationViewLayoutBinding,
+) = InfoPanelCoordinator(this, binding)
 
 internal fun NavigationViewContext.actionButtonsCoordinator(actionListLayout: ViewGroup) =
     ActionButtonsCoordinator(this, actionListLayout)

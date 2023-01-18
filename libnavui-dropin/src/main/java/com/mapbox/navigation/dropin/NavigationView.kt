@@ -134,7 +134,7 @@ class NavigationView @JvmOverloads constructor(
                 backPressedComponent(activity),
                 scalebarPlaceholderCoordinator(binding.scalebarLayout),
                 maneuverCoordinator(binding.guidanceLayout),
-                infoPanelCoordinator(binding.infoPanelLayout, binding.guidelineBottom),
+                infoPanelCoordinator(binding),
                 actionButtonsCoordinator(binding.actionListLayout),
                 speedLimitCoordinator(binding.speedLimitLayout),
                 roadNameCoordinator(binding.roadNameLayout),
