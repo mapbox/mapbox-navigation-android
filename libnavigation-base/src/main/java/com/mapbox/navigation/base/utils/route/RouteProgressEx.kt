@@ -33,9 +33,8 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
 
         val routeProgressData = ifNonNull(
             currentLegProgress,
-            currentLegProgress?.currentStepProgress
-        ) { legProgress, stepProgress ->
-            RouteProgressData(legProgress.legIndex, stepProgress.stepIndex)
+        ) { legProgress ->
+            RouteProgressData(legProgress.legIndex, legProgress.geometryIndex)
         }
 
         var currentLegFirstWaypointIndex = 0
@@ -54,7 +53,7 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
                         return@forEach
                     } else if (
                         routeProgressData.currentLegIndex == routeLegIndex &&
-                        routeProgressData.currentStepIndex >= closure.geometryIndexStart()
+                        routeProgressData.currentGeometryLegIndex >= closure.geometryIndexStart()
                     ) {
                         // skipping current and passed closures on the current leg
                         return@forEach
@@ -127,7 +126,7 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
 
 private class RouteProgressData(
     val currentLegIndex: Int,
-    val currentStepIndex: Int,
+    val currentGeometryLegIndex: Int,
 )
 
 private fun DirectionsRoute.getSnappingResultList(): List<Boolean> {

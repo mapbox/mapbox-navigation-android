@@ -28,7 +28,7 @@ class RouteProgressExTest {
         private val snappingIncludeClosures: BooleansProvider?,
         private val snappingIncludeStaticClosures: BooleansProvider?,
         private val currentLegIndex: Int,
-        private val currentStepIndex: Int,
+        private val currentGeometryLegIndex: Int,
         private val expectedHasUnexpectedUpcomingClosures: Boolean,
     ) {
 
@@ -229,12 +229,12 @@ class RouteProgressExTest {
             private fun mockRouteProgress(
                 navigationRoute: NavigationRoute,
                 currentLegIndex: Int,
-                currentStepIndex: Int,
+                currentLegGeometryIndex: Int,
             ): RouteProgress = mockk {
                 every { this@mockk.navigationRoute } returns navigationRoute
                 every { currentLegProgress } returns mockk {
                     every { legIndex } returns currentLegIndex
-                    every { currentStepProgress?.stepIndex } returns currentStepIndex
+                    every { geometryIndex } returns currentLegGeometryIndex
                 }
             }
 
@@ -252,7 +252,7 @@ class RouteProgressExTest {
                     snappingIncludeStaticClosures,
                 ),
                 currentLegIndex,
-                currentStepIndex,
+                currentGeometryLegIndex,
             )
 
             val hasUnexpectedUpcomingClosures = routeProgress.hasUnexpectedUpcomingClosures()
