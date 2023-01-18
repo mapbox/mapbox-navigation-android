@@ -17,7 +17,7 @@ internal data class RouteProgressData(
  * Accumulates and provides route refresh model data from different sources.
  */
 @MainThread
-internal class RouteProgressDataProvider : RouteProgressObserver {
+internal class PrimaryRouteProgressDataProvider : RouteProgressObserver {
 
     private val defaultRouteProgressData = RouteProgressData(0, 0, null)
     private var routeProgressData: RouteProgressData? = null

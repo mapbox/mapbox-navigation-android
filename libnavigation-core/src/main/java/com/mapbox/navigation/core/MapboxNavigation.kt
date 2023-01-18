@@ -556,6 +556,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.routeRefreshOptions,
             directionsSession,
             routeRefreshRequestDataProvider,
+            routeAlternativesController,
             evDynamicDataHolder
         )
 

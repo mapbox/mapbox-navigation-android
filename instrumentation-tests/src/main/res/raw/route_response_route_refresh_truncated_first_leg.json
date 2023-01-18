@@ -112,6 +112,12 @@
               "unknown": true
             },
             {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
               "speed": 40,
               "unit": "km/h"
             },
@@ -198,6 +204,8 @@
             "unknown",
             "unknown",
             "unknown",
+            "unknown",
+            "unknown",
             "low",
             "low",
             "low",
@@ -213,6 +221,8 @@
             "low"
           ],
           "speed": [
+            6.2,
+            6.3,
             6.1,
             5.8,
             5.8,
@@ -249,6 +259,8 @@
             9.7
           ],
           "distance": [
+            10.2,
+            9.7,
             24.5,
             4,
             4.6,
@@ -285,6 +297,8 @@
             3.7
           ],
           "duration": [
+            1.802,
+            3.002,
             4.003,
             0.687,
             0.787,
