@@ -3,8 +3,10 @@ package com.mapbox.navigation.dropin.navigationview
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.getDestination
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.NavigationViewApi
 import com.mapbox.navigation.dropin.NavigationViewApiError
 import com.mapbox.navigation.dropin.NavigationViewApiErrorTypes
@@ -89,8 +91,9 @@ internal class MapboxNavigationViewApi(
             store.dispatch(startArrival(point, routes))
         }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun isReplayEnabled(): Boolean {
-        return store.state.value.tripSession.isReplayEnabled
+        return MapboxNavigationApp.current()?.isReplayEnabled() ?: false
     }
 
     override fun routeReplayEnabled(enabled: Boolean) {

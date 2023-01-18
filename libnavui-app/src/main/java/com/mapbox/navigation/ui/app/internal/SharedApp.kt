@@ -16,7 +16,6 @@ import com.mapbox.navigation.ui.app.internal.controller.TripSessionStarterStateC
 import com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProvider
 import com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeComponent
 import com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeContract
-import java.util.concurrent.atomic.AtomicBoolean
 
 object SharedApp {
     private var isSetup = false
@@ -24,8 +23,6 @@ object SharedApp {
     val store = Store()
     val state get() = store.state.value
     val routeOptionsProvider: RouteOptionsProvider = RouteOptionsProvider()
-
-    private val ignoreTripSessionUpdates = AtomicBoolean(false)
 
     private val navigationObservers: Array<MapboxNavigationObserver> = arrayOf(
         RouteStateController(store),
@@ -45,21 +42,12 @@ object SharedApp {
         if (isSetup) return
         isSetup = true
 
-        MapboxNavigationApp.registerObserver(StateResetController(store, ignoreTripSessionUpdates))
+        MapboxNavigationApp.registerObserver(StateResetController(store))
         MapboxNavigationApp.registerObserver(
             RouteAlternativeComponent {
                 routeAlternativeContract ?: RouteAlternativeComponentImpl(store)
             }
         )
         MapboxNavigationApp.lifecycleOwner.attachCreated(*navigationObservers)
-    }
-
-    fun tripSessionTransaction(updateSession: () -> Unit) {
-        // Any changes to MapboxNavigation TripSession should be done within `tripSessionTransaction { }` block.
-        // This ensures that non of the registered TripSessionStateObserver accidentally execute cleanup logic
-        // when TripSession state changes.
-        ignoreTripSessionUpdates.set(true)
-        updateSession()
-        ignoreTripSessionUpdates.set(false)
     }
 }

@@ -7,7 +7,6 @@ import com.mapbox.navigation.ui.app.internal.camera.CameraState
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewState
-import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterState
 
 /**
  * Navigation state for internal use.
@@ -20,5 +19,4 @@ data class State constructor(
     val audio: AudioGuidanceState = AudioGuidanceState(),
     val routes: List<NavigationRoute> = emptyList(),
     val previewRoutes: RoutePreviewState = RoutePreviewState.Empty,
-    val tripSession: TripSessionStarterState = TripSessionStarterState()
 )

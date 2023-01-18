@@ -12,7 +12,6 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.app.internal.State
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 import io.mockk.every
 import io.mockk.mockk
@@ -75,9 +74,7 @@ class LocationPermissionComponentTest {
         locationPermissionComponent.onAttached(mockMapboxNavigation())
 
         verify {
-            testStore.dispatch(
-                TripSessionStarterAction.OnLocationPermission(true)
-            )
+            testStore.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
         }
     }
 
@@ -92,9 +89,7 @@ class LocationPermissionComponentTest {
         locationPermissionComponent.onAttached(mockMapboxNavigation())
 
         verify(exactly = 0) {
-            testStore.dispatch(
-                TripSessionStarterAction.OnLocationPermission(false)
-            )
+            testStore.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
         }
     }
 
@@ -127,9 +122,7 @@ class LocationPermissionComponentTest {
         callbackSlot.captured.onActivityResult(permissions)
 
         verify {
-            testStore.dispatch(
-                TripSessionStarterAction.OnLocationPermission(true)
-            )
+            testStore.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
         }
     }
 
@@ -149,9 +142,7 @@ class LocationPermissionComponentTest {
         callbackSlot.captured.onActivityResult(permissions)
 
         verify {
-            testStore.dispatch(
-                TripSessionStarterAction.OnLocationPermission(false)
-            )
+            testStore.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
         }
     }
 
@@ -175,13 +166,6 @@ class LocationPermissionComponentTest {
                 componentActivity,
                 testStore
             )
-            testStore.setState(
-                State(
-                    tripSession = mockk {
-                        every { isLocationPermissionGranted } returns false
-                    }
-                )
-            )
             every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
             locationPermissionComponent.onAttached(mockMapboxNavigation())
@@ -189,9 +173,7 @@ class LocationPermissionComponentTest {
             testLifecycle.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
 
             verify {
-                testStore.dispatch(
-                    TripSessionStarterAction.OnLocationPermission(true)
-                )
+                testStore.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
             }
         }
 

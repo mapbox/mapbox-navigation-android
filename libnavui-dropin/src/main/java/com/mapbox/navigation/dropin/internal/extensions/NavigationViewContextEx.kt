@@ -35,7 +35,6 @@ import com.mapbox.navigation.dropin.permission.LocationPermissionComponent
 import com.mapbox.navigation.dropin.roadname.RoadNameCoordinator
 import com.mapbox.navigation.dropin.speedlimit.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.tripprogress.TripProgressBinder
-import com.mapbox.navigation.dropin.tripsession.TripSessionComponent
 import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
 import com.mapbox.navigation.ui.maps.internal.ui.BuildingHighlightComponent
@@ -255,9 +254,6 @@ internal fun NavigationViewContext.analyticsComponent() =
 
 internal fun NavigationViewContext.locationPermissionComponent(activity: ComponentActivity) =
     LocationPermissionComponent(activity, store)
-
-internal fun NavigationViewContext.tripSessionComponent() =
-    TripSessionComponent(lifecycleOwner.lifecycle, store)
 
 internal fun NavigationViewContext.backPressedComponent(activity: ComponentActivity) =
     BackPressedComponent(activity.onBackPressedDispatcher, store, lifecycleOwner)
