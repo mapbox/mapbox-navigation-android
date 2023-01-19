@@ -21,6 +21,9 @@ import com.mapbox.navigator.UserFeedbackMetadata
 class FeedbackMetadataWrapper internal constructor(
     private val userFeedbackHandle: UserFeedbackHandle
 ) {
+    /**
+     * Provide the instance of [FeedbackMetadata]
+     */
     fun get(): FeedbackMetadata = FeedbackMetadata(userFeedbackHandle.metadata)
 }
 
