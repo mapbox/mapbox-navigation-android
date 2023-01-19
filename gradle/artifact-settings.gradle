@@ -52,6 +52,11 @@ def getSnapshotVersion(String version) {
         if (!isPreRelease) {
             minor += 1
         }
-        return "${major}.${minor}.0-SNAPSHOT"
+        def branch = System.getenv("CIRCLE_BRANCH")
+        if (!branch || branch == "main" || branch ==~ /release-v.*/) {
+            return "${major}.${minor}.0-SNAPSHOT"
+        } else {
+            return "${major}.${minor}.0-${branch}-SNAPSHOT"
+        }
     }
 }
