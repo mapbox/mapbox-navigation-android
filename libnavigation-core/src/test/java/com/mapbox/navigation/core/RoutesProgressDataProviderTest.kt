@@ -73,13 +73,13 @@ class RoutesProgressDataProviderTest {
         every {
             alternativeMetadataProvider.getMetadataFor(alternativeRoute2)
         } returns alternativeMetadata2
-        every {
+        coEvery {
             AlternativeRouteProgressDataProvider.getRouteProgressData(
                 primaryRouteProgressData,
                 alternativeMetadata1
             )
         } returns alternativeRoute1ProgressData
-        every {
+        coEvery {
             AlternativeRouteProgressDataProvider.getRouteProgressData(
                 primaryRouteProgressData,
                 alternativeMetadata2
@@ -116,7 +116,7 @@ class RoutesProgressDataProviderTest {
         every {
             alternativeMetadataProvider.getMetadataFor(alternativeRoute2)
         } returns alternativeMetadata2
-        every {
+        coEvery {
             AlternativeRouteProgressDataProvider.getRouteProgressData(
                 primaryRouteProgressData,
                 alternativeMetadata2
