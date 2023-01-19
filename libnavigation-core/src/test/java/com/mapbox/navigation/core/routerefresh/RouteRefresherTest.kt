@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.core.RouteProgressDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
-import com.mapbox.navigation.core.ev.EVDynamicDataHolder
+import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
@@ -43,12 +43,12 @@ class RouteRefresherTest {
     private val routeProgressDataProvider = mockk<RouteProgressDataProvider>(relaxed = true) {
         coEvery { getRouteRefreshRequestDataOrWait() } returns routeProgressData
     }
-    private val evDataHolder = mockk<EVDynamicDataHolder>(relaxed = true)
+    private val evRefreshDataProvider = mockk<EVRefreshDataProvider>(relaxed = true)
     private val routeDiffProvider = mockk<DirectionsRouteDiffProvider>(relaxed = true)
     private val routeRefresh = mockk<RouteRefresh>(relaxed = true)
     private val sut = RouteRefresher(
         routeProgressDataProvider,
-        evDataHolder,
+        evRefreshDataProvider,
         routeDiffProvider,
         routeRefresh,
     )

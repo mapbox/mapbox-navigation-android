@@ -1,0 +1,1 @@
+- Added `MapboxNavigation#refreshRoutesImmediately` to trigger route refresh request immediately.

@@ -19,6 +19,30 @@ class CancellableHandlerTest {
     private val handler = CancellableHandler(coroutineRule.coroutineScope)
 
     @Test
+    fun postExecutesWithZeroTimeout() = coroutineRule.runBlockingTest {
+        handler.postDelayed(0, runnable, cancellation)
+
+        verify(exactly = 1) {
+            runnable.run()
+        }
+        verify(exactly = 0) {
+            cancellation.invoke()
+        }
+    }
+
+    @Test
+    fun postExecutesWithNegativeTimeout() = coroutineRule.runBlockingTest {
+        handler.postDelayed(-10, runnable, cancellation)
+
+        verify(exactly = 1) {
+            runnable.run()
+        }
+        verify(exactly = 0) {
+            cancellation.invoke()
+        }
+    }
+
+    @Test
     fun postExecutesAfterTimeout() = coroutineRule.runBlockingTest {
         val timeout = 7000L
 
@@ -42,6 +66,28 @@ class CancellableHandlerTest {
         val timeout = 7000L
         handler.postDelayed(timeout, runnable, cancellation)
         coroutineRule.testDispatcher.advanceTimeBy(timeout)
+
+        handler.cancelAll()
+
+        verify(exactly = 0) {
+            cancellation.invoke()
+        }
+    }
+
+    @Test
+    fun postWithZeroTimeoutRemovesBlockFromMap() = coroutineRule.runBlockingTest {
+        handler.postDelayed(0, runnable, cancellation)
+
+        handler.cancelAll()
+
+        verify(exactly = 0) {
+            cancellation.invoke()
+        }
+    }
+
+    @Test
+    fun postWithNegativeTimeoutRemovesBlockFromMap() = coroutineRule.runBlockingTest {
+        handler.postDelayed(-10, runnable, cancellation)
 
         handler.cancelAll()
 

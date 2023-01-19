@@ -15,7 +15,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     private val listener: RouteRefresherListener,
     private val cancellableHandler: CancellableHandler,
     private val retryStrategy: RetryRouteRefreshStrategy,
-) : Pausable {
+) {
 
     constructor(
         routeRefresherExecutor: RouteRefresherExecutor,
@@ -63,14 +63,14 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         }
     }
 
-    override fun pause() {
+    fun pause() {
         if (!paused) {
             paused = true
             cancellableHandler.cancelAll()
         }
     }
 
-    override fun resume() {
+    fun resume() {
         if (paused) {
             paused = false
             routesToRefresh?.let {

@@ -4,7 +4,6 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 #### Features
-- Added `MapboxNavigation#refreshRoutesImmediately` to trigger route refresh request immediately. [#6610](https://github.com/mapbox/mapbox-navigation-android/pull/6610)
 #### Bug fixes and improvements
 
 ## Mapbox Navigation SDK 2.11.0-alpha.1 - 13 January, 2023

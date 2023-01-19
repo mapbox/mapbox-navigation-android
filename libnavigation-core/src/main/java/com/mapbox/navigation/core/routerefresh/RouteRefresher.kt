@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.core.RouteProgressDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
-import com.mapbox.navigation.core.ev.EVDynamicDataHolder
+import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.async
@@ -25,7 +25,7 @@ internal data class RouteRefresherResult(
 
 internal class RouteRefresher(
     private val routeProgressDataProvider: RouteProgressDataProvider,
-    private val evDataHolder: EVDynamicDataHolder,
+    private val evRefreshDataProvider: EVRefreshDataProvider,
     private val routeDiffProvider: DirectionsRouteDiffProvider,
     private val routeRefresh: RouteRefresh,
 ) {
@@ -85,7 +85,7 @@ internal class RouteRefresher(
             routeProgressData.legIndex,
             routeProgressData.routeGeometryIndex,
             routeProgressData.legGeometryIndex,
-            evDataHolder.currentData(route.routeOptions.unrecognizedJsonProperties ?: emptyMap())
+            evRefreshDataProvider.get(route.routeOptions)
         )
         return when (val result = requestRouteRefresh(route, routeRefreshRequestData)) {
             is RouteRefreshResult.Fail -> {

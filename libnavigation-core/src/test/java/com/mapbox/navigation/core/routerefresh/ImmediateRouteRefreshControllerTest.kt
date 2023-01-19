@@ -11,45 +11,37 @@ import org.junit.Test
 class ImmediateRouteRefreshControllerTest {
 
     private val routeRefresherExecutor = mockk<RouteRefresherExecutor>(relaxed = true)
-    private val plannedRefreshController = mockk<Pausable>(relaxed = true)
     private val stateHolder = mockk<RouteRefreshStateHolder>(relaxed = true)
     private val listener = mockk<RouteRefresherListener>(relaxed = true)
+    private val clientCallback = mockk<(RouteRefresherResult) -> Unit>(relaxed = true)
     private val routes = listOf<NavigationRoute>(mockk())
 
     private val sut = ImmediateRouteRefreshController(
         routeRefresherExecutor,
-        plannedRefreshController,
         stateHolder,
         listener
     )
 
     @Test
     fun requestRoutesRefreshWithEmptyRoutes() {
-        sut.requestRoutesRefresh(emptyList())
+        sut.requestRoutesRefresh(emptyList(), clientCallback)
 
         verify(exactly = 0) {
-            plannedRefreshController.pause()
+            clientCallback(any())
             routeRefresherExecutor.postRoutesToRefresh(any(), any())
         }
     }
 
     @Test
-    fun requestRoutesRefreshPausesPlannedController() {
-        sut.requestRoutesRefresh(routes)
-
-        verify(exactly = 1) { plannedRefreshController.pause() }
-    }
-
-    @Test
     fun requestRoutesRefreshPostsRefreshRequest() {
-        sut.requestRoutesRefresh(routes)
+        sut.requestRoutesRefresh(routes, clientCallback)
 
         verify(exactly = 1) { routeRefresherExecutor.postRoutesToRefresh(routes, any()) }
     }
 
     @Test
     fun routesRefreshStarted() {
-        sut.requestRoutesRefresh(routes)
+        sut.requestRoutesRefresh(routes, clientCallback)
         val callback = interceptCallback()
 
         callback.onStarted()
@@ -59,7 +51,7 @@ class ImmediateRouteRefreshControllerTest {
 
     @Test
     fun routesRefreshFinishedSuccessfully() {
-        sut.requestRoutesRefresh(routes)
+        sut.requestRoutesRefresh(routes, clientCallback)
         val callback = interceptCallback()
         val result = RouteRefresherResult(
             true,
@@ -71,11 +63,12 @@ class ImmediateRouteRefreshControllerTest {
 
         verify(exactly = 1) { stateHolder.onSuccess() }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
+        verify(exactly = 1) { clientCallback(result) }
     }
 
     @Test
     fun routesRefreshFinishedWithFailure() {
-        sut.requestRoutesRefresh(routes)
+        sut.requestRoutesRefresh(routes, clientCallback)
         val callback = interceptCallback()
         val result = RouteRefresherResult(
             false,
@@ -86,7 +79,7 @@ class ImmediateRouteRefreshControllerTest {
         callback.onResult(result)
 
         verify(exactly = 1) { stateHolder.onFailure(null) }
-        verify(exactly = 1) { plannedRefreshController.resume() }
+        verify(exactly = 1) { clientCallback(result) }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
     }
 

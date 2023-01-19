@@ -6,12 +6,11 @@ import com.mapbox.navigation.base.route.NavigationRoute
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ImmediateRouteRefreshController(
     private val routeRefresherExecutor: RouteRefresherExecutor,
-    private val plannedRefreshController: Pausable,
     private val stateHolder: RouteRefreshStateHolder,
     private val listener: RouteRefresherListener
 ) {
 
-    private val callback = object : RouteRefresherProgressCallback {
+    private val progressCallback = object : RouteRefresherProgressCallback {
 
         override fun onStarted() {
             stateHolder.onStarted()
@@ -22,17 +21,29 @@ internal class ImmediateRouteRefreshController(
                 stateHolder.onSuccess()
             } else {
                 stateHolder.onFailure(null)
-                plannedRefreshController.resume()
             }
             listener.onRoutesRefreshed(routeRefresherResult)
         }
     }
 
-    fun requestRoutesRefresh(routes: List<NavigationRoute>) {
+    fun requestRoutesRefresh(routes: List<NavigationRoute>, callback: (RouteRefresherResult) -> Unit) {
         if (routes.isEmpty()) {
             return
         }
-        plannedRefreshController.pause()
-        routeRefresherExecutor.postRoutesToRefresh(routes, callback)
+        routeRefresherExecutor.postRoutesToRefresh(routes, wrapCallback(callback))
+    }
+
+    private fun wrapCallback(
+        callback: (RouteRefresherResult) -> Unit
+    ) = object : RouteRefresherProgressCallback {
+
+        override fun onStarted() {
+            progressCallback.onStarted()
+        }
+
+        override fun onResult(routeRefresherResult: RouteRefresherResult) {
+            progressCallback.onResult(routeRefresherResult)
+            callback(routeRefresherResult)
+        }
     }
 }
