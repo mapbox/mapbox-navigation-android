@@ -11,6 +11,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.common.LogConfiguration
+import com.mapbox.common.LoggingLevel
 import com.mapbox.navigation.examples.core.IndependentRouteGenerationActivity
 import com.mapbox.navigation.examples.core.MapboxBuildingHighlightActivity
 import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
@@ -39,6 +41,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
         binding = LayoutActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

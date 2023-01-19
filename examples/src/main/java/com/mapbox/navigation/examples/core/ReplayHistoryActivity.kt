@@ -6,11 +6,11 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
@@ -23,11 +23,8 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.core.replay.history.ReplayEventBase
-import com.mapbox.navigation.core.replay.history.ReplaySetNavigationRoute
+import com.mapbox.navigation.core.replay.history.ReplayHistorySession
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -50,21 +47,17 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.launch
-import java.util.Collections
 
 private const val DEFAULT_INITIAL_ZOOM = 15.0
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class ReplayHistoryActivity : AppCompatActivity() {
 
-    private var loadNavigationJob: Job? = null
     private val navigationLocationProvider = NavigationLocationProvider()
     private lateinit var historyFileLoader: HistoryFileLoader
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var mapboxReplayer: MapboxReplayer
     private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
@@ -103,6 +96,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
             40.0 * pixelDensity
         )
     }
+    private val replayHistorySession = ReplayHistorySession()
 
     private val initialCameraOptions: CameraOptions? = CameraOptions.Builder()
         .zoom(DEFAULT_INITIAL_ZOOM)
@@ -163,7 +157,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
-        mapboxReplayer.finish()
+        replayHistorySession.onDetached(mapboxNavigation)
         mapboxNavigation.onDestroy()
         if (::locationComponent.isInitialized) {
             locationComponent.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
@@ -212,15 +206,16 @@ class ReplayHistoryActivity : AppCompatActivity() {
             viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
             viewportDataSource.evaluate()
             if (!isLocationInitialized) {
+                logI("ReplayHistoryActivity") {
+                    "onNewLocationMatcherResult initialize location"
+                }
                 isLocationInitialized = true
-                val instantTransition = NavigationCameraTransitionOptions.Builder()
-                    .maxDuration(0)
-                    .build()
-                navigationCamera.requestNavigationCameraToOverview(
-                    stateTransitionOptions = instantTransition,
+                navigationCamera.requestNavigationCameraToFollowing(
+                    stateTransitionOptions = NavigationCameraTransitionOptions.Builder()
+                        .maxDuration(0)
+                        .build(),
                 )
             }
-
             navigationLocationProvider.changePosition(
                 locationMatcherResult.enhancedLocation,
                 locationMatcherResult.keyPoints,
@@ -308,21 +303,12 @@ class ReplayHistoryActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
         historyFileLoader = HistoryFileLoader()
-        mapboxNavigation = MapboxNavigationProvider.create(
+        mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(Utils.getMapboxAccessToken(this))
                 .build()
         )
-        startReplayTripSession()
-    }
-
-    /**
-     * This is showcasing a new way to replay rides at runtime.
-     */
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    private fun startReplayTripSession() {
-        mapboxReplayer = mapboxNavigation.mapboxReplayer
-        mapboxNavigation.startReplayTripSession()
+        replayHistorySession.onAttached(mapboxNavigation)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -335,25 +321,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun handleHistoryFileSelected() {
-        loadNavigationJob = CoroutineScope(Dispatchers.Main).launch {
-            val events = historyFileLoader
-                .loadReplayHistory(this@ReplayHistoryActivity)
-            mapboxReplayer.clearEvents()
-            mapboxReplayer.pushEvents(events)
-            binding.playReplay.visibility = View.VISIBLE
-            mapboxNavigation.resetTripSession()
-            mapboxNavigation.setRoutes(emptyList())
+        lifecycleScope.launch {
+            val historyReader = historyFileLoader.loadReplayHistory(this@ReplayHistoryActivity)
+            replayHistorySession.setHistoryFile(historyReader.filePath)
             isLocationInitialized = false
-            mapboxReplayer.playFirstLocation()
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun updateReplayStatus(playbackEvents: List<ReplayEventBase>) {
-        playbackEvents.lastOrNull()?.eventTimestamp?.let {
-            val currentSecond = mapboxReplayer.eventSeconds(it).toInt()
-            val durationSecond = mapboxReplayer.durationSeconds().toInt()
-            binding.playerStatus.text = "$currentSecond:$durationSecond"
         }
     }
 
@@ -368,7 +339,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         binding.seekBar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    mapboxReplayer.playbackSpeed(progress.toDouble())
+                    mapboxNavigation.mapboxReplayer.playbackSpeed(progress.toDouble())
                     binding.seekBarText.text = getString(
                         R.string.replay_playback_speed_seekbar,
                         progress
@@ -379,26 +350,5 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 override fun onStopTrackingTouch(seekBar: SeekBar) {}
             }
         )
-
-        binding.playReplay.setOnClickListener {
-            mapboxReplayer.play()
-            binding.playReplay.visibility = View.GONE
-            navigationCamera.requestNavigationCameraToFollowing()
-        }
-
-        mapboxReplayer.registerObserver { events ->
-            updateReplayStatus(events)
-            events.forEach {
-                when (it) {
-                    is ReplaySetNavigationRoute -> setRoute(it)
-                }
-            }
-        }
-    }
-
-    private fun setRoute(replaySetRoute: ReplaySetNavigationRoute) {
-        replaySetRoute.route?.let { directionRoute ->
-            mapboxNavigation.setNavigationRoutes(Collections.singletonList(directionRoute))
-        }
     }
 }

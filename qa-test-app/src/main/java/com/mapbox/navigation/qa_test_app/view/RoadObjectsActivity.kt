@@ -27,6 +27,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollColle
 import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.MapboxTripStarter
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -48,6 +49,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.utils.internal.ifNonNull
+import java.io.File
 
 class RoadObjectsActivity : AppCompatActivity() {
 
@@ -79,7 +81,16 @@ class RoadObjectsActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val mapboxTripStarter = MapboxTripStarter.create()
-        .enableReplayRoute()
+        .enableReplayHistory(
+            options = ReplayHistorySessionOptions.Builder()
+                .filePath(getFirstHistoryFile())
+                .build()
+        )
+
+    fun getFirstHistoryFile(): String? {
+        return mapboxNavigation.historyRecorder.fileDirectory()?.let { File(it) }
+            ?.listFiles()?.firstOrNull()?.absolutePath
+    }
 
     private val mapCamera: CameraAnimationsPlugin by lazy {
         binding.mapView.camera
