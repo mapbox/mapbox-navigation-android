@@ -12,7 +12,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
-import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
 import com.mapbox.navigation.examples.androidauto.CarAppSyncComponent
 import com.mapbox.navigation.examples.androidauto.databinding.ActivityMainBinding
 import com.mapbox.navigation.examples.androidauto.databinding.LayoutDrawerMenuNavViewBinding

@@ -341,7 +341,7 @@ package com.mapbox.androidauto.navigation {
 
   public final class CarNavigationInfoMapper {
     ctor public CarNavigationInfoMapper(android.content.Context context, com.mapbox.androidauto.navigation.maneuver.CarManeuverInstructionRenderer carManeuverInstructionRenderer, com.mapbox.androidauto.navigation.maneuver.CarManeuverIconRenderer carManeuverIconRenderer, com.mapbox.androidauto.navigation.lanes.CarLanesImageRenderer carLanesImageGenerator);
-    method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? mapNavigationInfo(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> expectedManeuvers, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> routeShields, com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? mapNavigationInfo(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> expectedManeuvers, java.util.List<? extends com.mapbox.navigation.ui.shield.model.RouteShield> routeShields, com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue? junctionValue);
   }
 
   public final class CarNavigationInfoProvider implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
