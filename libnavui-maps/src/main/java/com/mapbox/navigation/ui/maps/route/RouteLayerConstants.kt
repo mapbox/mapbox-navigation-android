@@ -84,7 +84,7 @@ object RouteLayerConstants {
     internal const val RESTRICTED_CONGESTION_VALUE = "restricted"
     internal const val ORIGIN_MARKER_NAME = "originMarker"
     internal const val DESTINATION_MARKER_NAME = "destinationMarker"
-    internal const val ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 3.0
+    internal const val ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 10.0
     internal const val DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER = "mapboxDescriptorPlaceHolderUnused"
     internal const val MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO = 1500000000.0 // 1.5s
     internal const val DEFAULT_ROUTE_SOURCES_TOLERANCE = 0.375
