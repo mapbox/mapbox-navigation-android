@@ -41,11 +41,12 @@ class CarNavigationInfoMapper(
     private val secondaryExitOptions = ManeuverSecondaryOptions.Builder().build().exitOptions
     private val subExitOptions = ManeuverSubOptions.Builder().build().exitOptions
 
+    @JvmOverloads
     fun mapNavigationInfo(
         expectedManeuvers: Expected<ManeuverError, List<Maneuver>>,
         routeShields: List<RouteShield>,
         routeProgress: RouteProgress,
-        junctionValue: JunctionValue?
+        junctionValue: JunctionValue? = null
     ): NavigationTemplate.NavigationInfo? {
         val currentStepProgress = routeProgress.currentLegProgress?.currentStepProgress
         val distanceRemaining = currentStepProgress?.distanceRemaining ?: return null

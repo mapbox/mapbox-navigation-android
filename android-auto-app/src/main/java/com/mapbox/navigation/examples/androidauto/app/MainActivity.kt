@@ -59,10 +59,10 @@ class MainActivity : DrawerActivity() {
 
         menuBinding.junctionViewTestButton.setOnClickListener {
             lifecycleScope.launch {
-                val (or, de) = TestRoutes.valueOf(
+                val (origin, destination) = TestRoutes.valueOf(
                     menuBinding.spinnerTestRoute.selectedItem as String
                 )
-                controller.startActiveGuidance(or, de)
+                controller.startActiveGuidance(origin, destination)
                 closeDrawers()
             }
         }
