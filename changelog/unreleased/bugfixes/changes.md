@@ -1,0 +1,1 @@
+- Increased max distance from the user indicator to route line valid to continue vanishing updates from 3m to 10m.
