@@ -75,7 +75,7 @@ dependencies {
     implementation("com.mapbox.navigation:ui-dropin:2.10.0-rc.1")
     implementation("com.mapbox.search:mapbox-search-android:1.0.0-beta.42")
 
-    // Support libraries
+    // Dependencies needed for this example.
     implementation dependenciesList.androidXCore
     implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXAppCompat
@@ -84,7 +84,4 @@ dependencies {
     implementation dependenciesList.androidXFragment
     implementation dependenciesList.androidXLifecycleLivedata
     implementation dependenciesList.androidXLifecycleRuntime
-
-    // Dependencies needed for this example.
-    implementation dependenciesList.androidXAppCompat
 }
