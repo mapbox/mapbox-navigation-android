@@ -67,7 +67,7 @@ abstract class MapViewBinder : UIBinder {
         val store = context.store
         val navigationState = store.select { it.navigation }
         return navigationListOf(
-            CameraLayoutObserver(store, mapView, navigationViewBinding),
+            CameraLayoutObserver(context, mapView, navigationViewBinding),
             LocationComponent(context.locationProvider),
             context.locationPuckComponent(mapView),
             LogoAttributionComponent(mapView, context.systemBarsInsets),
