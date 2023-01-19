@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -59,6 +60,7 @@ import java.net.URI
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
@@ -526,6 +528,73 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
             assertEquals(194.3, alternativeRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
             assertEquals(187.126, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+        }
+
+    @Test
+    fun route_refresh_updates_annotations_for_new_alternative_with_more_legs() =
+        sdkTest {
+            setupMockRequestHandlers(
+                multilegCoordinates,
+                R.raw.route_response_single_route_multileg,
+                R.raw.route_response_single_route_multileg_refreshed,
+                "route_response_single_route_multileg",
+                acceptedGeometryIndex = 70
+            )
+            mockWebServerRule.requestHandlers.add(
+                FailByRequestMockRequestHandler(
+                    MockDirectionsRefreshHandler(
+                        "route_response_single_route_multileg_alternative",
+                        readRawFileText(
+                            activity,
+                            R.raw.route_response_single_route_multileg_alternative_refreshed
+                        ),
+                        acceptedGeometryIndex = 11
+                    )
+                )
+            )
+            val routeOptions = generateRouteOptions(multilegCoordinates)
+            val alternativeRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            // alternative which was requested on the second leg of the original route,
+            // so the alternative has only one leg while the original route has two
+            val primaryRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
+
+            // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
+            mockLocationUpdatesRule.pushLocationUpdate(
+                mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.581798
+                longitude = -121.476146
+                }
+            )
+
+            mapboxNavigation.setNavigationRoutes(listOf(primaryRoute) + alternativeRoutes, initialLegIndex = 0)
+            mapboxNavigation.startTripSession()
+
+            mapboxNavigation.routeProgressUpdates()
+                .filter {
+                    it.currentRouteGeometryIndex == 11
+                }
+                .first()
+
+            val refreshedRoutes = mapboxNavigation.routesUpdates()
+                .filter {
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH
+                }
+                .first()
+                .navigationRoutes
+
+            assertEquals(
+                alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001
+            )
+
+            assertEquals(201.673, alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+            assertEquals(202.881, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+
+            assertEquals(194.3, primaryRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(187.126, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
         }
 
     @Test
