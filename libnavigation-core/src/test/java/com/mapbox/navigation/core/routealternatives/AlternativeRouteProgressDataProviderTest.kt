@@ -121,7 +121,9 @@ class AlternativeRouteProgressDataProviderTest {
                 listOf(List(10) { mockk() }, List(7) { mockk() }, List(15) { mockk() }),
                 listOf(List(23) { mockk() }),
                 listOf(List(32) { mockk() }, List(19) { mockk() }),
-                listOf(List(14) { mockk() }, List(23) { mockk() }), // 135 points for legs #0-#3
+                listOf(List(14) { mockk() }, List(23) { mockk() }),
+                // 136 points for legs #0-#3
+                // (135 if you don't count the current leg's starting point)
                 listOf(List(8) { mockk() }),
             )
         )
@@ -145,12 +147,14 @@ class AlternativeRouteProgressDataProviderTest {
                 primaryForkLegGeometryIndex = 85,
                 alternativeForkLegIndex = 5,
                 alternativeForkRouteGeometryIndex = 220,
-                alternativeForkLegGeometryIndex = 86,
+                alternativeForkLegGeometryIndex = 85,
                 listOf(
                     listOf(List(10) { mockk() }, List(7) { mockk() }, List(15) { mockk() }),
                     listOf(List(23) { mockk() }),
                     listOf(List(32) { mockk() }, List(19) { mockk() }),
-                    listOf(List(14) { mockk() }, List(23) { mockk() }), // 135 points for legs #0-#3
+                    listOf(List(14) { mockk() }, List(23) { mockk() }),
+                    // 136 points for legs #0-#3
+                    // (135 if you don't count the current leg's starting point)
                     listOf(List(8) { mockk() }),
                 )
             )
@@ -177,10 +181,10 @@ class AlternativeRouteProgressDataProviderTest {
                 alternativeForkLegGeometryIndex = 81,
                 listOf(
                     listOf(List(10) { mockk() }, List(7) { mockk() }, List(15) { mockk() }),
-                    listOf(List(23) { mockk() }), // 135 points for legs #0-#1
+                    listOf(List(23) { mockk() }),
+                    // 136 points for legs #0-#1
+                    // (135 if you don't count the current leg's starting point)
                     listOf(List(32) { mockk() }, List(19) { mockk() }),
-                    listOf(List(14) { mockk() }, List(23) { mockk() }),
-                    listOf(List(8) { mockk() }),
                 )
             )
             val expected = RouteProgressData(2, 170, 119)
@@ -196,7 +200,6 @@ class AlternativeRouteProgressDataProviderTest {
     @Test
     fun `before fork, alternative starts after the primary route on the current leg`() =
         coroutineRule.runBlockingTest {
-            // primary leg and route indices diff is 140
             val primaryRouteProgressData = RouteProgressData(4, 200, 60)
             val alternativeMetadata = alternativeRouteMetadata(
                 primaryForkLegIndex = 4,
@@ -204,7 +207,7 @@ class AlternativeRouteProgressDataProviderTest {
                 primaryForkLegGeometryIndex = 110,
                 alternativeForkLegIndex = 0,
                 alternativeForkRouteGeometryIndex = 90,
-                alternativeForkLegGeometryIndex = 20,
+                alternativeForkLegGeometryIndex = 90,
                 listOf(
                     listOf(List(10) { mockk() }, List(7) { mockk() }, List(15) { mockk() }),
                     listOf(List(23) { mockk() }),
@@ -233,14 +236,17 @@ class AlternativeRouteProgressDataProviderTest {
                 primaryForkLegGeometryIndex = 90,
                 alternativeForkLegIndex = 4,
                 alternativeForkRouteGeometryIndex = 250,
-                alternativeForkLegGeometryIndex = 10,
+                alternativeForkLegGeometryIndex = 115,
                 listOf(
                     listOf(List(10) { mockk() }, List(7) { mockk() }, List(15) { mockk() }),
                     listOf(List(23) { mockk() }),
                     listOf(List(32) { mockk() }, List(19) { mockk() }),
                     listOf(
                         List(14) { mockk() },
-                        List(23) { mockk() }),  // 135 points for legs #0-#3
+                        List(23) { mockk() }
+                    ),
+                    // 136 points for legs #0-#3
+                    // (135 if you don't count the current leg's starting point)
                     listOf(List(8) { mockk() }),
                 )
             )
