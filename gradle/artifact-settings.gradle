@@ -42,8 +42,9 @@ def getSnapshotVersion(String version) {
         def matcher = version =~ /$prefix(\d+)\.(\d+)\.(\d+.*)/
         def major = (matcher[0][1] as Integer)
         def isPreRelease
+        def patch = 0
         try {
-            Integer.parseInt(matcher[0][3])
+            patch = Integer.parseInt(matcher[0][3])
             isPreRelease = false
         } catch (NumberFormatException ignored) {
             isPreRelease = true
@@ -54,9 +55,9 @@ def getSnapshotVersion(String version) {
         }
         def branch = System.getenv("CIRCLE_BRANCH")
         if (!branch || branch == "main" || branch ==~ /release-v.*/) {
-            return "${major}.${minor}.0-SNAPSHOT"
+            return "${major}.${minor}.${patch}-SNAPSHOT"
         } else {
-            return "${major}.${minor}.0-${branch}-SNAPSHOT"
+            return "${major}.${minor}.${patch}-${branch}-SNAPSHOT"
         }
     }
 }
