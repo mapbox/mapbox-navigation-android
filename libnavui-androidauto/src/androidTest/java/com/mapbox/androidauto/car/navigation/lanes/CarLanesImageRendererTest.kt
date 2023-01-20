@@ -7,16 +7,20 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
 import com.mapbox.androidauto.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.androidauto.testing.BitmapTestUtil
-import com.mapbox.navigation.ui.maneuver.model.Lane
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.ui.maneuver.model.LaneFactory
+import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 @RunWith(AndroidJUnit4ClassRunner::class)
 @SmallTest
 class CarLanesImageRendererTest {
@@ -42,22 +46,61 @@ class CarLanesImageRendererTest {
     )
 
     @Test
-    fun cache_test() {
-        val lane = mockk<Lane> {
-            every { allLanes } returns listOf(
-                mockk {
-                    every { drivingSide } returns "right"
-                    every { activeDirection } returns "uturn"
-                    every { isActive } returns true
-                    every { directions } returns listOf("uturn")
-                }
+    fun cache_hit() {
+        val lane1 = LaneFactory.buildLane(
+            allLanes = listOf(
+                LaneIndicator.Builder()
+                    .drivingSide("right")
+                    .activeDirection("uturn")
+                    .isActive(true)
+                    .directions(listOf("uturn"))
+                    .build()
             )
-        }
-        val img1 = carLanesImageGenerator.renderLanesImage(lane)
-        val img2 = carLanesImageGenerator.renderLanesImage(lane)
+        )
+        val lane2 = LaneFactory.buildLane(
+            allLanes = listOf(
+                LaneIndicator.Builder()
+                    .drivingSide("right")
+                    .activeDirection("uturn")
+                    .isActive(true)
+                    .directions(listOf("uturn"))
+                    .build()
+            )
+        )
+        val img1 = carLanesImageGenerator.renderLanesImage(lane1)
+        val img2 = carLanesImageGenerator.renderLanesImage(lane2)
 
         assertNotNull(img1)
         assertSame(img1, img2)
+    }
+
+    @Test
+    fun cache_miss() {
+        val lane1 = LaneFactory.buildLane(
+            allLanes = listOf(
+                LaneIndicator.Builder()
+                    .drivingSide("right")
+                    .activeDirection("uturn")
+                    .isActive(true)
+                    .directions(listOf("uturn"))
+                    .build()
+            )
+        )
+        val lane2 = LaneFactory.buildLane(
+            allLanes = listOf(
+                LaneIndicator.Builder()
+                    .drivingSide("right")
+                    .activeDirection("straight")
+                    .isActive(true)
+                    .directions(listOf("straight"))
+                    .build()
+            )
+        )
+        val img1 = carLanesImageGenerator.renderLanesImage(lane1)
+        val img2 = carLanesImageGenerator.renderLanesImage(lane2)
+
+        assertNotNull(img1)
+        assertNotSame(img1, img2)
     }
 
     @Test
