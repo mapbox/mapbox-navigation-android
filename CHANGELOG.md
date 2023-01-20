@@ -6,6 +6,124 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.10.0 - 20 January, 2023
+### Changelog
+[Changes between v2.9.6 and v2.10.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.6...v2.10.0)
+
+#### Features
+
+- Added support to use `MapboxSpeedInfoView` as default view to render posted and current speed in Drop-In UI. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - Introduced `ViewStyleCustomization.speedInfoOptions` to style the `MapboxSpeedInfoView` using Drop-In UI. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - Introduced `ViewBinderCustomization.legacySpeedLimitBinder()` and `ViewBinderCustomization.defaultSpeedInfoBinder` to facilitate the simple use of legacy `MapboxSpeedLimitView` and new `MapboxSpeedInfoView`. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+  - :warning: Deprecated `ViewStyleCustomization.setSpeedLimitStyle` and `ViewStyleCustomization.setSpeedLimitTextAppearance`. [#6743](https://github.com/mapbox/mapbox-navigation-android/pull/6743)
+
+To use the legacy speed limit view, add the following code:
+  ```kotlin
+  binding.navigationView.customizeViewBinders {
+      binding.navigationView.customizeViewBinders {
+          speedLimitBinder = legacySpeedLimitBinder()
+      }
+  }
+  ```
+- Introduced `NavigationViewListener.onSpeedInfoClicked` that would be triggered when `MapboxSpeedInfoView` is clicked upon. [#6770](https://github.com/mapbox/mapbox-navigation-android/pull/6770)
+- Introduced `ViewStyleCustomization.infoPanelGuidelineMaxPosPercent` that allows customization of the `NavigationView` InfoPanel bottom guideline maximum position. Increased default value to 50%. [#6792](https://github.com/mapbox/mapbox-navigation-android/pull/6792)
+- Introduced `MapboxSpeedInfoApi` and `MapboxSpeedInfoView`. The combination of API and View can be used to render posted and current speed limit at user's current location. [#6687](https://github.com/mapbox/mapbox-navigation-android/pull/6687)
+- :warning: Deprecated `MapboxSpeedLimitApi` and `MapboxSpeedLimitView`. [#6687](https://github.com/mapbox/mapbox-navigation-android/pull/6687)
+- Introduced `ReplayRouteSession` and `ReplayRouteSessionOptions`. When enabled the active route will be simulated. This will replay routes in a memory efficient way, so you can simulate long routes at high location frequencies. [#6636](https://github.com/mapbox/mapbox-navigation-android/pull/6636)
+- Added building highlight on arrival support to `NavigationView`. Added new customization options `ViewOptionsCustomization.enableBuildingHighlightOnArrival` and  `ViewOptionsCustomization.buildingHighlightOptions`. [#6651](https://github.com/mapbox/mapbox-navigation-android/pull/6651)
+- Added `ComponentInstaller` for the `BuildingHighlightComponent` that offers simplified integration of the `MapboxBuildingsApi` and `MapboxBuildingView`. [#6651](https://github.com/mapbox/mapbox-navigation-android/pull/6651)
+- Introduced parallelization of route requests made with `MapboxNavigation#requestRoutes`. Now, if an offboard route request fails or times out (the default timeout has been decreased from 10 seconds to 5 seconds), we're already in the process of calculating an onboard route to decrease the time needed to provide a usable route to the user, as long as we have the data cached or pre-downloaded to succeed with an onboard request. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Added public-preview Copilot feature. [#6572](https://github.com/mapbox/mapbox-navigation-android/pull/6572)
+- :warning: Introduced `ViewStyleCustomization.locationPuckOptions` in favor of `ViewStyleCustomization.locationPuck` that can be used to leverage `LocationPuckOptions` to change the location puck at runtime for each navigation state. [#6574](https://github.com/mapbox/mapbox-navigation-android/pull/6574)
+- Removed `@Experimental` annotation from all files related to Drop-In UI. [#6471](https://github.com/mapbox/mapbox-navigation-android/pull/6471)
+- Added experimental routes preview state, see `MapboxNavigaton#setRoutesPreview`, `MapboxNavigaton#changeRoutesPreviewPrimaryRoute`, `MapboxNavigaton#registerRoutesPreviewObserver`, `MapboxNavigaton#getRoutesPreview`. [#6495](https://github.com/mapbox/mapbox-navigation-android/pull/6495)
+- Added support for EV route refresh. [#6511](https://github.com/mapbox/mapbox-navigation-android/pull/6511)
+- Added `MapboxNavigation#onEVDataUpdated` method to be invoked by the end user to notify Navigation SDK of EV data changes so that it can be used in refresh requests. [#6511](https://github.com/mapbox/mapbox-navigation-android/pull/6511)
+
+#### Bug fixes and improvements
+- Ensure map-matching considers HOV-only roads as auto accessible. [#6834](https://github.com/mapbox/mapbox-navigation-android/pull/6834)
+- Removed `NavigationRoute#hasUnexpectedClosures` and added `RouteProgress#hasUnexpectedUpcomingClosures` instead that checks whether route has upcoming unexpected closures (the algorithm does not take into account closures that the puck has already been on). [#6841](https://github.com/mapbox/mapbox-navigation-android/pull/6841)
+- Increased max distance from the user indicator to route line valid to continue vanishing updates from 3m to 10m. [#6854](https://github.com/mapbox/mapbox-navigation-android/pull/6854)
+- Fixed an issue where alternative routes might have had an incorrect or incomplete portion of the route refreshed or occasionally fail to refresh. [#6857](https://github.com/mapbox/mapbox-navigation-android/pull/6857)
+- Fixed an issue with `NavigationView` that caused info panel to shrink in landscape mode with a full screen theme. [#6811](https://github.com/mapbox/mapbox-navigation-android/pull/6811)
+- Fixed standalone `MapboxManeuverView` appearance when the app also integrates Drop-In UI. [#6810](https://github.com/mapbox/mapbox-navigation-android/pull/6810)
+- Each newly instantiated MapboxRouteArrowView class will initialize the layers with the provided options on the first render call. Previously this would only be done if the layers hadn't already been initialized. [#6466](https://github.com/mapbox/mapbox-navigation-android/pull/6466)
+- Fixed an issue where the first voice instruction might have been played twice. [#6766](https://github.com/mapbox/mapbox-navigation-android/pull/6766)
+- :warning: Updated the `NavigationView` default navigation puck asset. [#6678](https://github.com/mapbox/mapbox-navigation-android/pull/6678)
+
+Previous puck can be restored by injecting `LocationPuck2D` with the `bearingImage` set to `com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon` drawable:
+  ```kotlin
+  navigationView.customizeViewStyles {
+      locationPuckOptions = LocationPuckOptions.Builder(context)
+          .defaultPuck(
+              LocationPuck2D(
+                  bearingImage = ContextCompat.getDrawable(
+                      context,
+                      com.mapbox.navigation.ui.maps.R.drawable.mapbox_navigation_puck_icon,
+                  )
+              )
+          )
+          .idlePuck(regularPuck(context))
+          .build()
+  }
+  ```
+- Fixed approaches list update in `RouteOptionsUpdater`(uses for reroute). It was putting to the origin approach corresponding approach from legacy approach list. [#6540](https://github.com/mapbox/mapbox-navigation-android/pull/6540)
+- Updated the `MapboxRestAreaApi` logic to load a SAPA map only if the upcoming rest stop is at the current step of the route leg. [#6695](https://github.com/mapbox/mapbox-navigation-android/pull/6695)
+- Fixed an issue where `MapboxRerouteController` could deliver a delayed interruption state notifications. Now, the interruption state is always delivered synchronously, as soon as it's available. [#6718](https://github.com/mapbox/mapbox-navigation-android/pull/6718)
+- Fixed the `NavigationView` issue where route arrows are being rendered above navigation puck after device rotation. [#6747](https://github.com/mapbox/mapbox-navigation-android/pull/6747)
+- Fixed an issue where a refresh of the routes or a change in alternatives that occurred while user was off-route would call `RerouteController#interrupt` and interrupt the potentially ongoing reroute process without recovery. [#6719](https://github.com/mapbox/mapbox-navigation-android/pull/6719)
+- Improved OpenLR matching rate. Updates take lowest FRC to next point into account during path generation. [#6750](https://github.com/mapbox/mapbox-navigation-android/pull/6750)
+- Fixed an issue where `MapboxBuildingsApi` would fail to highlight buildings. [#6749](https://github.com/mapbox/mapbox-navigation-android/pull/6749)
+- Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6684](https://github.com/mapbox/mapbox-navigation-android/pull/6684)
+- Fixed an issue where `RouteProgress#VoiceInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6689](https://github.com/mapbox/mapbox-navigation-android/pull/6689)
+- Added `MapboxNavigation#resetTripSession(callback)` and deprecated the counterpart without a callback. [#6685](https://github.com/mapbox/mapbox-navigation-android/pull/6685)
+- Fixed memory leak in `ReplayProgressObserver` which happened after route refresh. [#6691](https://github.com/mapbox/mapbox-navigation-android/pull/6691)
+- Fixed a rare issue where a reroute relative to old routes might have occurred after setting new routes. [#6693](https://github.com/mapbox/mapbox-navigation-android/pull/6693)
+- Added experimental `MapboxRouteLineOptions#shareLineGeometrySources` option to enable route line's GeoJson source data sharing between multiple instances of the map. [#6680](https://github.com/mapbox/mapbox-navigation-android/pull/6680)
+- Fixed issues in `ReplayRouteSession`. The routes observer was never unregistered. Alternative route selection resets replay to the beginning. Drop-In Ui changing portrait and landscape modes resets replay to the beginning. [#6675](https://github.com/mapbox/mapbox-navigation-android/pull/6675)
+- Fixed an issue where first `BannerInstructions` of `RouteProgress` and `BannerInstructionsObserver` could have not been delivered after starting active guidance. [#6702](https://github.com/mapbox/mapbox-navigation-android/pull/6702)
+- Fixed an issue in the `NavigationView` where the last audio instruction from the previous session becomes the 1st on the next session. [#6662](https://github.com/mapbox/mapbox-navigation-android/pull/6662)
+- Fixed crash in `PermissionsLauncherFragment` occurring on device rotation. [#6635](https://github.com/mapbox/mapbox-navigation-android/pull/6635)
+- Fixed a rare `java.lang.IllegalArgumentException: The Path cannot loop back on itself.` exception when using `NavigationLocationProvider`. [#6641](https://github.com/mapbox/mapbox-navigation-android/pull/6641)
+- Started clearing route geometry cache when no routes (neither routes used for Active Guidance nor previewed ones) are available. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
+- Added convenience `MapboxNavigation#moveRoutesFromPreviewToNavigator` method to simplify transition from Routes Preview state to Active Guidance state. [#6617](https://github.com/mapbox/mapbox-navigation-android/pull/6617)
+- Minor performance improvements for `MapboxNavigationViewportDataSource#evaluate`. [#6645](https://github.com/mapbox/mapbox-navigation-android/pull/6645)
+- Minor optimization when updating the vanishing route line by removing check for route line related layers. [#6642](https://github.com/mapbox/mapbox-navigation-android/pull/6642)
+- Added minor optimization to vanishing route line calculations by checking if the incoming point equal to the previous point in order to avoid recalculation and re-rendering. [#6643](https://github.com/mapbox/mapbox-navigation-android/pull/6643)
+- Improved performance of `MapboxRouteLineApi#updateWithRouteProgress` function execution. [#6648](https://github.com/mapbox/mapbox-navigation-android/pull/6648)
+- Fixed a rare issue where the offset marking the traveled portion of the route would be ahead of the user location puck, especially around sharp maneuvers. [#6648](https://github.com/mapbox/mapbox-navigation-android/pull/6648)
+- Fixed an issue where reroute requests where not applying the latest EV data provided via `MapboxNavigation#onEVDataUpdated`. [#6650](https://github.com/mapbox/mapbox-navigation-android/pull/6650)
+- Added `NavigationRoute#waypoints` as the source of truth for `DirectionsWaypoint`s which can be common for all routes or route specific depending on `RouteOptions#waypointsPerRoute()` parameter. [#6555](https://github.com/mapbox/mapbox-navigation-android/pull/6555)
+- Improved behavior in tunnels and underground parking lots for `DeviceType#AUTOMOBILE` by preventing tunnel-induced location simulation while we're off-road and vice-versa preventing generation of off-road location samples in tunnels. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Improved fork detection in tunnels for `DeviceType#AUTOMOBILE`. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- :warning: Changed `NavigationRouteAlternativesObserver` to only return the latest generated set of possible alternative routes to prevent accumulation of routes. This decreases the applicable usages of `AlternativeRouteMetadata#alternativeId` as the ID will be rebuilt in most of the cases. Future releases will provide improved mechanism to help understand similarity of continuously delivered alternative routes. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Improved location generation on multi-level roads for `DeviceType#AUTOMOBILE`, especially focusing on avoiding snapping the user location to the incorrect level or inaccessible parallel road. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Fixed an issue where `NavigationRouteAlternativesObserver` would fire unnecessarily often with new sets of routes. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Optimized predictive resource caching and reduced peak memory and CPU consumption on very long and complex routes. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Fixed an issue for `DeviceType#AUTOMOBILE` where entering a tunnel just after exiting a previous one (in a short time frame) could lead to incorrect location simulation. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
+- Updated `MapboxAudioGuidance`, used by `NavigationView`, to avoid playback of duplicate voice instructions when un-muting. [#6608](https://github.com/mapbox/mapbox-navigation-android/pull/6608)
+- Optimized rerouting: now the reroute request is interrupted if the puck returns to the route. [#6614](https://github.com/mapbox/mapbox-navigation-android/pull/6614)
+- Fixed crash in `MapboxInfoPanelHeaderArrivalLayoutBinding.java` by disabling layout transitions in `InfoPanelHeaderActiveGuidanceBinder`, `InfoPanelHeaderArrivalBinder`, `InfoPanelHeaderDestinationPreviewBinder` and `InfoPanelHeaderRoutesPreviewBinder`. [#6616](https://github.com/mapbox/mapbox-navigation-android/pull/6616)
+- Fixed location permissions request when hosting `NavigationView` in a Fragment. [#6618](https://github.com/mapbox/mapbox-navigation-android/pull/6618) 
+- Updated route refresh log to account for state_of_charge annotations and waypoints updates. [#6579](https://github.com/mapbox/mapbox-navigation-android/pull/6579)
+- :warning: Updated the `RoadObject#location` property to be lazily initialized. This change greatly decreases `RouteProgress` generation time and boosts performance when navigating routes with many `UpcomingRoadObject`s. [#6573](https://github.com/mapbox/mapbox-navigation-android/pull/6573)
+- Fixed an issue where "silent waypoints" (not regular waypoints that define legs) had markers added on the map when route line was drawn with `MapboxRouteLineApi` and `MapboxRouteLineView`. [#6526](https://github.com/mapbox/mapbox-navigation-android/pull/6526)
+- Fixed an issue where `DirectionsResponse#waypoints` list was cleared after a successful non-EV route refresh. [#6539](https://github.com/mapbox/mapbox-navigation-android/pull/6539)
+- Fixed an issue with EV route refresh failing in cases where EV data updates are not provided. Now, the initial parameters from a route request will be used as a fallback. [#6534](https://github.com/mapbox/mapbox-navigation-android/pull/6534)
+- Slightly decreased the memory consumption of the online router. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
+- Improved positioning and location signal simulation in tunnels. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
+- Fixed an issue where re-routes could have failed for EV routes. [#6005](https://github.com/mapbox/mapbox-navigation-android/pull/6005)
+
+:warning: `RouteProgress#remainingWaypoints` defines the amount of all remaining waypoints, including explicit (requested with `RouteOptions#coordinatesList`) and implicit (added on the fly, like Electric Vehicle waypoints - [see](https://docs.mapbox.com/api/navigation/directions/#electric-vehicle-routing)) ones.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0))
+- Mapbox Navigation Native `v123.2.0`
+- Mapbox Core Common `v23.2.1`
+- Mapbox Java `v6.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0))
+
+
 ## Mapbox Navigation SDK 2.11.0-alpha.1 - 13 January, 2023
 ### Changelog
 [Changes between vandroidauto-0.18.0 and v2.11.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/vandroidauto-0.18.0...v2.11.0-alpha.1)
