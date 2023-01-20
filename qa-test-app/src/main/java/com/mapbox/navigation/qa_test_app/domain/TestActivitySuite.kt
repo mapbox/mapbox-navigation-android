@@ -20,6 +20,7 @@ import com.mapbox.navigation.qa_test_app.view.RoadObjectsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteLineFeaturesActivity
 import com.mapbox.navigation.qa_test_app.view.RouteLineScalingActivity
 import com.mapbox.navigation.qa_test_app.view.RouteNumericTrafficUpdateActivity
+import com.mapbox.navigation.qa_test_app.view.RouteRefreshActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.RoutesPreviewActivity
@@ -241,6 +242,12 @@ object TestActivitySuite {
             category = CATEGORY_COMPONENTS
         ) { activity ->
             activity.startActivity<RestAreaActivity>()
+        },
+        TestActivityDescription(
+            "Route Refresh Example",
+            R.string.description_route_refresh,
+        ) { activity ->
+            activity.startActivity<RouteRefreshActivity>()
         },
     )
 
