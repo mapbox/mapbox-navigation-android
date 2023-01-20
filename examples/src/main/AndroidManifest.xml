@@ -95,6 +95,11 @@
         android:label="@string/title_multileg_route">
     </activity>
 
+      <activity
+          android:name=".RouteRefreshActivity"
+          android:label="@string/title_route_refresh">
+      </activity>
+
     <activity
         android:name="com.mapbox.navigation.examples.MainActivity"
         android:exported="true">
