@@ -76,5 +76,12 @@ dependencies {
     implementation("com.mapbox.search:mapbox-search-android:1.0.0-beta.42")
 
     // Dependencies needed for this example.
+    implementation dependenciesList.androidXCore
+    implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXCardView
+    implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.androidXFragment
+    implementation dependenciesList.androidXLifecycleLivedata
+    implementation dependenciesList.androidXLifecycleRuntime
 }

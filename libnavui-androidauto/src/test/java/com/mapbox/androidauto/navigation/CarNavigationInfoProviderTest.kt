@@ -4,11 +4,19 @@ import androidx.car.app.Screen
 import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.mapbox.androidauto.testing.CarAppTestRule
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi
+import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
+import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -16,6 +24,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -37,11 +46,13 @@ class CarNavigationInfoProviderTest {
     private val carNavigationEtaMapper: CarNavigationEtaMapper = mockk(relaxed = true)
     private val carNavigationInfoMapper: CarNavigationInfoMapper = mockk(relaxed = true)
     private val maneuverApi: MapboxManeuverApi = mockk(relaxed = true)
+    private val junctionApi: MapboxJunctionApi = mockk(relaxed = true)
     private val serviceProvider: CarNavigationInfoServices = mockk {
         every { carNavigationEtaMapper(any()) } returns carNavigationEtaMapper
         every { carNavigationInfoMapper(any(), any()) } returns carNavigationInfoMapper
         every { maneuverApi(any()) } returns maneuverApi
         every { mapUserStyleObserver() } returns mockk(relaxed = true)
+        every { junctionApi(any()) } returns junctionApi
     }
 
     private val sut = CarNavigationInfoProvider(serviceProvider)
@@ -61,6 +72,7 @@ class CarNavigationInfoProviderTest {
         val observerSlot = slot<RouteProgressObserver>()
         val mapboxNavigation: MapboxNavigation = mockk {
             every { registerRouteProgressObserver(capture(observerSlot)) } just runs
+            every { registerBannerInstructionsObserver(any()) } just runs
         }
         val mapboxCarMapSurface: MapboxCarMapSurface = mockk(relaxed = true)
 
@@ -88,10 +100,38 @@ class CarNavigationInfoProviderTest {
     }
 
     @Test
+    fun `junctionView is available before route progress`() = runBlockingTest {
+        val routeProgress = mockk<RouteProgress>(relaxed = true)
+        val junctionValue = mockk<JunctionValue>(relaxed = true)
+        val progressObserver = slot<RouteProgressObserver>()
+        val instrObserver = slot<BannerInstructionsObserver>()
+        val mapboxNavigation: MapboxNavigation = mockk {
+            every { registerRouteProgressObserver(capture(progressObserver)) } just runs
+            every { registerBannerInstructionsObserver(capture(instrObserver)) } just runs
+        }
+        every { junctionApi.generateJunction(any(), any()) } answers {
+            secondArg<MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>>()
+                .accept(ExpectedFactory.createValue(junctionValue))
+        }
+        val mapboxCarMapSurface: MapboxCarMapSurface = mockk(relaxed = true)
+
+        carAppTestRule.onAttached(mapboxNavigation)
+        sut.onAttached(mapboxCarMapSurface)
+        instrObserver.captured.onNewBannerInstructions(mockk(relaxed = true))
+        progressObserver.captured.onRouteProgressChanged(routeProgress)
+
+        verify {
+            carNavigationInfoMapper.mapNavigationInfo(any(), any(), routeProgress, junctionValue)
+        }
+        assertNotNull(sut.carNavigationInfo.value.navigationInfo)
+    }
+
+    @Test
     fun `travelEstimate is available after route progress`() {
         val observerSlot = slot<RouteProgressObserver>()
         val mapboxNavigation: MapboxNavigation = mockk {
             every { registerRouteProgressObserver(capture(observerSlot)) } just runs
+            every { registerBannerInstructionsObserver(any()) } just runs
         }
         val mapboxCarMapSurface: MapboxCarMapSurface = mockk(relaxed = true)
 
