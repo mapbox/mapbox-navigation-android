@@ -1,14 +1,14 @@
-package com.mapbox.navigation.examples.core
+package com.mapbox.navigation.qa_test_app.view
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -21,7 +21,6 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -45,8 +44,9 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.examples.core.databinding.ActivityRouteRefreshBinding
-import com.mapbox.navigation.examples.util.Utils
+import com.mapbox.navigation.qa_test_app.R
+import com.mapbox.navigation.qa_test_app.databinding.LayoutRouteRefreshBinding
+import com.mapbox.navigation.qa_test_app.utils.Utils
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
@@ -75,11 +75,10 @@ import kotlinx.coroutines.launch
  * 5. Wait for refresh: the traffic should reappear.
  * 6. Optionally, remove the traffic and wait for refresh again.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteRefreshActivity : AppCompatActivity() {
 
     /* ----- Layout binding reference ----- */
-    private lateinit var binding: ActivityRouteRefreshBinding
+    private lateinit var binding: LayoutRouteRefreshBinding
 
     /* ----- Mapbox Maps components ----- */
     private lateinit var mapboxMap: MapboxMap
@@ -208,7 +207,7 @@ class RouteRefreshActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityRouteRefreshBinding.inflate(layoutInflater)
+        binding = LayoutRouteRefreshBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
 
@@ -232,20 +231,24 @@ class RouteRefreshActivity : AppCompatActivity() {
                 .routeRefreshOptions(RouteRefreshOptions.Builder().intervalMillis(30000).build())
                 .build()
         )
-        mapboxNavigation.registerRouteAlternativesObserver(object : NavigationRouteAlternativesObserver {
-            override fun onRouteAlternatives(
-                routeProgress: RouteProgress,
-                alternatives: List<NavigationRoute>,
-                routerOrigin: RouterOrigin
-            ) {
-                mapboxNavigation.setNavigationRoutes(listOf(routeProgress.navigationRoute) + alternatives)
-            }
+        mapboxNavigation.registerRouteAlternativesObserver(
+            object :
+                NavigationRouteAlternativesObserver {
+                override fun onRouteAlternatives(
+                    routeProgress: RouteProgress,
+                    alternatives: List<NavigationRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    mapboxNavigation.setNavigationRoutes(
+                        listOf(routeProgress.navigationRoute) + alternatives
+                    )
+                }
 
-            override fun onRouteAlternativesError(error: RouteAlternativesError) {
-                TODO("Not yet implemented")
+                override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                    // no-op
+                }
             }
-
-        })
+        )
         // move the camera to current location on the first update
         mapboxNavigation.registerLocationObserver(object : LocationObserver {
             override fun onNewRawLocation(rawLocation: Location) {
@@ -360,18 +363,22 @@ class RouteRefreshActivity : AppCompatActivity() {
             val newRoutes = routes.map {
                 it.directionsRoute
                     .toBuilder()
-                    .legs(it.directionsRoute.legs()?.map { leg ->
-                        leg.toBuilder()
-                            .annotation(
-                                leg.annotation()?.let { annotation ->
-                                    annotation.toBuilder()
-                                        .congestion(annotation.congestion()?.map { null })
-                                        .congestionNumeric(annotation.congestionNumeric()?.map { null })
-                                        .build()
-                                }
-                            )
-                            .build()
-                    })
+                    .legs(
+                        it.directionsRoute.legs()?.map { leg ->
+                            leg.toBuilder()
+                                .annotation(
+                                    leg.annotation()?.let { annotation ->
+                                        annotation.toBuilder()
+                                            .congestion(annotation.congestion()?.map { "unknown" })
+                                            .congestionNumeric(
+                                                annotation.congestionNumeric()?.map { null }
+                                            )
+                                            .build()
+                                    }
+                                )
+                                .build()
+                        }
+                    )
                     .build()
                     .toNavigationRoute(it.origin)
             }
@@ -459,7 +466,6 @@ class RouteRefreshActivity : AppCompatActivity() {
         // update the camera position to account for the new route
         viewportDataSource.onRouteChanged(routes.first())
         viewportDataSource.evaluate()
-
 
         // show UI elements
         binding.routeOverview.visibility = VISIBLE

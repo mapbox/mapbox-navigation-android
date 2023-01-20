@@ -4,7 +4,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.utils.internal.ThreadController
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 internal object AlternativeRouteProgressDataProvider {
@@ -37,7 +36,10 @@ internal object AlternativeRouteProgressDataProvider {
         return RouteProgressData(legIndex, routeGeometryIndex, legGeometryIndex)
     }
 
-    private suspend fun prevLegsGeometryIndicesCount(route: NavigationRoute, currentLegIndex: Int): Int {
+    private suspend fun prevLegsGeometryIndicesCount(
+        route: NavigationRoute,
+        currentLegIndex: Int
+    ): Int {
         return withContext(ThreadController.DefaultDispatcher) {
             var result = 0
             val stepsGeometries by lazy { route.directionsRoute.stepsGeometryToPoints() }
