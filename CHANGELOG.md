@@ -163,7 +163,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v6.7.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0))
 - Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
 
-- Changed distance formatting: now all the imperial distances down to 0.1 miles will be represented in miles, while the smaller ones - in feet. [#6775](https://github.com/mapbox/mapbox-navigation-android/pull/6775)
 
 ## Mapbox Navigation SDK 2.10.0-rc.1 - 16 December, 2022
 ### Changelog
