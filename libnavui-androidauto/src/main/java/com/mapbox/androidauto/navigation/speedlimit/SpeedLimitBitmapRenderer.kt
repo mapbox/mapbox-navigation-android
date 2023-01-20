@@ -5,7 +5,7 @@ import android.graphics.Canvas
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 
-internal class SpeedLimitBitmapProvider {
+internal class SpeedLimitBitmapRenderer {
     private val mutcdDrawable: SpeedLimitDrawable = MutcdSpeedLimitDrawable()
     private val viennaDrawable: SpeedLimitDrawable = ViennaSpeedLimitDrawable()
     private val bitmapPool: LruBitmapPool = LruBitmapPool(

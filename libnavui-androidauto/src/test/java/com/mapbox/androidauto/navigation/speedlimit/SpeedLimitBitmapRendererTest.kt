@@ -13,9 +13,9 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.O])
-class SpeedLimitBitmapProviderTest {
+class SpeedLimitBitmapRendererTest {
 
-    private val sut = SpeedLimitBitmapProvider()
+    private val sut = SpeedLimitBitmapRenderer()
 
     @Test
     fun `getBitmap - should return correctly sized bitmap for SpeedLimitSign VIENNA`() {

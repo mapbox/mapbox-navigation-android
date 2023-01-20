@@ -11,19 +11,19 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 @MapboxExperimental
 class SpeedLimitWidget private constructor(
     initialSignFormat: SpeedLimitSign,
-    private val bitmapProvider: SpeedLimitBitmapProvider,
+    private val bitmapRenderer: SpeedLimitBitmapRenderer,
     position: WidgetPosition,
     marginX: Float,
     marginY: Float
 ) : BitmapWidget(
-    bitmap = bitmapProvider.getBitmap(initialSignFormat),
+    bitmap = bitmapRenderer.getBitmap(initialSignFormat),
     position,
     marginX,
     marginY
 ) {
     constructor(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD) : this(
         initialSignFormat = initialSignFormat,
-        bitmapProvider = SpeedLimitBitmapProvider(),
+        bitmapRenderer = SpeedLimitBitmapRenderer(),
         position = WidgetPosition(WidgetPosition.Horizontal.RIGHT, WidgetPosition.Vertical.BOTTOM),
         marginX = 14f,
         marginY = 30f,
@@ -49,7 +49,7 @@ class SpeedLimitWidget private constructor(
         lastSignFormat = newSignFormat
         lastWarn = warn
 
-        updateBitmap(bitmapProvider.getBitmap(newSignFormat, speedLimit, speed, warn))
+        updateBitmap(bitmapRenderer.getBitmap(newSignFormat, speedLimit, speed, warn))
     }
 
     fun update(signFormat: SpeedLimitSign?, threshold: Int) {
@@ -61,6 +61,6 @@ class SpeedLimitWidget private constructor(
         lastSignFormat = newSignFormat
         lastWarn = warn
 
-        updateBitmap(bitmapProvider.getBitmap(newSignFormat, speedLimit, speed, warn))
+        updateBitmap(bitmapRenderer.getBitmap(newSignFormat, speedLimit, speed, warn))
     }
 }

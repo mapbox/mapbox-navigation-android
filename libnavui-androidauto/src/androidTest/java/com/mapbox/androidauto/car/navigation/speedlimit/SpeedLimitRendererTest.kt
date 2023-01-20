@@ -4,7 +4,7 @@ import android.Manifest
 import androidx.test.filters.SmallTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.GrantPermissionRule
-import com.mapbox.androidauto.navigation.speedlimit.SpeedLimitBitmapProvider
+import com.mapbox.androidauto.navigation.speedlimit.SpeedLimitBitmapRenderer
 import com.mapbox.androidauto.testing.BitmapTestUtil
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import org.junit.Rule
@@ -33,7 +33,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_120_speed_150_mutcd() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.MUTCD,
             speedLimit = 120,
             speed = 150,
@@ -44,7 +44,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_120_speed_90_mutcd() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.MUTCD,
             speedLimit = 120,
             speed = 90,
@@ -55,7 +55,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_65_speed_30_mutcd() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.MUTCD,
             speedLimit = 65,
             speed = 30,
@@ -66,7 +66,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_5_speed_30_mutcd() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.MUTCD,
             speedLimit = 5,
             speed = 30,
@@ -77,7 +77,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_5_speed_0_mutcd() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.MUTCD,
             speedLimit = 5,
             speed = 0,
@@ -88,7 +88,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_unknown_speed_5_mutcd() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.MUTCD,
             speedLimit = null,
             speed = 5,
@@ -99,7 +99,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_120_speed_150_vienna() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.VIENNA,
             speedLimit = 120,
             speed = 150,
@@ -110,7 +110,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_120_speed_90_vienna() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.VIENNA,
             speedLimit = 120,
             speed = 90,
@@ -121,7 +121,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_65_speed_30_vienna() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.VIENNA,
             speedLimit = 65,
             speed = 30,
@@ -132,7 +132,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_5_speed_30_vienna() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.VIENNA,
             speedLimit = 5,
             speed = 30,
@@ -143,7 +143,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_5_speed_0_vienna() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.VIENNA,
             speedLimit = 5,
             speed = 0,
@@ -154,7 +154,7 @@ class SpeedLimitRendererTest {
 
     @Test
     fun speed_limit_unknown_speed_5_vienna() {
-        val bitmap = SpeedLimitBitmapProvider().getBitmap(
+        val bitmap = SpeedLimitBitmapRenderer().getBitmap(
             SpeedLimitSign.VIENNA,
             speedLimit = null,
             speed = 5,
