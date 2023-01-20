@@ -556,19 +556,23 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             val alternativeRoutes = mapboxNavigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
-            // alternative which was requested on the second leg of the original route,
-            // so the alternative has only one leg while the original route has two
+            // In this test setup we are considering a case where user was driving along the route,
+            // started the second leg and received an alternative, and selected it before the fork.
+            // This means that the primary route is shorter than the alternative route (former primary route).
             val primaryRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
 
             // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
             mockLocationUpdatesRule.pushLocationUpdate(
                 mockLocationUpdatesRule.generateLocationUpdate {
-                latitude = 38.581798
-                longitude = -121.476146
+                    latitude = 38.581798
+                    longitude = -121.476146
                 }
             )
 
-            mapboxNavigation.setNavigationRoutes(listOf(primaryRoute) + alternativeRoutes, initialLegIndex = 0)
+            mapboxNavigation.setNavigationRoutes(
+                listOf(primaryRoute) + alternativeRoutes,
+                initialLegIndex = 0
+            )
             mapboxNavigation.startTripSession()
 
             mapboxNavigation.routeProgressUpdates()
@@ -590,7 +594,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 0.0001
             )
 
-            assertEquals(201.673, alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+            assertEquals(
+                201.673,
+                alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
+                0.0001
+            )
             assertEquals(202.881, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
 
             assertEquals(194.3, primaryRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
@@ -861,7 +869,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     private fun alternativeForMultileg(context: Context): MockRoute {
-        val jsonResponse = readRawFileText(context, R.raw.route_response_single_route_multileg_alternative)
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.route_response_single_route_multileg_alternative
+        )
         val coordinates = listOf(
             Point.fromLngLat(38.577427, -121.478077),
             Point.fromLngLat(38.582195, -121.468458)
