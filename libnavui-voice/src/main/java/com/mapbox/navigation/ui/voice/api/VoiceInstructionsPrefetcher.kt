@@ -26,7 +26,7 @@ class VoiceInstructionsPrefetcher internal constructor(
     private val timePercentageToTriggerAfter: Double,
     private val nextVoiceInstructionsProvider: NextVoiceInstructionsProvider =
         TimeBasedNextVoiceInstructionsProvider(observableTime),
-    private val timeProvider: Time = Time.SystemImpl,
+    private val timeProvider: Time = Time.SystemClockImpl,
 ) : MapboxNavigationObserver {
 
     /**
