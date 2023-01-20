@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -18,11 +17,7 @@ class RouteRefresherExecutorTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
-    private val routeRefresherResult = RouteRefresherResult(
-        true,
-        emptyList(),
-        RouteProgressData(1, 2, 3)
-    )
+    private val routeRefresherResult = RouteRefresherResult(true, mockk())
     private val routeRefresher = mockk<RouteRefresher>(relaxed = true) {
         coEvery { refresh(any(), any()) } returns routeRefresherResult
     }
@@ -48,11 +43,7 @@ class RouteRefresherExecutorTest {
     fun twoRequestsAreNotExecutedSimultaneously() = coroutineRule.runBlockingTest {
         val routes2 = listOf<NavigationRoute>(mockk(), mockk(), mockk())
         val callback2 = mockk<RouteRefresherProgressCallback>(relaxed = true)
-        val routeRefresherResult2 = RouteRefresherResult(
-            false,
-            emptyList(),
-            RouteProgressData(4, 5, 6)
-        )
+        val routeRefresherResult2 = RouteRefresherResult(false, mockk())
 
         coEvery { routeRefresher.refresh(routes, any()) } coAnswers {
             delay(10000)

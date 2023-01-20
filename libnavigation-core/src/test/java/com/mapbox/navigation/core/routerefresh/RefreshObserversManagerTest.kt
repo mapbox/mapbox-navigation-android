@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.navigation.core.RouteProgressData
+import com.mapbox.navigation.core.RoutesProgressData
 import io.mockk.clearAllMocks
 import io.mockk.mockk
 import io.mockk.verify
@@ -10,15 +10,9 @@ class RefreshObserversManagerTest {
 
     private val sut = RefreshObserversManager()
     private val observer = mockk<RouteRefreshObserver>(relaxed = true)
-    private val inputResult = RouteRefresherResult(
-        true,
-        listOf(mockk()),
-        RouteProgressData(1, 2, 3)
-    )
-    private val outputResult = RefreshedRouteInfo(
-        inputResult.refreshedRoutes,
-        inputResult.routeProgressData
-    )
+    private val routesProgressData = mockk<RoutesProgressData>()
+    private val inputResult = RouteRefresherResult(true, routesProgressData)
+    private val outputResult = routesProgressData
 
     @Test
     fun registerObserverThenReceiveUpdate() {
@@ -107,14 +101,10 @@ class RefreshObserversManagerTest {
 
     @Test
     fun receiveMultipleUpdates() {
+        val routesProgressData2 = mockk<RoutesProgressData>()
         val inputResult2 = RouteRefresherResult(
             true,
-            listOf(mockk(), mockk()),
-            RouteProgressData(4, 5, 6)
-        )
-        val outputResult2 = RefreshedRouteInfo(
-            inputResult2.refreshedRoutes,
-            inputResult2.routeProgressData
+            routesProgressData2
         )
 
         sut.registerObserver(observer)
@@ -123,7 +113,7 @@ class RefreshObserversManagerTest {
 
         sut.onRoutesRefreshed(inputResult2)
 
-        verify { observer.onRoutesRefreshed(outputResult2) }
+        verify { observer.onRoutesRefreshed(routesProgressData2) }
     }
 
     @Test

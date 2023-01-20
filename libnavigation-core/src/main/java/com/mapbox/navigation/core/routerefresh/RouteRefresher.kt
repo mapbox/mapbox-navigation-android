@@ -1,11 +1,13 @@
 package com.mapbox.navigation.core.routerefresh
 
+import android.util.Log
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.core.RouteProgressData
-import com.mapbox.navigation.core.RouteProgressDataProvider
+import com.mapbox.navigation.core.RoutesProgressData
+import com.mapbox.navigation.core.RoutesProgressDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.utils.internal.logE
@@ -19,50 +21,70 @@ import kotlin.coroutines.resume
 
 internal data class RouteRefresherResult(
     val success: Boolean,
-    val refreshedRoutes: List<NavigationRoute>,
-    val routeProgressData: RouteProgressData
+    val refreshedRoutesData: RoutesProgressData,
 )
 
 internal class RouteRefresher(
-    private val routeProgressDataProvider: RouteProgressDataProvider,
+    private val routesProgressDataProvider: RoutesProgressDataProvider,
     private val evRefreshDataProvider: EVRefreshDataProvider,
     private val routeDiffProvider: DirectionsRouteDiffProvider,
     private val routeRefresh: RouteRefresh,
 ) {
 
+    /**
+     * Refreshes routes.
+     *
+     * @throws IllegalArgumentException when routes are empty
+     */
+    @Throws(IllegalArgumentException::class)
     suspend fun refresh(
         routes: List<NavigationRoute>,
         routeRefreshTimeout: Long
     ): RouteRefresherResult {
-        val routeProgressData = routeProgressDataProvider.getRouteRefreshRequestDataOrWait()
-        val refreshedRoutes = refreshRoutesOrNull(routes, routeProgressData, routeRefreshTimeout)
+        val routesProgressData = routesProgressDataProvider.getRoutesProgressData(routes)
+        val refreshedRoutes = refreshRoutesOrNull(routesProgressData, routeRefreshTimeout)
         return if (refreshedRoutes.any { it != null }) {
+            val primaryRoute = refreshedRoutes.first() ?: routes.first()
+            val alternativeRoutesProgressData =
+                routesProgressData.alternativeRoutesProgressData.mapIndexed { index, pair ->
+                    (refreshedRoutes[index + 1] ?: routes[index + 1]) to pair.second
+                }
             RouteRefresherResult(
                 success = true,
-                refreshedRoutes.mapIndexed { index, navigationRoute ->
-                    navigationRoute ?: routes[index]
-                },
-                routeProgressData
+                RoutesProgressData(
+                    primaryRoute,
+                    routesProgressData.primaryRouteProgressData,
+                    alternativeRoutesProgressData
+                )
             )
         } else {
             RouteRefresherResult(
                 success = false,
-                routes,
-                routeProgressData
+                routesProgressData
             )
         }
     }
 
     private suspend fun refreshRoutesOrNull(
-        routes: List<NavigationRoute>,
-        routeProgressData: RouteProgressData,
+        routesData: RoutesProgressData,
         timeout: Long
     ): List<NavigationRoute?> {
         return coroutineScope {
-            routes.map { route ->
+            routesData.allRoutesProgressData.map { routeData ->
                 async {
                     withTimeoutOrNull(timeout) {
-                        refreshRouteOrNull(route, routeProgressData)
+                        val routeProgressData = routeData.second
+                        if (routeProgressData != null) {
+                            refreshRouteOrNull(routeData.first, routeProgressData)
+                        } else {
+                            // No RouteProgressData - no refresh. Should not happen in production.
+                            Log.w(
+                                RouteRefreshLog.LOG_CATEGORY,
+                                "Can't refresh route ${routeData.first.id}: " +
+                                    "no route progress data for it"
+                            )
+                            null
+                        }
                     }
                 }
             }

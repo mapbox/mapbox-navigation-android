@@ -26,7 +26,10 @@ internal class ImmediateRouteRefreshController(
         }
     }
 
-    fun requestRoutesRefresh(routes: List<NavigationRoute>, callback: (RouteRefresherResult) -> Unit) {
+    fun requestRoutesRefresh(
+        routes: List<NavigationRoute>,
+        callback: (RouteRefresherResult) -> Unit
+    ) {
         if (routes.isEmpty()) {
             return
         }

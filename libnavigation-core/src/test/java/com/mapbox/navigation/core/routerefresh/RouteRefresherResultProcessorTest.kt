@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.RouteProgressData
+import com.mapbox.navigation.core.RoutesProgressData
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -16,9 +17,16 @@ class RouteRefresherResultProcessorTest {
     private val timeProvider = mockk<Time>(relaxed = true)
     private val initialTime = 50L
     private val staleDataTimeout = 100L
-    private val route1 = mockk<NavigationRoute>(relaxed = true)
-    private val route2 = mockk<NavigationRoute>(relaxed = true)
-    private val routeProgressData = RouteProgressData(1, 2, 3)
+    private val routesProgressData1 = RoutesProgressData(
+        mockk(relaxed = true),
+        RouteProgressData(1, 2, 3),
+        listOf(mockk<NavigationRoute>(relaxed = true) to RouteProgressData(4, 5, 6))
+    )
+    private val routesProgressData2 = RoutesProgressData(
+        mockk(relaxed = true),
+        RouteProgressData(3, 4, 5),
+        listOf(mockk<NavigationRoute>(relaxed = true) to RouteProgressData(4, 5, 6))
+    )
     private val sut = RouteRefresherResultProcessor(
         observersManager,
         expiringDataRemover,
@@ -28,7 +36,7 @@ class RouteRefresherResultProcessorTest {
 
     @Test
     fun `onRoutesRefreshed success notifies observer`() {
-        val result = RouteRefresherResult(true, listOf(route1, route2), routeProgressData)
+        val result = RouteRefresherResult(true, mockk())
 
         sut.onRoutesRefreshed(result)
 
@@ -37,36 +45,36 @@ class RouteRefresherResultProcessorTest {
 
     @Test
     fun `onRoutesRefreshed success updates last refresh time`() {
-        val result = RouteRefresherResult(true, listOf(route1, route2), routeProgressData)
+        val result = RouteRefresherResult(true, mockk())
 
         sut.onRoutesRefreshed(result)
 
         clearAllMocks(answers = false)
-        val newResult = RouteRefresherResult(false, listOf(route1), routeProgressData)
+        val newResult = RouteRefresherResult(false, mockk())
         sut.onRoutesRefreshed(newResult)
         verify(exactly = 0) { observersManager.onRoutesRefreshed(any()) }
     }
 
     @Test
     fun `onRoutesRefreshed failure timeout did not pass does not notify observer`() {
-        val result = RouteRefresherResult(false, listOf(route1, route2), routeProgressData)
+        val result = RouteRefresherResult(false, mockk())
         setUpForTimeoutToNotPass()
 
         sut.onRoutesRefreshed(result)
 
-        verify(exactly = 0) { expiringDataRemover.removeExpiringDataFromRoutes(any(), any()) }
+        verify(exactly = 0) { expiringDataRemover.removeExpiringDataFromRoutesProgressData(any()) }
         verify(exactly = 0) { observersManager.onRoutesRefreshed(any()) }
     }
 
     @Test
     fun `onRoutesRefreshed failure timeout did not pass does not update last refresh time`() {
-        val result = RouteRefresherResult(false, listOf(route1, route2), routeProgressData)
+        val result = RouteRefresherResult(false, mockk())
         setUpForTimeoutToNotPass()
 
         sut.onRoutesRefreshed(result)
 
         clearAllMocks(answers = false)
-        val newResult = RouteRefresherResult(false, listOf(route1), routeProgressData)
+        val newResult = RouteRefresherResult(false, mockk())
         every { timeProvider.millis() } returns initialTime + staleDataTimeout
         sut.onRoutesRefreshed(newResult)
         verify(exactly = 1) { observersManager.onRoutesRefreshed(any()) }
@@ -74,17 +82,11 @@ class RouteRefresherResultProcessorTest {
 
     @Test
     fun `onRoutesRefreshed failure timeout passed routes changed notifies observer`() {
-        val expectedRoute1 = mockk<NavigationRoute>(relaxed = true)
-        val expectedRoute2 = mockk<NavigationRoute>(relaxed = true)
-        val result = RouteRefresherResult(false, listOf(route1, route2), routeProgressData)
-        val expected = RouteRefresherResult(
-            false,
-            listOf(expectedRoute1, expectedRoute2),
-            routeProgressData
-        )
+        val result = RouteRefresherResult(false, routesProgressData1)
+        val expected = RouteRefresherResult(false, routesProgressData2)
         every {
-            expiringDataRemover.removeExpiringDataFromRoutes(listOf(route1, route2), 1)
-        } returns listOf(expectedRoute1, expectedRoute2)
+            expiringDataRemover.removeExpiringDataFromRoutesProgressData(routesProgressData1)
+        } returns routesProgressData2
         setUpForTimeoutToPass()
 
         sut.onRoutesRefreshed(result)
@@ -94,28 +96,26 @@ class RouteRefresherResultProcessorTest {
 
     @Test
     fun `onRoutesRefreshed failure timeout passed routes changed updates last refresh time`() {
-        val expectedRoute1 = mockk<NavigationRoute>(relaxed = true)
-        val expectedRoute2 = mockk<NavigationRoute>(relaxed = true)
-        val result = RouteRefresherResult(false, listOf(route1, route2), routeProgressData)
+        val result = RouteRefresherResult(false, routesProgressData1)
         every {
-            expiringDataRemover.removeExpiringDataFromRoutes(listOf(route1, route2), 1)
-        } returns listOf(expectedRoute1, expectedRoute2)
+            expiringDataRemover.removeExpiringDataFromRoutesProgressData(routesProgressData1)
+        } returns routesProgressData2
         setUpForTimeoutToPass()
 
         sut.onRoutesRefreshed(result)
 
         clearAllMocks(answers = false)
-        val newResult = RouteRefresherResult(false, listOf(route1), routeProgressData)
+        val newResult = RouteRefresherResult(false, mockk())
         sut.onRoutesRefreshed(newResult)
         verify(exactly = 0) { observersManager.onRoutesRefreshed(any()) }
     }
 
     @Test
     fun `onRoutesRefreshed failure timeout passed routes did not change does not notify observer`() {
-        val result = RouteRefresherResult(false, listOf(route1, route2), routeProgressData)
+        val result = RouteRefresherResult(false, routesProgressData1)
         every {
-            expiringDataRemover.removeExpiringDataFromRoutes(listOf(route1, route2), 1)
-        } returns listOf(route1, route2)
+            expiringDataRemover.removeExpiringDataFromRoutesProgressData(routesProgressData1)
+        } returns routesProgressData1
         setUpForTimeoutToPass()
 
         sut.onRoutesRefreshed(result)
@@ -125,16 +125,16 @@ class RouteRefresherResultProcessorTest {
 
     @Test
     fun `onRoutesRefreshed failure timeout passed routes did not change updates last refresh time`() {
-        val result = RouteRefresherResult(false, listOf(route1, route2), routeProgressData)
+        val result = RouteRefresherResult(false, routesProgressData1)
         every {
-            expiringDataRemover.removeExpiringDataFromRoutes(listOf(route1, route2), 1)
-        } returns listOf(route1, route2)
+            expiringDataRemover.removeExpiringDataFromRoutesProgressData(routesProgressData1)
+        } returns routesProgressData1
         setUpForTimeoutToPass()
 
         sut.onRoutesRefreshed(result)
 
         clearAllMocks(answers = false)
-        val newResult = RouteRefresherResult(false, listOf(route1), routeProgressData)
+        val newResult = RouteRefresherResult(false, mockk())
         sut.onRoutesRefreshed(newResult)
         verify(exactly = 0) { observersManager.onRoutesRefreshed(any()) }
     }
@@ -144,7 +144,7 @@ class RouteRefresherResultProcessorTest {
         sut.reset()
 
         clearAllMocks(answers = false)
-        val newResult = RouteRefresherResult(false, listOf(route1), routeProgressData)
+        val newResult = RouteRefresherResult(false, mockk())
         sut.onRoutesRefreshed(newResult)
         verify(exactly = 0) { observersManager.onRoutesRefreshed(any()) }
     }

@@ -16,7 +16,6 @@ import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSessionRoutes
 import com.mapbox.navigation.core.directions.session.IgnoredRoute
-import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
@@ -29,7 +28,6 @@ import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
-import com.mapbox.navigation.core.routerefresh.RefreshedRouteInfo
 import com.mapbox.navigation.core.routerefresh.RouteRefreshObserver
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -1534,22 +1532,27 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             createMapboxNavigation()
             mapboxNavigation.setRerouteController(rerouteController)
             val initialRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
-            val routeProgressData = RouteProgressData(5, 12, 43)
-            val refreshedRoutes = listOf(mockk<NavigationRoute>(relaxed = true))
+            val primaryRoute = mockk<NavigationRoute>(relaxed = true)
+            val alternativeRoute = mockk<NavigationRoute>(relaxed = true)
+            val primaryRouteProgressData = RouteProgressData(5, 12, 43)
+            val alternativeRouteProgressData = RouteProgressData(1, 2, 3)
+            val routesProgressData = RoutesProgressData(
+                primaryRoute,
+                primaryRouteProgressData,
+                listOf(alternativeRoute to alternativeRouteProgressData)
+            )
 
             routeObserversSlot.forEach {
                 it.onRoutesChanged(
                     createRoutesUpdatedResult(initialRoutes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
                 )
             }
-            interceptRefreshObserver().onRoutesRefreshed(
-                RefreshedRouteInfo(refreshedRoutes, routeProgressData)
-            )
+            interceptRefreshObserver().onRoutesRefreshed(routesProgressData)
 
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
-                    refreshedRoutes,
-                    SetRoutes.RefreshRoutes(routeProgressData)
+                    listOf(primaryRoute, alternativeRoute),
+                    SetRoutes.RefreshRoutes(primaryRouteProgressData)
                 )
             }
             verify(exactly = 0) { rerouteController.interrupt() }
@@ -1613,9 +1616,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     SetRoutes.RefreshRoutes(routeProgressData)
                 )
             } returns NativeSetRouteError("some error")
-            coEvery {
-                routeRefreshController.requestPlannedRouteRefresh(routes)
-            } coAnswers { RefreshedRouteInfo(refreshedRoutes, routeProgressData) }
 
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
             routeObserversSlot.forEach {
@@ -1707,34 +1707,41 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `refreshed route is set to trip session and directions session`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
-            val primary: NavigationRoute = mockk {
-                every { directionsRoute } returns mockk()
-            }
-            val routes = listOf(primary)
+            val primaryRoute = routeWithId("id#0")
+            val routes = listOf(primaryRoute)
             val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
-            val routeProgressData = RouteProgressData(5, 12, 43)
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
-            val refreshedRoutes =
-                listOf(routeWithId("id#0"), routeWithId("id#1"), routeWithId("id#2"))
-            val acceptedRefreshRoutes = listOf(refreshedRoutes[0], refreshedRoutes[2])
-            val ignoredRefreshRoutes = listOf(IgnoredRoute(refreshedRoutes[1], invalidRouteReason))
+            val alternativeRoute1 = routeWithId("id#1")
+            val alternativeRoute2 = routeWithId("id#2")
+            val primaryRouteProgressData = RouteProgressData(5, 12, 43)
+            val alternativeRoute1ProgressData = RouteProgressData(1, 2, 3)
+            val alternativeRoute2ProgressData = RouteProgressData(4, 5, 6)
+            val refreshedRoutes = listOf(primaryRoute, alternativeRoute1, alternativeRoute2)
+            val acceptedRefreshRoutes = listOf(primaryRoute, alternativeRoute2)
+            val ignoredRefreshRoutes = listOf(IgnoredRoute(alternativeRoute1, invalidRouteReason))
             coEvery {
                 tripSession.setRoutes(refreshedRoutes, ofType(SetRoutes.RefreshRoutes::class))
             } returns NativeSetRouteValue(refreshedRoutes, listOf(alternativeWithId("id#2")))
             routeObserversSlot.forEach {
                 it.onRoutesChanged(RoutesUpdatedResult(routes, emptyList(), reason))
             }
-            interceptRefreshObserver().onRoutesRefreshed(
-                RefreshedRouteInfo(refreshedRoutes, routeProgressData)
+            val routesProgressData = RoutesProgressData(
+                primaryRoute,
+                primaryRouteProgressData,
+                listOf(
+                    alternativeRoute1 to alternativeRoute1ProgressData,
+                    alternativeRoute2 to alternativeRoute2ProgressData
+                )
             )
+            interceptRefreshObserver().onRoutesRefreshed(routesProgressData)
 
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
-                    refreshedRoutes,
-                    SetRoutes.RefreshRoutes(routeProgressData)
+                    listOf(primaryRoute, alternativeRoute1, alternativeRoute2),
+                    SetRoutes.RefreshRoutes(primaryRouteProgressData)
                 )
             }
             verify(exactly = 1) {
@@ -1742,7 +1749,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     DirectionsSessionRoutes(
                         acceptedRefreshRoutes,
                         ignoredRefreshRoutes,
-                        SetRoutes.RefreshRoutes(routeProgressData)
+                        SetRoutes.RefreshRoutes(primaryRouteProgressData)
                     )
                 )
             }
@@ -1758,26 +1765,32 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val routes = listOf(primary)
             val ignoredRoutes = listOf<IgnoredRoute>(mockk(relaxed = true))
             val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
-            val routeProgressData = RouteProgressData(4, 13, 42)
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
             verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
-            val refreshedRoutes = listOf(mockk<NavigationRoute>(relaxed = true))
+            val primaryRoute = routeWithId("id#0")
+            val alternativeRoute = routeWithId("id#1")
+            val primaryRouteProgressData = RouteProgressData(5, 12, 43)
+            val alternativeRouteProgressData = RouteProgressData(1, 2, 3)
+            val routesProgressData = RoutesProgressData(
+                primaryRoute,
+                primaryRouteProgressData,
+                listOf(alternativeRoute to alternativeRouteProgressData)
+            )
+
             coEvery {
                 tripSession.setRoutes(any(), any())
             } returns NativeSetRouteError("some error")
             routeObserversSlot.forEach {
                 it.onRoutesChanged(RoutesUpdatedResult(routes, ignoredRoutes, reason))
             }
-            interceptRefreshObserver().onRoutesRefreshed(
-                RefreshedRouteInfo(refreshedRoutes, routeProgressData)
-            )
+            interceptRefreshObserver().onRoutesRefreshed(routesProgressData)
 
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
-                    refreshedRoutes,
-                    SetRoutes.RefreshRoutes(routeProgressData)
+                    listOf(primaryRoute, alternativeRoute),
+                    SetRoutes.RefreshRoutes(primaryRouteProgressData)
                 )
             }
             verify(exactly = 0) {

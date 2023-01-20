@@ -5,19 +5,28 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.RoutesProgressData
 import java.util.Date
 
 internal class ExpiringDataRemover(
     private val localDateProvider: () -> Date,
 ) {
 
-    fun removeExpiringDataFromRoutes(
-        routes: List<NavigationRoute>,
-        currentLegIndex: Int,
-    ): List<NavigationRoute> {
-        return routes.map {
-            removeExpiringDataFromRoute(it, currentLegIndex)
+    fun removeExpiringDataFromRoutesProgressData(
+        routesProgressData: RoutesProgressData,
+    ): RoutesProgressData {
+        val primaryRoute = removeExpiringDataFromRoute(
+            routesProgressData.primaryRoute,
+            routesProgressData.primaryRouteProgressData.legIndex
+        )
+        val alternativeRoutesData = routesProgressData.alternativeRoutesProgressData.map {
+            removeExpiringDataFromRoute(it.first, it.second?.legIndex ?: 0) to it.second
         }
+        return RoutesProgressData(
+            primaryRoute,
+            routesProgressData.primaryRouteProgressData,
+            alternativeRoutesData
+        )
     }
 
     private fun removeExpiringDataFromRoute(

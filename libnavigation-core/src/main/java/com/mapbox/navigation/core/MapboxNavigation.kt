@@ -559,7 +559,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             evDynamicDataHolder
         )
         routeRefreshController.registerRouteRefreshObserver {
-            internalSetNavigationRoutes(it.routes, SetRoutes.RefreshRoutes(it.routeProgressData))
+            internalSetNavigationRoutes(
+                it.allRoutesProgressData.map { pair -> pair.first },
+                SetRoutes.RefreshRoutes(it.primaryRouteProgressData)
+            )
         }
 
         defaultRerouteController = MapboxRerouteController(

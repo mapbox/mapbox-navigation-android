@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
-import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.Called
@@ -210,8 +209,7 @@ class PlannedRouteRefreshControllerTest {
         finishRequest(
             RouteRefresherResult(
                 false,
-                listOf(route1, route2),
-                RouteProgressData(1, 2, 3)
+                mockk()
             )
         )
 
@@ -228,7 +226,7 @@ class PlannedRouteRefreshControllerTest {
         } returns RouteRefreshValidator.RouteValidationResult.Valid
 
         sut.startRoutesRefreshing(routes)
-        val result = RouteRefresherResult(true, listOf(route1, route2), RouteProgressData(1, 2, 3))
+        val result = RouteRefresherResult(true, mockk())
         finishRequest(result)
 
         verify(exactly = 1) {
@@ -250,7 +248,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.startRoutesRefreshing(routes)
         clearMocks(retryStrategy, answers = false)
-        val result = RouteRefresherResult(false, listOf(route1, route2), RouteProgressData(1, 2, 3))
+        val result = RouteRefresherResult(false, mockk())
         finishRequest(result)
 
         verify(exactly = 1) {
@@ -274,7 +272,7 @@ class PlannedRouteRefreshControllerTest {
         every { retryStrategy.shouldRetry() } returns true
 
         sut.startRoutesRefreshing(routes)
-        val result = RouteRefresherResult(false, listOf(route1, route2), RouteProgressData(1, 2, 3))
+        val result = RouteRefresherResult(false, mockk())
         finishRequest(result)
         startRequest()
 
@@ -293,7 +291,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.startRoutesRefreshing(routes)
         clearMocks(retryStrategy, answers = false)
-        val result = RouteRefresherResult(false, listOf(route1, route2), RouteProgressData(1, 2, 3))
+        val result = RouteRefresherResult(false, mockk())
         finishRequest(result)
 
         verifyOrder {
@@ -317,7 +315,7 @@ class PlannedRouteRefreshControllerTest {
         every { retryStrategy.shouldRetry() } returns false
 
         sut.startRoutesRefreshing(routes)
-        val result = RouteRefresherResult(false, listOf(route1, route2), RouteProgressData(1, 2, 3))
+        val result = RouteRefresherResult(false, mockk())
         finishRequest(result)
         startRequest()
 

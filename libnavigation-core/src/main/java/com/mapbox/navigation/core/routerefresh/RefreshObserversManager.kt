@@ -1,10 +1,11 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.navigation.core.RoutesProgressData
 import java.util.concurrent.CopyOnWriteArraySet
 
 internal fun interface RouteRefreshObserver {
 
-    fun onRoutesRefreshed(routeInfo: RefreshedRouteInfo)
+    fun onRoutesRefreshed(routeInfo: RoutesProgressData)
 }
 
 internal class RefreshObserversManager {
@@ -25,10 +26,7 @@ internal class RefreshObserversManager {
 
     fun onRoutesRefreshed(result: RouteRefresherResult) {
         refreshObservers.forEach { observer ->
-            observer.onRoutesRefreshed(result.toRefreshedRoutesInfo())
+            observer.onRoutesRefreshed(result.refreshedRoutesData)
         }
     }
-
-    private fun RouteRefresherResult.toRefreshedRoutesInfo() =
-        RefreshedRouteInfo(refreshedRoutes, routeProgressData)
 }

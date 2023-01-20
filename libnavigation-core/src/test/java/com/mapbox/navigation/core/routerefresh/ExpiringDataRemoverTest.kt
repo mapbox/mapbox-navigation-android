@@ -2,6 +2,8 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
+import com.mapbox.navigation.core.RouteProgressData
+import com.mapbox.navigation.core.RoutesProgressData
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createNavigationRoute
@@ -96,6 +98,13 @@ class ExpiringDataRemoverTest {
                         incidents = null
                     ),
                     createRouteLeg(
+                        annotation = LegAnnotation.builder()
+                            .congestion(listOf("severe", "low"))
+                            .congestionNumeric(listOf(120, 20))
+                            .build(),
+                        incidents = null
+                    ),
+                    createRouteLeg(
                         annotation = null,
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:59:00Z"),
@@ -125,6 +134,13 @@ class ExpiringDataRemoverTest {
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
+                            .congestion(listOf("heavy", "moderate"))
+                            .congestionNumeric(listOf(90, 80))
+                            .build(),
+                        incidents = null
+                    ),
+                    createRouteLeg(
+                        annotation = LegAnnotation.builder()
                             .congestion(listOf("unknown", "unknown"))
                             .congestionNumeric(listOf(null, null))
                             .build(),
@@ -149,9 +165,28 @@ class ExpiringDataRemoverTest {
         val expectedNewRoute3 = createNavigationRoute(
             directionsRoute = createDirectionsRoute(legs = null)
         )
+        val route1RouteProgressData = RouteProgressData(1, 2, 3)
+        val route2RouteProgressData = RouteProgressData(2, 5, 6)
+        val route3RouteProgressData = RouteProgressData(0, 5, 7)
+        val input = RoutesProgressData(
+            route1,
+            route1RouteProgressData,
+            listOf(
+                route2 to route2RouteProgressData,
+                route3 to route3RouteProgressData
+            )
+        )
+        val expected = RoutesProgressData(
+            expectedNewRoute1,
+            route1RouteProgressData,
+            listOf(
+                expectedNewRoute2 to route2RouteProgressData,
+                expectedNewRoute3 to route3RouteProgressData
+            )
+        )
 
-        val actual = sut.removeExpiringDataFromRoutes(listOf(route1, route2, route3), 1)
+        val actual = sut.removeExpiringDataFromRoutesProgressData(input)
 
-        assertEquals(listOf(expectedNewRoute1, expectedNewRoute2, expectedNewRoute3), actual)
+        assertEquals(expected, actual)
     }
 }

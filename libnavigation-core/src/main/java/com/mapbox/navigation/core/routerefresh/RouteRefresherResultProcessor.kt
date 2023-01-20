@@ -23,15 +23,13 @@ internal class RouteRefresherResultProcessor(
         } else {
             if (currentTime >= lastRefreshTimeMillis + staleDataTimeoutMillis) {
                 lastRefreshTimeMillis = currentTime
-                val newRoutes = expiringDataRemover.removeExpiringDataFromRoutes(
-                    result.refreshedRoutes,
-                    result.routeProgressData.legIndex
+                val newRoutesData = expiringDataRemover.removeExpiringDataFromRoutesProgressData(
+                    result.refreshedRoutesData
                 )
-                if (result.refreshedRoutes != newRoutes) {
+                if (result.refreshedRoutesData != newRoutesData) {
                     val processedResult = RouteRefresherResult(
                         result.success,
-                        newRoutes,
-                        result.routeProgressData
+                        newRoutesData
                     )
                     observersManager.onRoutesRefreshed(processedResult)
                 }

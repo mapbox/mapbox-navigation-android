@@ -18,6 +18,12 @@ internal class RoutesProgressDataProvider(
     private val alternativeMetadataProvider: AlternativeMetadataProvider,
 ) {
 
+    /**
+     * Retrieved progress data for passed routes.
+     *
+     * @throws IllegalArgumentException if routes re empty
+     */
+    @Throws(IllegalArgumentException::class)
     suspend fun getRoutesProgressData(
         routes: List<NavigationRoute>
     ): RoutesProgressData {

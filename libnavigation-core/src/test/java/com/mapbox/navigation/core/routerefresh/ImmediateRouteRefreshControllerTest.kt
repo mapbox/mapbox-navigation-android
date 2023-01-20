@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.RouteProgressData
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
@@ -55,8 +54,7 @@ class ImmediateRouteRefreshControllerTest {
         val callback = interceptCallback()
         val result = RouteRefresherResult(
             true,
-            listOf(mockk(), mockk()),
-            RouteProgressData(1, 2, 3)
+            mockk()
         )
 
         callback.onResult(result)
@@ -72,8 +70,7 @@ class ImmediateRouteRefreshControllerTest {
         val callback = interceptCallback()
         val result = RouteRefresherResult(
             false,
-            listOf(mockk(), mockk()),
-            RouteProgressData(1, 2, 3)
+            mockk()
         )
 
         callback.onResult(result)
