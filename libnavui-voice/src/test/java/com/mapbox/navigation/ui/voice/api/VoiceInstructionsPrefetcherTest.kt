@@ -336,6 +336,22 @@ class VoiceInstructionsPrefetcherTest {
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
+    @Test
+    fun `onDetached should nullify lastDownloadTime`() {
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val route = validRoute()
+        onRoutesChanged(
+            routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
+        sut.onDetached(mapboxNavigation)
+        clearMocks(speechAPI, answers = false)
+        every { timeProvider.seconds() } returns currentTimeSeconds + 49
+
+        onRouteProgressChanged(validRouteProgress())
+
+        verify(exactly = 1) { speechAPI.predownload(any()) }
+    }
+
     private fun routesUpdatedResult(
         routes: List<NavigationRoute>,
         @RoutesExtra.RoutesUpdateReason mockReason: String

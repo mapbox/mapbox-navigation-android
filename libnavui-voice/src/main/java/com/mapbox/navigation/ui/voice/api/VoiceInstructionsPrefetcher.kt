@@ -63,6 +63,7 @@ class VoiceInstructionsPrefetcher internal constructor(
      * See [MapboxNavigationObserver.onDetached].
      */
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        lastDownloadTime = 0
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         speechApi.destroy()
