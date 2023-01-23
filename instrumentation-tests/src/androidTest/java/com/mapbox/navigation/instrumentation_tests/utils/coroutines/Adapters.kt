@@ -2,6 +2,7 @@
 
 package com.mapbox.navigation.instrumentation_tests.utils.coroutines
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
@@ -36,67 +37,49 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 fun MapboxNavigation.routesUpdates(): Flow<RoutesUpdatedResult> {
-    val navigation = this
-    return callbackFlow {
-        val observer = RoutesObserver {
-            trySend(it)
-        }
-        navigation.registerRoutesObserver(observer)
-        awaitClose {
-            navigation.unregisterRoutesObserver(observer)
-        }
-    }
+    return loggedCallbackFlow(
+        { RoutesObserver(it) },
+        { registerRoutesObserver(it) },
+        { unregisterRoutesObserver(it) },
+        "RoutesUpdatedResult"
+    )
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
 fun MapboxNavigation.routesPreviewUpdates(): Flow<RoutesPreviewUpdate> {
-    val navigation = this
-    return callbackFlow {
-        val observer = RoutesPreviewObserver {
-            trySend(it)
-        }
-        navigation.registerRoutesPreviewObserver(observer)
-        awaitClose {
-            navigation.unregisterRoutesPreviewObserver(observer)
-        }
-    }
+    return loggedCallbackFlow(
+        { RoutesPreviewObserver(it) },
+        { registerRoutesPreviewObserver(it) },
+        { unregisterRoutesPreviewObserver(it) },
+        "RoutesPreviewUpdate"
+    )
 }
 
 fun MapboxNavigation.routeProgressUpdates(): Flow<RouteProgress> {
-    val navigation = this
-    return callbackFlow {
-        val observer = RouteProgressObserver {
-            trySend(it)
-        }
-        navigation.registerRouteProgressObserver(observer)
-        awaitClose {
-            navigation.unregisterRouteProgressObserver(observer)
-        }
-    }
+    return loggedCallbackFlow(
+        { RouteProgressObserver(it) },
+        { registerRouteProgressObserver(it) },
+        { unregisterRouteProgressObserver(it) },
+        "RouteProgress"
+    )
 }
 
 fun MapboxNavigation.offRouteUpdates(): Flow<Boolean> {
-    val navigation = this
-    return callbackFlow {
-        val observer = OffRouteObserver { trySend(it) }
-        navigation.registerOffRouteObserver(observer)
-        awaitClose {
-            navigation.unregisterOffRouteObserver(observer)
-        }
-    }
+    return loggedCallbackFlow(
+        { OffRouteObserver(it) },
+        { registerOffRouteObserver(it) },
+        { unregisterOffRouteObserver(it) },
+        "OffRoute"
+    )
 }
 
 fun MapboxNavigation.roadObjectsOnRoute(): Flow<List<UpcomingRoadObject>> {
-    val navigation = this
-    return callbackFlow {
-        val observer = RoadObjectsOnRouteObserver {
-            trySend(it)
-        }
-        navigation.registerRoadObjectsOnRouteObserver(observer)
-        awaitClose {
-            navigation.unregisterRoadObjectsOnRouteObserver(observer)
-        }
-    }
+    return loggedCallbackFlow(
+        { RoadObjectsOnRouteObserver(it) },
+        { registerRoadObjectsOnRouteObserver(it) },
+        { unregisterRoadObjectsOnRouteObserver(it) },
+        "UpcomingRoadObject"
+    )
 }
 
 suspend fun MapboxNavigation.requestRoutes(options: RouteOptions) =
@@ -157,33 +140,45 @@ fun RouteRequestResult.getSuccessfulResultOrThrowException(): RouteRequestResult
 }
 
 suspend fun MapboxNavigation.bannerInstructions(): Flow<BannerInstructions> {
-    val navigation = this
-    return callbackFlow {
-        val observer = BannerInstructionsObserver {
-            trySend(it)
-        }
-        navigation.registerBannerInstructionsObserver(observer)
-        awaitClose {
-            navigation.unregisterBannerInstructionsObserver(observer)
-        }
-    }
+    return loggedCallbackFlow(
+        { BannerInstructionsObserver(it) },
+        { registerBannerInstructionsObserver(it) },
+        { unregisterBannerInstructionsObserver(it) },
+        "BannerInstructions"
+    )
 }
 
 suspend fun MapboxNavigation.voiceInstructions(): Flow<VoiceInstructions> {
-    val navigation = this
-    return callbackFlow {
-        val observer = VoiceInstructionsObserver {
-            trySend(it)
-        }
-        navigation.registerVoiceInstructionsObserver(observer)
-        awaitClose {
-            navigation.unregisterVoiceInstructionsObserver(observer)
-        }
-    }
+    return loggedCallbackFlow(
+        { VoiceInstructionsObserver(it) },
+        { registerVoiceInstructionsObserver(it) },
+        { unregisterVoiceInstructionsObserver(it) },
+        "VoiceInstructions"
+    )
 }
 
 suspend fun MapboxHistoryRecorder.stopRecording(): String? = suspendCoroutine { cont ->
     stopRecording { path ->
         cont.resume(path)
+    }
+}
+
+fun <T, OBSERVER> loggedCallbackFlow(
+    observerCreator: (block: (T) -> Unit) -> OBSERVER,
+    observerRegistrator: (OBSERVER) -> Unit,
+    observerUnregistrator: (OBSERVER) -> Unit,
+    tag: String,
+): Flow<T> {
+    return callbackFlow {
+        var lastUpdate: T? = null
+        val observer = observerCreator {
+            lastUpdate = it
+            trySend(it)
+        }
+        observerRegistrator(observer)
+        awaitClose {
+            Log.d("[$tag]", "Last update: $lastUpdate")
+            observerUnregistrator(observer)
+        }
     }
 }
