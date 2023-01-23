@@ -62,6 +62,9 @@ object MapboxMetricsReporter : MetricsReporter {
             }
         }
 
+    @Volatile
+    var eventsPriority: EventPriority = EventPriority.QUEUED
+
     /**
      * Initialize [EventsServiceInterface] and [TelemetryService] that need to send event to
      * Mapbox Telemetry server.
@@ -119,7 +122,7 @@ object MapboxMetricsReporter : MetricsReporter {
                 return
             }
             eventsService.sendEvent(
-                Event(EventPriority.QUEUED, metricEvent.toValue(), null)
+                Event(eventsPriority, metricEvent.toValue(), null)
             ) {
                 if (it != null) {
                     logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
@@ -157,6 +160,20 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     override fun removeObserver() {
         this.metricsObserver = null
+    }
+
+    /**
+     * Register [EventsServiceObserver]
+     */
+    fun registerEventsServiceObserver(observer: EventsServiceObserver) {
+        eventsService.registerObserver(observer)
+    }
+
+    /**
+     * Unregister [EventsServiceObserver]
+     */
+    fun unregisterEventsServiceObserver(observer: EventsServiceObserver) {
+        eventsService.unregisterObserver(observer)
     }
 
     private inline fun ifTelemetryIsRunning(func: () -> Unit) {
