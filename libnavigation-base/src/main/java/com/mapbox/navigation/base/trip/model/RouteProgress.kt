@@ -135,21 +135,21 @@ class RouteProgress internal constructor(
     override fun toString(): String {
         return "RouteProgress(" +
             "navigationRoute=$navigationRoute, " +
-            "bannerInstructions=$bannerInstructions, " +
-            "voiceInstructions=$voiceInstructions, " +
             "currentState=$currentState, " +
-            "currentLegProgress=$currentLegProgress, " +
-            "upcomingStepPoints=$upcomingStepPoints, " +
             "inTunnel=$inTunnel, " +
             "distanceRemaining=$distanceRemaining, " +
             "distanceTraveled=$distanceTraveled, " +
             "durationRemaining=$durationRemaining, " +
             "fractionTraveled=$fractionTraveled, " +
-            "remainingWaypoints=$remainingWaypoints, " +
-            "upcomingRoadObjects=$upcomingRoadObjects, " +
             "stale=$stale, " +
             "routeAlternativeId=$routeAlternativeId, " +
-            "currentRouteGeometryIndex=$currentRouteGeometryIndex" +
+            "currentRouteGeometryIndex=$currentRouteGeometryIndex, " +
+            "currentLegProgress=$currentLegProgress, " +
+            "bannerInstructions=$bannerInstructions, " +
+            "voiceInstructions=$voiceInstructions, " +
+            "upcomingStepPoints=$upcomingStepPoints, " +
+            "remainingWaypoints=$remainingWaypoints, " +
+            "upcomingRoadObjects=$upcomingRoadObjects" +
             ")"
     }
 }
