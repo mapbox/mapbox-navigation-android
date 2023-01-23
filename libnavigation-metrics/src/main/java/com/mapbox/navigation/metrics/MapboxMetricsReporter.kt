@@ -62,6 +62,9 @@ object MapboxMetricsReporter : MetricsReporter {
             }
         }
 
+    /**
+     * Events priority. See [EventPriority]
+     */
     @Volatile
     var eventsPriority: EventPriority = EventPriority.QUEUED
 
