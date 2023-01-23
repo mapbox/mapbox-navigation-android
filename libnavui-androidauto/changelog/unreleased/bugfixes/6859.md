@@ -1,0 +1,1 @@
+- Optimized `SpeedLimitWidget` memory usage.
