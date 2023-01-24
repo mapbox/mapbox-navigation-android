@@ -62,11 +62,7 @@ class InfoPanelCoordinatorTest {
         )
         mapboxNavigation = mockk(relaxed = true)
 
-        sut = InfoPanelCoordinator(
-            viewContext,
-            binding.infoPanelLayout,
-            binding.guidelineBottom
-        )
+        sut = InfoPanelCoordinator(viewContext, binding)
     }
 
     @Test
