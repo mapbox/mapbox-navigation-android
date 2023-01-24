@@ -120,8 +120,8 @@ internal open class RouteRefreshIntegrationTest {
         unmockkObject(CoroutineUtils)
     }
 
-    fun createRefreshController(refreshInternal: Long): RouteRefreshController {
-        val options = RouteRefreshOptions.Builder().intervalMillis(refreshInternal).build()
+    fun createRefreshController(refreshInterval: Long): RouteRefreshController {
+        val options = RouteRefreshOptions.Builder().intervalMillis(refreshInterval).build()
         return RouteRefreshControllerProvider.createRouteRefreshController(
             testDispatcher,
             testDispatcher,
@@ -146,7 +146,8 @@ internal open class RouteRefreshIntegrationTest {
         successfulAttemptNumber: Int = 0,
         responseDelay: Long = 0
     ): List<NavigationRoute> {
-        val routes = NavigationRoute.create(
+        setUpRouteRefresh(fileName, successfulAttemptNumber, responseDelay)
+        return NavigationRoute.create(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
             RouteOptions.builder()
                 .coordinatesList(
@@ -160,6 +161,21 @@ internal open class RouteRefreshIntegrationTest {
                 .build(),
             RouterOrigin.Custom()
         )
+    }
+
+    fun failRouteRefreshResponse() {
+        every { router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any()) } answers {
+            val callback = thirdArg() as NavigationRouterRefreshCallback
+            callback.onFailure(mockk(relaxed = true))
+            0
+        }
+    }
+
+    fun setUpRouteRefresh(
+        fileName: String,
+        successfulAttemptNumber: Int = 0,
+        responseDelay: Long = 0
+    ) {
         val refreshedRoute = NavigationRoute.create(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
             RouteOptions.builder()
@@ -170,7 +186,7 @@ internal open class RouteRefreshIntegrationTest {
                     )
                 )
                 .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .enableRefresh(enableRefresh)
+                .enableRefresh(true)
                 .build(),
             RouterOrigin.Custom()
         ).first()
@@ -210,6 +226,5 @@ internal open class RouteRefreshIntegrationTest {
             invocationNumber++
             0
         }
-        return routes
     }
 }

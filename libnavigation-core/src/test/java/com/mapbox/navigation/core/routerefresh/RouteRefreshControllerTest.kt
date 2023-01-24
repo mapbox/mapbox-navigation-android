@@ -212,4 +212,22 @@ class RouteRefreshControllerTest {
             resultProcessor.reset()
         }
     }
+
+    @Test
+    fun pauseRouteRefreshes() {
+        sut.pauseRouteRefreshes()
+
+        verify(exactly = 1) {
+            plannedRouteRefreshController.pause()
+        }
+    }
+
+    @Test
+    fun resumeRouteRefreshes() {
+        sut.resumeRouteRefreshes()
+
+        verify(exactly = 1) {
+            plannedRouteRefreshController.resume()
+        }
+    }
 }
