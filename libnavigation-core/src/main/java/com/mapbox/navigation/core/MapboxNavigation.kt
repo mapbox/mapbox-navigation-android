@@ -85,8 +85,8 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
+import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerImpl
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
-import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
@@ -266,7 +266,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
-    private val routeRefreshController: RouteRefreshController
+    private val routeRefreshControllerImpl: RouteRefreshControllerImpl
     private val arrivalProgressObserver: ArrivalProgressObserver
     private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
         navigationOptions.eHorizonOptions.length,
@@ -376,6 +376,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     val historyRecorder = MapboxHistoryRecorder(navigationOptions)
 
+    /**
+     * Use route refresh controller to handle route refreshes.
+     * @see [RouteRefreshController] for more details.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    val routeRefreshController: RouteRefreshController
+
     internal val copilotHistoryRecorder = MapboxHistoryRecorder(navigationOptions)
 
     /**
@@ -388,6 +395,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     val experimental: com.mapbox.navigator.Experimental
         get() = navigator.experimental
+
 
     private var reachabilityObserverId: Long? = null
 
@@ -550,7 +558,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSession,
             threadController,
         )
-        routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
+        routeRefreshControllerImpl = RouteRefreshControllerProvider.createRouteRefreshController(
             threadController,
             navigationOptions.routeRefreshOptions,
             directionsSession,
@@ -558,7 +566,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeAlternativesController,
             evDynamicDataHolder
         )
-        routeRefreshController.registerRouteRefreshObserver {
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        routeRefreshController = routeRefreshControllerImpl
+        routeRefreshControllerImpl.registerRouteRefreshObserver {
             internalSetNavigationRoutes(
                 it.allRoutesProgressData.map { pair -> pair.first },
                 SetRoutes.RefreshRoutes(it.primaryRouteProgressData)
@@ -1027,19 +1037,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         CacheHandleWrapper.requestRoadGraphDataUpdate(navigator.cache, callback)
     }
 
-    /**
-     * Immediately refresh current navigation routes.
-     * Listen for refreshed routes using [RoutesObserver].
-     *
-     * The on-demand refresh request is not guaranteed to succeed and call the [RoutesObserver],
-     * [refreshRoutesImmediately] invocations cannot be coupled with
-     * [RoutesObserver.onRoutesChanged] callbacks for state management.
-     * You can use [registerRouteRefreshStateObserver] to monitor refresh statuses independently.
-     */
-    fun refreshRoutesImmediately() {
-        routeRefreshController.requestImmediateRouteRefresh(getNavigationRoutes())
-    }
-
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
         setRoutesInfo: SetRoutes,
@@ -1234,7 +1231,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
-        routeRefreshController.destroy()
+        routeRefreshControllerImpl.destroy()
         routesPreviewController.unregisterAllRoutesPreviewObservers()
 
         isDestroyed = true
@@ -1799,28 +1796,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * Register a [RouteRefreshStatesObserver] to be notified of Route refresh state changes.
-     *
-     * @param routeRefreshStatesObserver RouteRefreshStatesObserver
-     */
-    @ExperimentalPreviewMapboxNavigationAPI
-    fun registerRouteRefreshStateObserver(
-        routeRefreshStatesObserver: RouteRefreshStatesObserver
-    ) {
-        routeRefreshController.registerRouteRefreshStateObserver(routeRefreshStatesObserver)
-    }
-
-    /**
-     * Unregisters a [RouteRefreshStatesObserver].
-     */
-    @ExperimentalPreviewMapboxNavigationAPI
-    fun unregisterRouteRefreshStateObserver(
-        routeRefreshStatesObserver: RouteRefreshStatesObserver
-    ) {
-        routeRefreshController.unregisterRouteRefreshStateObserver(routeRefreshStatesObserver)
-    }
-
-    /**
      * Registers a [DeveloperMetadataObserver] to be notified of [DeveloperMetadata] changes.
      *
      * @param developerMetadataObserver [DeveloperMetadataObserver]
@@ -1909,7 +1884,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         routeRefreshRequestDataProvider.onNewRoutes()
-        routeRefreshController.requestPlannedRouteRefresh(result.navigationRoutes)
+        routeRefreshControllerImpl.requestPlannedRouteRefresh(result.navigationRoutes)
     }
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->

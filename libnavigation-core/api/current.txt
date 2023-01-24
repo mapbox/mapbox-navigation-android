@@ -26,6 +26,7 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.reroute.NavigationRerouteController? getRerouteController();
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher getRoadObjectMatcher();
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore getRoadObjectsStore();
+    method public com.mapbox.navigation.core.routerefresh.RouteRefreshController getRouteRefreshController();
     method @Deprecated public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.preview.RoutesPreview? getRoutesPreview();
     method public com.mapbox.navigation.core.navigator.TilesetDescriptorFactory getTilesetDescriptorFactory();
@@ -43,7 +44,6 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper provideFeedbackMetadataWrapper();
-    method public void refreshRoutesImmediately();
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerDeveloperMetadataObserver(com.mapbox.navigation.core.DeveloperMetadataObserver developerMetadataObserver);
@@ -56,7 +56,6 @@ package com.mapbox.navigation.core {
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver routeAlternativesObserver);
     method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
@@ -99,7 +98,6 @@ package com.mapbox.navigation.core {
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver routeAlternativesObserver);
     method public void unregisterRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
@@ -112,6 +110,7 @@ package com.mapbox.navigation.core {
     property public final com.mapbox.navigation.base.options.NavigationOptions navigationOptions;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher roadObjectMatcher;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore roadObjectsStore;
+    property public final com.mapbox.navigation.core.routerefresh.RouteRefreshController routeRefreshController;
     property public final com.mapbox.navigation.core.navigator.TilesetDescriptorFactory tilesetDescriptorFactory;
   }
 
@@ -530,6 +529,9 @@ package com.mapbox.navigation.core.replay.history {
     property public final Double? time;
   }
 
+  public final class ReplayEventLocationMapperKt {
+  }
+
   public final class ReplayEventUpdateLocation implements com.mapbox.navigation.core.replay.history.ReplayEventBase {
     ctor public ReplayEventUpdateLocation(@com.google.gson.annotations.SerializedName("event_timestamp") double eventTimestamp, @com.google.gson.annotations.SerializedName("location") com.mapbox.navigation.core.replay.history.ReplayEventLocation location);
     method public double component1();
@@ -879,6 +881,12 @@ package com.mapbox.navigation.core.routeoptions {
 }
 
 package com.mapbox.navigation.core.routerefresh {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface RouteRefreshController {
+    method public void registerRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
+    method public void requestImmediateRouteRefresh();
+    method public void unregisterRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
+  }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteRefreshExtra {
     field public static final com.mapbox.navigation.core.routerefresh.RouteRefreshExtra INSTANCE;

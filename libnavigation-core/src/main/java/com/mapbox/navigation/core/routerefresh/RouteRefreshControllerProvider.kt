@@ -22,7 +22,7 @@ internal object RouteRefreshControllerProvider {
         primaryRouteProgressDataProvider: PrimaryRouteProgressDataProvider,
         alternativeMetadataProvider: AlternativeMetadataProvider,
         evDynamicDataHolder: EVDynamicDataHolder,
-    ): RouteRefreshController {
+    ): RouteRefreshControllerImpl {
         val scope = threadController.getMainScopeAndRootJob().scope
         val routeRefresher = RouteRefresher(
             RoutesProgressDataProvider(
@@ -59,7 +59,7 @@ internal object RouteRefreshControllerProvider {
             stateHolder,
             routeRefresherResultProcessor
         )
-        return RouteRefreshController(
+        return RouteRefreshControllerImpl(
             plannedRouteRefreshController,
             immediateRouteRefreshController,
             stateHolder,

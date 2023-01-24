@@ -1919,27 +1919,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun registerRouteRefreshStateObserver() {
-        val observer = mockk<RouteRefreshStatesObserver>()
+    fun routeRefreshController() {
         createMapboxNavigation()
 
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
-
-        verify(exactly = 1) {
-            routeRefreshController.registerRouteRefreshStateObserver(observer)
-        }
-    }
-
-    @Test
-    fun unregisterRouteRefreshStateObserver() {
-        val observer = mockk<RouteRefreshStatesObserver>()
-        createMapboxNavigation()
-
-        mapboxNavigation.unregisterRouteRefreshStateObserver(observer)
-
-        verify(exactly = 1) {
-            routeRefreshController.unregisterRouteRefreshStateObserver(observer)
-        }
+        assertEquals(routeRefreshController, mapboxNavigation.routeRefreshController)
     }
 
     @Test
@@ -1987,26 +1970,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             tripSession.setRoutes(routes, any())
             routesPreviewController.previewNavigationRoutes(emptyList())
         }
-    }
-
-    @Test
-    fun refreshRoutesImmediatelyNoRoutes() {
-        createMapboxNavigation()
-
-        mapboxNavigation.refreshRoutesImmediately()
-
-        verify(exactly = 1) { routeRefreshController.requestImmediateRouteRefresh(emptyList()) }
-    }
-
-    @Test
-    fun refreshRoutesImmediatelyHasRoutes() = coroutineRule.runBlockingTest {
-        val routes = listOf(createNavigationRoute(), createNavigationRoute())
-        createMapboxNavigation()
-        every { directionsSession.routes } returns routes
-
-        mapboxNavigation.refreshRoutesImmediately()
-
-        verify(exactly = 1) { routeRefreshController.requestImmediateRouteRefresh(routes) }
     }
 
     private fun interceptRefreshObserver(): RouteRefreshObserver {

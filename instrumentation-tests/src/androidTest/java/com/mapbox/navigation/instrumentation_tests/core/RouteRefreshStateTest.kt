@@ -83,8 +83,8 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
         mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
         delay(2000) // refresh interval + accuracy
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
 
         assertEquals(emptyList<String>(), observer.getStatesSnapshot())
     }
@@ -107,8 +107,8 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
         delay(7000) // refresh interval + accuracy
 
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         delay(1000) // accuracy
 
         assertEquals(
@@ -132,7 +132,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(1_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes(enableRefresh = false)
         mapboxNavigation.setNavigationRoutes(requestedRoutes)
@@ -157,7 +157,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(10_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutes(requestedRoutes)
@@ -185,7 +185,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutes(requestedRoutes)
@@ -223,7 +223,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutes(requestedRoutes)
@@ -254,7 +254,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(4_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutes(requestedRoutes)
@@ -287,7 +287,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
@@ -314,11 +314,11 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(10_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
 
         waitForRefresh()
 
@@ -346,11 +346,11 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(10_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
 
         delay(2500) // execute request
 
@@ -380,16 +380,16 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(20_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
 
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         delay(2000) // start refresh request
-        mapboxNavigation.refreshRoutesImmediately()
-        mapboxNavigation.refreshRoutesImmediately()
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         delay(4000)
 
         waitForRefresh()
@@ -418,12 +418,12 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
 
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         delay(5000)
 
         waitForRefreshes(2) // immediate + planned
@@ -453,12 +453,12 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
 
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         delay(5000)
 
         waitForRefresh()
@@ -488,13 +488,13 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
         delay(8000) // refresh interval + accuracy
 
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
 
         waitForRefreshes(2) // one from immediate and the next planned
 
@@ -525,13 +525,13 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5_000))
-        mapboxNavigation.registerRouteRefreshStateObserver(observer)
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         val requestedRoutes = requestRoutes()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
         delay(8000) // refresh interval + accuracy
 
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
 
         waitForRefresh()
 

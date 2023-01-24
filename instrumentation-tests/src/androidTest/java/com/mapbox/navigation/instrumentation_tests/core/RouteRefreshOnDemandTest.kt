@@ -5,6 +5,7 @@ import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -44,6 +45,7 @@ import org.junit.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
@@ -95,7 +97,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         stayOnInitialPosition()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
 
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         val refreshedRoutes = mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
             .first()
@@ -138,7 +140,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
         delay(2500)
 
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
             .first()
@@ -177,7 +179,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         stayOnInitialPosition()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
 
-        mapboxNavigation.refreshRoutesImmediately()
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         delay(2000)
         assertEquals(0, refreshes.size)
     }
@@ -196,9 +198,9 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
 
         delay(7000) // 2 failed planned attempts + accuracy
-        mapboxNavigation.refreshRoutesImmediately() // fail and postpone next planned attempt
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh() // fail and postpone next planned attempt
         delay(2000)
-        mapboxNavigation.refreshRoutesImmediately() // dispatch new routes with REFRESH reason
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh() // dispatch new routes with REFRESH reason
 
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }

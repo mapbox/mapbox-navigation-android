@@ -33,7 +33,8 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     )
 
     private var paused = false
-    private var routesToRefresh: List<NavigationRoute>? = null
+    var routesToRefresh: List<NavigationRoute>? = null
+        private set
 
     fun startRoutesRefreshing(routes: List<NavigationRoute>) {
         cancellableHandler.cancelAll()

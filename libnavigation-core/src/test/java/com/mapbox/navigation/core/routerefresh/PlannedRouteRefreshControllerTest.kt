@@ -15,6 +15,8 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,6 +69,7 @@ class PlannedRouteRefreshControllerTest {
             RouteRefreshValidator.validateRoute(any())
             cancellableHandler.postDelayed(any(), any(), any())
         }
+        assertNull(sut.routesToRefresh)
     }
 
     @Test
@@ -99,6 +102,7 @@ class PlannedRouteRefreshControllerTest {
             stateHolder.reset()
         }
         verify(exactly = 0) { cancellableHandler.postDelayed(any(), any(), any()) }
+        assertNull(sut.routesToRefresh)
     }
 
     @Test
@@ -120,6 +124,7 @@ class PlannedRouteRefreshControllerTest {
             retryStrategy.reset()
             cancellableHandler.postDelayed(interval, any(), any())
         }
+        assertEquals(routes, sut.routesToRefresh)
     }
 
     @Test
@@ -137,6 +142,7 @@ class PlannedRouteRefreshControllerTest {
             retryStrategy.reset()
             cancellableHandler.postDelayed(interval, any(), any())
         }
+        assertEquals(routes, sut.routesToRefresh)
     }
 
     @Test
@@ -599,6 +605,7 @@ class PlannedRouteRefreshControllerTest {
             retryStrategy.shouldRetry()
             cancellableHandler.postDelayed(any(), any(), any())
         }
+        assertNull(sut.routesToRefresh)
     }
 
     @Test
@@ -622,6 +629,7 @@ class PlannedRouteRefreshControllerTest {
             retryStrategy.shouldRetry()
             cancellableHandler.postDelayed(any(), any(), any())
         }
+        assertNull(sut.routesToRefresh)
     }
 
     @Test
@@ -656,6 +664,7 @@ class PlannedRouteRefreshControllerTest {
         }
         attemptBlocks.last().run()
         verify(exactly = 1) { executor.postRoutesToRefresh(listOf(route3, route4), any()) }
+        assertEquals(listOf(route3, route4), sut.routesToRefresh)
     }
 
     @Test
@@ -681,5 +690,6 @@ class PlannedRouteRefreshControllerTest {
         }
         attemptBlocks.last().run()
         verify(exactly = 1) { executor.postRoutesToRefresh(listOf(route3, route4), any()) }
+        assertEquals(listOf(route3, route4), sut.routesToRefresh)
     }
 }

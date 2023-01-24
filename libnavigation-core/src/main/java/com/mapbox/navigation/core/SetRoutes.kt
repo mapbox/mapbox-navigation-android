@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
-import com.mapbox.navigation.core.routerefresh.RouteRefreshController
+import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerImpl
 
 internal sealed class SetRoutes {
 
@@ -37,7 +37,7 @@ internal sealed class SetRoutes {
     /**
      * Triggered when the **routes do not change but are refreshed**.
      *
-     * Currently this can only be trigger internally by a response to [RouteRefreshController.refresh].
+     * Currently this can only be trigger internally by a response to [RouteRefreshControllerImpl.refresh].
      */
     internal data class RefreshRoutes(
         val routeProgressData: RouteProgressData
