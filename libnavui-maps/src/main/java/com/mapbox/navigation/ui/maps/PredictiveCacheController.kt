@@ -345,23 +345,23 @@ class PredictiveCacheController constructor(
                 """.trimIndent()
             handleError(message)
         } else {
-            val descriptorOptions = TilesetDescriptorOptions.Builder()
-                .styleURI(styleURI)
-                .minZoom(
-                    predictiveCacheOptions.predictiveCacheMapsOptions.minZoom
-                )
-                .maxZoom(
-                    predictiveCacheOptions.predictiveCacheMapsOptions.maxZoom
-                )
-                .build()
+            val descriptorsToOptions =
+                predictiveCacheOptions.predictiveCacheMapsOptionsList.map { options ->
+                    val descriptorOptions = TilesetDescriptorOptions.Builder()
+                        .styleURI(styleURI)
+                        .minZoom(options.minZoom)
+                        .maxZoom(options.maxZoom)
+                        .build()
 
-            val tilesetDescriptor = offlineManager.createTilesetDescriptor(descriptorOptions)
+                    val tilesetDescriptor =
+                        offlineManager.createTilesetDescriptor(descriptorOptions)
+                    tilesetDescriptor to options.predictiveCacheLocationOptions
+                }
 
-            PredictiveCache.createMapsController(
+            PredictiveCache.createMapsControllers(
                 map,
                 tileStore,
-                tilesetDescriptor,
-                predictiveCacheOptions.predictiveCacheMapsOptions.predictiveCacheLocationOptions,
+                descriptorsToOptions
             )
         }
     }

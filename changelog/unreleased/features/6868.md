@@ -1,0 +1,1 @@
+- Introduced `PredictiveCacheOptions.Builder#predictiveCacheMapsOptionsList` as an alternative for deprecated `PredictiveCacheOptions.Builder#predictiveCacheMapsOptions`. This allows to use different `PredictiveCacheLocationOptions` for different zoom level ranges.
