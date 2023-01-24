@@ -11,14 +11,14 @@ object PredictiveCache {
     internal val cachedNavigationPredictiveCacheControllers =
         mutableSetOf<PredictiveCacheController>()
     internal val cachedMapsPredictiveCacheControllers =
-        mutableMapOf<Any, Pair<TilesetDescriptor, PredictiveCacheController>>()
+        mutableMapOf<Any, List<Pair<TilesetDescriptor, PredictiveCacheController>>>()
     internal val cachedMapsPredictiveCacheControllersTileVariant =
         mutableMapOf<Any, MutableMap<String, PredictiveCacheController>>()
 
     internal val navPredictiveCacheLocationOptions =
         mutableSetOf<PredictiveCacheLocationOptions>()
-    internal val mapsPredictiveCacheLocationOptions =
-        mutableMapOf<Any, Triple<TilesetDescriptor, TileStore, PredictiveCacheLocationOptions>>()
+    internal val mapsPredictiveCacheLocationOptions = mutableMapOf<Any,
+        Pair<TileStore, List<Pair<TilesetDescriptor, PredictiveCacheLocationOptions>>>>()
     internal val mapsPredictiveCacheLocationOptionsTileVariant =
         mutableMapOf<Any, MutableMap<String, Pair<TileStore, PredictiveCacheLocationOptions>>>()
 
@@ -35,12 +35,11 @@ object PredictiveCache {
                 createNavigationController(it)
             }
             mapsOptions.forEach { entry ->
-                entry.value.let { (descriptor, tileStore, options) ->
-                    createMapsController(
+                entry.value.let { (tileStore, descriptorsAndOptions) ->
+                    createMapsControllers(
                         mapboxMap = entry.key,
-                        tilesetDescriptor = descriptor,
                         tileStore = tileStore,
-                        predictiveCacheLocationOptions = options
+                        descriptorsAndOptions = descriptorsAndOptions
                     )
                 }
             }
@@ -69,9 +68,7 @@ object PredictiveCache {
     }
 
     @Deprecated(
-        "Use createMapsController(" +
-            "mapboxMap, tileStore, tilesetDescriptor, predictiveCacheLocationOptions" +
-            ") instead."
+        "Use createMapsControllers(mapboxMap, tileStore, descriptorsAndOptions) instead."
     )
     fun createMapsController(
         mapboxMap: Any,
@@ -97,23 +94,21 @@ object PredictiveCache {
         mapsPredictiveCacheLocationOptionsTileVariant[mapboxMap] = locationOptions
     }
 
-    fun createMapsController(
+    fun createMapsControllers(
         mapboxMap: Any,
         tileStore: TileStore,
-        tilesetDescriptor: TilesetDescriptor,
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+        descriptorsAndOptions: List<Pair<TilesetDescriptor, PredictiveCacheLocationOptions>>
     ) {
-        val predictiveCacheController =
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheController(
+        val descriptorsToPredictiveCacheControllers = descriptorsAndOptions.map {
+            it.first to MapboxNativeNavigatorImpl.createMapsPredictiveCacheController(
                 tileStore,
-                tilesetDescriptor,
-                predictiveCacheLocationOptions
+                it.first,
+                it.second
             )
+        }
 
-        cachedMapsPredictiveCacheControllers[mapboxMap] =
-            Pair(tilesetDescriptor, predictiveCacheController)
-        mapsPredictiveCacheLocationOptions[mapboxMap] =
-            Triple(tilesetDescriptor, tileStore, predictiveCacheLocationOptions)
+        cachedMapsPredictiveCacheControllers[mapboxMap] = descriptorsToPredictiveCacheControllers
+        mapsPredictiveCacheLocationOptions[mapboxMap] = tileStore to descriptorsAndOptions
     }
 
     @Deprecated("Will be removed with other TileVariant logic")

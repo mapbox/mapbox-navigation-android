@@ -542,17 +542,20 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class PredictiveCacheOptions {
-    method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions getPredictiveCacheMapsOptions();
+    method @Deprecated public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions getPredictiveCacheMapsOptions();
+    method public java.util.List<com.mapbox.navigation.base.options.PredictiveCacheMapsOptions> getPredictiveCacheMapsOptionsList();
     method public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions getPredictiveCacheNavigationOptions();
     method public com.mapbox.navigation.base.options.PredictiveCacheOptions.Builder toBuilder();
-    property public final com.mapbox.navigation.base.options.PredictiveCacheMapsOptions predictiveCacheMapsOptions;
+    property @Deprecated public final com.mapbox.navigation.base.options.PredictiveCacheMapsOptions predictiveCacheMapsOptions;
+    property public final java.util.List<com.mapbox.navigation.base.options.PredictiveCacheMapsOptions> predictiveCacheMapsOptionsList;
     property public final com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions predictiveCacheNavigationOptions;
   }
 
   public static final class PredictiveCacheOptions.Builder {
     ctor public PredictiveCacheOptions.Builder();
     method public com.mapbox.navigation.base.options.PredictiveCacheOptions build();
-    method public com.mapbox.navigation.base.options.PredictiveCacheOptions.Builder predictiveCacheMapsOptions(com.mapbox.navigation.base.options.PredictiveCacheMapsOptions predictiveCacheMapsOptions);
+    method @Deprecated public com.mapbox.navigation.base.options.PredictiveCacheOptions.Builder predictiveCacheMapsOptions(com.mapbox.navigation.base.options.PredictiveCacheMapsOptions predictiveCacheMapsOptions);
+    method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public com.mapbox.navigation.base.options.PredictiveCacheOptions.Builder predictiveCacheMapsOptionsList(java.util.List<com.mapbox.navigation.base.options.PredictiveCacheMapsOptions> predictiveCacheMapsOptionsList) throws java.lang.IllegalArgumentException;
     method public com.mapbox.navigation.base.options.PredictiveCacheOptions.Builder predictiveCacheNavigationOptions(com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions predictiveCacheNavigationOptions);
   }
 
