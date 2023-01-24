@@ -8,7 +8,7 @@ import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.MapMatcherOutput
 import com.mapbox.navigator.NavigationStatus
-import com.mapbox.navigator.Road
+import com.mapbox.navigator.RoadName
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
@@ -36,7 +36,7 @@ fun createNavigationStatus(
     geometryIndex: Int = 0,
     shapeIndex: Int = 0,
     intersectionIndex: Int = 0,
-    roads: List<Road> = emptyList(),
+    roads: List<RoadName> = emptyList(),
     voiceInstruction: VoiceInstruction? = null,
     // default banner instruction workarounds the direct usage of the MapboxNativeNavigatorImpl
     bannerInstruction: BannerInstruction? = createBannerInstruction(),

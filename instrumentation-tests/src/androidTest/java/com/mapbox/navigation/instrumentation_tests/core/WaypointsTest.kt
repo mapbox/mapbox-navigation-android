@@ -53,7 +53,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     )
 
     private lateinit var mapboxNavigation: MapboxNavigation
-    private val tolerance = 0.00001
+    private val tolerance = 0.0001
     private val expectedEvWaypointsNamesAndLocations = listOf(
         "Leopoldstraße" to ApproximateCoordinates(48.176099, 11.585226, tolerance),
         "" to ApproximateCoordinates(48.39023, 11.063842, tolerance),

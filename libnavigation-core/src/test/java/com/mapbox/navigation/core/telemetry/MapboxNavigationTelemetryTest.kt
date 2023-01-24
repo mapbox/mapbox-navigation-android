@@ -1419,12 +1419,14 @@ class MapboxNavigationTelemetryTest {
         every { telephonyManager.dataNetworkType } returns 5
         every { telephonyManager.networkType } returns 6
 
-        val activityManager = mockk<ActivityManager>()
+        val activityManager = mockk<ActivityManager> {
+            every { runningAppProcesses } returns listOf()
+            every { getRunningTasks(any()) } returns listOf()
+            every { getRunningServices(any()) } returns listOf()
+        }
         every {
             applicationContext.getSystemService(Context.ACTIVITY_SERVICE)
         } returns activityManager
-        every { activityManager.runningAppProcesses } returns listOf()
-        every { activityManager.getRunningTasks(any()) } returns listOf()
     }
 
     private fun initTelemetry() {

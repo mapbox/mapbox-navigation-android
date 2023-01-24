@@ -48,6 +48,7 @@ class NavigatorMapperTest {
     private val route: NavigationRoute = mockk(relaxed = true) {
         every { directionsRoute } returns this@NavigatorMapperTest.directionsRoute
     }
+    private val roadName = com.mapbox.navigator.RoadName("Central Av", "en", null, null)
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
@@ -128,7 +129,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns false
             }
@@ -174,7 +175,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns false
             }
@@ -220,7 +221,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { roads } returns listOf(roadName)
                 every { isFallback } returns true
                 every { inTunnel } returns false
             }
@@ -266,7 +267,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns false
             }
@@ -305,7 +306,7 @@ class NavigatorMapperTest {
                 every { matches } returns listOf()
             }
             every { layer } returns null
-            every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+            every { roads } returns listOf(roadName)
             every { isFallback } returns false
             every { inTunnel } returns false
         }
@@ -355,7 +356,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns 2
-                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns false
             }
@@ -401,7 +402,7 @@ class NavigatorMapperTest {
                     )
                 }
                 every { layer } returns null
-                every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+                every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns true
             }
@@ -608,7 +609,7 @@ class NavigatorMapperTest {
         every { voiceInstruction } returns nativeVoiceInstructions
         every { inTunnel } returns true
         every { upcomingRouteAlerts } returns emptyList()
-        every { roads } returns listOf(com.mapbox.navigator.Road("Central Av", null, null))
+        every { roads } returns listOf(roadName)
         every { locatedAlternativeRouteId } returns "alternative_id"
         every { geometryIndex } returns routeGeometryIndex
         every { shapeIndex } returns legGeometryIndex

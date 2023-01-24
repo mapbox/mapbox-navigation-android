@@ -18,6 +18,7 @@ object RoadFactory {
                 text = road.text,
                 shield = road.shield.toMapboxShield(),
                 imageBaseUrl = road.imageBaseUrl,
+                language = road.language,
             )
         }
         return Road(

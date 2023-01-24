@@ -615,9 +615,11 @@ package com.mapbox.navigation.base.road.model {
 
   public final class RoadComponent {
     method public String? getImageBaseUrl();
+    method public String getLanguage();
     method public com.mapbox.api.directions.v5.models.MapboxShield? getShield();
     method public String getText();
     property public final String? imageBaseUrl;
+    property public final String language;
     property public final com.mapbox.api.directions.v5.models.MapboxShield? shield;
     property public final String text;
   }
@@ -1020,7 +1022,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     method public double getLength();
     method public Double? getMeanElevation();
     method public boolean getMotorway();
-    method public java.util.List<com.mapbox.navigation.base.trip.model.eh.RoadName> getNames();
+    method public java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> getNames();
     method public boolean getRamp();
     method public String getRoadSurface();
     method public double getSpeed();
@@ -1044,7 +1046,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     property public final double length;
     property public final Double? meanElevation;
     property public final boolean motorway;
-    property public final java.util.List<com.mapbox.navigation.base.trip.model.eh.RoadName> names;
+    property public final java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> names;
     property public final boolean ramp;
     property public final String roadSurface;
     property public final double speed;
@@ -1154,13 +1156,6 @@ package com.mapbox.navigation.base.trip.model.eh {
   }
 
   @StringDef({com.mapbox.navigation.base.trip.model.eh.RoadClass.MOTORWAY, com.mapbox.navigation.base.trip.model.eh.RoadClass.TRUNK, com.mapbox.navigation.base.trip.model.eh.RoadClass.PRIMARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.SECONDARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.TERTIARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.UNCLASSIFIED, com.mapbox.navigation.base.trip.model.eh.RoadClass.RESIDENTIAL, com.mapbox.navigation.base.trip.model.eh.RoadClass.SERVICE_OTHER}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RoadClass.Type {
-  }
-
-  public final class RoadName {
-    method public String getName();
-    method public boolean getShielded();
-    property public final String name;
-    property public final boolean shielded;
   }
 
   public final class RoadSurface {

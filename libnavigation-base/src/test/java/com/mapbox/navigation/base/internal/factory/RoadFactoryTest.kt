@@ -44,8 +44,9 @@ class RoadFactoryTest {
 
     private fun createNavigationStatus(): NavigationStatus = mockk {
         every { roads } returns listOf(
-            com.mapbox.navigator.Road(
+            com.mapbox.navigator.RoadName(
                 "roadName1",
+                "en",
                 "legacyUrl1",
                 com.mapbox.navigator.Shield(
                     "designUrl",
@@ -54,8 +55,9 @@ class RoadFactoryTest {
                     "color"
                 )
             ),
-            com.mapbox.navigator.Road(
+            com.mapbox.navigator.RoadName(
                 "roadName2",
+                "en",
                 null,
                 null
             )
