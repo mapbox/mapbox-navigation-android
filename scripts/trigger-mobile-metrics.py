@@ -2,14 +2,12 @@
 
 # Implements https://circleci.com/docs/2.0/api-job-trigger/
 
-import json
 import os
+import json
+import requests
 import sys
 
-import requests
-
-
-def trigger_workflow(token, commit, publish):
+def TriggerWorkflow(token, commit, publish):
     url = "https://circleci.com/api/v2/project/github/mapbox/mobile-metrics/pipeline"
 
     headers = {
@@ -19,9 +17,9 @@ def trigger_workflow(token, commit, publish):
 
     data = {
         "parameters": {
-            "run_android_navigation_benchmark": publish,
-            "mapbox_slug": "mapbox/mapbox-navigation-android",
-            "mapbox_hash": commit
+          "run_android_navigation_benchmark": publish,
+          "mapbox_slug": "mapbox/mapbox-navigation-android",
+          "mapbox_hash": commit
         }
     }
 
@@ -31,14 +29,13 @@ def trigger_workflow(token, commit, publish):
     response = requests.post(url, auth=(token, ""), headers=headers, json=data)
 
     if response.status_code != 201 and response.status_code != 200:
-        print("Error triggering the CircleCI: %s." % response.json()["message"])
-        sys.exit(1)
+      print("Error triggering the CircleCI: %s." % response.json()["message"])
+      sys.exit(1)
     else:
-        response_dict = json.loads(response.text)
-        print("Started run_android_navigation_benchmark: %s" % response_dict)
+      response_dict = json.loads(response.text)
+      print("Started run_android_navigation_benchmark: %s" % response_dict)
 
-
-def trigger_job(token, commit, job):
+def TriggerJob(token, commit, job):
     url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master"
 
     headers = {
@@ -48,42 +45,43 @@ def trigger_job(token, commit, job):
 
     data = {
         "build_parameters": {
-            "CIRCLE_JOB": job,
-            "BENCHMARK_COMMIT": commit
+          "CIRCLE_JOB": job,
+          "BENCHMARK_COMMIT": commit
         }
     }
 
     response = requests.post(url, auth=(token, ""), headers=headers, json=data)
 
     if response.status_code != 201 and response.status_code != 200:
-        print("Error triggering the CircleCI: %s." % response.json()["message"])
-        sys.exit(1)
+      print("Error triggering the CircleCI: %s." % response.json()["message"])
+      sys.exit(1)
     else:
-        response_dict = json.loads(response.text)
-        build_url = response_dict['build_url']
-        print("Started %s: %s" % (job, build_url))
+      response_dict = json.loads(response.text)
+      build_url = response_dict['build_url']
+      print("Started %s: %s" % (job, build_url))
 
+def Main():
+  token = os.getenv("MOBILE_METRICS_TOKEN")
+  commit = os.getenv("CIRCLE_SHA1")
+  
+  if token is None:
+    print("Error triggering because MOBILE_METRICS_TOKEN is not set")
+    sys.exit(1)
 
-def main():
-    token = os.getenv("MOBILE_METRICS_TOKEN")
-    commit = os.getenv("CIRCLE_SHA1")
+  # Publish results that have been committed to the main branch.
+  # Development runs can be found in CircleCI after manually triggered.
+  publishResults = os.getenv("CIRCLE_BRANCH") == "main"
+  TriggerWorkflow(token, commit, publishResults)
 
-    if token is None:
-        print("Error triggering because MOBILE_METRICS_TOKEN is not set")
-        sys.exit(1)
+  if publishResults:
+    TriggerJob(token, commit, "android-navigation-benchmark")
+    TriggerJob(token, commit, "android-navigation-code-coverage")
+    TriggerJob(token, commit, "android-navigation-binary-size")
+  else:
+    TriggerJob(token, commit, "android-navigation-code-coverage-ci")
+    TriggerJob(token, commit, "android-navigation-binary-size-ci")
 
-    # Publish results that have been committed to the main branch.
-    # Development runs can be found in CircleCI after manually triggered.
-    publish_results = os.getenv("CIRCLE_BRANCH") == "main"
-
-    trigger_workflow(token, commit, publish_results)
-
-    if not publish_results:
-        trigger_job(token, commit, "android-navigation-code-coverage-ci")
-        trigger_job(token, commit, "android-navigation-binary-size-ci")
-
-    return 0
-
+  return 0
 
 if __name__ == "__main__":
-    main()
+    Main()
