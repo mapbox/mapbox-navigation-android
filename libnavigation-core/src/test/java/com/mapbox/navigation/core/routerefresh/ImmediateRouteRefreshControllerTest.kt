@@ -1,88 +1,128 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.LoggerFrontend
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 class ImmediateRouteRefreshControllerTest {
+
+    private val logger = mockk<LoggerFrontend>(relaxed = true)
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule(logger)
 
     private val routeRefresherExecutor = mockk<RouteRefresherExecutor>(relaxed = true)
     private val stateHolder = mockk<RouteRefreshStateHolder>(relaxed = true)
     private val listener = mockk<RouteRefresherListener>(relaxed = true)
-    private val clientCallback = mockk<(RouteRefresherResult) -> Unit>(relaxed = true)
+    private val clientCallback =
+        mockk<(Expected<String, RouteRefresherResult>) -> Unit>(relaxed = true)
     private val routes = listOf<NavigationRoute>(mockk())
 
     private val sut = ImmediateRouteRefreshController(
         routeRefresherExecutor,
         stateHolder,
+        coroutineRule.coroutineScope,
         listener
     )
 
-    @Test
-    fun requestRoutesRefreshWithEmptyRoutes() {
+    @Test(expected = IllegalArgumentException::class)
+    fun requestRoutesRefreshWithEmptyRoutes() = coroutineRule.runBlockingTest {
         sut.requestRoutesRefresh(emptyList(), clientCallback)
-
-        verify(exactly = 0) {
-            clientCallback(any())
-            routeRefresherExecutor.postRoutesToRefresh(any(), any())
-        }
     }
 
     @Test
-    fun requestRoutesRefreshPostsRefreshRequest() {
+    fun requestRoutesRefreshPostsRefreshRequest() = coroutineRule.runBlockingTest {
         sut.requestRoutesRefresh(routes, clientCallback)
 
-        verify(exactly = 1) { routeRefresherExecutor.postRoutesToRefresh(routes, any()) }
+        coVerify(exactly = 1) { routeRefresherExecutor.executeRoutesRefresh(routes, any()) }
     }
 
     @Test
-    fun routesRefreshStarted() {
+    fun routesRefreshStarted() = coroutineRule.runBlockingTest {
         sut.requestRoutesRefresh(routes, clientCallback)
-        val callback = interceptCallback()
+        val startCallback = interceptStartCallback()
 
-        callback.onStarted()
+        startCallback()
 
         verify(exactly = 1) { stateHolder.onStarted() }
     }
 
     @Test
-    fun routesRefreshFinishedSuccessfully() {
-        sut.requestRoutesRefresh(routes, clientCallback)
-        val callback = interceptCallback()
+    fun routesRefreshFinishedSuccessfully() = coroutineRule.runBlockingTest {
         val result = RouteRefresherResult(
             true,
             mockk()
         )
+        coEvery {
+            routeRefresherExecutor.executeRoutesRefresh(any(), any())
+        } returns ExpectedFactory.createValue(result)
 
-        callback.onResult(result)
+        sut.requestRoutesRefresh(routes, clientCallback)
 
         verify(exactly = 1) { stateHolder.onSuccess() }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
-        verify(exactly = 1) { clientCallback(result) }
+        verify(exactly = 1) { clientCallback(match { it.value == result }) }
     }
 
     @Test
-    fun routesRefreshFinishedWithFailure() {
-        sut.requestRoutesRefresh(routes, clientCallback)
-        val callback = interceptCallback()
+    fun routesRefreshFinishedWithFailure() = coroutineRule.runBlockingTest {
         val result = RouteRefresherResult(
             false,
             mockk()
         )
+        coEvery {
+            routeRefresherExecutor.executeRoutesRefresh(any(), any())
+        } returns ExpectedFactory.createValue(result)
 
-        callback.onResult(result)
+        sut.requestRoutesRefresh(routes, clientCallback)
 
         verify(exactly = 1) { stateHolder.onFailure(null) }
-        verify(exactly = 1) { clientCallback(result) }
+        verify(exactly = 1) { clientCallback(match { it.value == result }) }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
     }
 
-    private fun interceptCallback(): RouteRefresherProgressCallback {
-        val callbacks = mutableListOf<RouteRefresherProgressCallback>()
-        verify { routeRefresherExecutor.postRoutesToRefresh(any(), capture(callbacks)) }
+    @Test
+    fun routesRefreshFinishedWithError() = coroutineRule.runBlockingTest {
+        val error: Expected<String, RouteRefresherResult> =
+            ExpectedFactory.createError("Some error")
+        coEvery {
+            routeRefresherExecutor.executeRoutesRefresh(any(), any())
+        } returns error
+
+        sut.requestRoutesRefresh(routes, clientCallback)
+
+        verify(exactly = 0) {
+            stateHolder.onFailure(any())
+            stateHolder.onSuccess()
+            listener.onRoutesRefreshed(any())
+        }
+        verify(exactly = 1) { clientCallback.invoke(error) }
+        verify(exactly = 1) {
+            logger.logW(
+                "Route refresh on-demand error: Some error",
+                "RouteRefreshController"
+            )
+        }
+    }
+
+    private fun interceptStartCallback(): () -> Unit {
+        val callbacks = mutableListOf<() -> Unit>()
+        coVerify { routeRefresherExecutor.executeRoutesRefresh(any(), capture(callbacks)) }
         return callbacks.last()
     }
 }

@@ -1,36 +1,30 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.route.NavigationRoute
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-
-internal interface RouteRefresherProgressCallback {
-
-    fun onStarted()
-
-    fun onResult(routeRefresherResult: RouteRefresherResult)
-}
 
 internal class RouteRefresherExecutor(
     private val routeRefresher: RouteRefresher,
-    private val scope: CoroutineScope,
     private val timeout: Long,
 ) {
 
     private var hasCurrentRequest = false
 
-    fun postRoutesToRefresh(
+    suspend fun executeRoutesRefresh(
         routes: List<NavigationRoute>,
-        callback: RouteRefresherProgressCallback
-    ) {
-        scope.launch {
-            if (!hasCurrentRequest) {
-                hasCurrentRequest = true
-                callback.onStarted()
-                val result = routeRefresher.refresh(routes, timeout)
-                callback.onResult(result)
+        startCallback: () -> Unit
+    ): Expected<String, RouteRefresherResult> {
+        if (!hasCurrentRequest) {
+            hasCurrentRequest = true
+            startCallback()
+            try {
+                return ExpectedFactory.createValue(routeRefresher.refresh(routes, timeout))
+            } finally {
                 hasCurrentRequest = false
             }
+        } else {
+            return ExpectedFactory.createError("Skipping request as another one is in progress.")
         }
     }
 }

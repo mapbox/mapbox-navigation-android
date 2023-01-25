@@ -253,6 +253,76 @@ class RouteRefreshStateHolderTest {
     }
 
     @Test
+    fun `null to cleared_expired`() {
+        sut.onClearedExpired()
+
+        verify(exactly = 1) {
+            RouteRefreshStateChanger.canChange(
+                null,
+                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
+            )
+        }
+        verify(exactly = 1) {
+            observer.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED)
+            )
+        }
+    }
+
+    @Test
+    fun `started to cleared_expired can change`() {
+        sut.onStarted()
+        clearAllMocks(answers = false)
+
+        sut.onClearedExpired()
+
+        verify(exactly = 1) {
+            RouteRefreshStateChanger.canChange(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
+            )
+        }
+        verify(exactly = 1) {
+            observer.onNewState(
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED)
+            )
+        }
+    }
+
+    @Test
+    fun `started to cleared_expired cannot change`() {
+        every {
+            RouteRefreshStateChanger.canChange(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
+            )
+        } returns false
+        sut.onStarted()
+        clearAllMocks(answers = false)
+
+        sut.onClearedExpired()
+
+        verify(exactly = 1) {
+            RouteRefreshStateChanger.canChange(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
+            )
+        }
+        verify(exactly = 0) { observer.onNewState(any()) }
+    }
+
+    @Test
+    fun `cleared_expired to cleared_expired`() {
+        sut.onClearedExpired()
+        clearAllMocks(answers = false)
+
+        sut.onClearedExpired()
+
+        verify(exactly = 0) { RouteRefreshStateChanger.canChange(any(), any()) }
+        verify(exactly = 0) { observer.onNewState(any()) }
+    }
+
+    @Test
     fun `null to cancelled`() {
         sut.onCancel()
 

@@ -21,7 +21,7 @@ internal class RoutesProgressDataProvider(
     /**
      * Retrieved progress data for passed routes.
      *
-     * @throws IllegalArgumentException if routes re empty
+     * @throws IllegalArgumentException if routes are empty
      */
     @Throws(IllegalArgumentException::class)
     suspend fun getRoutesProgressData(

@@ -23,8 +23,9 @@ class RouteRefreshStateChangerTest(
             val result = listOf<Array<Any?>>(
                 arrayOf(null, null, false),
                 arrayOf(null, RouteRefreshExtra.REFRESH_STATE_STARTED, true),
-                arrayOf(null, RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, true),
+                arrayOf(null, RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, false),
                 arrayOf(null, RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS, false),
+                arrayOf(null, RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED, false),
                 arrayOf(null, RouteRefreshExtra.REFRESH_STATE_CANCELED, false),
                 arrayOf(RouteRefreshExtra.REFRESH_STATE_STARTED, null, true),
                 arrayOf(
@@ -41,6 +42,11 @@ class RouteRefreshStateChangerTest(
                     RouteRefreshExtra.REFRESH_STATE_STARTED,
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
                     true
+                ),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_STARTED,
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    false
                 ),
                 arrayOf(
                     RouteRefreshExtra.REFRESH_STATE_STARTED,
@@ -65,6 +71,11 @@ class RouteRefreshStateChangerTest(
                 ),
                 arrayOf(
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    true
+                ),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
                     RouteRefreshExtra.REFRESH_STATE_CANCELED,
                     false
                 ),
@@ -82,6 +93,11 @@ class RouteRefreshStateChangerTest(
                 arrayOf(
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+                    false
+                ),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
                     false
                 ),
                 arrayOf(
@@ -107,6 +123,37 @@ class RouteRefreshStateChangerTest(
                 ),
                 arrayOf(
                     RouteRefreshExtra.REFRESH_STATE_CANCELED,
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    false
+                ),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_CANCELED,
+                    RouteRefreshExtra.REFRESH_STATE_CANCELED,
+                    false
+                ),
+                arrayOf(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED, null, true),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    RouteRefreshExtra.REFRESH_STATE_STARTED,
+                    true
+                ),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                    false
+                ),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+                    false
+                ),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    false
+                ),
+                arrayOf(
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
                     RouteRefreshExtra.REFRESH_STATE_CANCELED,
                     false
                 ),

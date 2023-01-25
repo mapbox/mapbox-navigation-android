@@ -1,15 +1,26 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteRefreshControllerImplTest {
+
+    private val logger = mockk<LoggerFrontend>(relaxed = true)
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule(logger)
 
     private val plannedRouteRefreshController = mockk<PlannedRouteRefreshController>(relaxed = true)
     private val immediateRouteRefreshController =
@@ -117,7 +128,7 @@ class RouteRefreshControllerImplTest {
     @Test
     fun requestImmediateRouteRefreshWithNonEmptySuccess() {
         val routes = listOf<NavigationRoute>(mockk())
-        val callback = slot<(RouteRefresherResult) -> Unit>()
+        val callback = slot<(Expected<String, RouteRefresherResult>) -> Unit>()
         every { plannedRouteRefreshController.routesToRefresh } returns routes
 
         sut.requestImmediateRouteRefresh()
@@ -125,7 +136,7 @@ class RouteRefreshControllerImplTest {
         verify(exactly = 1) {
             immediateRouteRefreshController.requestRoutesRefresh(routes, capture(callback))
         }
-        callback.captured(RouteRefresherResult(true, mockk()))
+        callback.captured(ExpectedFactory.createValue(RouteRefresherResult(true, mockk())))
         verify(exactly = 0) {
             plannedRouteRefreshController.resume()
         }
@@ -134,7 +145,7 @@ class RouteRefreshControllerImplTest {
     @Test
     fun requestImmediateRouteRefreshWithNonEmptyFailure() {
         val routes = listOf<NavigationRoute>(mockk())
-        val callback = slot<(RouteRefresherResult) -> Unit>()
+        val callback = slot<(Expected<String, RouteRefresherResult>) -> Unit>()
         every { plannedRouteRefreshController.routesToRefresh } returns routes
 
         sut.requestImmediateRouteRefresh()
@@ -142,8 +153,25 @@ class RouteRefreshControllerImplTest {
         verify(exactly = 1) {
             immediateRouteRefreshController.requestRoutesRefresh(routes, capture(callback))
         }
-        callback.captured(RouteRefresherResult(false, mockk()))
+        callback.captured(ExpectedFactory.createValue(RouteRefresherResult(false, mockk())))
         verify(exactly = 1) {
+            plannedRouteRefreshController.resume()
+        }
+    }
+
+    @Test
+    fun requestImmediateRouteRefreshWithNonEmptyError() {
+        val routes = listOf<NavigationRoute>(mockk())
+        val callback = slot<(Expected<String, RouteRefresherResult>) -> Unit>()
+        every { plannedRouteRefreshController.routesToRefresh } returns routes
+
+        sut.requestImmediateRouteRefresh()
+
+        verify(exactly = 1) {
+            immediateRouteRefreshController.requestRoutesRefresh(routes, capture(callback))
+        }
+        callback.captured(ExpectedFactory.createError("error"))
+        verify(exactly = 0) {
             plannedRouteRefreshController.resume()
         }
     }
@@ -158,6 +186,13 @@ class RouteRefreshControllerImplTest {
             plannedRouteRefreshController.pause()
             immediateRouteRefreshController.requestRoutesRefresh(any(), any())
             resultProcessor.reset()
+        }
+        verifyOrder {
+            stateHolder.onStarted()
+            stateHolder.onFailure("No routes to refresh")
+        }
+        verify(exactly = 1) {
+            logger.logI("No routes to refresh", "RouteRefreshController")
         }
     }
 

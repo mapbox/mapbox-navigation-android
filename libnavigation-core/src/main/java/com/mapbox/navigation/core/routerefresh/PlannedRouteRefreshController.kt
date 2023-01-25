@@ -5,6 +5,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -29,7 +30,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         stateHolder,
         listener,
         CancellableHandler(scope),
-        RetryRouteRefreshStrategy(maxRetryCount = MAX_RETRY_COUNT)
+        RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT)
     )
 
     private var paused = false
@@ -40,7 +41,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         cancellableHandler.cancelAll()
         routesToRefresh = null
         if (routes.isEmpty()) {
-            logI("Routes are empty", RouteRefreshLog.LOG_CATEGORY)
+            logI("Routes are empty, nothing to refresh", RouteRefreshLog.LOG_CATEGORY)
             stateHolder.reset()
             return
         }
@@ -59,6 +60,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                 )
             val logMessage = "No routes which could be refreshed. $message"
             logI(logMessage, RouteRefreshLog.LOG_CATEGORY)
+            stateHolder.onStarted()
             stateHolder.onFailure(logMessage)
             stateHolder.reset()
         }
@@ -90,10 +92,13 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     }
 
     private fun scheduleUpdateRetry(routes: List<NavigationRoute>, shouldNotifyOnStart: Boolean) {
-        postAttempt { executePlannedRefresh(routes, shouldNotifyOnStart = shouldNotifyOnStart) }
+        postAttempt {
+            retryStrategy.onNextAttempt()
+            executePlannedRefresh(routes, shouldNotifyOnStart = shouldNotifyOnStart)
+        }
     }
 
-    private fun postAttempt(attemptBlock: () -> Unit) {
+    private fun postAttempt(attemptBlock: suspend () -> Unit) {
         cancellableHandler.postDelayed(
             timeout = routeRefreshOptions.intervalMillis,
             block = attemptBlock,
@@ -101,44 +106,35 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         )
     }
 
-    private fun executePlannedRefresh(
+    private suspend fun executePlannedRefresh(
         routes: List<NavigationRoute>,
         shouldNotifyOnStart: Boolean
     ) {
-        routeRefresherExecutor.postRoutesToRefresh(
+        val routeRefresherResult = routeRefresherExecutor.executeRoutesRefresh(
             routes,
-            createCallback(routes, shouldNotifyOnStart)
-        )
-    }
-
-    private fun createCallback(
-        routes: List<NavigationRoute>,
-        shouldNotifyOnStart: Boolean
-    ): RouteRefresherProgressCallback {
-        return object : RouteRefresherProgressCallback {
-
-            override fun onStarted() {
+            startCallback = {
                 if (shouldNotifyOnStart) {
                     stateHolder.onStarted()
                 }
             }
-
-            override fun onResult(routeRefresherResult: RouteRefresherResult) {
-                retryStrategy.onNextAttempt()
-                if (routeRefresherResult.success) {
+        )
+        routeRefresherResult.fold(
+            { logW("Planned route refresh error: $it", RouteRefreshLog.LOG_CATEGORY) },
+            {
+                if (it.success) {
                     stateHolder.onSuccess()
-                    listener.onRoutesRefreshed(routeRefresherResult)
+                    listener.onRoutesRefreshed(it)
                 } else {
                     if (retryStrategy.shouldRetry()) {
                         scheduleUpdateRetry(routes, shouldNotifyOnStart = false)
                     } else {
                         stateHolder.onFailure(null)
-                        listener.onRoutesRefreshed(routeRefresherResult)
+                        listener.onRoutesRefreshed(it)
                         scheduleNewUpdate(routes)
                     }
                 }
             }
-        }
+        )
     }
 
     companion object {

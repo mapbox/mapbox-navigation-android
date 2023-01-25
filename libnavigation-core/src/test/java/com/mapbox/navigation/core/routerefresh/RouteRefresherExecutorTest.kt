@@ -5,10 +5,12 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
@@ -22,27 +24,25 @@ class RouteRefresherExecutorTest {
         coEvery { refresh(any(), any()) } returns routeRefresherResult
     }
     private val timeout = 100L
-    private val sut = RouteRefresherExecutor(routeRefresher, coroutineRule.coroutineScope, timeout)
+    private val sut = RouteRefresherExecutor(routeRefresher, timeout)
     private val routes = listOf<NavigationRoute>(mockk(), mockk())
-    private val callback = mockk<RouteRefresherProgressCallback>(relaxed = true)
+    private val startCallback = mockk<() -> Unit>(relaxed = true)
 
     @Test
-    fun postRoutesToRefresh() = coroutineRule.runBlockingTest {
-        sut.postRoutesToRefresh(routes, callback)
+    fun executeRoutesRefresh() = coroutineRule.runBlockingTest {
+        val actual = sut.executeRoutesRefresh(routes, startCallback)
 
-        coVerifyOrder {
-            callback.onStarted()
-            callback.onResult(routeRefresherResult)
-        }
         coVerify(exactly = 1) {
+            startCallback.invoke()
             routeRefresher.refresh(routes, timeout)
         }
+        assertEquals(routeRefresherResult, actual.value)
     }
 
     @Test
     fun twoRequestsAreNotExecutedSimultaneously() = coroutineRule.runBlockingTest {
         val routes2 = listOf<NavigationRoute>(mockk(), mockk(), mockk())
-        val callback2 = mockk<RouteRefresherProgressCallback>(relaxed = true)
+        val startCallback2 = mockk<() -> Unit>(relaxed = true)
         val routeRefresherResult2 = RouteRefresherResult(false, mockk())
 
         coEvery { routeRefresher.refresh(routes, any()) } coAnswers {
@@ -51,26 +51,34 @@ class RouteRefresherExecutorTest {
         }
         coEvery { routeRefresher.refresh(routes2, any()) } returns routeRefresherResult2
 
-        sut.postRoutesToRefresh(routes, callback)
+        val result1 = async {
+            sut.executeRoutesRefresh(routes, startCallback)
+        }
 
-        coVerify(exactly = 1) { callback.onStarted() }
-        coVerify(exactly = 0) { callback.onResult(any()) }
+        coVerify(exactly = 1) { startCallback() }
         clearAllMocks(answers = false)
 
-        sut.postRoutesToRefresh(routes2, callback2)
-
-        coVerify(exactly = 0) { callback.onResult(any()) }
-        coVerify(exactly = 0) { callback2.onStarted() }
-        coVerify(exactly = 0) { callback2.onResult(any()) }
-
-        coroutineRule.testDispatcher.advanceTimeBy(10000)
-
-        coVerify {
-            callback.onResult(routeRefresherResult)
+        val result2 = async {
+            sut.executeRoutesRefresh(routes2, startCallback2)
         }
-        coVerify(exactly = 0) {
-            callback2.onStarted()
-            callback2.onResult(any())
+        assertEquals("Skipping request as another one is in progress.", result2.await().error)
+
+        assertEquals(routeRefresherResult, result1.await().value)
+    }
+
+    @Test
+    fun secondRequestIsExecutedWhenTheFirstOneIsCancelled() = coroutineRule.runBlockingTest {
+        coEvery { routeRefresher.refresh(routes, any()) } coAnswers {
+            delay(1000)
+            routeRefresherResult
         }
+        val job1 = launch {
+            sut.executeRoutesRefresh(routes, startCallback)
+        }
+        job1.cancel()
+
+        val actual = sut.executeRoutesRefresh(routes, startCallback)
+
+        assertEquals(routeRefresherResult, actual.value)
     }
 }

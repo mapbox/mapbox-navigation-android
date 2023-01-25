@@ -86,7 +86,13 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
 
-        assertEquals(emptyList<String>(), observer.getStatesSnapshot())
+        assertEquals(
+            listOf(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+            ),
+            observer.getStatesSnapshot()
+        )
     }
 
     @Test
@@ -114,7 +120,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         assertEquals(
             listOf(
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
             ),
             observer.getStatesSnapshot()
         )
@@ -140,7 +146,10 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         delay(2000) // refresh interval + accuracy
 
         assertEquals(
-            listOf(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED),
+            listOf(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+            ),
             observer.getStatesSnapshot()
         )
     }
@@ -265,6 +274,7 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
             listOf(
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS
             ),

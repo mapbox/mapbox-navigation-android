@@ -2,9 +2,13 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import org.junit.Rule
 import org.junit.Test
 
@@ -14,16 +18,17 @@ class CancellableHandlerTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val runnable = mockk<Runnable>(relaxed = true)
+    private val runnable = mockk<suspend () -> Unit>(relaxed = true)
     private val cancellation = mockk<() -> Unit>(relaxed = true)
-    private val handler = CancellableHandler(coroutineRule.coroutineScope)
+    private val testScope = coroutineRule.createTestScope()
+    private val handler = CancellableHandler(testScope)
 
     @Test
     fun postExecutesWithZeroTimeout() = coroutineRule.runBlockingTest {
         handler.postDelayed(0, runnable, cancellation)
 
-        verify(exactly = 1) {
-            runnable.run()
+        coVerify(exactly = 1) {
+            runnable()
         }
         verify(exactly = 0) {
             cancellation.invoke()
@@ -34,8 +39,8 @@ class CancellableHandlerTest {
     fun postExecutesWithNegativeTimeout() = coroutineRule.runBlockingTest {
         handler.postDelayed(-10, runnable, cancellation)
 
-        verify(exactly = 1) {
-            runnable.run()
+        coVerify(exactly = 1) {
+            runnable()
         }
         verify(exactly = 0) {
             cancellation.invoke()
@@ -48,13 +53,13 @@ class CancellableHandlerTest {
 
         handler.postDelayed(timeout, runnable, cancellation)
 
-        verify(exactly = 0) {
-            runnable.run()
+        coVerify(exactly = 0) {
+            runnable()
             cancellation.invoke()
         }
         coroutineRule.testDispatcher.advanceTimeBy(timeout)
-        verify(exactly = 1) {
-            runnable.run()
+        coVerify(exactly = 1) {
+            runnable()
         }
         verify(exactly = 0) {
             cancellation.invoke()
@@ -97,6 +102,32 @@ class CancellableHandlerTest {
     }
 
     @Test
+    fun cancelScope_noJobs() = coroutineRule.runBlockingTest {
+        testScope.cancel()
+    }
+
+    @Test
+    fun cancelScope_hasRunningJob() = coroutineRule.runBlockingTest {
+        coEvery { runnable() } coAnswers { delay(1000) }
+        handler.postDelayed(0, runnable, cancellation)
+
+        testScope.cancel()
+
+        coVerify(exactly = 1) { cancellation() }
+    }
+
+    @Test
+    fun cancelScope_hasCompletedJob() = coroutineRule.runBlockingTest {
+        coEvery { runnable() } coAnswers { delay(1000) }
+        handler.postDelayed(0, runnable, cancellation)
+        coroutineRule.testDispatcher.advanceTimeBy(1000)
+
+        testScope.cancel()
+
+        coVerify(exactly = 0) { cancellation() }
+    }
+
+    @Test
     fun cancelAll_noJobs() = coroutineRule.runBlockingTest {
         handler.cancelAll()
     }
@@ -111,14 +142,14 @@ class CancellableHandlerTest {
             cancellation.invoke()
         }
         coroutineRule.testDispatcher.advanceTimeBy(1000)
-        verify(exactly = 0) {
-            runnable.run()
+        coVerify(exactly = 0) {
+            runnable()
         }
     }
 
     @Test
     fun cancelAll_multipleJobs() = coroutineRule.runBlockingTest {
-        val runnable2 = mockk<Runnable>(relaxed = true)
+        val runnable2 = mockk<suspend () -> Unit>(relaxed = true)
         val cancellation2 = mockk<() -> Unit>(relaxed = true)
         handler.postDelayed(1000, runnable, cancellation)
         handler.postDelayed(500, runnable2, cancellation2)
@@ -140,7 +171,7 @@ class CancellableHandlerTest {
         handler.postDelayed(1000, runnable, cancellation)
         coroutineRule.testDispatcher.advanceTimeBy(1000)
 
-        verify(exactly = 1) { runnable.run() }
+        coVerify(exactly = 1) { runnable() }
         verify(exactly = 0) { cancellation.invoke() }
     }
 }

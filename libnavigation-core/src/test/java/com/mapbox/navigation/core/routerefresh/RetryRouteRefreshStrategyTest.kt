@@ -10,14 +10,7 @@ class RetryRouteRefreshStrategyTest {
     fun maxRetryCountIsZero() {
         val sut = RetryRouteRefreshStrategy(0)
 
-        assertTrue(sut.shouldRetry())
-
-        sut.onNextAttempt()
         assertFalse(sut.shouldRetry())
-
-        sut.reset()
-
-        assertTrue(sut.shouldRetry())
 
         sut.onNextAttempt()
         assertFalse(sut.shouldRetry())
@@ -36,9 +29,6 @@ class RetryRouteRefreshStrategyTest {
         assertTrue(sut.shouldRetry())
 
         sut.onNextAttempt()
-        assertTrue(sut.shouldRetry())
-
-        sut.onNextAttempt()
         assertFalse(sut.shouldRetry())
 
         sut.reset()
@@ -48,7 +38,7 @@ class RetryRouteRefreshStrategyTest {
 
     @Test
     fun shouldRetryDoesNotChangeState() {
-        val sut = RetryRouteRefreshStrategy(0)
+        val sut = RetryRouteRefreshStrategy(1)
 
         assertTrue(sut.shouldRetry())
         assertTrue(sut.shouldRetry())
@@ -61,9 +51,6 @@ class RetryRouteRefreshStrategyTest {
 
         sut.reset()
 
-        assertTrue(sut.shouldRetry())
-
-        sut.onNextAttempt()
         assertTrue(sut.shouldRetry())
 
         sut.onNextAttempt()

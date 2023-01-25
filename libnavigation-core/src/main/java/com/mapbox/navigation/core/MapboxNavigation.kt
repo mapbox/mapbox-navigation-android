@@ -396,7 +396,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     val experimental: com.mapbox.navigator.Experimental
         get() = navigator.experimental
 
-
     private var reachabilityObserverId: Long? = null
 
     private var latestLegIndex: Int? = null
@@ -1222,17 +1221,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         historyRecordingStateHandler.unregisterAllStateChangeObservers()
         historyRecordingStateHandler.unregisterAllCopilotSessionObservers()
         developerMetadataAggregator.unregisterAllObservers()
+        routeRefreshControllerImpl.destroy()
+        routesPreviewController.unregisterAllRoutesPreviewObservers()
         runInTelemetryContext { telemetry ->
             telemetry.destroy(this@MapboxNavigation)
         }
+        // first unregister all observers, then cancel the coroutines to avoid getting cancelled state
         threadController.cancelAllNonUICoroutines()
         threadController.cancelAllUICoroutines()
         ifNonNull(reachabilityObserverId) {
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
-        routeRefreshControllerImpl.destroy()
-        routesPreviewController.unregisterAllRoutesPreviewObservers()
 
         isDestroyed = true
         hasInstance = false

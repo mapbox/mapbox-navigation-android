@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 internal class RetryRouteRefreshStrategy(
-    private val maxRetryCount: Int
+    private val maxAttemptsCount: Int
 ) {
 
     private var attemptNumber = 0
@@ -11,7 +11,7 @@ internal class RetryRouteRefreshStrategy(
     }
 
     fun shouldRetry(): Boolean {
-        return attemptNumber <= maxRetryCount
+        return attemptNumber < maxAttemptsCount
     }
 
     fun onNextAttempt() {

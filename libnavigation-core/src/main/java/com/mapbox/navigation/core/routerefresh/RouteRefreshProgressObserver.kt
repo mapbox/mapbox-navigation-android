@@ -8,5 +8,7 @@ internal interface RouteRefreshProgressObserver {
 
     fun onFailure(message: String?)
 
+    fun onClearedExpired()
+
     fun onCancel()
 }

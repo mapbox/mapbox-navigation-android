@@ -35,16 +35,16 @@ internal object RouteRefreshControllerProvider {
         )
         val routeRefresherExecutor = RouteRefresherExecutor(
             routeRefresher,
-            scope,
             routeRefreshOptions.intervalMillis
         )
         val stateHolder = RouteRefreshStateHolder()
         val refreshObserversManager = RefreshObserversManager()
         val routeRefresherResultProcessor = RouteRefresherResultProcessor(
+            stateHolder,
             refreshObserversManager,
             ExpiringDataRemover { Date() },
             Time.SystemImpl,
-            routeRefreshOptions.intervalMillis * (PlannedRouteRefreshController.MAX_RETRY_COUNT + 1)
+            routeRefreshOptions.intervalMillis * 3
         )
 
         val plannedRouteRefreshController = PlannedRouteRefreshController(
@@ -57,6 +57,7 @@ internal object RouteRefreshControllerProvider {
         val immediateRouteRefreshController = ImmediateRouteRefreshController(
             routeRefresherExecutor,
             stateHolder,
+            scope,
             routeRefresherResultProcessor
         )
         return RouteRefreshControllerImpl(

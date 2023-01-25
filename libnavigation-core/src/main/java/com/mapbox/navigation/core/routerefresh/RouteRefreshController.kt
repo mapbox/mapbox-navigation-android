@@ -9,7 +9,6 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 @ExperimentalPreviewMapboxNavigationAPI
 interface RouteRefreshController {
 
-
     /**
      * Immediately refresh current navigation routes.
      * Listen for refreshed routes using [RoutesObserver].

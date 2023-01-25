@@ -1,19 +1,25 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -21,10 +27,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 class PlannedRouteRefreshControllerTest {
 
     private val logger = mockk<LoggerFrontend>(relaxed = true)
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule(logger)
@@ -56,13 +65,13 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun startRoutesRefreshing_emptyRoutes() {
+    fun startRoutesRefreshing_emptyRoutes() = coroutineRule.runBlockingTest {
         sut.startRoutesRefreshing(emptyList())
 
         verify(exactly = 1) {
             cancellableHandler.cancelAll()
             stateHolder.reset()
-            logger.logI("Routes are empty", "RouteRefreshController")
+            logger.logI("Routes are empty, nothing to refresh", "RouteRefreshController")
         }
         verify(exactly = 0) {
             stateHolder.onFailure(any())
@@ -73,7 +82,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun startRoutesRefreshing_allRoutesAreInvalid() {
+    fun startRoutesRefreshing_allRoutesAreInvalid() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val validation1 = RouteRefreshValidator.RouteValidationResult.Invalid("some reason 1")
@@ -98,6 +107,7 @@ class PlannedRouteRefreshControllerTest {
             logger.logI(expectedLogMessage, "RouteRefreshController")
         }
         verifyOrder {
+            stateHolder.onStarted()
             stateHolder.onFailure(expectedLogMessage)
             stateHolder.reset()
         }
@@ -106,7 +116,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun startRoutesRefreshing_someRoutesAreInvalid() {
+    fun startRoutesRefreshing_someRoutesAreInvalid() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -128,7 +138,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun startRoutesRefreshing_allRoutesAreValid() {
+    fun startRoutesRefreshing_allRoutesAreValid() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -146,7 +156,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun startRoutesRefreshing_resetsRetryStrategy() {
+    fun startRoutesRefreshing_resetsRetryStrategy() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -160,7 +170,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun startRoutesRefreshing_postsCancellableTask() {
+    fun startRoutesRefreshing_postsCancellableTask() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -170,7 +180,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.startRoutesRefreshing(routes)
 
-        val attemptBlocks = mutableListOf<Runnable>()
+        val attemptBlocks = mutableListOf<suspend () -> Unit>()
         val cancellableBlocks = mutableListOf<() -> Unit>()
         verify(exactly = 1) {
             cancellableHandler.postDelayed(
@@ -181,12 +191,12 @@ class PlannedRouteRefreshControllerTest {
         }
         cancellableBlocks.last().invoke()
         verify { stateHolder.onCancel() }
-        attemptBlocks.last().run()
-        verify(exactly = 1) { executor.postRoutesToRefresh(routes, any()) }
+        attemptBlocks.last().invoke()
+        coVerify(exactly = 1) { executor.executeRoutesRefresh(routes, any()) }
     }
 
     @Test
-    fun startRoutesRefreshing_notifiesOnStart() {
+    fun startRoutesRefreshing_notifiesOnStart() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -203,13 +213,14 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun finishRequestIncrementsAttempt() {
+    fun retryIncrementsAttempt() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
         every {
             RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
+        every { retryStrategy.shouldRetry() } returns true
 
         sut.startRoutesRefreshing(routes)
         finishRequest(
@@ -219,11 +230,12 @@ class PlannedRouteRefreshControllerTest {
             )
         )
 
+        startRequest()
         verify(exactly = 1) { retryStrategy.onNextAttempt() }
     }
 
     @Test
-    fun finishRequestSuccessfully() {
+    fun finishRequestSuccessfully() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -243,7 +255,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun finishRequestUnsuccessfullyShouldRetry() {
+    fun finishRequestUnsuccessfullyShouldRetry() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -268,25 +280,26 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun finishRequestUnsuccessfullyShouldRetryDoesNotNotifyOnStart() {
-        val route1 = mockk<NavigationRoute>(relaxed = true)
-        val route2 = mockk<NavigationRoute>(relaxed = true)
-        val routes = listOf(route1, route2)
-        every {
-            RouteRefreshValidator.validateRoute(any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { retryStrategy.shouldRetry() } returns true
+    fun finishRequestUnsuccessfullyShouldRetryDoesNotNotifyOnStart() =
+        coroutineRule.runBlockingTest {
+            val route1 = mockk<NavigationRoute>(relaxed = true)
+            val route2 = mockk<NavigationRoute>(relaxed = true)
+            val routes = listOf(route1, route2)
+            every {
+                RouteRefreshValidator.validateRoute(any())
+            } returns RouteRefreshValidator.RouteValidationResult.Valid
+            every { retryStrategy.shouldRetry() } returns true
 
-        sut.startRoutesRefreshing(routes)
-        val result = RouteRefresherResult(false, mockk())
-        finishRequest(result)
-        startRequest()
+            sut.startRoutesRefreshing(routes)
+            val result = RouteRefresherResult(false, mockk())
+            finishRequest(result)
+            startRequest()
 
-        verify(exactly = 0) { stateHolder.onStarted() }
-    }
+            verify(exactly = 0) { stateHolder.onStarted() }
+        }
 
     @Test
-    fun finishRequestUnsuccessfullyShouldNotRetry() {
+    fun finishRequestUnsuccessfullyShouldNotRetry() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -311,7 +324,26 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun finishRequestUnsuccessfullyShouldNotRetryShouldNotifyOnStart() {
+    fun finishRequestUnsuccessfullyShouldNotRetryShouldNotifyOnStart() =
+        coroutineRule.runBlockingTest {
+            val route1 = mockk<NavigationRoute>(relaxed = true)
+            val route2 = mockk<NavigationRoute>(relaxed = true)
+            val routes = listOf(route1, route2)
+            every {
+                RouteRefreshValidator.validateRoute(any())
+            } returns RouteRefreshValidator.RouteValidationResult.Valid
+            every { retryStrategy.shouldRetry() } returns false
+
+            sut.startRoutesRefreshing(routes)
+            val result = RouteRefresherResult(false, mockk())
+            finishRequest(result)
+            startRequest()
+
+            verify(exactly = 1) { stateHolder.onStarted() }
+        }
+
+    @Test
+    fun finishRequestWithErrorIsIgnored() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -321,15 +353,24 @@ class PlannedRouteRefreshControllerTest {
         every { retryStrategy.shouldRetry() } returns false
 
         sut.startRoutesRefreshing(routes)
-        val result = RouteRefresherResult(false, mockk())
-        finishRequest(result)
-        startRequest()
+        clearMocks(retryStrategy, answers = false)
+        finishRequest(ExpectedFactory.createError("Some error"))
 
-        verify(exactly = 1) { stateHolder.onStarted() }
+        verify(exactly = 0) {
+            stateHolder.onSuccess()
+            stateHolder.onFailure(any())
+            listener.onRoutesRefreshed(any())
+            retryStrategy.shouldRetry()
+            retryStrategy.reset()
+            cancellableHandler.postDelayed(any(), any(), any())
+        }
+        verify(exactly = 1) {
+            logger.logW("Planned route refresh error: Some error", "RouteRefreshController")
+        }
     }
 
-    private fun startRequest() {
-        val attemptBlocks = mutableListOf<Runnable>()
+    private suspend fun startRequest() {
+        val attemptBlocks = mutableListOf<suspend () -> Unit>()
         verify(exactly = 1) {
             cancellableHandler.postDelayed(
                 any(),
@@ -337,14 +378,21 @@ class PlannedRouteRefreshControllerTest {
                 any()
             )
         }
-        attemptBlocks.last().run()
-        val progressCallbacks = mutableListOf<RouteRefresherProgressCallback>()
-        verify(exactly = 1) { executor.postRoutesToRefresh(any(), capture(progressCallbacks)) }
-        progressCallbacks.last().onStarted()
+        attemptBlocks.last().invoke()
+        val startCallbacks = mutableListOf<() -> Unit>()
+        coVerify(exactly = 1) { executor.executeRoutesRefresh(any(), capture(startCallbacks)) }
+        startCallbacks.last().invoke()
     }
 
-    private fun finishRequest(result: RouteRefresherResult) {
-        val attemptBlocks = mutableListOf<Runnable>()
+    private suspend fun finishRequest(result: RouteRefresherResult) {
+        finishRequest(ExpectedFactory.createValue(result))
+    }
+
+    private suspend fun finishRequest(result: Expected<String, RouteRefresherResult>) {
+        coEvery {
+            executor.executeRoutesRefresh(any(), any())
+        } returns result
+        val attemptBlocks = mutableListOf<suspend () -> Unit>()
         verify(exactly = 1) {
             cancellableHandler.postDelayed(
                 any(),
@@ -353,22 +401,19 @@ class PlannedRouteRefreshControllerTest {
             )
         }
         clearMocks(cancellableHandler, answers = false)
-        attemptBlocks.last().run()
-        val progressCallbacks = mutableListOf<RouteRefresherProgressCallback>()
-        verify(exactly = 1) { executor.postRoutesToRefresh(any(), capture(progressCallbacks)) }
+        attemptBlocks.last().invoke()
         clearMocks(executor, answers = false)
-        progressCallbacks.last().onResult(result)
     }
 
     @Test
-    fun pauseNotPaused() {
+    fun pauseNotPaused() = coroutineRule.runBlockingTest {
         sut.pause()
 
         verify(exactly = 1) { cancellableHandler.cancelAll() }
     }
 
     @Test
-    fun pausePaused() {
+    fun pausePaused() = coroutineRule.runBlockingTest {
         sut.pause()
         clearAllMocks(answers = false)
 
@@ -378,7 +423,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun pauseResumed() {
+    fun pauseResumed() = coroutineRule.runBlockingTest {
         sut.pause()
         sut.resume()
         clearAllMocks(answers = false)
@@ -389,7 +434,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumePausedNoRoutes() {
+    fun resumePausedNoRoutes() = coroutineRule.runBlockingTest {
         sut.pause()
         clearAllMocks(answers = false)
 
@@ -402,7 +447,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumePausedHasRoutesShouldNotRetry() {
+    fun resumePausedHasRoutesShouldNotRetry() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -420,7 +465,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumePausedHasRoutesShouldRetry() {
+    fun resumePausedHasRoutesShouldRetry() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -438,7 +483,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumeNotPausedHasRoutesShouldRetry() {
+    fun resumeNotPausedHasRoutesShouldRetry() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -455,7 +500,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumeResumedHasRoutesShouldRetry() {
+    fun resumeResumedHasRoutesShouldRetry() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -474,7 +519,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun resumePausedHasRoutesShouldRetryNotifiesOnStart() {
+    fun resumePausedHasRoutesShouldRetryNotifiesOnStart() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -493,7 +538,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun emptyRoutesAreNotRemembered() {
+    fun emptyRoutesAreNotRemembered() = coroutineRule.runBlockingTest {
         sut.startRoutesRefreshing(emptyList())
         sut.pause()
         clearAllMocks(answers = false)
@@ -507,7 +552,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun invalidRoutesAreNotRemembered() {
+    fun invalidRoutesAreNotRemembered() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val validation1 = RouteRefreshValidator.RouteValidationResult.Invalid("some reason 1")
@@ -537,7 +582,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun partiallyInvalidRoutesAreRemembered() {
+    fun partiallyInvalidRoutesAreRemembered() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -555,16 +600,16 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        val attemptBlocks = mutableListOf<Runnable>()
+        val attemptBlocks = mutableListOf<suspend () -> Unit>()
         verify(exactly = 1) {
             cancellableHandler.postDelayed(interval, capture(attemptBlocks), any())
         }
-        attemptBlocks.last().run()
-        verify(exactly = 1) { executor.postRoutesToRefresh(routes, any()) }
+        attemptBlocks.last().invoke()
+        coVerify(exactly = 1) { executor.executeRoutesRefresh(routes, any()) }
     }
 
     @Test
-    fun validRoutesAreRemembered() {
+    fun validRoutesAreRemembered() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -578,16 +623,16 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        val attemptBlocks = mutableListOf<Runnable>()
+        val attemptBlocks = mutableListOf<suspend () -> Unit>()
         verify(exactly = 1) {
             cancellableHandler.postDelayed(interval, capture(attemptBlocks), any())
         }
-        attemptBlocks.last().run()
-        verify(exactly = 1) { executor.postRoutesToRefresh(routes, any()) }
+        attemptBlocks.last().invoke()
+        coVerify(exactly = 1) { executor.executeRoutesRefresh(routes, any()) }
     }
 
     @Test
-    fun emptyRoutesResetOldValidRoutes() {
+    fun emptyRoutesResetOldValidRoutes() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val routes = listOf(route1, route2)
@@ -609,7 +654,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun invalidRoutesResetOldValidRoutes() {
+    fun invalidRoutesResetOldValidRoutes() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         every {
@@ -633,7 +678,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
-    fun partiallyValidRoutesResetOldValidRoutes() {
+    fun partiallyValidRoutesResetOldValidRoutes() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val route3 = mockk<NavigationRoute>(relaxed = true)
@@ -658,17 +703,17 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        val attemptBlocks = mutableListOf<Runnable>()
+        val attemptBlocks = mutableListOf<suspend () -> Unit>()
         verify(exactly = 1) {
             cancellableHandler.postDelayed(interval, capture(attemptBlocks), any())
         }
-        attemptBlocks.last().run()
-        verify(exactly = 1) { executor.postRoutesToRefresh(listOf(route3, route4), any()) }
+        attemptBlocks.last().invoke()
+        coVerify(exactly = 1) { executor.executeRoutesRefresh(listOf(route3, route4), any()) }
         assertEquals(listOf(route3, route4), sut.routesToRefresh)
     }
 
     @Test
-    fun validRoutesResetOldValidRoutes() {
+    fun validRoutesResetOldValidRoutes() = coroutineRule.runBlockingTest {
         val route1 = mockk<NavigationRoute>(relaxed = true)
         val route2 = mockk<NavigationRoute>(relaxed = true)
         val route3 = mockk<NavigationRoute>(relaxed = true)
@@ -684,12 +729,12 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        val attemptBlocks = mutableListOf<Runnable>()
+        val attemptBlocks = mutableListOf<suspend () -> Unit>()
         verify(exactly = 1) {
             cancellableHandler.postDelayed(interval, capture(attemptBlocks), any())
         }
-        attemptBlocks.last().run()
-        verify(exactly = 1) { executor.postRoutesToRefresh(listOf(route3, route4), any()) }
+        attemptBlocks.last().invoke()
+        coVerify(exactly = 1) { executor.executeRoutesRefresh(listOf(route3, route4), any()) }
         assertEquals(listOf(route3, route4), sut.routesToRefresh)
     }
 }

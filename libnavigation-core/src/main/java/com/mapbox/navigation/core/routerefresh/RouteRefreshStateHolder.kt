@@ -22,6 +22,10 @@ internal class RouteRefreshStateHolder : RouteRefreshProgressObserver {
         onNewState(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, message)
     }
 
+    override fun onClearedExpired() {
+        onNewState(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED)
+    }
+
     override fun onCancel() {
         onNewState(RouteRefreshExtra.REFRESH_STATE_CANCELED)
     }

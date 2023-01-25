@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.routerefresh
 
 import androidx.annotation.StringDef
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.route.RouteRefreshOptions
 
 /**
  * Extra data of route refresh
@@ -22,11 +21,17 @@ object RouteRefreshExtra {
     const val REFRESH_STATE_FINISHED_SUCCESS = "FINISHED_SUCCESS"
 
     /**
-     * The state becomes [REFRESH_STATE_FINISHED_FAILED] when a route refresh failed and the route
-     * is cleaned up of expired data, see [RouteRefreshOptions] for details.
-     * The state is triggered in case if every single route refresh of a set of the routes is failed.
+     * The state becomes [REFRESH_STATE_FINISHED_FAILED] when a route refresh failed after all
+     * the retry attempts (whose number may differ depending on refresh mode: planned or on-demand).
+     * The state is triggered in case refresh of every route from routes failed.
      */
     const val REFRESH_STATE_FINISHED_FAILED = "FINISHED_FAILED"
+
+    /**
+     * The state becomes [REFRESH_STATE_CLEARED_EXPIRED] when expired incidents and congestion
+     * annotations are removed from the route due to failure of a route refresh request.
+     */
+    const val REFRESH_STATE_CLEARED_EXPIRED = "CLEARED_EXPIRED"
 
     /**
      * The state becomes [REFRESH_STATE_CANCELED] when a route refresh canceled. It occurs
@@ -42,6 +47,7 @@ object RouteRefreshExtra {
         REFRESH_STATE_STARTED,
         REFRESH_STATE_FINISHED_SUCCESS,
         REFRESH_STATE_FINISHED_FAILED,
+        REFRESH_STATE_CLEARED_EXPIRED,
         REFRESH_STATE_CANCELED,
     )
     annotation class RouteRefreshState

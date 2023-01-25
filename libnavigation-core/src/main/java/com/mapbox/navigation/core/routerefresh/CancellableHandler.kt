@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.routerefresh
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -9,21 +11,25 @@ internal class CancellableHandler(
     private val scope: CoroutineScope
 ) {
 
-    private val jobs = linkedMapOf<Job, () -> Unit>()
+    private val jobs = linkedSetOf<Job>()
 
-    fun postDelayed(timeout: Long, block: Runnable, cancellationCallback: () -> Unit) {
-        val job = scope.launch {
-            delay(timeout)
-            block.run()
+    fun postDelayed(timeout: Long, block: suspend () -> Unit, cancellationCallback: () -> Unit) {
+        val job = scope.launch(Dispatchers.Main.immediate) {
+            try {
+                delay(timeout)
+                block()
+            } catch (ex: CancellationException) {
+                cancellationCallback()
+                throw ex
+            }
         }
-        jobs[job] = cancellationCallback
+        jobs.add(job)
         job.invokeOnCompletion { jobs.remove(job) }
     }
 
     fun cancelAll() {
-        HashMap(jobs).forEach {
-            it.value.invoke()
-            it.key.cancel()
+        HashSet(jobs).forEach {
+            it.cancel()
         }
     }
 }

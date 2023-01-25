@@ -8,7 +8,6 @@ internal object RouteRefreshStateChanger {
     private val allowedTransitions = mapOf(
         null to listOf(
             RouteRefreshExtra.REFRESH_STATE_STARTED,
-            RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
         ),
         RouteRefreshExtra.REFRESH_STATE_STARTED to listOf(
             RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
@@ -22,6 +21,7 @@ internal object RouteRefreshStateChanger {
             null,
         ),
         RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED to listOf(
+            RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
             RouteRefreshExtra.REFRESH_STATE_STARTED,
             null,
         ),
@@ -29,6 +29,10 @@ internal object RouteRefreshStateChanger {
             RouteRefreshExtra.REFRESH_STATE_STARTED,
             null
         ),
+        RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED to listOf(
+            RouteRefreshExtra.REFRESH_STATE_STARTED,
+            null,
+        )
     )
 
     fun canChange(

@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.utils.internal.logI
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteRefreshControllerImpl(
@@ -45,11 +46,14 @@ internal class RouteRefreshControllerImpl(
     override fun requestImmediateRouteRefresh() {
         val routes = plannedRouteRefreshController.routesToRefresh
         if (routes.isNullOrEmpty()) {
+            logI("No routes to refresh", RouteRefreshLog.LOG_CATEGORY)
+            stateHolder.onStarted()
+            stateHolder.onFailure("No routes to refresh")
             return
         }
         plannedRouteRefreshController.pause()
         immediateRouteRefreshController.requestRoutesRefresh(routes) {
-            if (!it.success) {
+            if (it.value?.success == false) {
                 plannedRouteRefreshController.resume()
             }
         }

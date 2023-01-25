@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
+import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.DynamicResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessfulResultOrThrowException
@@ -198,10 +199,32 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
 
         delay(7000) // 2 failed planned attempts + accuracy
-        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh() // fail and postpone next planned attempt
+        // fail and postpone next planned attempt
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         delay(2000)
-        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh() // dispatch new routes with REFRESH reason
+        // dispatch new routes with REFRESH reason
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
 
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .first()
+    }
+
+    @Test
+    fun route_refresh_on_demand_during_planned_request() = sdkTest {
+        val routeRefreshOptions = createRouteRefreshOptionsWithInvalidInterval(5000)
+        refreshHandler.jsonResponseModifier = DelayedResponseModifier(3000)
+        createMapboxNavigation(routeRefreshOptions)
+        val routeOptions = generateRouteOptions(twoCoordinates)
+        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+
+        delay(6000) // refresh interval + accuracy
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
             .first()
