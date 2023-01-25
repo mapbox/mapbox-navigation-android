@@ -1,6 +1,7 @@
 package com.mapbox.navigation.metrics
 
 import android.content.Context
+import android.os.Handler
 import com.google.gson.Gson
 import com.mapbox.bindgen.Value
 import com.mapbox.common.Event
@@ -66,7 +67,7 @@ object MapboxMetricsReporter : MetricsReporter {
      * Events priority. See [EventPriority]
      */
     @Volatile
-    var eventsPriority: EventPriority = EventPriority.QUEUED
+    var eventsPriority: EventPriority = EventPriority.IMMEDIATE
 
     /**
      * Initialize [EventsServiceInterface] and [TelemetryService] that need to send event to

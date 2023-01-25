@@ -156,7 +156,6 @@ import kotlinx.coroutines.sync.withLock
 import java.lang.reflect.Field
 import java.util.Locale
 
-private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
     "You need to provide an access token in NavigationOptions in order to use the default " +
         "Router."
@@ -554,7 +553,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             MapboxMetricsReporter.init(
                 navigationOptions.applicationContext,
                 token,
-                obtainUserAgent()
+                USER_AGENT,
             )
             MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
         }
@@ -2030,10 +2029,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun cancelReroute() {
         rerouteController?.interrupt()
-    }
-
-    private fun obtainUserAgent(): String {
-        return "$MAPBOX_NAVIGATION_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
     }
 
     private fun monitorNotificationActionButton(channel: ReceiveChannel<NotificationAction>) {
