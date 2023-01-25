@@ -14,7 +14,6 @@ import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
@@ -22,40 +21,21 @@ import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
 
-class UpcommingRouteObjectsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+class UpcomingRouteObjectsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
 
-    @get:Rule
-    val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
-
-
     private lateinit var mapboxNavigation: MapboxNavigation
 
-    private val routeWithIncident by lazy {
-        NavigationRoute.create(
-            directionsResponseJson = readRawFileText(activity, R.raw.route_witn_incident_one_leg),
-            routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/11.428011943347627,48.143406486859135;11.443258702449555,48.14554279886465?access_token=**&alternatives=true&annotations=closure,congestion_numeric,congestion,speed,duration,distance&geometries=polyline6&language=en&overview=full&steps=true",
-            routerOrigin = RouterOrigin.Offboard
-        ).first()
-    }
-    private val routeWithIncidentTwoLegs by lazy {
-        NavigationRoute.create(
-            directionsResponseJson = readRawFileText(activity, R.raw.route_witn_incident_two_legs),
-            routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/11.428011943347627,48.143406486859135;11.42945687746061,48.1436160028498;11.443258702449555,48.14554279886465?access_token=**&alternatives=true&annotations=closure,congestion_numeric,congestion,speed,duration,distance&geometries=polyline6&language=en&overview=full&steps=true",
-            routerOrigin = RouterOrigin.Offboard
-        ).first()
-    }
-
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
-        latitude = routeWithIncident.routeOptions.coordinatesList()[0].latitude()
-        longitude = routeWithIncident.routeOptions.coordinatesList()[0].longitude()
-        bearing = 190f
+        latitude = 48.143406486859135
+        longitude = 11.428011943347627
     }
 
     @Before
@@ -75,21 +55,45 @@ class UpcommingRouteObjectsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity:
     }
 
     @Test
-    fun routeRefreshesWorksAfterSettingsNewRoutes() = sdkTest {
+    @Ignore("waiting for the NN fix, see NAVAND-1108")
+    fun distanceToIncidentDoNotChangeAfterAddingNewWaypoint() = sdkTest {
+        val routeWithIncident = NavigationRoute.create(
+            directionsResponseJson = readRawFileText(activity, R.raw.route_witn_incident_one_leg),
+            routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+                "11.428011943347627,48.143406486859135;11.443258702449555,48.14554279886465" +
+                "?access_token=**&alternatives=true" +
+                "&annotations=closure,congestion_numeric,congestion,speed,duration,distance" +
+                "&geometries=polyline6&language=en&overview=full&steps=true",
+            routerOrigin = RouterOrigin.Offboard
+        )
+        val routeWithIncidentTwoLegs = NavigationRoute.create(
+            directionsResponseJson = readRawFileText(activity, R.raw.route_witn_incident_two_legs),
+            routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+                "11.428011943347627,48.143406486859135;11.42945687746061,48.1436160028498" +
+                ";11.443258702449555,48.14554279886465" +
+                "?access_token=**&alternatives=true" +
+                "&annotations=closure,congestion_numeric,congestion,speed,duration,distance" +
+                "&geometries=polyline6&language=en&overview=full&steps=true",
+            routerOrigin = RouterOrigin.Offboard
+        )
+        val incidentId = "6058002857835914"
+
         mapboxNavigation.startTripSession()
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(routeWithIncident))
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routeWithIncident)
         val upcomingIncidentForOneLeg = mapboxNavigation.routeProgressUpdates()
             .first { it.currentState == RouteProgressState.TRACKING }
             .upcomingRoadObjects
-            .first { it.roadObject.id == "6058002857835914" }
+            .first { it.roadObject.id == incidentId }
 
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(routeWithIncidentTwoLegs))
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routeWithIncidentTwoLegs)
         val upcomingIncidentForTwoLegsRoute = mapboxNavigation.routeProgressUpdates()
             .first { it.currentState == RouteProgressState.TRACKING }
             .upcomingRoadObjects
-            .first { it.roadObject.id == "6058002857835914" }
+            .first { it.roadObject.id == incidentId }
 
-        assertEquals(upcomingIncidentForOneLeg.distanceToStart, upcomingIncidentForTwoLegsRoute.distanceToStart)
+        assertEquals(
+            upcomingIncidentForOneLeg.distanceToStart,
+            upcomingIncidentForTwoLegsRoute.distanceToStart
+        )
     }
-
 }
