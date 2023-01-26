@@ -5,6 +5,9 @@ import com.mapbox.common.LoggingLevel
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.replay.history.ReplayHistorySession
+import com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions
+import com.mapbox.navigation.core.replay.route.ReplayRouteSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -19,6 +22,7 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -40,7 +44,21 @@ class MapboxTripStarterTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val sut = MapboxTripStarter()
+    private val replayRouteSession = mockk<ReplayRouteSession>(relaxed = true)
+    private var historyOptions = MutableStateFlow(ReplayHistorySessionOptions.Builder().build())
+    private val replayHistorySession = mockk<ReplayHistorySession>(relaxed = true) {
+        every { getOptions() } returns historyOptions
+        every { setOptions(any()) } answers {
+            historyOptions.value = firstArg()
+        }
+    }
+
+    private val sut = MapboxTripStarter(
+        mockk {
+            every { getReplayRouteSession() } returns replayRouteSession
+            every { getReplayHistorySession() } returns replayHistorySession
+        }
+    )
 
     @Before
     fun setup() {
@@ -121,18 +139,19 @@ class MapboxTripStarterTest {
     }
 
     @Test
-    fun `enableReplayRoute will startReplayTripSession without location permissions`() {
+    fun `enableReplayRoute will attach ReplayRouteSession without location permissions`() {
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
         val mapboxNavigation = mockMapboxNavigation()
         sut.enableReplayRoute()
         sut.onAttached(mapboxNavigation)
 
-        verify(exactly = 1) { mapboxNavigation.startReplayTripSession() }
+        verify(exactly = 1) { replayRouteSession.onAttached(mapboxNavigation) }
+        verify(exactly = 0) { replayRouteSession.onDetached(mapboxNavigation) }
     }
 
     @Test
-    fun `enableReplayRoute will resetTripSession when the options change`() {
+    fun `enableReplayRoute will set options before onAttached`() {
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
         val mapboxNavigation = mockMapboxNavigation()
@@ -144,10 +163,11 @@ class MapboxTripStarterTest {
         sut.enableReplayRoute(nextOptions)
 
         verifyOrder {
-            mapboxNavigation.startReplayTripSession()
-            mapboxNavigation.resetTripSession(any())
-            mapboxNavigation.startReplayTripSession()
-            mapboxNavigation.resetTripSession(any())
+            replayRouteSession.setOptions(any())
+            replayRouteSession.onAttached(mapboxNavigation)
+            replayRouteSession.onDetached(mapboxNavigation)
+            replayRouteSession.setOptions(nextOptions)
+            replayRouteSession.onAttached(mapboxNavigation)
         }
         verify(exactly = 0) { mapboxNavigation.stopTripSession() }
     }
@@ -163,14 +183,16 @@ class MapboxTripStarterTest {
         sut.onDetached(mapboxNavigation)
 
         verifyOrder {
-            mapboxNavigation.startReplayTripSession()
+            replayHistorySession.onDetached(mapboxNavigation)
+            replayRouteSession.onAttached(mapboxNavigation)
+            replayRouteSession.onDetached(mapboxNavigation)
             mapboxNavigation.startTripSession()
             mapboxNavigation.stopTripSession()
         }
     }
 
     @Test
-    fun `setLocationPermissionGranted will not restart startReplayTripSession`() {
+    fun `setLocationPermissionGranted will not restart ReplayRouteSession`() {
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
         val mapboxNavigation = mockMapboxNavigation()
@@ -179,11 +201,11 @@ class MapboxTripStarterTest {
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
         sut.refreshLocationPermissions()
 
-        verify(exactly = 1) { mapboxNavigation.startReplayTripSession() }
+        verify(exactly = 1) { replayRouteSession.onAttached(mapboxNavigation) }
     }
 
     @Test
-    fun `update will not stop a trip session that has been started`() {
+    fun `enableReplayRoute will not stop a trip session that has been started`() {
         val mapboxNavigation = mockMapboxNavigation()
         every { mapboxNavigation.getTripSessionState() } returns TripSessionState.STARTED
         every { mapboxNavigation.isReplayEnabled() } returns false
@@ -192,11 +214,11 @@ class MapboxTripStarterTest {
         sut.enableReplayRoute()
 
         verify(exactly = 0) { mapboxNavigation.stopTripSession() }
-        verify(exactly = 1) { mapboxNavigation.startReplayTripSession() }
+        verify(exactly = 1) { replayRouteSession.onAttached(mapboxNavigation) }
     }
 
     @Test
-    fun `update before onAttached will not startTripSession`() {
+    fun `enableReplayRoute before onAttached will not startTripSession`() {
         val mapboxNavigation = mockMapboxNavigation()
 
         sut.enableReplayRoute()
@@ -204,7 +226,42 @@ class MapboxTripStarterTest {
 
         verify(exactly = 0) { mapboxNavigation.stopTripSession() }
         verify(exactly = 0) { mapboxNavigation.startTripSession() }
-        verify(exactly = 1) { mapboxNavigation.startReplayTripSession() }
+        verify(exactly = 1) { replayRouteSession.onAttached(mapboxNavigation) }
+    }
+
+    @Test
+    fun `enableReplayHistory before onAttached will not startTripSession`() {
+        val mapboxNavigation = mockMapboxNavigation()
+
+        sut.enableReplayHistory()
+        sut.onAttached(mapboxNavigation)
+
+        verify(exactly = 0) { mapboxNavigation.stopTripSession() }
+        verify(exactly = 0) { mapboxNavigation.startTripSession() }
+        verify(exactly = 1) { replayHistorySession.onAttached(mapboxNavigation) }
+    }
+
+    @Test
+    fun `enableReplayHistory will set options before onAttached`() {
+        every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
+
+        val mapboxNavigation = mockMapboxNavigation()
+        sut.enableReplayHistory()
+        sut.onAttached(mapboxNavigation)
+        val nextOptions = sut.getReplayHistorySessionOptions().toBuilder()
+            .enableSetRoute(false)
+            .build()
+        sut.enableReplayHistory(nextOptions)
+
+        verifyOrder {
+            replayHistorySession.setOptions(any())
+            replayHistorySession.onAttached(mapboxNavigation)
+            replayHistorySession.setOptions(nextOptions)
+        }
+        verify(exactly = 0) {
+            mapboxNavigation.stopTripSession()
+            replayHistorySession.onDetached(mapboxNavigation)
+        }
     }
 
     private fun mockMapboxNavigation(): MapboxNavigation {

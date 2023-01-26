@@ -34,23 +34,11 @@
         android:text="@string/select_history"
         />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/playReplay"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@color/colorPrimary"
-        android:text="@string/play_history"
-        android:textColor="@android:color/white"
-        />
-
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/Theme.MaterialComponents.Light"
-        app:layout_constraintBottom_toTopOf="@id/playReplay"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:cardElevation="3dp"
         app:cardUseCompatPadding="true">
 
@@ -71,16 +59,9 @@
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="6dp"
+                android:paddingBottom="30dp"
                 android:paddingTop="6dp"
                 />
-
-            <TextView
-                android:id="@+id/playerStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="6dp"
-                android:text="Paused"/>
 
         </LinearLayout>
 

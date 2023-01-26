@@ -529,6 +529,9 @@ package com.mapbox.navigation.core.replay.history {
     property public final Double? time;
   }
 
+  public final class ReplayEventLocationMapperKt {
+  }
+
   public final class ReplayEventUpdateLocation implements com.mapbox.navigation.core.replay.history.ReplayEventBase {
     ctor public ReplayEventUpdateLocation(@com.google.gson.annotations.SerializedName("event_timestamp") double eventTimestamp, @com.google.gson.annotations.SerializedName("location") com.mapbox.navigation.core.replay.history.ReplayEventLocation location);
     method public double component1();
@@ -568,6 +571,33 @@ package com.mapbox.navigation.core.replay.history {
     method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper.Builder pushEventMappers(java.util.List<? extends com.mapbox.navigation.core.replay.history.ReplayHistoryEventMapper<com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord>> pushEventMappers);
     method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper.Builder setRouteMapper(com.mapbox.navigation.core.replay.history.ReplayHistoryEventMapper<com.mapbox.navigation.core.history.model.HistoryEventSetRoute>? setRouteMapper);
     method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper.Builder statusMapper(com.mapbox.navigation.core.replay.history.ReplayHistoryEventMapper<com.mapbox.navigation.core.history.model.HistoryEventGetStatus>? statusMapper);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ReplayHistorySession implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public ReplayHistorySession();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions> getOptions();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void setHistoryFile(String absolutePath);
+    method public void setOptions(com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions options);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ReplayHistorySessionOptions {
+    method public boolean getEnableSetRoute();
+    method public String? getFilePath();
+    method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper getReplayHistoryMapper();
+    method public com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions.Builder toBuilder();
+    property public final boolean enableSetRoute;
+    property public final String? filePath;
+    property public final com.mapbox.navigation.core.replay.history.ReplayHistoryMapper replayHistoryMapper;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class ReplayHistorySessionOptions.Builder {
+    ctor public ReplayHistorySessionOptions.Builder();
+    method public com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions build();
+    method public com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions.Builder enableSetRoute(boolean enableSetRoute);
+    method public com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions.Builder filePath(String? filePath);
+    method public com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions.Builder replayHistoryMapper(com.mapbox.navigation.core.replay.history.ReplayHistoryMapper replayHistoryMapper);
   }
 
   public final class ReplaySetNavigationRoute implements com.mapbox.navigation.core.replay.history.ReplayEventBase {
@@ -1027,8 +1057,10 @@ package com.mapbox.navigation.core.trip {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxTripStarter implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     method public static com.mapbox.navigation.core.trip.MapboxTripStarter create();
     method public com.mapbox.navigation.core.trip.MapboxTripStarter enableMapMatching();
+    method public com.mapbox.navigation.core.trip.MapboxTripStarter enableReplayHistory(com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions? options = null);
     method public com.mapbox.navigation.core.trip.MapboxTripStarter enableReplayRoute(com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions? options = null);
     method public static com.mapbox.navigation.core.trip.MapboxTripStarter getRegisteredInstance();
+    method public com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions getReplayHistorySessionOptions();
     method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions getReplayRouteSessionOptions();
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);

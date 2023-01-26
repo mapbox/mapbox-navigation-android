@@ -11,7 +11,12 @@ internal sealed class MapboxTripStarterType {
     object MapMatching : MapboxTripStarterType()
 
     /**
-     * The [MapboxTripStarter] will enable replay for the navigation routes.
+     * The [MapboxTripStarter] will replay navigation routes with an artificial driver.
      */
     object ReplayRoute : MapboxTripStarterType()
+
+    /**
+     * The [MapboxTripStarter] will use history files to replay navigation experiences.
+     */
+    object ReplayHistory : MapboxTripStarterType()
 }
