@@ -32,16 +32,6 @@ workflows:
     when:
       not: << pipeline.parameters.mapbox_navigation_native_upstream >>
     jobs:
-      - release-snapshot-start:
-          type: approval
-          filters:
-            branches:
-              ignore:
-                - main
-                - /release-v.*/
-      - release-snapshot:
-          requires:
-            - release-snapshot-start
       - release-snapshot:
           filters:
             branches:
