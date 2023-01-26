@@ -18,6 +18,7 @@ import com.mapbox.navigation.copilot.internal.PushStatus
 import com.mapbox.navigation.copilot.internal.PushStatusObserver
 import com.mapbox.navigation.utils.internal.logD
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -446,7 +447,7 @@ class HistoryUploadWorkerTest {
         mockkObject(HistoryAttachmentsUtils)
         val fileSlot = slot<File>()
         val mockedFile = mockk<File>(relaxed = true)
-        every { copyToAndRemove(capture(fileSlot), any()) } answers {
+        coEvery { copyToAndRemove(capture(fileSlot), any()) } coAnswers {
             every { mockedFile.absolutePath } returns fileSlot.captured.toString()
             mockedFile
         }

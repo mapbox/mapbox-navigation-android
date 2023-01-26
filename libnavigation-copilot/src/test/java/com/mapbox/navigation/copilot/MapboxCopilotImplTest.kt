@@ -30,8 +30,10 @@ import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.logD
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -44,6 +46,7 @@ import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.util.Locale
@@ -57,6 +60,9 @@ import java.util.Locale
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxCopilotImplTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @After
     fun teardown() {
@@ -2458,7 +2464,7 @@ class MapboxCopilotImplTest {
         mockkObject(HistoryAttachmentsUtils)
         val fileSlot = slot<File>()
         val mockedFile = mockk<File>(relaxed = true)
-        every { copyToAndRemove(capture(fileSlot), any()) } answers {
+        coEvery { copyToAndRemove(capture(fileSlot), any()) } coAnswers {
             every { mockedFile.absolutePath } returns fileSlot.captured.toString()
             mockedFile
         }
