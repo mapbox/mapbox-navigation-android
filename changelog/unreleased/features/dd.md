@@ -1,0 +1,3 @@
+- Added custom header x-mapbox-app-info to requests.
+- Fix upcoming route alerts incorrect position.
+- Stabilized routes with alternatives refresh / re-route on deviate.
