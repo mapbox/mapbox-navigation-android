@@ -3,6 +3,8 @@ package com.mapbox.navigation.copilot
 import android.util.Base64
 import com.mapbox.navigation.copilot.internal.CopilotMetadata
 import com.mapbox.navigation.core.BuildConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
@@ -60,11 +62,10 @@ internal object HistoryAttachmentsUtils {
 
     fun delete(file: File): Boolean = file.delete()
 
-    fun copyToAndRemove(from: File, filename: String): File {
-        val to = from.copyTo(File(from.parent, filename))
-        from.delete()
-        return to
-    }
+    suspend fun copyToAndRemove(from: File, filename: String): File =
+        withContext(Dispatchers.IO) {
+            File(from.parent, filename).also { from.renameTo(it) }
+        }
 
     private fun decode(str: String): JSONObject {
         val requiredLength = (str.length - 1) / 4 * 4 + 4

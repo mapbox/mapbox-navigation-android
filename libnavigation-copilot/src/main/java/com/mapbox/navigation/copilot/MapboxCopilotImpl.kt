@@ -35,6 +35,8 @@ import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Locale
 
@@ -48,6 +50,7 @@ internal class MapboxCopilotImpl(
     private val mapboxNavigation: MapboxNavigation,
 ) {
 
+    private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val activeGuidanceHistoryEvents = mutableSetOf<HistoryEventDTO>()
     private val copilotHistoryRecorder = mapboxNavigation.retrieveCopilotHistoryRecorder()
     private var currentHistoryRecordingSessionState: HistoryRecordingSessionState = Idle
@@ -277,7 +280,9 @@ internal class MapboxCopilotImpl(
         val drive = buildNavigationSession()
         stopRecording { historyFilePath ->
             if (hasFeedback || !shouldSendHistoryOnlyWithFeedback) {
-                pushHistoryFile(historyFilePath, drive)
+                mainJobController.scope.launch {
+                    pushHistoryFile(historyFilePath, drive)
+                }
             }
         }
     }
@@ -310,7 +315,7 @@ internal class MapboxCopilotImpl(
         return context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
     }
 
-    private fun pushHistoryFile(historyFilePath: String, drive: CopilotMetadata) {
+    private suspend fun pushHistoryFile(historyFilePath: String, drive: CopilotMetadata) {
         val metadata = buildAttachmentMetadata(drive)
         val uploadOptions = buildUploadOptions(historyFilePath, metadata)
         HistoryUploadWorker.uploadHistory(
@@ -335,7 +340,7 @@ internal class MapboxCopilotImpl(
         )
     }
 
-    private fun buildUploadOptions(
+    private suspend fun buildUploadOptions(
         filePath: String,
         metadata: AttachmentMetadata,
     ): UploadOptions {
