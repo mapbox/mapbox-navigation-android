@@ -15,7 +15,7 @@ def get_changes(path):
         pr_number = file.partition('.')[0]
         pr_changes = open(path + file, 'r').read()
         if path.endswith('bugfixes/') or path.endswith('features/'):
-            pr_link = ' [#' + pr_number + '](https://github.com/mapbox/mapbox-navigation-android/pull/' + pr_number + ')' + '\n'
+            pr_link = ' `[#' + pr_number + '](https://github.com/mapbox/mapbox-navigation-android/pull/' + pr_number + ')`' + '\n'
             lines_with_description = []
             for line in open(path + file, 'r').readlines():
                 if line.startswith('- '):
@@ -48,10 +48,10 @@ pr_comments_url = 'https://api.github.com/repos/mapbox/mapbox-navigation-android
 headers = {"Authorization": "Bearer " + token}
 comments = requests.get(pr_comments_url, headers=headers).json()
 
-full_changelog = '<details>\n<summary>Changelog</summary>\n\n```\n' + \
-                 changelog + '\n```\n</details>\n' + \
-                 '<details>\n<summary>Android Auto Changelog</summary>\n\n```\n' + \
-                 auto_changelog + '\n```\n</details>'
+full_changelog = '<details>\n<summary>Changelog</summary>\n\n' + \
+                 changelog + '</details>\n' + \
+                 '<details>\n<summary>Android Auto Changelog</summary>\n\n' + \
+                 auto_changelog + '</details>'
 
 comment_with_changelog_id = None
 for comment in comments:
