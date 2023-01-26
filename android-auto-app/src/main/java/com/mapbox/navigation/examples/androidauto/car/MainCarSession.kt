@@ -21,6 +21,7 @@ import com.mapbox.androidauto.map.compass.CarCompassRenderer
 import com.mapbox.androidauto.map.logo.CarLogoRenderer
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
+import com.mapbox.androidauto.screenmanager.prepareExperimentalRoutePreviewScreen
 import com.mapbox.androidauto.screenmanager.prepareScreens
 import com.mapbox.maps.ContextMode
 import com.mapbox.maps.MapInitOptions
@@ -43,6 +44,7 @@ class MainCarSession : Session() {
     private val mapboxCarMap = MapboxCarMap().registerObserver(mapboxCarMapLoader)
     private val mapboxCarContext = MapboxCarContext(lifecycle, mapboxCarMap)
         .prepareScreens()
+        .prepareExperimentalRoutePreviewScreen()
         .customize {
             // Use the actionStripProvider to customize the screen actions.
             actionsStripProvider = object : MapboxScreenActionStripProvider() {
