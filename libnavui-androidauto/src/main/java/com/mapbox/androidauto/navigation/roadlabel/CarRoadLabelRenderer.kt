@@ -5,8 +5,7 @@ import android.graphics.Color
 import android.graphics.Rect
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
-import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
+import com.mapbox.androidauto.internal.extensions.styleFlow
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.navigation.MapUserStyleObserver
 import com.mapbox.maps.EdgeInsets
@@ -14,13 +13,17 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
-import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.renderer.widget.BitmapWidget
 import com.mapbox.maps.renderer.widget.WidgetPosition
 import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.RouteShield
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 /**
  * This will show the current road name at the bottom center of the screen.
@@ -35,7 +38,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
     private val roadLabelBitmapRenderer = CarRoadLabelBitmapRenderer()
     private val routeShieldApi = MapboxRouteShieldApi()
     private val mapUserStyleObserver = MapUserStyleObserver()
-    private var styleLoadedListener: OnStyleLoadedListener? = null
+    private lateinit var scope: CoroutineScope
     private var roadNameObserver: CarRoadNameObserver? = null
     private var roadLabelWidget: BitmapWidget? = null
 
@@ -57,7 +60,8 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
                 roadLabelWidget.updateBitmap(bitmap ?: EMPTY_BITMAP)
             }
         }.also { roadNameObserver = it }
-        styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached {
+        scope = MainScope()
+        mapboxCarMapSurface.styleFlow().onEach {
             val bitmap = roadLabelBitmapRenderer.render(
                 carContext.resources,
                 roadNameObserver.currentRoad,
@@ -65,7 +69,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
                 roadLabelOptions(carContext)
             )
             roadLabelWidget.updateBitmap(bitmap ?: EMPTY_BITMAP)
-        }
+        }.launchIn(scope)
 
         mapUserStyleObserver.onAttached(mapboxCarMapSurface)
         MapboxNavigationApp.registerObserver(roadNameObserver)
@@ -73,7 +77,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("RoadLabelSurfaceLayer carMapSurface detached")
-        mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)
+        scope.cancel()
         roadNameObserver?.let { MapboxNavigationApp.unregisterObserver(it) }
         roadNameObserver = null
         routeShieldApi.cancel()
