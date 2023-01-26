@@ -48,10 +48,10 @@ pr_comments_url = 'https://api.github.com/repos/mapbox/mapbox-navigation-android
 headers = {"Authorization": "Bearer " + token}
 comments = requests.get(pr_comments_url, headers=headers).json()
 
-full_changelog = '<details>\n<summary>Changelog</summary>\n\n' + \
-                 changelog + '</details>\n' + \
-                 '<details>\n<summary>Android Auto Changelog</summary>\n\n' + \
-                 auto_changelog + '</details>'
+full_changelog = '<details>\n<summary>Changelog</summary>\n\n```\n' + \
+                 changelog + '\n```\n</details>\n' + \
+                 '<details>\n<summary>Android Auto Changelog</summary>\n\n```\n' + \
+                 auto_changelog + '\n```\n</details>'
 
 comment_with_changelog_id = None
 for comment in comments:
