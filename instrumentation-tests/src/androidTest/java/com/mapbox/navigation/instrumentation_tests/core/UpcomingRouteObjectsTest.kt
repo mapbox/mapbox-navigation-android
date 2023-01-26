@@ -56,7 +56,7 @@ class UpcomingRouteObjectsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
 
     @Test
     @Ignore("waiting for the NN fix, see NN-449")
-    fun distanceToIncidentDoNotChangeAfterAddingNewWaypoint() = sdkTest {
+    fun distanceToIncidentDoesNotChangeAfterAddingNewWaypointOnTheRouteGeometry() = sdkTest {
         val (oneLegRoute, twoLegsRoute, incidentId) =
             getRoutesFromTheSameOriginButDifferentWaypointsCount()
 
