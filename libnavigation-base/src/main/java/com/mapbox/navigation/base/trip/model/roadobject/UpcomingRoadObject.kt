@@ -16,7 +16,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectD
  * - [RoadObjectDistanceInfoType.SUB_GRAPH]
  *
  * @param roadObject road object
- * @param distanceToStart remaining distance to the start of the object.
+ * @param distanceToStart distance from current enhanced(matched) location to the start
+ * of the object along the current route.
  * This value will be negative after passing the start of the object and until we cross the finish
  * point of the [RoadObject]s geometry for objects that are on the actively navigated route,
  * but it will be zero for [EHorizon] objects. It will be null if couldn't be determined.
