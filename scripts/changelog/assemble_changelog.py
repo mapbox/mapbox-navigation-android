@@ -15,7 +15,7 @@ def get_changes(path):
         pr_number = file.partition('.')[0]
         pr_changes = open(path + file, 'r').read()
         if path.endswith('bugfixes/') or path.endswith('features/'):
-            pr_link = ' [#' + pr_number + '](https://github.com/mapbox/mapbox-navigation-android/pull/' + pr_number + ')' + '\n'
+            pr_link = ' `[#' + pr_number + '](https://github.com/mapbox/mapbox-navigation-android/pull/' + pr_number + ')`' + '\n'
             lines_with_description = []
             for line in open(path + file, 'r').readlines():
                 if line.startswith('- '):
