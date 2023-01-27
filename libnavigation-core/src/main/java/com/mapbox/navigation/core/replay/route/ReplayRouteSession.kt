@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.history.MapboxHistoryReaderProvider
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -20,6 +21,17 @@ import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import java.util.Collections
 
 /**
@@ -54,13 +66,13 @@ import java.util.Collections
 @ExperimentalPreviewMapboxNavigationAPI
 class ReplayRouteSession : MapboxNavigationObserver {
 
-    private var options = ReplayRouteSessionOptions.Builder().build()
-
     private lateinit var replayRouteMapper: ReplayRouteMapper
+    private val optionsFlow = MutableStateFlow(ReplayRouteSessionOptions.Builder().build())
     private var mapboxNavigation: MapboxNavigation? = null
     private var lastLocationEvent: ReplayEventUpdateLocation? = null
     private var polylineDecodeStream: ReplayPolylineDecodeStream? = null
     private var currentRoute: NavigationRoute? = null
+    private var coroutineScope: CoroutineScope? = null
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         if (currentRoute?.id != routeProgress.navigationRoute.id) {
@@ -89,7 +101,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
      * setOptions(getOptions().toBuilder().locationResetEnabled(false).build())
      * ```
      */
-    fun getOptions(): ReplayRouteSessionOptions = options
+    fun getOptions(): StateFlow<ReplayRouteSessionOptions> = optionsFlow.asStateFlow()
 
     /**
      * Set new options for the [ReplayRouteSession]. This will not effect previously simulated
@@ -97,26 +109,39 @@ class ReplayRouteSession : MapboxNavigationObserver {
      * the effect of the options, you need to set options before [MapboxNavigation] is attached.
      */
     fun setOptions(options: ReplayRouteSessionOptions) = apply {
-        this.options = options
-        if (::replayRouteMapper.isInitialized) {
-            replayRouteMapper.options = this.options.replayRouteOptions
-        }
+        this.optionsFlow.value = options
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        this.replayRouteMapper = ReplayRouteMapper(options.replayRouteOptions)
+        val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+            .also { this.coroutineScope = it }
         this.mapboxNavigation = mapboxNavigation
         mapboxNavigation.startReplayTripSession()
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxNavigation.mapboxReplayer.play()
+        observeStateFlow(mapboxNavigation).launchIn(coroutineScope)
     }
+
+    private fun observeStateFlow(mapboxNavigation: MapboxNavigation): Flow<*> {
+        return optionsFlow.mapDistinct { it.replayRouteOptions }.onEach { replayRouteOptions ->
+            mapboxNavigation.mapboxReplayer.clearEvents()
+            this.replayRouteMapper = ReplayRouteMapper(replayRouteOptions)
+            val routes = mapboxNavigation.getNavigationRoutes()
+            mapboxNavigation.setNavigationRoutes(emptyList())
+            mapboxNavigation.setNavigationRoutes(routes)
+        }
+    }
+
+    private inline fun <T, R> Flow<T>.mapDistinct(
+        crossinline transform: suspend (value: T) -> R
+    ): Flow<R> = map(transform).distinctUntilChanged()
 
     private fun MapboxNavigation.resetReplayLocation() {
         mapboxReplayer.clearEvents()
         resetTripSession {
-            if (options.locationResetEnabled) {
+            if (optionsFlow.value.locationResetEnabled) {
                 val context = navigationOptions.applicationContext
                 if (PermissionsManager.areLocationPermissionsGranted(context)) {
                     pushRealLocation(context)
@@ -174,7 +199,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
     }
 
     private fun pushMorePoints() {
-        val nextPoints = polylineDecodeStream?.decode(options.decodeMinDistance) ?: return
+        val nextPoints = polylineDecodeStream?.decode(optionsFlow.value.decodeMinDistance) ?: return
         val nextReplayLocations = replayRouteMapper.mapPointList(nextPoints)
         lastLocationEvent = nextReplayLocations.lastOrNull { it is ReplayEventUpdateLocation }
             as? ReplayEventUpdateLocation
