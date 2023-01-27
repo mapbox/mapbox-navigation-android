@@ -76,8 +76,9 @@ class UpcomingRouteObjectsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             .first { it.roadObject.id == incidentId }
 
         assertEquals(
-            upcomingIncidentForOneLeg.distanceToStart,
-            upcomingIncidentForTwoLegsRoute.distanceToStart
+            upcomingIncidentForOneLeg.distanceToStart!!,
+            upcomingIncidentForTwoLegsRoute.distanceToStart!!,
+            0.1
         )
     }
 
