@@ -1,0 +1,18 @@
+name: Run release-snapshot job
+on:
+  pull_request:
+    types: [ opened, synchronize, labeled ]
+jobs:
+  process:
+    if: contains(github.event.pull_request.labels.*.name, 'publish-snapshot')
+    permissions:
+      pull-requests: write
+      contents: write
+    runs-on: ubuntu-20.04
+    env:
+      BRANCH_NAME: ${{ github.head_ref }}
+      CIRCLE_CI_TOKEN: ${{ secrets.CIRCLE_CI_TOKEN }}
+    steps:
+      - name: Run release-snapshot job
+        run: |
+          curl -X POST -H "Circle-Token: ${CIRCLE_CI_TOKEN}" --header "Content-Type: application/json" --data "{\"build_parameters\":{\"CIRCLE_JOB\":\"release-snapshot\"}}" https://circleci.com/api/v1.1/project/github/mapbox/mapbox-navigation-android/tree/${BRANCH_NAME}
