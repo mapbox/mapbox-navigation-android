@@ -245,6 +245,7 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions? getDestinationMarkerAnnotationOptions();
     method public Integer? getEndNavigationButtonStyle();
     method public Integer? getInfoPanelBackground();
+    method public Float? getInfoPanelGuidelineMaxPosPercent();
     method public Integer? getInfoPanelMarginEnd();
     method public Integer? getInfoPanelMarginStart();
     method public Integer? getInfoPanelPeekHeight();
@@ -267,6 +268,7 @@ package com.mapbox.navigation.dropin {
     method public void setDestinationMarkerAnnotationOptions(com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions?);
     method public void setEndNavigationButtonStyle(Integer?);
     method public void setInfoPanelBackground(Integer?);
+    method public void setInfoPanelGuidelineMaxPosPercent(Float?);
     method public void setInfoPanelMarginEnd(Integer?);
     method public void setInfoPanelMarginStart(Integer?);
     method public void setInfoPanelPeekHeight(Integer?);
@@ -289,6 +291,7 @@ package com.mapbox.navigation.dropin {
     property public final com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions? destinationMarkerAnnotationOptions;
     property public final Integer? endNavigationButtonStyle;
     property public final Integer? infoPanelBackground;
+    property public final Float? infoPanelGuidelineMaxPosPercent;
     property public final Integer? infoPanelMarginEnd;
     property public final Integer? infoPanelMarginStart;
     property public final Integer? infoPanelPeekHeight;
@@ -315,6 +318,7 @@ package com.mapbox.navigation.dropin {
     method public com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions defaultDestinationMarkerAnnotationOptions(android.content.Context context);
     method @StyleRes public int defaultEndNavigationButtonStyle();
     method @DrawableRes public int defaultInfoPanelBackground();
+    method @FloatRange(from=0.0, to=1.0) public float defaultInfoPanelGuidelineMaxPosPercent();
     method @Px public int defaultInfoPanelMarginEnd();
     method @Px public int defaultInfoPanelMarginStart();
     method @Px public int defaultInfoPanelPeekHeight(android.content.Context context);
