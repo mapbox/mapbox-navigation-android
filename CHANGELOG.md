@@ -6,6 +6,28 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.10.1 - 27 January, 2023
+### Changelog
+[Changes between v2.10.0 and v2.10.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0...v2.10.1)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Started using separate DeadReckoningDetector for Garmin GNSS receiver which uses accuracy for better tunnel exit detection. [#6886](https://github.com/mapbox/mapbox-navigation-android/pull/6886)
+- Fixed situations with intensive re-routes on looped/u-turn routes by changing the route matcher's choice of the first location. Now we use fallback localization controller matching to provide the first active guidance progress after setting a new route to help the route matcher start working from the right segment (it already takes road direction, bearing, and looped routes into account). [#6886](https://github.com/mapbox/mapbox-navigation-android/pull/6886)
+- Set limit of simultaneously running onboard route requests in config to 2 to prevent excessive resource consumption during intensive/repeated re-routes. [#6886](https://github.com/mapbox/mapbox-navigation-android/pull/6886)
+- Fixed potential timestamp inconsistencies that may have led to location rejection by making the timestamp shift corrector configurable and disabled by default. [#6886](https://github.com/mapbox/mapbox-navigation-android/pull/6886)
+- Fixed an issue with incorrect `UpcomingRoadObject#distanceToStart` values on multi-leg routes. [#6886](https://github.com/mapbox/mapbox-navigation-android/pull/6886)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.1))
+- Mapbox Navigation Native `v123.3.1`
+- Mapbox Core Common `v23.2.2`
+- Mapbox Java `v6.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0))
+
+
 ## Mapbox Navigation SDK 2.11.0-beta.1 - 27 January, 2023
 ### Changelog
 [Changes between v2.11.0-alpha.1 and v2.11.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.11.0-alpha.1...v2.11.0-beta.1)
