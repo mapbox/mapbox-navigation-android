@@ -15,4 +15,4 @@ jobs:
     steps:
       - name: Run release-snapshot job
         run: |
-          curl -X POST -H "Circle-Token: \"${CIRCLE_CI_TOKEN}\"" --header "Content-Type: application/json" --data "{\"build_parameters\":{\"CIRCLE_JOB\":\"release-snapshot\"}}" https://circleci.com/api/v1.1/project/github/mapbox/mapbox-navigation-android/tree/${BRANCH_NAME}
+          curl -X POST -H "Circle-Token: ${CIRCLE_CI_TOKEN}" --header "Content-Type: application/json" --data "{\"build_parameters\":{\"CIRCLE_JOB\":\"release-snapshot\"}}" https://circleci.com/api/v1.1/project/github/mapbox/mapbox-navigation-android/tree/${BRANCH_NAME}
