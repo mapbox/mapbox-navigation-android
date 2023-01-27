@@ -72,6 +72,11 @@
         <item>--</item>
         <item>LARGE</item>
     </string-array>
+    <string-array name="drop_in_speed_info_sign" translatable="false">
+        <item>--</item>
+        <item>MUTCD</item>
+        <item>VIENNA</item>
+    </string-array>
     <string-array name="drop_in_routing_profile" translatable="false">
         <item>--</item>
         <item>DRIVING-TRAFFIC</item>
