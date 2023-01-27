@@ -1,5 +1,5 @@
 buildscript {
-    apply from: "${rootDir}/gradle/dependencies.gradle"
+    apply from: "../gradle/dependencies.gradle"
 
     repositories {
         google()
@@ -14,7 +14,7 @@ buildscript {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply from: "${rootDir}/gradle/metalava-dependencies.gradle"
+apply from: "../gradle/metalava-dependencies.gradle"
 
 android.libraryVariants.all { variant ->
     // TODO eliminate variants https://issuetracker.google.com/issues/62201427
