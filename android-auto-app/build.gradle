@@ -72,8 +72,8 @@ dependencies {
     // This example is used for development so it may depend on unstable versions.
     // Examples based on final versions can be found in the examples repository.
     //   https://github.com/mapbox/mapbox-navigation-android-examples
-    implementation("com.mapbox.navigation:ui-dropin:2.10.0-rc.1")
-    implementation("com.mapbox.search:mapbox-search-android:1.0.0-beta.42")
+    implementation("com.mapbox.navigation:ui-dropin:2.10.0")
+    implementation("com.mapbox.search:mapbox-search-android:1.0.0-beta.43")
 
     // Dependencies needed for this example.
     implementation dependenciesList.androidXCore

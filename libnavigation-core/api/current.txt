@@ -703,7 +703,7 @@ package com.mapbox.navigation.core.replay.route {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ReplayRouteSession implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
     ctor public ReplayRouteSession();
-    method public com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions getOptions();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions> getOptions();
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteSession setOptions(com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions options);

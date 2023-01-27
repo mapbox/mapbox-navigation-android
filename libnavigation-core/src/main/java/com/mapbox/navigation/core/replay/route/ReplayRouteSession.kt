@@ -12,7 +12,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.history.MapboxHistoryReaderProvider
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -24,6 +23,7 @@ import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -67,25 +67,33 @@ import java.util.Collections
 class ReplayRouteSession : MapboxNavigationObserver {
 
     private lateinit var replayRouteMapper: ReplayRouteMapper
+    private lateinit var coroutineScope: CoroutineScope
     private val optionsFlow = MutableStateFlow(ReplayRouteSessionOptions.Builder().build())
     private var mapboxNavigation: MapboxNavigation? = null
     private var lastLocationEvent: ReplayEventUpdateLocation? = null
     private var polylineDecodeStream: ReplayPolylineDecodeStream? = null
     private var currentRoute: NavigationRoute? = null
-    private var coroutineScope: CoroutineScope? = null
+        set(value) {
+            field = value
+            isNewRouteInitialized = value != null
+        }
+    private var isNewRouteInitialized = false
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         if (currentRoute?.id != routeProgress.navigationRoute.id) {
             currentRoute = routeProgress.navigationRoute
-            onRouteChanged(routeProgress)
+            onRouteProgressRouteChanged(routeProgress)
         }
     }
 
     private val routesObserver = RoutesObserver { result ->
-        if (result.navigationRoutes.isEmpty()) {
+        val route = result.navigationRoutes.firstOrNull()
+        if (route == null) {
             mapboxNavigation?.resetReplayLocation()
             currentRoute = null
             polylineDecodeStream = null
+        } else if (!isNewRouteInitialized && currentRoute?.id != route.id) {
+            onInitializeNewRoute(route)
         }
     }
 
@@ -113,24 +121,23 @@ class ReplayRouteSession : MapboxNavigationObserver {
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-            .also { this.coroutineScope = it }
+        this.coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         this.mapboxNavigation = mapboxNavigation
         mapboxNavigation.startReplayTripSession()
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.mapboxReplayer.registerObserver(replayEventsObserver)
-        mapboxNavigation.mapboxReplayer.play()
         observeStateFlow(mapboxNavigation).launchIn(coroutineScope)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.mapboxReplayer.registerObserver(replayEventsObserver)
     }
 
     private fun observeStateFlow(mapboxNavigation: MapboxNavigation): Flow<*> {
         return optionsFlow.mapDistinct { it.replayRouteOptions }.onEach { replayRouteOptions ->
             mapboxNavigation.mapboxReplayer.clearEvents()
             this.replayRouteMapper = ReplayRouteMapper(replayRouteOptions)
-            val routes = mapboxNavigation.getNavigationRoutes()
-            mapboxNavigation.setNavigationRoutes(emptyList())
-            mapboxNavigation.setNavigationRoutes(routes)
+            currentRoute = null
+            mapboxNavigation.resetTripSession {
+                mapboxNavigation.mapboxReplayer.play()
+            }
         }
     }
 
@@ -158,6 +165,9 @@ class ReplayRouteSession : MapboxNavigationObserver {
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        if (this::coroutineScope.isInitialized) {
+            coroutineScope.cancel()
+        }
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.mapboxReplayer.unregisterObserver(replayEventsObserver)
@@ -167,28 +177,43 @@ class ReplayRouteSession : MapboxNavigationObserver {
         this.currentRoute = null
     }
 
-    private fun onRouteChanged(routeProgress: RouteProgress) {
+    private fun onInitializeNewRoute(route: NavigationRoute) {
+        mapboxNavigation?.mapboxReplayer?.clearEvents()
+        this.replayRouteMapper = ReplayRouteMapper(optionsFlow.value.replayRouteOptions)
+        mapboxNavigation?.resetTripSession {
+            route.routeOptions.coordinatesList().firstOrNull()?.let {
+                val replayFirstLocation = replayRouteMapper.mapPointList(listOf(it))
+                mapboxNavigation?.mapboxReplayer?.pushEvents(replayFirstLocation)
+            }
+            mapboxNavigation?.mapboxReplayer?.play()
+        }
+        isNewRouteInitialized = true
+    }
+
+    private fun onRouteProgressRouteChanged(routeProgress: RouteProgress) {
         val navigationRoute = routeProgress.navigationRoute
         val mapboxReplayer = mapboxNavigation?.mapboxReplayer ?: return
         mapboxReplayer.clearEvents()
-        mapboxReplayer.play()
-        val geometries = navigationRoute.directionsRoute.routeOptions()!!.geometries()
-        val usesPolyline6 = geometries.contains(DirectionsCriteria.GEOMETRY_POLYLINE6)
-        val geometry = navigationRoute.directionsRoute.geometry()
-        if (!usesPolyline6 || geometry.isNullOrEmpty()) {
-            logW(LOG_CATEGORY) {
-                "The NavigationRouteReplay must have geometry encoded with polyline6 " +
-                    "$geometries $geometry"
+        mapboxNavigation?.resetTripSession {
+            mapboxReplayer.play()
+            val geometries = navigationRoute.directionsRoute.routeOptions()!!.geometries()
+            val usesPolyline6 = geometries.contains(DirectionsCriteria.GEOMETRY_POLYLINE6)
+            val geometry = navigationRoute.directionsRoute.geometry()
+            if (!usesPolyline6 || geometry.isNullOrEmpty()) {
+                logW(LOG_CATEGORY) {
+                    "The NavigationRouteReplay must have geometry encoded with polyline6 " +
+                        "$geometries $geometry"
+                }
+                return@resetTripSession
             }
-            return
+            polylineDecodeStream = ReplayPolylineDecodeStream(geometry, 6)
+
+            // Skip up to the current geometry index. There is some imprecision here because the
+            // distance traveled is not equal to a route index.
+            polylineDecodeStream?.skip(routeProgress.currentRouteGeometryIndex)
+
+            pushMorePoints()
         }
-        polylineDecodeStream = ReplayPolylineDecodeStream(geometry, 6)
-
-        // Skip up to the current geometry index. There is some imprecision here because the
-        // distance traveled is not equal to a route index.
-        polylineDecodeStream?.skip(routeProgress.currentRouteGeometryIndex)
-
-        pushMorePoints()
     }
 
     private fun isLastEventPlayed(events: List<ReplayEventBase>): Boolean {

@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.onEach
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class MapboxTripStarter internal constructor(
-    private val services: MapboxTripStarterServices = MapboxTripStarterServices()
+    services: MapboxTripStarterServices = MapboxTripStarterServices()
 ) : MapboxNavigationObserver {
 
     private val tripType = MutableStateFlow<MapboxTripStarterType>(
@@ -152,14 +152,16 @@ class MapboxTripStarter internal constructor(
                     isLocationPermissionGranted.onEach { granted ->
                         onMapMatchingEnabled(mapboxNavigation, granted)
                     }
-                MapboxTripStarterType.ReplayRoute ->
-                    replayRouteSession.getOptions().onEach { options ->
-                        onReplayRouteEnabled(mapboxNavigation, options)
-                    }
-                MapboxTripStarterType.ReplayHistory ->
-                    replayHistorySession.getOptions().onEach { options ->
-                        onReplayHistoryEnabled(mapboxNavigation, options)
-                    }
+                MapboxTripStarterType.ReplayRoute -> {
+                    replayHistorySession.onDetached(mapboxNavigation)
+                    replayRouteSession.onAttached(mapboxNavigation)
+                    replayRouteSession.getOptions()
+                }
+                MapboxTripStarterType.ReplayHistory -> {
+                    replayRouteSession.onDetached(mapboxNavigation)
+                    replayHistorySession.onAttached(mapboxNavigation)
+                    replayHistorySession.getOptions()
+                }
             }
         }
     }
@@ -184,36 +186,6 @@ class MapboxTripStarter internal constructor(
             }
             onTripDisabled(mapboxNavigation)
         }
-    }
-
-    /**
-     * Internally called when the trip type has been set to replay route.
-     *
-     * @param mapboxNavigation
-     * @param options parameters for the [ReplayRouteSession]
-     */
-    private fun onReplayRouteEnabled(
-        mapboxNavigation: MapboxNavigation,
-        options: ReplayRouteSessionOptions
-    ) {
-        replayHistorySession.onDetached(mapboxNavigation)
-        replayRouteSession.setOptions(options)
-        replayRouteSession.onAttached(mapboxNavigation)
-    }
-
-    /**
-     * Internally called when the trip type has been set to replay history.
-     *
-     * @param mapboxNavigation
-     * @param options parameters for the [ReplayHistorySession]
-     */
-    private fun onReplayHistoryEnabled(
-        mapboxNavigation: MapboxNavigation,
-        options: ReplayHistorySessionOptions
-    ) {
-        replayRouteSession.onDetached(mapboxNavigation)
-        replayHistorySession.setOptions(options)
-        replayHistorySession.onAttached(mapboxNavigation)
     }
 
     /**
