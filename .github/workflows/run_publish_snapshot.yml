@@ -1,4 +1,4 @@
-name: Assemble changelog
+name: Run release-snapshot job
 on:
   pull_request:
     types: [ opened, synchronize, labeled ]
