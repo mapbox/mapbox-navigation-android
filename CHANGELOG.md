@@ -6,6 +6,49 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.11.0-beta.1 - 27 January, 2023
+### Changelog
+[Changes between v2.11.0-alpha.1 and v2.11.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.11.0-alpha.1...v2.11.0-beta.1)
+
+#### Features
+- Introduced `ReplayHistorySession` and `ReplayHistorySessionOptions` to simplify the implementation for replaying history files. History can also be enabled with `MapboxTripStarter.enableReplayHistory()`. This can replay large history files in a memory efficient way. [#6855](https://github.com/mapbox/mapbox-navigation-android/pull/6855)
+- Added `RoadComponent.language` value. [#6833](https://github.com/mapbox/mapbox-navigation-android/pull/6833)
+- :warning: Changed `EHorizonEdgeMetadata.names` class from `RoadName` to `RoadComponent`. [#6833](https://github.com/mapbox/mapbox-navigation-android/pull/6833)
+  To migrate change your code from:
+```kotlin
+val shielded = roadName.shielded
+```
+into:
+```kotlin
+val shielded = roadComponent.shield != null
+```
+- Added support for continuous EV alternatives in `NavigationRouteAlternativesObserver`. [#6833](https://github.com/mapbox/mapbox-navigation-android/pull/6833)
+- Fixed issues with map-matching to HOV-only roads. [#6833](https://github.com/mapbox/mapbox-navigation-android/pull/6833)
+- Set a limit of simultaneously running onboard route requests to avoid too many tasks blocking too much of the device's computing resources. [#6833](https://github.com/mapbox/mapbox-navigation-android/pull/6833)
+- Fixed an issue with Road Access Policy ignoring the setting to map-match to closed road sections, when enabled. [#6833](https://github.com/mapbox/mapbox-navigation-android/pull/6833)
+- Added `MapboxTripStarter` to simplify the solution for managing the trip session and replaying routes. This also makes it possible to share the replay state between drop-in-ui and android-auto. [#6794](https://github.com/mapbox/mapbox-navigation-android/pull/6794)
+
+#### Bug fixes and improvements
+- Increased max distance from the user indicator to route line valid to continue vanishing updates from 3m to 10m. [#6854](https://github.com/mapbox/mapbox-navigation-android/pull/6854)
+- Improved `NavigationView` camera behavior to go back into overview state if routes change during route preview state. [#6840](https://github.com/mapbox/mapbox-navigation-android/pull/6840)
+- Fixed an issue where alternative routes might have had an incorrect or incomplete portion of the route refreshed or occasionally fail to refresh. [#6848](https://github.com/mapbox/mapbox-navigation-android/pull/6848)
+- Removed `NavigationRoute#hasUnexpectedClosures` and added `RouteProgress#hasUnexpectedUpcomingClosures` instead that checks whether route has upcoming unexpected closures (the algorithm does not take into account closures that the puck has already been on) [#6841](https://github.com/mapbox/mapbox-navigation-android/pull/6841)
+- Improved `NavigationView` camera behavior to ignore keyboard insets. [#6845](https://github.com/mapbox/mapbox-navigation-android/pull/6845)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.11.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.11.0-beta.1))
+- Mapbox Navigation Native `v124.0.1`
+- Mapbox Core Common `v23.3.0-beta.1`
+- Mapbox Java `v6.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0))
+
+
 ## Mapbox Navigation SDK 2.10.0 - 20 January, 2023
 ### Changelog
 [Changes between v2.9.6 and v2.10.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.6...v2.10.0)
