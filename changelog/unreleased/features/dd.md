@@ -1,0 +1,5 @@
+- Started using separate DeadReckoningDetector for Garmin GNSS receiver which uses accuracy for better tunnel exit detection.
+- Fixed situations with intensive re-routes on looped/u-turn routes by changing the route matcher's choice of the first location. Now we use fallback localization controller matching to provide the first active guidance progress after setting a new route to help the route matcher start working from the right segment (it already takes road direction, bearing, and looped routes into account).
+- Set limit of simultaneously running onboard route requests in config to 2 to prevent excessive resource consumption during intensive/repeated re-routes.
+- Fixed potential timestamp inconsistencies that may have led to location rejection by making the timestamp shift corrector configurable and disabled by default.
+- Fixed an issue with incorrect `UpcomingRoadObject#distanceToStart` values on multi-leg routes.
