@@ -5,30 +5,23 @@ package com.mapbox.androidauto.internal.extensions
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
-fun MapboxCarMapSurface.handleStyleOnAttached(
-    block: (Style) -> Unit
-): OnStyleLoadedListener {
-    getStyle()?.let { block(it) }
-
-    return OnStyleLoadedListener {
-        getStyle()?.let { block(it) }
-    }.also {
-        mapSurface.getMapboxMap().addOnStyleLoadedListener(it)
+@OptIn(ExperimentalCoroutinesApi::class)
+fun MapboxCarMapSurface.styleFlow(): Flow<Style> {
+    return callbackFlow {
+        getStyle()?.let { trySend(it) }
+        val listener = OnStyleLoadedListener {
+            getStyle()?.let { trySend(it) }
+        }
+        mapSurface.getMapboxMap().addOnStyleLoadedListener(listener)
+        awaitClose { mapSurface.getMapboxMap().removeOnStyleLoadedListener(listener) }
     }
-}
-
-fun MapboxCarMapSurface.handleStyleOnDetached(
-    listener: OnStyleLoadedListener?,
-): Style? {
-    listener?.let { mapSurface.getMapboxMap().removeOnStyleLoadedListener(it) }
-    return getStyle()
 }
 
 fun MapboxCarMapSurface.getStyle(): Style? {
     return mapSurface.getMapboxMap().getStyle()
-}
-
-fun MapboxCarMapSurface.getStyleAsync(block: (Style) -> Unit) {
-    mapSurface.getMapboxMap().getStyle { block(it) }
 }

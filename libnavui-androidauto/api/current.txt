@@ -283,7 +283,7 @@ package com.mapbox.androidauto.map.logo {
 package com.mapbox.androidauto.navigation {
 
   public final class CarActiveGuidanceMarkers implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarActiveGuidanceMarkers();
+    ctor public CarActiveGuidanceMarkers(com.mapbox.androidauto.routes.CarRoutesProvider carRoutesProvider = com.mapbox.androidauto.routes.NavigationCarRoutesProvider());
   }
 
   public final class CarArrivalTrigger implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {

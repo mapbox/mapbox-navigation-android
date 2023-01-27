@@ -1,18 +1,18 @@
 package com.mapbox.androidauto.placeslistonmap
 
 import androidx.car.app.model.ItemList
-import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
+import com.mapbox.androidauto.internal.extensions.getStyle
 import com.mapbox.androidauto.internal.extensions.mapboxNavigationForward
+import com.mapbox.androidauto.internal.extensions.styleFlow
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.location.CarLocationProvider
 import com.mapbox.androidauto.search.PlaceRecord
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
+import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
-import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +22,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -30,8 +32,7 @@ class PlacesListOnMapManager(
 ) : MapboxCarMapObserver {
 
     private var carMapSurface: MapboxCarMapSurface? = null
-    private var coroutineScope: CoroutineScope? = null
-    private var styleLoadedListener: OnStyleLoadedListener? = null
+    private lateinit var coroutineScope: CoroutineScope
     private var placesListItemMapper: PlacesListItemMapper? = null
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil()
     private val navigationObserver = mapboxNavigationForward(this::onAttached) { onDetached() }
@@ -65,25 +66,22 @@ class PlacesListOnMapManager(
         coroutineScope = MainScope()
         MapboxNavigationApp.registerObserver(navigationObserver)
 
-        styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached {
-            placesLayerUtil.initializePlacesListOnMapLayer(
-                it,
-                mapboxCarMapSurface.carContext.resources
-            )
-            loadPlaceRecords()
+        loadPlaceRecords()
+        coroutineScope.launch {
+            mapboxCarMapSurface.styleFlow().collectLatest { style ->
+                val resources = mapboxCarMapSurface.carContext.resources
+                placesLayerUtil.initializePlacesListOnMapLayer(style, resources)
+                placeRecords.collect { addPlaceIconsToMap(style, it) }
+            }
         }
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         super.onDetached(mapboxCarMapSurface)
-        mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)?.let {
-            placesLayerUtil.removePlacesListOnMapLayer(it)
-        }
-        styleLoadedListener = null
+        mapboxCarMapSurface.getStyle()?.let { placesLayerUtil.removePlacesListOnMapLayer(it) }
         MapboxNavigationApp.unregisterObserver(navigationObserver)
         carMapSurface = null
-        coroutineScope?.cancel()
-        coroutineScope = null
+        coroutineScope.cancel()
     }
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -101,37 +99,29 @@ class PlacesListOnMapManager(
     }
 
     private fun loadPlaceRecords() {
-        coroutineScope?.launch {
+        coroutineScope.launch {
             val expectedPlaceRecords = withContext(Dispatchers.IO) {
                 placesListOnMapProvider.getPlaces()
             }
-            _placeRecords.value = emptyList()
-            expectedPlaceRecords.fold(
+            _placeRecords.value = expectedPlaceRecords.fold(
                 {
                     logAndroidAuto(
                         "PlacesListOnMapScreen ${it.errorMessage}, ${it.throwable?.stackTrace}"
                     )
+                    emptyList()
                 },
-                {
-                    _placeRecords.value = it
-                    addPlaceIconsToMap(it)
-                }
+                { it },
             )
         }
     }
 
-    private fun addPlaceIconsToMap(places: List<PlaceRecord>) {
+    private fun addPlaceIconsToMap(style: Style, places: List<PlaceRecord>) {
         logAndroidAuto("PlacesListOnMapScreen addPlaceIconsToMap with ${places.size} places.")
-        carMapSurface?.mapSurface?.getMapboxMap()?.let { mapboxMap ->
-            val features = places.filter { it.coordinate != null }.map {
-                Feature.fromGeometry(
-                    Point.fromLngLat(it.coordinate!!.longitude(), it.coordinate.latitude())
-                )
-            }
-            val featureCollection = FeatureCollection.fromFeatures(features)
-            mapboxMap.getStyle()?.let {
-                placesLayerUtil.updatePlacesListOnMapLayer(it, featureCollection)
-            }
+        val features = places.mapNotNull { place ->
+            val coordinate = place.coordinate ?: return@mapNotNull null
+            Feature.fromGeometry(Point.fromLngLat(coordinate.longitude(), coordinate.latitude()))
         }
+        val featureCollection = FeatureCollection.fromFeatures(features)
+        placesLayerUtil.updatePlacesListOnMapLayer(style, featureCollection)
     }
 }
