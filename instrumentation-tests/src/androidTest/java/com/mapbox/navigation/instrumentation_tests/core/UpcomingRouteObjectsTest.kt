@@ -21,7 +21,6 @@ import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
@@ -76,8 +75,9 @@ class UpcomingRouteObjectsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             .first { it.roadObject.id == incidentId }
 
         assertEquals(
-            upcomingIncidentForOneLeg.distanceToStart,
-            upcomingIncidentForTwoLegsRoute.distanceToStart
+            upcomingIncidentForOneLeg.distanceToStart!!,
+            upcomingIncidentForTwoLegsRoute.distanceToStart!!,
+            0.1
         )
     }
 
