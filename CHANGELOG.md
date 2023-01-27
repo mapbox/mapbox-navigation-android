@@ -8,6 +8,19 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Ensure map-matching considers HOV-only roads as auto accessible. [#6791](https://github.com/mapbox/mapbox-navigation-android/pull/6791)
 
+## Mapbox Navigation SDK 2.8.3 - 27 January, 2023
+### Changelog
+[Changes between v2.8.2 and v2.8.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.2...v2.8.3)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
+- Mapbox Navigation Native `v115.1.0`
+- Mapbox Core Common `v23.0.0`
+- Mapbox Java `v6.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.8.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
 ## Mapbox Navigation SDK 2.8.2 - 10 January, 2023
 ### Changelog
 [Changes between v2.8.1 and v2.8.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.1...v2.8.2)
