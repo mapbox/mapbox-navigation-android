@@ -3,6 +3,8 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.content.res.AppCompatResources
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -17,6 +19,8 @@ import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.WaypointFactory
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -57,6 +61,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
+import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
@@ -2040,5 +2045,93 @@ class MapboxRouteLineUtilsTest {
         return first.zip(second).all { (x, y) ->
             equalityFun(x, y)
         }
+    }
+
+    @Test
+    fun temp() {
+        val route = loadNavigationRoute("cross-country-route.json")
+        val leg = route.directionsRoute.legs()!!.first()
+        val congestion = leg.annotation()!!.congestion()
+        val updateCongestion = congestion!!.shuffled()
+
+        val updatedAnnotation = leg.annotation()!!.toBuilder().congestion(updateCongestion).build()
+        val updatedLeg = leg.toBuilder().annotation(updatedAnnotation).build()
+        val updatedRoute = route.directionsRoute.toBuilder().legs(listOf(updatedLeg)).build()
+        val route2 = updatedRoute.toNavigationRoute(RouterOrigin.Offboard)
+
+
+        var start = System.currentTimeMillis()
+        val eq = equalsTraffic(route, route2)
+        println("equalsTraffic took ${System.currentTimeMillis() - start}")
+
+        start = System.currentTimeMillis()
+        val eq2 = route.hashCode() == route2.hashCode()
+        println("route hashCode took ${System.currentTimeMillis() - start}")
+
+        start = System.currentTimeMillis()
+        val hc = hashCodeTraffic(route)
+        val hc2 = hashCodeTraffic(route2)
+        println("trafficHashCode took ${System.currentTimeMillis() - start}")
+
+        println("eq equals $eq")
+        println("eq2 equals $eq2")
+        assertTrue(eq)
+    }
+
+    fun hashCodeTraffic(route: NavigationRoute): Int {
+        var result = route.id.hashCode()
+        route.directionsRoute.legs()?.forEach { routeLeg ->
+            result = 31 * result + routeLeg.annotation()?.congestion().hashCode()
+            result = 31 * result + routeLeg.annotation()?.congestionNumeric().hashCode()
+        }
+        return result
+    }
+    fun equalsTraffic(route: NavigationRoute, other: NavigationRoute): Boolean {
+        //if (this === other) return true
+        //if (javaClass != other?.javaClass) return false
+
+        /// as CacheResultUtils.CacheResultKeyRouteTraffic<*>
+
+        //if (route.id != other.id) return false
+        if (route.directionsRoute.legs()?.size != other.directionsRoute.legs()?.size) return false
+        if (!trafficIsEqual(route, other)) return false
+
+        return true
+    }
+
+    private fun trafficIsEqual(route: NavigationRoute, other: NavigationRoute): Boolean {
+        //would it be easier to check
+        //routeLeg.annotation()?.congestion() == other.directionsRoute.legs()?.get(index)?.annotation()?.congestion()
+        // && routeLeg.annotation()?.congestionNumeric() == other.directionsRoute.legs()?.get(index)?.annotation()?.congestionNumeric()
+        // perhaps using that collection contents equality method that's floating around
+        // in one of the test classes. ???
+
+
+
+
+        val hasNumericTraffic: Boolean = route.directionsRoute.routeOptions()?.annotationsList()
+            ?.contains(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC) ?: false
+        val sameTrafficType = hasNumericTraffic ==
+            other.directionsRoute.routeOptions()?.annotationsList()
+                ?.contains(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC)
+        when (sameTrafficType) {
+            false -> return false
+            true -> {
+                route.directionsRoute.legs()?.forEachIndexed { index, routeLeg ->
+                    val trafficCongestionIsEqual = when (hasNumericTraffic) {
+                        false ->  {
+                            routeLeg.annotation()?.congestion() == other.directionsRoute.legs()?.get(index)?.annotation()?.congestion()
+                        }
+                        true -> {
+                            routeLeg.annotation()?.congestionNumeric() == other.directionsRoute.legs()?.get(index)?.annotation()?.congestionNumeric()
+                        }
+                    }
+                    if (!trafficCongestionIsEqual) {
+                        return false
+                    }
+                }
+            }
+        }
+        return true
     }
 }

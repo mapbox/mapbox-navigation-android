@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.util
 
 import android.util.LruCache
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 
@@ -48,6 +49,60 @@ internal object CacheResultUtils {
 
         override fun hashCode(): Int {
             return route.id.hashCode()
+        }
+    }
+
+    data class CacheResultKeyRouteTraffic<R>(val route: NavigationRoute) :
+        CacheResultCall<(NavigationRoute) -> R, R> {
+
+        override fun invoke(f: (NavigationRoute) -> R) = f(route)
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as CacheResultKeyRouteTraffic<*>
+
+            if (route.id != other.route.id) return false
+            if (route.directionsRoute.legs()?.size != other.route.directionsRoute.legs()?.size) return false
+            if (!trafficIsEqual(route, other.route)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = route.id.hashCode()
+            route.directionsRoute.legs()?.forEach { routeLeg ->
+                result = 31 * result + routeLeg.annotation()?.congestion().hashCode()
+                result = 31 * result + routeLeg.annotation()?.congestionNumeric().hashCode()
+            }
+            return result
+        }
+
+        private fun trafficIsEqual(route: NavigationRoute, other: NavigationRoute): Boolean {
+            val hasNumericTraffic: Boolean = route.directionsRoute.routeOptions()?.annotationsList()
+                ?.contains(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC) ?: false
+            val sameTrafficType = hasNumericTraffic ==
+                other.directionsRoute.routeOptions()?.annotationsList()
+                    ?.contains(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC)
+            when (sameTrafficType) {
+                false -> return false
+                true -> {
+                    route.directionsRoute.legs()?.forEachIndexed { index, routeLeg ->
+                        val trafficCongestionIsEqual = when (hasNumericTraffic) {
+                            false ->  {
+                                routeLeg.annotation()?.congestion() == other.directionsRoute.legs()?.get(index)?.annotation()?.congestion()
+                            }
+                            true -> {
+                                routeLeg.annotation()?.congestionNumeric() == other.directionsRoute.legs()?.get(index)?.annotation()?.congestionNumeric()
+                            }
+                        }
+                        if (!trafficCongestionIsEqual) {
+                            return false
+                        }
+                    }
+                }
+            }
+            return true
         }
     }
 
