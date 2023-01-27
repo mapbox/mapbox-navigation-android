@@ -32,7 +32,22 @@ workflows:
     when:
       not: << pipeline.parameters.mapbox_navigation_native_upstream >>
     jobs:
-      - release-snapshot
+      - release-snapshot-start:
+          type: approval
+          filters:
+            branches:
+              ignore:
+                - main
+                - /release-v.*/
+      - release-snapshot:
+          requires:
+            - release-snapshot-start
+      - release-snapshot:
+          filters:
+            branches:
+              only:
+                - main
+                - /release-v.*/
       - release:
           filters:
             tags:
@@ -96,20 +111,6 @@ workflows:
 #---------- COMMANDS ----------
 #------------------------------
 commands:
-  check-snapshot-label:
-    steps:
-      - run:
-          name: Check snapshot label
-          command: |
-            if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
-              PR=$(curl -s $CIRCLE_PULL_REQUEST)
-            fi
-            if [[ $CIRCLE_BRANCH == main || $CIRCLE_BRANCH =~ release-v.* || $PR == *"mapbox/mapbox-navigation-android/labels/publish-snapshot"* ]]; then
-              exit 0
-            else
-              exit 1
-            fi
-
   write-workspace:
     steps:
       - persist_to_workspace:
@@ -777,7 +778,6 @@ jobs:
     executor: ndk-r22-latest-executor
     resource_class: medium+
     steps:
-      - check-snapshot-label
       - checkout
       - assemble-core-release
       - assemble-ui-release
