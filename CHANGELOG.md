@@ -10,6 +10,9 @@ Mapbox welcomes participation and contributions from everyone.
 ### Changelog
 [Changes between v2.7.2 and v2.7.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.2...v2.7.3)
 
+#### Bug fixes and improvements
+- Fixed some internal Copilot-related issues and added minor improvements.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.7.0))
