@@ -5,11 +5,13 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
-- Ensure map-matching considers HOV-only roads as auto accessible. [#6785](https://github.com/mapbox/mapbox-navigation-android/pull/6785)
 
 ## Mapbox Navigation SDK 2.9.7 - 27 January, 2023
 ### Changelog
 [Changes between v2.9.6 and v2.9.7](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.6...v2.9.7)
+
+#### Bug fixes and improvements
+- Fixed some internal Copilot-related issues and added minor improvements.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -25,7 +27,6 @@ This release depends on, and has been tested with, the following Mapbox dependen
 [Changes between v2.9.5 and v2.9.6](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.5...v2.9.6)
 
 #### Bug fixes and improvements
-
 - Ensure map-matching considers HOV-only roads as auto accessible. [#6785](https://github.com/mapbox/mapbox-navigation-android/pull/6785)
 
 ### Mapbox dependencies
