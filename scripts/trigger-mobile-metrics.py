@@ -2,6 +2,7 @@
 
 # Implements https://circleci.com/docs/2.0/api-job-trigger/
 
+import argparse
 import os
 import json
 import requests
@@ -35,8 +36,8 @@ def TriggerWorkflow(token, commit, publish):
       response_dict = json.loads(response.text)
       print("Started run_android_navigation_benchmark: %s" % response_dict)
 
-def TriggerJob(token, commit, job):
-    url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master"
+def TriggerJob(token, commit, job, publish):
+    url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/vv-publish-benchmark-results-from-job"
 
     headers = {
         "Content-Type": "application/json",
@@ -61,25 +62,35 @@ def TriggerJob(token, commit, job):
       print("Started %s: %s" % (job, build_url))
 
 def Main():
-  token = os.getenv("MOBILE_METRICS_TOKEN")
-  commit = os.getenv("CIRCLE_SHA1")
+  PARSER = argparse.ArgumentParser(description='Script to run mobile-metrics')
+  PARSER.add_argument('--commits', help='Comma separated SHAs of the commits of the Navigation SDK against which mobile-metrics will be run', required=True)
+  PARSER.add_argument('-t', '--token', help='CircleCI token which is used to start metrics', required=True)
+  PARSER.add_argument('--publish', help="A flag indicating that metrics result should be published", action="store_true",)
+  PARSER.set_defaults(publish=False)
+
+  ARGS = PARSER.parse_args()
   
-  if token is None:
-    print("Error triggering because MOBILE_METRICS_TOKEN is not set")
-    sys.exit(1)
+  token = ARGS.token
+  commits = ARGS.commits
+
 
   # Publish results that have been committed to the main branch.
   # Development runs can be found in CircleCI after manually triggered.
-  publishResults = os.getenv("CIRCLE_BRANCH") == "main"
-  TriggerWorkflow(token, commit, publishResults)
-
-  if publishResults:
-    TriggerJob(token, commit, "android-navigation-benchmark")
-    TriggerJob(token, commit, "android-navigation-code-coverage")
-    TriggerJob(token, commit, "android-navigation-binary-size")
-  else:
-    TriggerJob(token, commit, "android-navigation-code-coverage-ci")
-    TriggerJob(token, commit, "android-navigation-binary-size-ci")
+  #publishResults = os.getenv("CIRCLE_BRANCH") == "main"
+  #TriggerWorkflow(token, commit, True)
+  for commit in commits.split(','):
+    #print(f'{token} {commit} {ARGS.publish}')
+    TriggerJob(token, commit, "android-navigation-benchmark", ARGS.publish)
+    #TriggerWorkflow(token, commit, ARGS.publish)
+#
+#
+#   if publishResults:
+#     TriggerJob(token, commit, "android-navigation-benchmark")
+#     TriggerJob(token, commit, "android-navigation-code-coverage")
+#     TriggerJob(token, commit, "android-navigation-binary-size")
+#   else:
+#     TriggerJob(token, commit, "android-navigation-code-coverage-ci")
+#     TriggerJob(token, commit, "android-navigation-binary-size-ci")
 
   return 0
 
