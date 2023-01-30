@@ -1,3 +1,5 @@
+rootProject.name = "mapbox-navigation-android"
+
 include ':examples',
         ':app-tests-wrapper',
         ':instrumentation-tests',
