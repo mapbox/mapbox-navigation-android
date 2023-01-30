@@ -1,7 +1,5 @@
 package com.mapbox.navigation.qa_test_app.domain
 
-import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
@@ -36,18 +34,9 @@ import com.mapbox.navigation.qa_test_app.view.customnavview.MapboxNavigationView
 import com.mapbox.navigation.qa_test_app.view.main.SelectDestinationDialogFragment
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
-typealias LaunchActivityFun = (AppCompatActivity) -> Unit
-
-data class Destination(val name: String, val point: Point)
-
 object TestActivitySuite {
 
-    private val testDestinations = listOf(
-        Destination("Newmarket: A&B office", Point.fromLngLat(-79.4443, 44.0620)),
-        Destination("Toronto: Lume Kitchen and Lounge", Point.fromLngLat(-79.4843, 43.6244))
-    )
-
-    val testActivities = listOf(
+    val testActivities: List<TestActivityDescription> = mutableListOf(
         TestActivityDescription(
             "Components install via MapboxNavigationApp",
             R.string.experimental_components_install,
@@ -249,7 +238,9 @@ object TestActivitySuite {
         ) { activity ->
             activity.startActivity<RouteRefreshActivity>()
         },
-    )
+    ).also {
+        it.addAll(FlavorDependentTestActivitySuite.testActivities)
+    }
 
     fun getTestActivities(category: String): List<TestActivityDescription> {
         return if (category == CATEGORY_NONE) {
