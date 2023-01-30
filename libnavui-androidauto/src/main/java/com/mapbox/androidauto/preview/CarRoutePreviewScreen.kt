@@ -14,24 +14,17 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
-import com.mapbox.androidauto.internal.extensions.handleStyleOnAttached
-import com.mapbox.androidauto.internal.extensions.handleStyleOnDetached
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.location.CarLocationRenderer
+import com.mapbox.androidauto.navigation.CarActiveGuidanceMarkers
 import com.mapbox.androidauto.navigation.CarCameraMode
 import com.mapbox.androidauto.navigation.CarDistanceFormatter
 import com.mapbox.androidauto.navigation.CarNavigationCamera
 import com.mapbox.androidauto.navigation.audioguidance.muteAudioGuidance
 import com.mapbox.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
-import com.mapbox.androidauto.placeslistonmap.PlacesListOnMapLayerUtil
 import com.mapbox.androidauto.screenmanager.MapboxScreen
 import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.search.PlaceRecord
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
-import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
-import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -44,7 +37,6 @@ internal class CarRoutePreviewScreen @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext,
     private val placeRecord: PlaceRecord,
     private val navigationRoutes: List<NavigationRoute>,
-    private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil(),
 ) : Screen(mapboxCarContext.carContext) {
 
     private val carRoutesProvider = PreviewCarRoutesProvider(navigationRoutes)
@@ -57,37 +49,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
         alternativeCarCameraMode = CarCameraMode.FOLLOWING,
         carRoutesProvider = carRoutesProvider,
     )
-
-    private var styleLoadedListener: OnStyleLoadedListener? = null
-
-    private val surfaceListener = object : MapboxCarMapObserver {
-
-        override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
-            super.onAttached(mapboxCarMapSurface)
-            logAndroidAuto("CarRoutePreviewScreen loaded")
-            styleLoadedListener = mapboxCarMapSurface.handleStyleOnAttached { style ->
-                placesLayerUtil.initializePlacesListOnMapLayer(
-                    style,
-                    carContext.resources
-                )
-                val coordinate = placeRecord.coordinate ?: return@handleStyleOnAttached
-                val featureCollection =
-                    FeatureCollection.fromFeature(Feature.fromGeometry(coordinate))
-                placesLayerUtil.updatePlacesListOnMapLayer(
-                    style,
-                    featureCollection
-                )
-            }
-        }
-
-        override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
-            super.onDetached(mapboxCarMapSurface)
-            logAndroidAuto("CarRoutePreviewScreen detached")
-            mapboxCarMapSurface.handleStyleOnDetached(styleLoadedListener)?.let {
-                placesLayerUtil.removePlacesListOnMapLayer(it)
-            }
-        }
-    }
+    private val carMarkers = CarActiveGuidanceMarkers(carRoutesProvider)
 
     init {
         logAndroidAuto("CarRoutePreviewScreen constructor")
@@ -104,7 +66,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
                 mapboxCarContext.mapboxCarMap.registerObserver(carSpeedLimitRenderer)
                 mapboxCarContext.mapboxCarMap.registerObserver(carNavigationCamera)
                 mapboxCarContext.mapboxCarMap.registerObserver(carRouteLineRenderer)
-                mapboxCarContext.mapboxCarMap.registerObserver(surfaceListener)
+                mapboxCarContext.mapboxCarMap.registerObserver(carMarkers)
             }
 
             override fun onPause(owner: LifecycleOwner) {
@@ -113,7 +75,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carSpeedLimitRenderer)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carNavigationCamera)
                 mapboxCarContext.mapboxCarMap.unregisterObserver(carRouteLineRenderer)
-                mapboxCarContext.mapboxCarMap.unregisterObserver(surfaceListener)
+                mapboxCarContext.mapboxCarMap.unregisterObserver(carMarkers)
             }
         })
     }

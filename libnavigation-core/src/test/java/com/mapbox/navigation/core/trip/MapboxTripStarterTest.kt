@@ -127,6 +127,42 @@ class MapboxTripStarterTest {
     }
 
     @Test
+    fun `enableMapMatching after replay route will resetTripSession`() {
+        every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
+
+        val mapboxNavigation = mockMapboxNavigation()
+        sut.enableReplayRoute()
+        sut.onAttached(mapboxNavigation)
+        sut.enableMapMatching()
+
+        verifyOrder {
+            replayRouteSession.onAttached(mapboxNavigation)
+            replayRouteSession.onDetached(mapboxNavigation)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.resetTripSession(any())
+        }
+        verify(exactly = 0) { mapboxNavigation.stopTripSession() }
+    }
+
+    @Test
+    fun `enableMapMatching after replay history will resetTripSession`() {
+        every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
+
+        val mapboxNavigation = mockMapboxNavigation()
+        sut.enableReplayHistory()
+        sut.onAttached(mapboxNavigation)
+        sut.enableMapMatching()
+
+        verifyOrder {
+            replayHistorySession.onAttached(mapboxNavigation)
+            replayHistorySession.onDetached(mapboxNavigation)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.resetTripSession(any())
+        }
+        verify(exactly = 0) { mapboxNavigation.stopTripSession() }
+    }
+
+    @Test
     fun `refreshLocationPermissions will startTripSession after onAttached`() {
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 

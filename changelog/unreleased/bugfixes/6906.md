@@ -1,0 +1,1 @@
+- Make the location switch to map matching faster with MapboxTripStarter.enableMapMatching

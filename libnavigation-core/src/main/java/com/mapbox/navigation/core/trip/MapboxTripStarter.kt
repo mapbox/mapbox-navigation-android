@@ -179,6 +179,7 @@ class MapboxTripStarter internal constructor(
             replayRouteSession = null
             replayHistorySession.onDetached(mapboxNavigation)
             mapboxNavigation.startTripSession()
+            mapboxNavigation.resetTripSession { }
         } else {
             logI(LOG_CATEGORY) {
                 "startTripSession was not called. Accept location permissions and call " +
