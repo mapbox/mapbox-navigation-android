@@ -1,5 +1,3 @@
-@file:Suppress("NoMockkVerifyImport")
-
 package com.mapbox.navigation.core.lifecycle
 
 import android.app.Activity
@@ -24,6 +22,7 @@ import org.robolectric.RobolectricTestRunner
 
 @ExperimentalPreviewMapboxNavigationAPI
 @RunWith(RobolectricTestRunner::class)
+@Suppress("MaxLineLength")
 class CarAppLifecycleOwnerTest {
     private val testLifecycleObserver: DefaultLifecycleObserver = mockk(relaxUnitFun = true)
     private val carAppLifecycleOwner = CarAppLifecycleOwner()
@@ -183,7 +182,6 @@ class CarAppLifecycleOwnerTest {
     }
 
     @Test
-    @Suppress("MaxLineLength")
     fun `verify activity switching does not stop the app lifecycle`() {
         /**
          * https://developer.android.com/guide/components/activities/activity-lifecycle#coordinating-activities
@@ -214,23 +212,23 @@ class CarAppLifecycleOwnerTest {
     }
 
     @Test
-    @Suppress("MaxLineLength")
     fun `activityLifecycleCallbacks verify orientation switching does not stop the app lifecycle`() {
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
-            val activityA: Activity = mockActivity()
-            every { activityA.isChangingConfigurations } returns false
+            val activityA = mockActivity()
+            val activityB = mockActivity()
             onActivityCreated(activityA, mockk())
             onActivityStarted(activityA)
             onActivityResumed(activityA)
+            onActivityCreated(activityB, mockk())
+            onActivityStarted(activityB)
+            onActivityResumed(activityB)
             every { activityA.isChangingConfigurations } returns true
             onActivityPaused(activityA)
             onActivityStopped(activityA)
             onActivityDestroyed(activityA)
-            val activityB: Activity = mockActivity()
-            every { activityB.isChangingConfigurations } returns false
-            onActivityCreated(activityB, mockk())
-            onActivityStarted(activityB)
-            onActivityResumed(activityB)
+            onActivityPaused(activityB)
+            onActivityStopped(activityB)
+            onActivityDestroyed(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -241,17 +239,15 @@ class CarAppLifecycleOwnerTest {
     }
 
     @Test
-    @Suppress("MaxLineLength")
     fun `activityLifecycleCallbacks verify backgrounded orientation switching does not stop the app lifecycle`() {
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
-            val activityA: Activity = mockActivity()
-            every { activityA.isChangingConfigurations } returns false
+            val activityA = mockActivity()
+            val activityB = mockActivity()
             onActivityCreated(activityA, mockk())
+            onActivityCreated(activityB, mockk())
             every { activityA.isChangingConfigurations } returns true
             onActivityDestroyed(activityA)
-            val activityB: Activity = mockActivity()
-            every { activityB.isChangingConfigurations } returns false
-            onActivityCreated(activityB, mockk())
+            onActivityDestroyed(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -262,23 +258,23 @@ class CarAppLifecycleOwnerTest {
     }
 
     @Test
-    @Suppress("MaxLineLength")
     fun `startedReferenceCounter verify Activity orientation switching does not stop the app lifecycle`() {
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            val activityA: ComponentActivity = mockComponentActivity()
-            every { activityA.isChangingConfigurations } returns false
+            val activityA = mockComponentActivity()
+            val activityB = mockComponentActivity()
             onCreate(activityA)
             onStart(activityA)
             onResume(activityA)
+            onCreate(activityB)
+            onStart(activityB)
+            onResume(activityB)
             every { activityA.isChangingConfigurations } returns true
             onPause(activityA)
             onStop(activityA)
             onDestroy(activityA)
-            val activityB: ComponentActivity = mockComponentActivity()
-            every { activityB.isChangingConfigurations } returns false
-            onCreate(activityB)
-            onStart(activityB)
-            onResume(activityB)
+            onPause(activityB)
+            onStop(activityB)
+            onDestroy(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -289,17 +285,15 @@ class CarAppLifecycleOwnerTest {
     }
 
     @Test
-    @Suppress("MaxLineLength")
     fun `startedReferenceCounter verify Activity backgrounded orientation switching does not stop the app lifecycle`() {
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            val activityA: ComponentActivity = mockComponentActivity()
-            every { activityA.isChangingConfigurations } returns false
+            val activityA = mockComponentActivity()
+            val activityB = mockComponentActivity()
             onCreate(activityA)
+            onCreate(activityB)
             every { activityA.isChangingConfigurations } returns true
             onDestroy(activityA)
-            val activityB: ComponentActivity = mockComponentActivity()
-            every { activityB.isChangingConfigurations } returns false
-            onCreate(activityB)
+            onDestroy(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -310,23 +304,25 @@ class CarAppLifecycleOwnerTest {
     }
 
     @Test
-    @Suppress("MaxLineLength")
     fun `startedReferenceCounter verify Fragment orientation switching does not stop the app lifecycle`() {
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            val parentActivityA = mockActivity(false)
-            val fragmentA: Fragment = mockk { every { activity } returns parentActivityA }
+            val parentActivityA = mockActivity()
+            val parentActivityB = mockActivity()
+            val fragmentA = mockk<Fragment> { every { activity } returns parentActivityA }
+            val fragmentB = mockk<Fragment> { every { activity } returns parentActivityB }
             onCreate(fragmentA)
             onStart(fragmentA)
             onResume(fragmentA)
+            onCreate(fragmentB)
+            onStart(fragmentB)
+            onResume(fragmentB)
             every { parentActivityA.isChangingConfigurations } returns true
             onPause(fragmentA)
             onStop(fragmentA)
             onDestroy(fragmentA)
-            val parentActivityB = mockActivity(false)
-            val fragmentB: Fragment = mockk { every { activity } returns parentActivityB }
-            onCreate(fragmentB)
-            onStart(fragmentB)
-            onResume(fragmentB)
+            onPause(fragmentB)
+            onStop(fragmentB)
+            onDestroy(fragmentB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -337,17 +333,16 @@ class CarAppLifecycleOwnerTest {
     }
 
     @Test
-    @Suppress("MaxLineLength")
     fun `startedReferenceCounter verify Fragment backgrounded orientation switching does not stop the app lifecycle`() {
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            val parentActivityA = mockActivity(false)
-            val fragmentA: Fragment = mockk { every { activity } returns parentActivityA }
+            val parentActivityA = mockActivity()
+            val activityB = mockComponentActivity()
+            val fragmentA = mockk<Fragment> { every { activity } returns parentActivityA }
             onCreate(fragmentA)
+            onCreate(activityB)
             every { parentActivityA.isChangingConfigurations } returns true
             onDestroy(fragmentA)
-            val activityB: ComponentActivity = mockComponentActivity()
-            every { activityB.isChangingConfigurations } returns false
-            onCreate(activityB)
+            onDestroy(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -359,8 +354,8 @@ class CarAppLifecycleOwnerTest {
 
     @Test
     fun `verify app can restart after everything is destroyed`() {
+        val activity = mockActivity()
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
-            val activity: Activity = mockActivity()
             onActivityCreated(activity, mockk())
             onActivityStarted(activity)
             onActivityResumed(activity)
@@ -371,7 +366,6 @@ class CarAppLifecycleOwnerTest {
             onResume(carAppLifecycleOwner)
         }
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
-            val activity: Activity = mockActivity()
             onActivityPaused(activity)
             onActivityStopped(activity)
             onActivityDestroyed(activity)
@@ -466,6 +460,92 @@ class CarAppLifecycleOwnerTest {
         verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStop(any()) }
         verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+    }
+
+    @Test
+    fun `activityLifecycleCallbacks verify repeated attach will not affect subsequent detach`() {
+        carAppLifecycleOwner.activityLifecycleCallbacks.apply {
+            val activity = mockActivity()
+            onActivityCreated(activity, mockk())
+            onActivityStarted(activity)
+            onActivityResumed(activity)
+            onActivityCreated(activity, mockk())
+            onActivityStarted(activity)
+            onActivityResumed(activity)
+            onActivityPaused(activity)
+            onActivityStopped(activity)
+            onActivityDestroyed(activity)
+
+            verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onPause(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onStop(any()) }
+            verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+        }
+    }
+
+    @Test
+    fun `startedReferenceCounter verify repeated attach will not affect subsequent detach`() {
+        carAppLifecycleOwner.startedReferenceCounter.apply {
+            val activity = mockComponentActivity()
+            onCreate(activity)
+            onStart(activity)
+            onResume(activity)
+            onCreate(activity)
+            onStart(activity)
+            onResume(activity)
+            onPause(activity)
+            onStop(activity)
+            onDestroy(activity)
+
+            verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onPause(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onStop(any()) }
+            verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+        }
+    }
+
+    @Test
+    fun `activityLifecycleCallbacks verify detach without attach will not affect subsequent attach`() {
+        carAppLifecycleOwner.activityLifecycleCallbacks.apply {
+            val activity = mockActivity()
+            onActivityPaused(activity)
+            onActivityStopped(activity)
+            onActivityDestroyed(activity)
+            onActivityCreated(activity, mockk())
+            onActivityStarted(activity)
+            onActivityResumed(activity)
+
+            verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+            verify(exactly = 0) { testLifecycleObserver.onPause(any()) }
+            verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
+            verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+        }
+    }
+
+    @Test
+    fun `startedReferenceCounter verify detach without attach will not affect subsequent attach`() {
+        carAppLifecycleOwner.startedReferenceCounter.apply {
+            val activity = mockComponentActivity()
+            onPause(activity)
+            onStop(activity)
+            onDestroy(activity)
+            onCreate(activity)
+            onStart(activity)
+            onResume(activity)
+
+            verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+            verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+            verify(exactly = 0) { testLifecycleObserver.onPause(any()) }
+            verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
+            verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+        }
     }
 
     class TestLifecycleOwner : LifecycleOwner {

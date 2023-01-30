@@ -14,12 +14,12 @@ import com.mapbox.navigation.utils.internal.logI
 internal class CarAppLifecycleOwner : LifecycleOwner {
 
     // Keeps track of the activities created and foregrounded
-    private var activitiesCreated = 0
-    private var activitiesForegrounded = 0
+    private val activitiesCreated = hashSetOf<Activity>()
+    private val activitiesForegrounded = hashSetOf<Activity>()
 
     // Keeps track of the car session created and foregrounded
-    private var lifecycleCreated = 0
-    private var lifecycleForegrounded = 0
+    private val lifecycleCreated = hashSetOf<LifecycleOwner>()
+    private val lifecycleForegrounded = hashSetOf<LifecycleOwner>()
 
     // Keeps track of the activities changing configurations
     private var createdChangingConfiguration = 0
@@ -31,48 +31,54 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
     @VisibleForTesting
     internal val startedReferenceCounter = object : DefaultLifecycleObserver {
         override fun onCreate(owner: LifecycleOwner) {
+            if (!lifecycleCreated.add(owner)) return
             if (createdChangingConfiguration > 0) {
                 createdChangingConfiguration--
             } else {
-                lifecycleCreated++
                 logI("LifecycleOwner ($owner) onCreate", LOG_CATEGORY)
-                if (activitiesCreated == 0 && lifecycleCreated == 1) {
+                if (activitiesCreated.size == 0 && lifecycleCreated.size == 1) {
                     changeState(Lifecycle.State.STARTED)
                 }
             }
         }
 
         override fun onStart(owner: LifecycleOwner) {
+            if (!lifecycleForegrounded.add(owner)) return
             if (foregroundedChangingConfiguration > 0) {
                 foregroundedChangingConfiguration--
             } else {
-                lifecycleForegrounded++
                 logI("LifecycleOwner ($owner) onStart", LOG_CATEGORY)
-                if (activitiesForegrounded == 0 && lifecycleForegrounded == 1) {
+                if (activitiesForegrounded.size == 0 && lifecycleForegrounded.size == 1) {
                     changeState(Lifecycle.State.RESUMED)
                 }
             }
         }
 
         override fun onStop(owner: LifecycleOwner) {
+            if (!lifecycleForegrounded.remove(owner)) return
             if (owner.isChangingConfigurations()) {
                 foregroundedChangingConfiguration++
             } else {
-                lifecycleForegrounded--
                 logI("LifecycleOwner ($owner) onStop", LOG_CATEGORY)
-                if (activitiesForegrounded == 0 && lifecycleForegrounded == 0) {
+                if (activitiesForegrounded.size == 0 &&
+                    lifecycleForegrounded.size == 0 &&
+                    foregroundedChangingConfiguration == 0
+                ) {
                     changeState(Lifecycle.State.STARTED)
                 }
             }
         }
 
         override fun onDestroy(owner: LifecycleOwner) {
+            if (!lifecycleCreated.remove(owner)) return
             if (owner.isChangingConfigurations()) {
                 createdChangingConfiguration++
             } else {
-                lifecycleCreated--
                 logI("LifecycleOwner ($owner) onDestroy", LOG_CATEGORY)
-                if (activitiesCreated == 0 && lifecycleCreated == 0) {
+                if (activitiesCreated.size == 0 &&
+                    lifecycleCreated.size == 0 &&
+                    createdChangingConfiguration == 0
+                ) {
                     changeState(Lifecycle.State.CREATED)
                 }
             }
@@ -86,24 +92,24 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
     @VisibleForTesting
     internal val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+            if (!activitiesCreated.add(activity)) return
             if (createdChangingConfiguration > 0) {
                 createdChangingConfiguration--
             } else {
-                activitiesCreated++
                 logI("app onActivityCreated", LOG_CATEGORY)
-                if (lifecycleCreated == 0 && activitiesCreated == 1) {
+                if (lifecycleCreated.size == 0 && activitiesCreated.size == 1) {
                     changeState(Lifecycle.State.STARTED)
                 }
             }
         }
 
         override fun onActivityStarted(activity: Activity) {
+            if (!activitiesForegrounded.add(activity)) return
             if (foregroundedChangingConfiguration > 0) {
                 foregroundedChangingConfiguration--
             } else {
-                activitiesForegrounded++
                 logI("app onActivityStarted", LOG_CATEGORY)
-                if (lifecycleForegrounded == 0 && activitiesForegrounded == 1) {
+                if (lifecycleForegrounded.size == 0 && activitiesForegrounded.size == 1) {
                     changeState(Lifecycle.State.RESUMED)
                 }
             }
@@ -118,12 +124,15 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         }
 
         override fun onActivityStopped(activity: Activity) {
+            if (!activitiesForegrounded.remove(activity)) return
             if (activity.isChangingConfigurations) {
                 foregroundedChangingConfiguration++
             } else {
-                activitiesForegrounded--
                 logI("app onActivityStopped", LOG_CATEGORY)
-                if (lifecycleForegrounded == 0 && activitiesForegrounded == 0) {
+                if (lifecycleForegrounded.size == 0 &&
+                    activitiesForegrounded.size == 0 &&
+                    foregroundedChangingConfiguration == 0
+                ) {
                     changeState(Lifecycle.State.STARTED)
                 }
             }
@@ -134,12 +143,15 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         }
 
         override fun onActivityDestroyed(activity: Activity) {
+            if (!activitiesCreated.remove(activity)) return
             if (activity.isChangingConfigurations) {
                 createdChangingConfiguration++
             } else {
-                activitiesCreated--
                 logI("app onActivityDestroyed", LOG_CATEGORY)
-                if (lifecycleCreated == 0 && activitiesCreated == 0) {
+                if (lifecycleCreated.size == 0 &&
+                    activitiesCreated.size == 0 &&
+                    createdChangingConfiguration == 0
+                ) {
                     changeState(Lifecycle.State.CREATED)
                 }
             }
