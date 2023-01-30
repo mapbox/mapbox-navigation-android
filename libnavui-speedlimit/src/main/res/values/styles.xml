@@ -21,22 +21,22 @@
     </style>
 
     <style name="MapboxSpeedInfoPostedSpeedMutcdStyle">
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">32dp</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="MapboxSpeedInfoCurrentSpeedMutcdStyle">
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">32dp</item>
         <item name="android:textColor">@color/mapbox_current_speed_color</item>
     </style>
 
     <style name="MapboxSpeedInfoPostedSpeedViennaStyle">
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">32dp</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="MapboxSpeedInfoCurrentSpeedViennaStyle">
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">32dp</item>
         <item name="android:textColor">@color/mapbox_current_speed_color</item>
     </style>
 </resources>
