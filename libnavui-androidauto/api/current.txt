@@ -647,6 +647,15 @@ package com.mapbox.androidauto.preview {
     property public kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class PreviewCarRoutesProvider2 implements com.mapbox.androidauto.routes.CarRoutesProvider {
+    ctor public PreviewCarRoutesProvider2();
+    method public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getNavigationRoutes();
+    method public kotlinx.coroutines.flow.Flow<com.mapbox.navigation.core.preview.RoutesPreview> getRoutesPreview();
+    method public void updateSelectedRoute(int index);
+    property public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
+    property public final kotlinx.coroutines.flow.Flow<com.mapbox.navigation.core.preview.RoutesPreview> routesPreview;
+  }
+
 }
 
 package com.mapbox.androidauto.routes {
@@ -700,6 +709,7 @@ package com.mapbox.androidauto.screenmanager {
   }
 
   public final class MapboxScreenGraph {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.androidauto.MapboxCarContext prepareExperimentalRoutePreviewScreen(com.mapbox.androidauto.MapboxCarContext);
     method public static com.mapbox.androidauto.MapboxCarContext prepareScreens(com.mapbox.androidauto.MapboxCarContext);
   }
 
@@ -803,6 +813,11 @@ package com.mapbox.androidauto.screenmanager.factories {
 
   public final class RoutePreviewScreenFactory implements com.mapbox.androidauto.screenmanager.MapboxScreenFactory {
     ctor public RoutePreviewScreenFactory(com.mapbox.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoutePreviewScreenFactory2 implements com.mapbox.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public RoutePreviewScreenFactory2(com.mapbox.androidauto.MapboxCarContext mapboxCarContext);
     method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
   }
 

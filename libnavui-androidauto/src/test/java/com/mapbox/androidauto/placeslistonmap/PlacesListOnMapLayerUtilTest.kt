@@ -13,14 +13,21 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.unmockkStatic
+import io.mockk.unmockkAll
 import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PlacesListOnMapLayerUtilTest : MapboxRobolectricTestRunner() {
+
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
 
     @Test
     fun removeFavoritesLayer() {
@@ -45,12 +52,13 @@ class PlacesListOnMapLayerUtilTest : MapboxRobolectricTestRunner() {
         PlacesListOnMapLayerUtil().updatePlacesListOnMapLayer(style, featureCollection)
 
         verify { source.featureCollection(featureCollection) }
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
     fun initializeFavoritesLayer() {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkObject(GeoJsonSource)
+        every { GeoJsonSource.directSetterEnabled() } returns true
         val style = mockk<Style>(relaxed = true) {
             every { getStyleImage("MapboxGenericLocationIcon") } returns null
             every { styleSourceExists("MapboxCarPlacesListLayerIdSource") } returns false
@@ -73,6 +81,5 @@ class PlacesListOnMapLayerUtilTest : MapboxRobolectricTestRunner() {
         verify { style.addLayer(capture(layerSlot)) }
         assertEquals("MapboxCarPlacesListLayerIdSource", layerSlot.captured.sourceId)
         assertEquals("MapboxCarPlacesListLayerId", layerSlot.captured.layerId)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 }
