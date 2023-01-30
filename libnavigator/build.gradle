@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.jaredsburrows.license'
-apply from: "../gradle/ktlint.gradle"
+apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -16,7 +16,7 @@ android {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
     }
 
     testOptions {
@@ -48,13 +48,13 @@ dependencies {
     implementation dependenciesList.coroutinesCore
 
     testImplementation(project(':libtesting-utils'))
-    apply from: "../gradle/unit-testing-dependencies.gradle"
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     // instrumentation tests
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
     androidTestUtil dependenciesList.testOrchestrator
 }
 
-apply from: "../gradle/track-public-apis.gradle"
-apply from: "../gradle/publish.gradle"
-apply from: "../gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/track-public-apis.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"

@@ -3,8 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
-apply from: "../gradle/ktlint.gradle"
-apply from: file("../gradle/artifact-settings.gradle")
+apply from: "${rootDir}/gradle/ktlint.gradle"
+apply from: file("${rootDir}/gradle/artifact-settings.gradle")
 
 version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
@@ -21,7 +21,7 @@ android {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
     }
 
     buildFeatures {
@@ -37,6 +37,6 @@ dependencies {
     implementation dependenciesList.androidXAppCompat
 }
 
-apply from: "../gradle/track-public-apis.gradle"
-apply from: "../gradle/jacoco.gradle"
-apply from: "../gradle/publish.gradle"
+apply from: "${rootDir}/gradle/track-public-apis.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"

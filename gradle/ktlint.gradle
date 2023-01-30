@@ -1,4 +1,4 @@
-apply from: "../gradle/dependencies.gradle"
+apply from: "${rootDir}/gradle/dependencies.gradle"
 
 configurations {
     ktlint

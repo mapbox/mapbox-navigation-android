@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.mapbox.maps.token'
-apply from: "../gradle/ktlint.gradle"
+apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
