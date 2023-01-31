@@ -1,5 +1,5 @@
 buildscript {
-  apply from: "${rootDir}/gradle/dependencies.gradle"
+  apply from: "${rootDir}/gradle/scripts/dependencies.gradle"
   repositories {
     google()
     mavenCentral()
@@ -77,10 +77,10 @@ allprojects {
 
 subprojects {
   apply plugin: 'idea'
-  apply from: "${rootDir}/gradle/dependencies.gradle"
-  apply from: "${rootDir}/gradle/dependency-updates.gradle"
-  apply from: "${rootDir}/gradle/checkstyle.gradle"
-  apply from: "${rootDir}/gradle/dependencies-graph.gradle"
+  apply from: "${rootDir}/gradle/scripts/dependencies.gradle"
+  apply from: "${rootDir}/gradle/scripts/dependency-updates.gradle"
+  apply from: "${rootDir}/gradle/scripts/checkstyle.gradle"
+  apply from: "${rootDir}/gradle/scripts/dependencies-graph.gradle"
 
   plugins.withId('org.jetbrains.kotlin.jvm') {
     compileKotlin {
@@ -91,7 +91,7 @@ subprojects {
   }
 }
 
-apply from: "${rootDir}/gradle/kdoc-settings.gradle"
+apply from: "${rootDir}/gradle/scripts/kdoc-settings.gradle"
 
 dokkaHtmlMultiModule {
   outputDirectory.set(kdocPath)

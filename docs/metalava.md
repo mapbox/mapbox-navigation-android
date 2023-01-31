@@ -49,4 +49,4 @@ com.google.guava:guava:30.1.1-jre
 // Metalava isn't released yet. Check in its jar and explicitly track its transitive deps.
 ```
 
-- Copy and paste (update) the new deps into [`gradle/metalava-dependencies.gradle`](https://github.com/mapbox/mapbox-navigation-android/blob/main/gradle/metalava-dependencies.gradle)
+- Copy and paste (update) the new deps into [`gradle/metalava-dependencies.gradle`](https://github.com/mapbox/mapbox-navigation-android/blob/main/gradle/scripts/metalava-dependencies.gradle)

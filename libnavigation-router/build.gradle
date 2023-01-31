@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.jaredsburrows.license'
-apply from: "${rootDir}/gradle/ktlint.gradle"
+apply from: "${rootDir}/gradle/scripts/ktlint.gradle"
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -41,9 +41,9 @@ dependencies {
     testImplementation project(':libtesting-utils')
     testImplementation project(':libtesting-navigation-base')
     testImplementation project(':libtesting-navigation-util')
-    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    apply from: "${rootDir}/gradle/scripts/unit-testing-dependencies.gradle"
 }
 
-apply from: "${rootDir}/gradle/track-public-apis.gradle"
-apply from: "${rootDir}/gradle/publish.gradle"
-apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/scripts/track-public-apis.gradle"
+apply from: "${rootDir}/gradle/scripts/publish.gradle"
+apply from: "${rootDir}/gradle/scripts/jacoco.gradle"

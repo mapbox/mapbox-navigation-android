@@ -1,8 +1,8 @@
 ext {
     mapboxArtifactGroupId = 'com.mapbox.navigation'
-    mapboxArtifactId = project.property('POM_ARTIFACT_ID')
-    mapboxArtifactTitle = project.property('POM_ARTIFACT_TITLE')
-    mapboxArtifactDescription = project.property('POM_DESCRIPTION')
+    mapboxArtifactId = project.hasProperty('POM_ARTIFACT_ID') ? project.property('POM_ARTIFACT_ID') : 'undefined'
+    mapboxArtifactTitle = project.hasProperty('POM_ARTIFACT_TITLE') ? project.property('POM_ARTIFACT_TITLE') : 'undefined'
+    mapboxArtifactDescription = project.hasProperty('POM_DESCRIPTION') ? project.property('POM_DESCRIPTION') : 'undefined'
     mapboxDeveloperName = 'Mapbox'
     mapboxDeveloperId = 'mapbox'
     mapboxArtifactUrl = 'https://github.com/mapbox/mapbox-navigation-android'

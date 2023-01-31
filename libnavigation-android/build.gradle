@@ -3,8 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
-apply from: "${rootDir}/gradle/ktlint.gradle"
-apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+apply from: "${rootDir}/gradle/scripts/ktlint.gradle"
+apply from: file("${rootDir}/gradle/scripts/artifact-settings.gradle")
 
 version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
@@ -37,7 +37,7 @@ dependencies {
     api project(":libnavui-status")
 }
 
-apply from: "${rootDir}/gradle/track-public-apis.gradle"
-apply from: "${rootDir}/gradle/jacoco.gradle"
-apply from: "${rootDir}/gradle/publish.gradle"
-apply from: "${rootDir}/gradle/verify-common-sdk-version.gradle"
+apply from: "${rootDir}/gradle/scripts/track-public-apis.gradle"
+apply from: "${rootDir}/gradle/scripts/jacoco.gradle"
+apply from: "${rootDir}/gradle/scripts/publish.gradle"
+apply from: "${rootDir}/gradle/scripts/verify-common-sdk-version.gradle"

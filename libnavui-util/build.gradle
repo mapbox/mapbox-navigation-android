@@ -4,8 +4,8 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
-apply from: "${rootDir}/gradle/ktlint.gradle"
-apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+apply from: "${rootDir}/gradle/scripts/ktlint.gradle"
+apply from: file("${rootDir}/gradle/scripts/artifact-settings.gradle")
 
 version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
@@ -41,13 +41,13 @@ dependencies {
     implementation dependenciesList.androidXLifecycleRuntime
     implementation(dependenciesList.androidXDataStore)
 
-    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    apply from: "${rootDir}/gradle/scripts/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
     testImplementation project(':libtesting-navigation-util')
     testImplementation dependenciesList.androidXLifecycleTesting
     testImplementation dependenciesList.androidXArchCoreTesting
 }
 
-apply from: "${rootDir}/gradle/track-public-apis.gradle"
-apply from: "${rootDir}/gradle/jacoco.gradle"
-apply from: "${rootDir}/gradle/publish.gradle"
+apply from: "${rootDir}/gradle/scripts/track-public-apis.gradle"
+apply from: "${rootDir}/gradle/scripts/jacoco.gradle"
+apply from: "${rootDir}/gradle/scripts/publish.gradle"
