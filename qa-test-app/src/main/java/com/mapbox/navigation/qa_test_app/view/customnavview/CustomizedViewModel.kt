@@ -16,6 +16,8 @@ class CustomizedViewModel : ViewModel() {
     // General
     val showManeuver = MutableLiveData(true)
     val showSpeedLimit = MutableLiveData(true)
+    val showSpeedInfoLegend = MutableLiveData(false)
+    val speedInfoSign = MutableLiveData("--")
     val showRoadName = MutableLiveData(true)
     val showActionButtons = MutableLiveData(true)
     val useCustomStyles = MutableLiveData(false)

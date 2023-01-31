@@ -40,6 +40,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.dump.MapboxDumpRegistry
 import com.mapbox.navigation.core.internal.extensions.attachCreated
@@ -237,6 +238,32 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
             viewModel.useLegacy,
             ::toggleLegacySpeedLimit
         )
+
+        bindSwitch(
+            menuBinding.toggleShowSpeedInfoLegend,
+            viewModel.showSpeedInfoLegend
+        ) { updateSpeedInfoOptions() }
+
+        bindSpinner(
+            menuBinding.spinnerSpeedInfoSign,
+            viewModel.speedInfoSign
+        ) { updateSpeedInfoOptions() }
+    }
+
+    private fun updateSpeedInfoOptions() {
+        val speedLimitSign = when (viewModel.speedInfoSign.value) {
+            "MUTCD" -> SpeedLimitSign.MUTCD
+            "VIENNA" -> SpeedLimitSign.VIENNA
+            else -> null
+        }
+        val showLegend = viewModel.showSpeedInfoLegend.value ?: false
+
+        binding.navigationView.customizeViewStyles {
+            speedInfoOptions = MapboxSpeedInfoOptions.Builder()
+                .renderWithSpeedSign(speedLimitSign)
+                .showLegend(showLegend)
+                .build()
+        }
     }
 
     //endregion

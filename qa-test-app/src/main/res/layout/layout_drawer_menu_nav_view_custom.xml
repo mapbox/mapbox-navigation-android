@@ -131,15 +131,6 @@
                     android:textAllCaps="true" />
 
                 <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/toggleShowSpeedLimit"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingVertical="10dp"
-                    android:text="Show Speed Limit"
-                    android:textAllCaps="true" />
-
-                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/toggleShowRoadName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -321,6 +312,47 @@
                     android:text="Use Legacy Speed Limit"
                     android:textAllCaps="true" />
 
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowSpeedLimit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Speed Info"
+                    android:textAllCaps="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/toggleShowSpeedInfoLegend"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="10dp"
+                    android:text="Show Speed Info Legend"
+                    android:textAllCaps="true" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAllCaps="true"
+                        android:textColor="@color/colorOnSurface"
+                        android:text="Speed Info Sign" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/spinnerSpeedInfoSign"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="5dp"
+                        android:entries="@array/drop_in_speed_info_sign"
+                        android:spinnerMode="dropdown" />
+
+                </LinearLayout>
             </androidx.appcompat.widget.LinearLayoutCompat>
 
             <!-- Actions Customization -->

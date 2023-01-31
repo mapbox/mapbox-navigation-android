@@ -1,0 +1,1 @@
+- Fixed rendering of 3 digit speed limit values in `MapboxSpeedInfoView`.
