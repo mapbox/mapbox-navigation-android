@@ -37,6 +37,27 @@ object RoadObjectFactory {
             }
     }
 
+    fun List<UpcomingRoadObject>.getUpdatedObjectsAhead(
+        status: com.mapbox.navigator.NavigationStatus
+    ): List<UpcomingRoadObject> {
+        val idToDistanceRemaining = status.upcomingRouteAlerts.associate {
+            it.roadObject.id to it.distanceToStart
+        }
+        val updateObjects = mutableListOf<UpcomingRoadObject>()
+        forEach {
+            if (it.roadObject.id in idToDistanceRemaining.keys) {
+                updateObjects.add(
+                    buildUpcomingRoadObject(
+                        roadObject = it.roadObject, // reusing the old road object reference
+                        distanceToStart = idToDistanceRemaining[it.roadObject.id],
+                        distanceInfo = null
+                    )
+                )
+            }
+        }
+        return updateObjects
+    }
+
     /**
      * Build road object from native object
      */
