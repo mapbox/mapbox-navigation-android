@@ -100,6 +100,20 @@ class TestValidateChangelog(unittest.TestCase):
         '''
         validate_changelog_utils.check_has_changelog_diff(diff)
 
+    def test_check_has_changelog_diff_has_diff_auto_bugfixes(self):
+        diff = '''
+        diff --git a/libnavui-androidauto/changelog/unreleased/bugfixes/amazing-fix.md b/libnavui-androidauto/changelog/unreleased/bugfixes/amazing-fix.md
+        new file mode 100644
+        index 00000000000..c0505027151
+        --- /dev/null
+        +++ b/libnavui-androidauto/changelog/unreleased/features/amazing-fix.md
+        @@ -0,0 +1 @@
+        +- Definitely amazing fix
+        +- Nice changes 
+        \ No newline at end of file
+        '''
+        validate_changelog_utils.check_has_changelog_diff(diff)
+
     def test_parse_contents_url_empty_json(self):
         with self.assertRaises(Exception):
             validate_changelog_utils.parse_contents_url([])

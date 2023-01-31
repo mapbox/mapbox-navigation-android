@@ -1,6 +1,6 @@
 import re
 
-changelog_diff_regex = "^([\s]*)diff --git a/changelog/unreleased/(features|bugfixes|issues|other)/(.*).md b/changelog/unreleased/(features|bugfixes|issues|other)/(.*).md"
+changelog_diff_regex = "^([\s]*)diff --git a/(libnavui-androidauto/)?changelog/unreleased/(features|bugfixes|issues|other)/(.*).md b/(libnavui-androidauto/)?changelog/unreleased/(features|bugfixes|issues|other)/(.*).md"
 changelog_diff_filename_regex = re.compile("([\s]*)diff --git a\/(.*) b\/(.*)")
 changelog_filename = "CHANGELOG.md"
 any_diff_substring = "diff --git"
