@@ -85,6 +85,7 @@ class CarRouteLineRenderer(
                 val carContext = mapboxCarMapSurface.carContext
                 val routeLineOptions = getMapboxRouteLineOptions(carContext, style)
                 routeLineView = MapboxRouteLineView(routeLineOptions)
+                routeLineView.initializeLayers(style)
                 routeLineApi = MapboxRouteLineApi(routeLineOptions)
                 routeArrowApi = MapboxRouteArrowApi()
                 routeArrowView = MapboxRouteArrowView(
