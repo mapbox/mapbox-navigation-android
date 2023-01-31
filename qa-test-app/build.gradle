@@ -70,29 +70,6 @@ android {
         }
     }
 
-    flavorDimensions "version"
-    productFlavors {
-        "public" {
-            dimension "version"
-            applicationIdSuffix ".public"
-            versionNameSuffix "-public"
-            isDefault true
-        }
-        internal {
-            dimension "version"
-            applicationIdSuffix ".internal"
-            versionNameSuffix "-internal"
-        }
-    }
-
-    sourceSets {
-        internal {
-            java.srcDirs = ['../../qa-test-app-internal/src/internal/java']
-            res.srcDirs = ['../../qa-test-app-internal/src/internal/res']
-            manifest.srcFile '../../qa-test-app-internal/src/internal/AndroidManifest.xml'
-        }
-    }
-
     lintOptions {
         abortOnError false
     }
