@@ -1,0 +1,1 @@
+- Fixed an issue with `NavigationView` that caused left frame to overlap with maneuver view in landscape mode during active navigation.
