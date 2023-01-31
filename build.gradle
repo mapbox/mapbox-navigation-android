@@ -1,3 +1,5 @@
+// test
+
 buildscript {
   apply from: "${rootDir}/gradle/scripts/dependencies.gradle"
   repositories {
