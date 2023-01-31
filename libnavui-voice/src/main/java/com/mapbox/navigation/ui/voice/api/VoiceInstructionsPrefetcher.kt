@@ -66,7 +66,7 @@ class VoiceInstructionsPrefetcher internal constructor(
         lastDownloadTime = 0
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        speechApi.destroy()
+        speechApi.cancelPredownload()
     }
 
     private fun onRoutesChanged(result: RoutesUpdatedResult) {

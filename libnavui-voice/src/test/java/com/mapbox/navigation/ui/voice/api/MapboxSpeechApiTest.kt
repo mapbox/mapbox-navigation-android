@@ -275,7 +275,7 @@ class MapboxSpeechApiTest {
         coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
         val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
         sut.predownload(listOf(instruction))
-        sut.destroy()
+        sut.cancelPredownload()
 
         sut.generatePredownloaded(instruction, consumer)
 
@@ -505,7 +505,7 @@ class MapboxSpeechApiTest {
     fun `destroy with no instructions`() {
         val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
 
-        sut.destroy()
+        sut.cancelPredownload()
 
         coVerify(exactly = 0) { voiceAPI.clean(any()) }
     }
@@ -524,7 +524,7 @@ class MapboxSpeechApiTest {
         sut.predownload(listOf(instruction1, instruction2))
         clearMocks(voiceAPI, answers = false)
 
-        sut.destroy()
+        sut.cancelPredownload()
 
         coVerify(exactly = 1) {
             voiceAPI.clean(announcement1)

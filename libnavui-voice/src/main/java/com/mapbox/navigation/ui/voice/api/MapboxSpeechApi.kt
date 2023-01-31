@@ -15,7 +15,6 @@ import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -64,7 +63,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
         consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
     ) {
         mainJobController.scope.launch {
-            retrieveVoiceFile(voiceInstruction, consumer)
+            consumer.accept(retrieveVoiceFile(voiceInstruction))
         }
     }
 
@@ -138,11 +137,10 @@ class MapboxSpeechApi @JvmOverloads constructor(
             val typeAndAnnouncement = VoiceInstructionsParser.parse(instruction).value
             if (typeAndAnnouncement != null && !hasTypeAndAnnouncement(typeAndAnnouncement)) {
                 predownloadJobController.scope.launch {
-                    retrieveVoiceFile(instruction) {
-                        mainJobController.scope.launch(Dispatchers.Main.immediate) {
-                            it.onValue { speechValue ->
-                                cachedFiles[typeAndAnnouncement] = speechValue
-                            }
+                    val voiceFile = retrieveVoiceFile(instruction)
+                    mainJobController.scope.launch {
+                        voiceFile.onValue { speechValue ->
+                            cachedFiles[typeAndAnnouncement] = speechValue
                         }
                     }
                 }
@@ -150,7 +148,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
         }
     }
 
-    internal fun destroy() {
+    internal fun cancelPredownload() {
         predownloadJobController.job.children.forEach { it.cancel() }
         val announcements = cachedFiles.map { it.value.announcement }
         announcements.forEach { clean(it) }
@@ -159,28 +157,25 @@ class MapboxSpeechApi @JvmOverloads constructor(
     @Throws(IllegalStateException::class)
     private suspend fun retrieveVoiceFile(
         voiceInstruction: VoiceInstructions,
-        consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>,
-    ) {
+    ): Expected<SpeechError, SpeechValue> {
         when (val result = voiceAPI.retrieveVoiceFile(voiceInstruction)) {
             is VoiceState.VoiceFile -> {
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
-                consumer.accept(
-                    ExpectedFactory.createValue(
-                        SpeechValue(
-                            // Can't be null as it's checked in retrieveVoiceFile
-                            SpeechAnnouncement.Builder(announcement!!)
-                                .ssmlAnnouncement(ssmlAnnouncement)
-                                .file(result.instructionFile)
-                                .build()
-                        )
+                return ExpectedFactory.createValue(
+                    SpeechValue(
+                        // Can't be null as it's checked in retrieveVoiceFile
+                        SpeechAnnouncement.Builder(announcement!!)
+                            .ssmlAnnouncement(ssmlAnnouncement)
+                            .file(result.instructionFile)
+                            .build()
                     )
                 )
             }
             is VoiceState.VoiceError -> {
                 val fallback = getFallbackAnnouncement(voiceInstruction)
                 val speechError = SpeechError(result.exception, null, fallback)
-                consumer.accept(ExpectedFactory.createError(speechError))
+                return ExpectedFactory.createError(speechError)
             }
         }
     }

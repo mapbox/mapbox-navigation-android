@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.voice.api
 
+import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.utils.internal.logW
 
@@ -25,25 +27,22 @@ internal class TimeBasedNextVoiceInstructionsProvider(
             }
 
         val voiceInstructions = mutableListOf<VoiceInstructions>()
+        fillCurrentStepVoiceInstructions(
+            currentStep,
+            progress.stepDistanceRemaining,
+            voiceInstructions
+        )
         var cumulatedTime = progress.stepDurationRemaining
-        val currentStepInstructions = currentStep.voiceInstructions()?.filter { instruction ->
-            val distanceAlongGeometry = instruction.distanceAlongGeometry()
-            distanceAlongGeometry != null &&
-                distanceAlongGeometry <= progress.stepDistanceRemaining
-        }
-        if (currentStepInstructions != null) {
-            voiceInstructions.addAll(currentStepInstructions)
-        }
 
+        // fill next steps
         var currentStepIndex = progress.stepIndex
         var currentLegIndex = progress.legIndex
         while (cumulatedTime < observableTimeSeconds) {
-            if (currentStepIndex + 1 < (legSteps?.size ?: 0)) {
-                currentStep = legSteps!![currentStepIndex + 1]
-                currentStepIndex++
-            } else {
+            if (isLastStep(currentStepIndex, legSteps)) {
                 currentStepIndex = 0
-                if (currentLegIndex + 1 < legs.size) {
+                if (isLastLeg(currentLegIndex, legs)) {
+                    break
+                } else {
                     legSteps = legs[currentLegIndex + 1].steps()
                     currentLegIndex++
                     if (legSteps.isNullOrEmpty()) {
@@ -51,14 +50,38 @@ internal class TimeBasedNextVoiceInstructionsProvider(
                     } else {
                         currentStep = legSteps.first()
                     }
-                } else {
-                    break
                 }
+            } else {
+                currentStep = legSteps!![currentStepIndex + 1]
+                currentStepIndex++
             }
             currentStep.voiceInstructions()?.let { voiceInstructions.addAll(it) }
             cumulatedTime += currentStep.duration()
         }
         return voiceInstructions
+    }
+
+    private fun fillCurrentStepVoiceInstructions(
+        currentStep: LegStep,
+        stepDistanceRemaining: Double,
+        voiceInstructions: MutableList<VoiceInstructions>
+    ) {
+        val currentStepInstructions = currentStep.voiceInstructions()?.filter { instruction ->
+            val distanceAlongGeometry = instruction.distanceAlongGeometry()
+            distanceAlongGeometry != null &&
+                distanceAlongGeometry <= stepDistanceRemaining
+        }
+        if (currentStepInstructions != null) {
+            voiceInstructions.addAll(currentStepInstructions)
+        }
+    }
+
+    private fun isLastStep(currentStepIndex: Int, legSteps: List<LegStep>?): Boolean {
+        return currentStepIndex + 1 >= (legSteps?.size ?: 0)
+    }
+
+    private fun isLastLeg(currentLegIndex: Int, legs: List<RouteLeg>): Boolean {
+        return currentLegIndex + 1 >= legs.size
     }
 
     private companion object {

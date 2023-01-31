@@ -321,7 +321,7 @@ class MapboxAudioGuidanceTest {
         carAppAudioGuidance.onDetached(mapboxNavigation)
 
         verify(exactly = 1) {
-            speechApi.destroy()
+            speechApi.cancelPredownload()
         }
     }
 

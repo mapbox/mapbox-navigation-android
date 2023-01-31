@@ -85,7 +85,7 @@ class VoiceInstructionsPrefetcherTest {
         verify(exactly = 1) {
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserverSlot.first())
             mapboxNavigation.registerRoutesObserver(routesObserverSlot.first())
-            speechAPI.destroy()
+            speechAPI.cancelPredownload()
         }
     }
 
