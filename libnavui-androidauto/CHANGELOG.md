@@ -6,6 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## androidauto-v0.19.0 - 31 January, 2023
+### Changelog
+[Changes between 0.18.1 and 0.19.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.18.1...androidauto-v0.19.0)
+
+#### Features
+- Added experimental route preview screen that uses route preview feature from Nav SDK. It can be enabled using `prepareExperimentalRoutePreviewScreen` extension. [#6875](https://github.com/mapbox/mapbox-navigation-android/pull/6875)
+- Added support for Junction Views. [#6849](https://github.com/mapbox/mapbox-navigation-android/pull/6849)
+
+#### Bug fixes and improvements
+- Optimized `SpeedLimitWidget` memory usage. [#6859](https://github.com/mapbox/mapbox-navigation-android/pull/6859)
+- Fixed an issue with `CarRouteLineRenderer` that caused route arrows to be rendered above the location puck. [#6921](https://github.com/mapbox/mapbox-navigation-android/pull/6921)
+- Updated `CarActiveGuidanceMarkers` to support different route providers. This makes it possible to use the class in route preview screens. [#6873](https://github.com/mapbox/mapbox-navigation-android/pull/6873)
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.5.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.5.0))
+- Mapbox Navigation `v2.10.1` ([release notes](https://github.com/mapbox/mapbox-navigation-android/releases/tag/v2.10.1))
+
+
 ## androidauto-v0.18.1 - 12 December, 2022
 ### Changelog
 [Changes between 0.18.0 and 0.18.1](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.18.0...androidauto-v0.18.1)
