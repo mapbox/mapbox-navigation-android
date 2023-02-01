@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.voice.internal
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
@@ -16,7 +17,7 @@ import kotlin.coroutines.resume
  * @param mapboxVoiceInstructionsPlayer stream of [VoiceInstructions].
  */
 class MapboxAudioGuidanceVoice(
-    private val mapboxSpeechApi: MapboxSpeechApi,
+    internal val mapboxSpeechApi: MapboxSpeechApi,
     private val mapboxVoiceInstructionsPlayer: MapboxVoiceInstructionsPlayer
 ) {
     /**
@@ -41,10 +42,11 @@ class MapboxAudioGuidanceVoice(
         }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private suspend fun MapboxSpeechApi.generate(
         instructions: VoiceInstructions
     ): SpeechAnnouncement = suspendCancellableCoroutine { cont ->
-        generate(instructions) { value ->
+        generatePredownloaded(instructions) { value ->
             val announcement = value.value?.announcement ?: value.error!!.fallback
             cont.resume(announcement)
         }

@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.voice.api
 
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
-import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.testutils.Fixtures
 import io.mockk.coEvery
@@ -22,26 +21,25 @@ import java.io.InputStream
 internal class MapboxVoiceApiTest {
 
     private lateinit var sut: MapboxVoiceApi
-    private lateinit var mockSpeechProvider: MapboxSpeechProvider
+    private lateinit var mockSpeechLoader: MapboxSpeechProvider
     private lateinit var mockSpeechFileProvider: MapboxSpeechFileProvider
 
     @Before
     fun setUp() {
-        mockSpeechProvider = mockk(relaxed = true)
+        mockSpeechLoader = mockk(relaxed = true)
         mockSpeechFileProvider = mockk(relaxed = true)
 
-        sut = MapboxVoiceApi(mockSpeechProvider, mockSpeechFileProvider)
+        sut = MapboxVoiceApi(mockSpeechLoader, mockSpeechFileProvider)
     }
 
     @Test
     fun `retrieveVoiceFile should download audio data using MapboxSpeechProvider`() = runBlocking {
         val voiceInstructions = Fixtures.ssmlInstructions()
-        coEvery { mockSpeechProvider.load(any()) } returns ExpectedFactory.createError(Error())
+        coEvery { mockSpeechLoader.load(any()) } returns ExpectedFactory.createError(Error())
 
         sut.retrieveVoiceFile(voiceInstructions)
 
-        val announcement = TypeAndAnnouncement("ssml", voiceInstructions.ssmlAnnouncement()!!)
-        coVerify { mockSpeechProvider.load(announcement) }
+        coVerify { mockSpeechLoader.load(voiceInstructions) }
     }
 
     @Test
@@ -50,7 +48,7 @@ internal class MapboxVoiceApiTest {
             val voiceInstructions = Fixtures.ssmlInstructions()
             val blob = byteArrayOf(11, 22)
             val blobInputStream = slot<InputStream>()
-            coEvery { mockSpeechProvider.load(any()) } returns ExpectedFactory.createValue(blob)
+            coEvery { mockSpeechLoader.load(any()) } returns ExpectedFactory.createValue(blob)
             coEvery {
                 mockSpeechFileProvider.generateVoiceFileFrom(capture(blobInputStream))
             } returns File("ignored")
@@ -66,7 +64,7 @@ internal class MapboxVoiceApiTest {
             val voiceInstructions = Fixtures.ssmlInstructions()
             val blob = byteArrayOf(11, 22)
             val file = File("saved-audio-file")
-            coEvery { mockSpeechProvider.load(any()) } returns ExpectedFactory.createValue(blob)
+            coEvery { mockSpeechLoader.load(any()) } returns ExpectedFactory.createValue(blob)
             coEvery { mockSpeechFileProvider.generateVoiceFileFrom(any()) } returns file
 
             val result = sut.retrieveVoiceFile(voiceInstructions)
@@ -78,7 +76,9 @@ internal class MapboxVoiceApiTest {
     fun `retrieveVoiceFile should return VoiceError on any error`() =
         runBlocking {
             val voiceInstructions = Fixtures.emptyInstructions()
-            coEvery { mockSpeechProvider.load(any()) } returns ExpectedFactory.createError(Error())
+            coEvery {
+                mockSpeechLoader.load(any())
+            } returns ExpectedFactory.createError(Error())
             coEvery { mockSpeechFileProvider.generateVoiceFileFrom(any()) } throws Error()
 
             val result = sut.retrieveVoiceFile(voiceInstructions)
@@ -92,8 +92,8 @@ internal class MapboxVoiceApiTest {
         val mockedFile: File = mockk()
         every { mockedAnnouncement.file } returns mockedFile
         val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
-        val speechProvider: MapboxSpeechProvider = mockk()
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+        val speechLoader: MapboxSpeechProvider = mockk()
+        val mapboxVoiceApi = MapboxVoiceApi(speechLoader, fileProvider)
 
         mapboxVoiceApi.clean(mockedAnnouncement)
 
@@ -106,8 +106,8 @@ internal class MapboxVoiceApiTest {
         val nullFile: File? = null
         every { mockedAnnouncement.file } returns nullFile
         val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
-        val speechProvider: MapboxSpeechProvider = mockk()
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+        val speechLoader: MapboxSpeechProvider = mockk()
+        val mapboxVoiceApi = MapboxVoiceApi(speechLoader, fileProvider)
 
         mapboxVoiceApi.clean(mockedAnnouncement)
 
@@ -117,8 +117,8 @@ internal class MapboxVoiceApiTest {
     @Test
     fun cancel() {
         val fileProvider = mockk<MapboxSpeechFileProvider>(relaxed = true)
-        val speechProvider = mockk<MapboxSpeechProvider>()
-        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+        val speechLoader = mockk<MapboxSpeechProvider>()
+        val mapboxVoiceApi = MapboxVoiceApi(speechLoader, fileProvider)
 
         mapboxVoiceApi.cancel()
 

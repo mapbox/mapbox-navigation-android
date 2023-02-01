@@ -22,6 +22,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -60,6 +61,7 @@ import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
+import com.mapbox.navigation.ui.voice.api.VoiceInstructionsPrefetcher
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
@@ -79,6 +81,7 @@ import java.util.Locale
  * attention to its usage. Long press anywhere on the map to set a destination and trigger
  * navigation.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private var isMuted: Boolean = false
@@ -201,9 +204,13 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
+    private val voiceInstructionsPrefetcher by lazy {
+        VoiceInstructionsPrefetcher(speechApi)
+    }
+
     private val voiceInstructionsObserver =
         VoiceInstructionsObserver { voiceInstructions -> // The data obtained must be used to generate the synthesized speech mp3 file.
-            speechApi.generate(
+            speechApi.generatePredownloaded(
                 voiceInstructions,
                 speechCallback
             )
@@ -382,6 +389,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                 .build()
         )
         init()
+        voiceInstructionsPrefetcher.onAttached(mapboxNavigation)
     }
 
     override fun onStart() {
@@ -413,6 +421,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
         speechApi.cancel()
+        voiceInstructionsPrefetcher.onDetached(mapboxNavigation)
         voiceInstructionsPlayer.shutdown()
     }
 

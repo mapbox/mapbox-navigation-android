@@ -5,10 +5,12 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.net.Uri
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory.createError
 import com.mapbox.bindgen.ExpectedFactory.createValue
 import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadFlags
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
@@ -25,20 +27,27 @@ internal class MapboxSpeechProvider(
     private val language: String,
     private val urlSkuTokenProvider: UrlSkuTokenProvider,
     private val options: MapboxSpeechApiOptions,
-    private val resourceLoader: ResourceLoader
+    private val resourceLoader: ResourceLoader,
 ) {
 
-    suspend fun load(typeAndAnnouncement: TypeAndAnnouncement): Expected<Throwable, ByteArray> {
+    suspend fun load(voiceInstruction: VoiceInstructions): Expected<Throwable, ByteArray> {
         return runCatching {
-            val url = instructionUrl(typeAndAnnouncement.announcement, typeAndAnnouncement.type)
-            val response = resourceLoader.load(url)
+            val typeAndAnnouncement = VoiceInstructionsParser.parse(voiceInstruction)
+                .getValueOrElse { throw it }
+            val request = createRequest(typeAndAnnouncement)
+            val response = resourceLoader.load(request)
             return processResponse(response)
         }.getOrElse {
             createError(it)
         }
     }
 
-    private suspend fun ResourceLoader.load(url: String) = load(ResourceLoadRequest(url))
+    private fun createRequest(typeAndAnnouncement: TypeAndAnnouncement): ResourceLoadRequest {
+        val url = instructionUrl(typeAndAnnouncement.announcement, typeAndAnnouncement.type)
+        return ResourceLoadRequest(url).apply {
+            flags = ResourceLoadFlags.ACCEPT_EXPIRED
+        }
+    }
 
     private fun processResponse(
         response: Expected<ResourceLoadError, ResourceLoadResult>

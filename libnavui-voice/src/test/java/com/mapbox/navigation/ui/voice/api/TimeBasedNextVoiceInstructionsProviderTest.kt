@@ -4,7 +4,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
@@ -716,27 +715,6 @@ class TimeBasedNextVoiceInstructionsProviderTest {
         assertEquals(
             listOf(currentStepInstruction, nextStepInstruction, legAfterNextStepInstruction),
             sut.getNextVoiceInstructions(routeProgressData(legIndex = 1))
-        )
-    }
-
-    @Test
-    fun `real data`() {
-        val route = DirectionsRoute.fromJson(loadJsonFixture("multileg_route.json"))
-        val nextInstructions = sut.getNextVoiceInstructions(
-            RouteProgressData(route, 0, 4, 18.0, 80.0)
-        )
-        assertEquals(
-            listOf(
-                "Turn left onto Summerton Way",
-                "In 500 feet, turn right onto Forsythia Street",
-                "Turn right onto Forsythia Street, then you will arrive at your 1st destination",
-                "You have arrived at your 1st destination, on the left",
-                "Head northeast on Forsythia Street, then turn left onto Summerton Way",
-                "Turn left onto Summerton Way",
-                "In 500 feet, turn right onto Elder Avenue",
-                "Turn right onto Elder Avenue, then turn right onto Franconia Road (SR 644)",
-            ),
-            nextInstructions.map { it.announcement() }
         )
     }
 

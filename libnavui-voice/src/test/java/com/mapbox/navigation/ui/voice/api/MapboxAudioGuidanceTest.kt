@@ -3,13 +3,17 @@ package com.mapbox.navigation.ui.voice.api
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.voice.TestMapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.TestMapboxAudioGuidanceServices.Companion.SPEECH_ANNOUNCEMENT_DELAY_MS
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructionsState
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.excludeRecords
 import io.mockk.mockk
+import io.mockk.verify
 import io.mockk.verifySequence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
@@ -34,7 +38,7 @@ class MapboxAudioGuidanceTest {
     val coroutineRule = MainCoroutineRule()
 
     private val testMapboxAudioGuidanceServices = TestMapboxAudioGuidanceServices()
-    private val mapboxNavigation: MapboxNavigation = mockk {
+    private val mapboxNavigation: MapboxNavigation = mockk(relaxUnitFun = true) {
         every { navigationOptions } returns mockk {
             every { applicationContext } returns mockk()
         }
@@ -273,5 +277,57 @@ class MapboxAudioGuidanceTest {
 
         every { mapboxAudioGuidanceServices.voiceInstructionsPlayer } returns null
         assertNull(carAppAudioGuidance.getCurrentVoiceInstructionsPlayer())
+    }
+
+    @Test
+    fun `triggers are registered and unregistered`() = coroutineRule.runBlockingTest {
+        val routesObserverSlot = mutableListOf<RoutesObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        carAppAudioGuidance.onAttached(mapboxNavigation)
+        clearMocks(mapboxNavigation, answers = false)
+
+        testMapboxAudioGuidanceServices.emitVoiceLanguage("ru")
+        delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
+
+        verify(exactly = 1) {
+            mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
+            mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
+        }
+
+        testMapboxAudioGuidanceServices.emitVoiceLanguage("fr")
+        delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
+
+        verify(exactly = 1) {
+            mapboxNavigation.unregisterRoutesObserver(routesObserverSlot.first())
+            mapboxNavigation.registerRouteProgressObserver(routeProgressObserverSlot.first())
+        }
+        verify(exactly = 2) {
+            mapboxNavigation.registerRoutesObserver(any())
+            mapboxNavigation.registerRouteProgressObserver(any())
+        }
+
+        carAppAudioGuidance.onDetached(mapboxNavigation)
+    }
+
+    @Test
+    fun `onDetached destroys trigger when has one`() = coroutineRule.runBlockingTest {
+        carAppAudioGuidance.onAttached(mapboxNavigation)
+
+        testMapboxAudioGuidanceServices.emitVoiceLanguage("ru")
+        delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
+        val speechApi = testMapboxAudioGuidanceServices.mapboxAudioGuidanceVoice.mapboxSpeechApi
+        clearMocks(speechApi, answers = false)
+
+        carAppAudioGuidance.onDetached(mapboxNavigation)
+
+        verify(exactly = 1) {
+            speechApi.cancelPredownload()
+        }
+    }
+
+    @Test
+    fun `onDetached does not destroy voice guidance or trigger when does not have them`() {
+        carAppAudioGuidance.onDetached(mapboxNavigation)
+        // no crash
     }
 }

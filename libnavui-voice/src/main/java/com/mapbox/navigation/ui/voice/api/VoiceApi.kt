@@ -14,7 +14,9 @@ internal interface VoiceApi {
      * Given [VoiceInstructions] the method returns a [File] wrapped inside [VoiceState]
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
      */
-    suspend fun retrieveVoiceFile(voiceInstruction: VoiceInstructions): VoiceState
+    suspend fun retrieveVoiceFile(
+        voiceInstruction: VoiceInstructions,
+    ): VoiceState
 
     /**
      * Given the [SpeechAnnouncement] the method may cleanup any associated files

@@ -4,26 +4,35 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.ResourceLoadError
+import com.mapbox.common.ResourceLoadFlags
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import com.mapbox.navigation.ui.voice.testutils.Fixtures
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -35,6 +44,11 @@ internal class MapboxSpeechProviderTest {
 
     private lateinit var sut: MapboxSpeechProvider
 
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
     private var accessToken = "access_token"
     private val language = "en"
     private val apiOptions = MapboxSpeechApiOptions.Builder()
@@ -49,6 +63,10 @@ internal class MapboxSpeechProviderTest {
 
     @Before
     fun setUp() {
+        mockkObject(InternalJobControlFactory)
+        every {
+            InternalJobControlFactory.createDefaultScopeJobControl()
+        } returns JobControl(mockk(), coroutineRule.createTestScope())
         mockkObject(ThreadController)
 
         mockResourceLoader = mockk(relaxed = true)
@@ -69,7 +87,7 @@ internal class MapboxSpeechProviderTest {
 
     @Test
     fun `load should use ResourceLoader to load audio data`() = runBlocking {
-        val announcement = Fixtures.ssmlAnnouncement()
+        val instructions = Fixtures.ssmlInstructions()
         val requestCapture = slot<ResourceLoadRequest>()
         val callbackCapture = slot<ResourceLoadCallback>()
 
@@ -84,30 +102,61 @@ internal class MapboxSpeechProviderTest {
             1L
         }
 
-        sut.load(announcement)
+        sut.load(instructions)
 
-        val loadRequestUri = requestCapture.captured.url.toUri()
+        val loadRequest = requestCapture.captured
+        val loadRequestUri = loadRequest.url.toUri()
         assertEquals("https", loadRequestUri.scheme)
         assertEquals("example.com", loadRequestUri.authority)
         assertEquals(
-            "/voice/v1/speak/${UrlUtils.encodePathSegment(announcement.announcement)}",
+            "/voice/v1/speak/${UrlUtils.encodePathSegment(instructions.ssmlAnnouncement()!!)}",
             loadRequestUri.encodedPath
         )
         assertEquals(
             mapOf(
-                "textType" to announcement.type,
+                "textType" to "ssml",
                 "language" to language,
                 "access_token" to accessToken,
                 "sku" to sku
             ),
             loadRequestUri.getQueryParams()
         )
+        assertEquals(
+            ResourceLoadFlags.ACCEPT_EXPIRED,
+            loadRequest.flags
+        )
+    }
+
+    @Test
+    fun `load should allow network`() = runBlocking {
+        val instructions = Fixtures.ssmlInstructions()
+        val requestCapture = slot<ResourceLoadRequest>()
+        val callbackCapture = slot<ResourceLoadCallback>()
+
+        val loadResult = Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND)
+        every {
+            mockResourceLoader.load(capture(requestCapture), capture(callbackCapture))
+        } answers {
+            callbackCapture.captured.onFinish(
+                requestCapture.captured,
+                ExpectedFactory.createValue(loadResult)
+            )
+            1L
+        }
+
+        sut.load(instructions)
+
+        val loadRequest = requestCapture.captured
+        assertEquals(
+            NetworkRestriction.NONE,
+            loadRequest.networkRestriction
+        )
     }
 
     @Test
     fun `load should return Expected with non empty audio BLOB on success`() =
         runBlocking {
-            val announcement = Fixtures.textAnnouncement()
+            val instructions = Fixtures.textInstructions()
             val blob = byteArrayOf(12, 23, 34)
             val loadRequest = ResourceLoadRequest("https://some.url")
             val loadResult = Fixtures.resourceLoadResult(
@@ -116,7 +165,7 @@ internal class MapboxSpeechProviderTest {
             )
             givenResourceLoaderResponse(loadRequest, ExpectedFactory.createValue(loadResult))
 
-            val result = sut.load(announcement)
+            val result = sut.load(instructions)
 
             assertEquals(blob, result.value)
         }
@@ -125,7 +174,7 @@ internal class MapboxSpeechProviderTest {
     fun `load should return Expected with an Error on AVAILABLE loader response with empty BLOB`() =
         runBlocking {
             val expectedError = "No data available."
-            val announcement = Fixtures.textAnnouncement()
+            val instructions = Fixtures.textInstructions()
             val loadRequest = ResourceLoadRequest("https://some.url")
             val loadResult = Fixtures.resourceLoadResult(
                 Fixtures.resourceData(byteArrayOf()),
@@ -133,7 +182,7 @@ internal class MapboxSpeechProviderTest {
             )
             givenResourceLoaderResponse(loadRequest, ExpectedFactory.createValue(loadResult))
 
-            val result = sut.load(announcement)
+            val result = sut.load(instructions)
 
             assertEquals(expectedError, result.error!!.localizedMessage)
         }
@@ -142,7 +191,7 @@ internal class MapboxSpeechProviderTest {
     fun `load should return Expected with an Error on UNAUTHORIZED loader response`() =
         runBlocking {
             val expectedError = "Your token cannot access this resource."
-            val announcement = Fixtures.textAnnouncement()
+            val instructions = Fixtures.textInstructions()
             val loadRequest = ResourceLoadRequest("https://some.url")
             val loadResult = Fixtures.resourceLoadResult(
                 null,
@@ -150,7 +199,7 @@ internal class MapboxSpeechProviderTest {
             )
             givenResourceLoaderResponse(loadRequest, ExpectedFactory.createValue(loadResult))
 
-            val result = sut.load(announcement)
+            val result = sut.load(instructions)
 
             assertEquals(expectedError, result.error!!.localizedMessage)
         }
@@ -159,7 +208,7 @@ internal class MapboxSpeechProviderTest {
     fun `load should return Expected with an Error on NOT_FOUND loader response`() =
         runBlocking {
             val expectedError = "Resource is missing."
-            val announcement = Fixtures.textAnnouncement()
+            val instructions = Fixtures.textInstructions()
             val loadRequest = ResourceLoadRequest("https://some.url")
             val loadResult = Fixtures.resourceLoadResult(
                 null,
@@ -167,10 +216,20 @@ internal class MapboxSpeechProviderTest {
             )
             givenResourceLoaderResponse(loadRequest, ExpectedFactory.createValue(loadResult))
 
-            val result = sut.load(announcement)
+            val result = sut.load(instructions)
 
             assertEquals(expectedError, result.error!!.localizedMessage)
         }
+
+    @Test
+    fun `request is cancelled when scope is cancelled`() = coroutineRule.runBlockingTest {
+        val instructions = Fixtures.textInstructions()
+        val job = launch { sut.load(instructions) }
+
+        job.cancel()
+
+        verify(exactly = 1) { mockResourceLoader.cancel(any()) }
+    }
 
     private fun givenResourceLoaderResponse(
         request: ResourceLoadRequest,
