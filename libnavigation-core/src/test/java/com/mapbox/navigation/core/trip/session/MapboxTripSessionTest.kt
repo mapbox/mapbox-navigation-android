@@ -1745,7 +1745,7 @@ class MapboxTripSessionTest {
 }
 
 private fun mockNavigationRoute(
-    roadObjects: List<UpcomingRoadObject> = listOf(mockk())
+    roadObjects: List<UpcomingRoadObject> = listOf(mockk(relaxed = true))
 ): NavigationRoute = mockk(relaxed = true) {
     every { upcomingRoadObjects } returns roadObjects
 }
