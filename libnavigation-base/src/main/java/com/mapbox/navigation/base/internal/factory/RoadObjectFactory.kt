@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
 import com.mapbox.navigation.base.trip.model.roadobject.mapToRoadObject
 import com.mapbox.navigator.RoadObjectType
+import com.mapbox.navigator.UpcomingRouteAlert
 
 /**
  * Internal factory to build road objects
@@ -38,9 +39,9 @@ object RoadObjectFactory {
     }
 
     fun List<UpcomingRoadObject>.getUpdatedObjectsAhead(
-        status: com.mapbox.navigator.NavigationStatus
+        upcomingRouteAlerts: List<UpcomingRouteAlert>
     ): List<UpcomingRoadObject> {
-        val idToDistanceRemaining = status.upcomingRouteAlerts.associate {
+        val idToDistanceRemaining = upcomingRouteAlerts.associate {
             it.roadObject.id to it.distanceToStart
         }
         val updateObjects = mutableListOf<UpcomingRoadObject>()

@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.internal.factory
 
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.getUpdatedObjectsAhead
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.base.trip.model.roadobject.SDKAmenity
@@ -37,7 +38,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.*
+import java.util.Date
 
 private typealias SDKRouteAlertLocation =
     com.mapbox.navigation.base.trip.model.roadobject.location.RouteAlertLocation
@@ -321,6 +322,54 @@ class RoadObjectFactoryTest {
         }
     }
 
+    @Test
+    fun `create upcoming route objects reusing existing`() {
+        val firstUpdate: List<UpcomingRouteAlert> = listOf(
+            UpcomingRouteAlert(
+                createRoadObject(
+                    type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
+                    location = matchedRoadObjectLocation(location.shape),
+                    id = "0"
+                ),
+                5.0
+            ),
+            UpcomingRouteAlert(
+                createRoadObject(
+                    type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
+                    location = matchedRoadObjectLocation(location.shape),
+                    id = "1"
+                ),
+                9.0
+            ),
+        )
+        val secondUpdate: List<UpcomingRouteAlert> = listOf(
+            UpcomingRouteAlert(
+                createRoadObject(
+                    type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
+                    location = matchedRoadObjectLocation(location.shape),
+                    id = "0"
+                ),
+                4.0
+            ),
+            UpcomingRouteAlert(
+                createRoadObject(
+                    type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
+                    location = matchedRoadObjectLocation(location.shape),
+                    id = "1"
+                ),
+                8.0
+            ),
+        )
+        val existingUpcomingRoadObjects = firstUpdate.toUpcomingRoadObjects()
+
+        val roadObjects = existingUpcomingRoadObjects.getUpdatedObjectsAhead(secondUpdate)
+
+        assertEquals(4.0, roadObjects[0].distanceToStart)
+        assertEquals(8.0, roadObjects[1].distanceToStart)
+        assertTrue(roadObjects[0].roadObject === existingUpcomingRoadObjects[0].roadObject)
+        assertTrue(roadObjects[1].roadObject === existingUpcomingRoadObjects[1].roadObject)
+    }
+
     private fun matchedRoadObjectLocation(geometry: Geometry): MatchedRoadObjectLocation {
         return MatchedRoadObjectLocation.valueOf(object : RouteAlertLocation(1) {
             override fun getShape(): Geometry = geometry
@@ -435,6 +484,7 @@ class RoadObjectFactoryTest {
         tollCollectionInfo: com.mapbox.navigator.TollCollectionInfo? = null,
         serviceAreaInfo: com.mapbox.navigator.ServiceAreaInfo? = null,
         railwayCrossingInfo: com.mapbox.navigator.RailwayCrossingInfo? = null,
+        id: String = ID
     ): RoadObject {
         val metadata = when (type) {
             com.mapbox.navigator.RoadObjectType.INCIDENT ->
@@ -453,7 +503,7 @@ class RoadObjectFactoryTest {
         }
 
         return RoadObject(
-            ID,
+            id,
             LENGTH,
             location,
             type,
