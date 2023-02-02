@@ -502,7 +502,7 @@ commands:
           name: Track metrics of the Navigation SDK
           command: |
             pip3 install requests
-            python3 scripts/trigger-mobile-metrics.py
+            python3 scripts/trigger-mobile-metrics.py --token $MOBILE_METRICS_TOKEN --commits $CIRCLE_SHA1
 
   prepare-mbx-ci:
     steps:
