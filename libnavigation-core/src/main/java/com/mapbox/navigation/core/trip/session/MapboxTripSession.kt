@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.getUpdatedObjectsAhead
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -378,13 +379,17 @@ internal class MapboxTripSession(
             }
             val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
             val latestBannerInstructionsWrapper = bannerInstructionEvent.latestInstructionWrapper
+            val upcomingRoadObjects = roadObjects.getUpdatedObjectsAhead(
+                tripStatus.navigationStatus.upcomingRouteAlerts
+            )
             val routeProgress = getRouteProgressFrom(
                 tripStatus.route,
                 tripStatus.navigationStatus,
                 remainingWaypoints,
                 latestBannerInstructionsWrapper?.latestBannerInstructions,
                 latestBannerInstructionsWrapper?.latestInstructionIndex,
-                lastVoiceInstruction
+                lastVoiceInstruction,
+                upcomingRoadObjects,
             ).also {
                 if (it == null) {
                     logD(
