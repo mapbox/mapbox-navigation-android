@@ -169,6 +169,8 @@ fun createRouteInterface(
     routeInfo: RouteInfo = RouteInfo(emptyList()),
     waypoints: List<Waypoint> = emptyList(),
     waypointsJson: String = "",
+    expirationTimeMs: Long? = null,
+    lastRefreshTimestamp: Date? = null,
 ): RouteInterface = object : RouteInterface {
 
     override fun getRouteId() = "$responseUuid#$routeIndex"
@@ -188,4 +190,8 @@ fun createRouteInterface(
     override fun getWaypoints() = waypoints
 
     override fun getWaypointsJson() = waypointsJson
+
+    override fun getExpirationTimeMs(): Long? = expirationTimeMs
+
+    override fun getLastRefreshTimestamp(): Date? = lastRefreshTimestamp
 }
