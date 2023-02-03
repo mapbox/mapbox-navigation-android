@@ -74,6 +74,10 @@ import org.jetbrains.annotations.TestOnly
  * Many of the method calls execute tasks on a background thread. A cancel method is provided
  * in this class which will cancel the background tasks.
  *
+ * If you're recreating the [MapboxRouteLineView] instance, for example to change the
+ * [MapboxRouteLineOptions], make sure that your first interaction restores the state and re-applies
+ * the options by calling [MapboxRouteLineApi.getRouteDrawData] and passing the result to [MapboxRouteLineView.renderRouteDrawData].
+ *
  * @param options resource options used rendering the route line on the map
  */
 @UiThread
@@ -91,7 +95,8 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
     var options: MapboxRouteLineOptions = options
         @Deprecated(
             message = "Avoid using this setter as it will not correctly " +
-                "re-apply all mutated parameters."
+                "re-apply all mutated parameters. " +
+                "Recreate the instance and provide options via constructor instead."
         )
         set
 
@@ -145,8 +150,6 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
      * the layers if they have not yet been initialized. If you have a use case for initializing
      * the layers in advance of any API calls this method may be used.
      *
-     * If the layers already exist they will be removed and re-initialized with the options provided.
-     *
      * Each [Layer] added to the map by this class is a persistent layer - it will survive style changes.
      * This means that if the data has not changed, it does not have to be manually redrawn after a style change.
      * See [Style.addPersistentStyleLayer].
@@ -154,23 +157,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
      * @param style a valid [Style] instance
      */
     fun initializeLayers(style: Style) {
-        resetLayers(style)
-    }
-
-    /**
-     * Updates the [MapboxRouteLineOptions] used for the route line related layers and initializes the layers.
-     * If the layers already exist they will be removed and re-initialized with the options provided.
-     *
-     * Each [Layer] added to the map by this class is a persistent layer - it will survive style changes.
-     * This means that if the data has not changed, it does not have to be manually redrawn after a style change.
-     * See [Style.addPersistentStyleLayer].
-     *
-     * @param style a valid [Style] instance
-     * @param options used for the route line related layers.
-     */
-    fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
-        this.options = options
-        resetLayers(style)
+        rebuildSourcesAndLayersIfNeeded(style)
     }
 
     /**
@@ -255,7 +242,9 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                                         sourceLayerMap
                                     )
                                 }
-                            } else { {} }
+                            } else {
+                                {}
+                            }
                             listOf(layerMoveCommand).plus(trimOffsetCommands).plus(gradientCommands)
                         } ?: listOf()
                     }
@@ -858,7 +847,8 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                             }
                             else -> null
                         }
-                    } else -> {
+                    }
+                    else -> {
                         when (it) {
                             in casingLayerIds -> {
                                 options.resourceProvider.alternativeRouteCasingLineScaleExpression
