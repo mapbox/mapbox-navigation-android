@@ -352,7 +352,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         rerouteStateTransitionAssertion.assert()
     }
 
-    @Test(timeout = 100_000)
+    @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_route_refreshed() = sdkTest {
         // setting to 2s as NN router's default timeout at the time of creating the test is 5s
         val rerouteResponseDelay = 2_000L
