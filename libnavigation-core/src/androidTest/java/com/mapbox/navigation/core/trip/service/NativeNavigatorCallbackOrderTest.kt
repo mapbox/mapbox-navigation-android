@@ -176,7 +176,7 @@ internal class NativeNavigatorCallbackOrderTest :
         callbackInvocations.waitUntilHas(CallbackInvocation.Refresh, elementsAfter = 1)
 
         callbackInvocations.checkThatHas(
-            CallbackInvocation.Status(NavigationStatusOrigin.SET_ROUTE)
+            CallbackInvocation.Status(NavigationStatusOrigin.ROUTE_REFRESH)
         ) strictlyAfter CallbackInvocation.Refresh
     }
 
