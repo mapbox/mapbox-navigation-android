@@ -6,6 +6,39 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.11.0-beta.2 - 03 February, 2023
+### Changelog
+[Changes between v2.11.0-beta.1 and v2.11.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.11.0-beta.1...v2.11.0-beta.2)
+
+#### Features
+- Introduced `PredictiveCacheOptions.Builder#predictiveCacheMapsOptionsList` as an alternative for deprecated `PredictiveCacheOptions.Builder#predictiveCacheMapsOptions`. This allows to use different `PredictiveCacheLocationOptions` for different zoom level ranges. [#6868](https://github.com/mapbox/mapbox-navigation-android/pull/6868)
+- Changed alternatives fetching behaviour, prevent fetching alternatives in off-route or near destination point. [#6928](https://github.com/mapbox/mapbox-navigation-android/pull/6928)
+
+#### Bug fixes and improvements
+- Fixed rendering of 3 digit speed limit values in `MapboxSpeedInfoView`. [#6919](https://github.com/mapbox/mapbox-navigation-android/pull/6919)
+- Updated `MapboxNavigationApp` to ignore `detach` calls, if the `LifecycleOwner` wasn't attached first. [#6920](https://github.com/mapbox/mapbox-navigation-android/pull/6920)
+Fixed "global reference table overflow" in case an application accumulates and keeps links to `RouteProgress#upcomingRoadObjects`
+- Introduced `VoiceInstructionsPrefetcher` `MapboxSpeechAPI#generatePredownloaded` to use predownloaded voice instructions instead of downloading them on demand. Example usage can be found in the examples directory ( see `MapboxVoiceActivity`). [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)
+- Enabled voice instructions predownloading for those who use `MapboxAudioGuidance`. [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)
+- Fixed an issue where with low connectivity voice instruction might have been played too late for those who use `MapboxAudioGuidance`. If you use `MapboxSpeechAPI` directly, switch to voice instructions predownloading as described above if you encounter said issue. [#6771](https://github.com/mapbox/mapbox-navigation-android/pull/6771)
+- Make the location switch to map matching faster with MapboxTripStarter.enableMapMatching [#6906](https://github.com/mapbox/mapbox-navigation-android/pull/6906)
+- Fixed an issue with `NavigationView` that caused left frame to overlap with maneuver view in landscape mode during active navigation. [#6914](https://github.com/mapbox/mapbox-navigation-android/pull/6914)
+- :warning: If you're recreating the `MapboxRouteLineView` instance, for example to change the `MapboxRouteLineOptions`, make sure that your first interaction restores the state and re-applies the options by calling `MapboxRouteLineApi.getRouteDrawData` and passing the result to `MapboxRouteLineView.renderRouteDrawData`. This is a necessary change to fix an issue where `MapboxRouteLineOptions` provided in a new instance of `MapboxRouteLineView` were ignored if the style object used with `render` functions already had route line layers initialized. [#6793](https://github.com/mapbox/mapbox-navigation-android/pull/6793)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.11.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.11.0-rc.1))
+- Mapbox Navigation Native `v125.0.0`
+- Mapbox Core Common `v23.3.1`
+- Mapbox Java `v6.11.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0-beta.1))
+
+
 ## Mapbox Navigation SDK 2.9.7 - 27 January, 2023
 ### Changelog
 [Changes between v2.9.6 and v2.9.7](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.6...v2.9.7)
