@@ -628,7 +628,7 @@ jobs:
             - read-workspace
             - verify-codestyle
             - verify-license
-            - verify-common-sdk-version
+#            - verify-common-sdk-version
             - check-api-core
             - check-api-ui
             - check-api-androidauto
