@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.CameraOptions
@@ -33,64 +34,42 @@ class CustomAlternativeRouteColoringActivity : AppCompatActivity() {
         viewBinding.mapView.getMapboxMap()
     }
 
-    private val routeLineColorResources by lazy {
-        RouteLineColorResources.Builder().build()
-    }
+    private val styles = listOf(
+        NavigationStyles.NAVIGATION_DAY_STYLE,
+        NavigationStyles.NAVIGATION_NIGHT_STYLE,
+        Style.LIGHT,
+    )
 
-    private val routeLineResources: RouteLineResources by lazy {
-        RouteLineResources.Builder().routeLineColorResources(routeLineColorResources).build()
-    }
+    private val colors = listOf(
+        RouteLineColorResources.Builder().build().routeDefaultColor,
+        Color.GREEN,
+    )
 
-    private val routeLineOptions: MapboxRouteLineOptions by lazy {
-        MapboxRouteLineOptions.Builder(this)
-            .withRouteLineResources(routeLineResources)
-            .withRouteLineBelowLayerId("road-label-navigation")
-            .withVanishingRouteLineEnabled(true)
-            .withRouteStyleDescriptors(
-                listOf(
-                    RouteStyleDescriptor("altRoute1", Color.YELLOW, Color.GREEN),
-                    RouteStyleDescriptor("altRoute2", Color.CYAN, Color.MAGENTA)
-                )
-            )
-            .build()
-    }
-
-    private val routeLineView by lazy {
-        MapboxRouteLineView(routeLineOptions)
-    }
-
-    private val routeLineApi: MapboxRouteLineApi by lazy {
-        MapboxRouteLineApi(routeLineOptions)
-    }
+    private var routeColor = colors.first()
+    private var styleId = styles.first()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
-        initStyle()
+        initStyle(styleId)
+        viewBinding.buttonChangeStyle.setOnClickListener {
+            styleId = styles.filter { it != styleId }.random()
+            initStyle(styleId)
+        }
+        viewBinding.buttonChangePrimaryRouteColor.setOnClickListener {
+            routeColor = colors.filter { it != routeColor }.random()
+            setRoutes(mapboxMap.getStyle()!!, generateRouteLineOptions(styleId, routeColor))
+        }
     }
 
     @SuppressLint("MissingPermission")
-    private fun initStyle() {
+    private fun initStyle(
+        styleId: String,
+    ) {
         mapboxMap.loadStyleUri(
-            NavigationStyles.NAVIGATION_DAY_STYLE,
+            styleId,
             { style: Style ->
-
-                val route1 = getRoute(R.raw.basic_route1)
-                val route2 = getRoute(R.raw.basic_route2)
-                val route3 = getRoute(R.raw.basic_route3)
-                routeLineApi.setRoutes(
-                    listOf(
-                        RouteLine(route1, null),
-                        RouteLine(route2, "altRoute1"),
-                        RouteLine(route3, "altRoute2")
-                    )
-                ) {
-                    routeLineView.renderRouteDrawData(style, it)
-                    routeLineView.hideTraffic(style)
-                }
-                val routeOrigin = Utils.getRouteOriginPoint(route1)
-                val cameraOptions = CameraOptions.Builder().center(routeOrigin).zoom(14.0).build()
-                viewBinding.mapView.getMapboxMap().setCamera(cameraOptions)
+                setRoutes(style, generateRouteLineOptions(styleId, routeColor))
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
@@ -103,6 +82,53 @@ class CustomAlternativeRouteColoringActivity : AppCompatActivity() {
             }
         )
     }
+
+    private fun setRoutes(style: Style, options: MapboxRouteLineOptions) {
+        val routeLineApi = MapboxRouteLineApi(options)
+        val routeLineView = MapboxRouteLineView(options)
+        val route1 = getRoute(R.raw.basic_route1)
+        val route2 = getRoute(R.raw.basic_route2)
+        val route3 = getRoute(R.raw.basic_route3)
+        routeLineApi.setRoutes(
+            listOf(
+                RouteLine(route1, null),
+                RouteLine(route2, "altRoute1"),
+                RouteLine(route3, "altRoute2")
+            )
+        ) {
+            routeLineView.renderRouteDrawData(style, it)
+            routeLineView.hideTraffic(style)
+        }
+        val routeOrigin = Utils.getRouteOriginPoint(route1)
+        val cameraOptions = CameraOptions.Builder().center(routeOrigin).zoom(14.0).build()
+        viewBinding.mapView.getMapboxMap().setCamera(cameraOptions)
+    }
+
+    private fun generateRouteLineOptions(styleId: String, @ColorInt routeColor: Int) =
+        MapboxRouteLineOptions.Builder(this)
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(
+                        RouteLineColorResources.Builder()
+                            .routeDefaultColor(routeColor)
+                            .build()
+                    )
+                    .build()
+            )
+            .withRouteLineBelowLayerId(
+                when (styleId) {
+                    NavigationStyles.NAVIGATION_DAY_STYLE -> "road-label-navigation"
+                    Style.LIGHT -> "road-label"
+                    else -> "road-label-navigation"
+                }
+            )
+            .withRouteStyleDescriptors(
+                listOf(
+                    RouteStyleDescriptor("altRoute1", Color.YELLOW, Color.GREEN),
+                    RouteStyleDescriptor("altRoute2", Color.CYAN, Color.MAGENTA)
+                )
+            )
+            .build()
 
     private fun getRoute(routeResourceId: Int): DirectionsRoute {
         val routeAsString = Utils.readRawFileText(this, routeResourceId)

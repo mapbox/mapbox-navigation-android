@@ -2028,6 +2028,41 @@ class MapboxRouteLineUtilsTest {
         assertFalse(result)
     }
 
+    @Test
+    fun removeLayersAndSources() {
+        val style = mockk<Style> {
+            every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
+            every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
+        }
+
+        MapboxRouteLineUtils.removeLayersAndSources(style)
+
+        verify { style.removeStyleSource(LAYER_GROUP_1_SOURCE_ID) }
+        verify { style.removeStyleSource(LAYER_GROUP_2_SOURCE_ID) }
+        verify { style.removeStyleSource(LAYER_GROUP_3_SOURCE_ID) }
+        verify { style.removeStyleSource(WAYPOINT_SOURCE_ID) }
+        verify { style.removeStyleLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID) }
+        verify { style.removeStyleLayer(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) }
+        verify { style.removeStyleLayer(LAYER_GROUP_1_TRAIL_CASING) }
+        verify { style.removeStyleLayer(LAYER_GROUP_1_TRAIL) }
+        verify { style.removeStyleLayer(LAYER_GROUP_1_CASING) }
+        verify { style.removeStyleLayer(LAYER_GROUP_1_MAIN) }
+        verify { style.removeStyleLayer(LAYER_GROUP_1_TRAFFIC) }
+        verify { style.removeStyleLayer(LAYER_GROUP_1_RESTRICTED) }
+        verify { style.removeStyleLayer(LAYER_GROUP_2_TRAIL_CASING) }
+        verify { style.removeStyleLayer(LAYER_GROUP_2_TRAIL) }
+        verify { style.removeStyleLayer(LAYER_GROUP_2_CASING) }
+        verify { style.removeStyleLayer(LAYER_GROUP_2_MAIN) }
+        verify { style.removeStyleLayer(LAYER_GROUP_2_TRAFFIC) }
+        verify { style.removeStyleLayer(LAYER_GROUP_2_RESTRICTED) }
+        verify { style.removeStyleLayer(LAYER_GROUP_3_TRAIL_CASING) }
+        verify { style.removeStyleLayer(LAYER_GROUP_3_TRAIL) }
+        verify { style.removeStyleLayer(LAYER_GROUP_3_CASING) }
+        verify { style.removeStyleLayer(LAYER_GROUP_3_MAIN) }
+        verify { style.removeStyleLayer(LAYER_GROUP_3_TRAFFIC) }
+        verify { style.removeStyleLayer(LAYER_GROUP_3_RESTRICTED) }
+    }
+
     private fun <T> listElementsAreEqual(
         first: List<T>,
         second: List<T>,

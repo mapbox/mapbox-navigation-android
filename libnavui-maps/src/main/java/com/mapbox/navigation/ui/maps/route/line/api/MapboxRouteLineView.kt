@@ -18,6 +18,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.ge
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layersAreInitialized
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.sourceLayerMap
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
@@ -73,10 +74,16 @@ import org.jetbrains.annotations.TestOnly
  * Many of the method calls execute tasks on a background thread. A cancel method is provided
  * in this class which will cancel the background tasks.
  *
+ * If you're recreating the [MapboxRouteLineView] instance, for example to change the
+ * [MapboxRouteLineOptions], make sure that your first interaction restores the state and re-applies
+ * the options by calling [MapboxRouteLineApi.getRouteDrawData] and passing the result to [MapboxRouteLineView.renderRouteDrawData].
+ *
  * @param options resource options used rendering the route line on the map
  */
 @UiThread
 class MapboxRouteLineView(options: MapboxRouteLineOptions) {
+
+    private var rebuildLayersOnFirstRender: Boolean = true
 
     private companion object {
         private const val TAG = "MbxRouteLineView"
@@ -88,7 +95,8 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
     var options: MapboxRouteLineOptions = options
         @Deprecated(
             message = "Avoid using this setter as it will not correctly " +
-                "re-apply all mutated parameters."
+                "re-apply all mutated parameters. " +
+                "Recreate the instance and provide options via constructor instead."
         )
         set
 
@@ -149,7 +157,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
      * @param style a valid [Style] instance
      */
     fun initializeLayers(style: Style) {
-        MapboxRouteLineUtils.initializeLayers(style, options)
+        rebuildSourcesAndLayersIfNeeded(style)
     }
 
     /**
@@ -159,7 +167,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
      * @param routeDrawData a [Expected<RouteLineError, RouteSetValue>]
      */
     fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteLineError, RouteSetValue>) {
-        MapboxRouteLineUtils.initializeLayers(style, options)
+        rebuildSourcesAndLayersIfNeeded(style)
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 val primaryRouteTrafficVisibility = getTrafficVisibility(style)
@@ -234,7 +242,9 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                                         sourceLayerMap
                                     )
                                 }
-                            } else { {} }
+                            } else {
+                                {}
+                            }
                             listOf(layerMoveCommand).plus(trimOffsetCommands).plus(gradientCommands)
                         } ?: listOf()
                     }
@@ -332,7 +342,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
         style: Style,
         clearRouteLineValue: Expected<RouteLineError, RouteLineClearValue>
     ) {
-        MapboxRouteLineUtils.initializeLayers(style, options)
+        rebuildSourcesAndLayersIfNeeded(style)
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 clearRouteLineValue.onValue { value ->
@@ -837,7 +847,8 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                             }
                             else -> null
                         }
-                    } else -> {
+                    }
+                    else -> {
                         when (it) {
                             in casingLayerIds -> {
                                 options.resourceProvider.alternativeRouteCasingLineScaleExpression
@@ -861,5 +872,34 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                     style.setStyleLayerProperty(it, "line-width", this)
                 }
             }
+    }
+
+    private fun rebuildSourcesAndLayersIfNeeded(style: Style) {
+        if (rebuildLayersOnFirstRender || !layersAreInitialized(style, options)) {
+            rebuildLayersOnFirstRender = false
+            resetLayers(style)
+        }
+    }
+
+    private fun resetLayers(style: Style) {
+        sourceToFeatureMap.clear()
+        sourceToFeatureMap[MapboxRouteLineUtils.layerGroup1SourceKey] = RouteLineFeatureId(null)
+        sourceToFeatureMap[MapboxRouteLineUtils.layerGroup2SourceKey] = RouteLineFeatureId(null)
+        sourceToFeatureMap[MapboxRouteLineUtils.layerGroup3SourceKey] = RouteLineFeatureId(null)
+        primaryRouteLineLayerGroup = setOf()
+        listOf(
+            RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
+            RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
+            RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
+            RouteLayerConstants.WAYPOINT_SOURCE_ID
+        ).forEach {
+            updateSource(
+                style,
+                it,
+                FeatureCollection.fromFeatures(listOf())
+            )
+        }
+        MapboxRouteLineUtils.removeLayersAndSources(style)
+        MapboxRouteLineUtils.initializeLayers(style, options)
     }
 }
