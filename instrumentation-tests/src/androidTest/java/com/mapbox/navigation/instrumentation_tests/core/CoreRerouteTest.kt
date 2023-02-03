@@ -284,11 +284,11 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
     @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_alternatives_change() = sdkTest {
-        // setting to 4s as NN router's default timeout at the time of creating the test is 5s
-        val rerouteResponseDelay = 4_000L
+        // setting to 2s as NN router's default timeout at the time of creating the test is 5s
+        val rerouteResponseDelay = 2_000L
         // delay before setting alternatives
         // to let the off-route process fully start, but less than reroute response delay
-        val alternativesGenerationDelay = 2_000L
+        val alternativesGenerationDelay = 1_000L
 
         val mapboxNavigation = createMapboxNavigation()
         val mockRoute = RoutesProvider.dc_short_with_alternative(activity)
@@ -354,11 +354,11 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
     @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_route_refreshed() = sdkTest {
-        // setting to 4s as NN router's default timeout at the time of creating the test is 5s
-        val rerouteResponseDelay = 4_000L
-        // setting to 3s to be less than reroute response delay
+        // setting to 2s as NN router's default timeout at the time of creating the test is 5s
+        val rerouteResponseDelay = 2_000L
+        // setting to 1s to be less than reroute response delay
         // which should make refresh return before reroute if dispatched at a similar time
-        val refreshInterval = 3_000L
+        val refreshInterval = 1_000L
 
         val mapboxNavigation = createMapboxNavigation(
             customRefreshInterval = refreshInterval
