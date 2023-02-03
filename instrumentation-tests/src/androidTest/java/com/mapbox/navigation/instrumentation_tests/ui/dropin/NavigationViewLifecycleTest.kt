@@ -10,10 +10,8 @@ import com.mapbox.navigation.instrumentation_tests.activity.NavigationViewLifecy
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.idling.NavigationIdlingResource
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
-import org.junit.Ignore
 import org.junit.Test
 
-@Ignore("The tests are failing https://github.com/mapbox/mapbox-sdk-common/pull/3352, the fix available in common v23.3.0 GA")
 class NavigationViewLifecycleTest : BaseTest<NavigationViewLifecycleTestActivity>(
     NavigationViewLifecycleTestActivity::class.java
 ) {
