@@ -778,6 +778,9 @@ jobs:
   release-snapshot:
     executor: ndk-r22-latest-executor
     resource_class: medium+
+    # Allow snapshot repository for snapshot releases
+    environment:
+      ALLOW_SNAPSHOT_REPOSITORY: true
     steps:
       - checkout
       - assemble-core-release
