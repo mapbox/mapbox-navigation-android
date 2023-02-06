@@ -70,4 +70,6 @@ dependencies {
     implementation dependenciesList.gmsLocation
 
     implementation dependenciesList.multidex
+
+    implementation 'com.mapbox.common:common:23.3.1'
 }
