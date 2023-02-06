@@ -74,7 +74,6 @@ def Main():
   TriggerWorkflow(token, commit, publishResults)
 
   if publishResults:
-    TriggerJob(token, commit, "android-navigation-benchmark")
     TriggerJob(token, commit, "android-navigation-code-coverage")
     TriggerJob(token, commit, "android-navigation-binary-size")
   else:
