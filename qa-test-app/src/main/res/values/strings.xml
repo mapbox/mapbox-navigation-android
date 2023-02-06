@@ -37,6 +37,10 @@
     <string name="no_upcoming_toll_collection" translatable="false">No upcoming toll booth or gantry</string>
     <string name="upcoming_tunnel" translatable="false">Upcoming tunnel in %1$s</string>
     <string name="no_upcoming_tunnel" translatable="false">No upcoming tunnel</string>
+    <string name="upcoming_interchange" translatable="false">Upcoming interchange in %1$s</string>
+    <string name="no_upcoming_interchange" translatable="false">No upcoming interchange</string>
+    <string name="upcoming_junction" translatable="false">Upcoming junction in %1$s</string>
+    <string name="no_upcoming_junction" translatable="false">No upcoming junction</string>
 
     <string name="navigation_view_description" translatable="false">Utility for testing Drop-In UI.</string>
     <string name="navigation_view_customized_description" translatable="false">Utility for testing customized Drop-In UI.</string>

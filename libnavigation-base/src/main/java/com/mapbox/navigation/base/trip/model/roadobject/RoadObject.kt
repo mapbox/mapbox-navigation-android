@@ -21,6 +21,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  * - [RoadObjectType.BRIDGE]
  * - [RoadObjectType.INCIDENT]
  * - [RoadObjectType.CUSTOM]
+ * - [RoadObjectType.IC]
+ * - [RoadObjectType.JCT]
  *
  * @param length length of the object, null if the object is point-like.
  * @param provider provider of the road object

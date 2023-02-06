@@ -1180,6 +1180,13 @@ package com.mapbox.navigation.base.trip.model.eh {
 
 package com.mapbox.navigation.base.trip.model.roadobject {
 
+  public final class LocalizedString {
+    method public String getLanguage();
+    method public String getValue();
+    property public final String language;
+    property public final String value;
+  }
+
   public abstract class RoadObject {
     method public final String getId();
     method public final Double? getLength();
@@ -1248,8 +1255,10 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final int BRIDGE = 5; // 0x5
     field public static final int COUNTRY_BORDER_CROSSING = 1; // 0x1
     field public static final int CUSTOM = 7; // 0x7
+    field public static final int IC = 9; // 0x9
     field public static final int INCIDENT = 6; // 0x6
     field public static final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType INSTANCE;
+    field public static final int JCT = 10; // 0xa
     field public static final int RAILWAY_CROSSING = 8; // 0x8
     field public static final int RESTRICTED_AREA = 4; // 0x4
     field public static final int REST_STOP = 3; // 0x3
@@ -1257,7 +1266,7 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final int TUNNEL = 0; // 0x0
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RAILWAY_CROSSING}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RoadObjectType.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RAILWAY_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.IC, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.JCT}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RoadObjectType.Type {
   }
 
   public final class UpcomingRoadObject {
@@ -1393,6 +1402,15 @@ package com.mapbox.navigation.base.trip.model.roadobject.distanceinfo {
 
 }
 
+package com.mapbox.navigation.base.trip.model.roadobject.ic {
+
+  public final class Interchange extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.LocalizedString> getName();
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.LocalizedString> name;
+  }
+
+}
+
 package com.mapbox.navigation.base.trip.model.roadobject.incident {
 
   public final class Incident extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
@@ -1476,6 +1494,15 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
   }
 
   @IntDef({com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ACCIDENT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.CONGESTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.CONSTRUCTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.DISABLED_VEHICLE, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.LANE_RESTRICTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.MASS_TRANSIT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.MISCELLANEOUS, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.OTHER_NEWS, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.PLANNED_EVENT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ROAD_CLOSURE, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ROAD_HAZARD, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.WEATHER}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface IncidentType.Type {
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.jct {
+
+  public final class Junction extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.LocalizedString> getName();
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.LocalizedString> name;
   }
 
 }

@@ -274,6 +274,8 @@ internal fun RoadObjectType.mapToRoadObjectType(): Int {
         RoadObjectType.BRIDGE -> SDKRoadObjectType.BRIDGE
         RoadObjectType.CUSTOM -> SDKRoadObjectType.CUSTOM
         RoadObjectType.RAILWAY_CROSSING -> SDKRoadObjectType.RAILWAY_CROSSING
+        RoadObjectType.IC -> SDKRoadObjectType.IC
+        RoadObjectType.JCT -> SDKRoadObjectType.JCT
     }
 }
 

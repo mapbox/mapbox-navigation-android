@@ -6,7 +6,9 @@ import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCros
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo
 import com.mapbox.navigation.base.trip.model.roadobject.bridge.Bridge
 import com.mapbox.navigation.base.trip.model.roadobject.custom.Custom
+import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
+import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
@@ -127,6 +129,22 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             isUrban,
             this,
         )
+        RoadObjectType.IC -> Interchange(
+            id,
+            metadata.icInfo.name.map { it.toLocalizedString() },
+            length,
+            provider,
+            isUrban,
+            this,
+        )
+        RoadObjectType.JCT -> Junction(
+            id,
+            metadata.jctInfo.name.map { it.toLocalizedString() },
+            length,
+            provider,
+            isUrban,
+            this,
+        )
     }
 }
 
@@ -238,3 +256,6 @@ private fun IncidentImpact.toIncidentImpact(): String =
 
 private fun RailwayCrossingInfo.toRailwayCrossingInfo() =
     SDKRailwayCrossingInfo()
+
+private fun com.mapbox.navigator.LocalizedString.toLocalizedString() =
+    LocalizedString(language, value)

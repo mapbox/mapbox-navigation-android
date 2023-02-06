@@ -177,6 +177,8 @@ class UpcomingRoadObjectsActivity : DrawerActivity() {
                     RoadObjectType.INCIDENT -> "INCIDENT"
                     RoadObjectType.CUSTOM -> "CUSTOM"
                     RoadObjectType.RAILWAY_CROSSING -> "RAILWAY_CROSSING"
+                    RoadObjectType.IC -> "INTERCHANGE"
+                    RoadObjectType.JCT -> "JUNCTION"
                     else -> "???"
                 }
                 distanceText.text = upcomingRoadObject.distanceToStart?.let {

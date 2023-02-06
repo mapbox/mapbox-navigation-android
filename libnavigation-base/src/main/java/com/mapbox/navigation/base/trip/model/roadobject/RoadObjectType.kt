@@ -15,6 +15,8 @@ import androidx.annotation.IntDef
  * - [RoadObjectType.INCIDENT]
  * - [RoadObjectType.CUSTOM]
  * - [RoadObjectType.RAILWAY_CROSSING]
+ * - [RoadObjectType.IC]
+ * - [RoadObjectType.JCT]
  */
 object RoadObjectType {
 
@@ -64,6 +66,16 @@ object RoadObjectType {
     const val RAILWAY_CROSSING = 8
 
     /**
+     * Type of the [IC] - corresponds to interchange.
+     */
+    const val IC = 9
+
+    /**
+     * Type of the [JCT] - corresponds to junction.
+     */
+    const val JCT = 10
+
+    /**
      * Retention policy for the RoadObjectType
      */
     @Retention(AnnotationRetention.BINARY)
@@ -77,6 +89,8 @@ object RoadObjectType {
         INCIDENT,
         CUSTOM,
         RAILWAY_CROSSING,
+        IC,
+        JCT,
     )
     annotation class Type
 }
