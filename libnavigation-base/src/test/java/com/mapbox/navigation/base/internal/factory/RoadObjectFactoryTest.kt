@@ -10,11 +10,13 @@ import com.mapbox.navigation.base.trip.model.roadobject.SDKAmenityType
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo
+import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType
+import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
@@ -26,6 +28,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel
 import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo
 import com.mapbox.navigator.Amenity
 import com.mapbox.navigator.IncidentCongestionDescription
+import com.mapbox.navigator.LocalizedString
 import com.mapbox.navigator.MatchedRoadObjectLocation
 import com.mapbox.navigator.RoadObject
 import com.mapbox.navigator.RoadObjectMetadata
@@ -301,6 +304,8 @@ class RoadObjectFactoryTest {
             restrictedArea,
             incident,
             railwayCrossing,
+            ic,
+            jct
         ).mapIndexed { distanceToStart, roadObject ->
             UpcomingRouteAlert(roadObject, distanceToStart.toDouble())
         }
@@ -317,6 +322,8 @@ class RoadObjectFactoryTest {
         assertTrue(sdkObjects[6].roadObject is RestrictedArea)
         assertTrue(sdkObjects[7].roadObject is Incident)
         assertTrue(sdkObjects[8].roadObject is RailwayCrossing)
+        assertTrue(sdkObjects[9].roadObject is Interchange)
+        assertTrue(sdkObjects[10].roadObject is Junction)
         sdkObjects.forEachIndexed { distanceToStart, obj ->
             assertEquals(distanceToStart.toDouble(), obj.distanceToStart)
         }
@@ -415,6 +422,18 @@ class RoadObjectFactoryTest {
         railwayCrossingInfo = com.mapbox.navigator.RailwayCrossingInfo(true)
     )
 
+    private val ic = createRoadObject(
+        type = com.mapbox.navigator.RoadObjectType.IC,
+        location = matchedRoadObjectLocation(location.shape),
+        icInfo = com.mapbox.navigator.IcInfo(listOf(LocalizedString("en", "name")))
+    )
+
+    private val jct = createRoadObject(
+        type = com.mapbox.navigator.RoadObjectType.JCT,
+        location = matchedRoadObjectLocation(location.shape),
+        jctInfo = com.mapbox.navigator.JctInfo(listOf(LocalizedString("it", "nome")))
+    )
+
     private val countryBorderCrossing = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.BORDER_CROSSING,
         location = matchedRoadObjectLocation(location.shape),
@@ -484,6 +503,8 @@ class RoadObjectFactoryTest {
         tollCollectionInfo: com.mapbox.navigator.TollCollectionInfo? = null,
         serviceAreaInfo: com.mapbox.navigator.ServiceAreaInfo? = null,
         railwayCrossingInfo: com.mapbox.navigator.RailwayCrossingInfo? = null,
+        icInfo: com.mapbox.navigator.IcInfo? = null,
+        jctInfo: com.mapbox.navigator.JctInfo? = null,
         id: String = ID
     ): RoadObject {
         val metadata = when (type) {
@@ -499,6 +520,10 @@ class RoadObjectFactoryTest {
                 RoadObjectMetadata.valueOf(serviceAreaInfo!!)
             com.mapbox.navigator.RoadObjectType.RAILWAY_CROSSING ->
                 RoadObjectMetadata.valueOf(railwayCrossingInfo!!)
+            com.mapbox.navigator.RoadObjectType.IC ->
+                RoadObjectMetadata.valueOf(icInfo!!)
+            com.mapbox.navigator.RoadObjectType.JCT ->
+                RoadObjectMetadata.valueOf(jctInfo!!)
             else -> mockk()
         }
 

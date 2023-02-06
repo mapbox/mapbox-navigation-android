@@ -284,6 +284,8 @@ class RoadObjectsActivity : AppCompatActivity() {
             RoadObjectType.TOLL_COLLECTION
         )
         val upcomingTunnel = routeProgress.getFirstUpcomingRoadObject(RoadObjectType.TUNNEL)
+        val upcomingInterchange = routeProgress.getFirstUpcomingRoadObject(RoadObjectType.IC)
+        val upcomingJunction = routeProgress.getFirstUpcomingRoadObject(RoadObjectType.JCT)
 
         binding.bridge.text = ifNonNull(upcomingBridge?.distanceToStart) { distance ->
             getRoadObject(R.string.upcoming_bridge, distance)
@@ -334,6 +336,13 @@ class RoadObjectsActivity : AppCompatActivity() {
         binding.tunnel.text = ifNonNull(upcomingTunnel?.distanceToStart) { distance ->
             getRoadObject(R.string.upcoming_tunnel, distance)
         } ?: getString(R.string.no_upcoming_tunnel)
+
+        binding.ic.text = ifNonNull(upcomingInterchange?.distanceToStart) { distance ->
+            getRoadObject(R.string.upcoming_interchange, distance)
+        } ?: getString(R.string.no_upcoming_interchange)
+        binding.jct.text = ifNonNull(upcomingJunction?.distanceToStart) { distance ->
+            getRoadObject(R.string.upcoming_junction, distance)
+        } ?: getString(R.string.no_upcoming_junction)
     }
 
     private fun getRoadObject(

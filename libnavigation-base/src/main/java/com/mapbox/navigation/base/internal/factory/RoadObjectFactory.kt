@@ -23,6 +23,8 @@ object RoadObjectFactory {
         RoadObjectType.BRIDGE,
         RoadObjectType.CUSTOM,
         RoadObjectType.RAILWAY_CROSSING,
+        RoadObjectType.IC,
+        RoadObjectType.JCT,
     )
 
     fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRoadObjects():

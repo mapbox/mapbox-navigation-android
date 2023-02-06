@@ -118,7 +118,7 @@
           app:layout_constraintTop_toBottomOf="@id/bridge"
           app:layout_constraintEnd_toStartOf="@id/rest"
           app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintBottom_toTopOf="@id/ic"
           />
 
       <TextView
@@ -133,7 +133,7 @@
           app:layout_constraintTop_toBottomOf="@id/border"
           app:layout_constraintEnd_toStartOf="@id/toll"
           app:layout_constraintStart_toEndOf="@id/restricted"
-          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintBottom_toTopOf="@id/ic"
           />
 
       <TextView
@@ -148,7 +148,7 @@
           app:layout_constraintTop_toBottomOf="@id/incident"
           app:layout_constraintEnd_toStartOf="@id/tunnel"
           app:layout_constraintStart_toEndOf="@id/rest"
-          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintBottom_toTopOf="@id/ic"
           />
 
       <TextView
@@ -163,6 +163,36 @@
           app:layout_constraintTop_toBottomOf="@id/railway"
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toEndOf="@id/toll"
+          app:layout_constraintBottom_toTopOf="@id/ic"
+          />
+
+      <TextView
+          android:id="@+id/ic"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toBottomOf="@id/restricted"
+          app:layout_constraintEnd_toStartOf="@id/jct"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
+          />
+
+      <TextView
+          android:id="@+id/jct"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:textSize="12sp"
+          android:background="#D9FF5722"
+          android:textColor="@android:color/black"
+          android:layout_margin="1dp"
+          android:gravity="center"
+          app:layout_constraintTop_toBottomOf="@id/rest"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toEndOf="@id/ic"
           app:layout_constraintBottom_toBottomOf="parent"
           />
   </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,1 @@
+- Added `RoadObjectType.IC` and `RoadObjectType.JCT` for interchanges and junctions and the corresponding classes `Interchange` and `Junction`.
