@@ -77,6 +77,7 @@ def Main():
     TriggerJob(token, commit, "android-navigation-code-coverage")
     TriggerJob(token, commit, "android-navigation-binary-size")
   else:
+    TriggerJob(token, commit, "android-navigation-benchmark")
     TriggerJob(token, commit, "android-navigation-code-coverage-ci")
     TriggerJob(token, commit, "android-navigation-binary-size-ci")
 
