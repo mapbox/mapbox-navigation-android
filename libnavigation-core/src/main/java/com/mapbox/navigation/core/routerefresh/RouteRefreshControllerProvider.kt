@@ -8,22 +8,23 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.core.routealternatives.AlternativeMetadataProvider
-import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
+import kotlinx.coroutines.CoroutineScope
 import java.util.Date
 
 internal object RouteRefreshControllerProvider {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun createRouteRefreshController(
-        threadController: ThreadController,
+        scope: CoroutineScope,
+        immediateScope: CoroutineScope,
         routeRefreshOptions: RouteRefreshOptions,
         directionsSession: DirectionsSession,
         primaryRouteProgressDataProvider: PrimaryRouteProgressDataProvider,
         alternativeMetadataProvider: AlternativeMetadataProvider,
         evDynamicDataHolder: EVDynamicDataHolder,
+        timeProvider: Time
     ): RouteRefreshControllerImpl {
-        val scope = threadController.getMainScopeAndRootJob().scope
         val routeRefresher = RouteRefresher(
             RoutesProgressDataProvider(
                 primaryRouteProgressDataProvider,
@@ -43,7 +44,7 @@ internal object RouteRefreshControllerProvider {
             stateHolder,
             refreshObserversManager,
             ExpiringDataRemover { Date() },
-            Time.SystemImpl,
+            timeProvider,
             routeRefreshOptions.intervalMillis * 3
         )
 
@@ -51,7 +52,7 @@ internal object RouteRefreshControllerProvider {
             routeRefresherExecutor,
             routeRefreshOptions,
             stateHolder,
-            scope,
+            immediateScope,
             routeRefresherResultProcessor
         )
         val immediateRouteRefreshController = ImmediateRouteRefreshController(

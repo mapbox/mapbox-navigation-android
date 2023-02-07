@@ -27,7 +27,10 @@ internal class RouteRefreshStateHolder : RouteRefreshProgressObserver {
     }
 
     override fun onCancel() {
-        onNewState(RouteRefreshExtra.REFRESH_STATE_CANCELED)
+        // cancel can be invoked at any time because of coroutine cancellation: make sure the transition is valid
+        if (state?.state == RouteRefreshExtra.REFRESH_STATE_STARTED) {
+            onNewState(RouteRefreshExtra.REFRESH_STATE_CANCELED)
+        }
     }
 
     fun reset() {
@@ -54,7 +57,7 @@ internal class RouteRefreshStateHolder : RouteRefreshProgressObserver {
         message: String? = null
     ) {
         val oldState = this.state?.state
-        if (oldState != state && RouteRefreshStateChanger.canChange(from = oldState, to = state)) {
+        if (oldState != state) {
             val newState = state?.let { RouteRefreshStateResult(it, message) }
             this.state = newState
             if (newState != null) {

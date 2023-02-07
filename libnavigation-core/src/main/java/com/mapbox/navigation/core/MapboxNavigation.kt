@@ -124,6 +124,7 @@ import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.navigator.internal.router.RouterInterfaceAdapter
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
@@ -558,12 +559,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
         routeRefreshControllerImpl = RouteRefreshControllerProvider.createRouteRefreshController(
-            threadController,
+            threadController.getMainScopeAndRootJob().scope,
+            threadController.getImmediateMainScopeAndRootJob().scope,
             navigationOptions.routeRefreshOptions,
             directionsSession,
             routeRefreshRequestDataProvider,
             routeAlternativesController,
-            evDynamicDataHolder
+            evDynamicDataHolder,
+            Time.SystemImpl
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = routeRefreshControllerImpl

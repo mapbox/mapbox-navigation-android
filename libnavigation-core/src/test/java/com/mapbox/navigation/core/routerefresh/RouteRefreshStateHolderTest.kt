@@ -20,22 +20,12 @@ class RouteRefreshStateHolderTest {
     @Before
     fun setUp() {
         sut.registerRouteRefreshStateObserver(observer)
-        mockkObject(RouteRefreshStateChanger)
-        every { RouteRefreshStateChanger.canChange(any(), any()) } returns true
-    }
-
-    @After
-    fun tearDown() {
-        unmockkObject(RouteRefreshStateChanger)
     }
 
     @Test
     fun `null to started`() {
         sut.onStarted()
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(null, RouteRefreshExtra.REFRESH_STATE_STARTED)
-        }
         verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED, null)
@@ -44,18 +34,12 @@ class RouteRefreshStateHolderTest {
     }
 
     @Test
-    fun `failed to started can change`() {
+    fun `failed to started`() {
         sut.onFailure(null)
         clearAllMocks(answers = false)
 
         sut.onStarted()
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                RouteRefreshExtra.REFRESH_STATE_STARTED
-            )
-        }
         verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(
@@ -67,35 +51,12 @@ class RouteRefreshStateHolderTest {
     }
 
     @Test
-    fun `failed to started cannot change`() {
-        every {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                RouteRefreshExtra.REFRESH_STATE_STARTED
-            )
-        } returns false
-        sut.onFailure(null)
-        clearAllMocks(answers = false)
-
-        sut.onStarted()
-
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                RouteRefreshExtra.REFRESH_STATE_STARTED
-            )
-        }
-        verify(exactly = 0) { observer.onNewState(any()) }
-    }
-
-    @Test
     fun `started to started`() {
         sut.onStarted()
         clearAllMocks(answers = false)
 
         sut.onStarted()
 
-        verify(exactly = 0) { RouteRefreshStateChanger.canChange(any(), any()) }
         verify(exactly = 0) { observer.onNewState(any()) }
     }
 
@@ -104,12 +65,6 @@ class RouteRefreshStateHolderTest {
         sut.onSuccess()
 
         verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                null,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS
-            )
-        }
-        verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
@@ -120,18 +75,12 @@ class RouteRefreshStateHolderTest {
     }
 
     @Test
-    fun `failed to success can change`() {
+    fun `failed to success`() {
         sut.onFailure(null)
         clearAllMocks(answers = false)
 
         sut.onSuccess()
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS
-            )
-        }
         verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(
@@ -140,28 +89,6 @@ class RouteRefreshStateHolderTest {
                 )
             )
         }
-    }
-
-    @Test
-    fun `failed to success cannot change`() {
-        every {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS
-            )
-        } returns false
-        sut.onFailure(null)
-        clearAllMocks(answers = false)
-
-        sut.onSuccess()
-
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS
-            )
-        }
-        verify(exactly = 0) { observer.onNewState(any()) }
     }
 
     @Test
@@ -171,7 +98,6 @@ class RouteRefreshStateHolderTest {
 
         sut.onSuccess()
 
-        verify(exactly = 0) { RouteRefreshStateChanger.canChange(any(), any()) }
         verify(exactly = 0) { observer.onNewState(any()) }
     }
 
@@ -180,12 +106,6 @@ class RouteRefreshStateHolderTest {
         val message = "some message"
         sut.onFailure(message)
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                null,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
-            )
-        }
         verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(
@@ -197,47 +117,18 @@ class RouteRefreshStateHolderTest {
     }
 
     @Test
-    fun `started to failed can change`() {
+    fun `started to failed `() {
         val message = "some message"
         sut.onStarted()
         clearAllMocks(answers = false)
 
         sut.onFailure(message)
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
-            )
-        }
         verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, message)
             )
         }
-    }
-
-    @Test
-    fun `started to failed cannot change`() {
-        val message = "some message"
-        every {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
-            )
-        } returns false
-        sut.onStarted()
-        clearAllMocks(answers = false)
-
-        sut.onFailure(message)
-
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
-            )
-        }
-        verify(exactly = 0) { observer.onNewState(any()) }
     }
 
     @Test
@@ -248,7 +139,6 @@ class RouteRefreshStateHolderTest {
 
         sut.onFailure(message)
 
-        verify(exactly = 0) { RouteRefreshStateChanger.canChange(any(), any()) }
         verify(exactly = 0) { observer.onNewState(any()) }
     }
 
@@ -257,12 +147,6 @@ class RouteRefreshStateHolderTest {
         sut.onClearedExpired()
 
         verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                null,
-                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
-            )
-        }
-        verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED)
             )
@@ -270,45 +154,17 @@ class RouteRefreshStateHolderTest {
     }
 
     @Test
-    fun `started to cleared_expired can change`() {
+    fun `started to cleared_expired`() {
         sut.onStarted()
         clearAllMocks(answers = false)
 
         sut.onClearedExpired()
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
-            )
-        }
         verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED)
             )
         }
-    }
-
-    @Test
-    fun `started to cleared_expired cannot change`() {
-        every {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
-            )
-        } returns false
-        sut.onStarted()
-        clearAllMocks(answers = false)
-
-        sut.onClearedExpired()
-
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
-            )
-        }
-        verify(exactly = 0) { observer.onNewState(any()) }
     }
 
     @Test
@@ -318,7 +174,6 @@ class RouteRefreshStateHolderTest {
 
         sut.onClearedExpired()
 
-        verify(exactly = 0) { RouteRefreshStateChanger.canChange(any(), any()) }
         verify(exactly = 0) { observer.onNewState(any()) }
     }
 
@@ -326,13 +181,8 @@ class RouteRefreshStateHolderTest {
     fun `null to cancelled`() {
         sut.onCancel()
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(null, RouteRefreshExtra.REFRESH_STATE_CANCELED)
-        }
-        verify(exactly = 1) {
-            observer.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED, null)
-            )
+        verify(exactly = 0) {
+            observer.onNewState(any())
         }
     }
 
@@ -344,12 +194,6 @@ class RouteRefreshStateHolderTest {
         sut.onCancel()
 
         verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_CANCELED
-            )
-        }
-        verify(exactly = 1) {
             observer.onNewState(
                 RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED, null)
             )
@@ -357,24 +201,13 @@ class RouteRefreshStateHolderTest {
     }
 
     @Test
-    fun `started to cancelled cannot change`() {
-        every {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_CANCELED
-            )
-        } returns false
+    fun `success to cancelled cannot change`() {
         sut.onStarted()
+        sut.onSuccess()
         clearAllMocks(answers = false)
 
         sut.onCancel()
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_CANCELED
-            )
-        }
         verify(exactly = 0) { observer.onNewState(any()) }
     }
 
@@ -385,7 +218,6 @@ class RouteRefreshStateHolderTest {
 
         sut.onCancel()
 
-        verify(exactly = 0) { RouteRefreshStateChanger.canChange(any(), any()) }
         verify(exactly = 0) { observer.onNewState(any()) }
     }
 
@@ -393,36 +225,16 @@ class RouteRefreshStateHolderTest {
     fun `null to null`() {
         sut.reset()
 
-        verify(exactly = 0) { RouteRefreshStateChanger.canChange(any(), any()) }
         verify(exactly = 0) { observer.onNewState(any()) }
     }
 
     @Test
-    fun `started to null can change`() {
+    fun `started to null`() {
         sut.onStarted()
         clearAllMocks(answers = false)
 
         sut.reset()
 
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(RouteRefreshExtra.REFRESH_STATE_STARTED, null)
-        }
-        verify(exactly = 0) { observer.onNewState(any()) }
-    }
-
-    @Test
-    fun `started to null cannot change`() {
-        every {
-            RouteRefreshStateChanger.canChange(RouteRefreshExtra.REFRESH_STATE_STARTED, null)
-        } returns false
-        sut.onStarted()
-        clearAllMocks(answers = false)
-
-        sut.reset()
-
-        verify(exactly = 1) {
-            RouteRefreshStateChanger.canChange(RouteRefreshExtra.REFRESH_STATE_STARTED, null)
-        }
         verify(exactly = 0) { observer.onNewState(any()) }
     }
 
