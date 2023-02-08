@@ -251,7 +251,7 @@ class MapboxRouteLineOptions private constructor(
          *
          * @return the builder
          */
-        fun withRouteLineBelowLayerId(layerId: String): Builder =
+        fun withRouteLineBelowLayerId(layerId: String?): Builder =
             apply { this.routeLineBelowLayerId = layerId }
 
         /**

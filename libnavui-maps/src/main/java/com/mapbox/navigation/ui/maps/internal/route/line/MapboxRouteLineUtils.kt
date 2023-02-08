@@ -19,16 +19,20 @@ import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.addPersistentLayer
 import com.mapbox.maps.extension.style.layers.generated.BackgroundLayer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.getLayer
+import com.mapbox.maps.extension.style.layers.getLayerAs
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.getSourceAs
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
@@ -1064,321 +1068,423 @@ internal object MapboxRouteLineUtils {
         return expressionBuilder.build()
     }
 
-    private fun addSource(
-        style: Style,
-        layerSource: String,
+    private fun Style.addNewOrReuseSource(
+        id: String,
         tolerance: Double,
         useLineMetrics: Boolean,
         enableSharedCache: Boolean
     ) {
-        if (!style.styleSourceExists(layerSource)) {
-            style.addStyleSource(
-                layerSource,
-                Value(
-                    hashMapOf(
-                        "type" to Value("geojson"),
-                        "data" to Value(""),
-                        "sharedCache" to Value(enableSharedCache),
-                        "maxzoom" to Value(16),
-                        "lineMetrics" to Value(useLineMetrics),
-                        "tolerance" to Value(tolerance)
-                    )
+        val data = if (styleSourceExists(id)) {
+            getSourceAs<GeoJsonSource>(id)!!.data ?: ""
+        } else ""
+
+        addStyleSource(
+            id,
+            Value(
+                hashMapOf(
+                    "type" to Value("geojson"),
+                    "data" to Value(data),
+                    "sharedCache" to Value(enableSharedCache),
+                    "maxzoom" to Value(16),
+                    "lineMetrics" to Value(useLineMetrics),
+                    "tolerance" to Value(tolerance)
                 )
             )
-        }
+        )
+    }
+
+    private inline fun <reified T : Layer> Style.addNewOrReuseLayer(
+        id: String,
+        create: () -> T,
+        layerPosition: LayerPosition,
+        mutate: T.() -> Unit
+    ) {
+        if (styleLayerExists(id)) {
+            getLayerAs<T>(id)!!.also {
+                removeStyleLayer(it.layerId)
+            }
+        } else {
+            create()
+        }.also {
+            addPersistentLayer(it, layerPosition)
+        }.apply(mutate)
     }
 
     fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
-        if (layersAreInitialized(style, options)) {
-            return
-        }
-
         val belowLayerIdToUse: String? =
             getBelowLayerIdToUse(
                 options.routeLineBelowLayerId,
                 style
             )
 
-        addSource(
-            style,
+        style.addNewOrReuseSource(
             RouteLayerConstants.WAYPOINT_SOURCE_ID,
             options.tolerance,
             useLineMetrics = false,
             enableSharedCache = false
         )
-        addSource(
-            style,
+        style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
             enableSharedCache = options.shareLineGeometrySources
         )
-        addSource(
-            style,
+        style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
             enableSharedCache = options.shareLineGeometrySources
         )
-        addSource(
-            style,
+        style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
             enableSharedCache = options.shareLineGeometrySources
         )
 
-        if (!style.styleLayerExists(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)) {
-            style.addPersistentLayer(
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
+            create = {
                 BackgroundLayer(
                     RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
-                ).apply { this.backgroundOpacity(0.0) },
-                LayerPosition(null, belowLayerIdToUse, null)
-            )
-        }
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                backgroundOpacity(0.0)
+            }
+        )
 
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_3_TRAIL,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_CASING)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_3_CASING,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_MAIN)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_3_MAIN,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (options.displayRestrictedRoadSections) {
-            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)) {
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
+            create = {
                 LineLayer(
-                    RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
+                    RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
                     RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
                 )
-                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
-                    .lineJoin(LineJoin.ROUND)
-                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
-                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
-                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
-                    .lineCap(LineCap.ROUND)
-                    .apply {
-                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    }
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_3_TRAIL,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_3_TRAIL,
+                    RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_3_CASING,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_3_CASING,
+                    RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_3_MAIN,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_3_MAIN,
+                    RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
+                    RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        if (options.displayRestrictedRoadSections) {
+            style.addNewOrReuseLayer(
+                id = RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
+                create = {
+                    LineLayer(
+                        RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
+                        RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                    )
+                },
+                layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+                mutate = {
+                    lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    lineJoin(LineJoin.ROUND)
+                    lineOpacity(options.resourceProvider.restrictedRoadOpacity)
+                    lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
+                    lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    lineCap(LineCap.ROUND)
+
+                }
+            )
+        } else {
+            if (style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)) {
+                style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)
             }
         }
 
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_2_TRAIL,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_CASING)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_2_CASING,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_MAIN)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_2_MAIN,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (options.displayRestrictedRoadSections) {
-            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED)) {
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
+            create = {
                 LineLayer(
-                    RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
+                    RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
                     RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
                 )
-                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
-                    .lineJoin(LineJoin.ROUND)
-                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
-                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
-                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
-                    .lineCap(LineCap.ROUND)
-                    .apply {
-                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    }
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_2_TRAIL,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_2_TRAIL,
+                    RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_2_CASING,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_2_CASING,
+                    RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_2_MAIN,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_2_MAIN,
+                    RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
+                    RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        if (options.displayRestrictedRoadSections) {
+            style.addNewOrReuseLayer(
+                id = RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
+                create = {
+                    LineLayer(
+                        RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
+                        RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                    )
+                },
+                layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+                mutate = {
+                    lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    lineJoin(LineJoin.ROUND)
+                    lineOpacity(options.resourceProvider.restrictedRoadOpacity)
+                    lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
+                    lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    lineCap(LineCap.ROUND)
+
+                }
+            )
+        } else {
+            if (style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED)) {
+                style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED)
             }
         }
 
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_1_TRAIL,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_CASING)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_1_CASING,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_MAIN)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_1_MAIN,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC)) {
-            LineLayer(
-                RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
-            )
-                .lineCap(LineCap.ROUND)
-                .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
-                .lineColor(Color.GRAY).apply {
-                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                }
-        }
-        if (options.displayRestrictedRoadSections) {
-            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED)) {
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
+            create = {
                 LineLayer(
-                    RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
+                    RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
                     RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
                 )
-                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
-                    .lineJoin(LineJoin.ROUND)
-                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
-                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
-                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
-                    .lineCap(LineCap.ROUND)
-                    .apply {
-                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    }
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_1_TRAIL,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_1_TRAIL,
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_1_CASING,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_1_CASING,
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_1_MAIN,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_1_MAIN,
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
+            create = {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                lineColor(Color.GRAY)
+            }
+        )
+        if (options.displayRestrictedRoadSections) {
+            style.addNewOrReuseLayer(
+                id = RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
+                create = {
+                    LineLayer(
+                        RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
+                        RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                    )
+                },
+                layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+                mutate = {
+                    lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    lineJoin(LineJoin.ROUND)
+                    lineOpacity(options.resourceProvider.restrictedRoadOpacity)
+                    lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
+                    lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    lineCap(LineCap.ROUND)
+
+                }
+            )
+        } else {
+            if (style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED)) {
+                style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED)
             }
         }
 
-        if (!style.styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)) {
-            style.addPersistentLayer(
+        style.addNewOrReuseLayer(
+            id = RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID,
+            create = {
                 BackgroundLayer(
                     RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
-                ).apply { this.backgroundOpacity(0.0) },
-                LayerPosition(null, belowLayerIdToUse, null)
-            )
-        }
+                )
+            },
+            layerPosition = LayerPosition(null, belowLayerIdToUse, null),
+            mutate = {
+                backgroundOpacity(0.0)
+            }
+        )
 
         buildWayPointLayer(
             style,
