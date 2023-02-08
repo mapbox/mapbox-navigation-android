@@ -1,6 +1,7 @@
 package com.mapbox.navigation.qa_test_app.view
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
@@ -58,6 +59,7 @@ import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.set
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,7 +86,13 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val routeLineResources: RouteLineResources by lazy {
-        RouteLineResources.Builder().build()
+        RouteLineResources.Builder()
+            .routeLineColorResources(
+                RouteLineColorResources.Builder()
+                    .routeLowCongestionColor(Color.TRANSPARENT)
+                    .routeDefaultColor(Color.RED)
+                    .build()
+            ).build()
     }
 
     private val routeLineOptions: MapboxRouteLineOptions by lazy {
@@ -96,13 +104,9 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             .build()
     }
 
-    private val routeLineView by lazy {
-        MapboxRouteLineView(routeLineOptions)
-    }
+    private lateinit var routeLineView: MapboxRouteLineView
 
-    private val routeLineApi: MapboxRouteLineApi by lazy {
-        MapboxRouteLineApi(routeLineOptions)
-    }
+    private lateinit var routeLineApi: MapboxRouteLineApi
 
     private val mapboxNavigation: MapboxNavigation by requireMapboxNavigation(
         onResumedObserver = object : MapboxNavigationObserver {
@@ -129,6 +133,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        routeLineView = MapboxRouteLineView(routeLineOptions)
+        routeLineApi = MapboxRouteLineApi(routeLineOptions)
         initStyle()
         initListeners()
     }
@@ -189,6 +195,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
+    var blah = false
+
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         binding.mapView.getMapboxMap().loadStyleUri(
@@ -207,6 +215,54 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 }
             )
             binding.mapView.gestures.addOnMapLongClickListener(this)
+            binding.mapView.gestures.addOnMapClickListener {
+                blah = !blah
+                binding.mapView.getMapboxMap().loadStyleUri(
+                    if (blah) {
+                        NavigationStyles.NAVIGATION_NIGHT_STYLE
+                    } else {
+                        NavigationStyles.NAVIGATION_DAY_STYLE
+                    }
+                ) { style ->
+                    val options = MapboxRouteLineOptions.Builder(this)
+                        .withRouteLineResources(
+                            RouteLineResources.Builder()
+                                .routeLineColorResources(
+                                    RouteLineColorResources.Builder()
+                                        .routeLowCongestionColor(Color.TRANSPARENT)
+                                        .routeUnknownCongestionColor(Color.TRANSPARENT)
+                                        .routeDefaultColor(
+                                            if (blah)
+                                                Color.RED
+                                            else
+                                                RouteLineColorResources.Builder()
+                                                    .build().routeDefaultColor
+                                        )
+                                        .build()
+                                ).build()
+                        )
+                        .withRouteLineBelowLayerId(if (blah) "road-label-navigation" else null)
+                        .withVanishingRouteLineEnabled(true)
+                        .displayRestrictedRoadSections(true)
+                        .build()
+
+                    val offset = routeLineApi.getVanishPointOffset()
+                    routeLineApi = MapboxRouteLineApi(options)
+                    routeLineView = MapboxRouteLineView(options)
+
+                    CoroutineScope(Dispatchers.Main).launch {
+                        routeLineApi.setNavigationRoutes(
+                            mapboxNavigation.getNavigationRoutes(),
+                            mapboxNavigation.getAlternativeMetadataFor(mapboxNavigation.getNavigationRoutes())
+                        ).let {
+                            val r = routeLineApi.setVanishingOffset(offset)
+                            routeLineView.renderRouteDrawData(style, it)
+                            routeLineView.renderRouteLineUpdate(style, r)
+                        }
+                    }
+                }
+                true
+            }
         }
     }
 
@@ -226,10 +282,12 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         routeLineApi.updateTraveledRouteLine(point).let {
-            routeLineView.renderRouteLineUpdate(
-                binding.mapView.getMapboxMap().getStyle()!!,
-                it
-            )
+            binding.mapView.getMapboxMap().getStyle()?.let { style ->
+                routeLineView.renderRouteLineUpdate(
+                    style,
+                    it
+                )
+            }
         }
     }
 
@@ -336,10 +394,12 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     result.navigationRoutes
                 )
             ).apply {
-                routeLineView.renderRouteDrawData(
-                    binding.mapView.getMapboxMap().getStyle()!!,
-                    this
-                )
+                binding.mapView.getMapboxMap().getStyle()?.let { style ->
+                    routeLineView.renderRouteDrawData(
+                        style,
+                        this
+                    )
+                }
             }
         }
     }
