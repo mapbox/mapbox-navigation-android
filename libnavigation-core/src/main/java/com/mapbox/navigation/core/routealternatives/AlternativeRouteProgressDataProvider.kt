@@ -24,8 +24,13 @@ internal object AlternativeRouteProgressDataProvider {
             legIndex = primaryRouteProgressData.legIndex - legIndexDiff
             val routeGeometryIndexDiff =
                 primaryFork.geometryIndexInRoute - alternativeFork.geometryIndexInRoute
-            routeGeometryIndex =
+            val alternativeStarted =
+                primaryRouteProgressData.routeGeometryIndex >= routeGeometryIndexDiff
+            routeGeometryIndex = if (alternativeStarted) {
                 primaryRouteProgressData.routeGeometryIndex - routeGeometryIndexDiff
+            } else {
+                0
+            }
             legGeometryIndex = routeGeometryIndex -
                 prevLegsGeometryIndicesCount(alternativeMetadata.navigationRoute, legIndex)
         } else {
