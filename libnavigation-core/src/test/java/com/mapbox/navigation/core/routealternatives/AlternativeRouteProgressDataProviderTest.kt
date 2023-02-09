@@ -108,6 +108,31 @@ class AlternativeRouteProgressDataProviderTest {
     }
 
     @Test
+    fun `before fork, alternative starts after the primary route ahead of current position`() =
+        coroutineRule.runBlockingTest {
+            val primaryRouteProgressData = RouteProgressData(0, 3, 3)
+            val alternativeMetadata = alternativeRouteMetadata(
+                primaryForkLegIndex = 0,
+                primaryForkRouteGeometryIndex = 100,
+                primaryForkLegGeometryIndex = 100,
+                alternativeForkLegIndex = 0,
+                alternativeForkRouteGeometryIndex = 80,
+                alternativeForkLegGeometryIndex = 80,
+                listOf(
+                    listOf(List(10) { mockk() }, List(7) { mockk() }, List(15) { mockk() }),
+                )
+            )
+            val expected = RouteProgressData(0, 0, 0)
+
+            val actual = AlternativeRouteProgressDataProvider.getRouteProgressData(
+                primaryRouteProgressData,
+                alternativeMetadata
+            )
+
+            assertEquals(expected, actual)
+        }
+
+    @Test
     fun `before fork, alternative starts together with the primary route`() = coroutineRule.runBlockingTest {
         val primaryRouteProgressData = RouteProgressData(4, 200, 30)
         val alternativeMetadata = alternativeRouteMetadata(

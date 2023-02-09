@@ -1,0 +1,1 @@
+- Fixed an issue where alternative routes refresh might have finished with response code 422.
