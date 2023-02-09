@@ -85,7 +85,6 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
-import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerImpl
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
@@ -267,7 +266,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
-    private val routeRefreshControllerImpl: RouteRefreshControllerImpl
     private val arrivalProgressObserver: ArrivalProgressObserver
     private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
         navigationOptions.eHorizonOptions.length,
@@ -558,7 +556,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSession,
             threadController,
         )
-        routeRefreshControllerImpl = RouteRefreshControllerProvider.createRouteRefreshController(
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             threadController.getMainScopeAndRootJob().scope,
             threadController.getImmediateMainScopeAndRootJob().scope,
             navigationOptions.routeRefreshOptions,
@@ -569,8 +568,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             Time.SystemImpl
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-        routeRefreshController = routeRefreshControllerImpl
-        routeRefreshControllerImpl.registerRouteRefreshObserver {
+        routeRefreshController.registerRouteRefreshObserver {
             internalSetNavigationRoutes(
                 it.allRoutesProgressData.map { pair -> pair.first },
                 SetRoutes.RefreshRoutes(it.primaryRouteProgressData)
@@ -1224,7 +1222,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         historyRecordingStateHandler.unregisterAllStateChangeObservers()
         historyRecordingStateHandler.unregisterAllCopilotSessionObservers()
         developerMetadataAggregator.unregisterAllObservers()
-        routeRefreshControllerImpl.destroy()
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        routeRefreshController.destroy()
         routesPreviewController.unregisterAllRoutesPreviewObservers()
         runInTelemetryContext { telemetry ->
             telemetry.destroy(this@MapboxNavigation)
@@ -1887,7 +1886,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         routeRefreshRequestDataProvider.onNewRoutes()
-        routeRefreshControllerImpl.requestPlannedRouteRefresh(result.navigationRoutes)
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        routeRefreshController.requestPlannedRouteRefresh(result.navigationRoutes)
     }
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->

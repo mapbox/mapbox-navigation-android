@@ -1,14 +1,19 @@
 package com.mapbox.navigation.core.routerefresh
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
     fun routeRefreshOnDemandDoesNotNotifyObserverBeforeTimeout() = runBlockingTest {
-        val routes = setUpRoutes("route_response_single_route_refresh.json", successfulAttemptNumber = 100)
+        val routes = setUpRoutes(
+            "route_response_single_route_refresh.json",
+            successfulAttemptNumber = 100
+        )
         routeRefreshController = createRefreshController(60_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)
 

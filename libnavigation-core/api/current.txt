@@ -882,7 +882,7 @@ package com.mapbox.navigation.core.routeoptions {
 
 package com.mapbox.navigation.core.routerefresh {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface RouteRefreshController {
+  public final class RouteRefreshController {
     method public void registerRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
     method public void requestImmediateRouteRefresh();
     method public void unregisterRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);

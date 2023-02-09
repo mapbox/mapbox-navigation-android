@@ -31,6 +31,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -40,8 +41,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-open internal class RouteRefreshIntegrationTest {
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+internal open class RouteRefreshIntegrationTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
@@ -63,7 +64,7 @@ open internal class RouteRefreshIntegrationTest {
         tripSession,
         threadController
     )
-    lateinit var routeRefreshController: RouteRefreshControllerImpl
+    lateinit var routeRefreshController: RouteRefreshController
     val stateObserver = TestStateObserver()
     val refreshObserver = TestRefreshObserver()
     val testDispatcher = TestCoroutineDispatcher()
@@ -95,23 +96,23 @@ open internal class RouteRefreshIntegrationTest {
         every {
             NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } returns ExpectedFactory.createValue(listOf(mockk(relaxed = true)))
-        primaryRouteProgressDataProvider.onRouteProgressChanged(mockk {
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns 0
-                every { geometryIndex } returns 0
+        primaryRouteProgressDataProvider.onRouteProgressChanged(
+            mockk {
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 0
+                    every { geometryIndex } returns 0
+                }
+                every { currentRouteGeometryIndex } returns 0
             }
-            every { currentRouteGeometryIndex } returns 0
-        })
+        )
     }
-
 
     @After
     fun tearDown() {
         unmockkObject(NativeRouteParserWrapper)
     }
 
-
-    fun createRefreshController(refreshInternal: Long): RouteRefreshControllerImpl {
+    fun createRefreshController(refreshInternal: Long): RouteRefreshController {
         val options = RouteRefreshOptions.Builder().intervalMillis(refreshInternal).build()
         return RouteRefreshControllerProvider.createRouteRefreshController(
             testScope,
@@ -174,9 +175,11 @@ open internal class RouteRefreshIntegrationTest {
                                 leg.toBuilder()
                                     .annotation(
                                         leg.annotation()!!.toBuilder()
-                                            .duration(leg.annotation()!!.duration()!!.map {
-                                                it + (invocationNumber + 1) * 0.1
-                                            })
+                                            .duration(
+                                                leg.annotation()!!.duration()!!.map {
+                                                    it + (invocationNumber + 1) * 0.1
+                                                }
+                                            )
                                             .build()
                                     )
                                     .build()

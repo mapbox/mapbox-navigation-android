@@ -15,7 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class RouteRefreshControllerImplTest {
+class RouteRefreshControllerTest {
 
     private val logger = mockk<LoggerFrontend>(relaxed = true)
 
@@ -28,7 +28,7 @@ class RouteRefreshControllerImplTest {
     private val stateHolder = mockk<RouteRefreshStateHolder>(relaxed = true)
     private val refreshObserversManager = mockk<RefreshObserversManager>(relaxed = true)
     private val resultProcessor = mockk<RouteRefresherResultProcessor>(relaxed = true)
-    private val sut = RouteRefreshControllerImpl(
+    private val sut = RouteRefreshController(
         plannedRouteRefreshController,
         immediateRouteRefreshController,
         stateHolder,

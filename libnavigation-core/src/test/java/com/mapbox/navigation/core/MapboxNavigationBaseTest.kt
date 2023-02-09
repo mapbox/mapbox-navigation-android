@@ -27,7 +27,7 @@ import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
-import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerImpl
+import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
@@ -87,7 +87,7 @@ internal open class MapboxNavigationBaseTest {
     val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
-    val routeRefreshController: RouteRefreshControllerImpl = mockk(relaxed = true)
+    val routeRefreshController: RouteRefreshController = mockk(relaxed = true)
     val evDynamicDataHolder: EVDynamicDataHolder = mockk(relaxed = true)
     val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true)
     val routeProgress: RouteProgress = mockk(relaxed = true)
