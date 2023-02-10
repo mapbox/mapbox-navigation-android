@@ -37,6 +37,14 @@ auto_renamed_features_count = rename_files('libnavui-androidauto/changelog/unrel
 
 if renamed_features_count + renamed_bugfixes_count + auto_renamed_bugfixes_count + auto_renamed_features_count > 0:
     repository = git.Repo('.')
-    repository.git.add()
+
+    changelog_unreleased_dir = 'changelog/unreleased'
+    if os.path.isdir(changelog_unreleased_dir):
+        repository.git.add(changelog_unreleased_dir)
+
+    auto_changelog_unreleased_dir = 'libnavui-androidauto/changelog/unreleased'
+    if os.path.isdir(auto_changelog_unreleased_dir):
+        repository.git.add(auto_changelog_unreleased_dir)
+
     repository.index.commit('Rename changelog files')
     repository.remotes.origin.push().raise_if_error()
