@@ -1,0 +1,1 @@
+- Fixed a rare race condition where the alternative routes might have not been in sync with the current primary route.  

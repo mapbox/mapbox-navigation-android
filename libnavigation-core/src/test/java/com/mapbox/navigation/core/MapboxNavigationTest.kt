@@ -1637,6 +1637,78 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun `setNavigationRoutes alternative for current primary route`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        val route1 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id1"
+        }
+        val route2 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id2"
+        }
+        val route3 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id3"
+        }
+        every { directionsSession.routes } returns listOf(route1, route2)
+
+        mapboxNavigation.setNavigationRoutes(listOf(route1, route3))
+
+        coVerify(exactly = 1) {
+            tripSession.setRoutes(any(), ofType(SetRoutes.Alternatives::class))
+        }
+        verify(exactly = 1) {
+            directionsSession.setRoutes(any(), any())
+        }
+    }
+
+    @Test
+    fun `setNavigationRoutes new routes`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        val route1 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id1"
+        }
+        val route2 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id2"
+        }
+        val route3 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id3"
+        }
+        every { directionsSession.routes } returns listOf(route1, route2)
+
+        mapboxNavigation.setNavigationRoutes(listOf(route3, route2))
+
+        coVerify(exactly = 1) {
+            tripSession.setRoutes(any(), ofType(SetRoutes.NewRoutes::class))
+        }
+        verify(exactly = 1) {
+            directionsSession.setRoutes(any(), any())
+        }
+    }
+
+    @Test
+    fun `setNavigationRoutes alternative for outdated primary route`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        val route1 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id1"
+        }
+        val route2 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id2"
+        }
+        val route3 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id3"
+        }
+        every { directionsSession.routes } returnsMany listOf(listOf(route1), listOf(route2))
+
+        mapboxNavigation.setNavigationRoutes(listOf(route1, route3))
+
+        coVerify(exactly = 0) {
+            tripSession.setRoutes(any(), any())
+        }
+        verify(exactly = 0) {
+            directionsSession.setRoutes(any(), any())
+        }
+    }
+
+    @Test
     fun `refreshed route is set to trip session and directions session`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
