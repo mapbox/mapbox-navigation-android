@@ -1034,35 +1034,49 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         restartRouteRefreshScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
-                historyRecordingStateHandler.setRoutes(routes)
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
-                when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
-                    is NativeSetRouteValue -> {
-                        val (acceptedAlternatives, ignoredAlternatives) = routes
-                            .drop(1)
-                            .partition { passedRoute ->
-                                processedRoutes.nativeAlternatives.any { processedRoute ->
-                                    processedRoute.route.routeId == passedRoute.id
+                if (
+                    setRoutesInfo is SetRoutes.Alternatives &&
+                    routes.first().id != directionsSession.routes.firstOrNull()?.id
+                ) {
+                    routesSetResult = ExpectedFactory.createError(
+                        RoutesSetError(
+                            "Alternatives ${routes.drop(1).map { it.id }} " +
+                                "are outdated. Primary route has changed " +
+                                "from ${routes.first().id} " +
+                                "to ${directionsSession.routes.firstOrNull()?.id}"
+                        )
+                    )
+                } else {
+                    historyRecordingStateHandler.setRoutes(routes)
+                    when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
+                        is NativeSetRouteValue -> {
+                            val (acceptedAlternatives, ignoredAlternatives) = routes
+                                .drop(1)
+                                .partition { passedRoute ->
+                                    processedRoutes.nativeAlternatives.any { processedRoute ->
+                                        processedRoute.route.routeId == passedRoute.id
+                                    }
                                 }
-                            }
-                        directionsSession.setRoutes(processedRoutes.routes, setRoutesInfo)
-                        routesSetResult = ExpectedFactory.createValue(
-                            RoutesSetSuccess(
-                                ignoredAlternatives.associate {
-                                    it.id to RoutesSetError("invalid alternative")
-                                }
+                            directionsSession.setRoutes(processedRoutes.routes, setRoutesInfo)
+                            routesSetResult = ExpectedFactory.createValue(
+                                RoutesSetSuccess(
+                                    ignoredAlternatives.associate {
+                                        it.id to RoutesSetError("invalid alternative")
+                                    }
+                                )
                             )
-                        )
-                    }
-                    is NativeSetRouteError -> {
-                        logE(
-                            "Routes with IDs ${routes.map { it.id }} " +
-                                "will be ignored as they are not valid"
-                        )
-                        routesSetResult = ExpectedFactory.createError(
-                            RoutesSetError(processedRoutes.error)
-                        )
-                        historyRecordingStateHandler.lastSetRoutesFailed()
+                        }
+                        is NativeSetRouteError -> {
+                            logE(
+                                "Routes with IDs ${routes.map { it.id }} " +
+                                    "will be ignored as they are not valid"
+                            )
+                            routesSetResult = ExpectedFactory.createError(
+                                RoutesSetError(processedRoutes.error)
+                            )
+                            historyRecordingStateHandler.lastSetRoutesFailed()
+                        }
                     }
                 }
                 callback?.onRoutesSet(routesSetResult)
