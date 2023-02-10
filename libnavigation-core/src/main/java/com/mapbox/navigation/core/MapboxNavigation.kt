@@ -1044,33 +1044,48 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         restartRouteRefreshScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
-                historyRecordingStateHandler.setRoutes(routes)
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
-                when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
-                    is NativeSetRouteValue -> {
-                        val directionsSessionRoutes = Utils.createDirectionsSessionRoutes(
-                            routes,
-                            processedRoutes,
-                            setRoutesInfo
+                if (
+                    setRoutesInfo is SetRoutes.Alternatives &&
+                    routes.first().id != directionsSession.routes.firstOrNull()?.id
+                ) {
+                    routesSetResult = ExpectedFactory.createError(
+                        RoutesSetError(
+                            "Alternatives ${routes.drop(1).map { it.id }} " +
+                                "are outdated. Primary route has changed " +
+                                "from ${routes.first().id} " +
+                                "to ${directionsSession.routes.firstOrNull()?.id}"
                         )
-                        directionsSession.setRoutes(directionsSessionRoutes)
-                        routesSetResult = ExpectedFactory.createValue(
-                            RoutesSetSuccess(
-                                directionsSessionRoutes.ignoredRoutes.associate {
-                                    it.navigationRoute.id to RoutesSetError("invalid alternative")
-                                }
+                    )
+                } else {
+                    historyRecordingStateHandler.setRoutes(routes)
+                    when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
+                        is NativeSetRouteValue -> {
+                            val directionsSessionRoutes = Utils.createDirectionsSessionRoutes(
+                                routes,
+                                processedRoutes,
+                                setRoutesInfo
                             )
-                        )
-                    }
-                    is NativeSetRouteError -> {
-                        logE(
-                            "Routes with IDs ${routes.map { it.id }} " +
-                                "will be ignored as they are not valid"
-                        )
-                        routesSetResult = ExpectedFactory.createError(
-                            RoutesSetError(processedRoutes.error)
-                        )
-                        historyRecordingStateHandler.lastSetRoutesFailed()
+                            directionsSession.setRoutes(directionsSessionRoutes)
+                            routesSetResult = ExpectedFactory.createValue(
+                                RoutesSetSuccess(
+                                    directionsSessionRoutes.ignoredRoutes.associate {
+                                        it.navigationRoute.id to
+                                            RoutesSetError("invalid alternative")
+                                    }
+                                )
+                            )
+                        }
+                        is NativeSetRouteError -> {
+                            logE(
+                                "Routes with IDs ${routes.map { it.id }} " +
+                                    "will be ignored as they are not valid"
+                            )
+                            routesSetResult = ExpectedFactory.createError(
+                                RoutesSetError(processedRoutes.error)
+                            )
+                            historyRecordingStateHandler.lastSetRoutesFailed()
+                        }
                     }
                 }
                 callback?.onRoutesSet(routesSetResult)
