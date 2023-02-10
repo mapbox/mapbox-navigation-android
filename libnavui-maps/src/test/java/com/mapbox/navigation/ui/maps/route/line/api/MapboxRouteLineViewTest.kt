@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
@@ -42,6 +43,12 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
@@ -142,6 +149,12 @@ class MapboxRouteLineViewTest {
                 styleLayerExists(LAYER_GROUP_3_MAIN)
             } returns true
             every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL) } returns true
+            every { styleLayerExists(MASKING_LAYER_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
+            every { styleLayerExists(MASKING_LAYER_RESTRICTED) } returns true
 
             every {
                 styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
@@ -395,6 +408,8 @@ class MapboxRouteLineViewTest {
         val routeLineExp = mockk<Expression>()
         val casingLineEx = mockk<Expression>()
         val restrictedRoadExp = mockk<Expression>()
+        val trailExpression = mockk<Expression>()
+        val trailCasingExpression = mockk<Expression>()
         val state: Expected<RouteLineError, RouteLineUpdateValue> =
             ExpectedFactory.createValue(
                 RouteLineUpdateValue(
@@ -402,7 +417,9 @@ class MapboxRouteLineViewTest {
                         { routeLineExp },
                         { casingLineEx },
                         { trafficLineExp },
-                        { restrictedRoadExp }
+                        { restrictedRoadExp },
+                        trailExpressionProvider = { trailExpression },
+                        trailCasingExpressionProvider = { trailCasingExpression }
                     ),
                     alternativeRouteLinesDynamicData = listOf(
                         RouteLineDynamicData(
@@ -417,6 +434,14 @@ class MapboxRouteLineViewTest {
                             { throw UnsupportedOperationException() },
                             { throw UnsupportedOperationException() }
                         )
+                    ),
+                    routeLineMaskingLayerDynamicData = RouteLineDynamicData(
+                        { routeLineExp },
+                        { casingLineEx },
+                        { trafficLineExp },
+                        { restrictedRoadExp },
+                        trailExpressionProvider = { trailExpression },
+                        trailCasingExpressionProvider = { trailCasingExpression }
                     )
                 )
             )
@@ -462,6 +487,56 @@ class MapboxRouteLineViewTest {
                 restrictedRoadExp
             )
         }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL,
+                "line-gradient",
+                trailExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                LAYER_GROUP_1_TRAIL_CASING,
+                "line-gradient",
+                trailCasingExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAFFIC,
+                "line-gradient",
+                trafficLineExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_MAIN,
+                "line-gradient",
+                routeLineExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_CASING,
+                "line-gradient",
+                casingLineEx
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL,
+                "line-gradient",
+                trailExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL_CASING,
+                "line-gradient",
+                trailCasingExpression
+            )
+        }
+
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -502,6 +577,14 @@ class MapboxRouteLineViewTest {
                             { throw UnsupportedOperationException() },
                             { throw UnsupportedOperationException() }
                         )
+                    ),
+                    routeLineMaskingLayerDynamicData = RouteLineDynamicData(
+                        { routeLineExp },
+                        { casingLineEx },
+                        { trafficLineExp },
+                        { restrictedRoadExp },
+                        trailExpressionProvider = { trailExp },
+                        trailCasingExpressionProvider = { trailCasingExp }
                     )
                 )
             )
@@ -561,6 +644,41 @@ class MapboxRouteLineViewTest {
                 trailCasingExp
             )
         }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAFFIC,
+                "line-gradient",
+                trafficLineExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_MAIN,
+                "line-gradient",
+                routeLineExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_CASING,
+                "line-gradient",
+                casingLineEx
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL,
+                "line-gradient",
+                trailExp
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL_CASING,
+                "line-gradient",
+                trailCasingExp
+            )
+        }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -603,12 +721,18 @@ class MapboxRouteLineViewTest {
         val route3Main = mockk<LineLayer>(relaxed = true)
         val route3Traffic = mockk<LineLayer>(relaxed = true)
         val route3Restricted = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingTrail = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val maskingTraffic = mockk<LineLayer>(relaxed = true)
         val bottomLevelLayer = mockk<BackgroundLayer>(relaxed = true)
         val topLevelLayer = mockk<BackgroundLayer>(relaxed = true)
         val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
         val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
         val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
         val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
+        val maskingExpression = mockk<Expression>()
         val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
             RouteSetValue(
                 primaryRouteLineData = RouteLineData(
@@ -649,7 +773,16 @@ class MapboxRouteLineViewTest {
                         )
                     )
                 ),
-                waypointsFeatureCollection
+                waypointsFeatureCollection,
+                routeLineMaskingLayerDynamicData = RouteLineDynamicData(
+                    { maskingExpression },
+                    { maskingExpression },
+                    { maskingExpression },
+                    { maskingExpression },
+                    trimOffset = RouteLineTrimOffset(9.9),
+                    trailExpressionProvider = { maskingExpression },
+                    trailCasingExpressionProvider = { maskingExpression }
+                )
             )
         )
         val style = getMockedStyle(
@@ -671,6 +804,11 @@ class MapboxRouteLineViewTest {
             route3Main,
             route3Traffic,
             route3Restricted,
+            maskingTrailCasing,
+            maskingTrail,
+            maskingCasing,
+            maskingMain,
+            maskingTraffic,
             topLevelLayer,
             bottomLevelLayer,
             primaryRouteSource,
@@ -681,6 +819,11 @@ class MapboxRouteLineViewTest {
         every {
             style.setStyleLayerProperty(any(), any(), any())
         } returns ExpectedFactory.createNone()
+        every {
+            style.getStyleLayerProperty(MASKING_LAYER_TRAFFIC, "source")
+        } returns mockk {
+            every { value } returns Value.valueOf("foobar")
+        }
         every {
             MapboxRouteLineUtils.getTopRouteLineRelatedLayerId(style)
         } returns LAYER_GROUP_1_MAIN
@@ -825,6 +968,42 @@ class MapboxRouteLineViewTest {
             )
         }
 
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL_CASING,
+                "line-gradient",
+                maskingExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL,
+                "line-gradient",
+                maskingExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_CASING,
+                "line-gradient",
+                maskingExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_MAIN,
+                "line-gradient",
+                maskingExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAFFIC,
+                "line-gradient",
+                maskingExpression
+            )
+        }
+
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAIL_CASING,
@@ -954,6 +1133,42 @@ class MapboxRouteLineViewTest {
             )
         }
 
+        verify(exactly = 0) {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL_CASING,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify(exactly = 0) {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_CASING,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_MAIN,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAFFIC,
+                "line-trim-offset",
+                expectedRoute1Expression
+            )
+        }
+
         verify(exactly = 1) { style.moveStyleLayer(LAYER_GROUP_1_TRAIL_CASING, any()) }
         verify(exactly = 1) { style.moveStyleLayer(LAYER_GROUP_1_TRAIL, any()) }
         verify(exactly = 1) { style.moveStyleLayer(LAYER_GROUP_1_CASING, any()) }
@@ -972,6 +1187,11 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) { style.moveStyleLayer(LAYER_GROUP_3_MAIN, any()) }
         verify(exactly = 0) { style.moveStyleLayer(LAYER_GROUP_3_TRAFFIC, any()) }
         verify(exactly = 0) { style.moveStyleLayer(LAYER_GROUP_3_RESTRICTED, any()) }
+        verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_TRAIL_CASING, any()) }
+        verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_TRAIL, any()) }
+        verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_CASING, any()) }
+        verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_MAIN, any()) }
+        verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_TRAFFIC, any()) }
 
         verify {
             style.setStyleLayerProperty(
@@ -1079,6 +1299,42 @@ class MapboxRouteLineViewTest {
             )
         }
 
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL_CASING,
+                "line-width",
+                options.resourceProvider.routeCasingLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAIL,
+                "line-width",
+                options.resourceProvider.routeLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_CASING,
+                "line-width",
+                options.resourceProvider.routeCasingLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_MAIN,
+                "line-width",
+                options.resourceProvider.routeLineScaleExpression
+            )
+        }
+        verify {
+            style.setStyleLayerProperty(
+                MASKING_LAYER_TRAFFIC,
+                "line-width",
+                options.resourceProvider.routeTrafficLineScaleExpression
+            )
+        }
+
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
@@ -1120,6 +1376,11 @@ class MapboxRouteLineViewTest {
             val route3Main = mockk<LineLayer>(relaxed = true)
             val route3Traffic = mockk<LineLayer>(relaxed = true)
             val route3Restricted = mockk<LineLayer>(relaxed = true)
+            val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+            val maskingTrail = mockk<LineLayer>(relaxed = true)
+            val maskingCasing = mockk<LineLayer>(relaxed = true)
+            val maskingMain = mockk<LineLayer>(relaxed = true)
+            val maskingTraffic = mockk<LineLayer>(relaxed = true)
             val bottomLevelLayer = mockk<BackgroundLayer>(relaxed = true)
             val topLevelLayer = mockk<BackgroundLayer>(relaxed = true)
             val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
@@ -1195,6 +1456,11 @@ class MapboxRouteLineViewTest {
                 route3Main,
                 route3Traffic,
                 route3Restricted,
+                maskingTrailCasing,
+                maskingTrail,
+                maskingCasing,
+                maskingMain,
+                maskingTraffic,
                 topLevelLayer,
                 bottomLevelLayer,
                 primaryRouteSource,
@@ -1221,6 +1487,11 @@ class MapboxRouteLineViewTest {
                 route3Main,
                 route3Traffic,
                 route3Restricted,
+                maskingTrailCasing,
+                maskingTrail,
+                maskingCasing,
+                maskingMain,
+                maskingTraffic,
                 topLevelLayer,
                 bottomLevelLayer,
                 primaryRouteSource,
@@ -1264,6 +1535,17 @@ class MapboxRouteLineViewTest {
             verify(exactly = 0) { style2.moveStyleLayer(LAYER_GROUP_3_MAIN, any()) }
             verify(exactly = 0) { style2.moveStyleLayer(LAYER_GROUP_3_TRAFFIC, any()) }
             verify(exactly = 0) { style2.moveStyleLayer(LAYER_GROUP_3_RESTRICTED, any()) }
+
+            verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_TRAIL_CASING, any()) }
+            verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_TRAIL, any()) }
+            verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_CASING, any()) }
+            verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_MAIN, any()) }
+            verify(exactly = 1) { style.moveStyleLayer(MASKING_LAYER_TRAFFIC, any()) }
+            verify(exactly = 1) { style2.moveStyleLayer(MASKING_LAYER_TRAIL_CASING, any()) }
+            verify(exactly = 1) { style2.moveStyleLayer(MASKING_LAYER_TRAIL, any()) }
+            verify(exactly = 1) { style2.moveStyleLayer(MASKING_LAYER_CASING, any()) }
+            verify(exactly = 1) { style2.moveStyleLayer(MASKING_LAYER_MAIN, any()) }
+            verify(exactly = 1) { style2.moveStyleLayer(MASKING_LAYER_TRAFFIC, any()) }
 
             unmockkObject(MapboxRouteLineUtils)
             unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
@@ -1522,6 +1804,11 @@ class MapboxRouteLineViewTest {
         val route1Main = mockk<LineLayer>(relaxed = true)
         val route1Traffic = mockk<LineLayer>(relaxed = true)
         val route1Restricted = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingTrail = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val maskingTraffic = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
             every { styleLayerExists(any()) } returns true
             every {
@@ -1538,6 +1825,11 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_1_RESTRICTED)
             } returns route1Restricted
+            every { getLayer(MASKING_LAYER_TRAIL_CASING) } returns maskingTrailCasing
+            every { getLayer(MASKING_LAYER_TRAIL) } returns maskingTrail
+            every { getLayer(MASKING_LAYER_CASING) } returns maskingCasing
+            every { getLayer(MASKING_LAYER_MAIN) } returns maskingMain
+            every { getLayer(MASKING_LAYER_TRAFFIC) } returns maskingTraffic
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -1550,6 +1842,11 @@ class MapboxRouteLineViewTest {
         verify { route1Main.visibility(Visibility.VISIBLE) }
         verify { route1Traffic.visibility(Visibility.VISIBLE) }
         verify { route1Restricted.visibility(Visibility.VISIBLE) }
+        verify { maskingTrailCasing.visibility(Visibility.VISIBLE) }
+        verify { maskingTrail.visibility(Visibility.VISIBLE) }
+        verify { maskingCasing.visibility(Visibility.VISIBLE) }
+        verify { maskingMain.visibility(Visibility.VISIBLE) }
+        verify { maskingTraffic.visibility(Visibility.VISIBLE) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -1576,6 +1873,11 @@ class MapboxRouteLineViewTest {
         val route1Main = mockk<LineLayer>(relaxed = true)
         val route1Traffic = mockk<LineLayer>(relaxed = true)
         val route1Restricted = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingTrail = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val maskingTraffic = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
             every { styleLayerExists(any()) } returns true
             every {
@@ -1592,6 +1894,11 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_1_RESTRICTED)
             } returns route1Restricted
+            every { getLayer(MASKING_LAYER_TRAIL_CASING) } returns maskingTrailCasing
+            every { getLayer(MASKING_LAYER_TRAIL) } returns maskingTrail
+            every { getLayer(MASKING_LAYER_CASING) } returns maskingCasing
+            every { getLayer(MASKING_LAYER_MAIN) } returns maskingMain
+            every { getLayer(MASKING_LAYER_TRAFFIC) } returns maskingTraffic
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -1604,6 +1911,11 @@ class MapboxRouteLineViewTest {
         verify { route1Main.visibility(Visibility.NONE) }
         verify { route1Traffic.visibility(Visibility.NONE) }
         verify { route1Restricted.visibility(Visibility.NONE) }
+        verify { maskingTrailCasing.visibility(Visibility.NONE) }
+        verify { maskingTrail.visibility(Visibility.NONE) }
+        verify { maskingCasing.visibility(Visibility.NONE) }
+        verify { maskingMain.visibility(Visibility.NONE) }
+        verify { maskingTraffic.visibility(Visibility.NONE) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -1867,6 +2179,11 @@ class MapboxRouteLineViewTest {
         val route3Main = mockk<LineLayer>(relaxed = true)
         val route3Traffic = mockk<LineLayer>(relaxed = true)
         val route3Restricted = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingTrail = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val maskingTraffic = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
             every {
                 getLayer(LAYER_GROUP_1_TRAIL_CASING)
@@ -1922,6 +2239,11 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_3_RESTRICTED)
             } returns route3Restricted
+            every { getLayer(MASKING_LAYER_TRAIL_CASING) } returns maskingTrailCasing
+            every { getLayer(MASKING_LAYER_TRAIL) } returns maskingTrail
+            every { getLayer(MASKING_LAYER_CASING) } returns maskingCasing
+            every { getLayer(MASKING_LAYER_MAIN) } returns maskingMain
+            every { getLayer(MASKING_LAYER_TRAFFIC) } returns maskingTraffic
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -1946,6 +2268,12 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) { route3Main.visibility(Visibility.NONE) }
         verify(exactly = 1) { route3Traffic.visibility(Visibility.NONE) }
         verify(exactly = 0) { route3Restricted.visibility(Visibility.NONE) }
+        verify(exactly = 0) { maskingTrailCasing.visibility(Visibility.NONE) }
+        verify(exactly = 0) { maskingTrail.visibility(Visibility.NONE) }
+        verify(exactly = 0) { maskingCasing.visibility(Visibility.NONE) }
+        verify(exactly = 0) { maskingMain.visibility(Visibility.NONE) }
+        verify(exactly = 1) { maskingTraffic.visibility(Visibility.NONE) }
+
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -1973,6 +2301,11 @@ class MapboxRouteLineViewTest {
         val route3Main = mockk<LineLayer>(relaxed = true)
         val route3Traffic = mockk<LineLayer>(relaxed = true)
         val route3Restricted = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingTrail = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val maskingTraffic = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
             every {
                 getLayer(LAYER_GROUP_1_TRAIL_CASING)
@@ -2028,6 +2361,11 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_3_RESTRICTED)
             } returns route3Restricted
+            every { getLayer(MASKING_LAYER_TRAIL_CASING) } returns maskingTrailCasing
+            every { getLayer(MASKING_LAYER_TRAIL) } returns maskingTrail
+            every { getLayer(MASKING_LAYER_CASING) } returns maskingCasing
+            every { getLayer(MASKING_LAYER_MAIN) } returns maskingMain
+            every { getLayer(MASKING_LAYER_TRAFFIC) } returns maskingTraffic
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -2052,6 +2390,12 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) { route3Main.visibility(Visibility.VISIBLE) }
         verify(exactly = 1) { route3Traffic.visibility(Visibility.VISIBLE) }
         verify(exactly = 0) { route3Restricted.visibility(Visibility.VISIBLE) }
+        verify(exactly = 0) { maskingTrailCasing.visibility(Visibility.VISIBLE) }
+        verify(exactly = 0) { maskingTrail.visibility(Visibility.VISIBLE) }
+        verify(exactly = 0) { maskingCasing.visibility(Visibility.VISIBLE) }
+        verify(exactly = 0) { maskingMain.visibility(Visibility.VISIBLE) }
+        verify(exactly = 1) { maskingTraffic.visibility(Visibility.VISIBLE) }
+
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -2226,6 +2570,11 @@ class MapboxRouteLineViewTest {
         route3Main: LineLayer,
         route3Traffic: LineLayer,
         route3Restricted: LineLayer,
+        maskingTrailCasing: LineLayer,
+        maskingTrail: LineLayer,
+        maskingCasing: LineLayer,
+        maskingMain: LineLayer,
+        maskingTraffic: LineLayer,
         topLevelLayer: BackgroundLayer,
         bottomLevelLayer: BackgroundLayer,
         primaryRouteSource: GeoJsonSource,
@@ -2288,6 +2637,21 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_3_RESTRICTED)
             } returns route3Restricted
+            every {
+                getLayer(MASKING_LAYER_TRAIL_CASING)
+            } returns maskingTrailCasing
+            every {
+                getLayer(MASKING_LAYER_TRAIL)
+            } returns maskingTrail
+            every {
+                getLayer(MASKING_LAYER_CASING)
+            } returns maskingCasing
+            every {
+                getLayer(MASKING_LAYER_MAIN)
+            } returns maskingMain
+            every {
+                getLayer(MASKING_LAYER_TRAFFIC)
+            } returns maskingTraffic
             every {
                 getLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns topLevelLayer

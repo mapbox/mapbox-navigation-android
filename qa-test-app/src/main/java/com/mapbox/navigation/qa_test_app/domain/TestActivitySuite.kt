@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
+import com.mapbox.navigation.qa_test_app.view.ActiveLegAboveInactiveLegsActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.CustomAlternativeRouteColoringActivity
@@ -145,6 +146,12 @@ object TestActivitySuite {
             R.string.route_line_scaling_description
         ) { activity ->
             activity.startActivity<RouteLineScalingActivity>()
+        },
+        TestActivityDescription(
+            "Active route leg above other legs.",
+            R.string.route_line_active_leg_above_others_description
+        ) { activity ->
+            activity.startActivity<ActiveLegAboveInactiveLegsActivity>()
         },
         TestActivityDescription(
             "Feedback test activity",

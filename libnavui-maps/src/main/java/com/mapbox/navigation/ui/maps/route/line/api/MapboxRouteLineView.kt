@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import androidx.annotation.UiThread
 import com.mapbox.bindgen.Expected
+import com.mapbox.common.toValue
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
@@ -19,6 +20,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.la
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layersAreInitialized
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.maskingLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.sourceLayerMap
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
@@ -39,6 +41,12 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_RES
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineData
@@ -112,32 +120,38 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
     private val trailCasingLayerIds = setOf(
         LAYER_GROUP_1_TRAIL_CASING,
         LAYER_GROUP_2_TRAIL_CASING,
-        LAYER_GROUP_3_TRAIL_CASING
+        LAYER_GROUP_3_TRAIL_CASING,
+        MASKING_LAYER_TRAIL_CASING
     )
     private val trailLayerIds = setOf(
         LAYER_GROUP_1_TRAIL,
         LAYER_GROUP_2_TRAIL,
-        LAYER_GROUP_3_TRAIL
+        LAYER_GROUP_3_TRAIL,
+        MASKING_LAYER_TRAIL
     )
     private val casingLayerIds = setOf(
         LAYER_GROUP_1_CASING,
         LAYER_GROUP_2_CASING,
-        LAYER_GROUP_3_CASING
+        LAYER_GROUP_3_CASING,
+        MASKING_LAYER_CASING
     )
     private val mainLayerIds = setOf(
         LAYER_GROUP_1_MAIN,
         LAYER_GROUP_2_MAIN,
-        LAYER_GROUP_3_MAIN
+        LAYER_GROUP_3_MAIN,
+        MASKING_LAYER_MAIN
     )
     private val trafficLayerIds = setOf(
         LAYER_GROUP_1_TRAFFIC,
         LAYER_GROUP_2_TRAFFIC,
-        LAYER_GROUP_3_TRAFFIC
+        LAYER_GROUP_3_TRAFFIC,
+        MASKING_LAYER_TRAFFIC
     )
     private val restrictedLayerIds = setOf(
         LAYER_GROUP_1_RESTRICTED,
         LAYER_GROUP_2_RESTRICTED,
-        LAYER_GROUP_3_RESTRICTED
+        LAYER_GROUP_3_RESTRICTED,
+        MASKING_LAYER_RESTRICTED
     )
 
     @TestOnly
@@ -217,9 +231,21 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                             val gradientCommands = getGradientUpdateCommands(
                                 style,
                                 sourceKeyFeaturePair.first,
-                                routeLineData,
+                                routeLineData.dynamicData,
                                 sourceLayerMap
                             ).reversed()
+
+                            val maskingLayerGradientCommands = when (index) {
+                                0 -> ifNonNull(routeSetValue.routeLineMaskingLayerDynamicData) {
+                                    getGradientUpdateCommands(
+                                        style,
+                                        maskingLayerIds,
+                                        it
+                                    )
+                                } ?: listOf()
+                                else -> listOf()
+                            }
+
                             // Ignoring the trim offsets if the source was updated with an
                             // empty feature collection. Even though the call to update the
                             // source was made first the trim offset commands seem to get
@@ -227,13 +253,42 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                             // undesirable flash on the screen.
                             val trimOffsetCommands = when (sourceKeyFeaturePair.second.id()) {
                                 null -> listOf()
-                                else -> getTrimOffsetCommands(
-                                    style,
-                                    sourceKeyFeaturePair.first,
-                                    routeLineData,
-                                    sourceLayerMap
-                                )
+                                else -> {
+                                    val maskingTrimCommands = if (index == 0) {
+                                        listOf(
+                                            createTrimOffsetCommand(
+                                                routeSetValue.routeLineMaskingLayerDynamicData,
+                                                MASKING_LAYER_CASING,
+                                                style
+                                            ),
+                                            createTrimOffsetCommand(
+                                                routeSetValue.routeLineMaskingLayerDynamicData,
+                                                MASKING_LAYER_MAIN,
+                                                style
+                                            ),
+                                            createTrimOffsetCommand(
+                                                routeSetValue.routeLineMaskingLayerDynamicData,
+                                                MASKING_LAYER_TRAFFIC,
+                                                style
+                                            ),
+                                            createTrimOffsetCommand(
+                                                routeSetValue.routeLineMaskingLayerDynamicData,
+                                                MASKING_LAYER_RESTRICTED,
+                                                style
+                                            )
+                                        )
+                                    } else {
+                                        listOf()
+                                    }
+                                    getTrimOffsetCommands(
+                                        style,
+                                        sourceKeyFeaturePair.first,
+                                        routeLineData,
+                                        sourceLayerMap
+                                    ).plus(maskingTrimCommands)
+                                }
                             }
+
                             val layerMoveCommand = if (index == 0) {
                                 {
                                     moveLayersUp(
@@ -242,10 +297,12 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                                         sourceLayerMap
                                     )
                                 }
-                            } else {
-                                {}
-                            }
-                            listOf(layerMoveCommand).plus(trimOffsetCommands).plus(gradientCommands)
+                            } else { {} }
+
+                            listOf(layerMoveCommand)
+                                .plus(trimOffsetCommands)
+                                .plus(gradientCommands)
+                                .plus(maskingLayerGradientCommands)
                         } ?: listOf()
                     }
                 }).flatten().forEach { mutationCommand ->
@@ -266,27 +323,28 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                 // routes = showing. Only when an API call to show the primary route is made
                 // should the primary route line become visible. The snippet below adjusts
                 // the layer visibility to maintain that state.
-                val trafficLayerIds = setOf(
-                    LAYER_GROUP_1_TRAFFIC,
-                    LAYER_GROUP_2_TRAFFIC,
-                    LAYER_GROUP_3_TRAFFIC
+                adjustLayerVisibility(
+                    style,
+                    primaryRouteTrafficVisibility,
+                    primaryRouteVisibility,
+                    alternativeRouteVisibility
                 )
-                sourceLayerMap.values.flatten().map { layerID ->
-                    when (layerID in trafficLayerIds) {
-                        true -> when (primaryRouteLineLayerGroup.contains(layerID)) {
-                            true -> Pair(layerID, primaryRouteTrafficVisibility)
-                            false -> Pair(layerID, alternativeRouteVisibility)
-                        }
-                        false -> when (primaryRouteLineLayerGroup.contains(layerID)) {
-                            true -> Pair(layerID, primaryRouteVisibility)
-                            false -> Pair(layerID, alternativeRouteVisibility)
-                        }
+                adjustMaskingLayersVisibility(
+                    style,
+                    primaryRouteTrafficVisibility,
+                    primaryRouteVisibility
+                )
+
+                val updateMaskingLayerSourceCommands =
+                    getSourceKeyForPrimaryRoute(style).getOrNull()?.run {
+                        getMaskingLayerSourceSetCommands(style, this.sourceId)
+                    } ?: listOf()
+
+                val maskingLayerMoveCommands = getMaskingLayerMoveCommands(style)
+                updateMaskingLayerSourceCommands.plus(maskingLayerMoveCommands)
+                    .forEach { mutationCommand ->
+                        mutationCommand()
                     }
-                }.forEach {
-                    ifNonNull(it.second) { visibility ->
-                        updateLayerVisibility(style, it.first, visibility)
-                    }
-                }
             }
         }
     }
@@ -316,6 +374,43 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                         toExpressionUpdateFun(layerId, it.primaryRouteLineDynamicData)
                     }.forEach { updateFun ->
                         updateFun(style)
+                    }
+
+                    ifNonNull(it.routeLineMaskingLayerDynamicData) { overlayData ->
+                        overlayData.restrictedSectionExpressionProvider?.apply {
+                            getExpressionUpdateFun(MASKING_LAYER_RESTRICTED, this)(style)
+                        }
+                        overlayData.trafficExpressionProvider?.apply {
+                            getExpressionUpdateFun(MASKING_LAYER_TRAFFIC, this)(style)
+                        }
+                        getExpressionUpdateFun(
+                            MASKING_LAYER_MAIN,
+                            overlayData.baseExpressionProvider
+                        )(style)
+                        getExpressionUpdateFun(
+                            MASKING_LAYER_CASING,
+                            overlayData.casingExpressionProvider
+                        )(style)
+                        getExpressionUpdateFun(
+                            MASKING_LAYER_TRAIL,
+                            overlayData.trailExpressionProvider
+                        )(style)
+                        getExpressionUpdateFun(
+                            MASKING_LAYER_TRAIL_CASING,
+                            overlayData.trailCasingExpressionProvider
+                        )(style)
+
+                        // This method (renderRouteLineUpdate) is called every time the puck movement is updated and
+                        // on route progress updates.  It's not necessary to move the layers
+                        // on trim offset updates. Checking the kind of update that has come in
+                        // saves resources.
+                        if (
+                            overlayData.baseExpressionProvider !is RouteLineTrimExpressionProvider
+                        ) {
+                            getMaskingLayerMoveCommands(style).forEach { mutationCommand ->
+                                mutationCommand()
+                            }
+                        }
                     }
                 }
             }
@@ -402,8 +497,12 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
     fun showPrimaryRoute(style: Style) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
-                    .forEach { updateLayerVisibility(style, it, Visibility.VISIBLE) }
+                getLayerIdsForPrimaryRoute(
+                    primaryRouteLineLayerGroup,
+                    sourceLayerMap,
+                    style
+                ).plus(maskingLayerIds)
+                    .forEach { adjustLayerVisibility(style, it, Visibility.VISIBLE) }
             }
         }
     }
@@ -416,8 +515,12 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
     fun hidePrimaryRoute(style: Style) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
-                    .forEach { updateLayerVisibility(style, it, Visibility.NONE) }
+                getLayerIdsForPrimaryRoute(
+                    primaryRouteLineLayerGroup,
+                    sourceLayerMap,
+                    style
+                ).plus(maskingLayerIds)
+                    .forEach { adjustLayerVisibility(style, it, Visibility.NONE) }
             }
         }
     }
@@ -436,7 +539,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                     .union(layerGroup2SourceLayerIds)
                     .union(layerGroup3SourceLayerIds)
                     .subtract(primaryRouteLineLayers).forEach {
-                        updateLayerVisibility(style, it, Visibility.VISIBLE)
+                        adjustLayerVisibility(style, it, Visibility.VISIBLE)
                     }
             }
         }
@@ -456,7 +559,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                     .union(layerGroup2SourceLayerIds)
                     .union(layerGroup3SourceLayerIds)
                     .subtract(primaryRouteLineLayers).forEach {
-                        updateLayerVisibility(style, it, Visibility.NONE)
+                        adjustLayerVisibility(style, it, Visibility.NONE)
                     }
             }
         }
@@ -473,9 +576,10 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                 layerGroup1SourceLayerIds
                     .union(layerGroup2SourceLayerIds)
                     .union(layerGroup3SourceLayerIds)
+                    .union(maskingLayerIds)
                     .filter { it in trafficLayerIds }
                     .forEach { layerId ->
-                        updateLayerVisibility(style, layerId, Visibility.NONE)
+                        adjustLayerVisibility(style, layerId, Visibility.NONE)
                     }
             }
         }
@@ -492,9 +596,10 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                 layerGroup1SourceLayerIds
                     .union(layerGroup2SourceLayerIds)
                     .union(layerGroup3SourceLayerIds)
+                    .union(maskingLayerIds)
                     .filter { it in trafficLayerIds }
                     .forEach { layerId ->
-                        updateLayerVisibility(style, layerId, Visibility.VISIBLE)
+                        adjustLayerVisibility(style, layerId, Visibility.VISIBLE)
                     }
             }
         }
@@ -566,7 +671,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
     fun showOriginAndDestinationPoints(style: Style) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                updateLayerVisibility(
+                adjustLayerVisibility(
                     style,
                     RouteLayerConstants.WAYPOINT_LAYER_ID,
                     Visibility.VISIBLE
@@ -583,7 +688,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
     fun hideOriginAndDestinationPoints(style: Style) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
+                adjustLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
             }
         }
     }
@@ -595,7 +700,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
         jobControl.job.cancelChildren()
     }
 
-    private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
+    private fun adjustLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
         if (style.styleLayerExists(layerId)) {
             style.getLayer(layerId)?.visibility(visibility)
         }
@@ -681,87 +786,204 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
         routeLineData: RouteLineData,
         sourceLayerMap: Map<RouteLineSourceKey, Set<String>>
     ): List<() -> Unit> {
-        val mutationCommands = mutableListOf<() -> Unit>()
         val trailLayerIds = trailCasingLayerIds.plus(trailLayerIds)
-        sourceLayerMap[routeLineSourceKey]?.filter { !trailLayerIds.contains(it) }
-            ?.forEach { layerId ->
-                val provider = ifNonNull(routeLineData.dynamicData.trimOffset?.offset) { offset ->
-                    RouteLineExpressionProvider {
-                        literal(listOf(0.0, offset))
-                    }
-                }
+        return sourceLayerMap[routeLineSourceKey]?.filter { !trailLayerIds.contains(it) }
+            ?.map {
+                createTrimOffsetCommand(routeLineData.dynamicData, it, style)
+            } ?: listOf()
+    }
 
-                mutationCommands.add { updateTrimOffset(layerId, provider)(style) }
+    private fun createTrimOffsetCommand(
+        dynamicData: RouteLineDynamicData?,
+        layerId: String,
+        style: Style
+    ): () -> Unit {
+        val provider = ifNonNull(dynamicData, dynamicData?.trimOffset?.offset) { _, offset ->
+            RouteLineExpressionProvider {
+                literal(listOf(0.0, offset))
             }
-        return mutationCommands
+        }
+
+        return { updateTrimOffset(layerId, provider)(style) }
+    }
+
+    private fun getGradientUpdateCommands(
+        style: Style,
+        layerIds: Set<String>,
+        routeLineData: RouteLineDynamicData,
+    ): List<() -> Unit> {
+        return layerIds.map {
+            when (it) {
+                in trailCasingLayerIds -> Pair(it, routeLineData.trailCasingExpressionProvider)
+                in trailLayerIds -> Pair(it, routeLineData.trailExpressionProvider)
+                in casingLayerIds -> Pair(it, routeLineData.casingExpressionProvider)
+                in mainLayerIds -> Pair(it, routeLineData.baseExpressionProvider)
+                in trafficLayerIds -> Pair(it, routeLineData.trafficExpressionProvider)
+                in restrictedLayerIds -> Pair(it, routeLineData.restrictedSectionExpressionProvider)
+                else -> null
+            }
+        }.filter { it?.second != null }.map {
+            updateGradientCmd(
+                style,
+                it!!.second,
+                it.first
+            )
+        }
+    }
+
+    private fun getMaskingLayerMoveCommands(style: Style): List<() -> Unit> {
+        val commands = mutableListOf<() -> Unit>()
+        val belowLayerIdToUse = RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
+        commands.add {
+            style.moveStyleLayer(
+                MASKING_LAYER_TRAIL_CASING,
+                LayerPosition(null, belowLayerIdToUse, null)
+            )
+        }
+        commands.add {
+            style.moveStyleLayer(MASKING_LAYER_TRAIL, LayerPosition(null, belowLayerIdToUse, null))
+        }
+        commands.add {
+            style.moveStyleLayer(MASKING_LAYER_CASING, LayerPosition(null, belowLayerIdToUse, null))
+        }
+        commands.add {
+            style.moveStyleLayer(MASKING_LAYER_MAIN, LayerPosition(null, belowLayerIdToUse, null))
+        }
+        commands.add {
+            style.moveStyleLayer(
+                MASKING_LAYER_TRAFFIC,
+                LayerPosition(null, belowLayerIdToUse, null)
+            )
+        }
+        commands.add {
+            style.moveStyleLayer(
+                MASKING_LAYER_RESTRICTED,
+                LayerPosition(null, belowLayerIdToUse, null)
+            )
+        }
+
+        return commands
+    }
+
+    private fun getMaskingSourceId(style: Style): String? {
+        return try {
+            style.getStyleLayerProperty(
+                MASKING_LAYER_TRAFFIC,
+                "source"
+            ).value.contents as String
+        } catch (ex: Exception) {
+            null
+        }
+    }
+
+    private fun getMaskingLayerSourceSetCommands(style: Style, sourceId: String): List<() -> Unit> {
+        val commands = mutableListOf<() -> Unit>()
+        val maskingLayerSourceId = getMaskingSourceId(style)
+        if (sourceId != maskingLayerSourceId) {
+            commands.add {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_TRAFFIC,
+                    "source",
+                    sourceId.toValue()
+                )
+            }
+            commands.add {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_MAIN,
+                    "source",
+                    sourceId.toValue()
+                )
+            }
+            commands.add {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_CASING,
+                    "source",
+                    sourceId.toValue()
+                )
+            }
+            commands.add {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_TRAIL,
+                    "source",
+                    sourceId.toValue()
+                )
+            }
+            commands.add {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_TRAIL_CASING,
+                    "source",
+                    sourceId.toValue()
+                )
+            }
+        }
+        return commands
     }
 
     private fun getGradientUpdateCommands(
         style: Style,
         routeLineSourceKey: RouteLineSourceKey?,
-        routeLineData: RouteLineData,
+        routeLineData: RouteLineDynamicData,
         sourceLayerMap: Map<RouteLineSourceKey, Set<String>>
     ): List<() -> Unit> {
-        val mutationCommands = mutableListOf<() -> Unit>()
-        sourceLayerMap[routeLineSourceKey]?.forEach { layerId ->
-            when (layerId) {
-                in trailCasingLayerIds -> {
-                    mutationCommands.add(
-                        updateGradientCmd(
-                            style,
-                            routeLineData.dynamicData.trailCasingExpressionProvider,
-                            layerId
-                        )
-                    )
+        return sourceLayerMap[routeLineSourceKey]?.run {
+            getGradientUpdateCommands(
+                style,
+                this,
+                routeLineData
+            )
+        } ?: listOf()
+    }
+
+    // Any layer group can host the primary route.  If a call was made to
+    // hide the primary our alternative routes, that state needs to be maintained
+    // until a call is made to show the line(s).  For example if there are 3
+    // route lines showing on the map and a call is made to hide the primary route
+    // it's expected only the alternative routes are displayed. If a user then
+    // selects an alternative route in order to make it the primary route, that
+    // route line should then disappear and the previously hidden primary route line
+    // should appear since the state is: primary route line = hidden / alternative
+    // routes = showing. Only when an API call to show the primary route is made
+    // should the primary route line become visible. The snippet below adjusts
+    // the layer visibility to maintain that state.
+    private fun adjustLayerVisibility(
+        style: Style,
+        primaryRouteTrafficVisibility: Visibility?,
+        primaryRouteVisibility: Visibility?,
+        alternativeRouteVisibility: Visibility?
+    ) {
+        sourceLayerMap.values.flatten().map { layerID ->
+            when (layerID in trafficLayerIds) {
+                true -> when (primaryRouteLineLayerGroup.contains(layerID)) {
+                    true -> Pair(layerID, primaryRouteTrafficVisibility)
+                    false -> Pair(layerID, alternativeRouteVisibility)
                 }
-                in trailLayerIds -> {
-                    mutationCommands.add(
-                        updateGradientCmd(
-                            style,
-                            routeLineData.dynamicData.trailExpressionProvider,
-                            layerId
-                        )
-                    )
-                }
-                in casingLayerIds -> {
-                    mutationCommands.add(
-                        updateGradientCmd(
-                            style,
-                            routeLineData.dynamicData.casingExpressionProvider,
-                            layerId
-                        )
-                    )
-                }
-                in mainLayerIds -> {
-                    mutationCommands.add(
-                        updateGradientCmd(
-                            style,
-                            routeLineData.dynamicData.baseExpressionProvider,
-                            layerId
-                        )
-                    )
-                }
-                in trafficLayerIds -> {
-                    mutationCommands.add(
-                        updateGradientCmd(
-                            style,
-                            routeLineData.dynamicData.trafficExpressionProvider,
-                            layerId
-                        )
-                    )
-                }
-                in restrictedLayerIds -> {
-                    mutationCommands.add(
-                        updateGradientCmd(
-                            style,
-                            routeLineData.dynamicData.restrictedSectionExpressionProvider,
-                            layerId
-                        )
-                    )
+                false -> when (primaryRouteLineLayerGroup.contains(layerID)) {
+                    true -> Pair(layerID, primaryRouteVisibility)
+                    false -> Pair(layerID, alternativeRouteVisibility)
                 }
             }
+        }.forEach {
+            ifNonNull(it.second) { visibility ->
+                adjustLayerVisibility(style, it.first, visibility)
+            }
         }
-        return mutationCommands
+    }
+
+    private fun adjustMaskingLayersVisibility(
+        style: Style,
+        primaryRouteTrafficVisibility: Visibility?,
+        primaryRouteVisibility: Visibility?
+    ) {
+        primaryRouteTrafficVisibility?.apply {
+            adjustLayerVisibility(style, MASKING_LAYER_TRAFFIC, this)
+        }
+        primaryRouteVisibility?.apply {
+            adjustLayerVisibility(style, MASKING_LAYER_MAIN, this)
+            adjustLayerVisibility(style, MASKING_LAYER_CASING, this)
+            adjustLayerVisibility(style, MASKING_LAYER_TRAIL, this)
+            adjustLayerVisibility(style, MASKING_LAYER_TRAIL, this)
+            adjustLayerVisibility(style, MASKING_LAYER_TRAIL_CASING, this)
+        }
     }
 
     private fun toExpressionUpdateFun(

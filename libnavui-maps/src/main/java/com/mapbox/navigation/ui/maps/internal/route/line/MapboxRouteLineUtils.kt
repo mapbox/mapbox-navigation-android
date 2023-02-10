@@ -17,6 +17,7 @@ import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addPersistentLayer
@@ -45,11 +46,13 @@ import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineSourceKey
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
@@ -79,11 +82,6 @@ internal object MapboxRouteLineUtils {
             >,
         List<ExtractedRouteData>> by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
 
-    private val extractRouteRestrictionDataCache: LruCache<
-        CacheResultUtils.CacheResultKeyRoute<
-            List<ExtractedRouteRestrictionData>>, List<ExtractedRouteRestrictionData>>
-        by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
-
     private val granularDistancesCache: LruCache<
         CacheResultUtils.CacheResultKeyRoute<
             RouteLineGranularDistances?>, RouteLineGranularDistances?>
@@ -93,6 +91,7 @@ internal object MapboxRouteLineUtils {
     val layerGroup2SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID)
     val layerGroup3SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID)
 
+    // ordering is important
     val layerGroup1SourceLayerIds = setOf(
         RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
         RouteLayerConstants.LAYER_GROUP_1_TRAIL,
@@ -101,6 +100,8 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
         RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
     )
+
+    // ordering is important
     val layerGroup2SourceLayerIds = setOf(
         RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
         RouteLayerConstants.LAYER_GROUP_2_TRAIL,
@@ -109,6 +110,8 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
         RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
     )
+
+    // ordering is important
     val layerGroup3SourceLayerIds = setOf(
         RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
         RouteLayerConstants.LAYER_GROUP_3_TRAIL,
@@ -116,6 +119,16 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_3_MAIN,
         RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
         RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
+    )
+
+    // ordering is important
+    val maskingLayerIds = setOf(
+        RouteLayerConstants.MASKING_LAYER_TRAIL_CASING,
+        RouteLayerConstants.MASKING_LAYER_TRAIL,
+        RouteLayerConstants.MASKING_LAYER_CASING,
+        RouteLayerConstants.MASKING_LAYER_MAIN,
+        RouteLayerConstants.MASKING_LAYER_TRAFFIC,
+        RouteLayerConstants.MASKING_LAYER_RESTRICTED
     )
 
     val sourceLayerMap = mapOf<RouteLineSourceKey, Set<String>>(
@@ -524,8 +537,7 @@ internal object MapboxRouteLineUtils {
 
     /**
      * Extracts data from the [DirectionsRoute] and removes items that are deemed duplicates based
-     * on factors such as traffic congestion and/or road class. The results are cached for
-     * performance reasons.
+     * on factors such as traffic congestion and/or road class.
      */
     internal val extractRouteDataWithTrafficAndRoadClassDeDuped: (
         route: NavigationRoute,
@@ -557,22 +569,27 @@ internal object MapboxRouteLineUtils {
      * sections. This can be an expensive operation.The implementation defers or avoids the most
      * expensive operations as much as possible.
      */
-    internal val extractRouteRestrictionData: (
+    internal fun extractRouteRestrictionData(
         route: NavigationRoute,
-    ) -> List<ExtractedRouteRestrictionData> =
-        { route: NavigationRoute ->
-            val itemsToReturn = mutableListOf<ExtractedRouteRestrictionData>()
-            val granularDistances by lazy { granularDistancesProvider(route) }
-            route.directionsRoute.legs()?.forEachIndexed { legIndex, leg ->
-                val filteredIntersections = filterForRestrictedIntersections(leg)
-                ifNonNull(filteredIntersections) { stepIntersections ->
-                    val legDistancesArray = granularDistances?.legsDistances
-                    stepIntersections.forEach { stepIntersectionData ->
-                        val geometryIndex = stepIntersectionData.first.geometryIndex()
-                        if (geometryIndex != null && legDistancesArray?.isNotEmpty() == true) {
-                            val distanceRemaining =
-                                legDistancesArray[legIndex][geometryIndex].distanceRemaining
-                            (1.0 - distanceRemaining / granularDistances!!.completeDistance).apply {
+        distancesProvider: (NavigationRoute) -> RouteLineGranularDistances?
+    ): List<ExtractedRouteRestrictionData> {
+        val itemsToReturn = mutableListOf<ExtractedRouteRestrictionData>()
+        route.directionsRoute.legs()?.forEachIndexed { legIndex, leg ->
+            val filteredIntersections = filterForRestrictedIntersections(leg)
+            ifNonNull(filteredIntersections) { stepIntersections ->
+                val legDistancesArray = distancesProvider(route)?.legsDistances
+                stepIntersections.forEach { stepIntersectionData ->
+                    val geometryIndex = stepIntersectionData.first.geometryIndex()
+                    if (
+                        geometryIndex != null &&
+                        legDistancesArray?.isNotEmpty() == true &&
+                        legIndex < legDistancesArray.size &&
+                        geometryIndex < legDistancesArray[legIndex].size
+                    ) {
+                        val distanceRemaining =
+                            legDistancesArray[legIndex][geometryIndex].distanceRemaining
+                        (1.0 - distanceRemaining / distancesProvider(route)!!.completeDistance)
+                            .apply {
                                 if (this in 0.0..1.0) {
                                     itemsToReturn.add(
                                         ExtractedRouteRestrictionData(
@@ -583,12 +600,12 @@ internal object MapboxRouteLineUtils {
                                     )
                                 }
                             }
-                        }
                     }
                 }
             }
-            itemsToReturn
-        }.cacheRouteResult(extractRouteRestrictionDataCache)
+        }
+        return itemsToReturn
+    }
 
     /**
      * Filters the [RouteLeg] for intersections that are designated as restricted. If there are
@@ -620,12 +637,6 @@ internal object MapboxRouteLineUtils {
                 this
             }
         }
-    }
-
-    internal fun routeHasRestrictions(route: NavigationRoute?): Boolean {
-        return ifNonNull(route) {
-            extractRouteRestrictionData(it).isNotEmpty()
-        } == true
     }
 
     /**
@@ -1371,6 +1382,83 @@ internal object MapboxRouteLineUtils {
             }
         }
 
+        if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAIL_CASING)) {
+            LineLayer(
+                RouteLayerConstants.MASKING_LAYER_TRAIL_CASING,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAIL)) {
+            LineLayer(
+                RouteLayerConstants.MASKING_LAYER_TRAIL,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_CASING)) {
+            LineLayer(
+                RouteLayerConstants.MASKING_LAYER_CASING,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_MAIN)) {
+            LineLayer(
+                RouteLayerConstants.MASKING_LAYER_MAIN,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAFFIC)) {
+            LineLayer(
+                RouteLayerConstants.MASKING_LAYER_TRAFFIC,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                .lineColor(Color.GRAY).apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                }
+        }
+        if (options.displayRestrictedRoadSections) {
+            if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_RESTRICTED)) {
+                LineLayer(
+                    RouteLayerConstants.MASKING_LAYER_RESTRICTED,
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                )
+                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    .lineJoin(LineJoin.ROUND)
+                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
+                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
+                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineCap(LineCap.ROUND)
+                    .apply {
+                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    }
+            }
+        }
         if (!style.styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)) {
             style.addPersistentLayer(
                 BackgroundLayer(
@@ -1413,8 +1501,14 @@ internal object MapboxRouteLineUtils {
             style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_CASING) &&
             style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_MAIN) &&
             style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC) &&
+            style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAIL_CASING) &&
+            style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAIL) &&
+            style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_CASING) &&
+            style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_MAIN) &&
+            style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAFFIC) &&
             if (options.displayRestrictedRoadSections) {
-                style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED) &&
+                style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_RESTRICTED) &&
+                    style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED) &&
                     style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED) &&
                     style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)
             } else {
@@ -1536,7 +1630,6 @@ internal object MapboxRouteLineUtils {
 
     internal fun trimRouteDataCacheToSize(size: Int) {
         extractRouteDataCache.trimToSize(size)
-        extractRouteRestrictionDataCache.trimToSize(size)
         granularDistancesCache.trimToSize(size)
     }
 
@@ -1576,6 +1669,7 @@ internal object MapboxRouteLineUtils {
             )
 
             style.styleLayers.subList(lowerRange, upperRange)
+                .filter { it.id !in maskingLayerIds }
                 .mapIndexed { index, styleObjectInfo ->
                     Pair(index, styleObjectInfo.id)
                 }.maxByOrNull { it.first }?.second
@@ -1661,6 +1755,35 @@ internal object MapboxRouteLineUtils {
             }
             1.0 - distanceRemaining / distances.completeDistance
         } ?: 0.0
+    }
+    internal fun getMaskingLayerDynamicData(
+        route: NavigationRoute?,
+        offset: Double
+    ): RouteLineDynamicData? {
+        return if (
+            (route?.directionsRoute?.legs()?.size ?: 1) > 1
+        ) {
+            val trimmedOffsetExpression = literal(
+                listOf(
+                    0.0,
+                    offset
+                )
+            )
+            RouteLineDynamicData(
+                baseExpressionProvider =
+                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
+                casingExpressionProvider =
+                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
+                trafficExpressionProvider =
+                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
+                restrictedSectionExpressionProvider =
+                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
+                trailExpressionProvider = { trimmedOffsetExpression },
+                trailCasingExpressionProvider = { trimmedOffsetExpression },
+            )
+        } else {
+            null
+        }
     }
 
     private fun projectX(x: Double): Double {
@@ -1777,5 +1900,11 @@ internal object MapboxRouteLineUtils {
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_MAIN)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)
+        style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_TRAIL_CASING)
+        style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_TRAIL)
+        style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_CASING)
+        style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_MAIN)
+        style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_TRAFFIC)
+        style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_RESTRICTED)
     }
 }

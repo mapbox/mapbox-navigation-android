@@ -173,7 +173,10 @@ class VanishingRouteLineRoboTest {
                 true,
                 colorResources
             )
-        val restrictedSegments = MapboxRouteLineUtils.extractRouteRestrictionData(route)
+        val restrictedSegments = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],

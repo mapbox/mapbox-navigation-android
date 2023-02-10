@@ -5,10 +5,12 @@ package com.mapbox.navigation.ui.maps.route.line.model
  *
  * @param primaryRouteLineDynamicData the data describing the primary route line
  * @param alternativeRouteLinesDynamicData the data describing alternative route lines
+ * @param routeLineMaskingLayerDynamicData the data describing the masking layers
  */
 class RouteLineUpdateValue internal constructor(
     val primaryRouteLineDynamicData: RouteLineDynamicData,
-    val alternativeRouteLinesDynamicData: List<RouteLineDynamicData>
+    val alternativeRouteLinesDynamicData: List<RouteLineDynamicData>,
+    val routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null
 ) {
 
     /**
@@ -16,7 +18,8 @@ class RouteLineUpdateValue internal constructor(
      */
     fun toMutableValue() = MutableRouteLineUpdateValue(
         primaryRouteLineDynamicData,
-        alternativeRouteLinesDynamicData
+        alternativeRouteLinesDynamicData,
+        routeLineMaskingLayerDynamicData
     )
 
     /**
@@ -24,10 +27,12 @@ class RouteLineUpdateValue internal constructor(
      *
      * @param primaryRouteLineDynamicData the data describing the primary route line
      * @param alternativeRouteLinesDynamicData the data describing alternative route lines
+     * @param routeLineMaskingLayerDynamicData the data describing the masking layers
      */
     class MutableRouteLineUpdateValue internal constructor(
         var primaryRouteLineDynamicData: RouteLineDynamicData,
-        var alternativeRouteLinesDynamicData: List<RouteLineDynamicData>
+        var alternativeRouteLinesDynamicData: List<RouteLineDynamicData>,
+        var routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null
     ) {
 
         /**
@@ -35,7 +40,8 @@ class RouteLineUpdateValue internal constructor(
          */
         fun toImmutableValue() = RouteLineUpdateValue(
             primaryRouteLineDynamicData,
-            alternativeRouteLinesDynamicData
+            alternativeRouteLinesDynamicData,
+            routeLineMaskingLayerDynamicData
         )
     }
 
@@ -50,6 +56,7 @@ class RouteLineUpdateValue internal constructor(
 
         if (primaryRouteLineDynamicData != other.primaryRouteLineDynamicData) return false
         if (alternativeRouteLinesDynamicData != other.alternativeRouteLinesDynamicData) return false
+        if (routeLineMaskingLayerDynamicData != other.routeLineMaskingLayerDynamicData) return false
 
         return true
     }
@@ -60,6 +67,7 @@ class RouteLineUpdateValue internal constructor(
     override fun hashCode(): Int {
         var result = primaryRouteLineDynamicData.hashCode()
         result = 31 * result + alternativeRouteLinesDynamicData.hashCode()
+        result = 31 * result + routeLineMaskingLayerDynamicData.hashCode()
         return result
     }
 
@@ -69,7 +77,8 @@ class RouteLineUpdateValue internal constructor(
     override fun toString(): String {
         return "RouteLineUpdateValue(" +
             "primaryRouteLineDynamicData=$primaryRouteLineDynamicData, " +
-            "alternativeRouteLinesDynamicData=$alternativeRouteLinesDynamicData" +
+            "alternativeRouteLinesDynamicData=$alternativeRouteLinesDynamicData," +
+            "routeLineMaskingLayerDynamicData=$routeLineMaskingLayerDynamicData" +
             ")"
     }
 }

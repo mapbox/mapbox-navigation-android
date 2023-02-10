@@ -83,6 +83,8 @@
         <activity
             android:name=".view.componentinstaller.RestAreaActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <activity android:name=".view.ActiveLegAboveInactiveLegsActivity" />
     </application>
 
 </manifest>

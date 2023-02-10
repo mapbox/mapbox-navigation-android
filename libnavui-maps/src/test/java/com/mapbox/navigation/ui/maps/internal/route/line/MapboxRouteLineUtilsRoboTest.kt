@@ -48,6 +48,12 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_MAIN
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_RESTRICTED
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAFFIC
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ORIGIN_MARKER_NAME
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
@@ -168,6 +174,24 @@ class MapboxRouteLineUtilsRoboTest {
             } returns false
             every {
                 styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(MASKING_LAYER_TRAIL_CASING)
+            } returns false
+            every {
+                styleLayerExists(MASKING_LAYER_TRAIL)
+            } returns false
+            every {
+                styleLayerExists(MASKING_LAYER_CASING)
+            } returns false
+            every {
+                styleLayerExists(MASKING_LAYER_MAIN)
+            } returns false
+            every {
+                styleLayerExists(MASKING_LAYER_TRAFFIC)
+            } returns false
+            every {
+                styleLayerExists(MASKING_LAYER_RESTRICTED)
             } returns false
             every { getStyleImage(ARROW_HEAD_ICON) } returns null
             every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
@@ -399,35 +423,61 @@ class MapboxRouteLineUtilsRoboTest {
             "mapbox-layerGroup-1-restricted",
             (addStyleLayerSlots[18].contents as HashMap<String, Value>)["id"]!!.contents
         )
+
         assertEquals(
-            "mapbox-top-level-route-layer",
+            "mapbox-masking-layer-trailCasing",
             (addStyleLayerSlots[19].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-waypoint-layer",
+            "mapbox-masking-layer-trail",
             (addStyleLayerSlots[20].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
+            "mapbox-masking-layer-casing",
+            (addStyleLayerSlots[21].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-masking-layer-main",
+            (addStyleLayerSlots[22].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-masking-layer-traffic",
+            (addStyleLayerSlots[23].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-masking-layer-restricted",
+            (addStyleLayerSlots[24].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+
+        assertEquals(
+            "mapbox-top-level-route-layer",
+            (addStyleLayerSlots[25].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-waypoint-layer",
+            (addStyleLayerSlots[26].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
             "bottom-right",
-            (addStyleLayerSlots[20].contents as HashMap<String, Value>)["icon-anchor"]!!.contents
+            (addStyleLayerSlots[26].contents as HashMap<String, Value>)["icon-anchor"]!!.contents
         )
         assertEquals(
             33.3,
             (
-                (addStyleLayerSlots[20].contents as HashMap<String, Value>)
+                (addStyleLayerSlots[26].contents as HashMap<String, Value>)
                 ["icon-offset"]!!.contents as ArrayList<Value>
                 ).first().contents
         )
         assertEquals(
             44.4,
             (
-                (addStyleLayerSlots[20].contents as HashMap<String, Value>)
+                (addStyleLayerSlots[26].contents as HashMap<String, Value>)
                 ["icon-offset"]!!.contents as ArrayList<Value>
                 ).component2().contents
         )
         assertEquals(
             "viewport",
-            (addStyleLayerSlots[20].contents as HashMap<String, Value>)
+            (addStyleLayerSlots[26].contents as HashMap<String, Value>)
             ["icon-pitch-alignment"]!!.contents
         )
         assertEquals(
@@ -513,6 +563,26 @@ class MapboxRouteLineUtilsRoboTest {
         assertEquals(
             LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[20].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[21].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[22].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[23].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[24].below
+        )
+        assertEquals(
+            LocationComponentConstants.MODEL_LAYER,
+            addStyleLayerPositionSlots[25].below
         )
     }
 
