@@ -1486,7 +1486,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
     @Test
-    fun `set route - new routes immediately interrupts reroute`() = coroutineRule.runBlockingTest {
+    fun `set route - new routes interrupts reroute`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         mapboxNavigation.setRerouteController(rerouteController)
 
@@ -1496,14 +1496,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             NativeSetRouteValue(shortRoutes, emptyList())
         }
 
-        pauseDispatcher {
-            mapboxNavigation.setNavigationRoutes(shortRoutes)
-            verify(exactly = 1) { rerouteController.interrupt() }
-        }
+        mapboxNavigation.setNavigationRoutes(shortRoutes)
+        verify(exactly = 1) { rerouteController.interrupt() }
     }
 
     @Test
-    fun `set route - clean up immediately interrupts reroute`() =
+    fun `set route - clean up interrupts reroute`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
             mapboxNavigation.setRerouteController(rerouteController)
@@ -1511,14 +1509,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             every { directionsSession.routes } returns initialRoutes
             val updatedRoutes = emptyList<NavigationRoute>()
 
-            pauseDispatcher {
-                mapboxNavigation.setNavigationRoutes(updatedRoutes)
-                verify(exactly = 1) { rerouteController.interrupt() }
-            }
+            mapboxNavigation.setNavigationRoutes(updatedRoutes)
+            verify(exactly = 1) { rerouteController.interrupt() }
         }
 
     @Test
-    fun `set route - reroute immediately interrupts reroute`() =
+    fun `set route - reroute interrupts reroute`() =
         coroutineRule.runBlockingTest {
             val controller: NavigationRerouteController = mockk(relaxUnitFun = true)
             val rerouteCallbackSlot = slot<NavigationRerouteController.RoutesCallback>()
@@ -1537,10 +1533,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             observers.forEach {
                 it.onOffRouteStateChanged(true)
             }
-            pauseDispatcher {
-                rerouteCallbackSlot.captured.onNewRoutes(newRoutes, RouterOrigin.Offboard)
-                verify(exactly = 1) { controller.interrupt() }
-            }
+            rerouteCallbackSlot.captured.onNewRoutes(newRoutes, RouterOrigin.Offboard)
+            verify(exactly = 1) { controller.interrupt() }
         }
 
     @Test

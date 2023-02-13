@@ -885,20 +885,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         initialLegIndex: Int = 0,
         callback: RoutesSetCallback? = null
     ) {
-        if (routes.isNotEmpty()) {
-            billingController.onExternalRouteSet(routes.first())
-        }
-
         // Telemetry uses this field to determine what type of event should be triggered.
-        val setRoutesInfo = when {
-            routes.isEmpty() -> SetRoutes.CleanUp
-            routes.first() == directionsSession.routes.firstOrNull() ->
-                SetRoutes.Alternatives(initialLegIndex)
-            else -> SetRoutes.NewRoutes(initialLegIndex)
+        val setRoutesInfoProvider = { oldRoutes: List<NavigationRoute> ->
+            when {
+                routes.isEmpty() -> SetRoutes.CleanUp
+                routes.first() == oldRoutes.firstOrNull() ->
+                    SetRoutes.Alternatives(initialLegIndex)
+                else -> SetRoutes.NewRoutes(initialLegIndex)
+            }
         }
         internalSetNavigationRoutes(
             routes,
-            setRoutesInfo,
+            setRoutesInfoProvider,
+            areRoutesExternal = true,
             callback,
         )
     }
@@ -1024,26 +1023,33 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
-        setRoutesInfo: SetRoutes,
+        setRoutesInfoProvider: (List<NavigationRoute>) -> SetRoutes,
+        areRoutesExternal: Boolean = false,
         callback: RoutesSetCallback? = null,
     ) {
-        logD(LOG_CATEGORY) {
-            "setting routes; reason: ${setRoutesInfo.mapToReason()}; IDs: ${routes.map { it.id }}"
-        }
-        when (setRoutesInfo) {
-            SetRoutes.CleanUp,
-            is SetRoutes.NewRoutes,
-            SetRoutes.Reroute -> {
-                rerouteController?.interrupt()
-            }
-            is SetRoutes.RefreshRoutes,
-            is SetRoutes.Alternatives -> {
-                // do not interrupt reroute when primary route has not changed
-            }
-        }
-        restartRouteRefreshScope()
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
+                if (areRoutesExternal) {
+                    if (routes.isNotEmpty()) {
+                        billingController.onExternalRouteSet(routes.first())
+                    }
+                }
+                val setRoutesInfo = setRoutesInfoProvider(directionsSession.routes)
+                logD(LOG_CATEGORY) {
+                    "setting routes; reason: ${setRoutesInfo.mapToReason()}; IDs: ${routes.map { it.id }}"
+                }
+                when (setRoutesInfo) {
+                    SetRoutes.CleanUp,
+                    is SetRoutes.NewRoutes,
+                    SetRoutes.Reroute -> {
+                        rerouteController?.interrupt()
+                    }
+                    is SetRoutes.RefreshRoutes,
+                    is SetRoutes.Alternatives -> {
+                        // do not interrupt reroute when primary route has not changed
+                    }
+                }
+                restartRouteRefreshScope()
                 historyRecordingStateHandler.setRoutes(routes)
                 val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
                 when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
@@ -1198,7 +1204,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
-        internalSetNavigationRoutes(emptyList(), SetRoutes.CleanUp)
+        internalSetNavigationRoutes(emptyList(), { _ -> SetRoutes.CleanUp })
         resetTripSession()
         navigator.unregisterAllObservers()
         navigationVersionSwitchObservers.clear()
@@ -1899,7 +1905,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 )
                 internalSetNavigationRoutes(
                     refreshed.routes,
-                    SetRoutes.RefreshRoutes(refreshed.routeProgressData),
+                    { _ -> SetRoutes.RefreshRoutes(refreshed.routeProgressData) },
                 )
             }
         }
@@ -1989,7 +1995,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         rerouteController?.reroute { routes, _ ->
             internalSetNavigationRoutes(
                 routes,
-                SetRoutes.Reroute
+                { _ -> SetRoutes.Reroute }
             )
         }
     }
