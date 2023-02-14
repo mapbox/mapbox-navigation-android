@@ -17,9 +17,10 @@ def TriggerWorkflow(token, commit, publish):
 
     data = {
         "parameters": {
-          "run_android_navigation_benchmark": publish,
+          "run_android_navigation_benchmark": True,
+          "publish_android_navigation_benchmark": publish,
           "mapbox_slug": "mapbox/mapbox-navigation-android",
-          "mapbox_hash": commit
+          "navigation_sdk_commit_hash": commit
         }
     }
 
@@ -77,7 +78,6 @@ def Main():
     TriggerJob(token, commit, "android-navigation-code-coverage")
     TriggerJob(token, commit, "android-navigation-binary-size")
   else:
-    TriggerJob(token, commit, "android-navigation-benchmark")
     TriggerJob(token, commit, "android-navigation-code-coverage-ci")
     TriggerJob(token, commit, "android-navigation-binary-size-ci")
 
