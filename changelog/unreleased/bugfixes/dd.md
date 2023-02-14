@@ -1,0 +1,1 @@
+- Fixed an issue where all `UpcomingRoadObject`'s had the same `distanceToStart`. 
