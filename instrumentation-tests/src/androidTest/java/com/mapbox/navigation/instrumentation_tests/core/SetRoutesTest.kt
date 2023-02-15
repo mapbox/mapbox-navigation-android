@@ -11,6 +11,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.RoutesSetError
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
@@ -73,7 +74,7 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             mockRoute.routeResponse,
             RouteOptions.builder()
                 .coordinatesList(mockRoute.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .profile(ExperimentalData.EXPERIMENTAL_PROFILE)
                 .build(),
             RouterOrigin.Custom()
         )
@@ -159,7 +160,7 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             mockRoute.routeResponse,
             RouteOptions.builder()
                 .coordinatesList(mockRoute.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .profile(ExperimentalData.EXPERIMENTAL_PROFILE)
                 .build(),
             RouterOrigin.Custom()
         )

@@ -11,6 +11,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.bufferFromRawFile
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
@@ -30,7 +31,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 ),
@@ -68,7 +69,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 )
@@ -89,7 +90,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 )
@@ -111,7 +112,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates,
                 )
@@ -134,7 +135,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 )
@@ -157,7 +158,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile =ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 )
@@ -173,7 +174,7 @@ object RoutesProvider {
         return NavigationRoute.create(
             this.routeResponse,
             RouteOptions.builder().applyDefaultNavigationOptions()
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .profile(ExperimentalData.EXPERIMENTAL_PROFILE)
                 .coordinatesList(this.routeWaypoints)
                 .routeOptionsBlock()
                 .build(),

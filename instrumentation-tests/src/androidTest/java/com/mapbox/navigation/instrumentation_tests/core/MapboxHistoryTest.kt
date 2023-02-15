@@ -21,6 +21,7 @@ import com.mapbox.navigation.core.history.model.HistoryEventGetStatus
 import com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
@@ -322,7 +323,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertEquals(0, setRouteEvent.routeIndex)
         assertEquals(0, setRouteEvent.legIndex)
         assertEquals(DirectionsCriteria.GEOMETRY_POLYLINE6, setRouteEvent.geometries)
-        assertEquals(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC, setRouteEvent.profile)
+        assertEquals(ExperimentalData.EXPERIMENTAL_PROFILE, setRouteEvent.profile)
     }
 
     @Test

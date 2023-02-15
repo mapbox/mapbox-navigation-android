@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -816,7 +817,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
-                "driving-traffic",
+                ExperimentalData.EXPERIMENTAL_PROFILE,
                 readRawFileText(activity, routesResponse),
                 coordinates
             )
@@ -835,8 +836,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     private fun generateRouteOptions(coordinates: List<Point>): RouteOptions {
-        return RouteOptions.builder().applyDefaultNavigationOptions()
-            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+        return RouteOptions.builder().applyDefaultNavigationOptions(ExperimentalData.EXPERIMENTAL_PROFILE)
             .alternatives(true)
             .coordinatesList(coordinates)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
@@ -882,7 +882,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 )

@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -298,7 +299,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         initialCharge: String,
     ): RouteOptions {
         return RouteOptions.builder().applyDefaultNavigationOptions()
-            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+            .profile(ExperimentalData.EXPERIMENTAL_PROFILE)
             .alternatives(true)
             .enableRefresh(true)
             .coordinatesList(coordinates)

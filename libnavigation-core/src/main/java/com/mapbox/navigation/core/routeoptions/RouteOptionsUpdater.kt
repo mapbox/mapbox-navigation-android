@@ -111,7 +111,10 @@ class RouteOptionsUpdater {
                     }
                 )
                 .apply {
-                    if (routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC) {
+                    if (
+                        routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC ||
+                        routeOptions.profile().endsWith("-EXPERIMENTAL")
+                    ) {
                         snappingIncludeClosuresList(
                             routeOptions.snappingIncludeClosuresList()
                                 .withFirstTrue(remainingCoordinates)
@@ -145,7 +148,8 @@ class RouteOptionsUpdater {
 
             if (
                 routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING ||
-                routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+                routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC ||
+                routeOptions.profile().endsWith("-EXPERIMENTAL")
             ) {
                 optionsBuilder.layersList(
                     mutableListOf(locationMatcherResult.zLevel).apply {

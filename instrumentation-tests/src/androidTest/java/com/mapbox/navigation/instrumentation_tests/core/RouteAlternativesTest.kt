@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -302,7 +303,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         // ensuring the initial route has alternatives.
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
-                "driving-traffic",
+                ExperimentalData.EXPERIMENTAL_PROFILE,
                 readRawFileText(activity, R.raw.route_response_alternative_start),
                 coordinates
             )
@@ -310,7 +311,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     }
 
     private fun requestDirectionsRouteSync(coordinates: List<Point>): List<DirectionsRoute> {
-        val routeOptions = RouteOptions.builder().applyDefaultNavigationOptions()
+        val routeOptions = RouteOptions.builder().applyDefaultNavigationOptions(ExperimentalData.EXPERIMENTAL_PROFILE)
             .alternatives(true)
             .coordinatesList(coordinates)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
