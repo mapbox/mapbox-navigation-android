@@ -262,7 +262,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
         val originalRoutes = mapboxNavigation.requestRoutes(
             RouteOptions.builder()
-                .applyDefaultNavigationOptions()
+                .applyDefaultNavigationOptions(ExperimentalData.EXPERIMENTAL_PROFILE)
                 .applyLanguageAndVoiceUnitOptions(activity)
                 .baseUrl(mockWebServerRule.baseUrl)
                 .coordinatesList(mockRoute.routeWaypoints)
