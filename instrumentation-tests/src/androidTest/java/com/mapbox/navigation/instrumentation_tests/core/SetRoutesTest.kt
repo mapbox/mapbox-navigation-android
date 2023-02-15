@@ -74,7 +74,7 @@ class SetRoutesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             mockRoute.routeResponse,
             RouteOptions.builder()
                 .coordinatesList(mockRoute.routeWaypoints)
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .profile(ExperimentalData.EXPERIMENTAL_PROFILE)
                 .build(),
             RouterOrigin.Custom()
         )

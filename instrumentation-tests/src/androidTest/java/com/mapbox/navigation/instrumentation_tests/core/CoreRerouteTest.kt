@@ -229,13 +229,13 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         val requestHandler = MockDirectionsRequestHandler(
-            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            profile = ExperimentalData.EXPERIMENTAL_PROFILE,
             jsonResponse = mockRoute.routeResponseJson,
             expectedCoordinates = mockRoute.routeWaypoints,
             relaxedExpectedCoordinates = false
         )
         val rerouteRequestHandler = MockDirectionsRequestHandler(
-            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            profile = ExperimentalData.EXPERIMENTAL_PROFILE,
             jsonResponse = readRawFileText(activity, R.raw.empty_directions_response),
             expectedCoordinates = listOf(
                 Point.fromLngLat(
@@ -592,7 +592,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         )
 
         val originalRouteOptions = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
+            .applyDefaultNavigationOptions(ExperimentalData.EXPERIMENTAL_PROFILE)
             .applyLanguageAndVoiceUnitOptions(activity)
             .baseUrl(mockWebServerRule.baseUrl)
             .coordinatesList(mockRoute.routeWaypoints)

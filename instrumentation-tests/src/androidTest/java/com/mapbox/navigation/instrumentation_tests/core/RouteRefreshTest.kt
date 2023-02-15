@@ -836,8 +836,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     private fun generateRouteOptions(coordinates: List<Point>): RouteOptions {
-        return RouteOptions.builder().applyDefaultNavigationOptions()
-            .profile(ExperimentalData.EXPERIMENTAL_PROFILE)
+        return RouteOptions.builder().applyDefaultNavigationOptions(ExperimentalData.EXPERIMENTAL_PROFILE)
             .alternatives(true)
             .coordinatesList(coordinates)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
@@ -883,7 +882,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 )

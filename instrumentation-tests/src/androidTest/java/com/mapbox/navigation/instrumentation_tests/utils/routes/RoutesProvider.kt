@@ -69,7 +69,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 )
@@ -158,7 +158,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile =ExperimentalData.EXPERIMENTAL_PROFILE,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 )
@@ -174,7 +174,7 @@ object RoutesProvider {
         return NavigationRoute.create(
             this.routeResponse,
             RouteOptions.builder().applyDefaultNavigationOptions()
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .profile(ExperimentalData.EXPERIMENTAL_PROFILE)
                 .coordinatesList(this.routeWaypoints)
                 .routeOptionsBlock()
                 .build(),

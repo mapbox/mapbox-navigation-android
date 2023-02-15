@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.ApproximateCoordinates
@@ -163,7 +164,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         waypointsPerRoute: Boolean?,
     ): RouteOptions {
         return RouteOptions.builder().applyDefaultNavigationOptions()
-            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+            .profile(ExperimentalData.EXPERIMENTAL_PROFILE)
             .alternatives(true)
             .coordinatesList(coordinates)
             .waypointsPerRoute(waypointsPerRoute)
