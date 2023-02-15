@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
@@ -88,7 +89,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
             mapboxNavigation.startTripSession()
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
+                    .applyDefaultNavigationOptions(ExperimentalData.EXPERIMENTAL_PROFILE)
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .coordinatesList(mockRoute.routeWaypoints).build(),

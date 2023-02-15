@@ -25,6 +25,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
@@ -113,7 +114,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
-                profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                profile = ExperimentalData.EXPERIMENTAL_PROFILE,
                 jsonResponse = readRawFileText(activity, R.raw.reroute_response_dc_very_short),
                 expectedCoordinates = listOf(
                     Point.fromLngLat(
@@ -140,7 +141,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
             mapboxNavigation.startTripSession()
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
+                    .applyDefaultNavigationOptions(ExperimentalData.EXPERIMENTAL_PROFILE)
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .coordinatesList(mockRoute.routeWaypoints).build(),

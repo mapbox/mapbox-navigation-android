@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.utils.http
 
+import com.mapbox.navigation.instrumentation_tests.ExperimentalData
 import com.mapbox.navigation.testing.ui.http.BaseMockRequestHandler
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
@@ -20,7 +21,7 @@ data class MockDirectionsRefreshHandler(
     var jsonResponseModifier: ((String) -> String) = { it }
 
     override fun handleInternal(request: RecordedRequest): MockResponse? {
-        val prefix = """/directions-refresh/v1/mapbox/driving-traffic/$testUuid""" +
+        val prefix = """/directions-refresh/v1/mapbox/${ExperimentalData.EXPERIMENTAL_PROFILE}/$testUuid""" +
             if (routeIndex != null) { "/$routeIndex/" } else ""
         if (request.path!!.startsWith(prefix)) {
             val currentGeometryIndex = request.requestUrl
