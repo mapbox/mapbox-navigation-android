@@ -31,17 +31,6 @@ fun RouteOptions.Builder.applyDefaultNavigationOptions(
     )
 
     when (profile) {
-        DirectionsCriteria.PROFILE_DRIVING_TRAFFIC -> {
-            annotationsList(
-                mutableListOf(
-                    DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
-                    DirectionsCriteria.ANNOTATION_MAXSPEED,
-                    DirectionsCriteria.ANNOTATION_CLOSURE,
-                ).apply { addAll(defaultAnnotations) }
-            )
-            continueStraight(true)
-            enableRefresh(true)
-        }
         DirectionsCriteria.PROFILE_DRIVING -> {
             annotationsList(
                 mutableListOf(
@@ -57,9 +46,18 @@ fun RouteOptions.Builder.applyDefaultNavigationOptions(
             continueStraight(false)
             enableRefresh(false)
         }
-        else -> throw IllegalArgumentException(
-            "Unknown profile [$profile]. It must be one [DirectionsCriteria.ProfileCriteria]"
-        )
+        else -> {
+            // use below settings for PROFILE_DRIVING_TRAFFIC and anything unrecognized
+            annotationsList(
+                mutableListOf(
+                    DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
+                    DirectionsCriteria.ANNOTATION_MAXSPEED,
+                    DirectionsCriteria.ANNOTATION_CLOSURE,
+                ).apply { addAll(defaultAnnotations) }
+            )
+            continueStraight(true)
+            enableRefresh(true)
+        }
     }
 
     profile(profile)

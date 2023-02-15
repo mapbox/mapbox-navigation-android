@@ -11,6 +11,7 @@ fun String.mapToRoutingMode(): RoutingMode {
         DirectionsCriteria.PROFILE_WALKING -> RoutingMode.WALKING
         DirectionsCriteria.PROFILE_DRIVING -> RoutingMode.DRIVING
         DirectionsCriteria.PROFILE_DRIVING_TRAFFIC -> RoutingMode.DRIVING_TRAFFIC
+        endsWith("-EXPERIMENTAL") -> RoutingMode.DRIVING_TRAFFIC_EXPERIMENTAL
         else -> throw IllegalArgumentException("Invalid routing profile: $this")
     }
 }

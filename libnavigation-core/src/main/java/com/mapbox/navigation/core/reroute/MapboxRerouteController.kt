@@ -92,7 +92,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             val builder = toBuilder()
 
             if (this.profile() == DirectionsCriteria.PROFILE_DRIVING ||
-                this.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+                this.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC ||
+                this.profile().endsWith("-EXPERIMENTAL")
             ) {
                 val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds
                     .let { speed * it }.toDouble()
