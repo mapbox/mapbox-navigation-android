@@ -150,7 +150,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
             mapboxNavigation.startTripSession()
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
+                    .applyDefaultNavigationOptions(ExperimentalData.EXPERIMENTAL_PROFILE)
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .coordinatesList(mockRoute.routeWaypoints).build(),
