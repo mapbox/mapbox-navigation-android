@@ -36,7 +36,10 @@ import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallbac
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.ThreadController
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
 
@@ -48,6 +51,7 @@ import java.util.Locale
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapboxCopilotImpl(
     private val mapboxNavigation: MapboxNavigation,
+    private val computationDispatcher: CoroutineDispatcher = ThreadController.IODispatcher
 ) {
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
@@ -159,26 +163,28 @@ internal class MapboxCopilotImpl(
      * push
      */
     fun push(historyEvent: HistoryEvent) {
-        val eventType = historyEvent.snakeCaseEventName
-        val eventJson = toEventJson(historyEvent.eventDTO)
-        when (historyEvent) {
-            is InitRouteEvent -> {
-                addActiveGuidance(eventType, eventJson)
-                pushOnActiveGuidance()
-            }
-            is DriveEndsEvent, GoingToBackgroundEvent, GoingToForegroundEvent -> {
-                pushHistoryJson(eventType, eventJson)
-            }
-            is NavFeedbackSubmittedEvent -> {
-                pushOnFreeDriveOrActiveGuidance(eventType, eventJson)
-            }
-            is SearchResultsEvent -> {
-                addActiveGuidance(eventType, eventJson)
-                pushSearchResults(eventType, eventJson)
-            }
-            is SearchResultUsedEvent -> {
-                addActiveGuidance(eventType, eventJson)
-                pushOnActiveGuidance()
+        mainJobController.scope.launch {
+            val eventType = historyEvent.snakeCaseEventName
+            val eventJson = toEventJson(historyEvent.eventDTO)
+            when (historyEvent) {
+                is InitRouteEvent -> {
+                    addActiveGuidance(eventType, eventJson)
+                    pushOnActiveGuidance()
+                }
+                is DriveEndsEvent, GoingToBackgroundEvent, GoingToForegroundEvent -> {
+                    pushHistoryJson(eventType, eventJson)
+                }
+                is NavFeedbackSubmittedEvent -> {
+                    pushOnFreeDriveOrActiveGuidance(eventType, eventJson)
+                }
+                is SearchResultsEvent -> {
+                    addActiveGuidance(eventType, eventJson)
+                    pushSearchResults(eventType, eventJson)
+                }
+                is SearchResultUsedEvent -> {
+                    addActiveGuidance(eventType, eventJson)
+                    pushOnActiveGuidance()
+                }
             }
         }
     }
@@ -262,8 +268,10 @@ internal class MapboxCopilotImpl(
         currentHistoryRecordingSessionState is ActiveGuidance &&
             navigationRoutes.isNotEmpty() && !initRoute
 
-    private fun toEventJson(event: EventDTO): String {
-        val eventJson = gson.toJson(event) ?: ""
+    private suspend fun toEventJson(event: EventDTO): String {
+        val eventJson = withContext(computationDispatcher) {
+            gson.toJson(event) ?: ""
+        }
         check(eventJson != "null") {
             "The event did not convert to json: $eventJson $event"
         }
