@@ -68,7 +68,7 @@ dokkaHtmlPartial {
     moduleName.set("UI Maps")
     dokkaSourceSets {
         configureEach {
-            reportUndocumented.set(true)
+            reportUndocumented.set(false)
             perPackageOption {
                 matchingRegex.set("com.mapbox.navigation.ui.maps.internal.*")
                 suppress.set(true)
