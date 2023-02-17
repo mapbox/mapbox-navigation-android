@@ -1,0 +1,6 @@
+- Removed access token from TileStore Logs.
+- Limited number of reported alternatives to 2, i.e. the `alternatives` parameter in `RouteAlternativesObserver#onRouteAlternatives` has maximum size of 2.
+- Stopped fetching alternatives on off-routes and near destination points.
+- Increased alternatives discarding distance to ensure map matcher is confident enough.
+- Fixed redundant memory usage for routing algorithm.
+- Fixed null pointer dereference in RouteRefreshController.
