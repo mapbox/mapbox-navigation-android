@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -11,6 +12,7 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
+import com.mapbox.navigation.ui.maps.camera.LogTag
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
@@ -250,7 +252,7 @@ internal object ViewportDataSourceProcessor {
         }
 
         return followingFrameOptions.pitchNearManeuvers.run {
-            if (
+            (if (
                 enabled &&
                 upcomingManeuverType !in excludedManeuvers &&
                 currentStepProgress.distanceRemaining <= triggerDistanceFromManeuver
@@ -258,6 +260,8 @@ internal object ViewportDataSourceProcessor {
                 MapboxNavigationViewportDataSource.ZERO_PITCH
             } else {
                 followingFrameOptions.defaultPitch
+            }).also {
+                Log.i(LogTag.TAG, "getPitchFallbackFromRouteProgress, result=$it, default pitch=${followingFrameOptions.defaultPitch}, distanceRemaining=${currentStepProgress.distanceRemaining}, triggerDistanceFromManeuver=$triggerDistanceFromManeuver")
             }
         }
     }

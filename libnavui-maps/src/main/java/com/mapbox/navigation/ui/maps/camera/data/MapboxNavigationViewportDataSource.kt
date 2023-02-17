@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
 import android.location.Location
+import android.util.Log
 import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
@@ -16,6 +17,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.ui.maps.camera.LogTag
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
@@ -558,6 +560,7 @@ class MapboxNavigationViewportDataSource(
      * Provide additional points that should be fitted into the following frame update.
      */
     fun additionalPointsToFrameForFollowing(points: List<Point>) {
+        Log.i(LogTag.TAG, "additionalPointsToFrameForFollowing: $points")
         additionalPointsToFrameForFollowing = ArrayList(points)
     }
 
@@ -577,6 +580,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingCenterPropertyOverride(value: Point?) {
+        Log.i(LogTag.TAG, "followingCenterPropertyOverride: $value")
         followingCenterProperty.override = value
     }
 
@@ -589,6 +593,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingZoomPropertyOverride(value: Double?) {
+        Log.i(LogTag.TAG, "followingZoomPropertyOverride: $value")
         followingZoomProperty.override = value
     }
 
@@ -601,6 +606,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingBearingPropertyOverride(value: Double?) {
+        Log.i(LogTag.TAG, "followingBearingPropertyOverride: $value")
         followingBearingProperty.override = value
     }
 
@@ -613,6 +619,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingPitchPropertyOverride(value: Double?) {
+        Log.i(LogTag.TAG, "followingPitchPropertyOverride: $value")
         followingPitchProperty.override = value
     }
 
@@ -699,6 +706,8 @@ class MapboxNavigationViewportDataSource(
         // needs to be added here to be taken into account for bearing smoothing
         pointsForFollowing.addAll(additionalPointsToFrameForFollowing)
 
+        Log.i(LogTag.TAG, "Target location: $localTargetLocation, pointsToFrame: $pointsForFollowing")
+
         if (pointsForFollowing.isEmpty()) {
             options.followingFrameOptions.run {
                 val cameraState = mapboxMap.cameraState
@@ -734,6 +743,7 @@ class MapboxNavigationViewportDataSource(
                 options.followingFrameOptions.maximizeViewableGeometryWhenPitchZero &&
                 followingPitchProperty.get() == ZERO_PITCH
             ) {
+                Log.i(LogTag.TAG, "maximizeViewableGeometryWhenPitchZero=true, \npoints to frame: $pointsForFollowing, \npadding: $followingPadding")
                 mapboxMap.cameraForCoordinates(
                     pointsForFollowing,
                     followingPadding,
@@ -758,6 +768,7 @@ class MapboxNavigationViewportDataSource(
                     .pitch(followingPitchProperty.get())
                     .zoom(cameraState.zoom)
                     .build()
+                Log.i(LogTag.TAG, "maximizeViewableGeometryWhenPitchZero=false, \npoints to frame: $pointsForFollowing, \ncamera center: ${fallbackCameraOptions.center}\nmap size: $mapSize, followingPadding=${followingPadding}, screenBox=$screenBox, resultingPadding=$padding, zoom=${fallbackCameraOptions.zoom}")
                 if (pointsForFollowing.size > 1) {
                     mapboxMap.cameraForCoordinates(
                         pointsForFollowing,
