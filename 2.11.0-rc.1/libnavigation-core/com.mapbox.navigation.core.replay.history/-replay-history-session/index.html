@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ReplayHistorySession</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Core::com.mapbox.navigation.core.replay.history/ReplayHistorySession///PointingToDeclaration//119003296">
+  <div class="breadcrumbs"><a href="../../index.html">Core</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.core.replay.history</a><span class="delimiter">/</span><a href="index.html">ReplayHistorySession</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Replay</span><wbr><span>History</span><wbr><span><span>Session</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ReplayHistorySession</a> : <a href="../../com.mapbox.navigation.core.lifecycle/-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Testing and previewing the navigation experience is an important part of building with the Navigation SDK. You can use the SDK's replay functionality to go back in time and replay real experiences.</p><p class="paragraph">The <a href="index.html">ReplayHistorySession</a> will push the history events into the <a href="../../com.mapbox.navigation.core.replay/-mapbox-replayer/index.html">MapboxReplayer</a>. Some customizations can found in the <a href="../-replay-history-session-options/index.html">ReplayHistorySessionOptions</a>. In order to record history files refer to the <a href="../../com.mapbox.navigation.core.history/-mapbox-history-recorder/index.html">MapboxHistoryRecorder</a>.</p><p class="paragraph">Typically you would save a history file to a registry, and then select history files to replay in order to improve or demo an experience. But for the sake of example, this is how you would replay an experience that just happened.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">mapboxNavigation.historyRecorder.stopRecording { historyFile -&gt;<br>  historyFile?.let {<br>    replayHistorySession.setHistoryFile(historyFile)<br>    replayHistorySession.onAttached(mapboxNavigation)<br>  }<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="1063642921%2FConstructors%2F119003296" anchor-label="ReplayHistorySession" id="1063642921%2FConstructors%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-replay-history-session.html"><span>Replay</span><wbr><span>History</span><wbr><span><span>Session</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1063642921%2FConstructors%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-replay-history-session.html"><span class="token function">ReplayHistorySession</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1700424490%2FFunctions%2F119003296" anchor-label="getOptions" id="1700424490%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-options.html"><span>get</span><wbr><span><span>Options</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1700424490%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-options.html"><span class="token function">getOptions</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-replay-history-session-options/index.html">ReplayHistorySessionOptions</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Allows you to get or observe the <a href="../-replay-history-session-options/index.html">ReplayHistorySessionOptions</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1731000457%2FFunctions%2F119003296" anchor-label="onAttached" id="1731000457%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-attached.html"><span>on</span><wbr><span><span>Attached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1731000457%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-attached.html"><span class="token function">onAttached</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigation<span class="token operator">: </span><a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Signals that the <a href="on-attached.html">mapboxNavigation</a> instance is ready for use.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="641597271%2FFunctions%2F119003296" anchor-label="onDetached" id="641597271%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-detached.html"><span>on</span><wbr><span><span>Detached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="641597271%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-detached.html"><span class="token function">onDetached</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigation<span class="token operator">: </span><a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Signals that the <a href="on-detached.html">mapboxNavigation</a> instance is being detached.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1333615584%2FFunctions%2F119003296" anchor-label="setHistoryFile" id="-1333615584%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-history-file.html"><span>set</span><wbr><span>History</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1333615584%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-history-file.html"><span class="token function">setHistoryFile</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">absolutePath<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Change the history file to replay, if changed after <a href="on-attached.html">onAttached</a>, the previous trip will be reset and the new file will start.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1901110415%2FFunctions%2F119003296" anchor-label="setOptions" id="-1901110415%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-options.html"><span>set</span><wbr><span><span>Options</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1901110415%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-options.html"><span class="token function">setOptions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">options<span class="token operator">: </span><a href="../-replay-history-session-options/index.html">ReplayHistorySessionOptions</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Update the <a href="../-replay-history-session-options/index.html">ReplayHistorySessionOptions</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
