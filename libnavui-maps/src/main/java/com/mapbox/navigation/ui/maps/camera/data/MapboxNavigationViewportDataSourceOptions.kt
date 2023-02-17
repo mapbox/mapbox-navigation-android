@@ -17,6 +17,10 @@ class MapboxNavigationViewportDataSourceOptions internal constructor() {
      * Options that impact generation of overview frames.
      */
     val overviewFrameOptions = OverviewFrameOptions()
+
+    override fun toString(): String {
+        return "MapboxNavigationViewportDataSourceOptions(followingFrameOptions=$followingFrameOptions, overviewFrameOptions=$overviewFrameOptions)"
+    }
 }
 
 /**
@@ -179,6 +183,10 @@ class FollowingFrameOptions internal constructor() {
          * Defaults to `20.0` meters.
          */
         var minimumDistanceBetweenIntersections = 20.0
+
+        override fun toString(): String {
+            return "IntersectionDensityCalculation(enabled=$enabled, averageDistanceMultiplier=$averageDistanceMultiplier, minimumDistanceBetweenIntersections=$minimumDistanceBetweenIntersections)"
+        }
     }
 
     /**
@@ -218,6 +226,10 @@ class FollowingFrameOptions internal constructor() {
             StepManeuver.OFF_RAMP,
             StepManeuver.FORK
         )
+
+        override fun toString(): String {
+            return "PitchNearManeuvers(enabled=$enabled, triggerDistanceFromManeuver=$triggerDistanceFromManeuver, excludedManeuvers=$excludedManeuvers)"
+        }
     }
 
     /**
@@ -253,6 +265,10 @@ class FollowingFrameOptions internal constructor() {
          * Defaults to `100.0` meters.
          */
         var distanceToFrameAfterManeuver = 100.0
+
+        override fun toString(): String {
+            return "FrameGeometryAfterManeuver(enabled=$enabled, distanceToCoalesceCompoundManeuvers=$distanceToCoalesceCompoundManeuvers, distanceToFrameAfterManeuver=$distanceToFrameAfterManeuver)"
+        }
     }
 
     /**
@@ -275,6 +291,10 @@ class FollowingFrameOptions internal constructor() {
          * Defaults to `45.0` degrees.
          */
         var maxBearingAngleDiff = 45.0
+
+        override fun toString(): String {
+            return "BearingSmoothing(enabled=$enabled, maxBearingAngleDiff=$maxBearingAngleDiff)"
+        }
     }
 
     /**
@@ -290,6 +310,10 @@ class FollowingFrameOptions internal constructor() {
             require(x in 0.0..1.0) { "x value must be within [0.0..1.0] range" }
             require(y in 0.0..1.0) { "y value must be within [0.0..1.0] range" }
         }
+    }
+
+    override fun toString(): String {
+        return "FollowingFrameOptions(defaultPitch=$defaultPitch, minZoom=$minZoom, maxZoom=$maxZoom, focalPoint=$focalPoint, maximizeViewableGeometryWhenPitchZero=$maximizeViewableGeometryWhenPitchZero, intersectionDensityCalculation=$intersectionDensityCalculation, pitchNearManeuvers=$pitchNearManeuvers, frameGeometryAfterManeuver=$frameGeometryAfterManeuver, bearingSmoothing=$bearingSmoothing, centerUpdatesAllowed=$centerUpdatesAllowed, zoomUpdatesAllowed=$zoomUpdatesAllowed, bearingUpdatesAllowed=$bearingUpdatesAllowed, pitchUpdatesAllowed=$pitchUpdatesAllowed, paddingUpdatesAllowed=$paddingUpdatesAllowed)"
     }
 }
 
@@ -389,5 +413,13 @@ class OverviewFrameOptions internal constructor() {
          * The factor has to be a positive integer.
          */
         var simplificationFactor = 25
+
+        override fun toString(): String {
+            return "GeometrySimplification(enabled=$enabled, simplificationFactor=$simplificationFactor)"
+        }
+    }
+
+    override fun toString(): String {
+        return "OverviewFrameOptions(maxZoom=$maxZoom, geometrySimplification=$geometrySimplification, centerUpdatesAllowed=$centerUpdatesAllowed, zoomUpdatesAllowed=$zoomUpdatesAllowed, bearingUpdatesAllowed=$bearingUpdatesAllowed, pitchUpdatesAllowed=$pitchUpdatesAllowed, paddingUpdatesAllowed=$paddingUpdatesAllowed)"
     }
 }
