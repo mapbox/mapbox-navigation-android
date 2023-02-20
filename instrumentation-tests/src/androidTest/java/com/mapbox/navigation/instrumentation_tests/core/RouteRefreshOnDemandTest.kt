@@ -85,39 +85,8 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         failedRefreshHandlerWrapper.failResponse = false
     }
 
-    @Test(timeout = 10_000)
-    fun route_refresh_on_demand_executes_before_refresh_interval() = sdkTest {
-        val routeRefreshOptions = RouteRefreshOptions.Builder()
-            .intervalMillis(TimeUnit.MINUTES.toMillis(1))
-            .build()
-        createMapboxNavigation(routeRefreshOptions)
-        val routeOptions = generateRouteOptions(twoCoordinates)
-        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-        mapboxNavigation.startTripSession()
-        stayOnInitialPosition()
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-
-        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
-        val refreshedRoutes = mapboxNavigation.routesUpdates()
-            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
-            .first()
-
-        assertEquals(
-            224.2239,
-            requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-            0.0001
-        )
-        assertEquals(
-            258.767,
-            refreshedRoutes.navigationRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-            0.0001
-        )
-    }
-
     @Test
-    fun route_refresh_on_demand_invalidates_planned_timer() = sdkTest {
+    fun immediate_route_refresh_before_planned() = sdkTest {
         val observer = TestObserver()
         val routeRefreshes = mutableListOf<RoutesUpdatedResult>()
         val routeRefreshOptions = RouteRefreshOptions.Builder()
@@ -145,10 +114,20 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         delay(2500)
 
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
-        mapboxNavigation.routesUpdates()
+        val refreshedRoutes = mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
             .first()
         assertEquals(1, routeRefreshes.size)
+        assertEquals(
+            224.2239,
+            requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+            0.0001
+        )
+        assertEquals(
+            258.767,
+            refreshedRoutes.navigationRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+            0.0001
+        )
 
         // no route refresh 4 seconds after refresh on demand
         delay(4000)
