@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -18,6 +19,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -301,6 +305,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         waitForRouteToSuccessfullyRefresh()
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun routeSuccessfullyRefreshesAfterInvalidationOfExpiringData() = sdkTest {
         val routeOptions = generateRouteOptions(twoCoordinates)
@@ -311,6 +316,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
+        val observer = TestObserver()
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         // act
         val refreshedRoutes = mapboxNavigation.routesUpdates()
             .filter { it.reason == ROUTES_UPDATE_REASON_REFRESH }
@@ -329,6 +336,16 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         )
         failByRequestRouteRefreshResponse.failResponse = false
         waitForRouteToSuccessfullyRefresh()
+        assertEquals(
+            listOf(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS
+            ),
+            observer.getStatesSnapshot()
+        )
     }
 
     @Test
@@ -904,3 +921,15 @@ private fun NavigationRoute.getIncidentsIdFromTheRoute(legIndex: Int): List<Stri
     directionsRoute.legs()?.get(legIndex)
         ?.incidents()
         ?.map { it.id() }
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+class TestObserver : RouteRefreshStatesObserver {
+
+    private val states = mutableListOf<RouteRefreshStateResult>()
+
+    override fun onNewState(result: RouteRefreshStateResult) {
+        states.add(result)
+    }
+
+    fun getStatesSnapshot(): List<String> = states.map { it.state }
+}

@@ -67,40 +67,6 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     }
 
     @Test
-    fun threeFailedAttemptsThenSuccessfulRefreshTest() = sdkTest {
-        setupMockRequestHandlers(
-            coordinates,
-            R.raw.route_response_single_route_refresh_without_traffic,
-            NthAttemptHandler(
-                createRefreshHandler(
-                    R.raw.route_response_route_refresh_annotations_without_traffic,
-                    "route_response_single_route_refresh_without_traffic"
-                ),
-                3
-            )
-        )
-
-        createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(4_000))
-        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
-        mapboxNavigation.startTripSession()
-        val requestedRoutes = requestRoutes()
-        mapboxNavigation.setNavigationRoutes(requestedRoutes)
-
-        waitForRefresh()
-
-        assertEquals(
-            listOf(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS
-            ),
-            observer.getStatesSnapshot()
-        )
-    }
-
-    @Test
     fun routeRefreshDoesNotDispatchCancelledStateOnDestroyTest() = sdkTest {
         setupMockRequestHandlers(
             coordinates,
@@ -294,14 +260,3 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     }
 }
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-private class TestObserver : RouteRefreshStatesObserver {
-
-    private val states = mutableListOf<RouteRefreshStateResult>()
-
-    override fun onNewState(result: RouteRefreshStateResult) {
-        states.add(result)
-    }
-
-    fun getStatesSnapshot(): List<String> = states.map { it.state }
-}
