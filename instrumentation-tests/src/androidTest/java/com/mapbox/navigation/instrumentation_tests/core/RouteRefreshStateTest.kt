@@ -97,41 +97,6 @@ class RouteRefreshStateTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     }
 
     @Test
-    fun routeRefreshOnDemandThenPlannedTest() = sdkTest {
-        val refreshHandler = createRefreshHandler(
-            R.raw.route_response_route_refresh_annotations,
-            "route_response_single_route_refresh"
-        )
-        refreshHandler.jsonResponseModifier = DynamicResponseModifier()
-        setupMockRequestHandlers(
-            coordinates,
-            R.raw.route_response_single_route_refresh,
-            refreshHandler
-        )
-
-        createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5_000))
-        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
-        mapboxNavigation.startTripSession()
-        val requestedRoutes = requestRoutes()
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-
-        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
-        delay(5000)
-
-        waitForRefreshes(2) // immediate + planned
-
-        assertEquals(
-            listOf(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-            ),
-            observer.getStatesSnapshot()
-        )
-    }
-
-    @Test
     fun routeRefreshOnDemandBetweenPlannedAttemptsTest() = sdkTest {
         val refreshHandler = createRefreshHandler(
             R.raw.route_response_route_refresh_annotations,

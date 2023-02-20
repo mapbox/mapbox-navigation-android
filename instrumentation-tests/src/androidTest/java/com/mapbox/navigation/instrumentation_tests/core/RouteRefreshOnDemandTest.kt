@@ -15,6 +15,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
@@ -117,6 +118,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
 
     @Test
     fun route_refresh_on_demand_invalidates_planned_timer() = sdkTest {
+        val observer = TestObserver()
         val routeRefreshes = mutableListOf<RoutesUpdatedResult>()
         val routeRefreshOptions = RouteRefreshOptions.Builder()
             .intervalMillis(TimeUnit.SECONDS.toMillis(30))
@@ -131,6 +133,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
             .getSuccessfulResultOrThrowException()
             .routes
+        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
         mapboxNavigation.registerRoutesObserver {
@@ -157,6 +160,16 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
             .take(2)
             .toList()
+
+        assertEquals(
+            listOf(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+            ),
+            observer.getStatesSnapshot()
+        )
     }
 
     private fun createMapboxNavigation(routeRefreshOptions: RouteRefreshOptions) {
