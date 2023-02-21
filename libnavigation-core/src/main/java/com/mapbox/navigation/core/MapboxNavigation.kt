@@ -558,8 +558,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
-            threadController.getMainScopeAndRootJob().scope,
-            threadController.getImmediateMainScopeAndRootJob().scope,
+            Dispatchers.Main,
+            Dispatchers.Main.immediate,
             navigationOptions.routeRefreshOptions,
             directionsSession,
             routeRefreshRequestDataProvider,
@@ -1228,7 +1228,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         runInTelemetryContext { telemetry ->
             telemetry.destroy(this@MapboxNavigation)
         }
-        // first unregister all observers, then cancel the coroutines to avoid getting cancelled state
         threadController.cancelAllNonUICoroutines()
         threadController.cancelAllUICoroutines()
         ifNonNull(reachabilityObserverId) {

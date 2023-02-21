@@ -3,11 +3,12 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
@@ -281,6 +282,28 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+            ),
+            stateObserver.getStatesSnapshot()
+        )
+    }
+
+    @Test
+    fun routeRefreshDoesNotDispatchCancelledStateOnDestroyTest() = runBlockingTest {
+        val routes = setUpRoutes(
+            "route_response_single_route_refresh.json",
+            successfulAttemptNumber = 2
+        )
+        routeRefreshController = createRefreshController(50_000)
+        routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
+
+        routeRefreshController.requestPlannedRouteRefresh(routes)
+        testDispatcher.advanceTimeBy(80_000)
+
+        routeRefreshController.destroy()
+
+        assertEquals(
+            listOf(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
             ),
             stateObserver.getStatesSnapshot()
         )

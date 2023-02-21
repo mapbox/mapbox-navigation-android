@@ -26,7 +26,7 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
     }
 
     @Test
-    fun routeRefreshOnDemandDoesNotNotifiesObserverAfterTimeout() = runBlockingTest {
+    fun routeRefreshOnDemandDoesNotNotifyObserverAfterTimeout() = runBlockingTest {
         val routes = setUpRoutes("route_response_single_route_refresh.json", responseDelay = 30_000)
         routeRefreshController = createRefreshController(60_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)

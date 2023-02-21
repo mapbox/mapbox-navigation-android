@@ -101,9 +101,4 @@ class ThreadController {
         val parentJob = SupervisorJob(mainRootJob)
         return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main))
     }
-
-    fun getImmediateMainScopeAndRootJob(): JobControl {
-        val parentJob = SupervisorJob(mainRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main.immediate))
-    }
 }

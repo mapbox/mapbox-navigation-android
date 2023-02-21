@@ -49,7 +49,7 @@ internal open class RouteRefreshIntegrationTest {
 
     private val mapboxReplayer = MapboxReplayer()
     private val threadController = ThreadController()
-    val router = mockk<NavigationRouterV2>()
+    val router = mockk<NavigationRouterV2>(relaxed = true)
     private val primaryRouteProgressDataProvider = PrimaryRouteProgressDataProvider()
     private val tripSession = NavigationComponentProvider.createTripSession(
         tripService = mockk(relaxed = true),
@@ -115,8 +115,8 @@ internal open class RouteRefreshIntegrationTest {
     fun createRefreshController(refreshInternal: Long): RouteRefreshController {
         val options = RouteRefreshOptions.Builder().intervalMillis(refreshInternal).build()
         return RouteRefreshControllerProvider.createRouteRefreshController(
-            testScope,
-            testScope,
+            testDispatcher,
+            testDispatcher,
             options,
             directionsSession,
             primaryRouteProgressDataProvider,

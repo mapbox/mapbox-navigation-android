@@ -9,15 +9,17 @@ import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.core.routealternatives.AlternativeMetadataProvider
 import com.mapbox.navigation.utils.internal.Time
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import java.util.Date
 
 internal object RouteRefreshControllerProvider {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun createRouteRefreshController(
-        scope: CoroutineScope,
-        immediateScope: CoroutineScope,
+        dispatcher: CoroutineDispatcher,
+        immediateDispatcher: CoroutineDispatcher,
         routeRefreshOptions: RouteRefreshOptions,
         directionsSession: DirectionsSession,
         primaryRouteProgressDataProvider: PrimaryRouteProgressDataProvider,
@@ -48,20 +50,22 @@ internal object RouteRefreshControllerProvider {
             routeRefreshOptions.intervalMillis * 3
         )
 
+        val routeRefreshParentScope = CoroutineScope(SupervisorJob())
         val plannedRouteRefreshController = PlannedRouteRefreshController(
             routeRefresherExecutor,
             routeRefreshOptions,
             stateHolder,
-            immediateScope,
+            CoroutineScope(routeRefreshParentScope.coroutineContext + immediateDispatcher),
             routeRefresherResultProcessor
         )
         val immediateRouteRefreshController = ImmediateRouteRefreshController(
             routeRefresherExecutor,
             stateHolder,
-            scope,
+            CoroutineScope(routeRefreshParentScope.coroutineContext + dispatcher),
             routeRefresherResultProcessor
         )
         return RouteRefreshController(
+            routeRefreshParentScope,
             plannedRouteRefreshController,
             immediateRouteRefreshController,
             stateHolder,

@@ -132,18 +132,4 @@ class ThreadControllerTest {
             mainJobController.scope.toString()
         )
     }
-
-    @Test
-    fun checksGetImmediateMainScopeAndRootJob() {
-        val mainRootJob = SupervisorJob()
-        threadController.mainRootJob = mainRootJob
-
-        val immediateMainJobController = threadController.getImmediateMainScopeAndRootJob()
-
-        assertEquals(mainRootJob.children.first(), immediateMainJobController.job)
-        assertEquals(
-            CoroutineScope(immediateMainJobController.job + Dispatchers.Main.immediate).toString(),
-            immediateMainJobController.scope.toString()
-        )
-    }
 }
