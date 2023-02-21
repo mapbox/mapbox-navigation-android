@@ -5,10 +5,10 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.core.internal.utils.CoroutineUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
-import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -19,7 +19,13 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.job
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -41,27 +47,36 @@ class PlannedRouteRefreshControllerTest {
     private val executor = mockk<RouteRefresherExecutor>(relaxed = true)
     private val stateHolder = mockk<RouteRefreshStateHolder>(relaxed = true)
     private val listener = mockk<RouteRefresherListener>(relaxed = true)
-    private val cancellableHandler = mockk<CancellableHandler>(relaxed = true)
     private val retryStrategy = mockk<RetryRouteRefreshStrategy>(relaxed = true)
     private val interval = 40000L
     private val routeRefreshOptions = RouteRefreshOptions.Builder().intervalMillis(interval).build()
-    private val sut = PlannedRouteRefreshController(
-        executor,
-        routeRefreshOptions,
-        stateHolder,
-        listener,
-        cancellableHandler,
-        retryStrategy
-    )
+    private val childScopeDispatcher = TestCoroutineDispatcher()
+    private var childScope: CoroutineScope? = null
+    private val parentScope = coroutineRule.createTestScope()
+    private lateinit var sut: PlannedRouteRefreshController
 
     @Before
     fun setUp() {
         mockkObject(RouteRefreshValidator)
+        mockkObject(CoroutineUtils)
+        every { CoroutineUtils.createChildScope(parentScope.coroutineContext.job) } answers {
+            TestCoroutineScope(SupervisorJob() + childScopeDispatcher).also { childScope = it }
+        }
+        sut = PlannedRouteRefreshController(
+            executor,
+            routeRefreshOptions,
+            stateHolder,
+            listener,
+            parentScope,
+            retryStrategy
+        )
     }
 
     @After
     fun tearDown() {
+        parentScope.cancel()
         unmockkObject(RouteRefreshValidator)
+        unmockkObject(CoroutineUtils)
     }
 
     @Test
@@ -69,14 +84,16 @@ class PlannedRouteRefreshControllerTest {
         sut.startRoutesRefreshing(emptyList())
 
         verify(exactly = 1) {
-            cancellableHandler.cancelAll()
             stateHolder.reset()
             logger.logI("Routes are empty, nothing to refresh", "RouteRefreshController")
         }
         verify(exactly = 0) {
             stateHolder.onFailure(any())
             RouteRefreshValidator.validateRoute(any())
-            cancellableHandler.postDelayed(any(), any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
         }
         assertNull(sut.routesToRefresh)
     }
@@ -111,7 +128,10 @@ class PlannedRouteRefreshControllerTest {
             stateHolder.onFailure(expectedLogMessage)
             stateHolder.reset()
         }
-        verify(exactly = 0) { cancellableHandler.postDelayed(any(), any(), any()) }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
+        }
         assertNull(sut.routesToRefresh)
     }
 
@@ -132,7 +152,10 @@ class PlannedRouteRefreshControllerTest {
 
         verify(exactly = 1) {
             retryStrategy.reset()
-            cancellableHandler.postDelayed(interval, any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 1) {
+            executor.executeRoutesRefresh(any(), any())
         }
         assertEquals(routes, sut.routesToRefresh)
     }
@@ -150,7 +173,10 @@ class PlannedRouteRefreshControllerTest {
 
         verify(exactly = 1) {
             retryStrategy.reset()
-            cancellableHandler.postDelayed(interval, any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 1) {
+            executor.executeRoutesRefresh(any(), any())
         }
         assertEquals(routes, sut.routesToRefresh)
     }
@@ -180,19 +206,9 @@ class PlannedRouteRefreshControllerTest {
 
         sut.startRoutesRefreshing(routes)
 
-        val attemptBlocks = mutableListOf<suspend () -> Unit>()
-        val cancellableBlocks = mutableListOf<() -> Unit>()
-        verify(exactly = 1) {
-            cancellableHandler.postDelayed(
-                interval,
-                capture(attemptBlocks),
-                capture(cancellableBlocks)
-            )
-        }
-        cancellableBlocks.last().invoke()
+        childScopeDispatcher.advanceTimeBy(interval - 1)
+        childScope?.cancel()
         verify { stateHolder.onCancel() }
-        attemptBlocks.last().invoke()
-        coVerify(exactly = 1) { executor.executeRoutesRefresh(routes, any()) }
     }
 
     @Test
@@ -251,7 +267,10 @@ class PlannedRouteRefreshControllerTest {
             stateHolder.onSuccess()
             listener.onRoutesRefreshed(result)
         }
-        verify { cancellableHandler wasNot Called }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
+        }
     }
 
     @Test
@@ -269,8 +288,9 @@ class PlannedRouteRefreshControllerTest {
         val result = RouteRefresherResult(false, mockk())
         finishRequest(result)
 
-        verify(exactly = 1) {
-            cancellableHandler.postDelayed(interval, any(), any())
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 1) {
+            executor.executeRoutesRefresh(any(), any())
         }
         verify(exactly = 0) {
             stateHolder.onFailure(any())
@@ -316,10 +336,13 @@ class PlannedRouteRefreshControllerTest {
         verifyOrder {
             stateHolder.onFailure(null)
             retryStrategy.reset()
-            cancellableHandler.postDelayed(interval, any(), any())
         }
         verify(exactly = 1) {
             listener.onRoutesRefreshed(any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 1) {
+            executor.executeRoutesRefresh(any(), any())
         }
     }
 
@@ -362,7 +385,10 @@ class PlannedRouteRefreshControllerTest {
             listener.onRoutesRefreshed(any())
             retryStrategy.shouldRetry()
             retryStrategy.reset()
-            cancellableHandler.postDelayed(any(), any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
         }
         verify(exactly = 1) {
             logger.logW("Planned route refresh error: Some error", "RouteRefreshController")
@@ -370,15 +396,7 @@ class PlannedRouteRefreshControllerTest {
     }
 
     private suspend fun startRequest() {
-        val attemptBlocks = mutableListOf<suspend () -> Unit>()
-        verify(exactly = 1) {
-            cancellableHandler.postDelayed(
-                any(),
-                capture(attemptBlocks),
-                any()
-            )
-        }
-        attemptBlocks.last().invoke()
+        childScopeDispatcher.advanceTimeBy(interval)
         val startCallbacks = mutableListOf<() -> Unit>()
         coVerify(exactly = 1) { executor.executeRoutesRefresh(any(), capture(startCallbacks)) }
         startCallbacks.last().invoke()
@@ -392,45 +410,54 @@ class PlannedRouteRefreshControllerTest {
         coEvery {
             executor.executeRoutesRefresh(any(), any())
         } returns result
-        val attemptBlocks = mutableListOf<suspend () -> Unit>()
-        verify(exactly = 1) {
-            cancellableHandler.postDelayed(
-                any(),
-                capture(attemptBlocks),
-                any()
-            )
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 1) {
+            executor.executeRoutesRefresh(any(), any())
         }
-        clearMocks(cancellableHandler, answers = false)
-        attemptBlocks.last().invoke()
         clearMocks(executor, answers = false)
     }
 
     @Test
     fun pauseNotPaused() = coroutineRule.runBlockingTest {
+        every {
+            RouteRefreshValidator.validateRoute(any())
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        sut.startRoutesRefreshing(listOf(mockk(relaxed = true)))
+
         sut.pause()
 
-        verify(exactly = 1) { cancellableHandler.cancelAll() }
+        verify(exactly = 1) { stateHolder.onCancel() }
     }
 
     @Test
     fun pausePaused() = coroutineRule.runBlockingTest {
+        every {
+            RouteRefreshValidator.validateRoute(any())
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        every { retryStrategy.shouldRetry() } returns true
+        sut.startRoutesRefreshing(listOf(mockk(relaxed = true)))
         sut.pause()
         clearAllMocks(answers = false)
 
         sut.pause()
 
-        verify(exactly = 0) { cancellableHandler.cancelAll() }
+        verify(exactly = 0) { stateHolder.onCancel() }
     }
 
     @Test
     fun pauseResumed() = coroutineRule.runBlockingTest {
+        every {
+            RouteRefreshValidator.validateRoute(any())
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        every { retryStrategy.shouldRetry() } returns true
+        sut.startRoutesRefreshing(listOf(mockk(relaxed = true)))
         sut.pause()
         sut.resume()
         clearAllMocks(answers = false)
 
         sut.pause()
 
-        verify(exactly = 1) { cancellableHandler.cancelAll() }
+        verify(exactly = 1) { stateHolder.onCancel() }
     }
 
     @Test
@@ -442,7 +469,10 @@ class PlannedRouteRefreshControllerTest {
 
         verify(exactly = 0) {
             retryStrategy.shouldRetry()
-            cancellableHandler.postDelayed(any(), any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
         }
     }
 
@@ -461,7 +491,10 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        verify(exactly = 0) { cancellableHandler.postDelayed(any(), any(), any()) }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
+        }
     }
 
     @Test
@@ -479,7 +512,10 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        verify(exactly = 1) { cancellableHandler.postDelayed(interval, any(), any()) }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 1) {
+            executor.executeRoutesRefresh(any(), any())
+        }
     }
 
     @Test
@@ -496,7 +532,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        verify(exactly = 0) { cancellableHandler.postDelayed(any(), any(), any()) }
+        verify(exactly = 0) { retryStrategy.shouldRetry() }
     }
 
     @Test
@@ -515,7 +551,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        verify(exactly = 0) { cancellableHandler.postDelayed(any(), any(), any()) }
+        verify(exactly = 0) { retryStrategy.shouldRetry() }
     }
 
     @Test
@@ -547,7 +583,10 @@ class PlannedRouteRefreshControllerTest {
 
         verify(exactly = 0) {
             retryStrategy.shouldRetry()
-            cancellableHandler.postDelayed(any(), any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
         }
     }
 
@@ -577,7 +616,10 @@ class PlannedRouteRefreshControllerTest {
 
         verify(exactly = 0) {
             retryStrategy.shouldRetry()
-            cancellableHandler.postDelayed(any(), any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
         }
     }
 
@@ -600,11 +642,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        val attemptBlocks = mutableListOf<suspend () -> Unit>()
-        verify(exactly = 1) {
-            cancellableHandler.postDelayed(interval, capture(attemptBlocks), any())
-        }
-        attemptBlocks.last().invoke()
+        childScopeDispatcher.advanceTimeBy(interval)
         coVerify(exactly = 1) { executor.executeRoutesRefresh(routes, any()) }
     }
 
@@ -623,11 +661,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        val attemptBlocks = mutableListOf<suspend () -> Unit>()
-        verify(exactly = 1) {
-            cancellableHandler.postDelayed(interval, capture(attemptBlocks), any())
-        }
-        attemptBlocks.last().invoke()
+        childScopeDispatcher.advanceTimeBy(interval)
         coVerify(exactly = 1) { executor.executeRoutesRefresh(routes, any()) }
     }
 
@@ -648,7 +682,10 @@ class PlannedRouteRefreshControllerTest {
 
         verify(exactly = 0) {
             retryStrategy.shouldRetry()
-            cancellableHandler.postDelayed(any(), any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
         }
         assertNull(sut.routesToRefresh)
     }
@@ -672,7 +709,10 @@ class PlannedRouteRefreshControllerTest {
 
         verify(exactly = 0) {
             retryStrategy.shouldRetry()
-            cancellableHandler.postDelayed(any(), any(), any())
+        }
+        childScopeDispatcher.advanceTimeBy(interval)
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(any(), any())
         }
         assertNull(sut.routesToRefresh)
     }
@@ -703,11 +743,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        val attemptBlocks = mutableListOf<suspend () -> Unit>()
-        verify(exactly = 1) {
-            cancellableHandler.postDelayed(interval, capture(attemptBlocks), any())
-        }
-        attemptBlocks.last().invoke()
+        childScopeDispatcher.advanceTimeBy(interval)
         coVerify(exactly = 1) { executor.executeRoutesRefresh(listOf(route3, route4), any()) }
         assertEquals(listOf(route3, route4), sut.routesToRefresh)
     }
@@ -729,11 +765,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.resume()
 
-        val attemptBlocks = mutableListOf<suspend () -> Unit>()
-        verify(exactly = 1) {
-            cancellableHandler.postDelayed(interval, capture(attemptBlocks), any())
-        }
-        attemptBlocks.last().invoke()
+        childScopeDispatcher.advanceTimeBy(interval)
         coVerify(exactly = 1) { executor.executeRoutesRefresh(listOf(route3, route4), any()) }
         assertEquals(listOf(route3, route4), sut.routesToRefresh)
     }

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -9,7 +8,7 @@ import org.junit.Test
 internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
-    fun routeRefreshOnDemandDoesNotNotifyObserverBeforeTimeout() = runBlockingTest {
+    fun routeRefreshOnDemandDoesNotNotifyObserverBeforeTimeout() = coroutineRule.runBlockingTest {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 100
@@ -26,7 +25,7 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
     }
 
     @Test
-    fun routeRefreshOnDemandDoesNotNotifyObserverAfterTimeout() = runBlockingTest {
+    fun routeRefreshOnDemandDoesNotNotifyObserverAfterTimeout() = coroutineRule.runBlockingTest {
         val routes = setUpRoutes("route_response_single_route_refresh.json", responseDelay = 30_000)
         routeRefreshController = createRefreshController(60_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)

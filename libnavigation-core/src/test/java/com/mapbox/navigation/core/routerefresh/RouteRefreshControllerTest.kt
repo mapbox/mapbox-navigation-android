@@ -11,9 +11,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.Job
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,9 +29,9 @@ class RouteRefreshControllerTest {
     private val stateHolder = mockk<RouteRefreshStateHolder>(relaxed = true)
     private val refreshObserversManager = mockk<RefreshObserversManager>(relaxed = true)
     private val resultProcessor = mockk<RouteRefresherResultProcessor>(relaxed = true)
-    private val scope = mockk<CoroutineScope>()
+    private val job = mockk<Job>()
     private val sut = RouteRefreshController(
-        scope,
+        job,
         plannedRouteRefreshController,
         immediateRouteRefreshController,
         stateHolder,
@@ -84,7 +82,7 @@ class RouteRefreshControllerTest {
         verifyOrder {
             refreshObserversManager.unregisterAllObservers()
             stateHolder.unregisterAllRouteRefreshStateObservers()
-            scope.cancel()
+            job.cancel()
         }
     }
 

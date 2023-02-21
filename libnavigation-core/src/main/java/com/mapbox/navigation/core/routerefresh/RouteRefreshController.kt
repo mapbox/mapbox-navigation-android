@@ -3,12 +3,11 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.internal.logI
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.Job
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteRefreshController internal constructor(
-    private val routeRefreshScope: CoroutineScope,
+    private val routeRefreshParentJob: Job,
     private val plannedRouteRefreshController: PlannedRouteRefreshController,
     private val immediateRouteRefreshController: ImmediateRouteRefreshController,
     private val stateHolder: RouteRefreshStateHolder,
@@ -56,7 +55,7 @@ class RouteRefreshController internal constructor(
         refreshObserversManager.unregisterAllObservers()
         stateHolder.unregisterAllRouteRefreshStateObservers()
         // first unregister observers, then cancel scope - otherwise we dispatch CANCELLED state from onDestroy
-        routeRefreshScope.cancel()
+        routeRefreshParentJob.cancel()
     }
 
     internal fun requestPlannedRouteRefresh(routes: List<NavigationRoute>) {

@@ -19,12 +19,14 @@ import com.mapbox.navigation.core.NavigationComponentProvider
 import com.mapbox.navigation.core.PrimaryRouteProgressDataProvider
 import com.mapbox.navigation.core.RoutesProgressData
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
+import com.mapbox.navigation.core.internal.utils.CoroutineUtils
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.every
@@ -32,11 +34,8 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -46,6 +45,9 @@ internal open class RouteRefreshIntegrationTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     private val mapboxReplayer = MapboxReplayer()
     private val threadController = ThreadController()
@@ -67,8 +69,8 @@ internal open class RouteRefreshIntegrationTest {
     lateinit var routeRefreshController: RouteRefreshController
     val stateObserver = TestStateObserver()
     val refreshObserver = TestRefreshObserver()
-    val testDispatcher = TestCoroutineDispatcher()
-    val testScope = TestCoroutineScope(testDispatcher + SupervisorJob())
+    val testDispatcher = coroutineRule.testDispatcher
+    val testScope = coroutineRule.createTestScope()
 
     class TestRefreshObserver : RouteRefreshObserver {
 
@@ -96,6 +98,11 @@ internal open class RouteRefreshIntegrationTest {
         every {
             NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
         } returns ExpectedFactory.createValue(listOf(mockk(relaxed = true)))
+        mockkObject(CoroutineUtils)
+        every {
+            CoroutineUtils.createChildScope(any(), any())
+        } answers { coroutineRule.createTestScope() }
+
         primaryRouteProgressDataProvider.onRouteProgressChanged(
             mockk {
                 every { currentLegProgress } returns mockk {
@@ -110,6 +117,7 @@ internal open class RouteRefreshIntegrationTest {
     @After
     fun tearDown() {
         unmockkObject(NativeRouteParserWrapper)
+        unmockkObject(CoroutineUtils)
     }
 
     fun createRefreshController(refreshInternal: Long): RouteRefreshController {

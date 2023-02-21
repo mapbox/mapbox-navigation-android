@@ -4,9 +4,15 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.core.internal.utils.CoroutineUtils
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class PlannedRouteRefreshController @VisibleForTesting constructor(
@@ -14,7 +20,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val stateHolder: RouteRefreshStateHolder,
     private val listener: RouteRefresherListener,
-    private val cancellableHandler: CancellableHandler,
+    private val parentScope: CoroutineScope,
     private val retryStrategy: RetryRouteRefreshStrategy,
 ) {
 
@@ -22,23 +28,25 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         routeRefresherExecutor: RouteRefresherExecutor,
         routeRefreshOptions: RouteRefreshOptions,
         stateHolder: RouteRefreshStateHolder,
-        scope: CoroutineScope,
+        parentScope: CoroutineScope,
         listener: RouteRefresherListener,
     ) : this(
         routeRefresherExecutor,
         routeRefreshOptions,
         stateHolder,
         listener,
-        CancellableHandler(scope),
+        parentScope,
         RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT)
     )
 
+    private var plannedRefreshScope =
+        CoroutineUtils.createChildScope(parentScope.coroutineContext.job)
     private var paused = false
     var routesToRefresh: List<NavigationRoute>? = null
         private set
 
     fun startRoutesRefreshing(routes: List<NavigationRoute>) {
-        cancellableHandler.cancelAll()
+        recreateScope()
         routesToRefresh = null
         if (routes.isEmpty()) {
             logI("Routes are empty, nothing to refresh", RouteRefreshLog.LOG_CATEGORY)
@@ -69,7 +77,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     fun pause() {
         if (!paused) {
             paused = true
-            cancellableHandler.cancelAll()
+            recreateScope()
         }
     }
 
@@ -99,11 +107,15 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     }
 
     private fun postAttempt(attemptBlock: suspend () -> Unit) {
-        cancellableHandler.postDelayed(
-            timeout = routeRefreshOptions.intervalMillis,
-            block = attemptBlock,
-            cancellationCallback = { stateHolder.onCancel() }
-        )
+        plannedRefreshScope.launch {
+            try {
+                delay(routeRefreshOptions.intervalMillis)
+                attemptBlock()
+            } catch (ex: CancellationException) {
+                stateHolder.onCancel()
+                throw ex
+            }
+        }
     }
 
     private suspend fun executePlannedRefresh(
@@ -135,6 +147,11 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                 }
             }
         )
+    }
+
+    private fun recreateScope() {
+        plannedRefreshScope.cancel()
+        plannedRefreshScope = CoroutineUtils.createChildScope(parentScope.coroutineContext.job)
     }
 
     companion object {
