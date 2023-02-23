@@ -37,11 +37,10 @@ dependencies {
 
     testImplementation project(':libtesting-navigation-util')
     testImplementation project(':libtesting-utils')
-    testImplementation dependenciesList.mockk
     testImplementation dependenciesList.kotlinReflect
-    testImplementation ("io.mockk:mockk-agent-jvm:1.12.1")
+    testImplementation dependenciesList.mockkAgentJvm
+    testImplementation dependenciesList.mockkAgentApi
     apply from: "../gradle/unit-testing-dependencies.gradle"
-    implementation 'org.pitest:pitest:1.11.1'
 }
 
 dokkaHtmlPartial {
