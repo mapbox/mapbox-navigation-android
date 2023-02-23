@@ -35,9 +35,10 @@ dependencies {
     implementation dependenciesList.androidXWorkManager
     implementation dependenciesList.androidXLifecycleProcess
 
-    testImplementation project(':libtesting-navigation-util')
+//    testImplementation project(':libtesting-navigation-util')
     testImplementation project(':libtesting-utils')
     testImplementation dependenciesList.kotlinReflect
+    testImplementation dependenciesList.mockk
     testImplementation dependenciesList.mockkAgentJvm
     testImplementation dependenciesList.mockkAgentApi
     apply from: "../gradle/unit-testing-dependencies.gradle"

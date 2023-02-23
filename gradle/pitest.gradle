@@ -1,20 +1,19 @@
 apply plugin: 'pl.droidsonroids.pitest'
 
 pitest {
-    targetClasses = ['com.mapbox.navigation.**']
-    targetTests = ['**MapboxCopilotTest**']
-    pitestVersion = '1.7.0'
+    pitestVersion = '1.11.1'
     avoidCallsTo = ['kotlin.jvm.internal']
+    targetClasses = ['com.mapbox.maps.**']
+    targetTests = ['com.mapbox.maps.**Test**']
     threads = Runtime.getRuntime().availableProcessors()
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
-    jvmArgs = ['-Xmx4096m']
+    jvmArgs = ['-Xmx8192m']
     verbose = true
     exportLineCoverage = true
-    excludeMockableAndroidJar = true
-    failWhenNoMutations = false
+//    excludeMockableAndroidJar = true
 
-    mutators = ['CONSTRUCTOR_CALLS']
+    mutators = ['DEFAULTS']
 //    mutators = ['DEFAULTS']
     // https://pitest.org/quickstart/mutators/
 //    mutators = ['DEFAULTS', 'CONSTRUCTOR_CALLS', 'EMPTY_RETURNS', 'FALSE_RETURNS',
