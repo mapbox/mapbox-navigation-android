@@ -39,6 +39,7 @@ dependencies {
     testImplementation project(':libtesting-utils')
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.kotlinReflect
+    testImplementation ("io.mockk:mockk-agent-jvm:1.12.1")
     apply from: "../gradle/unit-testing-dependencies.gradle"
     implementation 'org.pitest:pitest:1.11.1'
 }
