@@ -1,7 +1,11 @@
+plugins {
+    id("pl.droidsonroids.pitest")
+}
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
+apply from: "../gradle/pitest.gradle"
 apply from: "../gradle/ktlint.gradle"
 apply from: "../gradle/kdoc-settings.gradle"
 
@@ -34,6 +38,7 @@ dependencies {
     testImplementation project(':libtesting-navigation-util')
     testImplementation project(':libtesting-utils')
     apply from: "../gradle/unit-testing-dependencies.gradle"
+    implementation 'org.pitest:pitest:1.11.1'
 }
 
 dokkaHtmlPartial {
@@ -54,4 +59,3 @@ dokkaHtmlPartial {
 apply from: "../gradle/track-public-apis.gradle"
 apply from: "../gradle/publish.gradle"
 apply from: "../gradle/jacoco.gradle"
-apply from: "../gradle/pitest.gradle"

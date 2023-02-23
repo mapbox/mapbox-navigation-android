@@ -2,21 +2,23 @@ apply plugin: 'pl.droidsonroids.pitest'
 
 pitest {
     targetClasses = ['com.mapbox.navigation.**']
-    targetTests = ['**Test**']
-    pitestVersion = '1.11.0'
-    avoidCallsTo = ['kotlin.jvm.internal']
-    threads = Runtime.getRuntime().availableProcessors()
+//    targetTests = ['**Test**']
+    pitestVersion = '1.11.1'
+//    avoidCallsTo = ['kotlin.jvm.internal']
+//    threads = Runtime.getRuntime().availableProcessors()
     outputFormats = ['XML', 'HTML']
-    timestampedReports = false
-    jvmArgs = ['-Xmx4096m']
+//    timestampedReports = false
+//    jvmArgs = ['-Xmx4096m']
     verbose = true
-    exportLineCoverage = true
+//    exportLineCoverage = true
+    excludeMockableAndroidJar = true
 
+    mutators = ['DEFAULTS']
     // https://pitest.org/quickstart/mutators/
-    mutators = ['DEFAULTS', 'CONSTRUCTOR_CALLS', 'EMPTY_RETURNS', 'FALSE_RETURNS',
-                'NULL_RETURNS', 'REMOVE_CONDITIONALS', 'REMOVE_INCREMENTS', 'EXPERIMENTAL_SWITCH']
+//    mutators = ['DEFAULTS', 'CONSTRUCTOR_CALLS', 'EMPTY_RETURNS', 'FALSE_RETURNS',
+//                'NULL_RETURNS', 'REMOVE_CONDITIONALS', 'REMOVE_INCREMENTS', 'EXPERIMENTAL_SWITCH']
 
-    excludedClasses = []
+    excludedTestClasses = []
 
     // Use feature EXPORT for debug
     // features = ["+EXPORT"]
