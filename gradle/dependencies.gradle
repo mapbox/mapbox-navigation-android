@@ -191,7 +191,8 @@ ext {
       mapboxSdkRegistry    : '0.7.0',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.2.2',
-      firebaseCrashlytics  : '2.5.1'
+      firebaseCrashlytics  : '2.5.1',
+      pitest               : '0.2.12'
   ]
 
   pluginDependencies = [
@@ -208,6 +209,7 @@ ext {
       mapboxSdkRegistry    : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapboxSdkRegistry}",
       mapboxAccessToken    : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapboxAccessToken}",
       mapboxNativeDownload : "com.mapbox.gradle.plugins:native-download:${pluginVersion.mapboxNativeDownload}",
-      firebaseCrashlytics  : "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}"
+      firebaseCrashlytics  : "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}",
+      pitest               : "pl.droidsonroids.gradle:gradle-pitest-plugin:${pluginVersion.pitest}"
   ]
 }
