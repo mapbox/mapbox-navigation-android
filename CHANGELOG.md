@@ -6,6 +6,32 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.11.0-rc.2 - 24 February, 2023
+### Changelog
+[Changes between v2.11.0-rc.1 and v2.11.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.11.0-rc.1...v2.11.0-rc.2)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed revealing of access token in the logs during tiles downloading. [#6966](https://github.com/mapbox/mapbox-navigation-android/pull/6966)
+- Optimized RAM usage for onboard routing. [#6966](https://github.com/mapbox/mapbox-navigation-android/pull/6966)
+- Increased the distance at which the navigator discards passed alternative route in `NavigationRouteAlternativesObserver#onRouteAlternatives`. This reduces the chance of discarding alternative routes to which a driver deviated from the primary route. [#6966](https://github.com/mapbox/mapbox-navigation-android/pull/6966)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.11.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.11.1))
+- Mapbox Navigation Native `v126.0.1`
+- Mapbox Core Common `v23.3.2`
+- Mapbox Java `v6.11.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0-beta.1))
+
+
 ## Mapbox Navigation SDK 2.11.0-rc.1 - 17 February, 2023
 ### Changelog
 [Changes between v2.11.0-beta.3 and v2.11.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.11.0-beta.3...v2.11.0-rc.1)
