@@ -1,16 +1,13 @@
 package com.mapbox.navigation.examples.androidauto.car
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import androidx.car.app.Screen
 import androidx.car.app.Session
 import androidx.car.app.model.ActionStrip
 import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.androidauto.MapboxCarContext
 import com.mapbox.androidauto.action.MapboxScreenActionStripProvider
@@ -30,12 +27,11 @@ import com.mapbox.maps.applyDefaultParams
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
-import com.mapbox.navigation.core.replay.route.ReplayRouteSession
-import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.core.trip.MapboxTripStarter
 import com.mapbox.navigation.examples.androidauto.CarAppSyncComponent
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MainCarSession : Session() {
@@ -59,10 +55,11 @@ class MainCarSession : Session() {
                 }
             }
         }
-    private val mapboxNavigation by requireMapboxNavigation()
-    private val replayRouteSession = ReplayRouteSession()
+    private val mapboxTripStarter = MapboxTripStarter.getRegisteredInstance()
 
     init {
+        MapboxNavigationApp.attach(this)
+
         // Decide how you want the car and app to interact. In this example, the car and app
         // are kept in sync where they essentially mirror each other.
         CarAppSyncComponent.getInstance().setCarSession(this)
@@ -145,31 +142,9 @@ class MainCarSession : Session() {
     // computer terminal.
     // adb shell dumpsys activity service com.mapbox.navigation.examples.androidauto.car.MainCarAppService AUTO_DRIVE
     private fun observeAutoDrive() {
-        lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mapboxCarContext.mapboxNavigationManager.autoDriveEnabledFlow.collect {
-                    refreshTripSession()
-                }
-            }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun refreshTripSession() {
-        val isAutoDriveEnabled = mapboxCarContext.mapboxNavigationManager
-            .autoDriveEnabledFlow.value
-        if (!PermissionsManager.areLocationPermissionsGranted(carContext)) {
-            mapboxNavigation.stopTripSession()
-            return
-        }
-
-        if (isAutoDriveEnabled) {
-            MapboxNavigationApp.registerObserver(replayRouteSession)
-        } else {
-            MapboxNavigationApp.unregisterObserver(replayRouteSession)
-            if (mapboxNavigation.getTripSessionState() != TripSessionState.STARTED) {
-                mapboxNavigation.startTripSession()
-            }
-        }
+        mapboxCarContext.mapboxNavigationManager.autoDriveEnabledFlow
+            .filter { it }
+            .onEach { mapboxTripStarter.enableReplayRoute() }
+            .launchIn(lifecycleScope)
     }
 }

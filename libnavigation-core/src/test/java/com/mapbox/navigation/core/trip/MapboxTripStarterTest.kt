@@ -8,6 +8,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.history.ReplayHistorySession
 import com.mapbox.navigation.core.replay.history.ReplayHistorySessionOptions
 import com.mapbox.navigation.core.replay.route.ReplayRouteSession
+import com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -44,12 +45,21 @@ class MapboxTripStarterTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val replayRouteSession = mockk<ReplayRouteSession>(relaxed = true)
-    private var historyOptions = MutableStateFlow(ReplayHistorySessionOptions.Builder().build())
-    private val replayHistorySession = mockk<ReplayHistorySession>(relaxed = true) {
-        every { getOptions() } returns historyOptions
+    private var replayRouteOptions = MutableStateFlow(ReplayRouteSessionOptions.Builder().build())
+    private val replayRouteSession = mockk<ReplayRouteSession>(relaxed = true) {
+        every { getOptions() } returns replayRouteOptions
         every { setOptions(any()) } answers {
-            historyOptions.value = firstArg()
+            replayRouteOptions.value = firstArg()
+            this@mockk
+        }
+    }
+    private var replayHistoryOptions = MutableStateFlow(
+        ReplayHistorySessionOptions.Builder().build()
+    )
+    private val replayHistorySession = mockk<ReplayHistorySession>(relaxed = true) {
+        every { getOptions() } returns replayHistoryOptions
+        every { setOptions(any()) } answers {
+            replayHistoryOptions.value = firstArg()
         }
     }
 
@@ -192,20 +202,20 @@ class MapboxTripStarterTest {
 
         val mapboxNavigation = mockMapboxNavigation()
         sut.enableReplayRoute()
-        sut.onAttached(mapboxNavigation)
-        val nextOptions = sut.getReplayRouteSessionOptions().toBuilder()
+        val customOptions = sut.getReplayRouteSessionOptions().toBuilder()
             .decodeMinDistance(Double.MAX_VALUE)
             .build()
-        sut.enableReplayRoute(nextOptions)
+        sut.enableReplayRoute(customOptions)
+        sut.onAttached(mapboxNavigation)
 
         verifyOrder {
-            replayRouteSession.setOptions(any())
-            replayRouteSession.onAttached(mapboxNavigation)
-            replayRouteSession.onDetached(mapboxNavigation)
-            replayRouteSession.setOptions(nextOptions)
+            replayRouteSession.setOptions(customOptions)
             replayRouteSession.onAttached(mapboxNavigation)
         }
-        verify(exactly = 0) { mapboxNavigation.stopTripSession() }
+        verify(exactly = 0) {
+            mapboxNavigation.stopTripSession()
+            replayRouteSession.onDetached(mapboxNavigation)
+        }
     }
 
     @Test
@@ -282,17 +292,15 @@ class MapboxTripStarterTest {
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
 
         val mapboxNavigation = mockMapboxNavigation()
-        sut.enableReplayHistory()
-        sut.onAttached(mapboxNavigation)
         val nextOptions = sut.getReplayHistorySessionOptions().toBuilder()
             .enableSetRoute(false)
             .build()
         sut.enableReplayHistory(nextOptions)
+        sut.onAttached(mapboxNavigation)
 
         verifyOrder {
-            replayHistorySession.setOptions(any())
-            replayHistorySession.onAttached(mapboxNavigation)
             replayHistorySession.setOptions(nextOptions)
+            replayHistorySession.onAttached(mapboxNavigation)
         }
         verify(exactly = 0) {
             mapboxNavigation.stopTripSession()

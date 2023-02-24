@@ -37,17 +37,14 @@ import kotlinx.coroutines.flow.onEach
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class MapboxTripStarter internal constructor(
-    private val services: MapboxTripStarterServices = MapboxTripStarterServices()
+    services: MapboxTripStarterServices = MapboxTripStarterServices()
 ) : MapboxNavigationObserver {
 
     private val tripType = MutableStateFlow<MapboxTripStarterType>(
         MapboxTripStarterType.MapMatching
     )
-    private val replayRouteSessionOptions = MutableStateFlow(
-        ReplayRouteSessionOptions.Builder().build()
-    )
     private val isLocationPermissionGranted = MutableStateFlow(false)
-    private var replayRouteSession: ReplayRouteSession? = null
+    private val replayRouteSession = services.getReplayRouteSession()
     private val replayHistorySession = services.getReplayHistorySession()
     private var mapboxNavigation: MapboxNavigation? = null
 
@@ -109,7 +106,8 @@ class MapboxTripStarter internal constructor(
      * Get the current [ReplayRouteSessionOptions]. This can be used with [enableReplayRoute] to
      * make minor adjustments to the current options.
      */
-    fun getReplayRouteSessionOptions(): ReplayRouteSessionOptions = replayRouteSessionOptions.value
+    fun getReplayRouteSessionOptions(): ReplayRouteSessionOptions =
+        replayRouteSession.getOptions().value
 
     /**
      * Enables a mode where the primary route is simulated by an artificial driver. Set the route
@@ -121,7 +119,7 @@ class MapboxTripStarter internal constructor(
     fun enableReplayRoute(
         options: ReplayRouteSessionOptions? = null
     ) = apply {
-        options?.let { options -> replayRouteSessionOptions.value = options }
+        options?.let { options -> replayRouteSession.setOptions(options) }
         tripType.value = MapboxTripStarterType.ReplayRoute
     }
 
@@ -154,14 +152,16 @@ class MapboxTripStarter internal constructor(
                     isLocationPermissionGranted.onEach { granted ->
                         onMapMatchingEnabled(mapboxNavigation, granted)
                     }
-                MapboxTripStarterType.ReplayRoute ->
-                    replayRouteSessionOptions.onEach { options ->
-                        onReplayRouteEnabled(mapboxNavigation, options)
-                    }
-                MapboxTripStarterType.ReplayHistory ->
-                    replayHistorySession.getOptions().onEach { options ->
-                        onReplayHistoryEnabled(mapboxNavigation, options)
-                    }
+                MapboxTripStarterType.ReplayRoute -> {
+                    replayHistorySession.onDetached(mapboxNavigation)
+                    replayRouteSession.onAttached(mapboxNavigation)
+                    replayRouteSession.getOptions()
+                }
+                MapboxTripStarterType.ReplayHistory -> {
+                    replayRouteSession.onDetached(mapboxNavigation)
+                    replayHistorySession.onAttached(mapboxNavigation)
+                    replayHistorySession.getOptions()
+                }
             }
         }
     }
@@ -175,8 +175,7 @@ class MapboxTripStarter internal constructor(
     @SuppressLint("MissingPermission")
     private fun onMapMatchingEnabled(mapboxNavigation: MapboxNavigation, granted: Boolean) {
         if (granted) {
-            replayRouteSession?.onDetached(mapboxNavigation)
-            replayRouteSession = null
+            replayRouteSession.onDetached(mapboxNavigation)
             replayHistorySession.onDetached(mapboxNavigation)
             mapboxNavigation.startTripSession()
             mapboxNavigation.resetTripSession { }
@@ -190,47 +189,12 @@ class MapboxTripStarter internal constructor(
     }
 
     /**
-     * Internally called when the trip type has been set to replay route.
-     *
-     * @param mapboxNavigation
-     * @param options parameters for the [ReplayRouteSession]
-     */
-    private fun onReplayRouteEnabled(
-        mapboxNavigation: MapboxNavigation,
-        options: ReplayRouteSessionOptions
-    ) {
-        replayHistorySession.onDetached(mapboxNavigation)
-        replayRouteSession?.onDetached(mapboxNavigation)
-        replayRouteSession = services.getReplayRouteSession().also {
-            it.setOptions(options)
-            it.onAttached(mapboxNavigation)
-        }
-    }
-
-    /**
-     * Internally called when the trip type has been set to replay history.
-     *
-     * @param mapboxNavigation
-     * @param options parameters for the [ReplayHistorySession]
-     */
-    private fun onReplayHistoryEnabled(
-        mapboxNavigation: MapboxNavigation,
-        options: ReplayHistorySessionOptions
-    ) {
-        replayRouteSession?.onDetached(mapboxNavigation)
-        replayRouteSession = null
-        replayHistorySession.setOptions(options)
-        replayHistorySession.onAttached(mapboxNavigation)
-    }
-
-    /**
      * Internally called when the trip session needs to be stopped.
      *
      * @param mapboxNavigation
      */
     private fun onTripDisabled(mapboxNavigation: MapboxNavigation) {
-        replayRouteSession?.onDetached(mapboxNavigation)
-        replayRouteSession = null
+        replayRouteSession.onDetached(mapboxNavigation)
         replayHistorySession.onDetached(mapboxNavigation)
         mapboxNavigation.stopTripSession()
     }

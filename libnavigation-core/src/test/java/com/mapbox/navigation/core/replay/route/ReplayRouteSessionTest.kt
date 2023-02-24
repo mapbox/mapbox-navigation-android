@@ -145,7 +145,7 @@ class ReplayRouteSessionTest {
         sut.setOptions(firstOptions)
 
         assertNotEquals(firstOptions, initialOptions)
-        assertEquals(firstOptions, sut.getOptions())
+        assertEquals(firstOptions, sut.getOptions().value)
     }
 
     @Test
@@ -158,7 +158,7 @@ class ReplayRouteSessionTest {
         sut.setOptions(firstOptions)
 
         assertNotEquals(firstOptions, initialOptions)
-        assertEquals(firstOptions, sut.getOptions())
+        assertEquals(firstOptions, sut.getOptions().value)
     }
 
     @Test
@@ -355,7 +355,6 @@ class ReplayRouteSessionTest {
         progressObserver.captured.onRouteProgressChanged(secondRouteProgress)
 
         verify(exactly = 2) {
-            replayer.clearEvents()
             replayer.pushEvents(any())
         }
         verifyOrder {
