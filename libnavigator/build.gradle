@@ -1,3 +1,7 @@
+plugins {
+    id("pl.droidsonroids.pitest") apply(false)
+}
+apply from: "../gradle/pitest.gradle"
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.jaredsburrows.license'
@@ -52,7 +56,7 @@ dependencies {
     // instrumentation tests
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
-    androidTestUtil dependenciesList.testOrchestrator
+//    androidTestUtil dependenciesList.testOrchestrator
 }
 
 apply from: "../gradle/track-public-apis.gradle"

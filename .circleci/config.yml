@@ -529,7 +529,7 @@ jobs:
       - checkout
       - run:
           name: Run pitests
-          command: ./gradlew :libnavigation-util:pitestDebug --info
+          command: ./gradlew :libnavigation-base:pitestDebug --info
 
   prepare-and-assemble:
     executor: ndk-r22-latest-executor

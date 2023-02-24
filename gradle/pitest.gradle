@@ -14,7 +14,8 @@ pitest {
     excludeMockableAndroidJar = true
     failWhenNoMutations = false
 
-    mutators = ['DEFAULTS']
+    mutators = ['EMPTY_RETURNS']
+//    mutators = ['DEFAULTS']
     // https://pitest.org/quickstart/mutators/
 //    mutators = ['DEFAULTS', 'CONSTRUCTOR_CALLS', 'EMPTY_RETURNS', 'FALSE_RETURNS',
 //                'NULL_RETURNS', 'REMOVE_CONDITIONALS', 'REMOVE_INCREMENTS', 'EXPERIMENTAL_SWITCH']
@@ -22,5 +23,5 @@ pitest {
     excludedTestClasses = []
 
     // Use feature EXPORT for debug
-    // features = ["+EXPORT"]
+//     features = ["+EXPORT"]
 }

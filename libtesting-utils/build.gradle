@@ -22,8 +22,10 @@ dependencies {
     implementation dependenciesList.junit
     implementation dependenciesList.androidXAnnotation
     implementation dependenciesList.coroutinesTestAndroid
-    implementation dependenciesList.kotlinReflect
     implementation dependenciesList.mapboxCommonNative
+    api dependenciesList.kotlinReflect
     implementation dependenciesList.mockk
+    api dependenciesList.mockkAgentJvm
+    api dependenciesList.mockkAgentApi
     implementation 'org.json:json:20210307'
 }

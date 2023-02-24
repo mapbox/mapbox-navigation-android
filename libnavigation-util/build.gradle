@@ -38,10 +38,6 @@ dependencies {
     api dependenciesList.mapboxAndroidCommon
     implementation dependenciesList.mapboxAnnotations
 
-    testImplementation dependenciesList.mockk
-    testImplementation dependenciesList.mockkAgentJvm
-    testImplementation dependenciesList.mockkAgentApi
-
     apply from: "../gradle/unit-testing-dependencies.gradle"
     testImplementation project(':libtesting-utils')
 }
