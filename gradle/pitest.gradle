@@ -8,7 +8,7 @@ pitest {
     threads = Runtime.getRuntime().availableProcessors()
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
-    jvmArgs = ['-Xmx8192m']
+//    jvmArgs = ['-Xmx8192m']
     verbose = true
     exportLineCoverage = true
 //    excludeMockableAndroidJar = true // remove for debug
