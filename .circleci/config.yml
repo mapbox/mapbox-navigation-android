@@ -525,6 +525,7 @@ commands:
 jobs:
   run-pitest-core:
     executor: ndk-r22-latest-executor
+    resource_class: 2xlarge
     steps:
       - checkout
       - run:
