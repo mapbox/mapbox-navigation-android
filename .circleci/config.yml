@@ -70,7 +70,7 @@ workflows:
               ignore: /.*/
   default:
     jobs:
-      - run-pitest
+      - run-pitest-core
 #      - prepare-and-assemble
 #      - changelog-verification:
 #          filters:
@@ -523,13 +523,15 @@ commands:
 #---------- JOBS ----------
 #--------------------------
 jobs:
-  run-pitest:
+  run-pitest-core:
     executor: ndk-r22-latest-executor
     steps:
       - checkout
       - run:
           name: Run pitests
-          command: ./gradlew :libnavigation-base:pitestDebug --info
+          command: make pitest-core
+      - store_artifacts:
+          path: libnavigation-core/build/reports/pitest
 
   prepare-and-assemble:
     executor: ndk-r22-latest-executor
