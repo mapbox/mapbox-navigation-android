@@ -11,7 +11,7 @@ pitest {
     jvmArgs = ['-Xmx8192m']
     verbose = true
     exportLineCoverage = true
-    excludeMockableAndroidJar = true // remove for debug
+//    excludeMockableAndroidJar = true // remove for debug
     failWhenNoMutations = false
 
 //    mutators = ['EMPTY_RETURNS']
