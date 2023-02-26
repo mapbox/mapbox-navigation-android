@@ -56,7 +56,7 @@ dependencies {
     // instrumentation tests
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
-//    androidTestUtil dependenciesList.testOrchestrator
+    androidTestUtil dependenciesList.testOrchestrator
 }
 
 apply from: "../gradle/track-public-apis.gradle"

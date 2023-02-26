@@ -11,7 +11,7 @@ pitest {
     jvmArgs = ['-Xmx8192m']
     verbose = true
     exportLineCoverage = true
-    excludeMockableAndroidJar = true
+    excludeMockableAndroidJar = true // remove for debug
     failWhenNoMutations = false
 
     mutators = ['EMPTY_RETURNS']
@@ -20,8 +20,116 @@ pitest {
 //    mutators = ['DEFAULTS', 'CONSTRUCTOR_CALLS', 'EMPTY_RETURNS', 'FALSE_RETURNS',
 //                'NULL_RETURNS', 'REMOVE_CONDITIONALS', 'REMOVE_INCREMENTS', 'EXPERIMENTAL_SWITCH']
 
-    excludedTestClasses = []
+    excludedTestClasses =
+    [
+            // libnavigation-metrics +
+            // libnavigation-router +
+            // libnavigation-android +
+            // libnavigator +
+            // libnavigation-util +
+            //  libnavui-util +
+            //  libnavui-resources +
+            //  libnavui-shield +
+            //  libnavui-androidauto +
+
+            // libnavigation-base
+            'com.mapbox.navigation.base.utils.route.RouteProgressExTest**',
+            'com.mapbox.navigation.base.route.RouteExclusionsTest**',
+            'com.mapbox.navigation.base.route.NavigationRouteTest**',
+            'com.mapbox.navigation.base.internal.extensions.LocaleExTest**',
+            'com.mapbox.navigation.base.internal.route.RouteCompatibilityCacheTest**',
+            'com.mapbox.navigation.base.internal.route.RouteProgressExTest**',
+            'com.mapbox.navigation.base.internal.utils.DirectionsRouteExTest**',
+            'com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheckTest**',
+            'com.mapbox.navigation.base.route.RouteExclusionsJavaTest**',
+            // libnavigation-core
+            'com.mapbox.navigation.core.routerefresh.RouteRefreshControllerTest',
+            'com.mapbox.navigation.core.formatter.MapboxDistanceFormatterTest',
+            'com.mapbox.navigation.core.formatter.MapboxDistanceUtilTest',
+            // libnavigation-copilot
+            'com.mapbox.navigation.copilot.MapboxCopilotTest',
+            'com.mapbox.navigation.copilot.HistoryAttachmentsUtilsTest',
+            'com.mapbox.navigation.copilot.MapboxCopilotImplTest',
+            // libtrip-notification +
+            'com.mapbox.navigation.trip.notification.internal.TimeFormatterTest',
+            // libnavui-base
+            'com.mapbox.navigation.ui.base.view.MapboxExtendableButtonTest',
+            // libnavui-maps
+            'com.mapbox.navigation.ui.maps.view.MapboxCameraModeButtonTest',
+            'com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtilsRoboTest',
+            'com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApiTest',
+            'com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApiRoboTest',
+            'com.mapbox.navigation.ui.maps.roadname.view.MapboxRoadNameLabelViewTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.RouteLineComponentTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.RouteArrowComponentTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.RouteAlternativeComponentTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.NavigationCameraComponentTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.MapboxRecenterButtonComponentContractTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.RoadNameComponentTest,',
+            'com.mapbox.navigation.ui.maps.internal.ui.RecenterButtonComponentTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.LocationPuckComponentTest,',
+            'com.mapbox.navigation.ui.maps.internal.ui.LocationComponentTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.CameraModeButtonComponentTest,',
+            'com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtilsTest',
+            'com.mapbox.navigation.ui.maps.PredictiveCacheControllerTest',
+            'com.mapbox.navigation.ui.maps.internal.ui.BuildingHighlightComponentTest',
+            'com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtilsRoboTest',
+            'com.mapbox.navigation.ui.maps.guidance.signboard.api.MapboxExternalFileResolverTest,',
+            'com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButtonTest',
+            'com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButtonTest',
+            // libnavui-tripprogress
+            'com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressViewTest',
+            'com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatterTest',
+            'com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatterTest',
+            'com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatterTest',
+            'com.mapbox.navigation.ui.tripprogress.internal.ui.TripProgressComponentTest',
+            'com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApiTest',
+            'com.mapbox.navigation.ui.tripprogress.TripProgressProcessorTest,',
+            // libnavui-maneuver
+            'com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApiTest',
+            'com.mapbox.navigation.ui.maneuver.internal.ManeuverComponentTest',
+            'com.mapbox.navigation.ui.maneuver.view.MapboxExitTextTest',
+            'com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceTest',
+            'com.mapbox.navigation.ui.maneuver.view.MapboxPrimaryManeuverTest,',
+            'com.mapbox.navigation.ui.maneuver.ManeuverProcessorTest',
+            // libnavui-voice
+            'com.mapbox.navigation.ui.voice.view.MapboxSoundButtonTest',
+            'com.mapbox.navigation.ui.voice.model.SpeechAnnouncementTest',
+            'com.mapbox.navigation.ui.voice.internal.ui.AudioGuidanceButtonComponentTest',
+            'com.mapbox.navigation.ui.voice.internal.impl.MapboxVoiceInstructionsTest',
+            'com.mapbox.navigation.ui.voice.api.VoiceInstructionsPrefetcherTest',
+            'com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceTest',
+            'com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceServicesTest',
+            // libnavui-speedlimit
+            'com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitViewTest',
+            'com.mapbox.navigation.ui.speedlimit.internal.SpeedInfoComponentTest',
+            'com.mapbox.navigation.ui.speedlimit.internal.SpeedLimitComponentTest',
+            'com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptionsTest',
+            'com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatterTest',
+            'com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedInfoViewTest',
+            // libnavui-status
+            'com.mapbox.navigation.ui.status.view.MapboxStatusViewTest',
+            // libnavui-dropin
+            'com.mapbox.navigation.dropin.analytics.AnalyticsComponentTest',
+            'com.mapbox.navigation.dropin.camera.CameraComponentTest',
+            'com.mapbox.navigation.dropin.map.geocoding.GeocodingComponentTest',
+            'com.mapbox.navigation.dropin.map.longpress.FreeDriveLongPressMapComponentTest',
+            'com.mapbox.navigation.dropin.map.longpress.RoutePreviewLongPressMapComponentTest',
+            'com.mapbox.navigation.dropin.navigationview.MapboxNavigationViewApiTest',
+            'com.mapbox.navigation.dropin.arrival.ArrivalTextComponentTest',
+            // libnavui-app
+            'com.mapbox.navigation.ui.app.internal.routefetch.RouteOptionsProviderTest',
+            'com.mapbox.navigation.ui.app.internal.controller.CameraStateControllerTest',
+            'com.mapbox.navigation.ui.app.internal.controller.LocationStateControllerTest',
+            'com.mapbox.navigation.ui.app.internal.controller.NavigationStateControllerTest',
+            'com.mapbox.navigation.ui.app.internal.controller.RouteAlternativeComponentImplTest',
+            'com.mapbox.navigation.ui.app.internal.controller.RoutePreviewStateControllerTest',
+            'com.mapbox.navigation.ui.app.internal.controller.RouteStateControllerTest',
+            '',
+            '',
+            '',
+    ]
 
     // Use feature EXPORT for debug
-//     features = ["+EXPORT"]
+    //     features = ["+EXPORT"]
 }

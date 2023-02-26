@@ -1,3 +1,7 @@
+plugins {
+    id("pl.droidsonroids.pitest") apply(false)
+}
+apply from: "../gradle/pitest.gradle"
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
