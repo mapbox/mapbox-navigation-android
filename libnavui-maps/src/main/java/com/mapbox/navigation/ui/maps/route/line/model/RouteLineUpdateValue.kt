@@ -13,6 +13,8 @@ class RouteLineUpdateValue internal constructor(
     val routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null
 ) {
 
+    internal var ignorePrimaryRouteLineData = false
+
     /**
      * @return a class with mutable values for replacing.
      */
@@ -20,7 +22,9 @@ class RouteLineUpdateValue internal constructor(
         primaryRouteLineDynamicData,
         alternativeRouteLinesDynamicData,
         routeLineMaskingLayerDynamicData
-    )
+    ).also {
+        it.ignorePrimaryRouteLineData = ignorePrimaryRouteLineData
+    }
 
     /**
      * Represents the mutable data for updating the appearance of the route lines.
@@ -35,6 +39,8 @@ class RouteLineUpdateValue internal constructor(
         var routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null
     ) {
 
+        internal var ignorePrimaryRouteLineData = false
+
         /**
          * @return a RouteLineUpdateValue
          */
@@ -42,7 +48,9 @@ class RouteLineUpdateValue internal constructor(
             primaryRouteLineDynamicData,
             alternativeRouteLinesDynamicData,
             routeLineMaskingLayerDynamicData
-        )
+        ).also {
+            it.ignorePrimaryRouteLineData = ignorePrimaryRouteLineData
+        }
     }
 
     /**

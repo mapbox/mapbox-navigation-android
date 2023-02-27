@@ -542,6 +542,151 @@ class MapboxRouteLineViewTest {
     }
 
     @Test
+    fun renderTraveledRouteLineUpdate_whenIgnorePrimaryRouteLineData() =
+        coroutineRule.runBlockingTest {
+            mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+            mockkObject(MapboxRouteLineUtils)
+            val options = MapboxRouteLineOptions.Builder(ctx).build()
+            val trafficLineExp = mockk<Expression>()
+            val routeLineExp = mockk<Expression>()
+            val casingLineEx = mockk<Expression>()
+            val restrictedRoadExp = mockk<Expression>()
+            val trailExpression = mockk<Expression>()
+            val trailCasingExpression = mockk<Expression>()
+            val state: Expected<RouteLineError, RouteLineUpdateValue> =
+                ExpectedFactory.createValue(
+                    RouteLineUpdateValue(
+                        primaryRouteLineDynamicData = RouteLineDynamicData(
+                            { routeLineExp },
+                            { casingLineEx },
+                            { trafficLineExp },
+                            { restrictedRoadExp },
+                            trailExpressionProvider = { trailExpression },
+                            trailCasingExpressionProvider = { trailCasingExpression }
+                        ),
+                        alternativeRouteLinesDynamicData = listOf(
+                            RouteLineDynamicData(
+                                { throw UnsupportedOperationException() },
+                                { throw UnsupportedOperationException() },
+                                { throw UnsupportedOperationException() },
+                                { throw UnsupportedOperationException() }
+                            ),
+                            RouteLineDynamicData(
+                                { throw UnsupportedOperationException() },
+                                { throw UnsupportedOperationException() },
+                                { throw UnsupportedOperationException() },
+                                { throw UnsupportedOperationException() }
+                            )
+                        ),
+                        routeLineMaskingLayerDynamicData = RouteLineDynamicData(
+                            { routeLineExp },
+                            { casingLineEx },
+                            { trafficLineExp },
+                            { restrictedRoadExp },
+                            trailExpressionProvider = { trailExpression },
+                            trailCasingExpressionProvider = { trailCasingExpression }
+                        )
+                    ).also {
+                        it.ignorePrimaryRouteLineData = true
+                    }
+                )
+            val style = mockk<Style> {
+                every {
+                    setStyleLayerProperty(any(), any(), any())
+                } returns ExpectedFactory.createNone()
+            }.also {
+                mockCheckForLayerInitialization(it)
+            }
+
+            pauseDispatcher {
+                val view = MapboxRouteLineView(options)
+                view.initPrimaryRouteLineLayerGroup(MapboxRouteLineUtils.layerGroup1SourceLayerIds)
+                view.renderRouteLineUpdate(style, state)
+            }
+
+            verify(exactly = 0) {
+                style.setStyleLayerProperty(
+                    LAYER_GROUP_1_TRAFFIC,
+                    "line-gradient",
+                    trafficLineExp
+                )
+            }
+            verify(exactly = 0) {
+                style.setStyleLayerProperty(
+                    LAYER_GROUP_1_MAIN,
+                    "line-gradient",
+                    routeLineExp
+                )
+            }
+            verify(exactly = 0) {
+                style.setStyleLayerProperty(
+                    LAYER_GROUP_1_CASING,
+                    "line-gradient",
+                    casingLineEx
+                )
+            }
+            verify(exactly = 0) {
+                style.setStyleLayerProperty(
+                    LAYER_GROUP_1_RESTRICTED,
+                    "line-gradient",
+                    restrictedRoadExp
+                )
+            }
+            verify(exactly = 0) {
+                style.setStyleLayerProperty(
+                    LAYER_GROUP_1_TRAIL,
+                    "line-gradient",
+                    trailExpression
+                )
+            }
+            verify(exactly = 0) {
+                style.setStyleLayerProperty(
+                    LAYER_GROUP_1_TRAIL_CASING,
+                    "line-gradient",
+                    trailCasingExpression
+                )
+            }
+            verify {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_TRAFFIC,
+                    "line-gradient",
+                    trafficLineExp
+                )
+            }
+            verify {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_MAIN,
+                    "line-gradient",
+                    routeLineExp
+                )
+            }
+            verify {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_CASING,
+                    "line-gradient",
+                    casingLineEx
+                )
+            }
+            verify {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_TRAIL,
+                    "line-gradient",
+                    trailExpression
+                )
+            }
+            verify {
+                style.setStyleLayerProperty(
+                    MASKING_LAYER_TRAIL_CASING,
+                    "line-gradient",
+                    trailCasingExpression
+                )
+            }
+
+            unmockkObject(MapboxRouteLineUtils)
+            unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        }
+
+    @Test
     fun renderTraveledRouteLineTrimUpdate() = coroutineRule.runBlockingTest {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)

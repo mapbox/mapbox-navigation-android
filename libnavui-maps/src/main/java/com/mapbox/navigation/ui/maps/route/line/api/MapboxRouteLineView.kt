@@ -370,10 +370,12 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 update.onValue {
-                    primaryRouteLineLayerGroup.map { layerId ->
-                        toExpressionUpdateFun(layerId, it.primaryRouteLineDynamicData)
-                    }.forEach { updateFun ->
-                        updateFun(style)
+                    if (!it.ignorePrimaryRouteLineData) {
+                        primaryRouteLineLayerGroup.map { layerId ->
+                            toExpressionUpdateFun(layerId, it.primaryRouteLineDynamicData)
+                        }.forEach { updateFun ->
+                            updateFun(style)
+                        }
                     }
 
                     ifNonNull(it.routeLineMaskingLayerDynamicData) { overlayData ->
