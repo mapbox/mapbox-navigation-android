@@ -7,6 +7,8 @@ import com.mapbox.navigation.core.RoutesSetCallback
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,6 +34,40 @@ fun sdkTest(
         withTimeout(timeout) {
             block()
         }
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+suspend fun MapboxNavigation.executeActionAndWaitForSessionState(
+    stateClass: Class<out NavigationSessionState>,
+    action: MapboxNavigation.() -> Unit
+) {
+    suspendCancellableCoroutine<Unit?> {
+        val observer = object : NavigationSessionStateObserver {
+            override fun onNavigationSessionStateChanged(
+                navigationSession: NavigationSessionState
+            ) {
+                if (navigationSession.javaClass == stateClass) {
+                    unregisterNavigationSessionStateObserver(this)
+                    it.resume(null) {}
+                }
+            }
+        }
+        it.invokeOnCancellation { unregisterNavigationSessionStateObserver(observer) }
+        registerNavigationSessionStateObserver(observer)
+        action()
+    }
+}
+
+suspend fun MapboxNavigation.startTripSessionAndWaitForFreeDriveState() {
+    executeActionAndWaitForSessionState(NavigationSessionState.FreeDrive::class.java) {
+        startTripSession()
+    }
+}
+
+suspend fun MapboxNavigation.stopTripSessionAndWaitForIdleState() {
+    executeActionAndWaitForSessionState(NavigationSessionState.Idle::class.java) {
+        stopTripSession()
     }
 }
 
