@@ -38,7 +38,7 @@ fun sdkTest(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-suspend fun MapboxNavigation.executeActionAndWaitForSessionState(
+private suspend fun MapboxNavigation.executeActionAndWaitForSessionState(
     stateClass: Class<out NavigationSessionState>,
     action: MapboxNavigation.() -> Unit
 ) {
@@ -60,7 +60,23 @@ suspend fun MapboxNavigation.executeActionAndWaitForSessionState(
 }
 
 suspend fun MapboxNavigation.startTripSessionAndWaitForFreeDriveState() {
+    check(getNavigationRoutes().isEmpty()) {
+        "startTripSessionAndWaitForFreeDriveState should not be invoked " +
+            "when routes have previously been set to MapboxNavigation"
+    }
+
     executeActionAndWaitForSessionState(NavigationSessionState.FreeDrive::class.java) {
+        startTripSession()
+    }
+}
+
+suspend fun MapboxNavigation.startTripSessionAndWaitForActiveGuidanceState() {
+    check(getNavigationRoutes().isNotEmpty()) {
+        "startTripSessionAndWaitForActiveGuidanceState should only be invoked " +
+            "when routes have previously been set to MapboxNavigation"
+    }
+
+    executeActionAndWaitForSessionState(NavigationSessionState.ActiveGuidance::class.java) {
         startTripSession()
     }
 }

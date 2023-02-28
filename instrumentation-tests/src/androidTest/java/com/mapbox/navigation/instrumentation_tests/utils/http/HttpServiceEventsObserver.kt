@@ -5,6 +5,10 @@ import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpResponse
 import com.mapbox.common.HttpServiceFactory
 import com.mapbox.common.HttpServiceInterceptorInterface
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.mapNotNull
 import java.net.URL
 
 sealed class HttpServiceEvent {
@@ -29,13 +33,16 @@ sealed class HttpServiceEvent {
 
 class HttpServiceEventsObserver : HttpServiceInterceptorInterface {
 
-    private val _latestEvents = mutableListOf<HttpServiceEvent>()
+    private val _eventsFlow = MutableSharedFlow<HttpServiceEvent>(
+        replay = Int.MAX_VALUE,
+        extraBufferCapacity = Int.MAX_VALUE
+    )
 
-    val latestEvents: List<HttpServiceEvent>
-        get() = _latestEvents
+    val eventsFlow: SharedFlow<HttpServiceEvent>
+        get() = _eventsFlow
 
-    val onRequestEvents: List<HttpServiceEvent.Request>
-        get() = latestEvents.mapNotNull { it as? HttpServiceEvent.Request }
+    val onRequestEventsFlow: Flow<HttpServiceEvent.Request> = eventsFlow
+        .mapNotNull { it as? HttpServiceEvent.Request }
 
     override fun onRequest(request: HttpRequest): HttpRequest {
         onEvent(HttpServiceEvent.Request(request))
@@ -53,7 +60,7 @@ class HttpServiceEventsObserver : HttpServiceInterceptorInterface {
     }
 
     private fun onEvent(event: HttpServiceEvent) {
-        _latestEvents.add(event)
+        _eventsFlow.tryEmit(event)
     }
 
     companion object {
@@ -61,6 +68,10 @@ class HttpServiceEventsObserver : HttpServiceInterceptorInterface {
             return HttpServiceEventsObserver().also {
                 HttpServiceFactory.getInstance().setInterceptor(it)
             }
+        }
+
+        fun unregister() {
+            HttpServiceFactory.getInstance().setInterceptor(null)
         }
     }
 }

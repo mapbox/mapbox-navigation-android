@@ -8,7 +8,6 @@ import com.adevinta.android.barista.rule.cleardata.ClearDatabaseRule
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.adevinta.android.barista.rule.cleardata.ClearPreferencesRule
 import org.junit.Before
-import org.junit.ClassRule
 import org.junit.Rule
 
 abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) : BaseCoreNoCleanUpTest() {
