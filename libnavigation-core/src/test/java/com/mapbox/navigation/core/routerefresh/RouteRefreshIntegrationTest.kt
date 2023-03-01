@@ -100,7 +100,7 @@ internal open class RouteRefreshIntegrationTest {
         } returns ExpectedFactory.createValue(listOf(mockk(relaxed = true)))
         mockkObject(CoroutineUtils)
         every {
-            CoroutineUtils.createChildScope(any(), any())
+            CoroutineUtils.createScope(any(), any())
         } answers { coroutineRule.createTestScope() }
 
         primaryRouteProgressDataProvider.onRouteProgressChanged(

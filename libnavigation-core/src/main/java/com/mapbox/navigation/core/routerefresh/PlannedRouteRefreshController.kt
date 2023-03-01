@@ -11,7 +11,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -39,8 +38,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT)
     )
 
-    private var plannedRefreshScope =
-        CoroutineUtils.createChildScope(parentScope.coroutineContext.job)
+    private var plannedRefreshScope = CoroutineUtils.createChildScope(parentScope)
     private var paused = false
     var routesToRefresh: List<NavigationRoute>? = null
         private set
@@ -151,7 +149,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
 
     private fun recreateScope() {
         plannedRefreshScope.cancel()
-        plannedRefreshScope = CoroutineUtils.createChildScope(parentScope.coroutineContext.job)
+        plannedRefreshScope = CoroutineUtils.createChildScope(parentScope)
     }
 
     companion object {

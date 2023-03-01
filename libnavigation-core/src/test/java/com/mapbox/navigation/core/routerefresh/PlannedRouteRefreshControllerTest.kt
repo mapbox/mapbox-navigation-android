@@ -23,7 +23,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.job
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.After
@@ -59,7 +58,7 @@ class PlannedRouteRefreshControllerTest {
     fun setUp() {
         mockkObject(RouteRefreshValidator)
         mockkObject(CoroutineUtils)
-        every { CoroutineUtils.createChildScope(parentScope.coroutineContext.job) } answers {
+        every { CoroutineUtils.createChildScope(parentScope) } answers {
             TestCoroutineScope(SupervisorJob() + childScopeDispatcher).also { childScope = it }
         }
         sut = PlannedRouteRefreshController(
