@@ -8,6 +8,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
@@ -66,7 +67,7 @@ import org.junit.Rule
 import java.io.File
 import java.util.Locale
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 internal open class MapboxNavigationBaseTest {
 
     @get:Rule
@@ -174,6 +175,9 @@ internal open class MapboxNavigationBaseTest {
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
+                any(),
+                any(),
+                any(),
                 any(),
                 any(),
                 any(),

@@ -230,7 +230,7 @@ fun createRouteOptions(
     coordinatesList: List<Point> = createCoordinatesList(2),
     profile: String = DirectionsCriteria.PROFILE_DRIVING,
     unrecognizedProperties: Map<String, JsonElement>? = null,
-    enableRefresh: Boolean = false,
+    enableRefresh: Boolean? = false,
     waypointsPerRoute: Boolean? = null,
 ): RouteOptions {
     return RouteOptions

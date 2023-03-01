@@ -5,7 +5,6 @@ import androidx.annotation.IdRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -20,6 +19,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
+import com.mapbox.navigation.instrumentation_tests.utils.DynamicResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
@@ -713,41 +713,5 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
         mockWebServerRule.requestHandlers.remove(this.routeHandler)
         mockWebServerRule.requestHandlers.add(0, routeHandler)
-    }
-}
-
-private class DynamicResponseModifier : (String) -> String {
-
-    var numberOfInvocations = 0
-
-    override fun invoke(p1: String): String {
-        numberOfInvocations++
-        val originalResponse = DirectionsRefreshResponse.fromJson(p1)
-        val newRoute = originalResponse.route()!!
-            .toBuilder()
-            .legs(
-                originalResponse.route()!!.legs()!!.map {
-                    it
-                        .toBuilder()
-                        .annotation(
-                            it.annotation()!!
-                                .toBuilder()
-                                .speed(
-                                    it.annotation()!!.speed()!!.map {
-                                        it + numberOfInvocations * 0.1
-                                    }
-                                )
-                                .build()
-                        )
-                        .build()
-                }
-            )
-            .build()
-        return DirectionsRefreshResponse.builder()
-            .route(newRoute)
-            .code(originalResponse.code())
-            .message(originalResponse.message())
-            .build()
-            .toJson()
     }
 }
