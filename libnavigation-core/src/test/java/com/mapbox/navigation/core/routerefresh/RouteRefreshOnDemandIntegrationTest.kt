@@ -1,10 +1,11 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test

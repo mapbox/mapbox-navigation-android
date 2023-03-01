@@ -29,7 +29,7 @@ class RouteRefreshControllerTest {
     private val stateHolder = mockk<RouteRefreshStateHolder>(relaxed = true)
     private val refreshObserversManager = mockk<RefreshObserversManager>(relaxed = true)
     private val resultProcessor = mockk<RouteRefresherResultProcessor>(relaxed = true)
-    private val job = mockk<Job>()
+    private val job = mockk<Job>(relaxed = true)
     private val sut = RouteRefreshController(
         job,
         plannedRouteRefreshController,

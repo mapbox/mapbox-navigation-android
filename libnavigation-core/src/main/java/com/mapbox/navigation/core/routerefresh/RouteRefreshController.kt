@@ -2,10 +2,14 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.Job
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+/**
+ * This class lets you manage route refreshes.
+ */
+@ExperimentalPreviewMapboxNavigationAPI
 class RouteRefreshController internal constructor(
     private val routeRefreshParentJob: Job,
     private val plannedRouteRefreshController: PlannedRouteRefreshController,
@@ -15,18 +19,37 @@ class RouteRefreshController internal constructor(
     private val routeRefresherResultProcessor: RouteRefresherResultProcessor,
 ) {
 
+    /**
+     * Register a [RouteRefreshStatesObserver] to be notified of Route refresh state changes.
+     *
+     * @param routeRefreshStatesObserver RouteRefreshStatesObserver
+     */
     fun registerRouteRefreshStateObserver(
         routeRefreshStatesObserver: RouteRefreshStatesObserver
     ) {
         stateHolder.registerRouteRefreshStateObserver(routeRefreshStatesObserver)
     }
 
+    /**
+     * Unregisters a [RouteRefreshStatesObserver].
+     *
+     * @param routeRefreshStatesObserver RouteRefreshStatesObserver
+     */
     fun unregisterRouteRefreshStateObserver(
         routeRefreshStatesObserver: RouteRefreshStatesObserver
     ) {
         stateHolder.unregisterRouteRefreshStateObserver(routeRefreshStatesObserver)
     }
 
+    /**
+     * Immediately refresh current navigation routes.
+     * Listen for refreshed routes using [RoutesObserver].
+     *
+     * The on-demand refresh request is not guaranteed to succeed and call the [RoutesObserver],
+     * [requestImmediateRouteRefresh] invocations cannot be coupled with
+     * [RoutesObserver.onRoutesChanged] callbacks for state management.
+     * You can use [registerRouteRefreshStateObserver] to monitor refresh statuses independently.
+     */
     fun requestImmediateRouteRefresh() {
         val routes = plannedRouteRefreshController.routesToRefresh
         if (routes.isNullOrEmpty()) {
