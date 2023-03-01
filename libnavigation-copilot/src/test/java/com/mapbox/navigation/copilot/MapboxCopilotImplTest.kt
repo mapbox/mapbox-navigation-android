@@ -2476,6 +2476,56 @@ class MapboxCopilotImplTest {
         }
     }
 
+    @Test
+    fun `The first active guidance session is cancelled, the second is stopped`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val routesObserver = slot<RoutesObserver>()
+        every {
+            mockedMapboxNavigation.registerRoutesObserver(capture(routesObserver))
+        } just Runs
+        val mockedNavigationRoute = mockk<NavigationRoute>(relaxed = true)
+        val mockedNavigationRoutes = listOf(mockedNavigationRoute)
+
+        val mapboxCopilot = createMapboxCopilotImplementation(
+            mockedMapboxNavigation
+        )
+        mapboxCopilot.start()
+        val mockedHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+        val mockedRoutesResult = mockk<RoutesUpdatedResult>()
+        every { mockedRoutesResult.navigationRoutes } returns mockedNavigationRoutes
+
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            mockedHistoryRecordingSessionState
+        )
+        routesObserver.captured.onRoutesChanged(mockedRoutesResult)
+        historyRecordingStateChangeObserver.captured.onShouldCancelRecording(
+            mockk<HistoryRecordingSessionState.FreeDrive>(relaxed = true)
+        )
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            mockedHistoryRecordingSessionState
+        )
+        routesObserver.captured.onRoutesChanged(mockedRoutesResult)
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockk<HistoryRecordingSessionState.FreeDrive>(relaxed = true)
+        )
+
+        verify(exactly = 2) {
+            mockedHistoryRecorder.pushHistory(INIT_ROUTE_EVENT_NAME, any())
+        }
+    }
+
     private fun prepareBasicMockks(): MapboxNavigation {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
         val mockedContext = mockk<Context>(relaxed = true)
