@@ -134,6 +134,8 @@ internal open class RouteRefreshIntegrationTest {
                 override fun nanoTime() = System.nanoTime()
 
                 override fun millis() = testDispatcher.currentTime
+
+                override fun seconds() = millis() / 1000
             }
         )
     }
