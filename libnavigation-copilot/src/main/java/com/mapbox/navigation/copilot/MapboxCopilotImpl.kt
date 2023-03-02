@@ -37,7 +37,7 @@ import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallb
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -249,7 +249,7 @@ internal class MapboxCopilotImpl(
             val navigationRoutes = routesResult.navigationRoutes
             if (initialRoute(navigationRoutes)) {
                 initRouteSerializationJob?.let {
-                    logE(TAG) {
+                    logW(TAG) {
                         "initRouteSerializationJob isn't null:" +
                             "Active: ${it.isActive}, cancelled: ${it.isCancelled}" +
                             "Only one init route is possible per session by design."
