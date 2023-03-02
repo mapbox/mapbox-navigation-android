@@ -355,6 +355,7 @@ class RestAreaProcessorTest {
             RoadObjectProvider.MAPBOX,
             RoadObjectMetadata(
                 ServiceAreaInfo(
+                    "id#0",
                     ServiceAreaType.REST_AREA,
                     name,
                     listOf(
