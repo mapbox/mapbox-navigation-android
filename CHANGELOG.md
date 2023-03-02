@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed an ANR caused by Copilot processing long routes. [#6984](https://github.com/mapbox/mapbox-navigation-android/pull/6984)
 
 ## Mapbox Navigation SDK 2.7.3 - 27 January, 2023
 ### Changelog
