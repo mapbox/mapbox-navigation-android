@@ -170,7 +170,7 @@ internal class MapboxCopilotImpl(
     fun push(historyEvent: HistoryEvent) {
         val eventType = historyEvent.snakeCaseEventName
         val eventJson = when (historyEvent) {
-            is InitRouteEvent -> historyEvent.initRoute.directionRouteJson
+            is InitRouteEvent -> historyEvent.preSerializedInitRoute
             else -> toEventJson(historyEvent.eventDTO)
         }
         when (historyEvent) {
@@ -258,15 +258,17 @@ internal class MapboxCopilotImpl(
                     it.cancel()
                 }
                 initRouteSerializationJob = mainJobController.scope.launch {
-                    val directionRouteJson = withContext(computationDispatcher) {
-                        routesResult.navigationRoutes.first().directionsRoute.toJson()
+                    val initRoute = InitRoute(
+                        routesResult.navigationRoutes.first().directionsRoute.requestUuid(),
+                        routesResult.navigationRoutes.first().directionsRoute,
+                    )
+                    val preSerializedInitRoute = withContext(computationDispatcher) {
+                        toEventJson(initRoute)
                     }
                     push(
                         InitRouteEvent(
-                            InitRoute(
-                                routesResult.navigationRoutes.first().directionsRoute.requestUuid(),
-                                directionRouteJson,
-                            )
+                            initRoute,
+                            preSerializedInitRoute
                         ),
                     )
                 }
