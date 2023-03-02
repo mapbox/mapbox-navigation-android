@@ -31,6 +31,7 @@ class RoadObjectMapperMapToRoadObjectTest {
             com.mapbox.navigator.RoadObjectProvider.MAPBOX,
             RoadObjectMetadata.valueOf(
                 IcInfo(
+                    "id#0",
                     listOf(
                         com.mapbox.navigator.LocalizedString(language1, name1),
                         com.mapbox.navigator.LocalizedString(language2, name2)
@@ -64,7 +65,7 @@ class RoadObjectMapperMapToRoadObjectTest {
             location,
             com.mapbox.navigator.RoadObjectType.IC,
             com.mapbox.navigator.RoadObjectProvider.CUSTOM,
-            RoadObjectMetadata.valueOf(IcInfo(emptyList())),
+            RoadObjectMetadata.valueOf(IcInfo("id#1", emptyList())),
             null
         )
         val expected = Interchange(
@@ -95,6 +96,7 @@ class RoadObjectMapperMapToRoadObjectTest {
             com.mapbox.navigator.RoadObjectProvider.MAPBOX,
             RoadObjectMetadata.valueOf(
                 JctInfo(
+                    "id#2",
                     listOf(
                         com.mapbox.navigator.LocalizedString(language1, name1),
                         com.mapbox.navigator.LocalizedString(language2, name2),
@@ -128,7 +130,7 @@ class RoadObjectMapperMapToRoadObjectTest {
             location,
             com.mapbox.navigator.RoadObjectType.JCT,
             com.mapbox.navigator.RoadObjectProvider.CUSTOM,
-            RoadObjectMetadata.valueOf(JctInfo(emptyList())),
+            RoadObjectMetadata.valueOf(JctInfo("id#3", emptyList())),
             null
         )
         val expected = Junction(

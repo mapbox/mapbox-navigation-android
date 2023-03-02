@@ -364,31 +364,32 @@ class RoadObjectFactoryTest {
     private val tunnel = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TUNNEL,
         location = matchedRoadObjectLocation(location.shape),
-        tunnelInfo = com.mapbox.navigator.TunnelInfo(TUNNEL_NAME)
+        tunnelInfo = com.mapbox.navigator.TunnelInfo("id#0", TUNNEL_NAME)
     )
 
     private val railwayCrossing = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.RAILWAY_CROSSING,
         location = matchedRoadObjectLocation(location.shape),
-        railwayCrossingInfo = com.mapbox.navigator.RailwayCrossingInfo(true)
+        railwayCrossingInfo = com.mapbox.navigator.RailwayCrossingInfo("id#1")
     )
 
     private val ic = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.IC,
         location = matchedRoadObjectLocation(location.shape),
-        icInfo = com.mapbox.navigator.IcInfo(listOf(LocalizedString("en", "name")))
+        icInfo = com.mapbox.navigator.IcInfo("id#2", listOf(LocalizedString("en", "name")))
     )
 
     private val jct = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.JCT,
         location = matchedRoadObjectLocation(location.shape),
-        jctInfo = com.mapbox.navigator.JctInfo(listOf(LocalizedString("it", "nome")))
+        jctInfo = com.mapbox.navigator.JctInfo("id#3", listOf(LocalizedString("it", "nome")))
     )
 
     private val countryBorderCrossing = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.BORDER_CROSSING,
         location = matchedRoadObjectLocation(location.shape),
         countryBorderCrossingInfo = com.mapbox.navigator.BorderCrossingInfo(
+            "id#4",
             com.mapbox.navigator.AdminInfo(USA_CODE_3, USA_CODE_2),
             com.mapbox.navigator.AdminInfo(CANADA_CODE_3, CANADA_CODE_2)
         )
@@ -398,6 +399,7 @@ class RoadObjectFactoryTest {
         type = com.mapbox.navigator.RoadObjectType.TOLL_COLLECTION_POINT,
         location = matchedRoadObjectLocation(location.shape),
         tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
+            "id#5",
             com.mapbox.navigator.TollCollectionType.TOLL_GANTRY,
             "toll_name_1"
         )
@@ -407,6 +409,7 @@ class RoadObjectFactoryTest {
         type = com.mapbox.navigator.RoadObjectType.TOLL_COLLECTION_POINT,
         location = matchedRoadObjectLocation(location.shape),
         tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
+            "id#6",
             com.mapbox.navigator.TollCollectionType.TOLL_BOOTH,
             "toll_name_2",
         )
@@ -422,6 +425,7 @@ class RoadObjectFactoryTest {
         type = com.mapbox.navigator.RoadObjectType.SERVICE_AREA,
         location = matchedRoadObjectLocation(location.shape),
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
+            "id#7",
             com.mapbox.navigator.ServiceAreaType.REST_AREA,
             "rest_stop_name",
             listOf(amenityATM),
@@ -433,6 +437,7 @@ class RoadObjectFactoryTest {
         type = com.mapbox.navigator.RoadObjectType.SERVICE_AREA,
         location = matchedRoadObjectLocation(location.shape),
         serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
+            "id#8",
             com.mapbox.navigator.ServiceAreaType.SERVICE_AREA,
             "rest_area_name",
             listOf(amenityATM),
