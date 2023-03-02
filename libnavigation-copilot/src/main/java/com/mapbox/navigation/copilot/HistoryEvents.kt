@@ -43,7 +43,7 @@ data class SearchResultUsedEvent(val searchResultUsed: SearchResultUsed) :
     HistoryEvent(SEARCH_RESULT_USED_EVENT_NAME, searchResultUsed)
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal data class InitRouteEvent(val initRoute: InitRoute) :
+internal data class InitRouteEvent(val initRoute: InitRoute, val preSerializedInitRoute: String) :
     HistoryEvent(INIT_ROUTE_EVENT_NAME, initRoute)
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
