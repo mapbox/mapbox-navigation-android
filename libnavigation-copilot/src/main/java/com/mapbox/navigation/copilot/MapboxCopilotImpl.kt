@@ -1,6 +1,7 @@
 package com.mapbox.navigation.copilot
 
 import android.content.pm.ApplicationInfo
+import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -38,12 +39,13 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
+
+private const val TAG = "MapboxCopilotImpl"
 
 /**
  * MapboxCopilot.
@@ -57,8 +59,7 @@ internal class MapboxCopilotImpl(
 ) {
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
-    private var recordingSessionScope: CoroutineScope =
-        InternalJobControlFactory.createMainScopeJobControl().scope
+    private var initRouteSerializationJob: Job? = null
     private val activeGuidanceHistoryEvents = mutableSetOf<HistoryEventDTO>()
     private val copilotHistoryRecorder = mapboxNavigation.retrieveCopilotHistoryRecorder()
     private var currentHistoryRecordingSessionState: HistoryRecordingSessionState = Idle
@@ -247,7 +248,16 @@ internal class MapboxCopilotImpl(
         routesObserver = RoutesObserver { routesResult ->
             val navigationRoutes = routesResult.navigationRoutes
             if (initialRoute(navigationRoutes)) {
-                recordingSessionScope.launch {
+                initRouteSerializationJob?.let {
+                    Log.e(
+                        TAG,
+                        "initRouteSerializationJob isn't null:" +
+                            "Active: ${it.isActive}, cancelled: ${it.isCancelled}" +
+                            "Only one init route is possible per session by design."
+                    )
+                    it.cancel()
+                }
+                initRouteSerializationJob = mainJobController.scope.launch {
                     val directionRouteJson = withContext(computationDispatcher) {
                         routesResult.navigationRoutes.first().directionsRoute.toJson()
                     }
@@ -382,7 +392,8 @@ internal class MapboxCopilotImpl(
     }
 
     private fun stopRecording(callback: (String) -> Unit) {
-        restartSessionRecordingScope("recording session is stopped")
+        initRouteSerializationJob?.cancel()
+        initRouteSerializationJob = null
         copilotHistoryRecorder.stopRecording { historyFilePath ->
             historyFilePath ?: return@stopRecording
             callback(historyFilePath)
@@ -394,11 +405,6 @@ internal class MapboxCopilotImpl(
             activeGuidanceHistoryEvents.clear()
         }
         currentHistoryRecordingSessionState = Idle
-    }
-
-    private fun restartSessionRecordingScope(restartReason: String) {
-        recordingSessionScope.cancel(restartReason)
-        recordingSessionScope = InternalJobControlFactory.createMainScopeJobControl().scope
     }
 
     private fun addActiveGuidance(eventType: String, eventJson: String) {
