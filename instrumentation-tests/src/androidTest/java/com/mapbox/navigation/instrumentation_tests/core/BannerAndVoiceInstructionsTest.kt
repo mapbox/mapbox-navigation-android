@@ -69,5 +69,5 @@ class BannerAndVoiceInstructionsTest : BaseTest<EmptyTestActivity>(EmptyTestActi
         )
     }
 
-    private fun testRoute() = RoutesProvider.dc_very_short(activity)
+    private fun testRoute() = RoutesProvider.dc_very_short(context)
 }

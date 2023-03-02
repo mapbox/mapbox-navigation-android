@@ -41,7 +41,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
 
     override fun setupMockLocation(): Location {
         val directionsResponse = RoutesProvider
-            .loadDirectionsResponse(activity, R.raw.multiple_routes)
+            .loadDirectionsResponse(context, R.raw.multiple_routes)
         val origin = directionsResponse.waypoints()!!.map { it.location()!! }
             .first()
         return mockLocationUpdatesRule.generateLocationUpdate {

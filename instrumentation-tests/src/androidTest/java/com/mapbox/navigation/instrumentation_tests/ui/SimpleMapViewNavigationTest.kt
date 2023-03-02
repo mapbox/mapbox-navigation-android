@@ -65,7 +65,7 @@ abstract class SimpleMapViewNavigationTest :
     protected lateinit var locationPlugin: LocationComponentPlugin
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
-        val mockRoute = getRoute(activity)
+        val mockRoute = getRoute(context)
         latitude = mockRoute.routeWaypoints.first().latitude()
         longitude = mockRoute.routeWaypoints.first().longitude()
     }
