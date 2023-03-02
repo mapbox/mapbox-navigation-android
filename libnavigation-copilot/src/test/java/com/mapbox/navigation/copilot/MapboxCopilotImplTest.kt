@@ -2423,7 +2423,7 @@ class MapboxCopilotImplTest {
     }
 
     @Test
-    fun `two active guidance sessions stop and finish, computation dispatcher doesn't for the first session`() {
+    fun `two active guidance sessions are started and stopped, computation dispatcher doesn't work during the first session`() {
         val mockedMapboxNavigation = prepareBasicMockks()
         prepareLifecycleOwnerMockk()
         val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
