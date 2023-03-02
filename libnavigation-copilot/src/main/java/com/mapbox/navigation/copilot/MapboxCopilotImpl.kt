@@ -168,7 +168,10 @@ internal class MapboxCopilotImpl(
      */
     fun push(historyEvent: HistoryEvent) {
         val eventType = historyEvent.snakeCaseEventName
-        val eventJson = toEventJson(historyEvent.eventDTO)
+        val eventJson = when (historyEvent) {
+            is InitRouteEvent -> historyEvent.initRoute.directionRouteJson
+            else -> toEventJson(historyEvent.eventDTO)
+        }
         when (historyEvent) {
             is InitRouteEvent -> {
                 addActiveGuidance(eventType, eventJson)
