@@ -1,7 +1,6 @@
 package com.mapbox.navigation.copilot
 
 import android.content.pm.ApplicationInfo
-import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -38,6 +37,7 @@ import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallb
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -249,12 +249,11 @@ internal class MapboxCopilotImpl(
             val navigationRoutes = routesResult.navigationRoutes
             if (initialRoute(navigationRoutes)) {
                 initRouteSerializationJob?.let {
-                    Log.e(
-                        TAG,
+                    logE(TAG) {
                         "initRouteSerializationJob isn't null:" +
                             "Active: ${it.isActive}, cancelled: ${it.isCancelled}" +
                             "Only one init route is possible per session by design."
-                    )
+                    }
                     it.cancel()
                 }
                 initRouteSerializationJob = mainJobController.scope.launch {
