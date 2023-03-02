@@ -36,9 +36,16 @@ import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallbac
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
+
+private const val TAG = "MapboxCopilotImpl"
 
 /**
  * MapboxCopilot.
@@ -48,9 +55,11 @@ import java.util.Locale
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapboxCopilotImpl(
     private val mapboxNavigation: MapboxNavigation,
+    private val computationDispatcher: CoroutineDispatcher = ThreadController.DefaultDispatcher
 ) {
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
+    private var initRouteSerializationJob: Job? = null
     private val activeGuidanceHistoryEvents = mutableSetOf<HistoryEventDTO>()
     private val copilotHistoryRecorder = mapboxNavigation.retrieveCopilotHistoryRecorder()
     private var currentHistoryRecordingSessionState: HistoryRecordingSessionState = Idle
@@ -160,7 +169,10 @@ internal class MapboxCopilotImpl(
      */
     fun push(historyEvent: HistoryEvent) {
         val eventType = historyEvent.snakeCaseEventName
-        val eventJson = toEventJson(historyEvent.eventDTO)
+        val eventJson = when (historyEvent) {
+            is InitRouteEvent -> historyEvent.preSerializedInitRoute
+            else -> toEventJson(historyEvent.eventDTO)
+        }
         when (historyEvent) {
             is InitRouteEvent -> {
                 addActiveGuidance(eventType, eventJson)
@@ -236,14 +248,29 @@ internal class MapboxCopilotImpl(
         routesObserver = RoutesObserver { routesResult ->
             val navigationRoutes = routesResult.navigationRoutes
             if (initialRoute(navigationRoutes)) {
-                push(
-                    InitRouteEvent(
-                        InitRoute(
-                            routesResult.navigationRoutes.first().directionsRoute.requestUuid(),
-                            routesResult.navigationRoutes.first().directionsRoute,
-                        )
-                    ),
-                )
+                initRouteSerializationJob?.let {
+                    logW(TAG) {
+                        "initRouteSerializationJob isn't null:" +
+                            "Active: ${it.isActive}, cancelled: ${it.isCancelled}" +
+                            "Only one init route is possible per session by design."
+                    }
+                    it.cancel()
+                }
+                initRouteSerializationJob = mainJobController.scope.launch {
+                    val initRoute = InitRoute(
+                        routesResult.navigationRoutes.first().directionsRoute.requestUuid(),
+                        routesResult.navigationRoutes.first().directionsRoute,
+                    )
+                    val preSerializedInitRoute = withContext(computationDispatcher) {
+                        toEventJson(initRoute)
+                    }
+                    push(
+                        InitRouteEvent(
+                            initRoute,
+                            preSerializedInitRoute
+                        ),
+                    )
+                }
                 initRoute = true
             }
         }.also {
@@ -366,6 +393,8 @@ internal class MapboxCopilotImpl(
     }
 
     private fun stopRecording(callback: (String) -> Unit) {
+        initRouteSerializationJob?.cancel()
+        initRouteSerializationJob = null
         copilotHistoryRecorder.stopRecording { historyFilePath ->
             historyFilePath ?: return@stopRecording
             callback(historyFilePath)
