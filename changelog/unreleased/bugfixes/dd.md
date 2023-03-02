@@ -1,0 +1,1 @@
+- Fixed a crash caused by segfault "wstring_convert: from_bytes" error for HTTP responses.
