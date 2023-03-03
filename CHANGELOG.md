@@ -6,6 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.10.3 - 03 March, 2023
+### Changelog
+[Changes between v2.10.2 and v2.10.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.2...v2.10.3)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an ANR caused by Copilot processing long routes [#6978](https://github.com/mapbox/mapbox-navigation-android/pull/6978)
+- Fixed a crash caused by segfault "wstring_convert: from_bytes" error for HTTP responses. [#6985](https://github.com/mapbox/mapbox-navigation-android/pull/6985)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.2))
+- Mapbox Navigation Native `v123.3.3`
+- Mapbox Core Common `v23.2.3`
+- Mapbox Java `v6.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0))
+
+
 ## Mapbox Navigation SDK 2.11.0-rc.2 - 24 February, 2023
 ### Changelog
 [Changes between v2.11.0-rc.1 and v2.11.0-rc.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.11.0-rc.1...v2.11.0-rc.2)
