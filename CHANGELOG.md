@@ -6,6 +6,61 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.12.0-alpha.1 - 04 March, 2023
+### Changelog
+[Changes between v2.11.0 and v2.12.0-alpha.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.11.0...v2.12.0-alpha.1)
+
+#### Features
+- Added `RouteRefreshController` interface to manage route refreshes. Retrieve it via `MapboxNavigation#routeRefreshController`. [#6610](https://github.com/mapbox/mapbox-navigation-android/pull/6610)
+- Added `RouteRefreshController#requestImmediateRouteRefresh` to trigger route refresh request immediately. [#6610](https://github.com/mapbox/mapbox-navigation-android/pull/6610)
+- Moved `MapboxNavigation#registerRouteRefreshStateObserver` to `RouteRefreshController#registerRouteRefreshStateObserver`. To migrate, change: [#6610](https://github.com/mapbox/mapbox-navigation-android/pull/6610)
+  ```kotlin
+  mapboxNavigation.registerRouteRefreshStateObserver(observer)
+  ```
+  to
+  ```kotlin
+  mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
+  ```
+- Moved `MapboxNavigation#unregisterRouteRefreshStateObserver` to `RouteRefreshController#unregisterRouteRefreshStateObserver`. To migrate, change: [#6610](https://github.com/mapbox/mapbox-navigation-android/pull/6610)
+  ```kotlin
+  mapboxNavigation.unregisterRouteRefreshStateObserver(observer)
+  ```
+  to
+  ```kotlin
+  mapboxNavigation.routeRefreshController.unregisterRouteRefreshStateObserver(observer)
+  ```
+
+#### Bug fixes and improvements
+- Fixed an ANR caused by Copilot processing long routes. [#6978](https://github.com/mapbox/mapbox-navigation-android/pull/6978)
+- Fixed revealing of access token in the logs during tiles downloading. [#6966](https://github.com/mapbox/mapbox-navigation-android/pull/6966)
+- Optimized RAM usage for onboard routing. [#6966](https://github.com/mapbox/mapbox-navigation-android/pull/6966)
+- Increased the distance at which the navigator discards passed alternative route in `NavigationRouteAlternativesObserver#onRouteAlternatives`. This reduces the chance of discarding alternative routes to which a driver deviated from the primary route. [#6966](https://github.com/mapbox/mapbox-navigation-android/pull/6966)
+- Improved duration calculation for EV routes to account for charging time. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Added snapping feature to the navigation for walking and cycling profiles. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Started invalidating passed alternatives conditionally on the fork structure. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Started using offline router if server returns 404 or 403. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+-  Increased the distance at which the navigator discards passed alternative route in `NavigationRouteAlternativesObserver#onRouteAlternatives`. This reduces the chance of discarding alternative routes to which a driver deviated from the primary route. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Fixed a possible native crash in `ElectronicHorizonObserver` on application exit. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Fixed redundant memory usage for onboard router. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Fixed inconsistent choice between re-route and switching to alternative due to the fact that the alternative was not checked on every off-route state.  [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Fixed a crash caused by segfault "wstring_convert: from_bytes" error for HTTP responses. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Made costing algorithms using lightweight info about road graph (should improve performance). [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+- Switched all realtime sensitive operations onto a separate thread instead of low-prioritised background thread pool. No long status delays should happen in the future. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.12.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.12.0-beta.1))
+- Mapbox Navigation Native `v127.1.0`
+- Mapbox Core Common `v23.4.0-beta.1`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.11.0 - 03 March, 2023
 ### Changelog
 [Changes between v2.10.0 and v2.11.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.0...v2.11.0)
