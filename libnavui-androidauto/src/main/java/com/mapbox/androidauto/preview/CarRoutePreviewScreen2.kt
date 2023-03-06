@@ -66,6 +66,7 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
         addBackPressedHandler {
             logAndroidAuto("CarRoutePreviewScreen2 onBackPressed")
             mapboxCarContext.mapboxScreenManager.goBack()
+            MapboxNavigationApp.current()!!.setRoutesPreview(emptyList())
         }
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -96,46 +97,49 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
     }
 
     override fun onGetTemplate(): Template {
-        val listBuilder = ItemList.Builder()
+        val templateBuilder = RoutePreviewNavigationTemplate.Builder()
         val routesPreview = routesPreview
         val originalRoutesList = routesPreview?.originalRoutesList
-        originalRoutesList?.forEach { navigationRoute ->
-            val route = navigationRoute.directionsRoute
-            val duration = CarDistanceFormatter.formatDistance(route.duration())
-            val title = route.legs()?.first()?.summary()?.let { "$duration $it" } ?: duration
-            val routeSpannableString = SpannableString(title)
-            val span = DurationSpan.create(route.duration().toLong())
-            routeSpannableString.setSpan(span, 0, duration.length, 0)
+        if (originalRoutesList.isNullOrEmpty()) {
+            templateBuilder.setLoading(true)
+        } else {
+            val listBuilder = ItemList.Builder()
+            for (navigationRoute in originalRoutesList) {
+                val route = navigationRoute.directionsRoute
+                val duration = CarDistanceFormatter.formatDistance(route.duration())
+                val title = route.legs()?.first()?.summary()?.let { "$duration $it" } ?: duration
+                val routeSpannableString = SpannableString(title)
+                val span = DurationSpan.create(route.duration().toLong())
+                routeSpannableString.setSpan(span, 0, duration.length, 0)
 
-            val item = Row.Builder().setTitle(routeSpannableString).addText(duration).build()
-            listBuilder.addItem(item)
-        }
-        if (!originalRoutesList.isNullOrEmpty()) {
+                val item = Row.Builder().setTitle(routeSpannableString).addText(duration).build()
+                listBuilder.addItem(item)
+            }
             listBuilder.setSelectedIndex(routesPreview.primaryRouteIndex)
             listBuilder.setOnSelectedListener { index ->
                 carRoutesProvider.updateSelectedRoute(index)
             }
+            templateBuilder.setItemList(listBuilder.build())
+            templateBuilder.setNavigateAction(
+                Action.Builder()
+                    .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
+                    .setOnClickListener {
+                        MapboxNavigationApp.current()!!.setNavigationRoutes(
+                            routesPreview.routesList,
+                        )
+                        MapboxScreenManager.replaceTop(MapboxScreen.ACTIVE_GUIDANCE)
+                    }
+                    .build(),
+            )
         }
 
-        return RoutePreviewNavigationTemplate.Builder()
-            .setItemList(listBuilder.build())
+        return templateBuilder
             .setTitle(carContext.getString(R.string.car_action_preview_title))
             .setActionStrip(
                 mapboxCarContext.options.actionStripProvider
                     .getActionStrip(screen = this, MapboxScreen.ROUTE_PREVIEW),
             )
             .setHeaderAction(Action.BACK)
-            .setNavigateAction(
-                Action.Builder()
-                    .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
-                    .setOnClickListener {
-                        MapboxNavigationApp.current()!!.setNavigationRoutes(
-                            routesPreview!!.routesList,
-                        )
-                        MapboxScreenManager.replaceTop(MapboxScreen.ACTIVE_GUIDANCE)
-                    }
-                    .build(),
-            )
             .build()
     }
 }
