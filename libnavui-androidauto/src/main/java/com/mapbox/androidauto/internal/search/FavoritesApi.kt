@@ -6,8 +6,8 @@ import com.mapbox.androidauto.search.PlaceRecord
 import com.mapbox.androidauto.search.PlaceRecordMapper
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.search.CompletionCallback
 import com.mapbox.search.common.AsyncOperationTask
+import com.mapbox.search.common.CompletionCallback
 import com.mapbox.search.record.FavoriteRecord
 import com.mapbox.search.record.FavoritesDataProvider
 import kotlin.coroutines.resume

@@ -3,8 +3,8 @@ package com.mapbox.androidauto.search
 import com.mapbox.androidauto.internal.search.FavoritesApi
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.search.CompletionCallback
 import com.mapbox.search.common.AsyncOperationTask
+import com.mapbox.search.common.CompletionCallback
 import com.mapbox.search.record.FavoriteRecord
 import com.mapbox.search.record.FavoritesDataProvider
 import com.mapbox.search.result.SearchResultType
