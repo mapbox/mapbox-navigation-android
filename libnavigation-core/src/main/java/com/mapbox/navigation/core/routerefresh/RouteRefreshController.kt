@@ -66,6 +66,24 @@ class RouteRefreshController internal constructor(
         }
     }
 
+    /**
+     * Pauses route refreshes. If route refreshes are already paused, this is a no-op.
+     * After this invocation, no route refreshes will be done,
+     * except for the ones that are requested explicitly via [refreshRoutesImmediately].
+     * To resume route refreshes, invoke [resumeRouteRefreshes].
+     */
+    fun pauseRouteRefreshes() {
+        plannedRouteRefreshController.pause()
+    }
+
+    /**
+     * Resumes route refreshes that were paused via [pauseRouteRefreshes].
+     * If route refreshes are not paused, this is a no-op.
+     */
+    fun resumeRouteRefreshes() {
+        plannedRouteRefreshController.resume()
+    }
+
     internal fun registerRouteRefreshObserver(observer: RouteRefreshObserver) {
         refreshObserversManager.registerObserver(observer)
     }

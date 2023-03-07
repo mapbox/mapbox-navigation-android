@@ -1,0 +1,1 @@
+- Added `RouteRefreshController#pauseRouteRefreshes` and `RouteRefreshController#resumeRouteRefreshes` to pause and resume planned route refreshes correspondingly.

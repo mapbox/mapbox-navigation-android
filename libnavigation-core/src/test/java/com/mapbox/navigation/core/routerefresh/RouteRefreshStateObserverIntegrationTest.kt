@@ -4,7 +4,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -304,6 +303,33 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         assertEquals(
             listOf(
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
+            ),
+            stateObserver.getStatesSnapshot()
+        )
+    }
+
+    @Test
+    fun pausingRoutesRefreshAddsCancelledState() = coroutineRule.runBlockingTest {
+        val routes = setUpRoutes(
+            "route_response_single_route_refresh.json",
+            successfulAttemptNumber = 1,
+        )
+
+        routeRefreshController = createRefreshController(30_000)
+        routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
+        routeRefreshController.requestPlannedRouteRefresh(routes)
+        testDispatcher.advanceTimeBy(40_000)
+
+        routeRefreshController.pauseRouteRefreshes()
+        routeRefreshController.resumeRouteRefreshes()
+        testDispatcher.advanceTimeBy(30_000)
+
+        assertEquals(
+            listOf(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_CANCELED,
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
             ),
             stateObserver.getStatesSnapshot()
         )

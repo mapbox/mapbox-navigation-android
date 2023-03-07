@@ -39,4 +39,52 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
         testDispatcher.advanceTimeBy(20_000)
         assertEquals(1, refreshObserver.refreshes.size)
     }
+
+    @Test
+    fun successfulRefreshOnDemandWhenUpdatesArePaused() = coroutineRule.runBlockingTest {
+        val routes = setUpRoutes("route_response_single_route_refresh.json")
+        routeRefreshController = createRefreshController(30_000)
+        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
+
+        routeRefreshController.requestPlannedRouteRefresh(routes)
+
+        testDispatcher.advanceTimeBy(30_000)
+        assertEquals(1, refreshObserver.refreshes.size)
+        routeRefreshController.pauseRouteRefreshes()
+        routeRefreshController.requestImmediateRouteRefresh()
+
+        assertEquals(2, refreshObserver.refreshes.size)
+
+        testDispatcher.advanceTimeBy(30_000)
+        assertEquals(2, refreshObserver.refreshes.size)
+
+        routeRefreshController.resumeRouteRefreshes()
+        testDispatcher.advanceTimeBy(10_000)
+        assertEquals(2, refreshObserver.refreshes.size)
+        testDispatcher.advanceTimeBy(20_000)
+        assertEquals(3, refreshObserver.refreshes.size)
+    }
+
+    @Test
+    fun failedRefreshOnDemandWhenUpdatesArePaused() = coroutineRule.runBlockingTest {
+        val routes = setUpRoutes("route_response_single_route_refresh.json")
+        routeRefreshController = createRefreshController(30_000)
+        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
+
+        routeRefreshController.requestPlannedRouteRefresh(routes)
+        testDispatcher.advanceTimeBy(30_000)
+
+        assertEquals(1, refreshObserver.refreshes.size)
+        failRouteRefreshResponse()
+        routeRefreshController.pauseRouteRefreshes()
+        routeRefreshController.requestImmediateRouteRefresh()
+
+        testDispatcher.advanceTimeBy(30_000)
+        assertEquals(1, refreshObserver.refreshes.size)
+
+        setUpRouteRefresh("route_response_single_route_refresh.json")
+        routeRefreshController.resumeRouteRefreshes()
+        testDispatcher.advanceTimeBy(30_000)
+        assertEquals(2, refreshObserver.refreshes.size)
+    }
 }
