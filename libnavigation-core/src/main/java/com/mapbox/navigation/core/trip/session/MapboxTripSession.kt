@@ -345,12 +345,12 @@ internal class MapboxTripSession(
                 processNativeStatus(status)
             } catch (error: Throwable) {
                 logE(LOG_CATEGORY) {
-                    "Error processing onStatus: origin: $origin, status: $status. \n" +
-                        "$error" +
-                        "MapboxTripSession state:\n" +
-                        "isUpdatingRoute=$isUpdatingRoute, primaryRoute:${primaryRoute?.id}"
+                    "Error processing native status update: origin=$origin, status=$status.\n" +
+                        "Error: $error\n" +
+                        "MapboxTripSession state: " +
+                        "isUpdatingRoute=$isUpdatingRoute, primaryRoute=${primaryRoute?.id}"
                 }
-                throw error
+                throw NativeStatusProcessingError(error)
             }
         }
     }
@@ -780,3 +780,6 @@ internal class MapboxTripSession(
         }
     }
 }
+
+private class NativeStatusProcessingError(cause: Throwable) :
+    Throwable("Error processing native status update", cause)
