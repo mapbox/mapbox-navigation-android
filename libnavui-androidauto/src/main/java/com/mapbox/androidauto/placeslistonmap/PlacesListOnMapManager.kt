@@ -35,7 +35,7 @@ class PlacesListOnMapManager(
     private lateinit var coroutineScope: CoroutineScope
     private var placesListItemMapper: PlacesListItemMapper? = null
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil()
-    private val navigationObserver = mapboxNavigationForward(this::onAttached) { onDetached() }
+    private val navigationObserver = mapboxNavigationForward(this::onAttached) { }
 
     private val _placeRecords = MutableStateFlow(listOf<PlaceRecord>())
     val placeRecords: StateFlow<List<PlaceRecord>> = _placeRecords.asStateFlow()
@@ -85,6 +85,7 @@ class PlacesListOnMapManager(
     }
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
+        if (placesListItemMapper != null) return
         placesListItemMapper = PlacesListItemMapper(
             PlaceMarkerRenderer(carMapSurface?.carContext!!),
             mapboxNavigation
@@ -94,9 +95,6 @@ class PlacesListOnMapManager(
         )
     }
 
-    private fun onDetached() {
-        placesListItemMapper = null
-    }
 
     private fun loadPlaceRecords() {
         coroutineScope.launch {
