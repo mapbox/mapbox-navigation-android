@@ -3,7 +3,6 @@ package com.mapbox.navigation.qa_test_app.view.customnavview
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -11,7 +10,6 @@ import com.mapbox.navigation.dropin.navigationview.NavigationViewListener
 import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
 import com.mapbox.navigation.utils.internal.logD
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class LoggingNavigationViewListener(
     private val tag: String = "LoggingNavigationViewListener"
 ) : NavigationViewListener() {

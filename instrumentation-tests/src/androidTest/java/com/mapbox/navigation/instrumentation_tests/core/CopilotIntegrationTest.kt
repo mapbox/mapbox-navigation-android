@@ -49,12 +49,12 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
     override fun setupMockLocation(): Location {
-        mockRoute = RoutesProvider.dc_very_short(activity)
+        mockRoute = RoutesProvider.dc_very_short(context)
         routes = NavigationRoute.create(
             mockRoute.routeResponse,
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
-                .applyLanguageAndVoiceUnitOptions(activity)
+                .applyLanguageAndVoiceUnitOptions(context)
                 .baseUrl(mockWebServerRule.baseUrl)
                 .coordinatesList(mockRoute.routeWaypoints).build(),
             RouterOrigin.Offboard

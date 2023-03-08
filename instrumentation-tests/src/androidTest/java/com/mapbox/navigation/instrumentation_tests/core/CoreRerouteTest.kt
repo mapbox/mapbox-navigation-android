@@ -84,7 +84,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
     }
 
     override fun setupMockLocation(): Location {
-        val mockRoute = RoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(context)
         return mockLocationUpdatesRule.generateLocationUpdate {
             latitude = mockRoute.routeWaypoints.first().latitude()
             longitude = mockRoute.routeWaypoints.first().longitude()

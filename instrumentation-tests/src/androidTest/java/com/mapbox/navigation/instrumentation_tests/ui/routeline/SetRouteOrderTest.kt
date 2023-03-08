@@ -42,7 +42,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         CountingIdlingResource("MultipleRouteSetTestResource")
 
     override fun setupMockLocation(): Location {
-        val shortRoute = getRoute(activity, R.raw.short_route)
+        val shortRoute = getRoute(context, R.raw.short_route)
         val origin = shortRoute.routeOptions()!!.coordinatesList().first()
         return mockLocationUpdatesRule.generateLocationUpdate {
             latitude = origin.latitude()
