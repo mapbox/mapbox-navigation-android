@@ -35,7 +35,7 @@ class PlacesListOnMapManager(
     private lateinit var coroutineScope: CoroutineScope
     private var placesListItemMapper: PlacesListItemMapper? = null
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil()
-    private val navigationObserver = mapboxNavigationForward(this::onAttached) { }
+    private val navigationObserver = mapboxNavigationForward(this::onAttached) { onDetached() }
 
     private val _placeRecords = MutableStateFlow(listOf<PlaceRecord>())
     val placeRecords: StateFlow<List<PlaceRecord>> = _placeRecords.asStateFlow()
@@ -43,21 +43,14 @@ class PlacesListOnMapManager(
     private val _placeSelected = MutableStateFlow<PlaceRecord?>(null)
     val placeSelected: StateFlow<PlaceRecord?> = _placeSelected.asStateFlow()
 
+    private val _itemList = MutableStateFlow(ItemList.Builder().build())
+    val itemList: StateFlow<ItemList> = _itemList.asStateFlow()
+
     private val placeClickListener = object : PlacesListItemClickListener {
         override fun onItemClick(placeRecord: PlaceRecord) {
             logAndroidAuto("PlacesListOnMapScreen request $placeRecord")
             _placeSelected.value = placeRecord
         }
-    }
-
-    fun currentItemList(): ItemList? {
-        val currentLocation = CarLocationProvider.getRegisteredInstance().lastLocation()
-            ?: return null
-        return placesListItemMapper?.mapToItemList(
-            currentLocation,
-            placeRecords.value,
-            placeClickListener
-        )
     }
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
@@ -76,6 +69,10 @@ class PlacesListOnMapManager(
         }
     }
 
+    private fun onDetached() {
+        placesListItemMapper = null
+    }
+
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         super.onDetached(mapboxCarMapSurface)
         mapboxCarMapSurface.getStyle()?.let { placesLayerUtil.removePlacesListOnMapLayer(it) }
@@ -85,7 +82,6 @@ class PlacesListOnMapManager(
     }
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
-        if (placesListItemMapper != null) return
         placesListItemMapper = PlacesListItemMapper(
             PlaceMarkerRenderer(carMapSurface?.carContext!!),
             mapboxNavigation
@@ -93,8 +89,19 @@ class PlacesListOnMapManager(
                 .distanceFormatterOptions
                 .unitType
         )
-    }
 
+        coroutineScope.launch {
+            placeRecords.collect { placeRecords ->
+                _itemList.value = CarLocationProvider.getRegisteredInstance().lastLocation()
+                    ?.let { currentLocation -> placesListItemMapper?.mapToItemList(
+                        currentLocation,
+                        placeRecords,
+                        placeClickListener
+                    )
+                } ?: ItemList.Builder().build()
+            }
+        }
+    }
 
     private fun loadPlaceRecords() {
         coroutineScope.launch {
