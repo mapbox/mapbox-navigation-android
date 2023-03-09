@@ -62,6 +62,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineSourceKey
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigator.RouteInterface
@@ -1968,6 +1969,34 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(MapboxRouteLineUtils.layerGroup1SourceLayerIds, result)
+    }
+
+    @Test
+    fun getLayerIdsForPrimaryRouteWithKey() {
+        val key1 = RouteLineSourceKey("key1")
+        val key2 = RouteLineSourceKey("key2")
+        val set1 = setOf("1", "2")
+        val set2 = setOf("3")
+        val sourceLayerMap = mapOf(
+            key1 to set1,
+            key2 to set2
+        )
+
+        val result1 = MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(sourceLayerMap, key1)
+
+        assertEquals(set1, result1)
+
+        val result2 = MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(sourceLayerMap, key2)
+
+        assertEquals(set2, result2)
+
+        val result3 = MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(sourceLayerMap, RouteLineSourceKey("key3"))
+
+        assertEquals(0, result3.size)
+
+        val result4 = MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(sourceLayerMap, null)
+
+        assertEquals(0, result4.size)
     }
 
     @Test

@@ -1,0 +1,1 @@
+- Introduced `RoutesRenderedCallback` along with overrides to `MapboxRouteLineView#renderRouteDrawData`, `MapboxRouteLineView#showPrimaryRoute` and `MapboxRouteLineView#showAlternativeRoutes` to notified whenever the routes are rendered on map. 

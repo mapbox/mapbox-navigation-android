@@ -14,12 +14,14 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.RouteLineFeaturesActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
@@ -96,6 +98,18 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
     private val routeLineApi: MapboxRouteLineApi by lazy {
         MapboxRouteLineApi(routeLineOptions)
     }
+
+    private val routesRenderedCallback = object : RoutesRenderedCallback {
+
+        override val map: MapboxMap
+            get() = mapboxMap
+
+        override fun onRoutesRendered(ids: List<String>) {
+            Log.i(LOG_CATEGORY, "Routes rendered: $ids")
+        }
+
+    }
+
     private var showTraffic = true
     private var showPrimaryRoute = true
     private var showAltRoutes = true
@@ -108,6 +122,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
         initListeners()
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun initListeners() {
         viewBinding.btnToggleTrafficVisibility.setOnClickListener {
             when (showTraffic) {
@@ -120,7 +135,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
         viewBinding.btnTogglePrimaryRouteVisibility.setOnClickListener {
             when (showPrimaryRoute) {
                 true -> routeLineView.hidePrimaryRoute(mapboxMap.getStyle()!!)
-                false -> routeLineView.showPrimaryRoute(mapboxMap.getStyle()!!)
+                false -> routeLineView.showPrimaryRoute(mapboxMap.getStyle()!!, routesRenderedCallback)
             }
             showPrimaryRoute = !showPrimaryRoute
         }
@@ -128,7 +143,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
         viewBinding.btnToggleAlternativeRouteVisibility.setOnClickListener {
             when (showAltRoutes) {
                 true -> routeLineView.hideAlternativeRoutes(mapboxMap.getStyle()!!)
-                false -> routeLineView.showAlternativeRoutes(mapboxMap.getStyle()!!)
+                false -> routeLineView.showAlternativeRoutes(mapboxMap.getStyle()!!, routesRenderedCallback)
             }
             showAltRoutes = !showAltRoutes
         }
@@ -177,6 +192,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
         viewBinding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun drawRoutes() {
         ifNonNull(mapboxMap.getStyle()) { style ->
             val route1 = getRoute(R.raw.basic_route4)
@@ -189,7 +205,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
                     RouteLine(route3, "altRoute1")
                 )
             ) {
-                routeLineView.renderRouteDrawData(style, it)
+                routeLineView.renderRouteDrawData(style, it, routesRenderedCallback)
             }
         }
     }
@@ -244,5 +260,9 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
             }
         }
         false
+    }
+
+    private companion object {
+        private const val LOG_CATEGORY = "[RouteLineFeatures]"
     }
 }

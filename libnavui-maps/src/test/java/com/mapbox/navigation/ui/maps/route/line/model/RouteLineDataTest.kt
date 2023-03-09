@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.navigation.base.route.NavigationRoute
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
@@ -28,6 +29,7 @@ class RouteLineDataTest {
         )
         val replacementFeatureCollection = mockk<FeatureCollection>()
         val replacementDynamicData = RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+        val replacementNavigationRoute = mockk<NavigationRoute>()
         val mutable = original.toMutableValue()
 
         mutable.featureCollection = replacementFeatureCollection

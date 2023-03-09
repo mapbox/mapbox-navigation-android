@@ -1637,20 +1637,27 @@ internal object MapboxRouteLineUtils {
         style: Style,
         sourceLayerMap: Map<RouteLineSourceKey, Set<String>>
     ): Set<String> {
+        return getLayerIdsForPrimaryRoute(sourceLayerMap, getLayerGroupSource(style))
+    }
+
+    internal fun getLayerIdsForPrimaryRoute(
+        sourceLayerMap: Map<RouteLineSourceKey, Set<String>>,
+        primaryRouteLayerGroupKey: RouteLineSourceKey?
+    ): Set<String> {
+        return primaryRouteLayerGroupKey?.let {
+            sourceLayerMap[it]
+        } ?: setOf()
+    }
+
+    internal fun getLayerGroupSource(style: Style): RouteLineSourceKey? {
         return getTopRouteLineRelatedLayerId(style)?.run {
             when (this) {
-                in layerGroup1SourceLayerIds -> {
-                    sourceLayerMap[layerGroup1SourceKey]
-                }
-                in layerGroup2SourceLayerIds -> {
-                    sourceLayerMap[layerGroup2SourceKey]
-                }
-                in layerGroup3SourceLayerIds -> {
-                    sourceLayerMap[layerGroup3SourceKey]
-                }
-                else -> setOf()
+                in layerGroup1SourceLayerIds -> layerGroup1SourceKey
+                in layerGroup2SourceLayerIds -> layerGroup2SourceKey
+                in layerGroup3SourceLayerIds -> layerGroup3SourceKey
+                else -> null
             }
-        } ?: setOf()
+        }
     }
 
     internal fun getTopRouteLineRelatedLayerId(style: Style): String? {
