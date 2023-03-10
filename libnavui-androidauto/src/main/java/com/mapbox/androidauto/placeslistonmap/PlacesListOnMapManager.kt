@@ -33,9 +33,8 @@ class PlacesListOnMapManager(
 
     private var carMapSurface: MapboxCarMapSurface? = null
     private lateinit var coroutineScope: CoroutineScope
-    private var placesListItemMapper: PlacesListItemMapper? = null
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil()
-    private val navigationObserver = mapboxNavigationForward(this::onAttached) { onDetached() }
+    private val navigationObserver = mapboxNavigationForward(this::onAttached) { }
 
     private val _placeRecords = MutableStateFlow(listOf<PlaceRecord>())
     val placeRecords: StateFlow<List<PlaceRecord>> = _placeRecords.asStateFlow()
@@ -69,10 +68,6 @@ class PlacesListOnMapManager(
         }
     }
 
-    private fun onDetached() {
-        placesListItemMapper = null
-    }
-
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         super.onDetached(mapboxCarMapSurface)
         mapboxCarMapSurface.getStyle()?.let { placesLayerUtil.removePlacesListOnMapLayer(it) }
@@ -82,7 +77,7 @@ class PlacesListOnMapManager(
     }
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
-        placesListItemMapper = PlacesListItemMapper(
+        val placesListItemMapper = PlacesListItemMapper(
             PlaceMarkerRenderer(carMapSurface?.carContext!!),
             mapboxNavigation
                 .navigationOptions
@@ -93,12 +88,13 @@ class PlacesListOnMapManager(
         coroutineScope.launch {
             placeRecords.collect { placeRecords ->
                 _itemList.value = CarLocationProvider.getRegisteredInstance().lastLocation()
-                    ?.let { currentLocation -> placesListItemMapper?.mapToItemList(
-                        currentLocation,
-                        placeRecords,
-                        placeClickListener
-                    )
-                } ?: ItemList.Builder().build()
+                    ?.let { currentLocation ->
+                        placesListItemMapper.mapToItemList(
+                            currentLocation,
+                            placeRecords,
+                            placeClickListener
+                        )
+                    } ?: ItemList.Builder().build()
             }
         }
     }

@@ -46,17 +46,17 @@ internal class PlacesListOnMapScreen @UiThread constructor(
         addBackPressedHandler {
             searchCarContext.mapboxScreenManager.goBack()
         }
-        repeatOnStart {
+        repeatOnResumed {
             placesListOnMapManager.placeRecords.collect { placeRecords ->
                 onPlaceRecordsChanged(placeRecords)
             }
         }
-        repeatOnStart {
+        repeatOnResumed {
             placesListOnMapManager.placeSelected.filterNotNull().collect { placeRecord ->
                 onPlaceRecordSelected(placeRecord)
             }
         }
-        repeatOnStart {
+        repeatOnResumed {
             placesListOnMapManager.itemList.collect { invalidate() }
         }
         lifecycle.addObserver(object : DefaultLifecycleObserver {
@@ -134,9 +134,9 @@ internal class PlacesListOnMapScreen @UiThread constructor(
         .setNoItemsMessage(carContext.getString(stringRes))
         .build()
 
-    private fun repeatOnStart(block: suspend () -> Unit) {
+    private fun repeatOnResumed(block: suspend () -> Unit) {
         lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 block()
             }
         }
