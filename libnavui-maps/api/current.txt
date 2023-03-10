@@ -1394,19 +1394,24 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public final class RouteLineUpdateValue {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> getAlternativeRouteLinesDynamicData();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getPrimaryRouteLineDynamicData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData? getRouteLineMaskingLayerDynamicData();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue.MutableRouteLineUpdateValue toMutableValue();
     property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> alternativeRouteLinesDynamicData;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData primaryRouteLineDynamicData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData? routeLineMaskingLayerDynamicData;
   }
 
   public static final class RouteLineUpdateValue.MutableRouteLineUpdateValue {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> getAlternativeRouteLinesDynamicData();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getPrimaryRouteLineDynamicData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData? getRouteLineMaskingLayerDynamicData();
     method public void setAlternativeRouteLinesDynamicData(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData>);
     method public void setPrimaryRouteLineDynamicData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData);
+    method public void setRouteLineMaskingLayerDynamicData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData?);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue toImmutableValue();
     property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> alternativeRouteLinesDynamicData;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData primaryRouteLineDynamicData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData? routeLineMaskingLayerDynamicData;
   }
 
   public final class RouteNotFound {
@@ -1419,23 +1424,28 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public final class RouteSetValue {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> getAlternativeRouteLinesData();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData getPrimaryRouteLineData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData? getRouteLineMaskingLayerDynamicData();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue.MutableRouteSetValue toMutableValue();
     property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> alternativeRouteLinesData;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineData primaryRouteLineData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData? routeLineMaskingLayerDynamicData;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;
   }
 
   public static final class RouteSetValue.MutableRouteSetValue {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> getAlternativeRouteLinesData();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData getPrimaryRouteLineData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData? getRouteLineMaskingLayerDynamicData();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
     method public void setAlternativeRouteLinesData(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData>);
     method public void setPrimaryRouteLineData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineData);
+    method public void setRouteLineMaskingLayerDynamicData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData?);
     method public void setWaypointsSource(com.mapbox.geojson.FeatureCollection);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue toImmutableValue();
     property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> alternativeRouteLinesData;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineData primaryRouteLineData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData? routeLineMaskingLayerDynamicData;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;
   }
 

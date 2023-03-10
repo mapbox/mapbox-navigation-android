@@ -11,29 +11,29 @@ import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
-import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Locale
+import kotlin.coroutines.resume
 
 /**
  * Mapbox Speech Api that allows you to generate an announcement based on [VoiceInstructions]
- * @param context Context
- * @param accessToken String
- * @param language [Locale] language (IETF BCP 47)
- * @param options [MapboxSpeechApiOptions] (optional)
  */
-class MapboxSpeechApi @JvmOverloads constructor(
+class MapboxSpeechApi internal constructor(
     private val context: Context,
     private val accessToken: String,
     private val language: String,
-    private val options: MapboxSpeechApiOptions = MapboxSpeechApiOptions.Builder().build()
+    private val options: MapboxSpeechApiOptions,
+    internal val firstInstructionChecker: FirstVoiceInstructionsChecker
 ) {
 
-    private val cachedFiles = mutableMapOf<TypeAndAnnouncement, SpeechValue>()
+    private val voiceInstructionsCache = VoiceInstructionsCache()
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val predownloadJobController by lazy {
         InternalJobControlFactory.createDefaultScopeJobControl()
@@ -44,6 +44,22 @@ class MapboxSpeechApi @JvmOverloads constructor(
         language,
         options
     )
+    private var firstInstructionDownloadJob: Job? = null
+
+    /**
+     * Creates Mapbox Speech Api instance.
+     *
+     * @param context Context
+     * @param accessToken String
+     * @param language [Locale] language (IETF BCP 47)
+     * @param options [MapboxSpeechApiOptions] (optional)
+     */
+    @JvmOverloads constructor(
+        context: Context,
+        accessToken: String,
+        language: String,
+        options: MapboxSpeechApiOptions = MapboxSpeechApiOptions.Builder().build(),
+    ) : this(context, accessToken, language, options, FirstVoiceInstructionsChecker())
 
     /**
      * Given [VoiceInstructions] the method will try to generate the
@@ -86,18 +102,38 @@ class MapboxSpeechApi @JvmOverloads constructor(
         voiceInstruction: VoiceInstructions,
         consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
     ) {
-        mainJobController.scope.launch {
-            val cachedValue = getFromCache(voiceInstruction)
-            if (cachedValue != null) {
-                consumer.accept(ExpectedFactory.createValue(cachedValue))
-            } else {
-                val fallback = getFallbackAnnouncement(voiceInstruction)
-                val speechError = SpeechError(
-                    "No predownloaded instruction for ${voiceInstruction.announcement()}",
-                    null,
-                    fallback
-                )
-                consumer.accept(ExpectedFactory.createError(speechError))
+        firstInstructionDownloadJob?.cancel()
+        firstInstructionDownloadJob = null
+        if (firstInstructionChecker.isFirstVoiceInstruction(voiceInstruction)) {
+            firstInstructionDownloadJob = mainJobController.scope.launch {
+                val cachedFile = try {
+                    awaitCachedFile(voiceInstruction)
+                } catch (ex: CancellationException) {
+                    val fallback = getFallbackAnnouncement(voiceInstruction)
+                    val error = SpeechError(
+                        "Instruction download cancelled: a newer instruction has to be played",
+                        ex,
+                        fallback
+                    )
+                    consumer.accept(ExpectedFactory.createError(error))
+                    throw ex
+                }
+                consumer.accept(cachedFile)
+            }
+        } else {
+            mainJobController.scope.launch {
+                val cachedValue = getFromCache(voiceInstruction)
+                if (cachedValue != null) {
+                    consumer.accept(cachedValue)
+                } else {
+                    val fallback = getFallbackAnnouncement(voiceInstruction)
+                    val speechError = SpeechError(
+                        "No predownloaded instruction for ${voiceInstruction.announcement()}",
+                        null,
+                        fallback
+                    )
+                    consumer.accept(ExpectedFactory.createError(speechError))
+                }
             }
         }
     }
@@ -121,12 +157,12 @@ class MapboxSpeechApi @JvmOverloads constructor(
     fun clean(announcement: SpeechAnnouncement) {
         voiceAPI.clean(announcement)
         VoiceInstructionsParser.parse(announcement).onValue {
-            val value = cachedFiles[it]
+            val value = voiceInstructionsCache.get(it)
             // when we clear fallback announcement, there is a chance we will remove the key
             // from map and not remove the file itself
             // since for fallback SpeechAnnouncement file is null
-            if (value?.announcement == announcement) {
-                cachedFiles.remove(it)
+            if (value?.value?.announcement == announcement) {
+                voiceInstructionsCache.remove(it)
             }
         }
     }
@@ -135,13 +171,14 @@ class MapboxSpeechApi @JvmOverloads constructor(
     internal fun predownload(instructions: List<VoiceInstructions>) {
         instructions.forEach { instruction ->
             val typeAndAnnouncement = VoiceInstructionsParser.parse(instruction).value
-            if (typeAndAnnouncement != null && !hasTypeAndAnnouncement(typeAndAnnouncement)) {
+            if (
+                typeAndAnnouncement != null &&
+                voiceInstructionsCache.get(typeAndAnnouncement)?.isValue != true
+            ) {
                 predownloadJobController.scope.launch {
                     val voiceFile = retrieveVoiceFile(instruction)
                     mainJobController.scope.launch {
-                        voiceFile.onValue { speechValue ->
-                            cachedFiles[typeAndAnnouncement] = speechValue
-                        }
+                        voiceInstructionsCache.put(typeAndAnnouncement, voiceFile)
                     }
                 }
             }
@@ -150,7 +187,9 @@ class MapboxSpeechApi @JvmOverloads constructor(
 
     internal fun cancelPredownload() {
         predownloadJobController.job.children.forEach { it.cancel() }
-        val announcements = cachedFiles.map { it.value.announcement }
+        val announcements = voiceInstructionsCache.getEntries().mapNotNull {
+            it.value.value?.announcement
+        }
         announcements.forEach { clean(it) }
     }
 
@@ -194,12 +233,24 @@ class MapboxSpeechApi @JvmOverloads constructor(
             .build()
     }
 
-    private fun hasTypeAndAnnouncement(typeAndAnnouncement: TypeAndAnnouncement): Boolean {
-        return typeAndAnnouncement in cachedFiles
+    private fun getFromCache(
+        voiceInstruction: VoiceInstructions
+    ): Expected<SpeechError, SpeechValue>? {
+        val key = VoiceInstructionsParser.parse(voiceInstruction).value
+        return key?.let { voiceInstructionsCache.get(it) }
     }
 
-    private fun getFromCache(voiceInstruction: VoiceInstructions): SpeechValue? {
-        val key = VoiceInstructionsParser.parse(voiceInstruction).value
-        return key?.let { cachedFiles[it] }
-    }
+    private suspend fun awaitCachedFile(voiceInstruction: VoiceInstructions) =
+        suspendCancellableCoroutine<Expected<SpeechError, SpeechValue>> { cont ->
+            val key = VoiceInstructionsParser.parse(voiceInstruction).value
+            key?.let {
+                val observer: (Expected<SpeechError, SpeechValue>) -> Unit = { speechValue ->
+                    cont.resume(speechValue)
+                }
+                cont.invokeOnCancellation {
+                    voiceInstructionsCache.unregisterOneShotObserver(key, observer)
+                }
+                voiceInstructionsCache.registerOneShotObserver(it, observer)
+            }
+        }
 }
