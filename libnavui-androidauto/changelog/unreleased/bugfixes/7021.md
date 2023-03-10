@@ -1,0 +1,1 @@
+- Fixed PlacesListOnMapScreen issues when screen changed cause places to disappear

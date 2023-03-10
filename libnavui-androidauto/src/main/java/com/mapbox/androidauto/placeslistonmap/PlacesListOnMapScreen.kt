@@ -9,8 +9,10 @@ import androidx.car.app.model.ItemList
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.PlaceListNavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.androidauto.R
 import com.mapbox.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.androidauto.location.CarLocationRenderer
@@ -44,15 +46,18 @@ internal class PlacesListOnMapScreen @UiThread constructor(
         addBackPressedHandler {
             searchCarContext.mapboxScreenManager.goBack()
         }
-        lifecycleScope.launch {
+        repeatOnResumed {
             placesListOnMapManager.placeRecords.collect { placeRecords ->
                 onPlaceRecordsChanged(placeRecords)
             }
         }
-        lifecycleScope.launch {
+        repeatOnResumed {
             placesListOnMapManager.placeSelected.filterNotNull().collect { placeRecord ->
                 onPlaceRecordSelected(placeRecord)
             }
+        }
+        repeatOnResumed {
+            placesListOnMapManager.itemList.collect { invalidate() }
         }
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
@@ -82,7 +87,7 @@ internal class PlacesListOnMapScreen @UiThread constructor(
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
-        val placesItemList = placesListOnMapManager.currentItemList() ?: ItemList.Builder().build()
+        val placesItemList = placesListOnMapManager.itemList.value
         return PlaceListNavigationTemplate.Builder()
             .setItemList(placesItemList)
             .setHeaderAction(Action.BACK)
@@ -128,4 +133,12 @@ internal class PlacesListOnMapScreen @UiThread constructor(
     private fun buildErrorItemList(@StringRes stringRes: Int) = ItemList.Builder()
         .setNoItemsMessage(carContext.getString(stringRes))
         .build()
+
+    private fun repeatOnResumed(block: suspend () -> Unit) {
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                block()
+            }
+        }
+    }
 }
