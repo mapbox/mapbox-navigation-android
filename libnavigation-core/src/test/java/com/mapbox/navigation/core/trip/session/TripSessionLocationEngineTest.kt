@@ -8,6 +8,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.mockk
@@ -30,8 +31,12 @@ class TripSessionLocationEngineTest {
     val loggerRule = LoggingFrontendTestRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val deviceLocationEngine = mockLocationEngine()
-    private val replayLocationEngine = mockLocationEngine()
+    private val deviceLocationEngine = mockk<LocationEngine>(relaxUnitFun = true).also {
+        mockLocationEngine(it)
+    }
+    private val replayLocationEngine = mockk<ReplayLocationEngine>(relaxUnitFun = true).also {
+        mockLocationEngine(it)
+    }
     private val navigationOptions = NavigationOptions.Builder(context)
         .locationEngine(deviceLocationEngine)
         .build()
@@ -107,6 +112,24 @@ class TripSessionLocationEngineTest {
     }
 
     @Test
+    fun `should clean up last location from replay engine when replay is enabled`() {
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(true, onRawLocationUpdate)
+        sut.stopLocationUpdates()
+
+        verify { replayLocationEngine.cleanUpLastLocation() }
+    }
+
+    @Test
+    fun `should not clean up last location from replay engine when replay is disabled`() {
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(false, onRawLocationUpdate)
+        sut.stopLocationUpdates()
+
+        verify(exactly = 0) { replayLocationEngine.cleanUpLastLocation() }
+    }
+
+    @Test
     fun `should not request location updates from navigation options when replay is enabled`() {
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(true, onRawLocationUpdate)
@@ -168,8 +191,7 @@ class TripSessionLocationEngineTest {
         assertFalse(sut.isReplayEnabled)
     }
 
-    private fun mockLocationEngine(): LocationEngine {
-        val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
+    private fun mockLocationEngine(locationEngine: LocationEngine) {
         val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
         val locationEngineResult: LocationEngineResult = mockk(relaxUnitFun = true)
         val location: Location = mockk(relaxed = true)
@@ -181,6 +203,5 @@ class TripSessionLocationEngineTest {
             )
         } answers {}
         every { locationEngineResult.locations } returns listOf(location)
-        return locationEngine
     }
 }

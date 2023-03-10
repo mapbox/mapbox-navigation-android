@@ -93,6 +93,10 @@ class ReplayLocationEngine(
         }
     }
 
+    internal fun cleanUpLastLocation() {
+        lastLocationEngineResult = null
+    }
+
     private fun replayLocation(event: ReplayEventUpdateLocation) {
         val eventLocation = event.location
         val location = eventLocation.mapToLocation(

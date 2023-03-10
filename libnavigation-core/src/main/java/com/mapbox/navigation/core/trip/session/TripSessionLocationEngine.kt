@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  */
 internal class TripSessionLocationEngine constructor(
     private val navigationOptions: NavigationOptions,
-    private val replayLocationEngineProvider: (MapboxReplayer) -> LocationEngine = {
+    private val replayLocationEngineProvider: (MapboxReplayer) -> ReplayLocationEngine = {
         ReplayLocationEngine(it)
     }
 ) {
@@ -34,7 +34,7 @@ internal class TripSessionLocationEngine constructor(
     var isReplayEnabled = false
         private set
 
-    private val replayLocationEngine: LocationEngine by lazy {
+    private val replayLocationEngine: ReplayLocationEngine by lazy {
         replayLocationEngineProvider.invoke(mapboxReplayer)
     }
     private var activeLocationEngine: LocationEngine? = null
@@ -78,6 +78,9 @@ internal class TripSessionLocationEngine constructor(
     }
 
     fun stopLocationUpdates() {
+        if (isReplayEnabled) {
+            replayLocationEngine.cleanUpLastLocation()
+        }
         isReplayEnabled = false
         onRawLocationUpdate = { }
         activeLocationEngine?.removeLocationUpdates(locationEngineCallback)

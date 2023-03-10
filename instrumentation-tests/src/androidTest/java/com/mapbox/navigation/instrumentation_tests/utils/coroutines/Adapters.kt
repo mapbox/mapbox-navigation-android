@@ -2,6 +2,7 @@
 
 package com.mapbox.navigation.instrumentation_tests.utils.coroutines
 
+import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -24,6 +25,8 @@ import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -79,6 +82,26 @@ fun MapboxNavigation.roadObjectsOnRoute(): Flow<List<UpcomingRoadObject>> {
         { registerRoadObjectsOnRouteObserver(it) },
         { unregisterRoadObjectsOnRouteObserver(it) },
         "UpcomingRoadObject"
+    )
+}
+
+fun MapboxNavigation.rawLocationUpdates(): Flow<Location> {
+    return loggedCallbackFlow(
+        {
+            object : LocationObserver {
+                override fun onNewRawLocation(rawLocation: Location) {
+                    it(rawLocation)
+                }
+
+                override fun onNewLocationMatcherResult(
+                    locationMatcherResult: LocationMatcherResult
+                ) {
+                }
+            }
+        },
+        { registerLocationObserver(it) },
+        { unregisterLocationObserver(it) },
+        "RawLocation"
     )
 }
 

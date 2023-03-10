@@ -9,11 +9,13 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.core.replay.history.ReplayEventGetStatus
 import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -65,6 +67,36 @@ class ReplayLocationEngineTest {
         }
 
         replayLocationEngine.getLastLocation(engineCallback)
+        replayLocationEngine.replayEvents(listOf(testLocation()))
+
+        val lastLocation = captureSuccess.captured.lastLocation!!
+        assertEquals(38.571011, lastLocation.latitude, 0.001)
+        assertEquals(-121.452869, lastLocation.longitude, 0.001)
+    }
+
+    @Test
+    fun `should clear last location`() {
+        val engineCallback = mockk<LocationEngineCallback<LocationEngineResult>>()
+
+        replayLocationEngine.replayEvents(listOf(testLocation()))
+        replayLocationEngine.cleanUpLastLocation()
+
+        replayLocationEngine.getLastLocation(engineCallback)
+
+        verify(exactly = 0) { engineCallback.onSuccess(any()) }
+    }
+
+    @Test
+    fun `should not remove last location observers`() {
+        val captureSuccess = slot<LocationEngineResult>()
+        val engineCallback: LocationEngineCallback<LocationEngineResult> = mockk {
+            every { onSuccess(capture(captureSuccess)) } returns Unit
+        }
+
+        replayLocationEngine.getLastLocation(engineCallback)
+        replayLocationEngine.cleanUpLastLocation()
+        clearAllMocks(answers = false)
+
         replayLocationEngine.replayEvents(listOf(testLocation()))
 
         val lastLocation = captureSuccess.captured.lastLocation!!
