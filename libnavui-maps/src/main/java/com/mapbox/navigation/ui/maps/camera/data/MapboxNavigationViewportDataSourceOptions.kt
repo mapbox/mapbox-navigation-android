@@ -11,18 +11,18 @@ class MapboxNavigationViewportDataSourceOptions internal constructor() {
     /**
      * Options that impact generation of following frames.
      */
-    val followingFrameOptions = FollowingFrameOptions()
+    var followingFrameOptions = FollowingFrameOptions()
 
     /**
      * Options that impact generation of overview frames.
      */
-    val overviewFrameOptions = OverviewFrameOptions()
+    var overviewFrameOptions = OverviewFrameOptions()
 }
 
 /**
  * Options that impact the generation of the following frame.
  */
-class FollowingFrameOptions internal constructor() {
+class FollowingFrameOptions {
 
     /**
      * The default pitch that will be generated for following camera frames.
@@ -148,7 +148,7 @@ class FollowingFrameOptions internal constructor() {
      *
      * By default we frame the whole remainder of the step while the options here shrink that geometry to increase the zoom level.
      */
-    class IntersectionDensityCalculation internal constructor() {
+    class IntersectionDensityCalculation {
         /**
          * **Preconditions**:
          * - a route is provided via [MapboxNavigationViewportDataSource.onRouteChanged]
@@ -184,7 +184,7 @@ class FollowingFrameOptions internal constructor() {
     /**
      * Options that modify the framed route geometries when approaching a maneuver.
      */
-    class PitchNearManeuvers internal constructor() {
+    class PitchNearManeuvers {
         /**
          * **Preconditions**:
          * - a route is provided via [MapboxNavigationViewportDataSource.onRouteChanged]
@@ -223,7 +223,7 @@ class FollowingFrameOptions internal constructor() {
     /**
      * Options that modify the framed route geometries by appending additional points after maneuver to extend the view.
      */
-    class FrameGeometryAfterManeuver internal constructor() {
+    class FrameGeometryAfterManeuver {
         /**
          * **Preconditions**:
          * - a route is provided via [MapboxNavigationViewportDataSource.onRouteChanged]
@@ -258,7 +258,7 @@ class FollowingFrameOptions internal constructor() {
     /**
      * Options that impact bearing generation to not be fixed to location's bearing but also taking into the direction to the upcoming maneuver.
      */
-    class BearingSmoothing internal constructor() {
+    class BearingSmoothing {
         /**
          * If enabled, the **following frame**'s bearing won't exactly reflect the bearing returned by the [Location] from [MapboxNavigationViewportDataSource.onLocationChanged]
          * but will also be affected by the direction to the upcoming framed geometry, to maximize the viewable area.
@@ -296,7 +296,7 @@ class FollowingFrameOptions internal constructor() {
 /**
  * Options that impact the generation of the overview frame.
  */
-class OverviewFrameOptions internal constructor() {
+class OverviewFrameOptions {
 
     /**
      * The max zoom that will be generated for camera overview frames.
@@ -367,7 +367,7 @@ class OverviewFrameOptions internal constructor() {
      *
      * Simplifying geometries, especially for longer routes, can have a significant impact on the performance of generating frames and each [MapboxNavigationViewportDataSource.evaluate] calls.
      */
-    class GeometrySimplification internal constructor() {
+    class GeometrySimplification {
 
         /**
          * **Preconditions**:
