@@ -1,0 +1,1 @@
+- Fixed "global reference table overflow" by reducing the amount of objects transferred through the JNI on every route progress update.

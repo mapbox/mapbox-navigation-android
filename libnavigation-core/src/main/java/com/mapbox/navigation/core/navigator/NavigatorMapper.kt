@@ -9,7 +9,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
@@ -18,6 +17,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
@@ -44,6 +44,7 @@ internal fun getRouteProgressFrom(
     bannerInstructions: BannerInstructions?,
     instructionIndex: Int?,
     lastVoiceInstruction: VoiceInstructions?,
+    upcomingRoadObjects: List<UpcomingRoadObject>,
 ): RouteProgress? {
     return status.getRouteProgress(
         route,
@@ -51,6 +52,7 @@ internal fun getRouteProgressFrom(
         bannerInstructions,
         instructionIndex,
         lastVoiceInstruction,
+        upcomingRoadObjects,
     )
 }
 
@@ -69,6 +71,7 @@ private fun NavigationStatus.getRouteProgress(
     bannerInstructions: BannerInstructions?,
     instructionIndex: Int?,
     lastVoiceInstruction: VoiceInstructions?,
+    upcomingRoadObjects: List<UpcomingRoadObject>,
 ): RouteProgress? {
     if (routeState == RouteState.INVALID) {
         return null
@@ -188,7 +191,7 @@ private fun NavigationStatus.getRouteProgress(
             routeProgressDurationRemaining,
             routeProgressFractionTraveled,
             remainingWaypoints,
-            upcomingRouteAlerts.toUpcomingRoadObjects(),
+            upcomingRoadObjects,
             stale,
             locatedAlternativeRouteId,
             geometryIndex,
