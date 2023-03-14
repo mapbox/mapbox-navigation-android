@@ -15,6 +15,7 @@ import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.UpcomingRouteAlert
+import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
@@ -46,6 +47,7 @@ fun createNavigationStatus(
     offRoadProba: Float = 0f,
     activeGuidanceInfo: ActiveGuidanceInfo? = null,
     upcomingRouteAlerts: List<UpcomingRouteAlert> = emptyList(),
+    upcomingRouteAlertUpdates: List<UpcomingRouteAlertUpdate> = emptyList(),
     nextWaypointIndex: Int = 0,
     layer: Int = 0,
 ): NavigationStatus {
@@ -72,6 +74,7 @@ fun createNavigationStatus(
         offRoadProba,
         activeGuidanceInfo,
         upcomingRouteAlerts,
+        upcomingRouteAlertUpdates,
         nextWaypointIndex,
         layer,
     )

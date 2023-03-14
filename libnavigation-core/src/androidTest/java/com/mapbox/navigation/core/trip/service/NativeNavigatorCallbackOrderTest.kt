@@ -153,7 +153,6 @@ internal class NativeNavigatorCallbackOrderTest :
         ) strictlyAfter CallbackInvocation.RoutesDataSet
     }
 
-    @Ignore("NN-572")
     @Test
     fun refreshRoute() = runBlocking(Dispatchers.Main.immediate) {
         navigator.addObserver { origin, _ ->
