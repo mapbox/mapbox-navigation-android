@@ -2041,8 +2041,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 dataset,
                 tilesVersion,
                 navigationOptions.accessToken ?: "",
-                USER_AGENT,
-                BuildConfig.NAV_NATIVE_SDK_VERSION,
                 isFallback,
                 navigationOptions.routingTilesOptions.tilesVersion,
                 navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion
