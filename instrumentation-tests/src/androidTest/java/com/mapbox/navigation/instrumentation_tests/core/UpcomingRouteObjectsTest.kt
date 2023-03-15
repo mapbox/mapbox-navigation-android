@@ -1,38 +1,56 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import android.util.Log
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
+import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
+import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
+import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
+import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection
+import com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
+import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
-import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
+import kotlin.math.abs
 
 class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
@@ -50,24 +68,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         longitude = 11.428011943347627
     }
 
-    @Before
-    fun setup() {
-        runOnMainSync {
-            mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(context)
-                    .accessToken(getMapboxAccessTokenFromResources(context))
-                    .routingTilesOptions(
-                        RoutingTilesOptions.Builder()
-                            .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                            .build()
-                    )
-                    .build()
-            )
-        }
-    }
-
     @Test
     fun sanityDistanceToStart() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
         val origin = Point.fromLngLat(139.790845, 35.634688)
         val positionAlongTheRoute = Point.fromLngLat(139.77466009278072, 35.625810364295305)
         stayOnPosition(origin)
@@ -110,6 +113,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun icTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
         mapboxNavigation.startTripSession()
         val icOrigin = Point.fromLngLat(140.025875, 35.66031)
         stayOnPosition(icOrigin)
@@ -131,6 +135,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun jctTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
         val jctOrigin = Point.fromLngLat(139.790845, 35.634688)
         stayOnPosition(jctOrigin)
         mapboxNavigation.startTripSession()
@@ -145,8 +150,8 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @Ignore("waiting for the NN fix, see NN-449")
     fun distanceToIncidentDoesNotChangeAfterAddingNewWaypointOnTheRouteGeometry() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
         val (oneLegRoute, twoLegsRoute, incidentId) =
             getRoutesFromTheSameOriginButDifferentWaypointsCount()
 
@@ -170,6 +175,304 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             upcomingIncidentForTwoLegsRoute.distanceToStart!!,
             0.1
         )
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun roadObjectsEuropeSanityTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
+        val coordinates = listOf(
+            Point.fromLngLat(14.238166, 50.32172),
+            Point.fromLngLat(13.234976, 51.551251)
+        )
+        mockWebServerRule.requestHandlers.clear()
+        val routeHandler = MockDirectionsRequestHandler(
+            "driving-traffic",
+            readRawFileText(context, R.raw.route_with_road_objects_europe),
+            coordinates,
+            relaxedExpectedCoordinates = true
+        )
+        mockWebServerRule.requestHandlers.add(routeHandler)
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_with_road_objects_europe",
+                    readRawFileText(context, R.raw.route_with_road_objects_europe_refresh1),
+                    acceptedGeometryIndex = 61
+                )
+            )
+        )
+
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder().applyDefaultNavigationOptions()
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .alternatives(false)
+                .enableRefresh(true)
+                .coordinatesList(coordinates)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .build()
+        ).getSuccessfulResultOrThrowException().routes
+        val originalRoadObjects = routes.first().upcomingRoadObjects
+        val expectedOriginalRoadObjectClasses = listOf(
+            RailwayCrossing::class.java,
+            TollCollection::class.java,
+            TollCollection::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            TollCollection::class.java,
+            TollCollection::class.java,
+            TollCollection::class.java,
+            TollCollection::class.java,
+            TollCollection::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            TollCollection::class.java,
+            CountryBorderCrossing::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Incident::class.java,
+            RailwayCrossing::class.java,
+            RailwayCrossing::class.java,
+            RestrictedArea::class.java,
+            RestrictedArea::class.java,
+            RailwayCrossing::class.java,
+            RailwayCrossing::class.java,
+            RailwayCrossing::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Incident::class.java,
+            Tunnel::class.java,
+            CountryBorderCrossing::class.java,
+            TollCollection::class.java,
+            RestrictedArea::class.java,
+        )
+
+        assertEquals(
+            expectedOriginalRoadObjectClasses,
+            originalRoadObjects.map { it.roadObject::class.java })
+
+        stayOnPosition(coordinates[0])
+
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutes(routes)
+
+        // distance travelled ~ 4894.979, first road object passed
+        val movedAlongTheRoutePosition =
+            routes.first().directionsRoute.completeGeometryToPoints()[60]
+        stayOnPosition(movedAlongTheRoutePosition)
+        val updateAfterMovedAlongTheRoute = mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentRouteGeometryIndex == 61
+            }
+            .first()
+        val distanceDiffAfterMovedAlongTheRoute = updateAfterMovedAlongTheRoute.distanceTraveled
+        val expectedRoadObjectsAfterMovedAlongTheRoute = originalRoadObjects.drop(1)
+            .map { it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterMovedAlongTheRoute }
+
+        checkRoadObjects(
+            expectedRoadObjectsAfterMovedAlongTheRoute,
+            updateAfterMovedAlongTheRoute.upcomingRoadObjects
+        )
+
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
+
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .first()
+
+        // distance traveled ~ 22073, second and third road objects are passed
+        val positionAfterFirstRefresh =
+            routes.first().directionsRoute.completeGeometryToPoints()[250]
+        stayOnPosition(positionAfterFirstRefresh)
+        val updateAfterRefresh = mapboxNavigation.routeProgressUpdates()
+            .filter { it.currentRouteGeometryIndex == 249 }
+            .first()
+        val distanceDiffAfterFirstRefresh = updateAfterRefresh.distanceTraveled
+        // refresh geometry_index_start = 1810, so resulting geometry_index_start = 1871
+        // (refresh was made with current_route_geometry_index = 61),
+        // this corresponds to distanceTravelled = 134617.89 ~ 134612.883
+        // (1 geometry index != 1 meter, so 134617.89 is an approximate value),
+        val newIncidentDistanceToStart = 134612.883
+        val newIncidentIndex = 22
+
+        val expectedObjectsAfterFirstRefresh = originalRoadObjects
+            .map {
+                it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterFirstRefresh
+            }.toMutableList().apply {
+                add(newIncidentIndex, Incident::class.java to newIncidentDistanceToStart - distanceDiffAfterFirstRefresh)
+            }.drop(3)
+
+        checkRoadObjects(expectedObjectsAfterFirstRefresh, updateAfterRefresh.upcomingRoadObjects)
+
+        mockWebServerRule.requestHandlers.removeLast()
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_with_road_objects_europe",
+                    readRawFileText(context, R.raw.route_with_road_objects_europe_refresh2),
+                    acceptedGeometryIndex = 249
+                )
+            )
+        )
+
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .take(2)
+            .toList()
+
+        // distanceTravelled = 52112.027, 10 road objects passed
+        val positionAfterSecondRefresh =
+            routes.first().directionsRoute.completeGeometryToPoints()[700]
+        stayOnPosition(positionAfterSecondRefresh)
+        val updateAfterSecondRefresh = mapboxNavigation.routeProgressUpdates()
+            .filter { it.currentRouteGeometryIndex == 700 }
+            .first()
+        val distanceDiffAfterSecondRefresh = updateAfterSecondRefresh.distanceTraveled
+        val expectedObjectsAfterSecondRefresh = originalRoadObjects
+            .map {
+                it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterSecondRefresh
+            }.toMutableList().apply {
+                add(newIncidentIndex, Incident::class.java to newIncidentDistanceToStart - distanceDiffAfterSecondRefresh)
+                removeAt(newIncidentIndex - 1) // first incident removed
+            }.drop(10)
+
+        checkRoadObjects(expectedObjectsAfterSecondRefresh, updateAfterSecondRefresh.upcomingRoadObjects)
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun roadObjectsJapanSanityTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
+        val coordinates = listOf(
+            Point.fromLngLat(139.790845, 35.634688),
+            Point.fromLngLat(139.778818, 35.635951),
+            Point.fromLngLat(139.785936, 35.550703),
+            Point.fromLngLat(140.025875, 35.66031),
+        )
+        mockWebServerRule.requestHandlers.clear()
+        val routeHandler = MockDirectionsRequestHandler(
+            "driving-traffic",
+            readRawFileText(context, R.raw.route_with_road_objects_japan),
+            coordinates,
+            relaxedExpectedCoordinates = true
+        )
+        mockWebServerRule.requestHandlers.add(routeHandler)
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_with_road_objects_japan",
+                    readRawFileText(context, R.raw.route_with_road_objects_japan_refresh1),
+                    acceptedGeometryIndex = 60
+                )
+            )
+        )
+
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder().applyDefaultNavigationOptions()
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .alternatives(false)
+                .enableRefresh(true)
+                .coordinatesList(coordinates)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .build()
+        ).getSuccessfulResultOrThrowException().routes
+        val originalRoadObjects = routes.first().upcomingRoadObjects
+        val expectedOriginalRoadObjectClasses = listOf(
+            Junction::class.java,
+            RestStop::class.java,
+            Junction::class.java,
+            Junction::class.java,
+            Incident::class.java,
+            Incident::class.java,
+            TollCollection::class.java,
+            Junction::class.java,
+            Junction::class.java,
+            Junction::class.java,
+            Tunnel::class.java,
+            Junction::class.java,
+            RestStop::class.java,
+            Junction::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Junction::class.java,
+            Tunnel::class.java,
+            TollCollection::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            Tunnel::class.java,
+            RestStop::class.java,
+            Junction::class.java,
+            Tunnel::class.java,
+            Junction::class.java,
+            Junction::class.java,
+            Junction::class.java,
+            Junction::class.java,
+            Junction::class.java,
+            Interchange::class.java,
+            Interchange::class.java,
+            TollCollection::class.java,
+        )
+
+        assertEquals(
+            expectedOriginalRoadObjectClasses,
+            originalRoadObjects.map { it.roadObject::class.java })
+
+        stayOnPosition(coordinates[0])
+
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutes(routes)
+        mapboxNavigation.routeProgressUpdates()
+            .filter { it.currentState == RouteProgressState.TRACKING }
+            .first()
+        // distance travelled ~ 2327.765, first road object passed
+        val movedAlongTheRoutePosition =
+            routes.first().directionsRoute.completeGeometryToPoints()[60]
+        stayOnPosition(movedAlongTheRoutePosition)
+
+        val updateAfterMovedAlongTheRoute = mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentRouteGeometryIndex == 60
+            }
+            .first()
+        val distanceDiffAfterMovedAlongTheRoute = updateAfterMovedAlongTheRoute.distanceTraveled
+        val expectedRoadObjectsAfterMovedAlongTheRoute = originalRoadObjects.drop(1)
+            .map { it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterMovedAlongTheRoute }
+
+        checkRoadObjects(
+            expectedRoadObjectsAfterMovedAlongTheRoute,
+            updateAfterMovedAlongTheRoute.upcomingRoadObjects
+        )
+
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
+
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .first()
+
+        // distance traveled ~ 5222, second and third road objects are passed
+        val positionAfterFirstRefresh =
+            routes.first().directionsRoute.completeGeometryToPoints()[150]
+        stayOnPosition(positionAfterFirstRefresh)
+        val updateAfterRefresh = mapboxNavigation.routeProgressUpdates()
+            .filter { it.currentRouteGeometryIndex == 150 }
+            .first()
+        val distanceDiffAfterFirstRefresh = updateAfterRefresh.distanceTraveled
+
+        val expectedObjectsAfterFirstRefresh = originalRoadObjects
+            .map {
+                it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterFirstRefresh
+            }.drop(3)
+
+        checkRoadObjects(expectedObjectsAfterFirstRefresh, updateAfterRefresh.upcomingRoadObjects)
     }
 
     private fun stayOnPosition(position: Point) {
@@ -252,5 +555,60 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             .directionsRoute.legs()!!.first()
             .incidents()!!.first()
         return Triple(routeWithIncident, routeWithIncidentTwoLegs, incident.id())
+    }
+
+    private fun checkRoadObjects(
+        expectedInput: List<Pair<Class<*>, Double>>,
+        actualInput: List<UpcomingRoadObject>
+    ) {
+        val expected = expectedInput.map { it.first to ApproxMeters(it.second) }
+        val actual = actualInput.map {
+            it.roadObject::class.java to ApproxMeters(it.distanceToStart!!)
+        }
+        try {
+            assertEquals(expected, actual)
+        } catch (ex: Throwable) {
+            Log.e(
+                "[UpcomingRouteObjectsTest]",
+                "Expected: ${expected.joinToString("\n")}, \nactual: ${actual.joinToString("\n")}"
+            )
+            throw ex
+        }
+    }
+
+    private fun createMapboxNavigation(): MapboxNavigation = MapboxNavigationProvider.create(
+        NavigationOptions.Builder(context)
+            .accessToken(getMapboxAccessTokenFromResources(context))
+            .routingTilesOptions(
+                RoutingTilesOptions.Builder()
+                    .tilesBaseUri(URI(mockWebServerRule.baseUrl))
+                    .build()
+            )
+            .build()
+    )
+
+    private class ApproxMeters(val value: Double) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as ApproxMeters
+
+            if (abs(value - other.value) > TOLERANCE) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return value.hashCode()
+        }
+
+        override fun toString(): String {
+            return "$value"
+        }
+
+        private companion object {
+            private const val TOLERANCE = 0.01
+        }
     }
 }

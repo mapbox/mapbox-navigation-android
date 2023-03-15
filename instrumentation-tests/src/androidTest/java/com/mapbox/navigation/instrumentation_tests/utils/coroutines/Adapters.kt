@@ -205,3 +205,12 @@ fun <T, OBSERVER> loggedCallbackFlow(
         }
     }
 }
+
+suspend fun MapboxNavigation.navigateNextRouteLeg() = suspendCancellableCoroutine<Unit> { cont ->
+    navigateNextRouteLeg {
+        if (!it) {
+            throw IllegalStateException("Could not navigate to next leg")
+        }
+        cont.resume(Unit)
+    }
+}
