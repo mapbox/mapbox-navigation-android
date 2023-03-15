@@ -106,13 +106,13 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
             val listBuilder = ItemList.Builder()
             for (navigationRoute in originalRoutesList) {
                 val route = navigationRoute.directionsRoute
-                val duration = CarDistanceFormatter.formatDistance(route.duration())
-                val title = route.legs()?.first()?.summary()?.let { "$duration $it" } ?: duration
+                val title = route.legs()?.first()?.summary()?.let { "  $it" } ?: " "
                 val routeSpannableString = SpannableString(title)
                 val span = DurationSpan.create(route.duration().toLong())
-                routeSpannableString.setSpan(span, 0, duration.length, 0)
+                routeSpannableString.setSpan(span, 0, 1, 0)
 
-                val item = Row.Builder().setTitle(routeSpannableString).addText(duration).build()
+                val distance = CarDistanceFormatter.formatDistance(route.distance())
+                val item = Row.Builder().setTitle(routeSpannableString).addText(distance).build()
                 listBuilder.addItem(item)
             }
             listBuilder.setSelectedIndex(routesPreview.primaryRouteIndex)
