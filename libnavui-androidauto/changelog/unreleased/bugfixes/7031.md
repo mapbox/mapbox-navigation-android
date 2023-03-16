@@ -1,0 +1,1 @@
+- Fixed an issue that caused route preview screens to display incorrect route distance.
