@@ -1237,6 +1237,7 @@ class MapboxRouteLineApiTest {
             checkExpression(expectedCasingExpressionContents, casingExpression)
             checkExpression(expectedTrailExpressionContents, trailExpression)
             checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+            assertTrue(result.ignorePrimaryRouteLineData)
 
             callbackCalled = true
         }

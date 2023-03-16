@@ -799,6 +799,12 @@ class MapboxRouteLineApi(
         }
     }
 
+    // The purpose of this is to provide the correct masking layer data to be rendered in the view.
+    // Although the primary route line layer data is returned here it shouldn't be rendered by the
+    // view. It is included because the parameter isn't nullable.  If it were the data wouldn't
+    // be included since it's only the masking layers that should be updated. For this reason
+    // the variable to ignore the primary route line data is set to true so the view class will
+    // ignore it.
     private fun provideRouteLegUpdate(
         routeLineOverlayDynamicData: RouteLineDynamicData?,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
@@ -806,13 +812,16 @@ class MapboxRouteLineApi(
         ifNonNull(routeLineOverlayDynamicData) { maskingLayerData ->
             getRouteDrawData { expected ->
                 expected.value?.apply {
+                    val updateValue = RouteLineUpdateValue(
+                        this.primaryRouteLineData.dynamicData,
+                        this.alternativeRouteLinesData.map { it.dynamicData },
+                        maskingLayerData
+                    ).also {
+                        it.ignorePrimaryRouteLineData = true
+                    }
                     consumer.accept(
                         ExpectedFactory.createValue<RouteLineError, RouteLineUpdateValue>(
-                            RouteLineUpdateValue(
-                                this.primaryRouteLineData.dynamicData,
-                                this.alternativeRouteLinesData.map { it.dynamicData },
-                                maskingLayerData
-                            )
+                            updateValue
                         )
                     )
                 }

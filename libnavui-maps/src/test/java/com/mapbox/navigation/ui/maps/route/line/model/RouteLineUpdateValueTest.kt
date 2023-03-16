@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RouteLineUpdateValueTest {
@@ -12,7 +13,9 @@ class RouteLineUpdateValueTest {
             RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
             listOf(),
             mockk()
-        )
+        ).also {
+            it.ignorePrimaryRouteLineData = true
+        }
 
         val result = original.toMutableValue()
 
@@ -25,6 +28,7 @@ class RouteLineUpdateValueTest {
             original.routeLineMaskingLayerDynamicData,
             result.routeLineMaskingLayerDynamicData
         )
+        assertTrue(result.ignorePrimaryRouteLineData)
     }
 
     @Test
@@ -33,7 +37,9 @@ class RouteLineUpdateValueTest {
             RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
             listOf(),
             mockk()
-        )
+        ).also {
+            it.ignorePrimaryRouteLineData = true
+        }
         val replacementPrimaryRouteLineDynamicData =
             RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
         val replacementList = listOf<RouteLineDynamicData>()
@@ -48,5 +54,6 @@ class RouteLineUpdateValueTest {
         assertEquals(replacementPrimaryRouteLineDynamicData, result.primaryRouteLineDynamicData)
         assertEquals(replacementList, result.alternativeRouteLinesDynamicData)
         assertEquals(replacementMaskingData, result.routeLineMaskingLayerDynamicData)
+        assertTrue(result.ignorePrimaryRouteLineData)
     }
 }
