@@ -185,6 +185,7 @@ class MapboxRouteLineOptionsTest {
             .waypointLayerIconAnchor(IconAnchor.BOTTOM)
             .iconPitchAlignment(IconPitchAlignment.AUTO)
             .shareLineGeometrySources(true)
+            .lineDepthOcclusionFactor(0.85)
             .build()
             .toBuilder(ctx)
             .build()
@@ -204,6 +205,19 @@ class MapboxRouteLineOptionsTest {
         assertEquals(2, options.waypointLayerIconOffset.size)
         assertEquals(IconAnchor.BOTTOM, options.waypointLayerIconAnchor)
         assertEquals(IconPitchAlignment.AUTO, options.iconPitchAlignment)
+        assertEquals(0.85, options.lineDepthOcclusionFactor, 0.00001)
         assertTrue(options.shareLineGeometrySources)
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test(expected = IllegalArgumentException::class)
+    fun lineDepthOcclusionFactorTooSmall() {
+        MapboxRouteLineOptions.Builder(ctx).lineDepthOcclusionFactor(-0.1).build()
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test(expected = IllegalArgumentException::class)
+    fun lineDepthOcclusionFactorTooBig() {
+        MapboxRouteLineOptions.Builder(ctx).lineDepthOcclusionFactor(1.1).build()
     }
 }

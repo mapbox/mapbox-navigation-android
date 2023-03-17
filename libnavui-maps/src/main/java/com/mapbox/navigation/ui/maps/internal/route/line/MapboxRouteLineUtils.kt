@@ -1157,6 +1157,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL)) {
@@ -1169,6 +1170,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_CASING)) {
@@ -1181,6 +1183,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_MAIN)) {
@@ -1193,6 +1196,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC)) {
@@ -1205,6 +1209,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (options.displayRestrictedRoadSections) {
@@ -1221,6 +1226,10 @@ internal object MapboxRouteLineUtils {
                     .lineCap(LineCap.ROUND)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                        style.layerLineDepthOcclusionFactor(
+                            layerId,
+                            options.lineDepthOcclusionFactor
+                        )
                     }
             }
         }
@@ -1235,6 +1244,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL)) {
@@ -1247,6 +1257,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_CASING)) {
@@ -1259,6 +1270,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_MAIN)) {
@@ -1271,6 +1283,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC)) {
@@ -1283,6 +1296,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (options.displayRestrictedRoadSections) {
@@ -1299,6 +1313,10 @@ internal object MapboxRouteLineUtils {
                     .lineCap(LineCap.ROUND)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                        style.layerLineDepthOcclusionFactor(
+                            layerId,
+                            options.lineDepthOcclusionFactor
+                        )
                     }
             }
         }
@@ -1313,6 +1331,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL)) {
@@ -1325,6 +1344,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_CASING)) {
@@ -1337,6 +1357,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_MAIN)) {
@@ -1349,6 +1370,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC)) {
@@ -1361,6 +1383,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (options.displayRestrictedRoadSections) {
@@ -1377,6 +1400,10 @@ internal object MapboxRouteLineUtils {
                     .lineCap(LineCap.ROUND)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                        style.layerLineDepthOcclusionFactor(
+                            layerId,
+                            options.lineDepthOcclusionFactor
+                        )
                     }
             }
         }
@@ -1391,6 +1418,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAIL)) {
@@ -1403,6 +1431,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_CASING)) {
@@ -1415,6 +1444,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_MAIN)) {
@@ -1427,6 +1457,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAFFIC)) {
@@ -1439,6 +1470,7 @@ internal object MapboxRouteLineUtils {
                 .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
                 }
         }
         if (options.displayRestrictedRoadSections) {
@@ -1455,6 +1487,10 @@ internal object MapboxRouteLineUtils {
                     .lineCap(LineCap.ROUND)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                        style.layerLineDepthOcclusionFactor(
+                            layerId,
+                            options.lineDepthOcclusionFactor
+                        )
                     }
             }
         }
@@ -1906,4 +1942,8 @@ internal object MapboxRouteLineUtils {
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_TRAFFIC)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_RESTRICTED)
     }
+}
+
+private fun Style.layerLineDepthOcclusionFactor(layerId: String, factor: Double) {
+    setStyleLayerProperty(layerId, "line-depth-occlusion-factor", Value(factor))
 }

@@ -9,8 +9,10 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -19,6 +21,7 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
+import com.mapbox.navigation.instrumentation_tests.utils.ApproximateDouble
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
@@ -34,9 +37,11 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -541,6 +546,45 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
             result.value!!.alternativeRouteLinesData[0].dynamicData.trimOffset!!.offset,
             0.0000000001
         )
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun lineDepthOcclusionFactorIsAppliedForRouteLine() = sdkTest {
+        val factor = 0.85
+        val options =
+            MapboxRouteLineOptions.Builder(activity).lineDepthOcclusionFactor(factor).build()
+        val routeLineApi = MapboxRouteLineApi(options)
+        val routeLineView = MapboxRouteLineView(options)
+        val style = activity.mapboxMap.getStyle()!!
+        val result = routeLineApi.setNavigationRoutes(
+            listOf(
+                route1,
+                route2,
+                route3,
+            )
+        )
+        routeLineView.renderRouteDrawData(style, result)
+
+        val lineLayers = withTimeoutOrNull(10000) {
+            var lineLayers: List<LineLayer>
+            do {
+                delay(50)
+                lineLayers = style.styleLayers.mapNotNull { style.getLayer(it.id) }
+                    .filterIsInstance(LineLayer::class.java)
+            } while (lineLayers.size < 3) // 3 routes
+            lineLayers
+        } ?: error("layer weren't initialised")
+        val expected = lineLayers.map { it.layerId to ApproximateDouble(factor) }
+        val actual = lineLayers.map {
+            it.layerId to ApproximateDouble(
+                style.getStyleLayerProperty(
+                    it.layerId, "" +
+                        "line-depth-occlusion-factor"
+                ).value.contents as Double
+            )
+        }
+        assertEquals(expected, actual)
     }
 
     private fun getRoute(routeResourceId: Int): NavigationRoute {

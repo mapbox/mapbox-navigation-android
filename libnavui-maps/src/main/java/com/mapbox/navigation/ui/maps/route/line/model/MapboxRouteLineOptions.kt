@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import androidx.annotation.FloatRange
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
@@ -39,6 +40,7 @@ import kotlin.math.abs
  * @param waypointLayerIconAnchor the anchor value, the default is [IconAnchor.CENTER]
  * @param iconPitchAlignment the pitch alignment value used for waypoint icons. The default is [IconPitchAlignment.MAP]
  * @param shareLineGeometrySources enable route line's GeoJson source data sharing between multiple instances of the map.
+ * @param lineDepthOcclusionFactor factor that decreases line layer opacity based on occlusion from 3D objects. Value 0 disables occlusion, value 1 means fully occluded.
  * If this option is enabled for multiple instances of [MapboxRouteLineView]s that are used to draw route lines on multiple maps at the same time,
  * they will all share the GeoJson source to optimize execution time of updates and decrease the memory footprint.
  * **Enable only for instances that should share the geometry of the lines**, leave disabled for instances that should draw geometries distinct from other instances.
@@ -62,7 +64,10 @@ class MapboxRouteLineOptions private constructor(
     val waypointLayerIconAnchor: IconAnchor = IconAnchor.CENTER,
     val iconPitchAlignment: IconPitchAlignment = IconPitchAlignment.MAP,
     @ExperimentalPreviewMapboxNavigationAPI
-    val shareLineGeometrySources: Boolean
+    val shareLineGeometrySources: Boolean,
+    @ExperimentalPreviewMapboxNavigationAPI
+    @FloatRange(from = 0.0, to = 1.0)
+    val lineDepthOcclusionFactor: Double,
 ) {
 
     /**
@@ -87,7 +92,8 @@ class MapboxRouteLineOptions private constructor(
             waypointLayerIconOffset,
             waypointLayerIconAnchor,
             iconPitchAlignment,
-            shareLineGeometrySources
+            shareLineGeometrySources,
+            lineDepthOcclusionFactor,
         )
     }
 
@@ -119,6 +125,7 @@ class MapboxRouteLineOptions private constructor(
         if (waypointLayerIconAnchor != other.waypointLayerIconAnchor) return false
         if (iconPitchAlignment != other.iconPitchAlignment) return false
         if (shareLineGeometrySources != other.shareLineGeometrySources) return false
+        if (lineDepthOcclusionFactor != other.lineDepthOcclusionFactor) return false
 
         return true
     }
@@ -142,6 +149,7 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (waypointLayerIconAnchor.hashCode())
         result = 31 * result + (iconPitchAlignment.hashCode())
         result = 31 * result + (shareLineGeometrySources.hashCode())
+        result = 31 * result + (lineDepthOcclusionFactor.hashCode())
         return result
     }
 
@@ -163,7 +171,8 @@ class MapboxRouteLineOptions private constructor(
             "waypointLayerIconOffset=$waypointLayerIconOffset," +
             "waypointLayerIconAnchor=$waypointLayerIconAnchor," +
             "iconPitchAlignment=$iconPitchAlignment," +
-            "shareLineGeometrySources=$shareLineGeometrySources" +
+            "shareLineGeometrySources=$shareLineGeometrySources," +
+            "lineDepthOcclusionFactor=$lineDepthOcclusionFactor" +
             ")"
     }
 
@@ -208,7 +217,10 @@ class MapboxRouteLineOptions private constructor(
         private var iconOffset: List<Double>,
         private var iconAnchor: IconAnchor,
         private var iconPitchAlignment: IconPitchAlignment,
-        private var shareLineGeometrySources: Boolean
+        private var shareLineGeometrySources: Boolean,
+        @ExperimentalPreviewMapboxNavigationAPI
+        @FloatRange(from = 0.0, to = 1.0)
+        private var lineDepthOcclusionFactor: Double,
     ) {
 
         /**
@@ -231,7 +243,8 @@ class MapboxRouteLineOptions private constructor(
             listOf(0.0, 0.0),
             IconAnchor.CENTER,
             IconPitchAlignment.MAP,
-            false
+            false,
+            0.0
         )
 
         /**
@@ -396,6 +409,25 @@ class MapboxRouteLineOptions private constructor(
             apply { this.shareLineGeometrySources = shareLineGeometrySources }
 
         /**
+         * Decrease line layer opacity based on occlusion from 3D objects.
+         * Value 0 disables occlusion, value 1 means fully occluded.
+         *
+         * @param lineDepthOcclusionFactor occlusion factor, the value should be from 0.0 to 1.0; 0.0 by default
+         * @return the builder
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun lineDepthOcclusionFactor(
+            @FloatRange(from = 0.0, to = 1.0) lineDepthOcclusionFactor: Double
+        ): Builder = apply {
+            if (lineDepthOcclusionFactor !in 0.0..1.0) {
+                throw IllegalArgumentException(
+                    "lineDepthOcclusionFactor should be in range [0.0; 1.0]"
+                )
+            }
+            this.lineDepthOcclusionFactor = lineDepthOcclusionFactor
+        }
+
+        /**
          * @return an instance of [MapboxRouteLineOptions]
          */
         fun build(): MapboxRouteLineOptions {
@@ -434,7 +466,8 @@ class MapboxRouteLineOptions private constructor(
                 iconOffset,
                 iconAnchor,
                 iconPitchAlignment,
-                shareLineGeometrySources
+                shareLineGeometrySources,
+                lineDepthOcclusionFactor,
             )
         }
     }

@@ -75,7 +75,6 @@ class MapboxRouteLineApiRoboTest {
     val nativeRouteParserRule = NativeRouteParserRule()
 
     private val parentJob = SupervisorJob()
-    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
     private val shortRoute by lazy { TestRoute(fileName = "short_route.json") }
     private val routeWithRestrictions by lazy {
@@ -94,7 +93,7 @@ class MapboxRouteLineApiRoboTest {
         mockkObject(InternalJobControlFactory)
         every {
             InternalJobControlFactory.createDefaultScopeJobControl()
-        } returns JobControl(parentJob, testScope)
+        } returns JobControl(parentJob, coroutineRule.coroutineScope)
     }
 
     @After

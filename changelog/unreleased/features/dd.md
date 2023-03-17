@@ -1,0 +1,1 @@
+- Introduced `MapboxRouteLineOptions#lineDepthOcclusionFactor` parameter to control route line layer opacity based on occlusion from 3D objects.

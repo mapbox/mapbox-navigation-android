@@ -5,14 +5,18 @@ import android.graphics.Color
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.Layer
+import com.mapbox.maps.extension.style.layers.addPersistentLayer
+import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.WaypointFactory
@@ -58,6 +62,9 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.SEVERE_CONGESTION
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.line.api.DoubleChecker
+import com.mapbox.navigation.ui.maps.route.line.api.StringChecker
+import com.mapbox.navigation.ui.maps.route.line.api.checkExpression
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
@@ -84,14 +91,19 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.UUID
+import kotlin.reflect.full.declaredMemberProperties
 
+@RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineUtilsTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
 
     private val ctx: Context = mockk()
+    private val tolerance = 0.000001
 
     @Before
     fun setUp() {
@@ -223,10 +235,21 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getRestrictedLineExpression() {
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.2, " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.4476941554901612, [rgba, 0.0, 255.0, 255.0, 1.0], " +
-            "0.4677574367125704, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, " +
-            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.2),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.4476941554901612),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.4677574367125704),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5021643413784516),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5196445159361185),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
         val route = loadNavigationRoute("route-with-restrictions.json")
         val expData = MapboxRouteLineUtils.extractRouteRestrictionData(
             route,
@@ -240,7 +263,7 @@ class MapboxRouteLineUtilsTest {
             expData
         )
 
-        assertEquals(expectedExpression, expression.toString())
+        checkExpression(expectedExpressionContents, expression)
     }
 
     @Test
@@ -248,10 +271,21 @@ class MapboxRouteLineUtilsTest {
         val colorResources = RouteLineColorResources.Builder()
             .restrictedRoadColor(Color.CYAN)
             .build()
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.2, " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.4476941554901612, [rgba, 0.0, 255.0, 255.0, 1.0], " +
-            "0.4677574367125704, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, " +
-            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.2),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.4476941554901612),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.4677574367125704),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5021643413784516),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5196445159361185),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
         val route = loadNavigationRoute("route-with-restrictions.json")
         val expData = MapboxRouteLineUtils.extractRouteRestrictionData(
             route,
@@ -265,7 +299,7 @@ class MapboxRouteLineUtilsTest {
             colorResources
         ).generateExpression()
 
-        assertEquals(expectedExpression, expression.toString())
+        checkExpression(expectedExpressionContents, expression)
     }
 
     @Test
@@ -514,6 +548,59 @@ class MapboxRouteLineUtilsTest {
         verify(exactly = 0) { style.addStyleSource(any(), any()) }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun initializeLayers_whenLayersAreNotInitialized() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils") {
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .lineDepthOcclusionFactor(0.85)
+                .displayRestrictedRoadSections(true)
+                .build()
+            val initializedLineLayersIds = mutableSetOf<String>()
+            val sourcesUsedByLayers = mutableSetOf<String>()
+            val initializedSourceIds = mutableSetOf<String>()
+            val style = mockk<Style>(relaxed = true) {
+                every { styleLayers } returns listOf()
+
+                every { styleSourceExists(any()) } answers {
+                    initializedSourceIds.contains(firstArg())
+                }
+                every { addStyleSource(any(), any()) } answers {
+                    initializedSourceIds.add(firstArg())
+                    ExpectedFactory.createNone()
+                }
+
+                every { addPersistentLayer(any(), any()) } answers {
+                    val layer = secondArg<Layer>()
+                    if (layer is LineLayer) {
+                        initializedLineLayersIds.add(layer.layerId)
+                    }
+
+                    val sourceId = Layer::class.declaredMemberProperties
+                        .first { it.name == "internalSourceId" }
+                        .get(layer) as String?
+                    if (sourceId != null) {
+                        sourcesUsedByLayers.add(sourceId)
+                    }
+                }
+            }
+
+            MapboxRouteLineUtils.initializeLayers(style, options)
+
+            sourcesUsedByLayers.forEach { sourceId ->
+                verify(exactly = 1) {
+                    style.addStyleSource(sourceId, any())
+                }
+            }
+
+            initializedLineLayersIds.forEach { layerId ->
+                verify(exactly = 1) {
+                    style.setStyleLayerProperty(layerId, "line-depth-occlusion-factor", Value(0.85))
+                }
+            }
+        }
+    }
+
     @Test
     fun getBelowLayerIdToUse() {
         val style = mockk<Style> {
@@ -622,16 +709,16 @@ class MapboxRouteLineUtilsTest {
         assertEquals(0.0, result[0].offset, 0.0)
         assertEquals("unknown", result[0].trafficCongestionIdentifier)
         assertEquals("motorway", result[0].roadClass)
-        assertEquals(0.00236427570458575, result[1].offset, 0.0)
+        assertEquals(0.00236427570458575, result[1].offset, tolerance)
         assertEquals("severe", result[1].trafficCongestionIdentifier)
         assertEquals("motorway", result[1].roadClass)
-        assertEquals(0.01736459676474489, result[2].offset, 0.0)
+        assertEquals(0.01736459676474489, result[2].offset, tolerance)
         assertEquals("unknown", result[2].trafficCongestionIdentifier)
         assertEquals("motorway", result[2].roadClass)
-        assertEquals(0.02522030104681694, result[3].offset, 0.0)
+        assertEquals(0.02522030104681694, result[3].offset, tolerance)
         assertEquals("severe", result[3].trafficCongestionIdentifier)
         assertEquals("motorway", result[3].roadClass)
-        assertEquals(0.0629029108487491, result[4].offset, 0.0)
+        assertEquals(0.0629029108487491, result[4].offset, tolerance)
         assertEquals("unknown", result[4].trafficCongestionIdentifier)
         assertEquals("motorway", result[4].roadClass)
     }
@@ -701,13 +788,13 @@ class MapboxRouteLineUtilsTest {
         assertEquals(5, result.size)
         assertEquals(0.0, result[0].offset, 0.0)
         assertEquals(-1, result[0].segmentColor)
-        assertEquals(0.00236427570458575, result[1].offset, 0.0)
+        assertEquals(0.00236427570458575, result[1].offset, tolerance)
         assertEquals(33, result[1].segmentColor)
-        assertEquals(0.01736459676474489, result[2].offset, 0.0)
+        assertEquals(0.01736459676474489, result[2].offset, tolerance)
         assertEquals(-1, result[2].segmentColor)
-        assertEquals(0.02522030104681694, result[3].offset, 0.0)
+        assertEquals(0.02522030104681694, result[3].offset, tolerance)
         assertEquals(33, result[3].segmentColor)
-        assertEquals(0.0629029108487491, result[4].offset, 0.0)
+        assertEquals(0.0629029108487491, result[4].offset, tolerance)
         assertEquals(-1, result[4].segmentColor)
     }
 
@@ -895,22 +982,22 @@ class MapboxRouteLineUtilsTest {
         assertEquals(0.0, result[0].offset, 0.0)
         assertEquals("severe", result[0].trafficCongestionIdentifier)
         assertEquals("motorway", result[0].roadClass)
-        assertEquals(0.00236427570458575, result[1].offset, 0.0)
+        assertEquals(0.00236427570458575, result[1].offset, tolerance)
         assertEquals("unknown", result[1].trafficCongestionIdentifier)
         assertEquals("motorway", result[1].roadClass)
-        assertEquals(0.01736459676474489, result[2].offset, 0.0)
+        assertEquals(0.01736459676474489, result[2].offset, tolerance)
         assertEquals("severe", result[2].trafficCongestionIdentifier)
         assertEquals("motorway", result[2].roadClass)
-        assertEquals(0.1714843563045706, result[3].offset, 0.0)
+        assertEquals(0.1714843563045706, result[3].offset, tolerance)
         assertEquals("severe", result[3].trafficCongestionIdentifier)
         assertEquals("intersection_without_class_fallback", result[3].roadClass)
-        assertEquals(0.19250306326360345, result[4].offset, 0.0)
+        assertEquals(0.19250306326360345, result[4].offset, tolerance)
         assertEquals("severe", result[4].trafficCongestionIdentifier)
         assertEquals("motorway", result[4].roadClass)
-        assertEquals(0.34420704878106756, result[5].offset, 0.0)
+        assertEquals(0.34420704878106756, result[5].offset, tolerance)
         assertEquals("severe", result[5].trafficCongestionIdentifier)
         assertEquals("intersection_without_class_fallback", result[5].roadClass)
-        assertEquals(0.7375706868313839, result[6].offset, 0.0)
+        assertEquals(0.7375706868313839, result[6].offset, tolerance)
         assertEquals("severe", result[6].trafficCongestionIdentifier)
         assertEquals("motorway", result[6].roadClass)
         assertEquals(1.0, result.last().offset, 0.0)
@@ -949,19 +1036,19 @@ class MapboxRouteLineUtilsTest {
 
         assertEquals(0, trafficExpressionData[1].legIndex)
         assertTrue(trafficExpressionData[1].isInRestrictedSection)
-        assertEquals(0.4476941554901612, trafficExpressionData[1].offset, 0.0)
+        assertEquals(0.4476941554901612, trafficExpressionData[1].offset, tolerance)
 
         assertEquals(0, trafficExpressionData[2].legIndex)
         assertFalse(trafficExpressionData[2].isInRestrictedSection)
-        assertEquals(0.4677574367125704, trafficExpressionData[2].offset, 0.0)
+        assertEquals(0.4677574367125704, trafficExpressionData[2].offset, tolerance)
 
         assertEquals(0, trafficExpressionData[3].legIndex)
         assertTrue(trafficExpressionData[3].isInRestrictedSection)
-        assertEquals(0.5021643413784516, trafficExpressionData[3].offset, 0.0)
+        assertEquals(0.5021643413784516, trafficExpressionData[3].offset, tolerance)
 
         assertEquals(0, trafficExpressionData[4].legIndex)
         assertFalse(trafficExpressionData[4].isInRestrictedSection)
-        assertEquals(0.5196445159361185, trafficExpressionData[4].offset, 0.0)
+        assertEquals(0.5196445159361185, trafficExpressionData[4].offset, tolerance)
 
         assertEquals(5, trafficExpressionData.size)
     }
@@ -977,9 +1064,9 @@ class MapboxRouteLineUtilsTest {
 
         assertEquals(22, result.size)
         assertFalse(result[7].isLegOrigin)
-        assertEquals(0.4897719974699625, result[7].offset, 0.0)
+        assertEquals(0.4897719974699625, result[7].offset, tolerance)
         assertTrue(result[8].isLegOrigin)
-        assertEquals(0.4897719974699625, result[8].offset, 0.0)
+        assertEquals(0.4897719974699625, result[8].offset, tolerance)
         assertFalse(result[9].isLegOrigin)
     }
 
@@ -1006,8 +1093,8 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(21, result.size)
-        assertEquals(0.039796278954241426, result[1].offset, 0.0)
-        assertEquals(0.9898280890800685, result.last().offset, 0.0)
+        assertEquals(0.039796278954241426, result[1].offset, tolerance)
+        assertEquals(0.9898280890800685, result.last().offset, tolerance)
     }
 
     @Test
@@ -1985,16 +2072,24 @@ class MapboxRouteLineUtilsTest {
         assertEquals(0.0, result[0].offset, 0.0)
         assertEquals(0, result[0].legIndex)
         assertFalse(result[0].isInRestrictedSection)
-        assertEquals(0.9963424099457971, result[1].offset, 0.0)
+        assertEquals(0.9963424099457971, result[1].offset, tolerance)
         assertEquals(0, result[1].legIndex)
         assertTrue(result[1].isInRestrictedSection)
     }
 
     @Test
     fun `getRestrictedLineExpression with restriction at end of route`() {
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.9963424099457971, " +
-            "[rgba, 0.0, 255.0, 255.0, 1.0], 1.0, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.9963424099457971),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
         val route = loadNavigationRoute("route-with-restrictions-at-end.json")
         val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(
             route,
@@ -2008,7 +2103,7 @@ class MapboxRouteLineUtilsTest {
             expressionData
         )
 
-        assertEquals(expectedExpression, result.toString())
+        checkExpression(expectedExpressionContents, result)
     }
 
     @Test
@@ -2024,7 +2119,7 @@ class MapboxRouteLineUtilsTest {
         assertEquals(0.0, result[0].offset, 0.0)
         assertEquals(0, result[0].legIndex)
         assertTrue(result[0].isInRestrictedSection)
-        assertEquals(0.0036660165533364264, result[1].offset, 0.0)
+        assertEquals(0.0036660165533364264, result[1].offset, tolerance)
         assertEquals(0, result[1].legIndex)
         assertFalse(result[1].isInRestrictedSection)
     }
