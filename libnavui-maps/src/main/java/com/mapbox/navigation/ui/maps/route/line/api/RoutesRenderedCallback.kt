@@ -19,4 +19,11 @@ interface RoutesRenderedCallback {
      * @param ids ids of the routes that were rendered (correspond to [NavigationRoute.id]).
      */
     fun onRoutesRendered(ids: List<String>)
+
+    /**
+     * Routes rendering has been cancelled, because newer routes are queued to be rendered.
+     *
+     * @param ids ids of the routes whose rendering has been cancelled (correspond to [NavigationRoute.id]).
+     */
+    fun onRoutesRenderingCancelled(ids: List<String>)
 }

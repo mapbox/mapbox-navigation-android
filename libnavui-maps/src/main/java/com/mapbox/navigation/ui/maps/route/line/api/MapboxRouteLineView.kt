@@ -1,13 +1,13 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.toValue
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.observable.eventdata.SourceDataLoadedEventData
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.Layer
@@ -15,7 +15,6 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
-import com.mapbox.maps.plugin.delegates.listeners.OnSourceDataLoadedListener
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerGroupSource
@@ -90,11 +89,13 @@ import org.jetbrains.annotations.TestOnly
  * If you're recreating the [MapboxRouteLineView] instance, for example to change the
  * [MapboxRouteLineOptions], make sure that your first interaction restores the state and re-applies
  * the options by calling [MapboxRouteLineApi.getRouteDrawData] and passing the result to [MapboxRouteLineView.renderRouteDrawDataInternal].
- *
- * @param options resource options used rendering the route line on the map
  */
 @UiThread
-class MapboxRouteLineView(options: MapboxRouteLineOptions) {
+class MapboxRouteLineView @VisibleForTesting internal constructor(
+    options: MapboxRouteLineOptions,
+    private val sourceToFeatureMap: MutableMap<RouteLineSourceKey, RouteLineFeatureId>,
+    private val routesExpector: RoutesExpector = RoutesExpector(sourceToFeatureMap),
+) {
 
     private var rebuildLayersOnFirstRender: Boolean = true
 
@@ -113,11 +114,20 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
         )
         set
 
-    private val sourceToFeatureMap = mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
-        Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
-        Pair(MapboxRouteLineUtils.layerGroup2SourceKey, RouteLineFeatureId(null)),
-        Pair(MapboxRouteLineUtils.layerGroup3SourceKey, RouteLineFeatureId(null))
+    /**
+     * Creates [MapboxRouteLineView] instance.
+     *
+     * @param options resource options used rendering the route line on the map
+     */
+    constructor(options: MapboxRouteLineOptions) : this(
+        options,
+        mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
+            Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
+            Pair(MapboxRouteLineUtils.layerGroup2SourceKey, RouteLineFeatureId(null)),
+            Pair(MapboxRouteLineUtils.layerGroup3SourceKey, RouteLineFeatureId(null))
+        )
     )
+
     private val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
     private val mutex = Mutex()
 
@@ -219,7 +229,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                     val expectedRoutes: Set<String> = setOfNotNull(routeDrawData.value?.primaryRouteLineData?.featureCollection?.features()?.firstOrNull()?.id()) +
                         (routeDrawData.value?.alternativeRouteLinesData?.mapNotNull { it.featureCollection.features()?.firstOrNull()?.id() } ?: emptyList()).toSet() -
                         hiddenSourceGroups.mapNotNull { sourceToFeatureMap[it]?.id() }.toSet()
-                    expectRoutes(expectedRoutes, callback)
+                    routesExpector.expectNewRoutes(expectedRoutes, callback)
                 }
                 val primaryRouteTrafficVisibility = getTrafficVisibility(style)
                 val primaryRouteVisibility = getPrimaryRouteVisibility(style)
@@ -554,7 +564,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                 primaryGroup?.let { hiddenSourceGroups.remove(it) }
                 if (callback != null) {
                     val expectedRoute = primaryGroup?.let { sourceToFeatureMap[it]?.id() }
-                    expectRoutes(setOfNotNull(expectedRoute), callback)
+                    routesExpector.expectNewRoutes(setOfNotNull(expectedRoute), callback)
                 }
                 getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, primaryGroup)
                     .plus(maskingLayerIds)
@@ -612,7 +622,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
                 alternativeKeys.forEach { hiddenSourceGroups.remove(it) }
                 if (callback != null) {
                     val expectedRoutes = (sourceToFeatureMap.values - (primaryRouteKey?.let { sourceToFeatureMap[it] })).mapNotNull { it?.id() }.toSet()
-                    expectRoutes(expectedRoutes, callback)
+                    routesExpector.expectNewRoutes(expectedRoutes, callback)
                 }
 
                 val primaryRouteLineLayers =
@@ -1218,27 +1228,5 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
         }
         MapboxRouteLineUtils.removeLayersAndSources(style)
         MapboxRouteLineUtils.initializeLayers(style, options)
-    }
-
-    private fun expectRoutes(expectedRoutes: Set<String>, callback: RoutesRenderedCallback) {
-        val renderedRoutes = mutableSetOf<String>()
-        if (expectedRoutes.isEmpty()) {
-            callback.onRoutesRendered(emptyList())
-        } else {
-            val map = callback.map
-            val listener = object : OnSourceDataLoadedListener {
-                override fun onSourceDataLoaded(eventData: SourceDataLoadedEventData) {
-                    if (eventData.loaded == true) {
-                        val routeId = sourceToFeatureMap[RouteLineSourceKey(eventData.id)]?.id()
-                        routeId?.let { renderedRoutes.add(it) }
-                        if (expectedRoutes == renderedRoutes) {
-                            map.removeOnSourceDataLoadedListener(this)
-                            callback.onRoutesRendered(renderedRoutes.toList())
-                        }
-                    }
-                }
-            }
-            map.addOnSourceDataLoadedListener(listener)
-        }
     }
 }

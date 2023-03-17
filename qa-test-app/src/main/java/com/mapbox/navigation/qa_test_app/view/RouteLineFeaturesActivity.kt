@@ -108,6 +108,10 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
             Log.i(LOG_CATEGORY, "Routes rendered: $ids")
         }
 
+        override fun onRoutesRenderingCancelled(ids: List<String>) {
+            Log.i(LOG_CATEGORY, "Routes rendering cancelled: $ids")
+        }
+
     }
 
     private var showTraffic = true
