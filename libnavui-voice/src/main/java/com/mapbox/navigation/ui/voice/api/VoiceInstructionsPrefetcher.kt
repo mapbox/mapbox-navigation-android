@@ -70,6 +70,11 @@ class VoiceInstructionsPrefetcher internal constructor(
     }
 
     private fun onRoutesChanged(result: RoutesUpdatedResult) {
+        val firstInstruction = result.navigationRoutes.firstOrNull()?.directionsRoute
+            ?.legs()?.firstOrNull()
+            ?.steps()?.firstOrNull()
+            ?.voiceInstructions()?.firstOrNull()
+        speechApi.firstInstructionChecker.onNewFirstInstruction(firstInstruction)
         if (result.reason in ignoredRouteUpdateReasons) {
             return
         }

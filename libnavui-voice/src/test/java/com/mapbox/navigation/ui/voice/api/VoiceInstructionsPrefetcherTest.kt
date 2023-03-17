@@ -30,13 +30,20 @@ class VoiceInstructionsPrefetcherTest {
     private val timePercentageToTriggerAfter = 0.5
     private val nextVoiceInstructionsProvider = mockk<NextVoiceInstructionsProvider>(relaxed = true)
     private val timeProvider = mockk<Time>(relaxed = true)
-    private val speechAPI = mockk<MapboxSpeechApi>(relaxed = true)
+    private val firstInstructionChecker = mockk<FirstVoiceInstructionsChecker>(relaxed = true)
+    private val speechAPI = mockk<MapboxSpeechApi>(relaxed = true) {
+        every {
+            firstInstructionChecker
+        } returns this@VoiceInstructionsPrefetcherTest.firstInstructionChecker
+    }
     private val stepDistance = 200.0
     private val stepDuration = 90.0
     private val legIndex = 1
     private val stepIndex = 2
     private val stepDistanceRemaining = 8.9f
     private val stepDurationRemaining = 4.5
+    private val firstVoiceInstruction =
+        VoiceInstructions.builder().announcement("turn around").build()
     private val instructionsToDownload = listOf(
         VoiceInstructions.builder().announcement("ann1").build(),
         VoiceInstructions.builder().announcement("ann2").build()
@@ -103,6 +110,7 @@ class VoiceInstructionsPrefetcherTest {
             stepDuration,
             stepDistance
         )
+        verify { firstInstructionChecker.onNewFirstInstruction(firstVoiceInstruction) }
         verify { nextVoiceInstructionsProvider.getNextVoiceInstructions(expectedData) }
         verify { speechAPI.predownload(instructionsToDownload) }
     }
@@ -121,6 +129,7 @@ class VoiceInstructionsPrefetcherTest {
             stepDuration,
             stepDistance
         )
+        verify { firstInstructionChecker.onNewFirstInstruction(firstVoiceInstruction) }
         verify { nextVoiceInstructionsProvider.getNextVoiceInstructions(expectedData) }
         verify { speechAPI.predownload(instructionsToDownload) }
     }
@@ -132,6 +141,7 @@ class VoiceInstructionsPrefetcherTest {
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
         )
 
+        verify { firstInstructionChecker.onNewFirstInstruction(firstVoiceInstruction) }
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
@@ -142,16 +152,17 @@ class VoiceInstructionsPrefetcherTest {
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE)
         )
 
+        verify { firstInstructionChecker.onNewFirstInstruction(firstVoiceInstruction) }
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
     @Test
     fun `onRoutesChanged should not trigger download for reason CLEANUP`() {
-        val route = validRoute()
         onRoutesChanged(
-            routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+            routesUpdatedResult(emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
         )
 
+        verify { firstInstructionChecker.onNewFirstInstruction(null) }
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
@@ -199,12 +210,35 @@ class VoiceInstructionsPrefetcherTest {
     }
 
     @Test
+    fun `onRoutesChanged should reset first instruction if steps instructions are null`() {
+        val route =
+            validRoute(listOf(validLeg().toBuilder().steps(listOf(validStep(null))).build()))
+        onRoutesChanged(
+            routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
+
+        verify { firstInstructionChecker.onNewFirstInstruction(null) }
+    }
+
+    @Test
+    fun `onRoutesChanged should reset first instruction if steps instructions are empty`() {
+        val route =
+            validRoute(listOf(validLeg().toBuilder().steps(listOf(validStep(emptyList()))).build()))
+        onRoutesChanged(
+            routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
+
+        verify { firstInstructionChecker.onNewFirstInstruction(null) }
+    }
+
+    @Test
     fun `onRoutesChanged should not trigger download if steps are null`() {
         val route = validRoute(listOf(validLeg().toBuilder().steps(null).build()))
         onRoutesChanged(
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
+        verify { firstInstructionChecker.onNewFirstInstruction(null) }
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
@@ -215,6 +249,7 @@ class VoiceInstructionsPrefetcherTest {
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
+        verify { firstInstructionChecker.onNewFirstInstruction(null) }
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
@@ -225,6 +260,7 @@ class VoiceInstructionsPrefetcherTest {
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
+        verify { firstInstructionChecker.onNewFirstInstruction(null) }
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
@@ -235,6 +271,7 @@ class VoiceInstructionsPrefetcherTest {
             routesUpdatedResult(listOf(route), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
+        verify { firstInstructionChecker.onNewFirstInstruction(null) }
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
@@ -244,6 +281,7 @@ class VoiceInstructionsPrefetcherTest {
             routesUpdatedResult(emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
         )
 
+        verify { firstInstructionChecker.onNewFirstInstruction(null) }
         verify(exactly = 0) { speechAPI.predownload(any()) }
     }
 
@@ -379,12 +417,18 @@ class VoiceInstructionsPrefetcherTest {
         .steps(listOf(validStep()))
         .build()
 
-    private fun validStep(): LegStep = LegStep.builder()
+    private fun validStep(
+        instructions: List<VoiceInstructions>? = listOf(
+            firstVoiceInstruction,
+            VoiceInstructions.builder().announcement("turn right").build()
+        )
+    ): LegStep = LegStep.builder()
         .distance(stepDistance)
         .duration(stepDuration)
         .mode("mode")
         .maneuver(StepManeuver.builder().rawLocation(doubleArrayOf(1.1, 2.2)).build())
         .weight(1.0)
+        .apply { instructions?.let { voiceInstructions(it) } }
         .build()
 
     private fun validRouteProgress(

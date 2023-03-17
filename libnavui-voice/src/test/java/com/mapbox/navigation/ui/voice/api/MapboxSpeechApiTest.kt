@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.voice.api
 
-import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -10,6 +9,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.VoiceState
+import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import com.mapbox.navigation.ui.voice.testutils.Fixtures
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
@@ -45,6 +45,7 @@ class MapboxSpeechApiTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
     private val voiceAPI = mockk<MapboxVoiceApi>(relaxed = true)
+    private val firstInstructionsChecker = mockk<FirstVoiceInstructionsChecker>(relaxed = true)
     private val parentJob = SupervisorJob()
     private val predownloadParentJob = SupervisorJob()
     private var exceptions: MutableList<Throwable> = mutableListOf()
@@ -85,9 +86,6 @@ class MapboxSpeechApiTest {
 
     @Test
     fun `generate voice file onAvailable`() = coroutineRule.runBlockingTest {
-        val aMockedContext: Context = mockk(relaxed = true)
-        val anyAccessToken = "pk.123"
-        val anyLanguage = Locale.US.language
         val mockedVoiceInstructions: VoiceInstructions = mockk()
         val anAnnouncement = "Turn right onto Frederick Road, Maryland 3 55."
         val aSsmlAnnouncement = """
@@ -106,7 +104,7 @@ class MapboxSpeechApiTest {
         coEvery {
             voiceAPI.retrieveVoiceFile(any())
         } returns VoiceState.VoiceFile(mockedInstructionFile)
-        val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
+        val mapboxSpeechApi = createMapboxSpeechApi()
 
         mapboxSpeechApi.generate(mockedVoiceInstructions, speechConsumer)
 
@@ -128,7 +126,7 @@ class MapboxSpeechApiTest {
             voiceAPI.retrieveVoiceFile(voiceInstructions)
         } returns VoiceState.VoiceError("Some error message")
 
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.generate(voiceInstructions, speechConsumer)
         val result = speechErrorCapture.captured
 
@@ -154,17 +152,145 @@ class MapboxSpeechApiTest {
             voiceAPI.retrieveVoiceFile(voiceInstructions)
         } returns VoiceState.VoiceError("Some error message")
 
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.generate(voiceInstructions, speechConsumer)
 
         assertTrue(exceptions[0] is java.lang.IllegalStateException)
     }
 
     @Test
+    fun `generatePredownloaded for first instruction, cached value appears later`() =
+        coroutineRule.runBlockingTest {
+            val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val sut = createMapboxSpeechApi()
+            val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
+            every { firstInstructionsChecker.isFirstVoiceInstruction(instruction) } returns true
+
+            sut.generatePredownloaded(instruction, consumer)
+
+            coVerify(exactly = 0) { consumer.accept(any()) }
+
+            val file = mockk<File>(relaxed = true)
+            val speechAnnouncement =
+                SpeechAnnouncement.Builder("turn up and down").file(file).build()
+            coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
+            sut.predownload(listOf(instruction))
+
+            coVerify(exactly = 1) {
+                consumer.accept(match { it.value!!.announcement == speechAnnouncement })
+            }
+        }
+
+    @Test
+    fun `generatePredownloaded for first instruction, cached error appears later`() =
+        coroutineRule.runBlockingTest {
+            val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val sut = createMapboxSpeechApi()
+            val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
+            every { firstInstructionsChecker.isFirstVoiceInstruction(instruction) } returns true
+
+            sut.generatePredownloaded(instruction, consumer)
+
+            coVerify(exactly = 0) { consumer.accept(any()) }
+
+            coEvery {
+                voiceAPI.retrieveVoiceFile(instruction)
+            } returns VoiceState.VoiceError("exception")
+            sut.predownload(listOf(instruction))
+
+            coVerify(exactly = 1) {
+                consumer.accept(match { it.isError })
+            }
+        }
+
+    @Test
+    fun `generatePredownloaded for first instruction, has cached value`() =
+        coroutineRule.runBlockingTest {
+            val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val sut = createMapboxSpeechApi()
+            val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
+            every { firstInstructionsChecker.isFirstVoiceInstruction(instruction) } returns true
+            val file = mockk<File>(relaxed = true)
+            val speechAnnouncement =
+                SpeechAnnouncement.Builder("turn up and down").file(file).build()
+            coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
+            sut.predownload(listOf(instruction))
+
+            sut.generatePredownloaded(instruction, consumer)
+
+            coVerify(exactly = 1) {
+                consumer.accept(match { it.value!!.announcement == speechAnnouncement })
+            }
+        }
+
+    @Test
+    fun `generatePredownloaded for first instruction, has cached error`() =
+        coroutineRule.runBlockingTest {
+            val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val sut = createMapboxSpeechApi()
+            val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
+            every { firstInstructionsChecker.isFirstVoiceInstruction(instruction) } returns true
+            coEvery {
+                voiceAPI.retrieveVoiceFile(instruction)
+            } returns VoiceState.VoiceError("exception")
+            sut.predownload(listOf(instruction))
+
+            sut.generatePredownloaded(instruction, consumer)
+
+            coVerify(exactly = 1) {
+                consumer.accept(match { it.isError })
+            }
+        }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `generatePredownloaded for first instruction doesn't get cancelled by another generatePredownloaded`() =
+        coroutineRule.runBlockingTest {
+            val consumer1: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val consumer2: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val sut = createMapboxSpeechApi()
+            val instruction1 = VoiceInstructions.builder().announcement("turn up and down").build()
+            val instruction2 = VoiceInstructions.builder().announcement("dance and jump").build()
+            every { firstInstructionsChecker.isFirstVoiceInstruction(instruction1) } returns true
+            every { firstInstructionsChecker.isFirstVoiceInstruction(instruction2) } returns true
+
+            sut.generatePredownloaded(instruction1, consumer1)
+
+            coVerify(exactly = 0) { consumer1.accept(any()) }
+
+            sut.generatePredownloaded(instruction2, consumer2)
+
+            val file1 = mockk<File>(relaxed = true)
+            val file2 = mockk<File>(relaxed = true)
+            val speechAnnouncement1 = SpeechAnnouncement.Builder("turn up and down")
+                .file(file1)
+                .build()
+            coEvery { voiceAPI.retrieveVoiceFile(instruction1) } returns VoiceState.VoiceFile(file1)
+            val speechAnnouncement2 = SpeechAnnouncement.Builder("dance and jump")
+                .file(file2)
+                .build()
+            coEvery { voiceAPI.retrieveVoiceFile(instruction2) } returns VoiceState.VoiceFile(file2)
+            sut.predownload(listOf(instruction1, instruction2))
+
+            coVerify(exactly = 1) {
+                consumer1.accept(match { it.value?.announcement == speechAnnouncement1 })
+            }
+            coVerify(exactly = 1) {
+                consumer2.accept(match { it.value?.announcement == speechAnnouncement2 })
+            }
+        }
+
+    @Test
     fun `generatePredownloaded for invalid instruction`() = coroutineRule.runBlockingTest {
         val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
             mockk(relaxed = true)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.generatePredownloaded(VoiceInstructions.builder().build(), consumer)
 
@@ -178,12 +304,30 @@ class MapboxSpeechApiTest {
     fun `generatePredownloaded no cached value`() = coroutineRule.runBlockingTest {
         val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
             mockk(relaxed = true)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.generatePredownloaded(
             VoiceInstructions.builder().announcement("turn up and down").build(),
             consumer
         )
+
+        coVerify(exactly = 1) {
+            consumer.accept(match { it.isError })
+        }
+    }
+
+    @Test
+    fun `generatePredownloaded has cached error`() = coroutineRule.runBlockingTest {
+        val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+            mockk(relaxed = true)
+        val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
+        coEvery {
+            voiceAPI.retrieveVoiceFile(instruction)
+        } returns VoiceState.VoiceError("exception")
+        val sut = createMapboxSpeechApi()
+        sut.predownload(listOf(instruction))
+
+        sut.generatePredownloaded(instruction, consumer)
 
         coVerify(exactly = 1) {
             consumer.accept(match { it.isError })
@@ -198,7 +342,7 @@ class MapboxSpeechApiTest {
         val file = mockk<File>(relaxed = true)
         val speechAnnouncement = SpeechAnnouncement.Builder("turn up and down").file(file).build()
         coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.predownload(listOf(instruction))
 
         sut.generatePredownloaded(instruction, consumer)
@@ -209,23 +353,25 @@ class MapboxSpeechApiTest {
     }
 
     @Test
-    fun `generatePredownloaded has removed via clean cached value`() = coroutineRule.runBlockingTest {
-        val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
-            mockk(relaxed = true)
-        val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
-        val file = mockk<File>(relaxed = true)
-        val speechAnnouncement = SpeechAnnouncement.Builder("turn up and down").file(file).build()
-        coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
-        sut.predownload(listOf(instruction))
-        sut.clean(speechAnnouncement)
+    fun `generatePredownloaded has removed via clean cached value`() =
+        coroutineRule.runBlockingTest {
+            val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
+            val file = mockk<File>(relaxed = true)
+            val speechAnnouncement =
+                SpeechAnnouncement.Builder("turn up and down").file(file).build()
+            coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
+            val sut = createMapboxSpeechApi()
+            sut.predownload(listOf(instruction))
+            sut.clean(speechAnnouncement)
 
-        sut.generatePredownloaded(instruction, consumer)
+            sut.generatePredownloaded(instruction, consumer)
 
-        coVerify(exactly = 1) {
-            consumer.accept(match { it.isError })
+            coVerify(exactly = 1) {
+                consumer.accept(match { it.isError })
+            }
         }
-    }
 
     @Test
     fun `generatePredownloaded, another cached value is cleaned`() = coroutineRule.runBlockingTest {
@@ -235,7 +381,7 @@ class MapboxSpeechApiTest {
         val file = mockk<File>(relaxed = true)
         val speechAnnouncement = SpeechAnnouncement.Builder("turn up and down").file(file).build()
         coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.predownload(listOf(instruction))
         sut.clean(SpeechAnnouncement.Builder("announcement").build())
 
@@ -247,46 +393,49 @@ class MapboxSpeechApiTest {
     }
 
     @Test
-    fun `generatePredownloaded, fallback cached value is cleaned`() = coroutineRule.runBlockingTest {
-        val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
-            mockk(relaxed = true)
-        val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
-        val file = mockk<File>(relaxed = true)
-        val speechAnnouncement = SpeechAnnouncement.Builder("turn up and down").file(file).build()
-        val fallbackAnnouncement = SpeechAnnouncement.Builder("turn up and down").build()
-        coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
-        sut.predownload(listOf(instruction))
-        sut.clean(fallbackAnnouncement)
+    fun `generatePredownloaded, fallback cached value is cleaned`() =
+        coroutineRule.runBlockingTest {
+            val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
+            val file = mockk<File>(relaxed = true)
+            val speechAnnouncement =
+                SpeechAnnouncement.Builder("turn up and down").file(file).build()
+            val fallbackAnnouncement = SpeechAnnouncement.Builder("turn up and down").build()
+            coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
+            val sut = createMapboxSpeechApi()
+            sut.predownload(listOf(instruction))
+            sut.clean(fallbackAnnouncement)
 
-        sut.generatePredownloaded(instruction, consumer)
+            sut.generatePredownloaded(instruction, consumer)
 
-        coVerify(exactly = 1) {
-            consumer.accept(match { it.value!!.announcement == speechAnnouncement })
+            coVerify(exactly = 1) {
+                consumer.accept(match { it.value!!.announcement == speechAnnouncement })
+            }
         }
-    }
 
     @Test
-    fun `generatePredownloaded has removed via destroy cached value`() = coroutineRule.runBlockingTest {
-        val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
-            mockk(relaxed = true)
-        val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
-        val file = mockk<File>(relaxed = true)
-        coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
-        sut.predownload(listOf(instruction))
-        sut.cancelPredownload()
+    fun `generatePredownloaded has removed via destroy cached value`() =
+        coroutineRule.runBlockingTest {
+            val consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
+                mockk(relaxed = true)
+            val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
+            val file = mockk<File>(relaxed = true)
+            coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceFile(file)
+            val sut = createMapboxSpeechApi()
+            sut.predownload(listOf(instruction))
+            sut.cancelPredownload()
 
-        sut.generatePredownloaded(instruction, consumer)
+            sut.generatePredownloaded(instruction, consumer)
 
-        coVerify(exactly = 1) {
-            consumer.accept(match { it.isError })
+            coVerify(exactly = 1) {
+                consumer.accept(match { it.isError })
+            }
         }
-    }
 
     @Test
     fun `predownload with empty list`() = coroutineRule.runBlockingTest {
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.predownload(emptyList())
 
@@ -295,7 +444,7 @@ class MapboxSpeechApiTest {
 
     @Test
     fun `predownload with invalid instruction`() = coroutineRule.runBlockingTest {
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.predownload(listOf(VoiceInstructions.builder().build()))
 
@@ -305,7 +454,7 @@ class MapboxSpeechApiTest {
     @Test
     fun `predownload with new instruction`() = coroutineRule.runBlockingTest {
         val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.predownload(listOf(instruction))
 
@@ -320,7 +469,7 @@ class MapboxSpeechApiTest {
         coEvery {
             voiceAPI.retrieveVoiceFile(any())
         } returns VoiceState.VoiceFile(mockk(relaxed = true))
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.predownload(listOf(instruction))
         clearMocks(voiceAPI, answers = false)
@@ -337,7 +486,7 @@ class MapboxSpeechApiTest {
         coEvery {
             voiceAPI.retrieveVoiceFile(any())
         } returns VoiceState.VoiceFile(mockk(relaxed = true))
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.predownload(listOf(instruction))
         clearMocks(voiceAPI, answers = false)
@@ -351,7 +500,7 @@ class MapboxSpeechApiTest {
     fun `predownload with multiple new instructions`() = coroutineRule.runBlockingTest {
         val instruction1 = VoiceInstructions.builder().announcement("turn up and down").build()
         val instruction2 = VoiceInstructions.builder().announcement("dance and jump").build()
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.predownload(listOf(instruction1, instruction2))
 
@@ -365,7 +514,7 @@ class MapboxSpeechApiTest {
     fun `failed download does not save instruction`() = coroutineRule.runBlockingTest {
         val instruction = VoiceInstructions.builder().announcement("turn up and down").build()
         coEvery { voiceAPI.retrieveVoiceFile(instruction) } returns VoiceState.VoiceError("")
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.predownload(listOf(instruction))
         clearMocks(voiceAPI, answers = false)
@@ -387,7 +536,7 @@ class MapboxSpeechApiTest {
         coEvery {
             voiceAPI.retrieveVoiceFile(instruction2)
         } returns VoiceState.VoiceFile(file2)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.predownload(listOf(instruction1, instruction2))
         clearMocks(voiceAPI, answers = false)
 
@@ -409,7 +558,7 @@ class MapboxSpeechApiTest {
         coEvery {
             voiceAPI.retrieveVoiceFile(any())
         } returns VoiceState.VoiceFile(mockk(relaxed = true))
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.predownload(listOf(instruction1, instruction2))
         clearMocks(voiceAPI, answers = false)
 
@@ -429,7 +578,7 @@ class MapboxSpeechApiTest {
         coEvery {
             voiceAPI.retrieveVoiceFile(any())
         } returns VoiceState.VoiceFile(mockk(relaxed = true))
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.predownload(listOf(instruction1, instruction2))
         clearMocks(voiceAPI, answers = false)
 
@@ -453,7 +602,7 @@ class MapboxSpeechApiTest {
         coEvery {
             voiceAPI.retrieveVoiceFile(any())
         } returns VoiceState.VoiceFile(mockk(relaxed = true))
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.predownload(listOf(instruction1, instruction2))
         clearMocks(voiceAPI, answers = false)
 
@@ -473,7 +622,7 @@ class MapboxSpeechApiTest {
         coEvery {
             voiceAPI.retrieveVoiceFile(any())
         } returns VoiceState.VoiceFile(mockk(relaxed = true))
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.predownload(listOf(instruction1, instruction2))
         clearMocks(voiceAPI, answers = false)
 
@@ -488,10 +637,7 @@ class MapboxSpeechApiTest {
 
     @Test
     fun `clean with no instructions`() {
-        val aMockedContext: Context = mockk(relaxed = true)
-        val anyAccessToken = "pk.123"
-        val anyLanguage = Locale.US.language
-        val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
+        val mapboxSpeechApi = createMapboxSpeechApi()
         val anyAnnouncement: SpeechAnnouncement = mockk(relaxed = true)
 
         mapboxSpeechApi.clean(anyAnnouncement)
@@ -503,7 +649,7 @@ class MapboxSpeechApiTest {
 
     @Test
     fun `destroy with no instructions`() {
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
 
         sut.cancelPredownload()
 
@@ -520,7 +666,7 @@ class MapboxSpeechApiTest {
         val announcement2 = SpeechAnnouncement.Builder("dance and jump").file(file2).build()
         coEvery { voiceAPI.retrieveVoiceFile(instruction1) } returns VoiceState.VoiceFile(file1)
         coEvery { voiceAPI.retrieveVoiceFile(instruction2) } returns VoiceState.VoiceFile(file2)
-        val sut = MapboxSpeechApi(mockk(relaxed = true), "pk.123", Locale.US.language)
+        val sut = createMapboxSpeechApi()
         sut.predownload(listOf(instruction1, instruction2))
         clearMocks(voiceAPI, answers = false)
 
@@ -536,5 +682,15 @@ class MapboxSpeechApiTest {
             voiceAPI.retrieveVoiceFile(instruction1)
             voiceAPI.retrieveVoiceFile(instruction2)
         }
+    }
+
+    private fun createMapboxSpeechApi(): MapboxSpeechApi {
+        return MapboxSpeechApi(
+            mockk(relaxed = true),
+            "pk.123",
+            Locale.US.language,
+            MapboxSpeechApiOptions.Builder().build(),
+            firstInstructionsChecker
+        )
     }
 }
