@@ -1064,6 +1064,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public boolean getDisplayRestrictedRoadSections();
     method public boolean getDisplaySoftGradientForTraffic();
     method public com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment getIconPitchAlignment();
+    method public double getLineDepthOcclusionFactor();
     method public android.graphics.drawable.Drawable getOriginIcon();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources getResourceProvider();
     method public String? getRouteLineBelowLayerId();
@@ -1080,6 +1081,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final boolean displayRestrictedRoadSections;
     property public final boolean displaySoftGradientForTraffic;
     property public final com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment;
+    property public final double lineDepthOcclusionFactor;
     property public final android.graphics.drawable.Drawable originIcon;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider;
     property public final String? routeLineBelowLayerId;
@@ -1099,6 +1101,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displayRestrictedRoadSections(boolean displayRestrictedRoadSections);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displaySoftGradientForTraffic(boolean enable);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder iconPitchAlignment(com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder lineDepthOcclusionFactor(@FloatRange(from=0.0, to=1.0) double lineDepthOcclusionFactor);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder shareLineGeometrySources(boolean shareLineGeometrySources);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder softGradientTransition(int transitionDistance);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder styleInactiveRouteLegsIndependently(boolean enable);

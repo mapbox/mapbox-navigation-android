@@ -58,6 +58,9 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ORIGIN_MARKER_NAM
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.line.api.DoubleChecker
+import com.mapbox.navigation.ui.maps.route.line.api.StringChecker
+import com.mapbox.navigation.ui.maps.route.line.api.checkExpression
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
@@ -115,7 +118,7 @@ class MapboxRouteLineUtilsRoboTest {
         val mockLayer = mockk<StyleObjectInfo> {
             every { id } returns LocationComponentConstants.MODEL_LAYER
         }
-        val style = mockk<Style> {
+        val style = mockk<Style>(relaxed = true) {
             every { styleLayers } returns listOf(mockLayer)
             every { styleSourceExists(LAYER_GROUP_1_SOURCE_ID) } returns false
             every { styleSourceExists(LAYER_GROUP_2_SOURCE_ID) } returns false
@@ -945,17 +948,30 @@ class MapboxRouteLineUtilsRoboTest {
 
     @Test
     fun getTrafficLineExpressionSoftGradient() {
-        val expectedExpression = "[interpolate, [linear], [line-progress], " +
-            "0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.4522143415383129, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+        val expectedExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4522143415383129),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
             // notice this value (below) minus the stopGap value equals the previous value (above)
-            "0.4677574367125704, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.48662124620419406, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.5021643413784516, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.8435770151055655, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.859120110279823, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.8746827711270166, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.8902258663012742, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+            DoubleChecker(0.4677574367125704),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.48662124620419406),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5021643413784516),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.8435770151055655),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.859120110279823),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8746827711270166),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8902258663012742),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
@@ -974,21 +990,34 @@ class MapboxRouteLineUtilsRoboTest {
             segments
         )
 
-        assertEquals(expectedExpression, result.toString())
+        checkExpression(expectedExpressionContents, result)
     }
 
     @Test
     fun getTrafficLineExpressionSoftGradient_offsetGreaterThanZero() {
-        val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.46999999999, " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.47, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.48662124620419406, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5021643413784516, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8435770151055655, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.859120110279823, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8746827711270166, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8902258663012742, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expectedExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.46999999999),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.47),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.48662124620419406),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5021643413784516),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.8435770151055655),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.859120110279823),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8746827711270166),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8902258663012742),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
@@ -1007,19 +1036,32 @@ class MapboxRouteLineUtilsRoboTest {
             segments
         )
 
-        assertEquals(expectedExpression, result.toString())
+        checkExpression(expectedExpressionContents, result)
     }
 
     @Test
     fun getTrafficLineExpressionSoftGradient_whenStopGapOffsetGreaterThanItemOffset() {
-        val expectedExpression = "[interpolate, [linear], [line-progress], " +
-            "0.0, [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.8454666619937382, [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.8454666620037382, [rgba, 86.0, 168.0, 251.0, 1.0], " + // this is the value to notice
-            "0.8454666620137382, [rgba, 86.0, 168.0, 251.0, 1.0], " + // this is the value to notice
-            "0.859120110279823, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.8746827711270166, [rgba, 255.0, 149.0, 0.0, 1.0], " +
-            "0.8902258663012742, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expectedExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.8454666619937382),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            // this is the value to notice
+            DoubleChecker(0.8454666620037382),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            // this is the value to notice
+            DoubleChecker(0.8454666620137382),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.859120110279823),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8746827711270166),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8902258663012742),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
@@ -1038,23 +1080,37 @@ class MapboxRouteLineUtilsRoboTest {
             segments
         )
 
-        assertEquals(expectedExpression, result.toString())
+        checkExpression(expectedExpressionContents, result)
     }
 
     @Test
     fun getTrafficLineExpressionSoftGradient_withExtremelySmallDistanceOffset() {
-        val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
+        val expectedExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
             // notice no stop added before the vanishing point
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 1.0267342531733E-12, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4522143415383129, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4677574367125704, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.48662124620419406, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5021643413784516, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8435770151055655, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.859120110279823, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8746827711270166, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8902258663012742, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(1.0267342531733E-12),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4522143415383129),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4677574367125704),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.48662124620419406),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5021643413784516),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.8435770151055655),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.859120110279823),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8746827711270166),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8902258663012742),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
@@ -1073,23 +1129,37 @@ class MapboxRouteLineUtilsRoboTest {
             segments
         )
 
-        assertEquals(expectedExpression, result.toString())
+        checkExpression(expectedExpressionContents, result)
     }
 
     @Test
     fun getTrafficLineExpressionSoftGradient_withOffsetEqualToVanishPointStopGap() {
-        val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
+        val expectedExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
             // notice no stop added before the vanishing point
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 1.0E-11, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4522143415383129, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4677574367125704, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.48662124620419406, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5021643413784516, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8435770151055655, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.859120110279823, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8746827711270166, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8902258663012742, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(1.0E-11),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4522143415383129),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4677574367125704),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.48662124620419406),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5021643413784516),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.8435770151055655),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.859120110279823),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8746827711270166),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8902258663012742),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
@@ -1108,7 +1178,7 @@ class MapboxRouteLineUtilsRoboTest {
             segments
         )
 
-        assertEquals(expectedExpression, result.toString())
+        checkExpression(expectedExpressionContents, result)
     }
 
     @Test

@@ -150,11 +150,21 @@ class VanishingRouteLineRoboTest {
 
     @Test
     fun getTraveledRouteLineExpressions_withRestrictedLineExpressionData() {
-        val expectedRestrictedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
-            " 0.0, [rgba, 0.0, 0.0, 0.0, 0.0], 0.4476941554901612, [rgba, 0.0, 0.0, 12.0, 0.0]," +
-            " 0.4677574367125704, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5021643413784516, " +
-            "[rgba, 0.0, 0.0, 12.0, 0.0], 0.5196445159361185, [rgba, 0.0, 0.0, 0.0, 0.0]]"
-
+        val expectedRestrictedExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.4476941554901612),
+            StringChecker("[rgba, 0.0, 0.0, 12.0, 0.0]"),
+            DoubleChecker(0.4677574367125704),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5021643413784516),
+            StringChecker("[rgba, 0.0, 0.0, 12.0, 0.0]"),
+            DoubleChecker(0.5196445159361185),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
         val colorResources = RouteLineColorResources.Builder()
             .restrictedRoadColor(Color.CYAN)
             .build()
@@ -189,9 +199,9 @@ class VanishingRouteLineRoboTest {
             false
         )
 
-        assertEquals(
-            expectedRestrictedExpression,
-            result!!.restrictedRoadExpression!!.generateExpression().toString()
+        checkExpression(
+            expectedRestrictedExpressionContents,
+            result!!.restrictedRoadExpression!!.generateExpression()
         )
     }
 
