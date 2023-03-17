@@ -8,6 +8,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.startTripSessionAndWaitForActiveGuidanceState
@@ -15,6 +16,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.coroutines.startTripSes
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopTripSessionAndWaitForIdleState
 import com.mapbox.navigation.instrumentation_tests.utils.http.HttpServiceEvent
 import com.mapbox.navigation.instrumentation_tests.utils.http.HttpServiceEventsObserver
+import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.parameters
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
@@ -24,6 +26,7 @@ import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import org.junit.After
@@ -43,9 +46,13 @@ class TripSessionsBillingTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::c
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
 
+    @get:Rule
+    val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
+
     private lateinit var mapboxNavigation: MapboxNavigation
 
     private val route = RoutesProvider.dc_very_short(context).toNavigationRoutes()[0]
+    private val anotherRoute = RoutesProvider.dc_short_with_alternative(context).toNavigationRoutes()[0]
 
     private lateinit var httpEventsObserver: HttpServiceEventsObserver
 
@@ -55,6 +62,20 @@ class TripSessionsBillingTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::c
             longitude = longitude()
         }
         bearing = 190f
+    }
+
+    private fun stayOnInitialPosition() {
+        mockLocationReplayerRule.loopUpdate(
+            mockLocationUpdatesRule.generateLocationUpdate {
+                route.routeOptions.coordinatesList().first().run {
+                    this@generateLocationUpdate.latitude = latitude()
+                    this@generateLocationUpdate.longitude = longitude()
+                }
+
+                bearing = 190f
+            },
+            times = 120
+        )
     }
 
     @Before
@@ -126,6 +147,55 @@ class TripSessionsBillingTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::c
 
         assertSessionEvents(BillingEventType.ACTIVE_GUIDANCE, billingRequests)
         assertSessionDuration(SESSION_DURATION_SECONDS, billingRequests.first().duration)
+    }
+
+    @Test
+    fun testBillingSessionsWhenNewRouteSet() = sdkTest {
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(route))
+
+        stayOnInitialPosition()
+
+        mapboxNavigation.startTripSessionAndWaitForActiveGuidanceState()
+
+        mapboxNavigation.routeProgressUpdates().first()
+
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(anotherRoute))
+
+        delay(TimeUnit.SECONDS.toMillis(2))
+
+        mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
+
+        val billingRequests = getAllBillingEventsWhenHasEvents(1, "Active Guidance") {
+            it.isActiveGuidanceSession
+        }
+
+        assertSessionEvents(BillingEventType.ACTIVE_GUIDANCE, billingRequests)
+        assertSessionDuration(3, billingRequests[0].duration)
+    }
+
+    @Test
+    fun testBillingSessionsWhenNewRouteSetImmediately() = sdkTest(timeout = Long.MAX_VALUE) {
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(route))
+        mapboxNavigation.startTripSessionAndWaitForActiveGuidanceState()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(anotherRoute))
+
+        delay(TimeUnit.SECONDS.toMillis(SESSION_DURATION_SECONDS))
+
+        mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
+
+        val billingRequests = getAllBillingEventsWhenHasEvents(2, "Active Guidance") {
+            it.isActiveGuidanceSession
+        }
+
+        assertSessionEvents(
+            listOf(
+                BillingEventType.ACTIVE_GUIDANCE,
+                BillingEventType.ACTIVE_GUIDANCE
+            ),
+            billingRequests
+        )
+        assertSessionDuration(0, billingRequests[0].duration)
+        assertSessionDuration(SESSION_DURATION_SECONDS, billingRequests[1].duration)
     }
 
     @Test
