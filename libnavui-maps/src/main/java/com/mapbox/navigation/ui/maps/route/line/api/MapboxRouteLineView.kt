@@ -225,12 +225,6 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         rebuildSourcesAndLayersIfNeeded(style)
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                if (callback != null) {
-                    val expectedRoutes: Set<String> = setOfNotNull(routeDrawData.value?.primaryRouteLineData?.featureCollection?.features()?.firstOrNull()?.id()) +
-                        (routeDrawData.value?.alternativeRouteLinesData?.mapNotNull { it.featureCollection.features()?.firstOrNull()?.id() } ?: emptyList()).toSet() -
-                        hiddenSourceGroups.mapNotNull { sourceToFeatureMap[it]?.id() }.toSet()
-                    routesExpector.expectNewRoutes(expectedRoutes, callback)
-                }
                 val primaryRouteTrafficVisibility = getTrafficVisibility(style)
                 val primaryRouteVisibility = getPrimaryRouteVisibility(style)
                 val alternativeRouteVisibility = getAlternativeRoutesVisibility(style)
@@ -267,6 +261,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                         updateSource(style, sourceToUpdate.key.sourceId, fc)
                         sourceToFeatureMap[sourceToUpdate.key] = RouteLineFeatureId(nextFeatureId?.id())
                     }
+                    if (callback != null) {
+                        val expected = (sourceToFeatureMap.values.mapNotNull { it.id() } - hiddenSourceGroups.mapNotNull { sourceToFeatureMap[it]?.id() }).toSet()
+                        routesExpector.expectNewRoutes(expected, callback)
+                    }
+
 
                     val sourceFeaturePairings = sourceToFeatureMap.toMutableList()
                     routeLineDatas.mapIndexed { index, routeLineData ->

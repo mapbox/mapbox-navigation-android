@@ -1031,6 +1031,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
   public interface RoutesRenderedCallback {
     method public com.mapbox.maps.MapboxMap getMap();
     method public void onRoutesRendered(java.util.List<java.lang.String> ids);
+    method public void onRoutesRenderingCancelled(java.util.List<java.lang.String> ids);
     property public abstract com.mapbox.maps.MapboxMap map;
   }
 
