@@ -6,6 +6,31 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.12.0-beta.2 - 17 March, 2023
+### Changelog
+[Changes between v2.12.0-beta.1 and v2.12.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0-beta.1...v2.12.0-beta.2)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed memory consumption issue on onboard router request cancellation. [#7029](https://github.com/mapbox/mapbox-navigation-android/pull/7029)
+- Fixed route progress vanishing point update issue introduced by feature that displays the active leg of the route line above inactive legs for multi-leg routes. [#6974](https://github.com/mapbox/mapbox-navigation-android/pull/6974)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.12.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.12.0-rc.1))
+- Mapbox Navigation Native `v128.0.0`
+- Mapbox Core Common `v23.4.0-rc.1`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.12.0-beta.1 - 10 March, 2023
 ### Changelog
 [Changes between v2.12.0-alpha.1 and v2.12.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0-alpha.1...v2.12.0-beta.1)
