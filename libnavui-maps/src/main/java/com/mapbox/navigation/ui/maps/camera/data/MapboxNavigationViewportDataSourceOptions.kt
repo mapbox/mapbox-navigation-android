@@ -144,6 +144,15 @@ class FollowingFrameOptions {
     var paddingUpdatesAllowed = true
 
     /**
+     * Set a [FollowingCameraFramingStrategy] used to calculate points to be framed for
+     * the following camera.
+     *
+     * Defaults to [FollowingCameraFramingStrategy.Default]
+     */
+    var framingStrategy: FollowingCameraFramingStrategy =
+        FollowingCameraFramingStrategy.Default
+
+    /**
      * Options that modify the framed route geometries based on the intersection density.
      *
      * By default we frame the whole remainder of the step while the options here shrink that geometry to increase the zoom level.

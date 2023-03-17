@@ -13,7 +13,6 @@ import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import kotlin.math.abs
@@ -21,8 +20,6 @@ import kotlin.math.abs
 internal object ViewportDataSourceProcessor {
 
     private const val LOG_CATEGORY = "ViewportDataSourceProcessor"
-
-    private const val maxAngleDifferenceForGeometrySlicing: Double = 100.0
 
     /**
      * Returns complete route points in nested arrays of points for all steps in all legs arranged as \[legs]\[steps]\[points].
@@ -152,57 +149,6 @@ internal object ViewportDataSourceProcessor {
     }
 
     /**
-     * Returns points to be framed on the remainder of the current step.
-     */
-    fun getPointsToFrameOnCurrentStep(
-        intersectionDensityCalculationEnabled: Boolean,
-        intersectionDensityAverageDistanceMultiplier: Double,
-        averageIntersectionDistancesOnRoute: List<List<Double>>,
-        currentLegProgress: RouteLegProgress,
-        currentStepProgress: RouteStepProgress
-    ): List<Point> {
-        var distanceTraveledOnStepKM =
-            currentStepProgress.distanceTraveled.metersToKilometers().coerceAtLeast(0.0)
-        val fullDistanceOfCurrentStepKM =
-            (currentStepProgress.distanceRemaining + currentStepProgress.distanceTraveled)
-                .metersToKilometers().coerceAtLeast(0.0)
-        if (distanceTraveledOnStepKM > fullDistanceOfCurrentStepKM) {
-            distanceTraveledOnStepKM = 0.0
-        }
-
-        var lookaheadDistanceForZoom = fullDistanceOfCurrentStepKM
-
-        if (intersectionDensityCalculationEnabled &&
-            averageIntersectionDistancesOnRoute.isNotEmpty()
-        ) {
-            val lookaheadInKM = averageIntersectionDistancesOnRoute
-                .get(currentLegProgress.legIndex)
-                .get(currentStepProgress.stepIndex)
-                .metersToKilometers()
-            lookaheadDistanceForZoom = distanceTraveledOnStepKM +
-                (lookaheadInKM * intersectionDensityAverageDistanceMultiplier)
-        }
-
-        return try {
-            val currentStepFullPoints = currentStepProgress.stepPoints ?: emptyList()
-            // todo bottom slice might not be needed since we always append the user location
-            val lineSliceCoordinatesForLookaheadDistance = TurfMisc.lineSliceAlong(
-                LineString.fromLngLats(currentStepFullPoints),
-                distanceTraveledOnStepKM,
-                lookaheadDistanceForZoom,
-                TurfConstants.UNIT_KILOMETERS
-            ).coordinates()
-            slicePointsAtAngle(
-                lineSliceCoordinatesForLookaheadDistance,
-                maxAngleDifferenceForGeometrySlicing
-            )
-        } catch (e: TurfException) {
-            logE(e.message.toString(), LOG_CATEGORY)
-            emptyList()
-        }
-    }
-
-    /**
      * Returns route geometry sliced at the point where it exceeds a certain angle difference from
      * the first edge's bearing.
      */
@@ -259,27 +205,6 @@ internal object ViewportDataSourceProcessor {
             } else {
                 followingFrameOptions.defaultPitch
             }
-        }
-    }
-
-    /**
-     * Finds the points to frame after maneuver based on preprocessed data and settings.
-     */
-    fun getPointsToFrameAfterCurrentManeuver(
-        frameGeometryAfterManeuverEnabled: Boolean,
-        generatedPostManeuverFramingPoints: List<List<List<Point>>>,
-        currentLegProgress: RouteLegProgress,
-        currentStepProgress: RouteStepProgress
-    ): List<Point> {
-        return if (
-            frameGeometryAfterManeuverEnabled &&
-            generatedPostManeuverFramingPoints.isNotEmpty()
-        ) {
-            generatedPostManeuverFramingPoints
-                .get(currentLegProgress.legIndex)
-                .get(currentStepProgress.stepIndex)
-        } else {
-            emptyList()
         }
     }
 
@@ -415,8 +340,8 @@ internal object ViewportDataSourceProcessor {
     }
 }
 
-private fun Double.metersToKilometers() = this / 1000.0
+internal fun Double.metersToKilometers() = this / 1000.0
 
-private fun Float.metersToKilometers() = this / 1000.0
+internal fun Float.metersToKilometers() = this / 1000.0
 
-private fun Double.kilometersToMeters() = this * 1000.0
+internal fun Double.kilometersToMeters() = this * 1000.0

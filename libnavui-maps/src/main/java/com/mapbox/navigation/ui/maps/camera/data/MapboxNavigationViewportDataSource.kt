@@ -20,8 +20,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameAfterCurrentManeuver
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameOnCurrentStep
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
@@ -488,24 +486,19 @@ class MapboxNavigationViewportDataSource(
                 options.followingFrameOptions
             )
 
-            options.followingFrameOptions.intersectionDensityCalculation.run {
-                pointsToFrameOnCurrentStep = getPointsToFrameOnCurrentStep(
-                    intersectionDensityCalculationEnabled = enabled,
-                    intersectionDensityAverageDistanceMultiplier = this.averageDistanceMultiplier,
-                    averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
-                    currentLegProgress = currentLegProgress,
-                    currentStepProgress = currentStepProgress
+            pointsToFrameOnCurrentStep = options.followingFrameOptions.framingStrategy
+                .getPointsToFrameOnCurrentStep(
+                    routeProgress,
+                    options.followingFrameOptions,
+                    averageIntersectionDistancesOnRoute
                 )
-            }
 
-            options.followingFrameOptions.frameGeometryAfterManeuver.run {
-                pointsToFrameAfterCurrentStep = getPointsToFrameAfterCurrentManeuver(
-                    frameGeometryAfterManeuverEnabled = enabled,
-                    generatedPostManeuverFramingPoints = postManeuverFramingPoints,
-                    currentLegProgress = currentLegProgress,
-                    currentStepProgress = currentStepProgress
+            pointsToFrameAfterCurrentStep = options.followingFrameOptions.framingStrategy
+                .getPointsToFrameAfterCurrentManeuver(
+                    routeProgress,
+                    options.followingFrameOptions,
+                    postManeuverFramingPoints
                 )
-            }
 
             simplifiedRemainingPointsOnRoute = getRemainingPointsOnRoute(
                 simplifiedCompleteRoutePoints,

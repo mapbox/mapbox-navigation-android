@@ -1,0 +1,1 @@
+- Introduced `FollowingCameraFramingStrategy`, an interface that defines a strategy used to calculate points to be framed for the FOLLOWING camera mode. Added `FollowingFrameOptions.framingStrategy` property that allows injection of custom `FollowingCameraFramingStrategy`.

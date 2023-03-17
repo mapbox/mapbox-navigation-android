@@ -9,14 +9,11 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameAfterCurrentManeuver
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameOnCurrentStep
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
@@ -27,7 +24,6 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.sim
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -36,36 +32,8 @@ class ViewportDataSourceProcessorTest {
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
 
-    private val pointAdapter =
-        object : ArrayTestAdapter<Point, LinkedTreeMap<String, String>> {
-            override fun encode(value: Point): String {
-                return value.toJson()
-            }
-
-            override fun decode(value: LinkedTreeMap<String, String>): Point {
-                val coordinates = value["coordinates"] as ArrayList<Double>
-                return Point.fromLngLat(coordinates[0], coordinates[1])
-            }
-
-            override fun assertEqual(expected: Point, actual: Point) {
-                assertEquals(expected.longitude(), actual.longitude(), 0.0000001)
-                assertEquals(expected.latitude(), actual.latitude(), 0.0000001)
-            }
-        }
-
-    private val doubleAdapter = object : ArrayTestAdapter<Double, Double> {
-        override fun encode(value: Double): String {
-            return value.toString()
-        }
-
-        override fun decode(value: Double): Double {
-            return value
-        }
-
-        override fun assertEqual(expected: Double, actual: Double) {
-            assertEquals(expected, actual, 0.0000001)
-        }
-    }
+    private val pointAdapter = PointArrayTestAdapter()
+    private val doubleAdapter = DoubleArrayTestAdapter()
 
     private val multiLegRoute = DirectionsRoute.fromJson(
         FileUtils.loadJsonFixture("multileg_route.json")
@@ -225,199 +193,6 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
-    fun `test getPointsToFrameOnCurrentStep, intersections disabled, nothing traveled`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { distanceTraveled } returns 0f
-            every { distanceRemaining } returns 93.4f
-            every { stepPoints } returns listOf(
-                Point.fromLngLat(-77.157347, 38.783004),
-                Point.fromLngLat(-77.157471, 38.78217)
-            )
-            every { stepIndex } returns 0
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { currentStepProgress } returns stepProgress
-            every { legIndex } returns 0
-        }
-        val expected: List<Point> = listOf(
-            Point.fromLngLat(-77.157347, 38.783004),
-            Point.fromLngLat(-77.157471, 38.78217)
-        )
-
-        val actual = getPointsToFrameOnCurrentStep(
-            intersectionDensityCalculationEnabled = false,
-            intersectionDensityAverageDistanceMultiplier = 7.0,
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
-    }
-
-    @Test
-    fun `test getPointsToFrameOnCurrentStep, intersections disabled, portion traveled`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { distanceTraveled } returns 70f
-            every { distanceRemaining } returns 23.4f
-            every { stepPoints } returns listOf(
-                Point.fromLngLat(-77.157347, 38.783004),
-                Point.fromLngLat(-77.157471, 38.78217)
-            )
-            every { stepIndex } returns 0
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { currentStepProgress } returns stepProgress
-            every { legIndex } returns 0
-        }
-        val expected: List<Point> = listOf(
-            Point.fromLngLat(-77.15743994716026, 38.78237885723322),
-            Point.fromLngLat(-77.157471, 38.78217)
-        )
-
-        val actual = getPointsToFrameOnCurrentStep(
-            intersectionDensityCalculationEnabled = false,
-            intersectionDensityAverageDistanceMultiplier = 7.0,
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
-    }
-
-    @Test
-    fun `test getPointsToFrameOnCurrentStep, intersections disabled, leg traveled`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { distanceTraveled } returns 60.4f
-            every { distanceRemaining } returns 100.4f
-            every { stepPoints } returns listOf(
-                Point.fromLngLat(-77.166911, 38.776967),
-                Point.fromLngLat(-77.168279, 38.777027),
-                Point.fromLngLat(-77.168762, 38.777048)
-            )
-            every { stepIndex } returns 1
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { currentStepProgress } returns stepProgress
-            every { legIndex } returns 1
-        }
-        val expected: List<Point> = listOf(
-            Point.fromLngLat(-77.16760644581015, 38.77699750401471),
-            Point.fromLngLat(-77.168279, 38.777027),
-            Point.fromLngLat(-77.168762, 38.777048)
-        )
-
-        val actual = getPointsToFrameOnCurrentStep(
-            intersectionDensityCalculationEnabled = false,
-            intersectionDensityAverageDistanceMultiplier = 7.0,
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
-    }
-
-    @Test
-    fun `test getPointsToFrameOnCurrentStep, intersections enabled, portion traveled`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { distanceTraveled } returns 60.4f
-            every { distanceRemaining } returns 100.4f
-            every { stepPoints } returns listOf(
-                Point.fromLngLat(-77.166911, 38.776967),
-                Point.fromLngLat(-77.168279, 38.777027),
-                Point.fromLngLat(-77.168762, 38.777048)
-            )
-            every { stepIndex } returns 1
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { currentStepProgress } returns stepProgress
-            every { legIndex } returns 1
-        }
-        val expected: List<Point> = listOf(
-            Point.fromLngLat(-77.16760644581015, 38.77699750401471),
-            Point.fromLngLat(-77.168279, 38.777027),
-            Point.fromLngLat(-77.16853194636113, 38.77703799791736)
-        )
-
-        val actual = getPointsToFrameOnCurrentStep(
-            intersectionDensityCalculationEnabled = true,
-            intersectionDensityAverageDistanceMultiplier = 0.5,
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
-    }
-
-    @Test
-    fun `test getPointsToFrameOnCurrentStep, intersections disabled, fully traveled`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { distanceTraveled } returns 93.4f
-            every { distanceRemaining } returns 0f
-            every { stepPoints } returns listOf(
-                Point.fromLngLat(-77.157347, 38.783004),
-                Point.fromLngLat(-77.157471, 38.78217)
-            )
-            every { stepIndex } returns 0
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { currentStepProgress } returns stepProgress
-            every { legIndex } returns 0
-        }
-        val expected: List<Point> = emptyList()
-
-        val actual = getPointsToFrameOnCurrentStep(
-            intersectionDensityCalculationEnabled = false,
-            intersectionDensityAverageDistanceMultiplier = 7.0,
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
-    }
-
-    @Test
-    fun `test getPointsToFrameOnCurrentStep, intersections disabled, cloverleaf`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { distanceTraveled } returns 0f
-            every { distanceRemaining } returns 20000000f
-            every { stepPoints } returns listOf(
-                Point.fromLngLat(20.0, 11.0),
-                Point.fromLngLat(20.0, 12.0),
-                Point.fromLngLat(21.0, 12.0),
-                Point.fromLngLat(21.0, 9.0),
-                Point.fromLngLat(19.0, 9.0),
-                Point.fromLngLat(19.0, 13.0),
-                Point.fromLngLat(22.0, 13.0)
-            )
-            every { stepIndex } returns 0
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { currentStepProgress } returns stepProgress
-            every { legIndex } returns 0
-        }
-        val expected: List<Point> = listOf(
-            Point.fromLngLat(20.0, 11.0),
-            Point.fromLngLat(20.0, 12.0),
-            Point.fromLngLat(21.0, 12.0)
-        )
-
-        val actual = getPointsToFrameOnCurrentStep(
-            intersectionDensityCalculationEnabled = false,
-            intersectionDensityAverageDistanceMultiplier = 7.0,
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
-    }
-
-    @Test
     fun `test getPitchFallbackFromRouteProgress - pitch near maneuver, defaults`() {
         val maneuvers = listOf("continue", "merge", "on ramp", "off ramp", "fork")
         maneuvers.forEach {
@@ -516,72 +291,6 @@ class ViewportDataSourceProcessorTest {
         )
 
         assertEquals(expected, actual, 0.0000001)
-    }
-
-    @Test
-    fun `test getPointsToFrameAfterCurrentManeuver - disabled`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { stepIndex } returns 1
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { legIndex } returns 1
-        }
-        val expected: List<Point> = emptyList()
-
-        val actual = getPointsToFrameAfterCurrentManeuver(
-            frameGeometryAfterManeuverEnabled = false,
-            generatedPostManeuverFramingPoints = postManeuverFramingPoints,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
-    }
-
-    @Test
-    fun `test getPointsToFrameAfterCurrentManeuver - enabled, empty maneuvers`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { stepIndex } returns 1
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { legIndex } returns 1
-        }
-        val expected: List<Point> = emptyList()
-
-        val actual = getPointsToFrameAfterCurrentManeuver(
-            frameGeometryAfterManeuverEnabled = true,
-            generatedPostManeuverFramingPoints = emptyList(),
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
-    }
-
-    @Test
-    fun `test getPointsToFrameAfterCurrentManeuver - enabled`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { stepIndex } returns 2
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { legIndex } returns 1
-        }
-        val expected: List<Point> = listOf(
-            Point.fromLngLat(-77.168728, 38.777728),
-            Point.fromLngLat(-77.168619, 38.777744),
-            Point.fromLngLat(-77.168499, 38.777768),
-            Point.fromLngLat(-77.167878, 38.777921),
-            Point.fromLngLat(-77.1676211, 38.7779783)
-        )
-
-        val actual = getPointsToFrameAfterCurrentManeuver(
-            frameGeometryAfterManeuverEnabled = true,
-            generatedPostManeuverFramingPoints = postManeuverFramingPoints,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
-        )
-
-        assertArrays1(expected, actual, pointAdapter)
     }
 
     @Test
@@ -788,128 +497,4 @@ class ViewportDataSourceProcessorTest {
 
         assertEquals(expected, actual, 0.0000001)
     }
-
-    private fun <V, D> assertArrays1(
-        expected: List<V>,
-        actual: List<V>,
-        adapter: ArrayTestAdapter<V, D>
-    ) {
-        assertTrue(expected.size == actual.size)
-        expected.forEachIndexed { index, expectedValue ->
-            val actualValue = actual[index]
-            adapter.assertEqual(expectedValue, actualValue)
-        }
-    }
-
-    private fun <V, D> assertArrays2(
-        expected: List<List<V>>,
-        actual: List<List<V>>,
-        adapter: ArrayTestAdapter<V, D>
-    ) {
-        assertTrue(expected.size == actual.size)
-        expected.forEachIndexed { index, nestedExpected ->
-            assertArrays1(nestedExpected, actual[index], adapter)
-        }
-    }
-
-    private fun <V, D> assertArrays3(
-        expected: List<List<List<V>>>,
-        actual: List<List<List<V>>>,
-        adapter: ArrayTestAdapter<V, D>
-    ) {
-        assertTrue(expected.size == actual.size)
-        expected.forEachIndexed { index, nestedExpected ->
-            assertArrays2(nestedExpected, actual[index], adapter)
-        }
-    }
-
-    private fun <V, D> decodeArrays1(list: List<D>, adapter: ArrayTestAdapter<V, D>): List<V> {
-        return list.map { value ->
-            adapter.decode(value)
-        }
-    }
-
-    private fun <V, D> decodeArrays2(
-        list: List<List<D>>,
-        adapter: ArrayTestAdapter<V, D>
-    ): List<List<V>> {
-        return list.map { nestedList ->
-            decodeArrays1(nestedList, adapter)
-        }
-    }
-
-    private fun <V, D> decodeArrays3(
-        list: List<List<List<D>>>,
-        adapter: ArrayTestAdapter<V, D>
-    ): List<List<List<V>>> {
-        return list.map { nestedList ->
-            decodeArrays2(nestedList, adapter)
-        }
-    }
-
-    /* below functions are used to update test suite if necessary */
-
-    private fun <V, D> encodeArrays1(list: List<V>, adapter: ArrayTestAdapter<V, D>): String {
-        val builder = StringBuilder()
-        builder.append("[")
-        list.forEachIndexed { index, value ->
-            if (index > 0) {
-                builder.append(",")
-            }
-            builder.append(adapter.encode(value))
-        }
-        builder.append("]")
-        return builder.toString()
-    }
-
-    private fun <V, D> encodeArrays2(list: List<List<V>>, adapter: ArrayTestAdapter<V, D>): String {
-        val builder = StringBuilder()
-        builder.append("[")
-        list.forEachIndexed { index, nestedList ->
-            if (index > 0) {
-                builder.append(",")
-            }
-            builder.append(encodeArrays1(nestedList, adapter))
-        }
-        builder.append("]")
-        return builder.toString()
-    }
-
-    private fun <V, D> encodeArrays3(
-        list: List<List<List<V>>>,
-        adapter: ArrayTestAdapter<V, D>
-    ): String {
-        val builder = StringBuilder()
-        builder.append("[")
-        list.forEachIndexed { index, nestedList ->
-            if (index > 0) {
-                builder.append(",")
-            }
-            builder.append(encodeArrays2(nestedList, adapter))
-        }
-        builder.append("]")
-        return builder.toString()
-    }
-
-    private fun routeProgressWith(
-        upcomingManeuverType: String,
-        distanceToUpcomingManeuver: Float,
-    ): RouteProgress = mockk {
-        every { currentLegProgress } returns mockk {
-            every { currentStepProgress } returns mockk {
-                every { distanceRemaining } returns distanceToUpcomingManeuver
-            }
-        }
-        every { bannerInstructions } returns mockk {
-            every { primary() } returns mockk {
-                every { type() } returns upcomingManeuverType
-            }
-        }
-    }
-}
-
-interface ArrayTestAdapter<V, D> {
-    fun encode(value: V): String
-    fun decode(value: D): V
-    fun assertEqual(expected: V, actual: V)
 }
