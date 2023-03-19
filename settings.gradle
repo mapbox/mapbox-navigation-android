@@ -1,6 +1,7 @@
 include ':examples',
         ':app-tests-wrapper',
         ':instrumentation-tests',
+        ':billing-tests',
         ':libnavigation-android',
         ':libnavigator',
         ':libnavigation-base',
