@@ -1,5 +1,6 @@
-package com.mapbox.navigation.instrumentation_tests.utils.coroutines
+package com.mapbox.navigation.testing.ui.utils.coroutines
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
@@ -59,6 +60,7 @@ private suspend fun MapboxNavigation.executeActionAndWaitForSessionState(
     }
 }
 
+@SuppressLint("MissingPermission")
 suspend fun MapboxNavigation.startTripSessionAndWaitForFreeDriveState() {
     check(getNavigationRoutes().isEmpty()) {
         "startTripSessionAndWaitForFreeDriveState should not be invoked " +
@@ -70,6 +72,7 @@ suspend fun MapboxNavigation.startTripSessionAndWaitForFreeDriveState() {
     }
 }
 
+@SuppressLint("MissingPermission")
 suspend fun MapboxNavigation.startTripSessionAndWaitForActiveGuidanceState() {
     check(getNavigationRoutes().isNotEmpty()) {
         "startTripSessionAndWaitForActiveGuidanceState should only be invoked " +

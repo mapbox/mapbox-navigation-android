@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.mapbox.navigation.instrumentation_tests.utils.coroutines
+package com.mapbox.navigation.testing.ui.utils.coroutines
 
 import android.location.Location
 import android.util.Log

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.billing_tests.billing
+package com.mapbox.navigation.billing.test
 
 import android.location.Location
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest

@@ -18,6 +18,8 @@ android {
 }
 
 dependencies {
+    api project(':libnavigation-android')
+
     implementation dependenciesList.multidex
     api dependenciesList.androidxTestJunit
     api dependenciesList.junit
@@ -27,5 +29,7 @@ dependencies {
     }
     api dependenciesList.androidXConstraintLayout
     api dependenciesList.mockwebserver
+    api dependenciesList.mapboxCommonNative
+    api dependenciesList.coroutinesAndroid
     compileOnly dependenciesList.gmsLocation
 }

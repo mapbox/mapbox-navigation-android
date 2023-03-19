@@ -6,23 +6,26 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.startTripSessionAndWaitForActiveGuidanceState
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.startTripSessionAndWaitForFreeDriveState
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopTripSessionAndWaitForIdleState
-import com.mapbox.navigation.instrumentation_tests.utils.http.HttpServiceEvent
-import com.mapbox.navigation.instrumentation_tests.utils.http.HttpServiceEventsObserver
-import com.mapbox.navigation.instrumentation_tests.utils.parameters
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.http.HttpServiceEvent
+import com.mapbox.navigation.testing.ui.http.HttpServiceEventsObserver
+import com.mapbox.navigation.testing.ui.http.billingRequests
+import com.mapbox.navigation.testing.ui.http.billingRequestsFlow
+import com.mapbox.navigation.testing.ui.http.duration
+import com.mapbox.navigation.testing.ui.http.isActiveGuidanceSession
+import com.mapbox.navigation.testing.ui.http.isFreeDriveSession
+import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
+import com.mapbox.navigation.testing.ui.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.startTripSessionAndWaitForActiveGuidanceState
+import com.mapbox.navigation.testing.ui.utils.coroutines.startTripSessionAndWaitForFreeDriveState
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopTripSessionAndWaitForIdleState
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -283,37 +286,6 @@ class TripSessionsBillingTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::c
 
         const val SESSION_DURATION_SECONDS = 2L
         const val SESSION_PAUSE_DURATION_SECONDS = 1L
-        const val ACTIVE_GUIDANCE_SKU_PREFIX = "10a"
-        const val FREE_DRIVE_SKU_PREFIX = "10b"
-
-        const val SESSIONS_ENDPOINT_PATH = "/sdk-sessions"
-
-        val HttpServiceEvent.skuParameter: String?
-            get() = url.parameters()["sku"]
-
-        val HttpServiceEvent.duration: Long?
-            get() = url.parameters()["duration"]?.toLong()
-
-        val HttpServiceEvent.isActiveGuidanceSession: Boolean
-            get() = skuParameter?.startsWith(ACTIVE_GUIDANCE_SKU_PREFIX) == true
-
-        val HttpServiceEvent.isFreeDriveSession: Boolean
-            get() = skuParameter?.startsWith(FREE_DRIVE_SKU_PREFIX) == true
-
-        val HttpServiceEvent.isBillingEvent: Boolean
-            get() = url.path.startsWith(SESSIONS_ENDPOINT_PATH) &&
-                (isFreeDriveSession || isActiveGuidanceSession)
-
-        fun HttpServiceEventsObserver.billingRequests(): List<HttpServiceEvent.Request> {
-            return eventsFlow.replayCache
-                .filterIsInstance(HttpServiceEvent.Request::class.java)
-                .filter { it.isBillingEvent }
-        }
-
-        fun HttpServiceEventsObserver.billingRequestsFlow(): Flow<HttpServiceEvent.Request> {
-            return onRequestEventsFlow
-                .filter { it.isBillingEvent }
-        }
 
         fun assertSessionEvents(expected: BillingEventType, actual: List<HttpServiceEvent>) {
             return assertSessionEvents(listOf(expected), actual)
