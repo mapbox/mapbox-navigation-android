@@ -8,6 +8,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
@@ -20,20 +22,26 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.RoutesRenderedResult
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.renderRouteDrawDataAsync
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.showAlternativeRoutesAsync
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.showPrimaryRouteAsync
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -41,6 +49,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
     BasicNavigationViewActivity::class.java
@@ -541,6 +551,110 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
             result.value!!.alternativeRouteLinesData[0].dynamicData.trimOffset!!.offset,
             0.0000000001
         )
+    }
+
+    @Test
+    fun routes_rendered_callback() = sdkTest {
+        val routes = listOf(route1, route2, route3)
+        val options = MapboxRouteLineOptions.Builder(activity)
+            .displayRestrictedRoadSections(true)
+            .build()
+        val map = activity.mapboxMap
+        val routeLineApi = MapboxRouteLineApi(options)
+        val routeLineView = MapboxRouteLineView(options)
+        val style = waitForStyleLoad(map)
+        val routeLineValue1 = routeLineApi.setNavigationRoutes(routes)
+
+        val renderedRoutesResult1 = routeLineView.renderRouteDrawDataAsync(map, style, routeLineValue1)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route1.id, route2.id, route3.id)),
+            renderedRoutesResult1
+        )
+
+        routeLineView.renderClearRouteLineValue(style, routeLineApi.clearRouteLine())
+        val routeLineValue2 = routeLineApi.setNavigationRoutes(routes)
+        val renderedRoutesResult2 = routeLineView.renderRouteDrawDataAsync(map, style, routeLineValue2)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route1.id, route2.id, route3.id)),
+            renderedRoutesResult2
+        )
+
+        routeLineView.hideAlternativeRoutes(style)
+        delay(200) // TODO makes sure routes are first cleared, only then redrawn, otherwise there is a risk GL native will optimize and skip clearing routes -> listener will not fire
+        val renderedRoutesResult3 = routeLineView.showAlternativeRoutesAsync(map, style)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route2.id, route3.id)),
+            renderedRoutesResult3
+        )
+
+        routeLineView.hidePrimaryRoute(style)
+        delay(200)
+        val renderedRoutesResult4 = routeLineView.showPrimaryRouteAsync(map, style)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route1.id)),
+            renderedRoutesResult4
+        )
+
+        routeLineView.hidePrimaryRoute(style)
+        routeLineView.renderClearRouteLineValue(style, routeLineApi.clearRouteLine())
+        val routeLineValue5 = routeLineApi.setNavigationRoutes(routes)
+        val renderedRoutesResult5 = routeLineView.renderRouteDrawDataAsync(map, style, routeLineValue5)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route2.id, route3.id)),
+            renderedRoutesResult5
+        )
+
+        val renderedRoutesResult6 = routeLineView.showPrimaryRouteAsync(map, style)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route1.id)),
+            renderedRoutesResult6
+        )
+
+        routeLineView.renderClearRouteLineValue(style, routeLineApi.clearRouteLine())
+        routeLineView.hideAlternativeRoutes(style)
+        delay(200)
+
+        val routeLineValue7 = routeLineApi.setNavigationRoutes(routes)
+        val renderedRoutesResult7 = routeLineView.renderRouteDrawDataAsync(map, style, routeLineValue7)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route1.id)),
+            renderedRoutesResult7
+        )
+
+        val renderedRoutesResult8 = routeLineView.showAlternativeRoutesAsync(map, style)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route2.id, route3.id)),
+            renderedRoutesResult8
+        )
+
+        val routeLineValue9 = routeLineApi.setNavigationRoutes(listOf(route3, route1, route2))
+        val renderedRoutesResult9 = routeLineView.renderRouteDrawDataAsync(map, style, routeLineValue9)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route3.id, route1.id, route2.id)),
+            renderedRoutesResult9
+        )
+
+        routeLineView.hideAlternativeRoutes(style)
+        delay(200)
+        val renderedRoutesResult10 = routeLineView.showAlternativeRoutesAsync(map, style)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route1.id)),
+            renderedRoutesResult10
+        )
+
+        routeLineView.hidePrimaryRoute(style)
+        delay(200)
+        val renderedRoutesResult11 = routeLineView.showPrimaryRouteAsync(map, style)
+        assertEquals(
+            RoutesRenderedResult.Success(setOf(route2.id)),
+            renderedRoutesResult11
+        )
+    }
+
+    private suspend fun waitForStyleLoad(map: MapboxMap): Style = suspendCoroutine { cont ->
+        map.getStyle {
+            cont.resume(it)
+        }
     }
 
     private fun getRoute(routeResourceId: Int): NavigationRoute {

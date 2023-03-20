@@ -7,6 +7,8 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
+import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -28,6 +30,10 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -160,6 +166,110 @@ suspend fun MapboxNavigation.voiceInstructions(): Flow<VoiceInstructions> {
 suspend fun MapboxHistoryRecorder.stopRecording(): String? = suspendCoroutine { cont ->
     stopRecording { path ->
         cont.resume(path)
+    }
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+suspend fun MapboxRouteLineView.renderRouteDrawDataAsync(
+    map: MapboxMap,
+    style: Style,
+    expected: Expected<RouteLineError, RouteSetValue>
+): RoutesRenderedResult = suspendCoroutine { cont ->
+    renderRouteDrawData(style, expected, object : RoutesRenderedCallback {
+        override val map: MapboxMap = map
+
+        override fun onRoutesRendered(ids: List<String>) {
+            cont.resume(RoutesRenderedResult.Success(ids.toSet()))
+        }
+
+        override fun onRoutesRenderingCancelled(ids: List<String>) {
+            cont.resume(RoutesRenderedResult.Cancelled(ids.toSet()))
+        }
+    })
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+suspend fun MapboxRouteLineView.showAlternativeRoutesAsync(
+    map: MapboxMap,
+    style: Style,
+): RoutesRenderedResult = suspendCoroutine { cont ->
+    showAlternativeRoutes(style, object : RoutesRenderedCallback {
+        override val map: MapboxMap = map
+
+        override fun onRoutesRendered(ids: List<String>) {
+            cont.resume(RoutesRenderedResult.Success(ids.toSet()))
+        }
+
+        override fun onRoutesRenderingCancelled(ids: List<String>) {
+            cont.resume(RoutesRenderedResult.Cancelled(ids.toSet()))
+        }
+    })
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+suspend fun MapboxRouteLineView.showPrimaryRouteAsync(
+    map: MapboxMap,
+    style: Style,
+): RoutesRenderedResult = suspendCoroutine { cont ->
+    showPrimaryRoute(style, object : RoutesRenderedCallback {
+        override val map: MapboxMap = map
+
+        override fun onRoutesRendered(ids: List<String>) {
+            cont.resume(RoutesRenderedResult.Success(ids.toSet()))
+        }
+
+        override fun onRoutesRenderingCancelled(ids: List<String>) {
+            cont.resume(RoutesRenderedResult.Cancelled(ids.toSet()))
+        }
+    })
+}
+
+sealed class RoutesRenderedResult(
+    val ids: Set<String>
+) {
+    class Success(ids: Set<String>): RoutesRenderedResult(ids) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            if (!super.equals(other)) return false
+            return true
+        }
+
+        override fun toString(): String {
+            return "Success() ${super.toString()}"
+        }
+    }
+
+    class Cancelled(ids: Set<String>): RoutesRenderedResult(ids) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            if (!super.equals(other)) return false
+            return true
+        }
+
+        override fun toString(): String {
+            return "Cancelled() ${super.toString()}"
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RoutesRenderedResult
+
+        if (ids != other.ids) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return ids.hashCode()
+    }
+
+    override fun toString(): String {
+        return "RoutesRenderedResult(ids=$ids)"
     }
 }
 
