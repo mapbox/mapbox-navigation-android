@@ -57,6 +57,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheRouteResult
+import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheRouteTrafficResult
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -76,11 +77,9 @@ internal object MapboxRouteLineUtils {
     private const val NUMBER_OF_SUPPORTED_ROUTES = 3
 
     internal val extractRouteDataCache: LruCache<
-        CacheResultUtils.CacheResultKey2<
-            NavigationRoute, (RouteLeg) -> List<String>?,
-            List<ExtractedRouteData>
-            >,
-        List<ExtractedRouteData>> by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
+        CacheResultUtils.CacheResultKeyRouteTraffic<
+            List<ExtractedRouteData>>, List<ExtractedRouteData>>
+        by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
 
     private val granularDistancesCache: LruCache<
         CacheResultUtils.CacheResultKeyRoute<
@@ -691,7 +690,7 @@ internal object MapboxRouteLineUtils {
                 }
             }
             itemsToReturn
-        }.cacheResult(extractRouteDataCache)
+        }.cacheRouteTrafficResult(extractRouteDataCache)
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
         routeLineColorResources: RouteLineColorResources
@@ -741,7 +740,7 @@ internal object MapboxRouteLineUtils {
             } ?: listOf()
     }
 
-    private fun getRoadClassArray(
+    internal fun getRoadClassArray(
         steps: List<LegStep>?
     ): Array<String?> {
         val intersectionsWithGeometryIndex = steps

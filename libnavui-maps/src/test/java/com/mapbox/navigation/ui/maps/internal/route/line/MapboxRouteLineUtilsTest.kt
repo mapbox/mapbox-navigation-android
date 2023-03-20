@@ -64,6 +64,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
+import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
@@ -2122,6 +2123,33 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun cacheResultKeyRouteTraffic_hashCode_numericTraffic() {
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = loadNavigationRoute("route-with-congestion-numeric.json")
+        val trafficProvider =
+            MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
+        var expectedHashCode = route.id.hashCode()
+        expectedHashCode = 31 * expectedHashCode + trafficProvider.hashCode()
+        route.directionsRoute.legs()?.forEach { routeLeg ->
+            expectedHashCode =
+                31 * expectedHashCode + routeLeg.annotation()?.congestion().hashCode()
+            expectedHashCode =
+                31 * expectedHashCode + routeLeg.annotation()?.congestionNumeric().hashCode()
+            expectedHashCode = 31 * expectedHashCode + routeLeg.closures().hashCode()
+            MapboxRouteLineUtils.getRoadClassArray(routeLeg.steps()).forEach {
+                expectedHashCode = 31 * expectedHashCode + it.hashCode()
+            }
+        }
+
+        val hashCode = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(
+            route,
+            trafficProvider
+        ).hashCode()
+
+        assertEquals(expectedHashCode, hashCode)
+    }
+
+    @Test
     fun removeLayersAndSources() {
         val style = mockk<Style> {
             every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
@@ -2156,17 +2184,284 @@ class MapboxRouteLineUtilsTest {
         verify { style.removeStyleLayer(LAYER_GROUP_3_RESTRICTED) }
     }
 
-    private fun <T> listElementsAreEqual(
-        first: List<T>,
-        second: List<T>,
-        equalityFun: (T, T) -> Boolean
-    ): Boolean {
-        if (first.size != second.size) {
-            return false
+    @Test
+    fun cacheResultKeyRouteTraffic_hashCode_legacyTraffic() {
+        val route = loadNavigationRoute("short_route.json")
+        val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        var expectedHashCode = route.id.hashCode()
+        expectedHashCode = 31 * expectedHashCode + trafficProvider.hashCode()
+        route.directionsRoute.legs()?.forEach { routeLeg ->
+            expectedHashCode =
+                31 * expectedHashCode + routeLeg.annotation()?.congestion().hashCode()
+            expectedHashCode =
+                31 * expectedHashCode + routeLeg.annotation()?.congestionNumeric().hashCode()
+            expectedHashCode = 31 * expectedHashCode + routeLeg.closures().hashCode()
         }
 
-        return first.zip(second).all { (x, y) ->
-            equalityFun(x, y)
+        val hashCode = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(
+            route,
+            trafficProvider
+        ).hashCode()
+
+        assertEquals(expectedHashCode, hashCode)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_hashCode_multiLegRoute() {
+        val route = loadNavigationRoute("multileg-route-two-legs.json")
+        val trafficProvider =
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        var expectedHashCode = route.id.hashCode()
+        expectedHashCode = 31 * expectedHashCode + trafficProvider.hashCode()
+        route.directionsRoute.legs()?.forEach { routeLeg ->
+            expectedHashCode =
+                31 * expectedHashCode + routeLeg.annotation()?.congestion().hashCode()
+            expectedHashCode =
+                31 * expectedHashCode + routeLeg.annotation()?.congestionNumeric().hashCode()
+            expectedHashCode = 31 * expectedHashCode + routeLeg.closures().hashCode()
+            MapboxRouteLineUtils.getRoadClassArray(routeLeg.steps()).forEach {
+                expectedHashCode = 31 * expectedHashCode + it.hashCode()
+            }
         }
+
+        val hashCode = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(
+            route,
+            trafficProvider
+        ).hashCode()
+
+        assertEquals(expectedHashCode, hashCode)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_equals() {
+        val route = loadNavigationRoute("multileg-route-two-legs.json")
+        val trafficProvider =
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+
+        assertTrue(equals)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_notEquals() {
+        val route = loadNavigationRoute("short_route.json")
+        val route2 = mockk<NavigationRoute> {
+            every { id } returns route.id
+            every { directionsRoute } returns route.directionsRoute
+            every { directionsRoute.legs() } returns route.directionsRoute.legs()
+            every { directionsRoute.legs()!!.size } returns route.directionsRoute.legs()!!.size
+            every {
+                directionsRoute.legs()!![0].annotation()
+            } returns route.directionsRoute.legs()!![0].annotation()
+            every {
+                directionsRoute.legs()!![0].annotation()!!.congestion()
+            } returns route.directionsRoute.legs()!![0].annotation()!!.congestion()!!
+                .shuffled()
+            every { directionsRoute.routeOptions() } returns route.directionsRoute.routeOptions()
+            every {
+                directionsRoute.legs()!![0].closures()
+            } returns route.directionsRoute.legs()?.first()?.closures()
+        }
+        val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
+
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+
+        assertFalse(equals)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_numericTrafficNotEquals() {
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = loadNavigationRoute("route-with-congestion-numeric.json")
+        val route2 = mockk<NavigationRoute> {
+            every { id } returns route.id
+            every { directionsRoute } returns route.directionsRoute
+            every { directionsRoute.legs() } returns route.directionsRoute.legs()
+            every { directionsRoute.legs()!!.size } returns route.directionsRoute.legs()!!.size
+            every {
+                directionsRoute.legs()!![0].annotation()
+            } returns route.directionsRoute.legs()!![0].annotation()
+            every { directionsRoute.routeOptions() } returns route.directionsRoute.routeOptions()
+            every {
+                directionsRoute.legs()!![0].annotation()!!.congestionNumeric()
+            } returns route.directionsRoute
+                .legs()!![0]
+                .annotation()!!
+                .congestionNumeric()!!
+                .shuffled()
+        }
+        val trafficProvider =
+            MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
+
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+
+        assertFalse(equals)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_differentTrafficType() {
+        val colorResources = RouteLineColorResources.Builder().build()
+        val routeWithLegacyTraffic = loadNavigationRoute("short_route.json")
+        val route = loadNavigationRoute("route-with-congestion-numeric.json")
+        val route2 = mockk<NavigationRoute> {
+            every { id } returns route.id
+            every { directionsRoute } returns route.directionsRoute
+            every { directionsRoute.legs() } returns route.directionsRoute.legs()
+            every { directionsRoute.legs()!!.size } returns route.directionsRoute.legs()!!.size
+            every {
+                directionsRoute.routeOptions()
+            } returns routeWithLegacyTraffic.directionsRoute.routeOptions()
+        }
+        val trafficProvider =
+            MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
+
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+
+        assertFalse(equals)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_closuresNotEqual() {
+        val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadNavigationRoute("route-with-closure.json")
+        val route2 = mockk<NavigationRoute> {
+            every { id } returns route.id
+            every { directionsRoute } returns route.directionsRoute
+            every { directionsRoute.legs() } returns route.directionsRoute.legs()
+            every { directionsRoute.legs()!!.size } returns route.directionsRoute.legs()!!.size
+            every {
+                directionsRoute.legs()!![0].annotation()
+            } returns route.directionsRoute.legs()!![0].annotation()
+            every { directionsRoute.routeOptions() } returns route.directionsRoute.routeOptions()
+            every { directionsRoute.legs()!![0].closures() } returns listOf(
+                route.directionsRoute
+                    .legs()!!
+                    .first()
+                    .closures()!!
+                    .first()
+                    .toBuilder()
+                    .geometryIndexStart(5)
+                    .build()
+            )
+        }
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
+
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+
+        assertFalse(equals)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_closuresEqual() {
+        val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadNavigationRoute("route-with-closure.json")
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
+
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+
+        assertTrue(equals)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_roadClassesNotEqual() {
+        val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadNavigationRoute("route-with-closure.json")
+        val mapboxStreetsV8 = route.directionsRoute
+            .legs()!![0]
+            .steps()!![0]
+            .intersections()!![0]
+            .mapboxStreetsV8()!!
+            .toBuilder()
+            .roadClass("foobar")
+            .build()
+        val stepIntersection = route.directionsRoute
+            .legs()!![0]
+            .steps()!![0]
+            .intersections()!![0]
+            .toBuilder()
+            .mapboxStreetsV8(mapboxStreetsV8)
+            .build()
+        val intersections = route.directionsRoute
+            .legs()!![0]
+            .steps()!![0]
+            .intersections()!!
+            .drop(1)
+            .toMutableList()
+            .also { it.add(0, stepIntersection) }
+        val legStep = route.directionsRoute
+            .legs()!![0]
+            .steps()!![0]
+            .toBuilder()
+            .intersections(intersections)
+            .build()
+        val legSteps = route.directionsRoute
+            .legs()!![0]
+            .steps()!!
+            .drop(1)
+            .toMutableList()
+            .also { it.add(0, legStep) }
+        val leg = route.directionsRoute.legs()!![0].toBuilder().steps(legSteps).build()
+        val updatedRoute = route.directionsRoute.toBuilder().legs(listOf(leg)).build()
+        val route2 = mockk<NavigationRoute> {
+            every { id } returns route.id
+            every { directionsRoute } returns updatedRoute
+        }
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
+
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+
+        assertFalse(equals)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_routeLegsNotEqualSize() {
+        val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadNavigationRoute("route-with-closure.json")
+        val route2 = mockk<NavigationRoute> {
+            every { id } returns route.id
+            every { directionsRoute } returns route.directionsRoute
+            every { directionsRoute.legs() } returns route.directionsRoute.legs()
+            every { directionsRoute.legs()!!.size } returns 100
+            every {
+                directionsRoute.legs()!![0].annotation()
+            } returns route.directionsRoute.legs()!![0].annotation()
+            every { directionsRoute.routeOptions() } returns route.directionsRoute.routeOptions()
+            every { directionsRoute.legs()!![0].closures() } returns route.directionsRoute
+                .legs()!!
+                .first()
+                .closures()!!
+        }
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
+
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider).equals(eqKey)
+
+        assertFalse(equals)
+    }
+
+    @Test
+    fun cacheResultKeyRouteTraffic_routeIdNotEqual() {
+        val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        val route = loadNavigationRoute("route-with-closure.json")
+        val route2 = mockk<NavigationRoute> {
+            every { id } returns "foobar"
+        }
+        val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
+
+        val equals =
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider).equals(eqKey)
+
+        assertFalse(equals)
     }
 }
