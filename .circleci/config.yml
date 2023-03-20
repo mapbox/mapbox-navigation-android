@@ -68,6 +68,16 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+  daily-billing-tests:
+    jobs:
+      - billing-tests
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - main
   default:
     jobs:
       - prepare-and-assemble
@@ -450,6 +460,24 @@ commands:
               --device model=panther,version=33,locale=it,orientation=landscape \
               --timeout 5m
 
+  run-firebase-billing:
+    parameters:
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Run billing tests on Firebase
+          no_output_timeout: 1200
+          shell: /bin/bash -euo pipefail
+          command: |
+            gcloud firebase test android run --type instrumentation \
+              --app billing-tests/build/outputs/apk/<< parameters.variant >>/billing-tests-<< parameters.variant >>.apk \
+              --test billing-tests/build/outputs/apk/androidTest/<< parameters.variant >>/billing-tests-<< parameters.variant >>-androidTest.apk \
+              --device model=oriole,version=33,locale=it,orientation=landscape \
+              --use-orchestrator \
+              --timeout 25m
+
   upload-artifacts-snapshot:
     steps:
       - deploy:
@@ -759,6 +787,34 @@ jobs:
             - read-workspace
             - login-google-cloud-platform
             - run-firebase-instrumentation:
+                variant: "debug"
+      - run: exit 0
+
+  billing-tests:
+    executor: ndk-r22-latest-executor
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
+    steps:
+      - checkout
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - generate-google-services-json
+            - login-google-cloud-platform
+            - assemble-module:
+                module_target: "billing-tests"
+                variant: "Debug"
+                inject_token: true
+            - assemble-instrumentation-test:
+                module_target: "billing-tests"
+            - run-firebase-billing:
                 variant: "debug"
       - run: exit 0
 
