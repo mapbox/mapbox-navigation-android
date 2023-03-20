@@ -28,7 +28,6 @@ internal class CustomFollowingCameraFramingStrategy(
         followingFrameOptions: FollowingFrameOptions,
         averageIntersectionDistancesOnRoute: List<List<Double>>
     ): List<Point> {
-
         return ifNonNull(
             routeProgress.currentLegProgress,
             routeProgress.currentLegProgress?.currentStepProgress
@@ -69,7 +68,9 @@ internal class CustomFollowingCameraFramingStrategy(
         postManeuverFramingPoints: List<List<List<Point>>>
     ): List<Point> =
         FollowingCameraFramingStrategy.Default.getPointsToFrameAfterCurrentManeuver(
-            routeProgress, followingFrameOptions, postManeuverFramingPoints
+            routeProgress = routeProgress,
+            followingFrameOptions = followingFrameOptions,
+            postManeuverFramingPoints = postManeuverFramingPoints
         )
 
     private fun slicePointsAtAngle(
