@@ -10,6 +10,7 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -189,6 +190,43 @@ class TripSessionLocationEngineTest {
         sut.stopLocationUpdates()
 
         assertFalse(sut.isReplayEnabled)
+    }
+
+    @Test
+    fun `should filter out locations from previous session`() {
+        val firstCallback = mockk<(Location) -> Unit>(relaxed = true)
+        val secondCallback = mockk<(Location) -> Unit>(relaxed = true)
+        val firstEngineCallback = slot<LocationEngineCallback<LocationEngineResult>>()
+        val secondEngineCallback = slot<LocationEngineCallback<LocationEngineResult>>()
+        val location1 = mockk<Location>(relaxed = true)
+        val locationResult1 = mockk<LocationEngineResult>(relaxed = true) {
+            every { locations } returns listOf(location1)
+        }
+        val location2 = mockk<Location>(relaxed = true)
+        val locationResult2 = mockk<LocationEngineResult>(relaxed = true) {
+            every { locations } returns listOf(location2)
+        }
+        sut.startLocationUpdates(true, firstCallback)
+        verify {
+            replayLocationEngine.getLastLocation(capture(firstEngineCallback))
+        }
+        sut.stopLocationUpdates()
+        clearAllMocks(answers = false)
+        sut.startLocationUpdates(true, secondCallback)
+        verify {
+            replayLocationEngine.getLastLocation(capture(secondEngineCallback))
+        }
+
+        firstEngineCallback.captured.onSuccess(locationResult1)
+        secondEngineCallback.captured.onSuccess(locationResult2)
+
+        verify(exactly = 0) {
+            firstCallback(any())
+            secondCallback(location1)
+        }
+        verify(exactly = 1) {
+            secondCallback(location2)
+        }
     }
 
     private fun mockLocationEngine(locationEngine: LocationEngine) {

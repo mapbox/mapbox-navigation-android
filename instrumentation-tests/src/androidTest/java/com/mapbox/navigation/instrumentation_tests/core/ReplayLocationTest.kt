@@ -90,7 +90,6 @@ class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         mapboxNavigation.stopTripSession()
         assertEquals(List(rawLocations.size) { firstReplayApproximateLocation }, rawLocations)
         rawLocations.clear()
-        delay(1000)
 
         mapboxNavigation.startTripSession()
         loopRealUpdate(realLocation, 120)
