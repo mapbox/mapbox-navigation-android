@@ -79,7 +79,7 @@ internal class TripSessionLocationEngine constructor(
             override fun onSuccess(result: LocationEngineResult?) {
                 // ignore last location updates from previous session
                 // (possible with last location callbacks: they can't be removed)
-                // reproducible with ReplayLocationTest#last_location_is_cleared_when_session_is_stopped
+                // reproducible with ReplayLocationTest#replay_session_locations_do_not_contain_locations_from_previous_session
                 if (locationEngineCallback != this) return
                 logD(LOG_CATEGORY) {
                     "successful location engine callback $result"
