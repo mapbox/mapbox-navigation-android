@@ -40,21 +40,7 @@ internal class TripSessionLocationEngine constructor(
     private var activeLocationEngine: LocationEngine? = null
     private var onRawLocationUpdate: (Location) -> Unit = { }
 
-    private val locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
-        override fun onSuccess(result: LocationEngineResult?) {
-            logD(LOG_CATEGORY) {
-                "successful location engine callback $result"
-            }
-            result?.locations?.lastOrNull()?.let {
-                logIfLocationIsNotFreshEnough(it)
-                onRawLocationUpdate(it)
-            }
-        }
-
-        override fun onFailure(exception: Exception) {
-            logD("location on failure exception=$exception", LOG_CATEGORY)
-        }
-    }
+    private var locationEngineCallback = createLocationEngineCallback()
 
     @SuppressLint("MissingPermission")
     fun startLocationUpdates(isReplayEnabled: Boolean, onRawLocationUpdate: (Location) -> Unit) {
@@ -84,7 +70,30 @@ internal class TripSessionLocationEngine constructor(
         isReplayEnabled = false
         onRawLocationUpdate = { }
         activeLocationEngine?.removeLocationUpdates(locationEngineCallback)
+        locationEngineCallback = createLocationEngineCallback()
         activeLocationEngine = null
+    }
+
+    private fun createLocationEngineCallback(): LocationEngineCallback<LocationEngineResult> {
+        return object : LocationEngineCallback<LocationEngineResult> {
+            override fun onSuccess(result: LocationEngineResult?) {
+                // ignore last location updates from previous session
+                // (possible with last location callbacks: they can't be removed)
+                // reproducible with ReplayLocationTest#last_location_is_cleared_when_session_is_stopped
+                if (locationEngineCallback != this) return
+                logD(LOG_CATEGORY) {
+                    "successful location engine callback $result"
+                }
+                result?.locations?.lastOrNull()?.let {
+                    logIfLocationIsNotFreshEnough(it)
+                    onRawLocationUpdate(it)
+                }
+            }
+
+            override fun onFailure(exception: Exception) {
+                logD("location on failure exception=$exception", LOG_CATEGORY)
+            }
+        }
     }
 
     private fun logIfLocationIsNotFreshEnough(location: Location) {
