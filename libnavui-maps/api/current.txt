@@ -1108,7 +1108,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder vanishingRouteLineUpdateInterval(long interval = 62500000L);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder waypointLayerIconAnchor(com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor iconAnchor = com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor.CENTER);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder waypointLayerIconOffset(java.util.List<java.lang.Double> iconOffset = listOf(0.0, 0.0));
-    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineBelowLayerId(String layerId);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineBelowLayerId(String? layerId);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withTolerance(double tolerance);

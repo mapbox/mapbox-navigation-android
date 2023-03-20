@@ -1106,24 +1106,7 @@ class MapboxRouteLineView(options: MapboxRouteLineOptions) {
     }
 
     private fun resetLayers(style: Style) {
-        sourceToFeatureMap.clear()
-        sourceToFeatureMap[MapboxRouteLineUtils.layerGroup1SourceKey] = RouteLineFeatureId(null)
-        sourceToFeatureMap[MapboxRouteLineUtils.layerGroup2SourceKey] = RouteLineFeatureId(null)
-        sourceToFeatureMap[MapboxRouteLineUtils.layerGroup3SourceKey] = RouteLineFeatureId(null)
-        primaryRouteLineLayerGroup = setOf()
-        listOf(
-            RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
-            RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
-            RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
-            RouteLayerConstants.WAYPOINT_SOURCE_ID
-        ).forEach {
-            updateSource(
-                style,
-                it,
-                FeatureCollection.fromFeatures(listOf())
-            )
-        }
-        MapboxRouteLineUtils.removeLayersAndSources(style)
+        MapboxRouteLineUtils.removeLayers(style)
         MapboxRouteLineUtils.initializeLayers(style, options)
     }
 }

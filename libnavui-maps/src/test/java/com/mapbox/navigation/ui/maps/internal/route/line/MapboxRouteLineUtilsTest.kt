@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.api.directions.v5.models.RouteLeg
@@ -11,6 +12,8 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.addPersistentLayer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
@@ -27,6 +30,7 @@ import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.CLOSURE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DESTINATION_MARKER_NAME
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.HEAVY_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_MAIN
@@ -57,10 +61,12 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MODERATE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ORIGIN_MARKER_NAME
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.SEVERE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.line.api.DoubleChecker
 import com.mapbox.navigation.ui.maps.route.line.api.StringChecker
@@ -96,6 +102,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 import kotlin.reflect.full.declaredMemberProperties
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineUtilsTest {
 
@@ -436,36 +443,11 @@ class MapboxRouteLineUtilsTest {
             every { displayRestrictedRoadSections } returns false
         }
         val style = mockk<Style> {
-            every { styleSourceExists(LAYER_GROUP_1_SOURCE_ID) } returns true
-            every { styleSourceExists(LAYER_GROUP_2_SOURCE_ID) } returns true
-            every { styleSourceExists(LAYER_GROUP_3_SOURCE_ID) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_TRAIL) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_MAIN) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_TRAFFIC) } returns true
+            every { styleSourceExists(any()) } returns true
+            every { styleLayerExists(any()) } returns true
             every { styleLayerExists(LAYER_GROUP_1_RESTRICTED) } returns false
-            every { styleLayerExists(LAYER_GROUP_2_TRAIL_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_TRAIL) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_MAIN) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_TRAFFIC) } returns true
             every { styleLayerExists(LAYER_GROUP_2_RESTRICTED) } returns false
-            every { styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_TRAIL) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_MAIN) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
             every { styleLayerExists(LAYER_GROUP_3_RESTRICTED) } returns false
-            every { styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
-            every { styleSourceExists(WAYPOINT_SOURCE_ID) } returns true
-            every { styleLayerExists(MASKING_LAYER_TRAIL_CASING) } returns true
-            every { styleLayerExists(MASKING_LAYER_TRAIL) } returns true
-            every { styleLayerExists(MASKING_LAYER_CASING) } returns true
-            every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
-            every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
-            every { styleLayerExists(MASKING_LAYER_RESTRICTED) } returns true
         }
 
         val result = MapboxRouteLineUtils.layersAreInitialized(style, options)
@@ -506,46 +488,199 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun initializeLayers_whenLayersAreInitialized() {
+    fun initializeLayers_whenLayersAreInitialized_whenSourcesAreCompatible() {
+        mockkStatic(Style::addPersistentLayer)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val expectedLineSourceProperties = hashMapOf(
+            "type" to Value("geojson"),
+            "sharedCache" to Value(options.shareLineGeometrySources),
+            "maxzoom" to Value(16),
+            "lineMetrics" to Value(true),
+            "tolerance" to Value(options.tolerance),
+        )
+        val expectedWaypointSourceProperties = hashMapOf(
+            "type" to Value("geojson"),
+            "sharedCache" to Value(false),
+            "maxzoom" to Value(16),
+            "lineMetrics" to Value(false),
+            "tolerance" to Value(options.tolerance),
+        )
         val style = mockk<Style> {
-            every { styleLayers } returns listOf()
-            every { styleSourceExists(LAYER_GROUP_1_SOURCE_ID) } returns true
-            every { styleSourceExists(LAYER_GROUP_2_SOURCE_ID) } returns true
-            every { styleSourceExists(LAYER_GROUP_3_SOURCE_ID) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_TRAIL) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_MAIN) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_TRAFFIC) } returns true
-            every { styleLayerExists(LAYER_GROUP_1_RESTRICTED) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_TRAIL_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_TRAIL) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_MAIN) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_TRAFFIC) } returns true
-            every { styleLayerExists(LAYER_GROUP_2_RESTRICTED) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_TRAIL) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_CASING) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_MAIN) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
-            every { styleLayerExists(LAYER_GROUP_3_RESTRICTED) } returns true
-            every { styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(MASKING_LAYER_TRAIL_CASING) } returns true
-            every { styleLayerExists(MASKING_LAYER_TRAIL) } returns true
-            every { styleLayerExists(MASKING_LAYER_CASING) } returns true
-            every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
-            every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
-            every { styleLayerExists(MASKING_LAYER_RESTRICTED) } returns true
-            every { styleSourceExists(WAYPOINT_SOURCE_ID) } returns false
+            every { styleSourceExists(any()) } returns true
+            every { styleLayerExists(any()) } returns true
+            every { hasStyleImage(any()) } returns true
+            mockSourceProperties(LAYER_GROUP_1_SOURCE_ID, expectedLineSourceProperties)
+            mockSourceProperties(LAYER_GROUP_2_SOURCE_ID, expectedLineSourceProperties)
+            mockSourceProperties(LAYER_GROUP_3_SOURCE_ID, expectedLineSourceProperties)
+            mockSourceProperties(WAYPOINT_SOURCE_ID, expectedWaypointSourceProperties)
+            every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
+            every { addStyleSource(any(), any()) } returns ExpectedFactory.createNone()
         }
 
         MapboxRouteLineUtils.initializeLayers(style, options)
 
-        verify(exactly = 0) { style.styleLayers }
+        verify(exactly = 0) { style.addPersistentLayer(any(), any()) }
         verify(exactly = 0) { style.addStyleSource(any(), any()) }
+        verify(exactly = 0) { style.addImage(any(), any<Bitmap>()) }
+
+        unmockkStatic(Style::addPersistentLayer)
+    }
+
+    @Test
+    fun initializeLayers_whenLayersAreInitialized_whenLineSourcesAreIncompatible() {
+        mockkStatic(Style::addPersistentLayer) {
+            val options = MapboxRouteLineOptions.Builder(ctx).build()
+            val waypointSourceProperties = hashMapOf(
+                "type" to Value("geojson"),
+                "sharedCache" to Value(false),
+                "maxzoom" to Value(16),
+                "lineMetrics" to Value(false),
+                "tolerance" to Value(options.tolerance),
+                "data" to Value("{}"),
+            )
+            val expectedLineSourceProperties = hashMapOf(
+                "type" to Value("geojson"),
+                "sharedCache" to Value(options.shareLineGeometrySources),
+                "maxzoom" to Value(16),
+                "lineMetrics" to Value(true),
+                "tolerance" to Value(options.tolerance),
+                "data" to Value("{}"),
+            )
+            listOf(
+                hashMapOf(
+                    "type" to Value("geojson"),
+                    "sharedCache" to Value(!options.shareLineGeometrySources),
+                    "maxzoom" to Value(16),
+                    "lineMetrics" to Value(true),
+                    "tolerance" to Value(options.tolerance),
+                    "data" to Value("{}"),
+                ),
+                hashMapOf(
+                    "type" to Value("geojson"),
+                    "sharedCache" to Value(options.shareLineGeometrySources),
+                    "maxzoom" to Value(17),
+                    "lineMetrics" to Value(true),
+                    "tolerance" to Value(options.tolerance),
+                    "data" to Value("{}"),
+                ),
+                hashMapOf(
+                    "type" to Value("geojson"),
+                    "sharedCache" to Value(options.shareLineGeometrySources),
+                    "maxzoom" to Value(16),
+                    "lineMetrics" to Value(false),
+                    "tolerance" to Value(options.tolerance),
+                    "data" to Value("{}"),
+                ),
+                hashMapOf(
+                    "type" to Value("geojson"),
+                    "sharedCache" to Value(options.shareLineGeometrySources),
+                    "maxzoom" to Value(16),
+                    "lineMetrics" to Value(true),
+                    "tolerance" to Value(options.tolerance + 0.5),
+                    "data" to Value("{}"),
+                ),
+            ).forEach { existingLineSourceProperties ->
+                val style = mockk<Style> {
+                    every { styleSourceExists(any()) } returns true
+                    every { styleLayerExists(any()) } returns true
+                    every { hasStyleImage(any()) } returns true
+                    mockSourceProperties(LAYER_GROUP_1_SOURCE_ID, existingLineSourceProperties)
+                    mockSourceProperties(LAYER_GROUP_2_SOURCE_ID, existingLineSourceProperties)
+                    mockSourceProperties(LAYER_GROUP_3_SOURCE_ID, existingLineSourceProperties)
+                    mockSourceProperties(WAYPOINT_SOURCE_ID, waypointSourceProperties)
+                    every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
+                    every { addStyleSource(any(), any()) } returns ExpectedFactory.createNone()
+                }
+
+                MapboxRouteLineUtils.initializeLayers(style, options)
+
+                verify(exactly = 0) { style.addPersistentLayer(any(), any()) }
+                verify(exactly = 1) {
+                    style.addStyleSource(
+                        LAYER_GROUP_1_SOURCE_ID,
+                        Value(expectedLineSourceProperties)
+                    )
+                }
+                verify(exactly = 1) {
+                    style.addStyleSource(
+                        LAYER_GROUP_2_SOURCE_ID,
+                        Value(expectedLineSourceProperties)
+                    )
+                }
+                verify(exactly = 1) {
+                    style.addStyleSource(
+                        LAYER_GROUP_3_SOURCE_ID,
+                        Value(expectedLineSourceProperties)
+                    )
+                }
+                verify(exactly = 0) { style.addImage(any(), any<Bitmap>()) }
+            }
+        }
+    }
+
+    @Test
+    fun initializeLayers_whenLayersAreInitialized_whenWaypointSourcesAreIncompatible() {
+        mockkStatic(Style::addPersistentLayer) {
+            val options = MapboxRouteLineOptions.Builder(ctx).build()
+            val lineSourceProperties = hashMapOf(
+                "type" to Value("geojson"),
+                "sharedCache" to Value(options.shareLineGeometrySources),
+                "maxzoom" to Value(16),
+                "lineMetrics" to Value(true),
+                "tolerance" to Value(options.tolerance),
+                "data" to Value("{}"),
+            )
+            val expectedWaypointSourceProperties = hashMapOf(
+                "type" to Value("geojson"),
+                "sharedCache" to Value(false),
+                "maxzoom" to Value(16),
+                "lineMetrics" to Value(false),
+                "tolerance" to Value(options.tolerance),
+                "data" to Value("{}"),
+            )
+            listOf(
+                hashMapOf(
+                    "type" to Value("geojson"),
+                    "sharedCache" to Value(false),
+                    "maxzoom" to Value(16),
+                    "lineMetrics" to Value(false),
+                    "tolerance" to Value(options.tolerance + 0.5),
+                    "data" to Value("{}"),
+                ),
+            ).forEach { existingWaypointSourceProperties ->
+                val style = mockk<Style> {
+                    every { styleSourceExists(any()) } returns true
+                    every { styleLayerExists(any()) } returns true
+                    every { hasStyleImage(any()) } returns true
+                    mockSourceProperties(LAYER_GROUP_1_SOURCE_ID, lineSourceProperties)
+                    mockSourceProperties(LAYER_GROUP_2_SOURCE_ID, lineSourceProperties)
+                    mockSourceProperties(LAYER_GROUP_3_SOURCE_ID, lineSourceProperties)
+                    mockSourceProperties(WAYPOINT_SOURCE_ID, existingWaypointSourceProperties)
+                    every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
+                    every { addStyleSource(any(), any()) } returns ExpectedFactory.createNone()
+                }
+
+                MapboxRouteLineUtils.initializeLayers(style, options)
+
+                verify(exactly = 0) { style.addPersistentLayer(any(), any()) }
+                verify(exactly = 1) {
+                    style.addStyleSource(
+                        WAYPOINT_SOURCE_ID,
+                        Value(expectedWaypointSourceProperties)
+                    )
+                }
+                verify(exactly = 0) { style.addImage(any(), any<Bitmap>()) }
+            }
+        }
+    }
+
+    private fun Style.mockSourceProperties(sourceId: String, properties: Map<String, Value>) {
+        properties.forEach {
+            every { getStyleSourceProperty(sourceId, it.key) } returns StylePropertyValue(
+                it.value,
+                StylePropertyValueKind.CONSTANT
+            )
+        }
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -2246,18 +2381,14 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun removeLayersAndSources() {
+    fun removeLayers() {
         val style = mockk<Style> {
             every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
-            every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
+            every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
         }
 
-        MapboxRouteLineUtils.removeLayersAndSources(style)
+        MapboxRouteLineUtils.removeLayers(style)
 
-        verify { style.removeStyleSource(LAYER_GROUP_1_SOURCE_ID) }
-        verify { style.removeStyleSource(LAYER_GROUP_2_SOURCE_ID) }
-        verify { style.removeStyleSource(LAYER_GROUP_3_SOURCE_ID) }
-        verify { style.removeStyleSource(WAYPOINT_SOURCE_ID) }
         verify { style.removeStyleLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID) }
         verify { style.removeStyleLayer(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) }
         verify { style.removeStyleLayer(LAYER_GROUP_1_TRAIL_CASING) }
@@ -2278,6 +2409,9 @@ class MapboxRouteLineUtilsTest {
         verify { style.removeStyleLayer(LAYER_GROUP_3_MAIN) }
         verify { style.removeStyleLayer(LAYER_GROUP_3_TRAFFIC) }
         verify { style.removeStyleLayer(LAYER_GROUP_3_RESTRICTED) }
+        verify { style.removeStyleLayer(WAYPOINT_LAYER_ID) }
+        verify { style.removeStyleImage(ORIGIN_MARKER_NAME) }
+        verify { style.removeStyleImage(DESTINATION_MARKER_NAME) }
     }
 
     @Test

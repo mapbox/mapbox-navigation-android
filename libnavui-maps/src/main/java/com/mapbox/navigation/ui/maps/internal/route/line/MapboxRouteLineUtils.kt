@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.util.LruCache
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -25,11 +24,11 @@ import com.mapbox.maps.extension.style.layers.generated.BackgroundLayer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.getLayer
-import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
-import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.getSourceAs
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
@@ -64,6 +63,7 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
+import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.sin
@@ -1074,64 +1074,93 @@ internal object MapboxRouteLineUtils {
         return expressionBuilder.build()
     }
 
-    private fun addSource(
-        style: Style,
-        layerSource: String,
+    /**
+     * Compares provided [properties] map with existing values for a source with [sourceId].
+     *
+     * The primary mechanism to compare the values is [Value.equals],
+     * however, there's a special case [Double]s which are compared with a delta.
+     * Delta comparison is not supported for collections
+     * but it's a case that this class currently doesn't need to take into account.
+     */
+    private fun Style.sourcePropertiesCompatible(
+        sourceId: String,
+        properties: HashMap<String, Value>
+    ) = properties.all {
+        val existing = getStyleSourceProperty(sourceId, it.key).value
+        val existingContents = existing.contents
+        val expected = it.value
+        val expectedContents = expected.contents
+        if (existingContents is Double && expectedContents is Double) {
+            abs(existingContents - expectedContents) < 0.000001
+        } else if (existingContents is Float && expectedContents is Float) {
+            abs(existingContents - expectedContents) < 0.000001f
+        } else {
+            existing == expected
+        }
+    }
+
+    private fun Style.addNewOrReuseSource(
+        id: String,
         tolerance: Double,
         useLineMetrics: Boolean,
         enableSharedCache: Boolean
     ) {
-        if (!style.styleSourceExists(layerSource)) {
-            style.addStyleSource(
-                layerSource,
+        val source = if (styleSourceExists(id)) {
+            getSourceAs<GeoJsonSource>(id)
+        } else {
+            null
+        }
+
+        val expectedProperties = hashMapOf(
+            "type" to Value("geojson"),
+            "sharedCache" to Value(enableSharedCache),
+            "maxzoom" to Value(16),
+            "lineMetrics" to Value(useLineMetrics),
+            "tolerance" to Value(tolerance),
+        )
+        val recreateSource = source == null || !sourcePropertiesCompatible(id, expectedProperties)
+        if (recreateSource) {
+            source?.let {
+                removeStyleSource(it.sourceId)
+            }
+            addStyleSource(
+                id,
                 Value(
-                    hashMapOf(
-                        "type" to Value("geojson"),
-                        "data" to Value(""),
-                        "sharedCache" to Value(enableSharedCache),
-                        "maxzoom" to Value(16),
-                        "lineMetrics" to Value(useLineMetrics),
-                        "tolerance" to Value(tolerance)
-                    )
+                    expectedProperties.apply {
+                        // reuse feature collections when re-adding the source
+                        put("data", Value(source?.data ?: ""))
+                    }
                 )
             )
         }
     }
 
     fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
-        if (layersAreInitialized(style, options)) {
-            return
-        }
-
         val belowLayerIdToUse: String? =
             getBelowLayerIdToUse(
                 options.routeLineBelowLayerId,
                 style
             )
 
-        addSource(
-            style,
+        style.addNewOrReuseSource(
             RouteLayerConstants.WAYPOINT_SOURCE_ID,
             options.tolerance,
             useLineMetrics = false,
             enableSharedCache = false
         )
-        addSource(
-            style,
+        style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
             enableSharedCache = options.shareLineGeometrySources
         )
-        addSource(
-            style,
+        style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
             enableSharedCache = options.shareLineGeometrySources
         )
-        addSource(
-            style,
+        style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
@@ -1503,15 +1532,67 @@ internal object MapboxRouteLineUtils {
             )
         }
 
-        buildWayPointLayer(
-            style,
-            options.originIcon,
-            options.destinationIcon,
-            options.waypointLayerIconOffset,
-            options.waypointLayerIconAnchor,
-            options.iconPitchAlignment
-        ).let {
-            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        if (!style.hasStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME)) {
+            options.originIcon.getBitmap().let {
+                style.addImage(RouteLayerConstants.ORIGIN_MARKER_NAME, it)
+            }
+        }
+        if (!style.hasStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME)) {
+            options.destinationIcon.getBitmap().let {
+                style.addImage(RouteLayerConstants.DESTINATION_MARKER_NAME, it)
+            }
+        }
+        if (!style.styleLayerExists(RouteLayerConstants.WAYPOINT_LAYER_ID)) {
+            style.addPersistentLayer(
+                SymbolLayer(
+                    RouteLayerConstants.WAYPOINT_LAYER_ID,
+                    RouteLayerConstants.WAYPOINT_SOURCE_ID
+                )
+                    .iconOffset(options.waypointLayerIconOffset)
+                    .iconAnchor(options.waypointLayerIconAnchor)
+                    .iconImage(
+                        match {
+                            toString {
+                                get { literal(RouteLayerConstants.WAYPOINT_PROPERTY_KEY) }
+                            }
+                            literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
+                            stop {
+                                RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
+                                literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
+                            }
+                            stop {
+                                RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
+                                literal(RouteLayerConstants.DESTINATION_MARKER_NAME)
+                            }
+                        }
+                    ).iconSize(
+                        interpolate {
+                            exponential { literal(1.5) }
+                            zoom()
+                            stop {
+                                literal(0.0)
+                                literal(0.6)
+                            }
+                            stop {
+                                literal(10.0)
+                                literal(0.8)
+                            }
+                            stop {
+                                literal(12.0)
+                                literal(1.3)
+                            }
+                            stop {
+                                literal(22.0)
+                                literal(2.8)
+                            }
+                        }
+                    )
+                    .iconPitchAlignment(options.iconPitchAlignment)
+                    .iconAllowOverlap(true)
+                    .iconIgnorePlacement(true)
+                    .iconKeepUpright(true),
+                LayerPosition(null, belowLayerIdToUse, null)
+            )
         }
     }
 
@@ -1835,86 +1916,7 @@ internal object MapboxRouteLineUtils {
         }
     }
 
-    private fun buildWayPointLayer(
-        style: Style,
-        originIcon: Drawable,
-        destinationIcon: Drawable,
-        iconOffset: List<Double>,
-        iconAnchor: IconAnchor,
-        iconPitchAlignment: IconPitchAlignment
-    ): SymbolLayer {
-        if (style.styleLayerExists(RouteLayerConstants.WAYPOINT_LAYER_ID)) {
-            style.removeStyleLayer(RouteLayerConstants.WAYPOINT_LAYER_ID)
-        }
-
-        if (style.getStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME) != null) {
-            style.removeStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME)
-        }
-        originIcon.getBitmap().let {
-            style.addImage(RouteLayerConstants.ORIGIN_MARKER_NAME, it)
-        }
-
-        if (style.getStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME) != null) {
-            style.removeStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME)
-        }
-        destinationIcon.getBitmap().let {
-            style.addImage(RouteLayerConstants.DESTINATION_MARKER_NAME, it)
-        }
-
-        return SymbolLayer(
-            RouteLayerConstants.WAYPOINT_LAYER_ID,
-            RouteLayerConstants.WAYPOINT_SOURCE_ID
-        )
-            .iconOffset(iconOffset)
-            .iconAnchor(iconAnchor)
-            .iconImage(
-                match {
-                    toString {
-                        get { literal(RouteLayerConstants.WAYPOINT_PROPERTY_KEY) }
-                    }
-                    literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
-                    stop {
-                        RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
-                        literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
-                    }
-                    stop {
-                        RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
-                        literal(RouteLayerConstants.DESTINATION_MARKER_NAME)
-                    }
-                }
-            ).iconSize(
-                interpolate {
-                    exponential { literal(1.5) }
-                    zoom()
-                    stop {
-                        literal(0.0)
-                        literal(0.6)
-                    }
-                    stop {
-                        literal(10.0)
-                        literal(0.8)
-                    }
-                    stop {
-                        literal(12.0)
-                        literal(1.3)
-                    }
-                    stop {
-                        literal(22.0)
-                        literal(2.8)
-                    }
-                }
-            )
-            .iconPitchAlignment(iconPitchAlignment)
-            .iconAllowOverlap(true)
-            .iconIgnorePlacement(true)
-            .iconKeepUpright(true)
-    }
-
-    internal fun removeLayersAndSources(style: Style) {
-        style.removeStyleSource(RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID)
-        style.removeStyleSource(RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID)
-        style.removeStyleSource(RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID)
-        style.removeStyleSource(RouteLayerConstants.WAYPOINT_SOURCE_ID)
+    internal fun removeLayers(style: Style) {
         style.removeStyleLayer(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
         style.removeStyleLayer(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING)
@@ -1941,6 +1943,9 @@ internal object MapboxRouteLineUtils {
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_MAIN)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_TRAFFIC)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_RESTRICTED)
+        style.removeStyleLayer(RouteLayerConstants.WAYPOINT_LAYER_ID)
+        style.removeStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME)
+        style.removeStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME)
     }
 }
 
