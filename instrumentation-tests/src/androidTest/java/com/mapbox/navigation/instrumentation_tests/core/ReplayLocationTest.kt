@@ -52,7 +52,7 @@ class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
     }
 
     @Test
-    fun last_location_is_cleared_when_session_is_stopped() = sdkTest {
+    fun replay_session_locations_do_not_contain_locations_from_previous_session() = sdkTest {
         val firstReplayApproximateLocation = ApproximateCoordinates(1.0, 1.0, tolerance)
         val secondReplayApproximateLocation = ApproximateCoordinates(1.2, 1.2, tolerance)
         val rawLocations = mutableListOf<ApproximateCoordinates>()

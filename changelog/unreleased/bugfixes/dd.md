@@ -1,1 +1,1 @@
-- Improved `ReplayLocationEngine` last location update behaviour: now the last location is cleaned up when replay session is stopped.
+- Fixed the case when `ReplayLocationEngine` returned outdated location at the begging of a new replay trip session.
