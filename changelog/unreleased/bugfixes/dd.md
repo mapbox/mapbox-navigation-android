@@ -1,1 +1,1 @@
-- Fixed the case when `ReplayLocationEngine` returned outdated location at the begging of a new replay trip session.
+- Fixed the case when `ReplayLocationEngine` returned outdated location at the beginning of a new replay trip session.

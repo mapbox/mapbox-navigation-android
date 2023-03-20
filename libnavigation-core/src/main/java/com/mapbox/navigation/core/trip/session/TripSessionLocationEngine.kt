@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Looper
 import android.os.SystemClock
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -37,10 +36,24 @@ internal class TripSessionLocationEngine constructor(
     private val replayLocationEngine: ReplayLocationEngine by lazy {
         replayLocationEngineProvider.invoke(mapboxReplayer)
     }
-    private var activeLocationEngine: LocationEngine? = null
+    private var activeLocationEngine: CancellableLocationEngine? = null
     private var onRawLocationUpdate: (Location) -> Unit = { }
 
-    private var locationEngineCallback = createLocationEngineCallback()
+    private val locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
+        override fun onSuccess(result: LocationEngineResult?) {
+            logD(LOG_CATEGORY) {
+                "successful location engine callback $result"
+            }
+            result?.locations?.lastOrNull()?.let {
+                logIfLocationIsNotFreshEnough(it)
+                onRawLocationUpdate(it)
+            }
+        }
+
+        override fun onFailure(exception: Exception) {
+            logD("location on failure exception=$exception", LOG_CATEGORY)
+        }
+    }
 
     @SuppressLint("MissingPermission")
     fun startLocationUpdates(isReplayEnabled: Boolean, onRawLocationUpdate: (Location) -> Unit) {
@@ -49,11 +62,13 @@ internal class TripSessionLocationEngine constructor(
         }
         stopLocationUpdates()
         this.onRawLocationUpdate = onRawLocationUpdate
-        activeLocationEngine = if (isReplayEnabled) {
-            replayLocationEngine
-        } else {
-            navigationOptions.locationEngine
-        }
+        activeLocationEngine = CancellableLocationEngine(
+            if (isReplayEnabled) {
+                replayLocationEngine
+            } else {
+                navigationOptions.locationEngine
+            }
+        )
         this.isReplayEnabled = isReplayEnabled
         activeLocationEngine?.requestLocationUpdates(
             navigationOptions.locationEngineRequest,
@@ -69,31 +84,11 @@ internal class TripSessionLocationEngine constructor(
         }
         isReplayEnabled = false
         onRawLocationUpdate = { }
-        activeLocationEngine?.removeLocationUpdates(locationEngineCallback)
-        locationEngineCallback = createLocationEngineCallback()
-        activeLocationEngine = null
-    }
-
-    private fun createLocationEngineCallback(): LocationEngineCallback<LocationEngineResult> {
-        return object : LocationEngineCallback<LocationEngineResult> {
-            override fun onSuccess(result: LocationEngineResult?) {
-                // ignore last location updates from previous session
-                // (possible with last location callbacks: they can't be removed)
-                // reproducible with ReplayLocationTest#replay_session_locations_do_not_contain_locations_from_previous_session
-                if (locationEngineCallback != this) return
-                logD(LOG_CATEGORY) {
-                    "successful location engine callback $result"
-                }
-                result?.locations?.lastOrNull()?.let {
-                    logIfLocationIsNotFreshEnough(it)
-                    onRawLocationUpdate(it)
-                }
-            }
-
-            override fun onFailure(exception: Exception) {
-                logD("location on failure exception=$exception", LOG_CATEGORY)
-            }
+        activeLocationEngine?.run {
+            cancelLastLocationTask(locationEngineCallback)
+            removeLocationUpdates(locationEngineCallback)
         }
+        activeLocationEngine = null
     }
 
     private fun logIfLocationIsNotFreshEnough(location: Location) {

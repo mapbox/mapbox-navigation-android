@@ -317,7 +317,7 @@ class MapboxRouteLineApiRoboTest {
     }
 
     @Test
-    fun setRoutesWithCallback() {
+    fun setRoutesWithCallback() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
         val expectedCasingExpressionContents = listOf(
