@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.content.res.AppCompatResources
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -2247,22 +2248,27 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun cacheResultKeyRouteTraffic_notEquals() {
         val route = loadNavigationRoute("short_route.json")
+        val routeId = route.id
+        val directionsRoute2 = route.directionsRoute.toBuilder()
+            .legs(
+                route.directionsRoute.legs()?.mapIndexed { index, leg ->
+                    if (index == 0) {
+                        leg.toBuilder()
+                            .annotation(
+                                leg.annotation()?.toBuilder()
+                                    ?.congestion(leg.annotation()?.congestion()?.reversed())
+                                    ?.build()
+                            )
+                            .build()
+                    } else {
+                        leg
+                    }
+                }
+            )
+            .build()
         val route2 = mockk<NavigationRoute> {
-            every { id } returns route.id
-            every { directionsRoute } returns route.directionsRoute
-            every { directionsRoute.legs() } returns route.directionsRoute.legs()
-            every { directionsRoute.legs()!!.size } returns route.directionsRoute.legs()!!.size
-            every {
-                directionsRoute.legs()!![0].annotation()
-            } returns route.directionsRoute.legs()!![0].annotation()
-            every {
-                directionsRoute.legs()!![0].annotation()!!.congestion()
-            } returns route.directionsRoute.legs()!![0].annotation()!!.congestion()!!
-                .shuffled()
-            every { directionsRoute.routeOptions() } returns route.directionsRoute.routeOptions()
-            every {
-                directionsRoute.legs()!![0].closures()
-            } returns route.directionsRoute.legs()?.first()?.closures()
+            every { id } returns routeId
+            every { directionsRoute } returns directionsRoute2
         }
         val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
@@ -2277,22 +2283,29 @@ class MapboxRouteLineUtilsTest {
     fun cacheResultKeyRouteTraffic_numericTrafficNotEquals() {
         val colorResources = RouteLineColorResources.Builder().build()
         val route = loadNavigationRoute("route-with-congestion-numeric.json")
+        val routeId = route.id
+        val directionsRoute2 = route.directionsRoute.toBuilder()
+            .legs(
+                route.directionsRoute.legs()?.mapIndexed { index, leg ->
+                    if (index == 0) {
+                        leg.toBuilder()
+                            .annotation(
+                                leg.annotation()?.toBuilder()
+                                    ?.congestionNumeric(
+                                        leg.annotation()?.congestionNumeric()?.reversed()
+                                    )
+                                    ?.build()
+                            )
+                            .build()
+                    } else {
+                        leg
+                    }
+                }
+            )
+            .build()
         val route2 = mockk<NavigationRoute> {
-            every { id } returns route.id
-            every { directionsRoute } returns route.directionsRoute
-            every { directionsRoute.legs() } returns route.directionsRoute.legs()
-            every { directionsRoute.legs()!!.size } returns route.directionsRoute.legs()!!.size
-            every {
-                directionsRoute.legs()!![0].annotation()
-            } returns route.directionsRoute.legs()!![0].annotation()
-            every { directionsRoute.routeOptions() } returns route.directionsRoute.routeOptions()
-            every {
-                directionsRoute.legs()!![0].annotation()!!.congestionNumeric()
-            } returns route.directionsRoute
-                .legs()!![0]
-                .annotation()!!
-                .congestionNumeric()!!
-                .shuffled()
+            every { id } returns routeId
+            every { directionsRoute } returns directionsRoute2
         }
         val trafficProvider =
             MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
@@ -2309,14 +2322,13 @@ class MapboxRouteLineUtilsTest {
         val colorResources = RouteLineColorResources.Builder().build()
         val routeWithLegacyTraffic = loadNavigationRoute("short_route.json")
         val route = loadNavigationRoute("route-with-congestion-numeric.json")
+        val routeId = route.id
+        val directionsRoute2 = route.directionsRoute.toBuilder()
+            .routeOptions(routeWithLegacyTraffic.directionsRoute.routeOptions())
+            .build()
         val route2 = mockk<NavigationRoute> {
-            every { id } returns route.id
-            every { directionsRoute } returns route.directionsRoute
-            every { directionsRoute.legs() } returns route.directionsRoute.legs()
-            every { directionsRoute.legs()!!.size } returns route.directionsRoute.legs()!!.size
-            every {
-                directionsRoute.routeOptions()
-            } returns routeWithLegacyTraffic.directionsRoute.routeOptions()
+            every { id } returns routeId
+            every { directionsRoute } returns directionsRoute2
         }
         val trafficProvider =
             MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
@@ -2332,25 +2344,31 @@ class MapboxRouteLineUtilsTest {
     fun cacheResultKeyRouteTraffic_closuresNotEqual() {
         val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         val route = loadNavigationRoute("route-with-closure.json")
-        val route2 = mockk<NavigationRoute> {
-            every { id } returns route.id
-            every { directionsRoute } returns route.directionsRoute
-            every { directionsRoute.legs() } returns route.directionsRoute.legs()
-            every { directionsRoute.legs()!!.size } returns route.directionsRoute.legs()!!.size
-            every {
-                directionsRoute.legs()!![0].annotation()
-            } returns route.directionsRoute.legs()!![0].annotation()
-            every { directionsRoute.routeOptions() } returns route.directionsRoute.routeOptions()
-            every { directionsRoute.legs()!![0].closures() } returns listOf(
-                route.directionsRoute
-                    .legs()!!
-                    .first()
-                    .closures()!!
-                    .first()
-                    .toBuilder()
-                    .geometryIndexStart(5)
-                    .build()
+        val routeId = route.id
+        val directionsRoute2 = route.directionsRoute.toBuilder()
+            .legs(
+                route.directionsRoute.legs()?.mapIndexed { index, leg ->
+                    if (index == 0) {
+                        leg.toBuilder()
+                            .closures(
+                                leg.closures()!!.mapIndexed { index, closure ->
+                                    if (index == 0) {
+                                        closure.toBuilder().geometryIndexStart(5).build()
+                                    } else {
+                                        closure
+                                    }
+                                }
+                            )
+                            .build()
+                    } else {
+                        leg
+                    }
+                }
             )
+            .build()
+        val route2 = mockk<NavigationRoute> {
+            every { id } returns routeId
+            every { directionsRoute } returns directionsRoute2
         }
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
 
@@ -2376,6 +2394,7 @@ class MapboxRouteLineUtilsTest {
     fun cacheResultKeyRouteTraffic_roadClassesNotEqual() {
         val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         val route = loadNavigationRoute("route-with-closure.json")
+        val routeId = route.id
         val mapboxStreetsV8 = route.directionsRoute
             .legs()!![0]
             .steps()!![0]
@@ -2413,7 +2432,7 @@ class MapboxRouteLineUtilsTest {
         val leg = route.directionsRoute.legs()!![0].toBuilder().steps(legSteps).build()
         val updatedRoute = route.directionsRoute.toBuilder().legs(listOf(leg)).build()
         val route2 = mockk<NavigationRoute> {
-            every { id } returns route.id
+            every { id } returns routeId
             every { directionsRoute } returns updatedRoute
         }
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
@@ -2428,19 +2447,13 @@ class MapboxRouteLineUtilsTest {
     fun cacheResultKeyRouteTraffic_routeLegsNotEqualSize() {
         val trafficProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         val route = loadNavigationRoute("route-with-closure.json")
+        val routeId = route.id
+        val directionsRoute2 = route.directionsRoute.toBuilder()
+            .legs(route.directionsRoute.legs()!! + mockk<RouteLeg>(relaxed = true))
+            .build()
         val route2 = mockk<NavigationRoute> {
-            every { id } returns route.id
-            every { directionsRoute } returns route.directionsRoute
-            every { directionsRoute.legs() } returns route.directionsRoute.legs()
-            every { directionsRoute.legs()!!.size } returns 100
-            every {
-                directionsRoute.legs()!![0].annotation()
-            } returns route.directionsRoute.legs()!![0].annotation()
-            every { directionsRoute.routeOptions() } returns route.directionsRoute.routeOptions()
-            every { directionsRoute.legs()!![0].closures() } returns route.directionsRoute
-                .legs()!!
-                .first()
-                .closures()!!
+            every { id } returns routeId
+            every { directionsRoute } returns directionsRoute2
         }
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
 
