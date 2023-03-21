@@ -209,6 +209,17 @@ package com.mapbox.navigation.ui.maps.camera {
 
 package com.mapbox.navigation.ui.maps.camera.data {
 
+  public interface FollowingCameraFramingStrategy {
+    method public java.util.List<com.mapbox.geojson.Point> getPointsToFrameAfterCurrentManeuver(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions followingFrameOptions, java.util.List<? extends java.util.List<? extends java.util.List<com.mapbox.geojson.Point>>> postManeuverFramingPoints);
+    method public java.util.List<com.mapbox.geojson.Point> getPointsToFrameOnCurrentStep(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions followingFrameOptions, java.util.List<? extends java.util.List<java.lang.Double>> averageIntersectionDistancesOnRoute);
+    field public static final com.mapbox.navigation.ui.maps.camera.data.FollowingCameraFramingStrategy.Companion Companion;
+  }
+
+  public static final class FollowingCameraFramingStrategy.Companion {
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingCameraFramingStrategy getDefault();
+    property public final com.mapbox.navigation.ui.maps.camera.data.FollowingCameraFramingStrategy Default;
+  }
+
   public final class FollowingFrameOptions {
     ctor public FollowingFrameOptions();
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.BearingSmoothing getBearingSmoothing();
@@ -217,6 +228,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public double getDefaultPitch();
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint getFocalPoint();
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FrameGeometryAfterManeuver getFrameGeometryAfterManeuver();
+    method public com.mapbox.navigation.ui.maps.camera.data.FollowingCameraFramingStrategy getFramingStrategy();
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.IntersectionDensityCalculation getIntersectionDensityCalculation();
     method public double getMaxZoom();
     method public boolean getMaximizeViewableGeometryWhenPitchZero();
@@ -229,6 +241,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void setCenterUpdatesAllowed(boolean);
     method public void setDefaultPitch(double);
     method public void setFocalPoint(com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint);
+    method public void setFramingStrategy(com.mapbox.navigation.ui.maps.camera.data.FollowingCameraFramingStrategy);
     method public void setMaxZoom(double);
     method public void setMaximizeViewableGeometryWhenPitchZero(boolean);
     method public void setMinZoom(double);
@@ -241,6 +254,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     property public final double defaultPitch;
     property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint focalPoint;
     property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FrameGeometryAfterManeuver frameGeometryAfterManeuver;
+    property public final com.mapbox.navigation.ui.maps.camera.data.FollowingCameraFramingStrategy framingStrategy;
     property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.IntersectionDensityCalculation intersectionDensityCalculation;
     property public final double maxZoom;
     property public final boolean maximizeViewableGeometryWhenPitchZero;

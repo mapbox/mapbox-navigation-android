@@ -54,6 +54,7 @@ import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationBu
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
+import com.mapbox.navigation.ui.maps.camera.data.FollowingCameraFramingStrategy
 import com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FocalPoint
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
@@ -497,6 +498,9 @@ class MapboxCameraAnimationsActivity :
 
     @SuppressLint("MissingPermission")
     override fun onButtonClicked(animationType: AnimationType) {
+        viewportDataSource.options.followingFrameOptions.framingStrategy =
+            FollowingCameraFramingStrategy.Default
+
         when (animationType) {
             AnimationType.Following, AnimationType.FastFollowing, AnimationType.FollowingNorth -> {
                 followingEdgeInsets = paddedFollowingEdgeInsets
@@ -588,6 +592,17 @@ class MapboxCameraAnimationsActivity :
             }
             AnimationType.RemoveRoute -> {
                 mapboxNavigation.setNavigationRoutes(emptyList())
+            }
+            AnimationType.CustomFollowing -> {
+                followingEdgeInsets = paddedFollowingEdgeInsets
+                viewportDataSource.apply {
+                    followingPadding = followingEdgeInsets
+                    options.followingFrameOptions.zoomUpdatesAllowed = true
+                    options.followingFrameOptions.framingStrategy =
+                        CustomFollowingCameraFramingStrategy()
+                    evaluate()
+                }
+                navigationCamera.requestNavigationCameraToFollowing()
             }
         }
     }

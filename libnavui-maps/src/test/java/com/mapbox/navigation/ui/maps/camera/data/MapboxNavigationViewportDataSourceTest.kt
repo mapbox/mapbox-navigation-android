@@ -16,14 +16,14 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.ui.maps.camera.data.MapboxFollowingCameraFramingStrategy.getPointsToFrameAfterCurrentManeuver
+import com.mapbox.navigation.ui.maps.camera.data.MapboxFollowingCameraFramingStrategy.getPointsToFrameOnCurrentStep
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.BEARING_NORTH
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.EMPTY_EDGE_INSETS
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.NULL_ISLAND_POINT
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.ZERO_PITCH
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameAfterCurrentManeuver
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameOnCurrentStep
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
@@ -139,6 +139,7 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
 
         mockkObject(ViewportDataSourceProcessor)
+        mockkObject(MapboxFollowingCameraFramingStrategy)
         every {
             getMapAnchoredPaddingFromUserPadding(mapSize, any(), any())
         } returns singlePixelEdgeInsets
@@ -183,21 +184,16 @@ class MapboxNavigationViewportDataSourceTest {
         } returns pitchFromProgress
         every {
             getPointsToFrameOnCurrentStep(
-                viewportDataSource.options.followingFrameOptions.intersectionDensityCalculation
-                    .enabled,
-                viewportDataSource.options.followingFrameOptions.intersectionDensityCalculation
-                    .averageDistanceMultiplier,
-                averageIntersectionDistancesOnRoute,
                 any(),
-                any()
+                viewportDataSource.options.followingFrameOptions,
+                averageIntersectionDistancesOnRoute,
             )
         } returns pointsToFrameOnCurrentStep
         every {
             getPointsToFrameAfterCurrentManeuver(
-                viewportDataSource.options.followingFrameOptions.frameGeometryAfterManeuver.enabled,
-                postManeuverFramingPoints,
                 any(),
-                any()
+                viewportDataSource.options.followingFrameOptions,
+                postManeuverFramingPoints,
             )
         } returns pointsToFrameAfterCurrentStep
         every {

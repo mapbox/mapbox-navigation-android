@@ -24,6 +24,7 @@ class AnimationAdapter(
         animationList.add(AnimationType.ToPOI)
         animationList.add(AnimationType.LookAtPOIWhenFollowing)
         animationList.add(AnimationType.RemoveRoute)
+        animationList.add(AnimationType.CustomFollowing)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnimationsViewHolder {

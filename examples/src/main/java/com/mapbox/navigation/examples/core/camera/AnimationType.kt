@@ -7,5 +7,6 @@ enum class AnimationType {
     FastFollowing,
     ToPOI,
     LookAtPOIWhenFollowing,
-    RemoveRoute
+    RemoveRoute,
+    CustomFollowing
 }
