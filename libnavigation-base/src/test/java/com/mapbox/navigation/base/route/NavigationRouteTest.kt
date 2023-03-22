@@ -8,6 +8,8 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
+import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
+import com.mapbox.navigation.base.internal.route.toTestNavigationRoutes
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
@@ -71,7 +73,7 @@ class NavigationRouteTest {
             FileUtils.loadJsonFixture("multileg_route.json")
         )
 
-        val navigationRoute = directionsRoute.toNavigationRoute()
+        val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Custom())
 
         assertEquals(3, navigationRoute.directionsResponse.waypoints()!!.size)
         assertEquals(
@@ -114,7 +116,7 @@ class NavigationRouteTest {
             every { legs() } returns null
         }
 
-        val navigationRoute = directionsRoute.toNavigationRoute()
+        val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Custom())
 
         assertEquals(2, navigationRoute.directionsResponse.waypoints()!!.size)
         assertEquals(
@@ -150,7 +152,7 @@ class NavigationRouteTest {
             every { legs() } returns null
         }
 
-        val navigationRoute = directionsRoute.toNavigationRoute(RouterOrigin.Offboard)
+        val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Offboard)
 
         val responseJsonSlot = slot<String>()
         verify {
@@ -184,7 +186,7 @@ class NavigationRouteTest {
             every { legs() } returns null
         }
 
-        val navigationRoute = directionsRoute.toNavigationRoute()
+        val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Custom())
 
         assertEquals(3, navigationRoute.directionsResponse.waypoints()!!.size)
         assertEquals(
@@ -345,7 +347,7 @@ class NavigationRouteTest {
             } throws IllegalStateException()
 
             assertThrows(IllegalStateException::class.java) {
-                listOf(mockDirectionsRoute).toNavigationRoutes(RouterOrigin.Offboard)
+                listOf(mockDirectionsRoute).toTestNavigationRoutes(RouterOrigin.Offboard)
             }
         }
     }

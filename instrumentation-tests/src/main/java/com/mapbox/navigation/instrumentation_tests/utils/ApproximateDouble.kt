@@ -6,8 +6,6 @@ class ApproximateDouble(
     private val value: Double,
     private val tolerance: Double = 0.000001
 ) {
-    
-    
     override fun toString(): String = value.toString()
 
     override fun equals(other: Any?): Boolean {

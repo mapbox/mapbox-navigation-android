@@ -3,13 +3,12 @@ package com.mapbox.navigation.core
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.toTestNavigationRoutes
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
-import com.mapbox.navigation.base.route.toNavigationRoutes
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalController
@@ -1009,13 +1008,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val route2: DirectionsRoute = createDirectionsRoute(requestUuid = "test2")
             val route3: DirectionsRoute = createDirectionsRoute(requestUuid = "test3")
             val routes = listOf(route1, route2, route3)
-            val acceptedRoutes = listOf(route1, route3).toNavigationRoutes(RouterOrigin.Custom())
+            val navigationRoutes = routes.toTestNavigationRoutes(RouterOrigin.Custom())
+            val acceptedRoutes = listOf(route1, route3)
+                .toTestNavigationRoutes(RouterOrigin.Custom())
             val initialLegIndex = 2
 
             coEvery {
                 tripSession.setRoutes(any(), any())
             } returns NativeSetRouteValue(
-                routes.toNavigationRoutes(RouterOrigin.Custom()),
+                navigationRoutes,
                 listOf(alternativeWithId("test3#0"))
             )
             mapboxNavigation.setRoutes(routes, initialLegIndex)
@@ -1026,7 +1027,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                         acceptedRoutes,
                         listOf(
                             IgnoredRoute(
-                                route2.toNavigationRoute(RouterOrigin.Custom()),
+                                navigationRoutes[1], // route2
                                 invalidRouteReason
                             )
                         ),
