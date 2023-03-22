@@ -13,6 +13,7 @@ import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
@@ -21,11 +22,30 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterOrigin
-import org.jetbrains.annotations.TestOnly
 
 private const val ROUTE_REFRESH_LOG_CATEGORY = "RouteRefresh"
 
 val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
+
+/**
+ * Convert [DirectionsRoute] to [NavigationRoute] without
+ * looking the corresponding object up in [RouteCompatibilityCache].
+ */
+@VisibleForTesting(otherwise = VisibleForTesting.NONE)
+fun DirectionsRoute.toTestNavigationRoute(
+    routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
+    sdkRouteParser: SDKRouteParser = NativeRouteParserWrapper,
+): NavigationRoute = toNavigationRoute(sdkRouteParser, routerOrigin, false)
+
+/**
+ * Convert list of [DirectionsRoute]s to list of [NavigationRoute]s without
+ * looking the corresponding object up in [RouteCompatibilityCache].
+ */
+@VisibleForTesting(otherwise = VisibleForTesting.NONE)
+fun List<DirectionsRoute>.toTestNavigationRoutes(
+    routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
+    sdkRouteParser: SDKRouteParser = NativeRouteParserWrapper,
+) = map { it.toTestNavigationRoute(routerOrigin, sdkRouteParser) }
 
 /**
  * Internal handle for the route's native peer.
@@ -138,13 +158,15 @@ fun NavigationRoute.refreshNativePeer(): NavigationRoute = copy()
 /**
  * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.
  */
-@TestOnly
+@VisibleForTesting(otherwise = VisibleForTesting.NONE)
 fun createNavigationRoute(
     directionsRoute: DirectionsRoute,
     sdkRouteParser: SDKRouteParser,
 ): NavigationRoute =
-    directionsRoute
-        .toNavigationRoute(sdkRouteParser, com.mapbox.navigation.base.route.RouterOrigin.Custom())
+    directionsRoute.toTestNavigationRoute(
+        com.mapbox.navigation.base.route.RouterOrigin.Custom(),
+        sdkRouteParser
+    )
 
 /**
  * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.

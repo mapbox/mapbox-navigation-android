@@ -7,9 +7,9 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
+import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.FileUtils
@@ -41,11 +41,10 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.job
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -74,8 +73,6 @@ class MapboxRouteLineApiRoboTest {
     @get:Rule
     val nativeRouteParserRule = NativeRouteParserRule()
 
-    private val parentJob = SupervisorJob()
-
     private val shortRoute by lazy { TestRoute(fileName = "short_route.json") }
     private val routeWithRestrictions by lazy {
         TestRoute(fileName = "route-with-restrictions.json")
@@ -93,7 +90,10 @@ class MapboxRouteLineApiRoboTest {
         mockkObject(InternalJobControlFactory)
         every {
             InternalJobControlFactory.createDefaultScopeJobControl()
-        } returns JobControl(parentJob, coroutineRule.coroutineScope)
+        } answers {
+            val defaultScope = coroutineRule.createTestScope()
+            JobControl(defaultScope.coroutineContext.job, defaultScope)
+        }
     }
 
     @After
@@ -426,7 +426,7 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
         )
         val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
-            .toNavigationRoute(RouterOrigin.Offboard)
+            .toTestNavigationRoute(RouterOrigin.Offboard)
 
         val result = api.setNavigationRoutes(listOf(route))
 

@@ -579,8 +579,8 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
         val actual = lineLayers.map {
             it.layerId to ApproximateDouble(
                 style.getStyleLayerProperty(
-                    it.layerId, "" +
-                        "line-depth-occlusion-factor"
+                    it.layerId,
+                    "line-depth-occlusion-factor"
                 ).value.contents as Double
             )
         }

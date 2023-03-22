@@ -3,8 +3,8 @@ package com.mapbox.navigation.ui.maps.testing
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils
@@ -26,7 +26,7 @@ object TestingUtil {
     }
 
     fun loadNavigationRoute(routeFileName: String, uuid: String? = null) =
-        loadRoute(routeFileName, uuid).toNavigationRoute(RouterOrigin.Offboard)
+        loadRoute(routeFileName, uuid).toTestNavigationRoute(RouterOrigin.Offboard)
 }
 
 internal data class TestRoute(

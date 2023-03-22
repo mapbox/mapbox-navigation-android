@@ -16,9 +16,9 @@ import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -880,10 +880,10 @@ class MapboxRouteLineApiTest {
     fun `setNavigationRouteLines uses distinct routes`() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
-        val route1 = loadRoute("short_route.json", uuid = "abc").toNavigationRoute(
+        val route1 = loadRoute("short_route.json", uuid = "abc").toTestNavigationRoute(
             routerOrigin = RouterOrigin.Offboard
         )
-        val route2 = loadRoute("short_route.json", uuid = "abc").toNavigationRoute(
+        val route2 = loadRoute("short_route.json", uuid = "abc").toTestNavigationRoute(
             routerOrigin = RouterOrigin.Offboard
         )
 
@@ -906,7 +906,7 @@ class MapboxRouteLineApiTest {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
-        val route = loadRoute("short_route.json").toNavigationRoute(
+        val route = loadRoute("short_route.json").toTestNavigationRoute(
             routerOrigin = RouterOrigin.Offboard
         )
 

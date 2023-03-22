@@ -449,6 +449,7 @@ fun List<DirectionsRoute>.toNavigationRoutes(
 fun DirectionsRoute.toNavigationRoute(): NavigationRoute = this.toNavigationRoute(
     NativeRouteParserWrapper,
     RouterOrigin.Custom(),
+    true,
 )
 
 /**
@@ -471,16 +472,19 @@ fun DirectionsRoute.toNavigationRoute(): NavigationRoute = this.toNavigationRout
  */
 fun DirectionsRoute.toNavigationRoute(
     routerOrigin: RouterOrigin,
-): NavigationRoute = this.toNavigationRoute(NativeRouteParserWrapper, routerOrigin)
+): NavigationRoute = this.toNavigationRoute(NativeRouteParserWrapper, routerOrigin, true)
 
 internal fun DirectionsRoute.toNavigationRoute(
     sdkRouteParser: SDKRouteParser,
     routerOrigin: RouterOrigin,
+    useCache: Boolean,
 ): NavigationRoute {
     DirectionsRouteMissingConditionsCheck.checkDirectionsRoute(this)
 
-    RouteCompatibilityCache.getFor(this)?.let {
-        return it
+    if (useCache) {
+        RouteCompatibilityCache.getFor(this)?.let {
+            return it
+        }
     }
 
     val options = requireNotNull(routeOptions()) {
