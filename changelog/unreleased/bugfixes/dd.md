@@ -1,0 +1,2 @@
+- Fixed false off-road detection on turns.
+- Updated off-road detector for automotive to stay on road even if we are further than 10 meters from the road.
