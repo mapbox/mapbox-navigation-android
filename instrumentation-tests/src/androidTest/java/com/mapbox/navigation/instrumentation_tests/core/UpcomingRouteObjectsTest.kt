@@ -491,10 +491,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
     ) {
         val origin = oneLegRoute.first().waypoints!!.first().location()
         assertEquals(origin, twoLegsRoute.first().waypoints!!.first().location())
-        mockLocationUpdatesRule.generateLocationUpdate {
-            latitude = origin.latitude()
-            longitude = origin.longitude()
-        }
+        stayOnPosition(origin)
     }
 
     private suspend fun setUpRoutes(file: Int, coordinates: String) {
