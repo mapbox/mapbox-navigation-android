@@ -27,9 +27,11 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.instrumentation_tests.utils.coroutines.navigateNextRouteLeg
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.instrumentation_tests.utils.coroutines.routesUpdates
@@ -255,7 +257,8 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         assertEquals(
             expectedOriginalRoadObjectClasses,
-            originalRoadObjects.map { it.roadObject::class.java })
+            originalRoadObjects.map { it.roadObject::class.java }
+        )
 
         stayOnPosition(coordinates[0])
 
@@ -272,8 +275,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             }
             .first()
         val distanceDiffAfterMovedAlongTheRoute = updateAfterMovedAlongTheRoute.distanceTraveled
-        val expectedRoadObjectsAfterMovedAlongTheRoute = originalRoadObjects.drop(1)
-            .map { it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterMovedAlongTheRoute }
+        val expectedRoadObjectsAfterMovedAlongTheRoute = originalRoadObjects.drop(1).map {
+            it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterMovedAlongTheRoute
+        }
 
         checkRoadObjects(
             expectedRoadObjectsAfterMovedAlongTheRoute,
@@ -305,7 +309,11 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             .map {
                 it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterFirstRefresh
             }.toMutableList().apply {
-                add(newIncidentIndex, Incident::class.java to newIncidentDistanceToStart - distanceDiffAfterFirstRefresh)
+                add(
+                    newIncidentIndex,
+                    Incident::class.java
+                        to newIncidentDistanceToStart - distanceDiffAfterFirstRefresh
+                )
             }.drop(3)
 
         checkRoadObjects(expectedObjectsAfterFirstRefresh, updateAfterRefresh.upcomingRoadObjects)
@@ -339,11 +347,18 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             .map {
                 it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterSecondRefresh
             }.toMutableList().apply {
-                add(newIncidentIndex, Incident::class.java to newIncidentDistanceToStart - distanceDiffAfterSecondRefresh)
+                add(
+                    newIncidentIndex,
+                    Incident::class.java
+                        to newIncidentDistanceToStart - distanceDiffAfterSecondRefresh
+                )
                 removeAt(newIncidentIndex - 1) // first incident removed
             }.drop(10)
 
-        checkRoadObjects(expectedObjectsAfterSecondRefresh, updateAfterSecondRefresh.upcomingRoadObjects)
+        checkRoadObjects(
+            expectedObjectsAfterSecondRefresh,
+            updateAfterSecondRefresh.upcomingRoadObjects
+        )
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -424,19 +439,30 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         assertEquals(
             expectedOriginalRoadObjectClasses,
-            originalRoadObjects.map { it.roadObject::class.java })
-
-        stayOnPosition(coordinates[0])
+            originalRoadObjects.map { it.roadObject::class.java }
+        )
 
         mapboxNavigation.startTripSession()
+        stayOnPosition(coordinates[0], 180f)
+        mapboxNavigation.flowLocationMatcherResult()
+            .filter {
+                abs(it.enhancedLocation.latitude - coordinates[0].latitude()) < 0.01 &&
+                    abs(it.enhancedLocation.longitude - coordinates[0].longitude()) < 0.01
+            }.first()
+
         mapboxNavigation.setNavigationRoutes(routes)
         mapboxNavigation.routeProgressUpdates()
-            .filter { it.currentState == RouteProgressState.TRACKING }
+            .filter {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.currentRouteGeometryIndex == 0
+            }
             .first()
+
         // distance travelled ~ 2327.765, first road object passed
         val movedAlongTheRoutePosition =
             routes.first().directionsRoute.completeGeometryToPoints()[60]
-        stayOnPosition(movedAlongTheRoutePosition)
+        stayOnPosition(movedAlongTheRoutePosition, 280f)
+        mapboxNavigation.navigateNextRouteLeg()
 
         val updateAfterMovedAlongTheRoute = mapboxNavigation.routeProgressUpdates()
             .filter {
@@ -444,8 +470,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             }
             .first()
         val distanceDiffAfterMovedAlongTheRoute = updateAfterMovedAlongTheRoute.distanceTraveled
-        val expectedRoadObjectsAfterMovedAlongTheRoute = originalRoadObjects.drop(1)
-            .map { it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterMovedAlongTheRoute }
+        val expectedRoadObjectsAfterMovedAlongTheRoute = originalRoadObjects.drop(1).map {
+            it.roadObject::class.java to it.distanceToStart!! - distanceDiffAfterMovedAlongTheRoute
+        }
 
         checkRoadObjects(
             expectedRoadObjectsAfterMovedAlongTheRoute,
@@ -461,7 +488,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         // distance traveled ~ 5222, second and third road objects are passed
         val positionAfterFirstRefresh =
             routes.first().directionsRoute.completeGeometryToPoints()[150]
-        stayOnPosition(positionAfterFirstRefresh)
+        stayOnPosition(positionAfterFirstRefresh, 0f)
         val updateAfterRefresh = mapboxNavigation.routeProgressUpdates()
             .filter { it.currentRouteGeometryIndex == 150 }
             .first()
@@ -475,11 +502,12 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         checkRoadObjects(expectedObjectsAfterFirstRefresh, updateAfterRefresh.upcomingRoadObjects)
     }
 
-    private fun stayOnPosition(position: Point) {
+    private fun stayOnPosition(position: Point, bearing: Float = 0f) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
                 latitude = position.latitude()
                 longitude = position.longitude()
+                this.bearing = bearing
             },
             times = 120
         )
