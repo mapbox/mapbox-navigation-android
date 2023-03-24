@@ -114,7 +114,7 @@ workflows:
           filters:
             branches:
               only:
-                - develop
+                - main
     jobs:
       - release-weekly-snapshot
 
