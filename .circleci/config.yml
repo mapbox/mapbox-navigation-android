@@ -108,13 +108,13 @@ workflows:
             - unit-tests-core
   weekly-snapshot-workflow:
     # Run workflow every Wednesday at 12pm UTC
-    triggers:
-      - schedule:
-          cron: "0 12 * * 3"
-          filters:
-            branches:
-              only:
-                - develop
+#    triggers:
+#      - schedule:
+#          cron: "0 12 * * 3"
+#          filters:
+#            branches:
+#              only:
+#                - develop
     jobs:
       - release-weekly-snapshot
 
