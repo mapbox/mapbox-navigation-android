@@ -6,6 +6,37 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.12.0-beta.3 - 24 March, 2023
+### Changelog
+[Changes between v2.12.0-beta.2 and v2.12.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0-beta.2...v2.12.0-beta.3)
+
+#### Features
+- Introduced `FollowingCameraFramingStrategy`, an interface that defines a strategy used to calculate points to be framed for the FOLLOWING camera mode. Added `FollowingFrameOptions.framingStrategy` property that allows injection of custom `FollowingCameraFramingStrategy`. [#7041](https://github.com/mapbox/mapbox-navigation-android/pull/7041)
+- Introduced `MapboxRouteLineOptions#lineDepthOcclusionFactor` parameter to control route line layer opacity based on occlusion from 3D objects. [#7038](https://github.com/mapbox/mapbox-navigation-android/pull/7038)
+
+#### Bug fixes and improvements
+- Fixed the case when `ReplayLocationEngine` returned outdated location at the beginning of a new replay trip session. [#7022](https://github.com/mapbox/mapbox-navigation-android/pull/7022)
+- Fixed false off-road detection on turns. [#7046](https://github.com/mapbox/mapbox-navigation-android/pull/7046)
+- Updated off-road detector for automotive to stay on road even if we are further than 10 meters from the road. [#7046](https://github.com/mapbox/mapbox-navigation-android/pull/7046)
+- Improved cache key performance for NavigationRoutes in order to address ANR experienced when setting long routes. [#6915](https://github.com/mapbox/mapbox-navigation-android/pull/6915)
+- Fixed "global reference table overflow" by reducing the amount of objects transferred through the JNI on every route progress update. [#7030](https://github.com/mapbox/mapbox-navigation-android/pull/7030)
+- Improved `MapboxRouteLineView` to prevent a flash of rendered route geometries on the map when the view instance is recreated to apply new `MapboxRouteLineOptions`. [#7043](https://github.com/mapbox/mapbox-navigation-android/pull/7043)
+
+#### Known issues :warning:
+- Native crash signal 11 (SIGSEGV), code 1 (SEGV_MAPERR) may happen at libmapbox-common.so at `SqlitePersistentStorage#createQuery`.
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.12.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.12.0-rc.1))
+- Mapbox Navigation Native `v129.0.0`
+- Mapbox Core Common `v23.4.0-rc.1`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.12.0-beta.2 - 17 March, 2023
 ### Changelog
 [Changes between v2.12.0-beta.1 and v2.12.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0-beta.1...v2.12.0-beta.2)
