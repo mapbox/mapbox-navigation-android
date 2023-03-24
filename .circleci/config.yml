@@ -106,6 +106,17 @@ workflows:
           requires:
             - unit-tests-ui
             - unit-tests-core
+  weekly-snapshot-workflow:
+    # Run workflow every Wednesday at 12pm UTC
+    triggers:
+      - schedule:
+          cron: "0 12 * * 3"
+          filters:
+            branches:
+              only:
+                - develop
+    jobs:
+      - release-weekly-snapshot
 
 #------------------------------
 #---------- COMMANDS ----------
@@ -504,6 +515,12 @@ commands:
             pip3 install requests
             python3 scripts/trigger-mobile-metrics.py
 
+  trigger-onetap:
+    steps:
+      - run:
+          name: Trigger onetap
+          command: python3 scripts/trigger-onetap.py
+
   prepare-mbx-ci:
     steps:
       - run:
@@ -517,6 +534,12 @@ commands:
           name: Obtain AWS credentials
           command: |
             ./mbx-ci aws setup
+
+  checkout-branch:
+    steps:
+      - run:
+          name: Checkout branch
+          command: python3 scripts/checkout-branch.py
 
 #--------------------------
 #---------- JOBS ----------
@@ -629,7 +652,7 @@ jobs:
             - verify-codestyle
             - verify-license
             #disabled to bring common 23.3.1 on top of 23.3.1-rc.1
-#            - verify-common-sdk-version
+            #            - verify-common-sdk-version
             - check-api-core
             - check-api-ui
             - check-api-androidauto
@@ -789,6 +812,24 @@ jobs:
       - setup-aws-credentials
       - upload-artifacts-snapshot
       - trigger-mobile-metrics
+
+  release-weekly-snapshot:
+    executor: ndk-r22-latest-executor
+    resource_class: medium+
+    # Allow snapshot repository for snapshot releases
+    environment:
+      ALLOW_SNAPSHOT_REPOSITORY: true
+      WEEKLY_SNAPSHOT_WORKFLOW: true
+    steps:
+      - checkout
+      - checkout-branch
+      - assemble-core-release
+      - assemble-ui-release
+      - prepare-mbx-ci
+      - setup-aws-credentials
+      - upload-artifacts-snapshot
+      - trigger-mobile-metrics
+      - trigger-onetap
 
   release:
     executor: ndk-r22-latest-executor

@@ -54,7 +54,10 @@ def getSnapshotVersion(String version) {
             minor += 1
         }
         def branch = System.getenv("CIRCLE_BRANCH")
-        if (!branch || branch == "main" || branch ==~ /release-v.*/) {
+        def weeklyWorkflow = System.getenv("WEEKLY_SNAPSHOT_WORKFLOW")?.toBoolean() ?: false
+        if (weeklyWorkflow) {
+            return "${major}.${minor}.${patch}-WEEKLY-SNAPSHOT"
+        } else if (!branch || branch == "main" || branch ==~ /release-v.*/) {
             return "${major}.${minor}.${patch}-SNAPSHOT"
         } else {
             return "${major}.${minor}.${patch}-${branch}-SNAPSHOT"
