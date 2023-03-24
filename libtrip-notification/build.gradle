@@ -1,3 +1,7 @@
+plugins {
+    id("pl.droidsonroids.pitest") apply(false)
+}
+apply from: "../gradle/pitest.gradle"
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
@@ -39,6 +43,7 @@ dependencies {
     implementation dependenciesList.coroutinesAndroid
 
     apply from: "../gradle/unit-testing-dependencies.gradle"
+    testImplementation(project(':libtesting-utils'))
 }
 
 apply from: "../gradle/track-public-apis.gradle"

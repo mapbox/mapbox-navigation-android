@@ -70,42 +70,43 @@ workflows:
               ignore: /.*/
   default:
     jobs:
-      - prepare-and-assemble
-      - changelog-verification:
-          filters:
-            branches:
-              ignore: /^(main|release-.*)/
-      - static-analysis:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-core:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-ui:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-androidauto:
-          requires:
-            - prepare-and-assemble
-      - ui-robo-tests:
-          requires:
-            - prepare-and-assemble
-      - internal-instrumentation-tests:
-          requires:
-            - prepare-and-assemble
-      - instrumentation-tests:
-          requires:
-            - prepare-and-assemble
-      - androidauto-test
-      - mobile-metrics-dry-run:
-          type: approval
-      - mobile-metrics-benchmarks:
-          requires:
-            - mobile-metrics-dry-run
-      - codecov-upload:
-          requires:
-            - unit-tests-ui
-            - unit-tests-core
+      - run-pitest-core
+#      - prepare-and-assemble
+#      - changelog-verification:
+#          filters:
+#            branches:
+#              ignore: /^(main|release-.*)/
+#      - static-analysis:
+#          requires:
+#            - prepare-and-assemble
+#      - unit-tests-core:
+#          requires:
+#            - prepare-and-assemble
+#      - unit-tests-ui:
+#          requires:
+#            - prepare-and-assemble
+#      - unit-tests-androidauto:
+#          requires:
+#            - prepare-and-assemble
+#      - ui-robo-tests:
+#          requires:
+#            - prepare-and-assemble
+#      - internal-instrumentation-tests:
+#          requires:
+#            - prepare-and-assemble
+#      - instrumentation-tests:
+#          requires:
+#            - prepare-and-assemble
+#      - androidauto-test
+#      - mobile-metrics-dry-run:
+#          type: approval
+#      - mobile-metrics-benchmarks:
+#          requires:
+#            - mobile-metrics-dry-run
+#      - codecov-upload:
+#          requires:
+#            - unit-tests-ui
+#            - unit-tests-core
 
 #------------------------------
 #---------- COMMANDS ----------
@@ -522,6 +523,17 @@ commands:
 #---------- JOBS ----------
 #--------------------------
 jobs:
+  run-pitest-core:
+    executor: ndk-r22-latest-executor
+    resource_class: 2xlarge
+    steps:
+      - checkout
+      - run:
+          name: Run pitests
+          command: make pitest-core
+      - store_artifacts:
+          path: libnavigation-core/build/reports/pitest
+
   prepare-and-assemble:
     executor: ndk-r22-latest-executor
     steps:

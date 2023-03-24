@@ -41,13 +41,13 @@ ext {
       materialDesignVersion     : '1.1.0',
       autoValue                 : '1.5.4',
       autoValueParcel           : '0.2.5',
-      junit                     : '4.12',
+      junit                     : '4.13.2',
       constraintLayout          : '1.1.3',
       mockito                   : '2.23.4',
-      mockkVersion              : '1.12.1',
+      mockkVersion              : '1.12.3',
       leakCanaryVersion         : '2.9.1',
       commonsIO                 : '2.6',
-      robolectric               : '4.7.3',
+      robolectric               : '4.8.1',
       mockwebserver             : '4.9.0',
       gmsLocation               : '17.0.0',
       ktlint                    : '0.47.1',
@@ -154,6 +154,8 @@ ext {
       junit                     : "junit:junit:${version.junit}",
       mockito                   : "org.mockito:mockito-core:${version.mockito}",
       mockk                     : "io.mockk:mockk:${version.mockkVersion}",
+      mockkAgentApi             : "io.mockk:mockk-agent-api:${version.mockkVersion}",
+      mockkAgentJvm             : "io.mockk:mockk-agent-jvm:${version.mockkVersion}",
       mockkAndroid              : "io.mockk:mockk-android:${version.mockkVersion}",
       commonsIO                 : "commons-io:commons-io:${version.commonsIO}",
       robolectric               : "org.robolectric:robolectric:${version.robolectric}",
@@ -191,7 +193,8 @@ ext {
       mapboxSdkRegistry    : '0.7.0',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.2.2',
-      firebaseCrashlytics  : '2.5.1'
+      firebaseCrashlytics  : '2.5.1',
+      pitest               : '0.2.9'
   ]
 
   pluginDependencies = [
@@ -208,6 +211,7 @@ ext {
       mapboxSdkRegistry    : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapboxSdkRegistry}",
       mapboxAccessToken    : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapboxAccessToken}",
       mapboxNativeDownload : "com.mapbox.gradle.plugins:native-download:${pluginVersion.mapboxNativeDownload}",
-      firebaseCrashlytics  : "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}"
+      firebaseCrashlytics  : "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}",
+      pitest               : "pl.droidsonroids.gradle:gradle-pitest-plugin:${pluginVersion.pitest}"
   ]
 }

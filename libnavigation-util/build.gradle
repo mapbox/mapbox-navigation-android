@@ -1,3 +1,7 @@
+plugins {
+    id("pl.droidsonroids.pitest") apply(false)
+}
+apply from: "../gradle/pitest.gradle"
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
@@ -41,3 +45,7 @@ dependencies {
 apply from: "../gradle/track-public-apis.gradle"
 apply from: "../gradle/publish.gradle"
 apply from: "../gradle/jacoco.gradle"
+
+task pitestRunUtils(type: Copy, dependsOn: ':libnavigation-util:pitestDebug') {
+
+}

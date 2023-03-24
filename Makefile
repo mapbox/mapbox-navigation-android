@@ -239,3 +239,17 @@ update-metalava:
 car:
 	adb forward tcp:5277 tcp:5277
 	cd $(ANDROID_HOME)/extras/google/auto/ && ./desktop-head-unit
+
+.PHONY: pitest
+pitest:
+	$(call run-gradle-tasks,$(CORE_MODULES),pitestDebug) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),pitestDebug) \
+	&& $(call run-gradle-tasks,$(ANDROIDAUTO_MODULES),pitestDebug) \
+
+.PHONY: pitest-libnavigation-core
+pitest-core:
+	./gradlew :libnavigation-core:pitestDebug
+
+.PHONY: pitest-libnavui-dropin
+pitest-libnavui-dropin:
+	./gradlew :libnavui-dropin:pitestDebug

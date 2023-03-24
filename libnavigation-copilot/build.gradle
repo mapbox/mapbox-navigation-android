@@ -1,3 +1,7 @@
+plugins {
+    id("pl.droidsonroids.pitest") apply(false)
+}
+apply from: "../gradle/pitest.gradle"
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
@@ -33,6 +37,7 @@ dependencies {
 
     testImplementation project(':libtesting-navigation-util')
     testImplementation project(':libtesting-utils')
+    implementation dependenciesList.androidXAppCompat
     apply from: "../gradle/unit-testing-dependencies.gradle"
 }
 
@@ -54,3 +59,7 @@ dokkaHtmlPartial {
 apply from: "../gradle/track-public-apis.gradle"
 apply from: "../gradle/publish.gradle"
 apply from: "../gradle/jacoco.gradle"
+
+task pitestRun(type: Exec, dependsOn: ':libnavigation-copilot:pitestDebug') {
+
+}

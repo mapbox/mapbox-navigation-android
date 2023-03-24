@@ -1,8 +1,8 @@
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
   repositories {
-    google()
     mavenCentral()
+    google()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication {
@@ -15,10 +15,12 @@ buildscript {
     }
     gradlePluginPortal()
   }
+
   dependencies {
     classpath pluginDependencies.gradle
     classpath pluginDependencies.kotlin
     classpath pluginDependencies.dependencyUpdates
+    classpath pluginDependencies.pitest
     classpath pluginDependencies.jacoco
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.license
