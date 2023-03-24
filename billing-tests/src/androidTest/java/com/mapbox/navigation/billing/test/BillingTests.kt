@@ -10,11 +10,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
-import com.mapbox.navigation.testing.ui.http.HttpServiceEvent
 import com.mapbox.navigation.testing.ui.http.HttpServiceEventsObserver
 import com.mapbox.navigation.testing.ui.http.billingRequests
-import com.mapbox.navigation.testing.ui.http.billingRequestsFlow
-import com.mapbox.navigation.testing.ui.http.isActiveGuidanceSession
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -25,17 +22,12 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.startTripSessionAndWait
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
-import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -100,9 +92,7 @@ class BillingTests : BaseCoreNoCleanUpTest() {
 
         mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
 
-        waitForBillingHttpEvents(1) {
-            it.isActiveGuidanceSession
-        }
+        delayForNetworkEvents()
     }
 
     private suspend fun requestRoutes(source: Point, destination: Point): List<NavigationRoute> {
@@ -118,20 +108,11 @@ class BillingTests : BaseCoreNoCleanUpTest() {
     }
 
     /**
-     * Waiting for http billing events to be sent to the backend.
+     * We allow some time for http billing events to be sent.
+     * If events are not sent within allowed time, this could mean an issue
+     * that can potentially happen in production and we want to catch such bugs.
      */
-    private suspend fun waitForBillingHttpEvents(
-        count: Int,
-        predicate: suspend (HttpServiceEvent) -> Boolean = { true }
-    ) {
-        try {
-            httpEventsObserver
-                .billingRequestsFlow()
-                .filter(predicate)
-                .take(count)
-                .toList()
-        } catch (e: CancellationException) {
-            Assert.fail("Timed out waiting for event(s)")
-        }
+    private suspend fun delayForNetworkEvents() {
+        delay(TimeUnit.SECONDS.toMillis(10))
     }
 }
