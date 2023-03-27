@@ -19,8 +19,6 @@ import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesO
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopRecording
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
@@ -29,6 +27,8 @@ import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdli
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.utils.internal.logE

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.instrumentation_tests.utils.http
+package com.mapbox.navigation.testing.ui.http
 
 import com.mapbox.common.DownloadOptions
 import com.mapbox.common.HttpRequest
@@ -8,27 +8,18 @@ import com.mapbox.common.HttpServiceInterceptorInterface
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
-import java.net.URL
 
-sealed class HttpServiceEvent {
+fun HttpServiceEventsObserver.billingRequests(): List<HttpServiceEvent.Request> {
+    return eventsFlow.replayCache
+        .filterIsInstance(HttpServiceEvent.Request::class.java)
+        .filter { it.isBillingEvent }
+}
 
-    abstract val request: HttpRequest
-
-    val url: URL
-        get() = URL(request.url)
-
-    data class Request(override val request: HttpRequest) : HttpServiceEvent()
-
-    data class Download(
-        val download: DownloadOptions,
-        override val request: HttpRequest = download.request
-    ) : HttpServiceEvent()
-
-    data class Response(
-        val response: HttpResponse,
-        override val request: HttpRequest = response.request
-    ) : HttpServiceEvent()
+fun HttpServiceEventsObserver.billingRequestsFlow(): Flow<HttpServiceEvent.Request> {
+    return onRequestEventsFlow
+        .filter { it.isBillingEvent }
 }
 
 class HttpServiceEventsObserver : HttpServiceInterceptorInterface {

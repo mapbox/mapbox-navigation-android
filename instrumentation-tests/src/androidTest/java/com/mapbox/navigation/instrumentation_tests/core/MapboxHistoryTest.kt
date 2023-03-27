@@ -22,14 +22,14 @@ import com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopRecording
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
+import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import junit.framework.TestCase.assertEquals

@@ -1,0 +1,50 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'com.mapbox.maps.token'
+apply from: "../gradle/ktlint.gradle"
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId "com.mapbox.navigation.billing.tests"
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        multiDexEnabled true
+        versionCode 1
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+}
+
+dependencies {
+    // Mapbox Navigation SDK
+    implementation project(':libnavigation-android')
+
+    // test
+    androidTestImplementation project(':libtesting-ui')
+    androidTestImplementation dependenciesList.testRunner
+    androidTestUtil dependenciesList.testOrchestrator
+
+    // Kotlin support
+    implementation dependenciesList.kotlinStdLib
+
+    // Coroutines
+    implementation dependenciesList.coroutinesAndroid
+
+    // Support libraries
+    implementation dependenciesList.androidXCore
+    implementation dependenciesList.androidXAppCompat
+}

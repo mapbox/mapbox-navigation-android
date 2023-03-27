@@ -4,10 +4,10 @@ import android.location.Location
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue

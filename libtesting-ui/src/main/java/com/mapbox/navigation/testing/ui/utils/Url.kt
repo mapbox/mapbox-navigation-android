@@ -1,4 +1,4 @@
-package com.mapbox.navigation.instrumentation_tests.utils
+package com.mapbox.navigation.testing.ui.utils
 
 import java.net.URL
 

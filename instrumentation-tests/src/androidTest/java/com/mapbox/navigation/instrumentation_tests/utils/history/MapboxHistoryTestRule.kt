@@ -8,7 +8,7 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.stopRecording
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
