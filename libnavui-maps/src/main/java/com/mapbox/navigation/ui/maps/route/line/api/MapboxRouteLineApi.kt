@@ -1362,9 +1362,14 @@ class MapboxRouteLineApi(
         val partitionedRoutes = routeFeatureData.partition {
             it.route == routes.first()
         }
+
+        val primaryRoute = partitionedRoutes.first.firstOrNull()
+        val alternativeRoute1 = partitionedRoutes.second.firstOrNull()
+        val alternativeRoute2 = partitionedRoutes.second.getOrNull(1)
+
         val vanishingPointOffset = routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
         val primaryRouteTrafficLineExpressionDef = jobControl.scope.async {
-            partitionedRoutes.first.firstOrNull()?.route?.run {
+            primaryRoute?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this,
                     routeLineOptions.resourceProvider.routeLineColorResources,
@@ -1380,31 +1385,31 @@ class MapboxRouteLineApi(
             }?.generateExpression()
         }
 
-        val alternative1PercentageTraveled = partitionedRoutes.second.firstOrNull()?.route?.run {
+        val alternative1PercentageTraveled = alternativeRoute1?.route?.run {
             alternativesDeviationOffset[this.id]
         } ?: 0.0
 
         val alternateRoute1LineColors = getMatchingColors(
-            partitionedRoutes.second.firstOrNull()?.featureCollection,
+            alternativeRoute1?.featureCollection,
             routeLineOptions.routeStyleDescriptors,
             routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor,
             routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
         )
 
         val alternative2PercentageTraveled =
-            partitionedRoutes.second.getOrNull(1)?.route?.run {
+            alternativeRoute2?.route?.run {
                 alternativesDeviationOffset[this.id]
             } ?: 0.0
 
         val alternateRoute2LineColors = getMatchingColors(
-            partitionedRoutes.second.getOrNull(1)?.featureCollection,
+            alternativeRoute2?.featureCollection,
             routeLineOptions.routeStyleDescriptors,
             routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor,
             routeLineOptions.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
         )
 
         val alternateRoute1TrafficExpressionDef = jobControl.scope.async {
-            partitionedRoutes.second.firstOrNull()?.route?.run {
+            alternativeRoute1?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this,
                     routeLineOptions.resourceProvider.routeLineColorResources,
@@ -1425,11 +1430,11 @@ class MapboxRouteLineApi(
         val alternateRoute2TrafficExpressionDef = jobControl.scope.async {
             if (partitionedRoutes.second.size > 1) {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    partitionedRoutes.second[1].route,
+                    alternativeRoute2!!.route,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     trafficBackfillRoadClasses,
                     false,
-                    alternativesDeviationOffset[partitionedRoutes.second[1].route.id] ?: 0.0,
+                    alternativesDeviationOffset[alternativeRoute2.route.id] ?: 0.0,
                     Color.TRANSPARENT,
                     routeLineOptions
                         .resourceProvider
@@ -1447,7 +1452,7 @@ class MapboxRouteLineApi(
         // then produce a gradient that is transparent except for the restricted sections.
         // If false produce a gradient for the restricted line layer that is completely transparent.
         val primaryRouteRestrictedSectionsExpressionDef = jobControl.scope.async {
-            partitionedRoutes.first.firstOrNull()?.route?.run {
+            primaryRoute?.route?.run {
                 getRestrictedLineExpressionProducerForLegIndex(
                     activeLegIndex,
                     routeLineOptions.resourceProvider.routeLineColorResources,
@@ -1457,23 +1462,20 @@ class MapboxRouteLineApi(
         }
 
         val wayPointsFeatureCollectionDef = jobControl.scope.async {
-            partitionedRoutes.first.firstOrNull()?.route?.run {
+            primaryRoute?.route?.run {
                 MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
             } ?: FeatureCollection.fromFeatures(listOf())
         }
 
-        val primaryRouteSource = partitionedRoutes.first.firstOrNull()?.featureCollection
+        val primaryRouteSource = primaryRoute?.featureCollection
             ?: FeatureCollection.fromFeatures(
                 listOf()
             )
         val alternativeRoute1FeatureCollection =
-            partitionedRoutes.second.firstOrNull()?.featureCollection
+            alternativeRoute1?.featureCollection
                 ?: FeatureCollection.fromFeatures(listOf())
-        val alternativeRoute2FeatureCollection = if (partitionedRoutes.second.size > 1) {
-            partitionedRoutes.second[1].featureCollection
-        } else {
-            FeatureCollection.fromFeatures(listOf())
-        }
+        val alternativeRoute2FeatureCollection = alternativeRoute2?.featureCollection
+            ?: FeatureCollection.fromFeatures(listOf())
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
 
         val primaryRouteTrafficLineExpressionProducer =
@@ -1490,7 +1492,7 @@ class MapboxRouteLineApi(
         val segmentsDef: Deferred<List<RouteLineExpressionData>>? = if (
             routeLineOptions.vanishingRouteLine != null ||
             routeLineOptions.styleInactiveRouteLegsIndependently ||
-            (partitionedRoutes.first.firstOrNull()?.route?.directionsRoute?.legs()?.size ?: 0) > 1
+            (primaryRoute?.route?.directionsRoute?.legs()?.size ?: 0) > 1
         ) {
             jobControl.scope.async {
                 partitionedRoutes.first.firstOrNull()?.route?.run {
@@ -1675,7 +1677,7 @@ class MapboxRouteLineApi(
                 RouteLineExpressionProvider { exp }
             }
 
-        val maskingLayerData = if ((primaryRoute?.directionsRoute?.legs()?.size ?: 0) > 1) {
+        val maskingLayerData = if ((primaryRoute?.route?.directionsRoute?.legs()?.size ?: 0) > 1) {
             getRouteLineDynamicDataForMaskingLayers(routeLineExpressionData, 0)
         } else {
             val exp = MapboxRouteLineUtils.getRouteLineExpression(

@@ -14,12 +14,15 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.RouteLineFeaturesActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback
+import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedResult
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
@@ -31,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteLineFeaturesActivity : AppCompatActivity() {
 
     private val routeClickPadding = com.mapbox.android.gestures.Utils.dpToPx(30f)
@@ -96,6 +100,21 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
     private val routeLineApi: MapboxRouteLineApi by lazy {
         MapboxRouteLineApi(routeLineOptions)
     }
+
+    private val routesRenderedCallback = object : RoutesRenderedCallback {
+
+        override fun onRoutesRendered(result: RoutesRenderedResult) {
+            Log.i(LOG_CATEGORY, "Routes rendered: $result")
+        }
+    }
+
+    private val routesClearedCallback = object : RoutesRenderedCallback {
+
+        override fun onRoutesRendered(result: RoutesRenderedResult) {
+            Log.i(LOG_CATEGORY, "Routes cleared: $result")
+        }
+    }
+
     private var showTraffic = true
     private var showPrimaryRoute = true
     private var showAltRoutes = true
@@ -108,6 +127,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
         initListeners()
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun initListeners() {
         viewBinding.btnToggleTrafficVisibility.setOnClickListener {
             when (showTraffic) {
@@ -137,7 +157,12 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
             when (routesAreShowing) {
                 true -> {
                     routeLineApi.clearRouteLine {
-                        routeLineView.renderClearRouteLineValue(mapboxMap.getStyle()!!, it)
+                        routeLineView.renderClearRouteLineValue(
+                            mapboxMap.getStyle()!!,
+                            it,
+                            mapboxMap,
+                            routesClearedCallback
+                        )
                     }
                     viewBinding.btnClear.text = "Draw Routes"
                 }
@@ -177,6 +202,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
         viewBinding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun drawRoutes() {
         ifNonNull(mapboxMap.getStyle()) { style ->
             val route1 = getRoute(R.raw.basic_route4)
@@ -189,7 +215,7 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
                     RouteLine(route3, "altRoute1")
                 )
             ) {
-                routeLineView.renderRouteDrawData(style, it)
+                routeLineView.renderRouteDrawData(style, it, mapboxMap, routesRenderedCallback)
             }
         }
     }
@@ -244,5 +270,9 @@ class RouteLineFeaturesActivity : AppCompatActivity() {
             }
         }
         false
+    }
+
+    private companion object {
+        private const val LOG_CATEGORY = "[RouteLineFeatures]"
     }
 }

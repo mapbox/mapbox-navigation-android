@@ -6,8 +6,11 @@ import androidx.annotation.RawRes
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
@@ -26,26 +29,31 @@ import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
+import com.mapbox.navigation.testing.ui.utils.coroutines.renderClearRouteLineValueAsync
+import com.mapbox.navigation.testing.ui.utils.coroutines.renderRouteDrawDataAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.ui.maps.internal.route.line.RoutesRenderedResultFactory
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
     BasicNavigationViewActivity::class.java
@@ -62,6 +70,9 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
     }
     private val route3 by lazy {
         getRoute(R.raw.basic_route6)
+    }
+    private val route4 by lazy {
+        getRoute(R.raw.basic_route7)
     }
 
     override fun setupMockLocation(): Location {
@@ -564,17 +575,11 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
                 route3,
             )
         )
-        routeLineView.renderRouteDrawData(style, result)
+        routeLineView.renderRouteDrawDataAsync(activity.mapboxMap, style, result)
 
-        val lineLayers = withTimeoutOrNull(10000) {
-            var lineLayers: List<LineLayer>
-            do {
-                delay(50)
-                lineLayers = style.styleLayers.mapNotNull { style.getLayer(it.id) }
-                    .filterIsInstance(LineLayer::class.java)
-            } while (lineLayers.size < 3) // 3 routes
-            lineLayers
-        } ?: error("layer weren't initialised")
+        val lineLayers = style.styleLayers.mapNotNull { style.getLayer(it.id) }
+            .filterIsInstance(LineLayer::class.java)
+        assertTrue(lineLayers.size >= 3)
         val expected = lineLayers.map { it.layerId to ApproximateDouble(factor) }
         val actual = lineLayers.map {
             it.layerId to ApproximateDouble(
@@ -585,6 +590,321 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
             )
         }
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun routes_rendered_callback() = sdkTest {
+        val routes = listOf(route1, route2, route3)
+        val options = MapboxRouteLineOptions.Builder(activity)
+            .displayRestrictedRoadSections(true)
+            .build()
+        val map = activity.mapboxMap
+        val routeLineApi = MapboxRouteLineApi(options)
+        val routeLineView = MapboxRouteLineView(options)
+        val style = waitForStyleLoad(map)
+        val routeLineValue1 = routeLineApi.setNavigationRoutes(routes)
+
+        val renderedRoutesResult1 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue1
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            renderedRoutesResult1
+        )
+
+        val clearedRoutesResult1 = routeLineView.renderClearRouteLineValueAsync(
+            map,
+            style,
+            routeLineApi.clearRouteLine()
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                emptySet(),
+                emptySet(),
+                setOf(route1.id, route2.id, route3.id),
+                emptySet()
+            ),
+            clearedRoutesResult1
+        )
+        val routeLineValue2 = routeLineApi.setNavigationRoutes(routes)
+        val renderedRoutesResult2 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue2
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            renderedRoutesResult2
+        )
+
+        val routeLineValue3 = routeLineApi.setNavigationRoutes(listOf(route3, route1, route2))
+        val renderedRoutesResult3 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue3
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route3.id, route1.id, route2.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            renderedRoutesResult3
+        )
+
+        val clearedRoutesResult2 = routeLineView.renderClearRouteLineValueAsync(
+            map,
+            style,
+            routeLineApi.clearRouteLine()
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                emptySet(),
+                emptySet(),
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+            ),
+            clearedRoutesResult2
+        )
+
+        val clearedRoutesResult3 = routeLineView.renderClearRouteLineValueAsync(
+            map,
+            style,
+            routeLineApi.clearRouteLine()
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                emptySet(),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            clearedRoutesResult3
+        )
+
+        val routeLineValue4 = routeLineApi.setNavigationRoutes(routes)
+        val renderedRoutesResult4 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue4
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            renderedRoutesResult4
+        )
+
+        routeLineView.hideAlternativeRoutes(style)
+        val clearedRoutesResult4 = routeLineView.renderClearRouteLineValueAsync(
+            map,
+            style,
+            routeLineApi.clearRouteLine()
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                emptySet(),
+                emptySet(),
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+            ),
+            clearedRoutesResult4
+        )
+
+        val routeLineValue6 = routeLineApi.setNavigationRoutes(routes)
+        val renderedRoutesResult6 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue6
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            renderedRoutesResult6
+        )
+
+        routeLineView.hidePrimaryRoute(style)
+        val clearedRoutesResult5 = routeLineView.renderClearRouteLineValueAsync(
+            map,
+            style,
+            routeLineApi.clearRouteLine()
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                emptySet(),
+                emptySet(),
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+            ),
+            clearedRoutesResult5
+        )
+        val routeLineValue7 = routeLineApi.setNavigationRoutes(routes)
+        val renderedRoutesResult7 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue7
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            renderedRoutesResult7
+        )
+
+        routeLineView.showPrimaryRoute(style)
+        routeLineView.showAlternativeRoutes(style)
+        val clearedRoutesResult6 = routeLineView.renderClearRouteLineValueAsync(
+            map,
+            style,
+            routeLineApi.clearRouteLine()
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                emptySet(),
+                emptySet(),
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+            ),
+            clearedRoutesResult6
+        )
+        val routeLineValue8 = routeLineApi.setNavigationRoutes(routes)
+        val renderedRoutesResult8 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue8
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            renderedRoutesResult8
+        )
+
+        val routeLineValue9 = routeLineApi.setNavigationRoutes(routes + route4)
+        val renderedRoutesResult9 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue9
+        )
+        assertEquals(
+            // only 2 alternatives are supported
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route2.id, route3.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            renderedRoutesResult9
+        )
+
+        val routeLineValue10 = routeLineApi.setNavigationRoutes(listOf(route1, route2, route4))
+        val renderedRoutesResult10 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue10
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route2.id, route4.id),
+                emptySet(),
+                setOf(route3.id),
+                emptySet(),
+            ),
+            renderedRoutesResult10
+        )
+
+        val routeLineValue11 = routeLineApi.setNavigationRoutes(listOf(route1, route3, route4))
+        val renderedRoutesResult11 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            routeLineValue11
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route3.id, route4.id),
+                emptySet(),
+                setOf(route2.id),
+                emptySet(),
+            ),
+            renderedRoutesResult11
+        )
+
+        val routeLineValue12 = routeLineApi.setNavigationRoutes(listOf(route1, route3, route2))
+            .value!!.toMutableValue()
+            .apply {
+                primaryRouteLineData = primaryRouteLineData.toMutableValue().apply {
+                    featureCollection = FeatureCollection.fromFeatures(emptyList())
+                }.toImmutableValue()
+            }.toImmutableValue()
+        val renderedRoutesResult12 = routeLineView.renderRouteDrawDataAsync(
+            map,
+            style,
+            ExpectedFactory.createValue(routeLineValue12)
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route3.id, route2.id),
+                emptySet(),
+                setOf(route1.id, route4.id),
+                emptySet(),
+            ),
+            renderedRoutesResult12
+        )
+
+        routeLineView.renderClearRouteLineValueAsync(map, style, routeLineApi.clearRouteLine())
+
+        val clearRouteLineValue = routeLineApi.clearRouteLine().value!!.toMutableValue()
+            .apply {
+                primaryRouteSource = routeLineValue11.value!!.primaryRouteLineData.featureCollection
+                alternativeRouteSourceSources = routeLineValue11.value!!.alternativeRouteLinesData
+                    .map { it.featureCollection }
+            }.toImmutableValue()
+        val clearedRoutesResult7 = routeLineView.renderClearRouteLineValueAsync(
+            map,
+            style,
+            ExpectedFactory.createValue(clearRouteLineValue)
+        )
+        assertEquals(
+            RoutesRenderedResultFactory.routesRenderedResult(
+                setOf(route1.id, route3.id, route4.id),
+                emptySet(),
+                emptySet(),
+                emptySet(),
+            ),
+            clearedRoutesResult7
+        )
+    }
+
+    private suspend fun waitForStyleLoad(map: MapboxMap): Style = suspendCoroutine { cont ->
+        map.getStyle {
+            cont.resume(it)
+        }
     }
 
     private fun getRoute(routeResourceId: Int): NavigationRoute {

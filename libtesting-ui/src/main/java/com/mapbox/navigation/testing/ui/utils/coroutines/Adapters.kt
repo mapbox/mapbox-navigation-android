@@ -8,6 +8,8 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
+import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -31,6 +33,12 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback
+import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedResult
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -184,6 +192,34 @@ suspend fun MapboxHistoryRecorder.stopRecording(): String? = suspendCoroutine { 
     stopRecording { path ->
         cont.resume(path)
     }
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+suspend fun MapboxRouteLineView.renderRouteDrawDataAsync(
+    map: MapboxMap,
+    style: Style,
+    expected: Expected<RouteLineError, RouteSetValue>
+): RoutesRenderedResult = suspendCoroutine { cont ->
+    renderRouteDrawData(style, expected, map, object : RoutesRenderedCallback {
+
+        override fun onRoutesRendered(result: RoutesRenderedResult) {
+            cont.resume(result)
+        }
+    })
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+suspend fun MapboxRouteLineView.renderClearRouteLineValueAsync(
+    map: MapboxMap,
+    style: Style,
+    expected: Expected<RouteLineError, RouteLineClearValue>
+): RoutesRenderedResult = suspendCoroutine { cont ->
+    renderClearRouteLineValue(style, expected, map, object : RoutesRenderedCallback {
+
+        override fun onRoutesRendered(result: RoutesRenderedResult) {
+            cont.resume(result)
+        }
+    })
 }
 
 fun <T, OBSERVER> loggedCallbackFlow(

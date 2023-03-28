@@ -1038,6 +1038,8 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void hideTraffic(com.mapbox.maps.Style style);
     method public void initializeLayers(com.mapbox.maps.Style style);
     method public void renderClearRouteLineValue(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue> clearRouteLineValue);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void renderClearRouteLineValue(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue> clearRouteLineValue, com.mapbox.maps.MapboxMap map, com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> routeDrawData, com.mapbox.maps.MapboxMap map, com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback callback);
     method public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> routeDrawData);
     method public void renderRouteLineUpdate(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> update);
     method @Deprecated public void setOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions);
@@ -1046,6 +1048,21 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void showPrimaryRoute(com.mapbox.maps.Style style);
     method public void showTraffic(com.mapbox.maps.Style style);
     property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions options;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface RoutesRenderedCallback {
+    method public void onRoutesRendered(com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedResult result);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoutesRenderedResult {
+    method public java.util.Set<java.lang.String> getClearingCancelledRouteIds();
+    method public java.util.Set<java.lang.String> getRenderingCancelledRouteIds();
+    method public java.util.Set<java.lang.String> getSuccessfullyClearedRouteIds();
+    method public java.util.Set<java.lang.String> getSuccessfullyRenderedRouteIds();
+    property public final java.util.Set<java.lang.String> clearingCancelledRouteIds;
+    property public final java.util.Set<java.lang.String> renderingCancelledRouteIds;
+    property public final java.util.Set<java.lang.String> successfullyClearedRouteIds;
+    property public final java.util.Set<java.lang.String> successfullyRenderedRouteIds;
   }
 
 }
