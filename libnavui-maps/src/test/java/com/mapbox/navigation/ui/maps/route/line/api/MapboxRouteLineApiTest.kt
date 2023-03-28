@@ -16,6 +16,7 @@ import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.maps.Style
 import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -562,7 +563,9 @@ class MapboxRouteLineApiTest {
     @Test
     fun findClosestRoute_whenClickPoint() = runBlockingTest {
         mockkObject(MapboxRouteLineUtils)
-        every { MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any(), any()) } returns setOf()
+        every {
+            MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
+        } returns setOf()
         val feature1 = mockk<QueriedFeature> {
             every { feature.id() } returns "abc#0"
         }
@@ -600,7 +603,9 @@ class MapboxRouteLineApiTest {
     @Test
     fun findClosestRoute_whenRectPoint() = runBlockingTest {
         mockkObject(MapboxRouteLineUtils)
-        every { MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any(), any()) } returns setOf()
+        every {
+            MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
+        } returns setOf()
         val feature1 = mockk<QueriedFeature> {
             every { feature.id() } returns "abc#0"
         }
@@ -644,7 +649,9 @@ class MapboxRouteLineApiTest {
     @Test
     fun findClosestRoute_whenPrimaryRoute() = runBlockingTest {
         mockkObject(MapboxRouteLineUtils)
-        every { MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any(), any()) } returns setOf()
+        every {
+            MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
+        } returns setOf()
         val feature1 = mockk<QueriedFeature> {
             every { feature.id() } returns "abc#0"
         }

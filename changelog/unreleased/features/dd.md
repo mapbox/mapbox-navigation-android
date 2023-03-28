@@ -1,0 +1,1 @@
+- Introduced `RoutesRenderedCallback` along with overloads to `MapboxRouteLineView#renderRouteDrawData` and `MapboxRouteLineView#renderClearRouteLineValue` to notified whenever the routes are rendered on map / cleared from map. 
