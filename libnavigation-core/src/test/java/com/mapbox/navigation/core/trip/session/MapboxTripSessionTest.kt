@@ -219,7 +219,7 @@ class MapboxTripSessionTest {
         verify { tripService.startService() }
         verify { tripSessionLocationEngine.startLocationUpdates(any(), any()) }
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -232,7 +232,7 @@ class MapboxTripSessionTest {
         verify(exactly = 0) { tripService.startService() }
         verify { tripSessionLocationEngine.startLocationUpdates(any(), any()) }
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -241,15 +241,17 @@ class MapboxTripSessionTest {
         tripSession.start(false)
         every { tripService.hasServiceStarted() } returns true
         assertTrue(tripSession.isRunningWithForegroundService())
-        tripSession.stop()
+        tripSession.stop(true)
 
         verifyOrder {
             navigator.addNavigatorObserver(any())
+            navigator.startTripSession()
             tripService.startService()
             tripSessionLocationEngine.startLocationUpdates(any(), any())
             tripSessionLocationEngine.startLocationUpdates(any(), any())
+            navigator.stopTripSession(true)
             navigator.removeNavigatorObserver(any())
-            tripSession.stop()
+            tripSession.stop(true)
             tripSessionLocationEngine.stopLocationUpdates()
         }
     }
@@ -259,7 +261,7 @@ class MapboxTripSessionTest {
         tripSession.start(true, withReplayEnabled = false)
         tripSession.start(true, withReplayEnabled = true)
         tripSession.start(true, withReplayEnabled = false)
-        tripSession.stop()
+        tripSession.stop(true)
 
         verifyOrder {
             navigator.addNavigatorObserver(any())
@@ -268,7 +270,7 @@ class MapboxTripSessionTest {
             tripSessionLocationEngine.startLocationUpdates(true, any())
             tripSessionLocationEngine.startLocationUpdates(false, any())
             navigator.removeNavigatorObserver(any())
-            tripSession.stop()
+            tripSession.stop(true)
             tripSessionLocationEngine.stopLocationUpdates()
         }
     }
@@ -277,7 +279,7 @@ class MapboxTripSessionTest {
     fun stopSessionCallsTripServiceStopService() {
         tripSession.start(true)
 
-        tripSession.stop()
+        tripSession.stop(true)
 
         verify { tripService.stopService() }
     }
@@ -287,7 +289,7 @@ class MapboxTripSessionTest {
         tripSession.start(true)
         locationUpdateAnswers.invoke(location)
 
-        tripSession.stop()
+        tripSession.stop(true)
 
         verify { tripSessionLocationEngine.stopLocationUpdates() }
     }
@@ -297,7 +299,7 @@ class MapboxTripSessionTest {
         tripSession.setRoutes(routes, setRoutesInfo)
         tripSession.start(true)
 
-        tripSession.stop()
+        tripSession.stop(true)
 
         assertEquals(routes.first(), tripSession.primaryRoute)
     }
@@ -310,7 +312,7 @@ class MapboxTripSessionTest {
             emptyList(),
             SetRoutes.CleanUp
         )
-        tripSession.stop()
+        tripSession.stop(true)
 
         coVerify(exactly = 1) {
             navigator.removeNavigatorObserver(navigatorObserverImplSlot.captured)
@@ -328,7 +330,7 @@ class MapboxTripSessionTest {
         verify { observer.onNewRawLocation(location) }
         assertEquals(location, tripSession.getRawLocation())
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -341,7 +343,7 @@ class MapboxTripSessionTest {
         verify { observer.onNewRawLocation(location) }
         assertEquals(location, tripSession.getRawLocation())
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -354,7 +356,7 @@ class MapboxTripSessionTest {
 
         verify { observer.onNewRawLocation(location) }
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -369,7 +371,7 @@ class MapboxTripSessionTest {
             observer.onNewLocationMatcherResult(any())
         }
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -377,7 +379,7 @@ class MapboxTripSessionTest {
         tripSession.start(true)
         updateLocationAndJoin()
         coVerify { navigator.updateLocation(fixLocation) }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -387,7 +389,7 @@ class MapboxTripSessionTest {
         locationUpdateAnswers.invoke(mockLocation())
         updateLocationAndJoin()
         coVerify { navigator.updateLocation(fixLocation) }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -401,7 +403,7 @@ class MapboxTripSessionTest {
 
         verify { observer.onRouteProgressChanged(routeProgress) }
         assertEquals(routeProgress, tripSession.getRouteProgress())
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -415,7 +417,7 @@ class MapboxTripSessionTest {
 
         verify(exactly = 0) { observer.onRouteProgressChanged(routeProgress) }
         assertNull(tripSession.getRouteProgress())
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -428,7 +430,7 @@ class MapboxTripSessionTest {
 
         verify(exactly = 1) { observer.onRouteProgressChanged(routeProgress) }
         assertEquals(routeProgress, tripSession.getRouteProgress())
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -446,7 +448,7 @@ class MapboxTripSessionTest {
 
             verify(exactly = 0) { observer.onRouteProgressChanged(routeProgress) }
             assertEquals(null, tripSession.getRouteProgress())
-            tripSession.stop()
+            tripSession.stop(true)
         }
 
     @Test
@@ -459,7 +461,7 @@ class MapboxTripSessionTest {
         updateLocationAndJoin()
 
         verify(exactly = 0) { observer.onRouteProgressChanged(routeProgress) }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -474,7 +476,7 @@ class MapboxTripSessionTest {
         tripSession.registerRouteProgressObserver(observer)
 
         verify(exactly = 2) { observer.onRouteProgressChanged(routeProgress) }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -494,7 +496,7 @@ class MapboxTripSessionTest {
             offRouteObserver.onOffRouteStateChanged(false)
             offRouteObserver.onOffRouteStateChanged(true)
         }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -508,7 +510,7 @@ class MapboxTripSessionTest {
 
         verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(false) }
         verify(exactly = 0) { offRouteObserver.onOffRouteStateChanged(true) }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -537,7 +539,7 @@ class MapboxTripSessionTest {
             offRouteObserver.onOffRouteStateChanged(true)
             offRouteObserver.onOffRouteStateChanged(false)
         }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -566,7 +568,7 @@ class MapboxTripSessionTest {
             offRouteObserver.onOffRouteStateChanged(true)
             offRouteObserver.onOffRouteStateChanged(false)
         }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -584,7 +586,7 @@ class MapboxTripSessionTest {
 
         updateLocationAndJoin()
 
-        tripSession.stop()
+        tripSession.stop(true)
 
         verify(exactly = 0) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
     }
@@ -908,7 +910,7 @@ class MapboxTripSessionTest {
     fun stateObserverStop() {
         tripSession.start(true)
         tripSession.registerStateObserver(stateObserver)
-        tripSession.stop()
+        tripSession.stop(true)
         verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STOPPED) }
     }
 
@@ -924,8 +926,8 @@ class MapboxTripSessionTest {
     fun stateObserverDoubleStop() {
         tripSession.start(true)
         tripSession.registerStateObserver(stateObserver)
-        tripSession.stop()
-        tripSession.stop()
+        tripSession.stop(true)
+        tripSession.stop(true)
         verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STOPPED) }
     }
 
@@ -935,7 +937,7 @@ class MapboxTripSessionTest {
         clearMocks(stateObserver)
         tripSession.unregisterStateObserver(stateObserver)
         tripSession.start(true)
-        tripSession.stop()
+        tripSession.stop(true)
         verify(exactly = 0) { stateObserver.onSessionStateChanged(any()) }
     }
 
@@ -957,7 +959,7 @@ class MapboxTripSessionTest {
         }
         assertEquals(location, tripSession.getRawLocation())
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -971,7 +973,7 @@ class MapboxTripSessionTest {
 
         verify(exactly = 0) { routeProgressObserver.onRouteProgressChanged(any()) }
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -992,7 +994,7 @@ class MapboxTripSessionTest {
         // of offRouteObservers should be empty.
         verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(false) }
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -1001,7 +1003,7 @@ class MapboxTripSessionTest {
         clearMocks(stateObserver)
         tripSession.unregisterAllStateObservers()
 
-        tripSession.stop()
+        tripSession.stop(true)
 
         verify(exactly = 0) { stateObserver.onSessionStateChanged(any()) }
     }
@@ -1017,7 +1019,7 @@ class MapboxTripSessionTest {
         tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
         tripSession.unregisterAllBannerInstructionsObservers()
         updateLocationAndJoin()
-        tripSession.stop()
+        tripSession.stop(true)
         verify(exactly = 0) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
     }
 
@@ -1036,7 +1038,7 @@ class MapboxTripSessionTest {
 
         updateLocationAndJoin()
 
-        tripSession.stop()
+        tripSession.stop(true)
 
         tripSession.start(true)
         tripSession.unregisterAllVoiceInstructionsObservers()
@@ -1045,7 +1047,7 @@ class MapboxTripSessionTest {
 
         verify(exactly = 1) { voiceInstructionsObserver.onNewVoiceInstructions(any()) }
 
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -1191,7 +1193,7 @@ class MapboxTripSessionTest {
 
         verify(exactly = 1) { observer.onNewLocationMatcherResult(locationMatcherResult) }
         assertEquals(location, tripSession.locationMatcherResult?.enhancedLocation)
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -1204,7 +1206,7 @@ class MapboxTripSessionTest {
 
         verify(exactly = 1) { observer.onNewLocationMatcherResult(locationMatcherResult) }
         assertEquals(location, tripSession.locationMatcherResult?.enhancedLocation)
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -1212,7 +1214,7 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
         tripSession.start(true)
         updateLocationAndJoin()
-        tripSession.stop()
+        tripSession.stop(true)
         val observer: LocationObserver = mockk(relaxUnitFun = true)
         tripSession.registerLocationObserver(observer)
 
@@ -1228,7 +1230,7 @@ class MapboxTripSessionTest {
         tripSession.registerEHorizonObserver(observer)
 
         verify(exactly = 1) { eHorizonSubscriptionManager.registerObserver(observer) }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -1240,7 +1242,7 @@ class MapboxTripSessionTest {
         tripSession.unregisterEHorizonObserver(observer)
 
         verify(exactly = 1) { eHorizonSubscriptionManager.unregisterObserver(observer) }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -1251,7 +1253,7 @@ class MapboxTripSessionTest {
         tripSession.unregisterAllEHorizonObservers()
 
         verify(exactly = 1) { eHorizonSubscriptionManager.unregisterAllObservers() }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -1262,7 +1264,7 @@ class MapboxTripSessionTest {
         navigatorRecreationObserverImplSlot.captured.onNativeNavigatorRecreated()
 
         verify(exactly = 2) { navigator.addNavigatorObserver(any()) }
-        tripSession.stop()
+        tripSession.stop(true)
     }
 
     @Test
@@ -1612,7 +1614,7 @@ class MapboxTripSessionTest {
         tripSession.start(withTripService = true)
         every { navigationStatus.layer } returns 3
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-        tripSession.stop()
+        tripSession.stop(true)
         assertNull(tripSession.zLevel)
     }
 

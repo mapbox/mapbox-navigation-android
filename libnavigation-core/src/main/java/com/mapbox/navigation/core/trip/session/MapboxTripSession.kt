@@ -324,6 +324,7 @@ internal class MapboxTripSession(
     override fun start(withTripService: Boolean, withReplayEnabled: Boolean) {
         if (state != TripSessionState.STARTED) {
             navigator.addNavigatorObserver(navigatorObserver)
+            navigator.startTripSession()
             if (withTripService) {
                 tripService.startService()
             }
@@ -359,10 +360,11 @@ internal class MapboxTripSession(
     /**
      * Stop MapboxTripSession
      */
-    override fun stop() {
+    override fun stop(canceled: Boolean) {
         if (state == TripSessionState.STOPPED) {
             return
         }
+        navigator.stopTripSession(canceled)
         navigator.removeNavigatorObserver(navigatorObserver)
         tripService.stopService()
         tripSessionLocationEngine.stopLocationUpdates()

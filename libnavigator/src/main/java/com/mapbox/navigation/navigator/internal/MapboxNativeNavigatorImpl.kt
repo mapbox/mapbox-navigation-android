@@ -44,6 +44,7 @@ import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.TilesConfig
+import com.mapbox.navigator.TripSessionState
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
@@ -115,7 +116,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         accessToken: String,
         router: RouterInterface,
     ) {
+        val storedSessionState = navigator!!.storeTripSession()
         create(config, historyRecorderComposite, tilesConfig, accessToken, router)
+        navigator!!.restoreTripSession(storedSessionState)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -146,6 +149,23 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     override fun removeNavigatorObserver(navigatorObserver: NavigatorObserver) =
         navigator!!.removeObserver(navigatorObserver)
+
+    // Session
+
+    override fun startTripSession() {
+        navigator!!.startTripSession()
+    }
+
+    override fun stopTripSession(canceled: Boolean) {
+        navigator!!.stopTripSession(canceled)
+    }
+
+    override fun storeTripSession(): TripSessionState =
+        navigator!!.storeTripSession()
+
+    override fun restoreTripSession(tripSessionState: TripSessionState) {
+        navigator!!.restoreTripSession(tripSessionState)
+    }
 
     // Routing
 

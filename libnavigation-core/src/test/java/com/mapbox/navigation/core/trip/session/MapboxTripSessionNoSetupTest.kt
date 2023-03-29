@@ -350,7 +350,7 @@ class MapboxTripSessionNoSetupTest {
         )
 
         tripSession.start(false)
-        tripSession.stop()
+        tripSession.stop(true)
         testLocationEngine.updateLocation(createLocation())
 
         assertNull(tripSession.getRawLocation())

@@ -23,7 +23,7 @@ internal interface TripSession {
     fun getState(): TripSessionState
 
     fun start(withTripService: Boolean, withReplayEnabled: Boolean = false)
-    fun stop()
+    fun stop(canceled: Boolean)
     fun isRunningWithForegroundService(): Boolean
 
     fun registerLocationObserver(locationObserver: LocationObserver)

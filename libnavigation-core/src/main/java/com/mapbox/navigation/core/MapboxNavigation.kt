@@ -650,7 +650,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun stopTripSession() {
         runIfNotDestroyed {
             latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
-            tripSession.stop()
+            tripSession.stop(true)
         }
     }
 
@@ -1216,7 +1216,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         billingController.onDestroy()
         directionsSession.shutdown()
         directionsSession.unregisterAllRoutesObservers()
-        tripSession.stop()
+        tripSession.stop(true)
         tripSession.unregisterAllLocationObservers()
         tripSession.unregisterAllRouteProgressObservers()
         tripSession.unregisterAllOffRouteObservers()
@@ -2010,7 +2010,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             channel,
             { notificationAction ->
                 when (notificationAction) {
-                    NotificationAction.END_NAVIGATION -> tripSession.stop()
+                    NotificationAction.END_NAVIGATION -> tripSession.stop(true)
                 }
             }
         )

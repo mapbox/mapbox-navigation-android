@@ -332,7 +332,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.stop() }
+        verify(exactly = 1) { tripSession.stop(true) }
     }
 
     @Test
@@ -425,7 +425,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.onDestroy()
 
         verifyOrder {
-            tripSession.stop()
+            tripSession.stop(true)
             MapboxNavigationTelemetry.destroy(mapboxNavigation)
         }
     }
@@ -1289,7 +1289,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     withTripService = true,
                     withReplayEnabled = false
                 )
-                tripSession.stop()
+                tripSession.stop(true)
                 tripSession.unregisterAllStateObservers()
             }
         }

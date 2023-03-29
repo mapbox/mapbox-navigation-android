@@ -28,6 +28,7 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.TilesConfig
+import com.mapbox.navigator.TripSessionState
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
@@ -72,6 +73,14 @@ interface MapboxNativeNavigator {
     fun addNavigatorObserver(navigatorObserver: NavigatorObserver)
 
     fun removeNavigatorObserver(navigatorObserver: NavigatorObserver)
+
+    fun startTripSession()
+
+    fun stopTripSession(canceled: Boolean)
+
+    fun storeTripSession(): TripSessionState
+
+    fun restoreTripSession(tripSessionState: TripSessionState)
 
     // Routing
     suspend fun setRoutes(
