@@ -13,7 +13,7 @@ last_release = str(subprocess.run("git describe --tag --match 'v*' --abbrev=0", 
                                   text=True).stdout).strip()
 print("Last release " + last_release)
 
-release_main_part = last_release.partition('-')[0]
+release_main_part = last_release.partition('-')[0].replace('v', '')
 snapshot_name = release_main_part + "-WEEKLY-SNAPSHOT"
 print("Snapshot name " + snapshot_name)
 
