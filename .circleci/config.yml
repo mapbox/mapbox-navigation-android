@@ -679,8 +679,7 @@ jobs:
             - read-workspace
             - verify-codestyle
             - verify-license
-            #disabled to bring common 23.3.1 on top of 23.3.1-rc.1
-            #            - verify-common-sdk-version
+            - verify-common-sdk-version
             - check-api-core
             - check-api-ui
             - check-api-androidauto
