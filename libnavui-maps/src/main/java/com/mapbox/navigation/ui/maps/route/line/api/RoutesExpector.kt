@@ -10,6 +10,41 @@ internal class RoutesExpector {
     private val routeRenderCallbackDatas =
         mutableMapOf<SourceIdAndDataId, RouteRenderCallbackHolder>()
 
+    /**
+     * `renderedRouteIdsToNotify` - the ids which have to be passed to callback,
+     *  corresponding to routes that are rendered (as opposed to cleared).
+     * `clearedRouteIdsToNotify` = the ids which have to be passed to callback,
+     *  corresponding to routes that are cleared (as opposed to rendered).
+     * `expectedRoutesToRender` - contains info about ids we expect to receive in Maps SDK listener
+     *  (some routes may not be rerendered as a result of optimization, so generally route ids
+     *  passed to callback may differ from ids we expect to receive in our listener).
+     *
+     *  The algorithm is the following:
+     *  1. If we don't expect anything from the map, we just invoke the callback right away
+     *     with the corresponding ids.
+     *  2. If we expect anything from the map, we add a listener and store all related data
+     *     as an entry in `routeRenderCallbackDatas`.
+     *  3. When the listener is invoked, we look for sourceId (eventData.id) and
+     *     dataId (eventData.dataId). DataId was passed by the SDK in [MapboxRouteLineView] to
+     *     identify the operation (see [MapboxRouteLineView#renderRouteDrawDataInternal] docs).
+     *     It's a monotonic increasing integer associated with a particular sourceId.
+     *     When we receive dataId in our listener here, by it and sourceId we understand
+     *     which operation this listener invocation corresponds to.
+     *     If the listener is triggered with sourceId="id#1" and dataId=2, it means that
+     *     the operations for (sourceId="id#1", dataId=0) and (sourceId="id#1", dataId=1) either
+     *     finished or are cancelled. We use this knowledge to understand which routes will never
+     *     be rendered or cleared (because a newer operation on the same source cancelled
+     *     this operation).
+     *  4. For (sourceId, dataId) received in listener we cancel the corresponding route ids for
+     *     all keys (sourceId, oldDataId), where oldDataId < dataId.
+     *     If for some callback it was the last route we were waiting for, we remove the
+     *     corresponding entry and notify user callback.
+     *  5. For (sourceId, dataId) received in listener we find the corresponding entry and say that
+     *     the operation finished. We understand whether it was rendering or clearing,
+     *     remember this fact.
+     *     If it was the last route we were waiting for, we remove the corresponding entry and
+     *     notify user callback.
+     */
     fun expectRoutes(
         renderedRouteIdsToNotify: Set<String>,
         clearedRouteIdsToNotify: Set<String>,
