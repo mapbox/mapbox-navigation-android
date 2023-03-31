@@ -221,6 +221,24 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         renderRouteDrawDataInternal(style, routeDrawData, null)
     }
 
+    /**
+     * Routes expecting works the following way:
+     * 1. ExpectedRoutesData#allRenderedRouteIds will have only route ids that we expect to be
+     *  actually rendered on the map (as opposed of just switching the source if the route is
+     *  already rendered on another source) as a result of this operation.
+     * 2. ExpectedRoutesData#allClearedRouteIds will have only route ids that we expect to be
+     *  removed from the map as a result of this operation (the ones that have previously been drawn
+     *  and will be removed either because new routes will be drawn or, if passed
+     *  `RouteSetValue#RouteLineData#FeatureCollection` is empty).
+     * 3. However, the callback will be invoked with all passed route ids, not only the ones
+     *  that will be actually drawn. For this reason we pass
+     *  `(expectedRoutesData.allRenderedRouteIds + incomingFeatureIds).toSet()` as the first
+     *  to RoutesExpector#expectRoutes. These are the ids the callback will be invoked with.
+     * 4. To understand when the routes rendering/clearing finished, we use
+     *  `OnSourceDataLoadedListener` from Maps SDK. To match the listener invocation with a
+     *  particular operation, we use dataId: it is a monotonic increasing integer associated with a
+     *  particular sourceId. See [RoutesExpector] docs on how it is used.
+     */
     private fun renderRouteDrawDataInternal(
         style: Style,
         routeDrawData: Expected<RouteLineError, RouteSetValue>,
@@ -531,6 +549,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         )
     }
 
+    /**
+     * See [renderRouteDrawDataInternal] on how routes expecting works.
+     * Keep in mind that technically `RouteLineClearValue#RouteLineData#FeatureCollection`
+     * might be non-empty, which will result in drawing, not clearing the routes.
+     */
     private fun renderClearRouteLineValueInternal(
         style: Style,
         clearRouteLineValue: Expected<RouteLineError, RouteLineClearValue>,
