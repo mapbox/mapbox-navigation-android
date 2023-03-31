@@ -6,6 +6,31 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.12.0-rc.1 - 31 March, 2023
+### Changelog
+[Changes between v2.12.0-beta.3 and v2.12.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0-beta.3...v2.12.0-rc.1)
+
+#### Features
+- Added support for voice languages in offline: Lithuanian, Hungarian, Finnish, Serbian, Greek, Czech, and Slovak. [#7061](https://github.com/mapbox/mapbox-navigation-android/pull/7061)
+- Introduced `RoutesRenderedCallback` along with overloads to `MapboxRouteLineView#renderRouteDrawData` and `MapboxRouteLineView#renderClearRouteLineValue` to notified whenever the routes are rendered on map / cleared from map.  [#7058](https://github.com/mapbox/mapbox-navigation-android/pull/7058)
+
+#### Bug fixes and improvements
+- Fixed Native crash signal 11 (SIGSEGV), code 1 (SEGV_MAPERR) that may happen at libmapbox-common.so at `SqlitePersistentStorage#createQuery`. [#7061](https://github.com/mapbox/mapbox-navigation-android/pull/7061)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.12.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.12.1))
+- Mapbox Navigation Native `v130.0.0`
+- Mapbox Core Common `v23.4.0`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.12.0-beta.3 - 24 March, 2023
 ### Changelog
 [Changes between v2.12.0-beta.2 and v2.12.0-beta.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0-beta.2...v2.12.0-beta.3)
