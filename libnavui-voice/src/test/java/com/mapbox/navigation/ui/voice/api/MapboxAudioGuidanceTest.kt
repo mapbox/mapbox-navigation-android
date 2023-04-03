@@ -10,6 +10,7 @@ import com.mapbox.navigation.ui.voice.TestMapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.TestMapboxAudioGuidanceServices.Companion.SPEECH_ANNOUNCEMENT_DELAY_MS
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructionsState
 import io.mockk.clearMocks
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.excludeRecords
 import io.mockk.mockk
@@ -94,11 +95,12 @@ class MapboxAudioGuidanceTest {
         }
 
         testMapboxAudioGuidanceServices.emitVoiceInstruction(
-            MapboxVoiceInstructionsState(true, null)
+            MapboxVoiceInstructionsState(true, false, null)
         )
 
         assertEquals(2, states.size)
         assertFalse(states[1].isMuted)
+        assertFalse(states[1].isFirst)
         assertTrue(states[1].isPlayable)
         assertNull(states[1].speechAnnouncement)
         job.cancelAndJoin()
@@ -106,19 +108,51 @@ class MapboxAudioGuidanceTest {
     }
 
     @Test
-    fun `plays voice instructions`() = coroutineRule.runBlockingTest {
+    fun `plays first voice instructions`() = coroutineRule.runBlockingTest {
         carAppAudioGuidance.onAttached(mapboxNavigation)
         val states = mutableListOf<MapboxAudioGuidanceState>()
         val job = launch {
             carAppAudioGuidance.stateFlow().collect { states.add(it) }
         }
 
-        val voiceInstruction = MapboxVoiceInstructionsState(true, VOICE_INSTRUCTION2)
+        val voiceInstruction = MapboxVoiceInstructionsState(true, true, VOICE_INSTRUCTION2)
         testMapboxAudioGuidanceServices.emitVoiceInstruction(voiceInstruction)
         delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
 
+        coVerify(exactly = 1) {
+            testMapboxAudioGuidanceServices.mapboxAudioGuidanceVoice.speak(VOICE_INSTRUCTION2)
+        }
         assertEquals(3, states.size)
         assertFalse(states[2].isMuted)
+        assertTrue(states[2].isFirst)
+        assertTrue(states[2].isPlayable)
+        assertEquals(
+            VOICE_INSTRUCTION2.announcement(),
+            states[2].speechAnnouncement?.announcement
+        )
+        job.cancelAndJoin()
+        carAppAudioGuidance.onDetached(mapboxNavigation)
+    }
+
+    @Test
+    fun `plays non-first voice instructions`() = coroutineRule.runBlockingTest {
+        carAppAudioGuidance.onAttached(mapboxNavigation)
+        val states = mutableListOf<MapboxAudioGuidanceState>()
+        val job = launch {
+            carAppAudioGuidance.stateFlow().collect { states.add(it) }
+        }
+
+        val voiceInstruction = MapboxVoiceInstructionsState(true, false, VOICE_INSTRUCTION2)
+        testMapboxAudioGuidanceServices.emitVoiceInstruction(voiceInstruction)
+        delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
+
+        coVerify(exactly = 1) {
+            testMapboxAudioGuidanceServices.mapboxAudioGuidanceVoice
+                .speakPredownloaded(VOICE_INSTRUCTION2)
+        }
+        assertEquals(3, states.size)
+        assertFalse(states[2].isMuted)
+        assertFalse(states[2].isFirst)
         assertTrue(states[2].isPlayable)
         assertEquals(
             VOICE_INSTRUCTION2.announcement(),
@@ -138,12 +172,13 @@ class MapboxAudioGuidanceTest {
 
         carAppAudioGuidance.mute()
         testMapboxAudioGuidanceServices.emitVoiceInstruction(
-            MapboxVoiceInstructionsState(true, VOICE_INSTRUCTION1)
+            MapboxVoiceInstructionsState(true, true, VOICE_INSTRUCTION1)
         )
         delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
 
         assertEquals(3, states.size)
         assertTrue(states[2].isMuted)
+        assertTrue(states[2].isFirst)
         assertTrue(states[2].isPlayable)
         assertEquals(
             VOICE_INSTRUCTION1.announcement(),
@@ -165,9 +200,9 @@ class MapboxAudioGuidanceTest {
         }
 
         // Emit two announcements without waiting for one to complete.
-        val firstVoiceInstruction = MapboxVoiceInstructionsState(true, VOICE_INSTRUCTION1)
+        val firstVoiceInstruction = MapboxVoiceInstructionsState(true, true, VOICE_INSTRUCTION1)
         testMapboxAudioGuidanceServices.emitVoiceInstruction(firstVoiceInstruction)
-        val secondVoiceInstruction = MapboxVoiceInstructionsState(true, VOICE_INSTRUCTION2)
+        val secondVoiceInstruction = MapboxVoiceInstructionsState(true, false, VOICE_INSTRUCTION2)
         testMapboxAudioGuidanceServices.emitVoiceInstruction(secondVoiceInstruction)
         // Wait for the announcements. Note that this is blocking a test scheduler
         // so it should not delay actual time.
@@ -195,7 +230,7 @@ class MapboxAudioGuidanceTest {
 
         // Emit two announcements without waiting for one to complete.
         testMapboxAudioGuidanceServices.emitVoiceInstruction(
-            MapboxVoiceInstructionsState(true, VOICE_INSTRUCTION1)
+            MapboxVoiceInstructionsState(true, true, VOICE_INSTRUCTION1)
         )
         // Wait for the playback. Note that this is only blocking the test scheduler.
         delay(SPEECH_ANNOUNCEMENT_DELAY_MS * 2)
@@ -203,34 +238,35 @@ class MapboxAudioGuidanceTest {
         carAppAudioGuidance.unmute()
         delay(SPEECH_ANNOUNCEMENT_DELAY_MS * 2) // Wait for the playback.
         testMapboxAudioGuidanceServices.emitVoiceInstruction(
-            MapboxVoiceInstructionsState(true, VOICE_INSTRUCTION2)
+            MapboxVoiceInstructionsState(true, false, VOICE_INSTRUCTION2)
         )
         delay(SPEECH_ANNOUNCEMENT_DELAY_MS * 2) // Wait for the playback.
 
         // expected MapboxAudioGuidanceState values
-        // # IS MUTED     INSTRUCTION         HAS SPEECH ANNOUNCEMENT
+        // # IS MUTED  IS FIRST   INSTRUCTION         HAS SPEECH ANNOUNCEMENT
         //          (first instruction)
-        // 0 false      VOICE_INSTRUCTION1    false
-        // 1 false      VOICE_INSTRUCTION1    true
+        // 0 false   true   VOICE_INSTRUCTION1    false
+        // 1 false   true   VOICE_INSTRUCTION1    true
         //          (mute)
-        // 2 true       VOICE_INSTRUCTION1    false
+        // 2 true    true   VOICE_INSTRUCTION1    false
         //          (un-mute)
-        // 3 false      VOICE_INSTRUCTION1    false
+        // 3 false   true   VOICE_INSTRUCTION1    false
         //          (second instruction)
-        // 4 false      VOICE_INSTRUCTION2    false
-        // 5 false      VOICE_INSTRUCTION2    true
-        val expectation = mutableListOf(
-            Triple(false, VOICE_INSTRUCTION1, false),
-            Triple(false, VOICE_INSTRUCTION1, true),
-            Triple(true, VOICE_INSTRUCTION1, false),
-            Triple(false, VOICE_INSTRUCTION1, false),
-            Triple(false, VOICE_INSTRUCTION2, false),
-            Triple(false, VOICE_INSTRUCTION2, true),
+        // 4 false   false   VOICE_INSTRUCTION2    false
+        // 5 false   false   VOICE_INSTRUCTION2    true
+        val expectation = listOf(
+            listOf(false, true, VOICE_INSTRUCTION1, false),
+            listOf(false, true, VOICE_INSTRUCTION1, true),
+            listOf(true, true, VOICE_INSTRUCTION1, false),
+            listOf(false, true, VOICE_INSTRUCTION1, false),
+            listOf(false, false, VOICE_INSTRUCTION2, false),
+            listOf(false, false, VOICE_INSTRUCTION2, true),
         )
         assertEquals(expectation.size, states.size)
         expectation.forEachIndexed { i, expected ->
-            val v = Triple(
+            val v = listOf(
                 states[i].isMuted,
+                states[i].isFirst,
                 states[i].voiceInstructions,
                 states[i].speechAnnouncement?.announcement != null
             )

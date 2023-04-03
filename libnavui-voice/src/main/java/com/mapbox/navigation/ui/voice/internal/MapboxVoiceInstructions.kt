@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -19,14 +20,30 @@ import kotlinx.coroutines.flow.mapLatest
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapboxVoiceInstructions {
 
+    private val reasonsWithoutNewInstructions = setOf(
+        RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
+        RoutesExtra.ROUTES_UPDATE_REASON_REFRESH,
+        RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE,
+    )
+
     private val voiceInstructionsFlow =
-        MutableStateFlow(MapboxVoiceInstructionsState(true, null))
+        MutableStateFlow(MapboxVoiceInstructionsState(true, false, null))
     private val routesFlow = MutableStateFlow<List<NavigationRoute>>(emptyList())
 
+    private var hasFirstVoiceInstruction = false
+
     private val voiceInstructionsObserver = VoiceInstructionsObserver {
-        voiceInstructionsFlow.value = MapboxVoiceInstructionsState(true, it)
+        voiceInstructionsFlow.value = MapboxVoiceInstructionsState(
+            true,
+            !hasFirstVoiceInstruction,
+            it
+        )
+        hasFirstVoiceInstruction = true
     }
     private val routesObserver = RoutesObserver {
+        if (it.reason !in reasonsWithoutNewInstructions) {
+            hasFirstVoiceInstruction = false
+        }
         routesFlow.value = it.navigationRoutes
         if (it.navigationRoutes.isEmpty()) {
             voiceInstructionsFlow.value = MapboxVoiceInstructionsState()
@@ -60,12 +77,14 @@ class MapboxVoiceInstructions {
     }
 
     private fun resetFlows() {
-        voiceInstructionsFlow.value = MapboxVoiceInstructionsState(true, null)
+        voiceInstructionsFlow.value = MapboxVoiceInstructionsState(true, false, null)
+        hasFirstVoiceInstruction = false
         routesFlow.value = emptyList()
     }
 
     interface State {
         val isPlayable: Boolean
+        val isFirst: Boolean
         val voiceInstructions: VoiceInstructions?
     }
 }
@@ -73,5 +92,6 @@ class MapboxVoiceInstructions {
 @VisibleForTesting
 internal data class MapboxVoiceInstructionsState(
     override val isPlayable: Boolean = false,
+    override val isFirst: Boolean = false,
     override val voiceInstructions: VoiceInstructions? = null
 ) : MapboxVoiceInstructions.State

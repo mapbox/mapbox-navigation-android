@@ -19,6 +19,14 @@ class MapboxAudioGuidanceState internal constructor(
     val isMuted: Boolean = false,
 
     /**
+     * Whether the `voiceInstructions` is the first one for this route.
+     * You can set different behaviour based on this information.
+     * For example, you can skip the starter instruction or always wait until it is downloaded
+     * instead of using onboard fallback.
+     */
+    val isFirst: Boolean = false,
+
+    /**
      * Once a voice instruction becomes available this will not be null.
      * When the state [isPlayable] and this is null, it means there are no voice instructions
      * on the route at this time.
@@ -43,6 +51,7 @@ class MapboxAudioGuidanceState internal constructor(
 
         if (isPlayable != other.isPlayable) return false
         if (isMuted != other.isMuted) return false
+        if (isFirst != other.isFirst) return false
         if (voiceInstructions != other.voiceInstructions) return false
         if (speechAnnouncement != other.speechAnnouncement) return false
 
@@ -55,6 +64,7 @@ class MapboxAudioGuidanceState internal constructor(
     override fun hashCode(): Int {
         var result = isPlayable.hashCode()
         result = 31 * result + isMuted.hashCode()
+        result = 31 * result + isFirst.hashCode()
         result = 31 * result + (voiceInstructions?.hashCode() ?: 0)
         result = 31 * result + (speechAnnouncement?.hashCode() ?: 0)
         return result
@@ -67,6 +77,7 @@ class MapboxAudioGuidanceState internal constructor(
         return "MapboxAudioGuidanceState(" +
             "isPlayable=$isPlayable, " +
             "isMuted=$isMuted, " +
+            "isFirst=$isFirst, " +
             "voiceInstructions=$voiceInstructions, " +
             "speechAnnouncement=$speechAnnouncement" +
             ")"
