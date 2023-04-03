@@ -138,6 +138,7 @@ internal constructor(
                         internalStateFlow.updateAndGet {
                             MapboxAudioGuidanceState(
                                 isMuted = isMuted,
+                                isFirst = state.isFirst,
                                 isPlayable = state.isPlayable,
                                 voiceInstructions = state.voiceInstructions
                             )
@@ -151,11 +152,16 @@ internal constructor(
                         .filter { it.voiceInstructions != lastPlayedInstructions }
                         .map {
                             lastPlayedInstructions = it.voiceInstructions
-                            val announcement = audioGuidance.speak(it.voiceInstructions)
+                            val announcement = if (it.isFirst) {
+                                audioGuidance.speak(it.voiceInstructions)
+                            } else {
+                                audioGuidance.speakPredownloaded(it.voiceInstructions)
+                            }
                             internalStateFlow.updateAndGet { state ->
                                 MapboxAudioGuidanceState(
                                     isPlayable = state.isPlayable,
                                     isMuted = state.isMuted,
+                                    isFirst = state.isFirst,
                                     voiceInstructions = state.voiceInstructions,
                                     speechAnnouncement = announcement
                                 )

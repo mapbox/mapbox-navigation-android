@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice.internal.impl
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -19,6 +20,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -44,6 +46,7 @@ class MapboxVoiceInstructionsTest {
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             val result = mockk<RoutesUpdatedResult> {
                 every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
             }
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
@@ -65,6 +68,7 @@ class MapboxVoiceInstructionsTest {
         assertTrue(initialInstruction.isPlayable)
         assertEquals(null, initialInstruction.voiceInstructions)
         assertEquals("Left on Broadway", updatedInstruction.voiceInstructions?.announcement())
+        assertEquals(true, updatedInstruction.isFirst)
     }
 
     @Test
@@ -77,6 +81,7 @@ class MapboxVoiceInstructionsTest {
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             val result = mockk<RoutesUpdatedResult> {
                 every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
             }
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
@@ -98,15 +103,17 @@ class MapboxVoiceInstructionsTest {
         sut.registerObservers(mapboxNavigation)
 
         observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
-        val firstAnnouncement = flow.first().voiceInstructions?.announcement()
+        val firstState = flow.first()
 
         observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
-        val secondAnnouncement = flow.first().voiceInstructions?.announcement()
+        val secondState = flow.first()
 
         // voiceInstructionsFlow has null voiceInstruction as initial state
         assertEquals(null, initialAnnouncement)
-        assertEquals("Left on Broadway", firstAnnouncement)
-        assertEquals("Right on Pennsylvania", secondAnnouncement)
+        assertEquals("Left on Broadway", firstState.voiceInstructions?.announcement())
+        assertEquals(true, firstState.isFirst)
+        assertEquals("Right on Pennsylvania", secondState.voiceInstructions?.announcement())
+        assertEquals(false, secondState.isFirst)
     }
 
     @Test
@@ -119,6 +126,7 @@ class MapboxVoiceInstructionsTest {
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             val result = mockk<RoutesUpdatedResult> {
                 every { navigationRoutes } returns emptyList()
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
             }
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
@@ -150,6 +158,7 @@ class MapboxVoiceInstructionsTest {
                     createRoute(language),
                     createRoute(voiceLanguage = "en")
                 )
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
             }
             firstArg<RoutesObserver>().onRoutesChanged(result)
         }
@@ -200,6 +209,7 @@ class MapboxVoiceInstructionsTest {
         routesObserver.captured.onRoutesChanged(
             mockk {
                 every { navigationRoutes } returns emptyList()
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
             }
         )
         val secondState = sut.voiceInstructions().first()
@@ -228,6 +238,311 @@ class MapboxVoiceInstructionsTest {
 
         assertNotNull(firstState.voiceInstructions)
         assertNull(secondState.voiceInstructions)
+    }
+
+    @Test
+    fun `voiceInstruction should be first after routes changed to new`() = runBlockingTest {
+        every { mapboxNavigation.registerTripSessionStateObserver(any()) } answers {
+            firstArg<TripSessionStateObserver>().onSessionStateChanged(
+                TripSessionState.STARTED
+            )
+        }
+        val routesObserverSlot = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) } just Runs
+
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val firstVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
+        }
+        val secondVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Right on Pennsylvania"
+        }
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
+
+        val flow = sut.voiceInstructions()
+
+        sut.registerObservers(mapboxNavigation)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
+
+        assertTrue(flow.first().isFirst)
+    }
+
+    @Test
+    fun `voiceInstruction should be first after routes changed due to reroute`() = runBlockingTest {
+        every { mapboxNavigation.registerTripSessionStateObserver(any()) } answers {
+            firstArg<TripSessionStateObserver>().onSessionStateChanged(
+                TripSessionState.STARTED
+            )
+        }
+        val routesObserverSlot = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) } just Runs
+
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val firstVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
+        }
+        val secondVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Right on Pennsylvania"
+        }
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
+
+        val flow = sut.voiceInstructions()
+
+        sut.registerObservers(mapboxNavigation)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
+
+        assertTrue(flow.first().isFirst)
+    }
+
+    @Test
+    fun `voiceInstruction should not be first after routes changed to alternatives`() = runBlockingTest {
+        every { mapboxNavigation.registerTripSessionStateObserver(any()) } answers {
+            firstArg<TripSessionStateObserver>().onSessionStateChanged(
+                TripSessionState.STARTED
+            )
+        }
+        val routesObserverSlot = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) } just Runs
+
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val firstVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
+        }
+        val secondVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Right on Pennsylvania"
+        }
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
+
+        val flow = sut.voiceInstructions()
+
+        sut.registerObservers(mapboxNavigation)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
+
+        assertFalse(flow.first().isFirst)
+    }
+
+    @Test
+    fun `voiceInstruction should not be first after routes changed due to refresh`() = runBlockingTest {
+        every { mapboxNavigation.registerTripSessionStateObserver(any()) } answers {
+            firstArg<TripSessionStateObserver>().onSessionStateChanged(
+                TripSessionState.STARTED
+            )
+        }
+        val routesObserverSlot = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) } just Runs
+
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val firstVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
+        }
+        val secondVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Right on Pennsylvania"
+        }
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
+
+        val flow = sut.voiceInstructions()
+
+        sut.registerObservers(mapboxNavigation)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
+
+        assertFalse(flow.first().isFirst)
+    }
+
+    @Test
+    fun `voiceInstruction should not be first after routes changed due to clean up`() = runBlockingTest {
+        every { mapboxNavigation.registerTripSessionStateObserver(any()) } answers {
+            firstArg<TripSessionStateObserver>().onSessionStateChanged(
+                TripSessionState.STARTED
+            )
+        }
+        val routesObserverSlot = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) } just Runs
+
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val firstVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
+        }
+        val secondVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Right on Pennsylvania"
+        }
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
+
+        val flow = sut.voiceInstructions()
+
+        sut.registerObservers(mapboxNavigation)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns emptyList()
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
+
+        assertFalse(flow.first().isFirst)
+    }
+
+    @Test
+    fun `voiceInstruction should be first after onDetached`() = runBlockingTest {
+        every { mapboxNavigation.registerTripSessionStateObserver(any()) } answers {
+            firstArg<TripSessionStateObserver>().onSessionStateChanged(
+                TripSessionState.STARTED
+            )
+        }
+        val routesObserverSlot = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) } just Runs
+
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val firstVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
+        }
+        val secondVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Right on Pennsylvania"
+        }
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
+
+        val flow = sut.voiceInstructions()
+
+        sut.registerObservers(mapboxNavigation)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+
+        sut.unregisterObservers(mapboxNavigation)
+        sut.registerObservers(mapboxNavigation)
+
+        observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
+
+        assertTrue(flow.first().isFirst)
+    }
+
+    @Test
+    fun `same voiceInstruction should not be first`() = runBlockingTest {
+        every { mapboxNavigation.registerTripSessionStateObserver(any()) } answers {
+            firstArg<TripSessionStateObserver>().onSessionStateChanged(
+                TripSessionState.STARTED
+            )
+        }
+        val routesObserverSlot = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) } just Runs
+
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val firstVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Left on Broadway"
+        }
+        val secondVoiceInstructions = mockk<VoiceInstructions> {
+            every { announcement() } returns "Right on Pennsylvania"
+        }
+        every {
+            mapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot))
+        } just Runs
+
+        val flow = sut.voiceInstructions()
+
+        sut.registerObservers(mapboxNavigation)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(mockk(), mockk())
+                every { reason } returns RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        )
+
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+        observerSlot.captured.onNewVoiceInstructions(secondVoiceInstructions)
+        observerSlot.captured.onNewVoiceInstructions(firstVoiceInstructions)
+        val newState = flow.first()
+
+        assertFalse(newState.isFirst)
     }
 
     private fun createRoute(voiceLanguage: String): NavigationRoute {
