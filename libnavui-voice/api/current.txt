@@ -50,8 +50,10 @@ package com.mapbox.navigation.ui.voice.api {
   public final class MapboxAudioGuidanceState {
     method public com.mapbox.navigation.ui.voice.model.SpeechAnnouncement? getSpeechAnnouncement();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
+    method public boolean isFirst();
     method public boolean isMuted();
     method public boolean isPlayable();
+    property public final boolean isFirst;
     property public final boolean isMuted;
     property public final boolean isPlayable;
     property public final com.mapbox.navigation.ui.voice.model.SpeechAnnouncement? speechAnnouncement;

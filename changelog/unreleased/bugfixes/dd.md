@@ -1,0 +1,1 @@
+- Fixed first voice instruction being pronounced in offline mode when using either Drop-In UI or `MapboxAudioGuidance`.

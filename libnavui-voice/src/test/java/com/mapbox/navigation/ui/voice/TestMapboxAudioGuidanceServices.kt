@@ -51,6 +51,20 @@ class TestMapboxAudioGuidanceServices(
             }
             speechAnnouncement
         }
+        coEvery { speakPredownloaded(any()) } coAnswers {
+            val voiceInstructions = firstArg<VoiceInstructions?>()
+            val speechAnnouncement: SpeechAnnouncement? = voiceInstructions?.let {
+                mockk {
+                    every { announcement } returns it.announcement()!!
+                    every { ssmlAnnouncement } returns it.ssmlAnnouncement()
+                }
+            }
+            if (speechAnnouncement != null) {
+                // Simulate a real speech announcement by delaying the TestCoroutineScope
+                delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
+            }
+            speechAnnouncement
+        }
         every { mapboxSpeechApi } returns this@TestMapboxAudioGuidanceServices.mapboxSpeechApi
     }
 
