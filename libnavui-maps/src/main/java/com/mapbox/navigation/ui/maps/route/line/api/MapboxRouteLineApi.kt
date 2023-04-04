@@ -47,6 +47,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
@@ -323,8 +324,29 @@ class MapboxRouteLineApi(
         newRoutes: List<NavigationRoute>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        setNavigationRoutes(newRoutes, 0, consumer)
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param activeLegIndex the index of the currently active leg of the primary route.
+     *  This is used when [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently] is enabled.
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRoutes(
+        newRoutes: List<NavigationRoute>,
+        activeLegIndex: Int,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
         setNavigationRoutes(
             newRoutes = newRoutes,
+            activeLegIndex = activeLegIndex,
             alternativeRoutesMetadata = emptyList(),
             consumer = consumer
         )
@@ -347,10 +369,33 @@ class MapboxRouteLineApi(
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        setNavigationRoutes(newRoutes, 0, alternativeRoutesMetadata, consumer)
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param activeLegIndex the index of the currently active leg of the primary route.
+     *  This is used when [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently] is enabled.
+     * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
+     * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRoutes(
+        newRoutes: List<NavigationRoute>,
+        activeLegIndex: Int,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
         val routeLines = newRoutes.map {
             NavigationRouteLine(it, null)
         }
-        setNavigationRouteLines(routeLines, alternativeRoutesMetadata, consumer)
+        setNavigationRouteLines(routeLines, activeLegIndex, alternativeRoutesMetadata, consumer)
     }
 
     /**
@@ -391,6 +436,29 @@ class MapboxRouteLineApi(
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        setNavigationRouteLines(newRoutes, 0, alternativeRoutesMetadata, consumer)
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param activeLegIndex the index of the currently active leg of the primary route.
+     *  This is used when [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently] is enabled.
+     * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
+     * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
+     * @param consumer a method that consumes the result of the operation.
+     */
+    fun setNavigationRouteLines(
+        newRoutes: List<NavigationRouteLine>,
+        activeLegIndex: Int,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
+    ) {
         cancel()
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
@@ -399,7 +467,8 @@ class MapboxRouteLineApi(
                 val routeData = setNewRouteData(
                     newRoutes.map(NavigationRouteLine::route),
                     featureDataProvider,
-                    alternativeRoutesMetadata
+                    alternativeRoutesMetadata,
+                    activeLegIndex
                 )
                 consumer.accept(routeData)
             }
@@ -419,7 +488,7 @@ class MapboxRouteLineApi(
             mutex.withLock {
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
-                val result = buildDrawRoutesState(featureDataProvider)
+                val result = buildDrawRoutesState(featureDataProvider, activeLegIndex)
                 consumer.accept(result)
             }
         }
@@ -1276,7 +1345,8 @@ class MapboxRouteLineApi(
     private suspend fun setNewRouteData(
         newRoutes: List<NavigationRoute>,
         featureDataProvider: () -> List<RouteFeatureData>,
-        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
+        activeLegIndex: Int,
     ): Expected<RouteLineError, RouteSetValue> {
         val distinctNewRoutes = newRoutes.distinctBy { it.id }
         if (distinctNewRoutes.size < newRoutes.size) {
@@ -1300,7 +1370,7 @@ class MapboxRouteLineApi(
         routes.addAll(distinctNewRoutes)
         primaryRoute = distinctNewRoutes.firstOrNull()
         MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
-        activeLegIndex = INVALID_ACTIVE_LEG_INDEX
+        this.activeLegIndex = INVALID_ACTIVE_LEG_INDEX
 
         preWarmRouteCaches(
             distinctNewRoutes,
@@ -1312,7 +1382,7 @@ class MapboxRouteLineApi(
             it.navigationRoute.id to MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(it)
         }
 
-        return buildDrawRoutesState(featureDataProvider)
+        return buildDrawRoutesState(featureDataProvider, activeLegIndex)
     }
 
     private suspend fun preWarmRouteCaches(
@@ -1340,7 +1410,8 @@ class MapboxRouteLineApi(
     }
 
     private suspend fun buildDrawRoutesState(
-        featureDataProvider: () -> List<RouteFeatureData>
+        featureDataProvider: () -> List<RouteFeatureData>,
+        legIndex: Int
     ): Expected<RouteLineError, RouteSetValue> {
         lastLocationPoint = null
 
@@ -1370,19 +1441,36 @@ class MapboxRouteLineApi(
         val vanishingPointOffset = routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
         val primaryRouteTrafficLineExpressionDef = jobControl.scope.async {
             primaryRoute?.route?.run {
-                MapboxRouteLineUtils.getTrafficLineExpressionProducer(
-                    this,
-                    routeLineOptions.resourceProvider.routeLineColorResources,
-                    trafficBackfillRoadClasses,
-                    isPrimaryRoute = true,
+                val workingRouteLineExpressionData =
+                    MapboxRouteLineUtils.calculateRouteLineSegments(
+                        this,
+                        trafficBackfillRoadClasses,
+                        isPrimaryRoute = true,
+                        routeLineOptions.resourceProvider.routeLineColorResources,
+                    ).run {
+                        if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                            alternativelyStyleSegmentsNotInLeg(
+                                legIndex,
+                                this,
+                                routeLineOptions
+                                    .resourceProvider
+                                    .routeLineColorResources
+                                    .inActiveRouteLegsColor
+                            )
+                        } else {
+                            this
+                        }
+                    }
+                MapboxRouteLineUtils.getTrafficLineExpression(
                     vanishingPointOffset,
                     Color.TRANSPARENT,
                     routeLineOptions.resourceProvider.routeLineColorResources
                         .routeUnknownCongestionColor,
+                    routeLineOptions.softGradientTransition / directionsRoute.distance(),
                     routeLineOptions.displaySoftGradientForTraffic,
-                    routeLineOptions.softGradientTransition
+                    workingRouteLineExpressionData
                 )
-            }?.generateExpression()
+            }
         }
 
         val alternative1PercentageTraveled = alternativeRoute1?.route?.run {
@@ -1454,7 +1542,7 @@ class MapboxRouteLineApi(
         val primaryRouteRestrictedSectionsExpressionDef = jobControl.scope.async {
             primaryRoute?.route?.run {
                 getRestrictedLineExpressionProducerForLegIndex(
-                    activeLegIndex,
+                    legIndex,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     restrictedExpressionData
                 )
@@ -1535,35 +1623,53 @@ class MapboxRouteLineApi(
                 RouteLineExpressionProvider { exp }
             }
 
+        val colorResources = routeLineOptions.resourceProvider.routeLineColorResources
         val primaryRouteBaseExpressionProducer =
             RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    vanishingPointOffset,
-                    routeLineOptions.resourceProvider.routeLineColorResources
-                        .routeLineTraveledColor,
-                    routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
-                )
+                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        vanishingPointOffset,
+                        routeLineExpressionData,
+                        colorResources.routeLineTraveledColor,
+                        colorResources.routeDefaultColor,
+                        colorResources.inActiveRouteLegsColor,
+                        legIndex,
+                    )
+                } else {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        vanishingPointOffset,
+                        colorResources.routeLineTraveledColor,
+                        colorResources.routeDefaultColor
+                    )
+                }
             }
 
         val primaryRouteCasingExpressionProducer =
             RouteLineExpressionProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    vanishingPointOffset,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .routeLineTraveledCasingColor,
-                    routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
-                )
+                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        vanishingPointOffset,
+                        routeLineExpressionData,
+                        colorResources.routeLineTraveledCasingColor,
+                        colorResources.routeCasingColor,
+                        Color.TRANSPARENT,
+                        legIndex
+                    )
+                } else {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        vanishingPointOffset,
+                        colorResources.routeLineTraveledCasingColor,
+                        colorResources.routeCasingColor
+                    )
+                }
             }
 
         val primaryRouteTrailExpressionProducer =
             RouteLineExpressionProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     vanishingPointOffset,
-                    routeLineOptions.resourceProvider.routeLineColorResources
-                        .routeLineTraveledColor,
-                    routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor
+                    colorResources.routeLineTraveledColor,
+                    colorResources.routeLineTraveledColor
                 )
             }
 
@@ -1571,14 +1677,8 @@ class MapboxRouteLineApi(
             RouteLineExpressionProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     vanishingPointOffset,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .routeLineTraveledCasingColor,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .routeLineTraveledCasingColor
+                    colorResources.routeLineTraveledCasingColor,
+                    colorResources.routeLineTraveledCasingColor
                 )
             }
 

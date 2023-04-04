@@ -1,0 +1,2 @@
+- Improved inactive leg independent styling: now the inactive leg will be styled differently right away, not only when the route progress updates begin.
+- Added optional parameter `initialLegIndex` to `MapboxRouteLineAPI#setNavigationRouteLines` and `MapboxRouteLineAPI#setNavigationRoutes` to explicitly specify which leg is active, 0 by default.

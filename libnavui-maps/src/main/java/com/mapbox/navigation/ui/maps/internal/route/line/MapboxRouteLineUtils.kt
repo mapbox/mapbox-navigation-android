@@ -1649,8 +1649,26 @@ internal object MapboxRouteLineUtils {
             isPrimaryRoute,
             colorResources
         )
-        if (useSoftGradient) {
-            val stopGap = softGradientTransitionDistance / route.directionsRoute.distance()
+        val stopGap = softGradientTransitionDistance / route.directionsRoute.distance()
+        getTrafficLineExpression(
+            vanishingPointOffset,
+            lineStartColor,
+            lineColor,
+            stopGap,
+            useSoftGradient,
+            segments
+        )
+    }
+
+    internal fun getTrafficLineExpression(
+        vanishingPointOffset: Double,
+        lineStartColor: Int,
+        lineColor: Int,
+        stopGap: Double,
+        useSoftGradient: Boolean,
+        segments: List<RouteLineExpressionData>,
+    ): Expression {
+        return if (useSoftGradient) {
             getTrafficLineExpressionSoftGradient(
                 vanishingPointOffset,
                 lineStartColor,

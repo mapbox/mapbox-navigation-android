@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
@@ -185,7 +186,13 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verifyOrder { mockApi.setNavigationRoutes(any(), any(), capture(callbackSlot)) }
+        verifyOrder {
+            mockApi.setNavigationRoutes(
+                any(),
+                any<List<AlternativeRouteMetadata>>(),
+                capture(callbackSlot)
+            )
+        }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
@@ -217,7 +224,13 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRoutes(any(), any(), capture(callbackSlot)) }
+        verify {
+            mockApi.setNavigationRoutes(
+                any(),
+                any<List<AlternativeRouteMetadata>>(),
+                capture(callbackSlot)
+            )
+        }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
@@ -249,7 +262,13 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verifyOrder { mockApi.setNavigationRoutes(any(), any(), capture(callbackSlot)) }
+        verifyOrder {
+            mockApi.setNavigationRoutes(
+                any(),
+                any<List<AlternativeRouteMetadata>>(),
+                capture(callbackSlot)
+            )
+        }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
@@ -282,7 +301,13 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRoutes(any(), any(), capture(callbackSlot)) }
+        verify {
+            mockApi.setNavigationRoutes(
+                any(),
+                any<List<AlternativeRouteMetadata>>(),
+                capture(callbackSlot)
+            )
+        }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
