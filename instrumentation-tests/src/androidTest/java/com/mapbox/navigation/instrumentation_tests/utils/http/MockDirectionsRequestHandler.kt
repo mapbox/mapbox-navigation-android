@@ -13,12 +13,20 @@ import okhttp3.mockwebserver.RecordedRequest
  * @param expectedCoordinates optionally the expected coordinates
  * that the handler should match when providing the response
  */
-data class MockDirectionsRequestHandler(
+data class MockDirectionsRequestHandler constructor(
     val profile: String,
-    val jsonResponse: String,
+    val lazyJsonResponse: () -> String,
     val expectedCoordinates: List<Point>?,
     val relaxedExpectedCoordinates: Boolean = false,
+    val serverDelayMs: Long = 0,
 ) : BaseMockRequestHandler() {
+
+    constructor(
+        profile: String,
+        jsonResponse: String,
+        expectedCoordinates: List<Point>?,
+        relaxedExpectedCoordinates: Boolean = false,
+    ) : this(profile, { jsonResponse }, expectedCoordinates, relaxedExpectedCoordinates)
 
     var jsonResponseModifier: ((String) -> String) = { it }
 
@@ -30,7 +38,8 @@ data class MockDirectionsRequestHandler(
         }
 
         return if (request.path!!.startsWith(prefix)) {
-            MockResponse().setBody(jsonResponseModifier(jsonResponse))
+            Thread.sleep(serverDelayMs)
+            MockResponse().setBody(jsonResponseModifier(lazyJsonResponse()))
         } else {
             null
         }
@@ -49,7 +58,8 @@ data class MockDirectionsRequestHandler(
             "profile='$profile', " +
             "expectedCoordinates=$expectedCoordinates, " +
             "relaxedExpectedCoordinates=$relaxedExpectedCoordinates, " +
-            "jsonResponse='$jsonResponse'" +
+            "lazyJsonResponse='$lazyJsonResponse', " +
+            "serverDelayMs='$serverDelayMs'" +
             ")"
     }
 }
