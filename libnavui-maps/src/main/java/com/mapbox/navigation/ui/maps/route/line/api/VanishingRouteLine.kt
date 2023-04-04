@@ -159,29 +159,17 @@ internal class VanishingRouteLine {
         ) { index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
                 vanishPointOffset = offset
-                val trafficLineExpressionProvider = if (useSoftGradient) {
-                    {
-                        MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
-                            offset,
-                            routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                            routeResourceProvider
-                                .routeLineColorResources
-                                .routeUnknownCongestionColor,
-                            softGradientTransition,
-                            routeLineExpressionData
-                        )
-                    }
-                } else {
-                    {
-                        MapboxRouteLineUtils.getTrafficLineExpression(
-                            offset,
-                            routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                            routeResourceProvider
-                                .routeLineColorResources
-                                .routeUnknownCongestionColor,
-                            routeLineExpressionData
-                        )
-                    }
+                val trafficLineExpressionProvider = {
+                    MapboxRouteLineUtils.getTrafficLineExpression(
+                        offset,
+                        routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                        routeResourceProvider
+                            .routeLineColorResources
+                            .routeUnknownCongestionColor,
+                        softGradientTransition,
+                        useSoftGradient,
+                        routeLineExpressionData
+                    )
                 }
                 val routeLineExpressionProvider = {
                     MapboxRouteLineUtils.getRouteLineExpression(
