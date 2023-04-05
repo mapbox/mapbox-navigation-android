@@ -15,15 +15,13 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.RouteRequestResult
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.requestRoutes
-import com.mapbox.navigation.instrumentation_tests.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
+import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
+import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.util.Date
@@ -38,8 +36,6 @@ class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         longitude = -77.031991
     }
 
-    @get:Rule
-    val mapboxNavigationRule = MapboxNavigationRule()
     private lateinit var mapboxNavigation: MapboxNavigation
 
     @Before
@@ -51,6 +47,11 @@ class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     .build()
             )
         }
+    }
+
+    @Test
+    fun emptyTest() {
+
     }
 
     @Test
@@ -100,76 +101,144 @@ class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             "0.967296,41.047474;6.44268,51.1955",
         )
         for (coordinates in testCases) {
-            var response: RouteRequestResult
-            var requestTime: Long? = null
-            var responseTime: Long? = null
-            var responseSize: Int? = null
-            HttpServiceFactory.getInstance()
-                .setInterceptor(object : HttpServiceInterceptorInterface {
-                    override fun onRequest(request: HttpRequest): HttpRequest {
-                        if (request.url.contains(coordinates)) {
-                            requestTime = Date().time
-                        }
-                        return request
-                    }
-
-                    override fun onDownload(download: DownloadOptions): DownloadOptions {
-                        return download
-                    }
-
-                    override fun onResponse(response: HttpResponse): HttpResponse {
-                        if (response.request.url.contains(coordinates)) {
-                            responseTime = Date().time
-                            responseSize = response.result.value?.data?.size
-                        }
-                        return response
-                    }
-
-                })
-            val time = measureTime {
-                val routeOptions = RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
-                    .coordinates(coordinates)
-                    .alternatives(true)
-                    .build()
-                response = mapboxNavigation.requestRoutes(routeOptions)
+            val measurementFull = measureResponseTimeRetryable(coordinates) {
+                this
             }
-            if (response is RouteRequestResult.Failure) {
-                val failure = response as RouteRequestResult.Failure
-                Log.e("time-test","error getting route for $coordinates: ${failure.reasons}")
-                continue
+            val measurementNoAnnotation = measureResponseTimeRetryable(coordinates) {
+                this.annotations(null)
             }
-            val successfulResponse = response as RouteRequestResult.Success
             writeResults(
                 testRunId = testRunId,
                 coordinates = coordinates,
-                distance = successfulResponse.routes.first().directionsRoute.distance(),
-                sdkResponseTime = time.inWholeMilliseconds,
-                networkResponseTime = responseTime!! - requestTime!!,
-                responseSize = responseSize!!
+                listOf(
+                    "full" to measurementFull,
+                    "no annotations" to measurementNoAnnotation
+                )
             )
+        }
+    }
+
+    private suspend fun measureResponseTimeRetryable(
+        coordinates: String,
+        requestModifier: RouteOptions.Builder.() -> RouteOptions.Builder
+    ): Measurement.SuccessfulMeasurement {
+        while (true) {
+            val measurement = measureResponseTime(coordinates, requestModifier)
+            if (measurement is Measurement.SuccessfulMeasurement) {
+                return measurement
+            }
+        }
+    }
+
+    private suspend fun measureResponseTime(
+        coordinates: String,
+        requestModifier: RouteOptions.Builder.() -> RouteOptions.Builder
+    ): Measurement {
+        var requestTime: Long? = null
+        var responseTime: Long? = null
+        var responseSize: Int? = null
+        val interceptor = object : HttpServiceInterceptorInterface {
+            override fun onRequest(request: HttpRequest): HttpRequest {
+                if (request.url.contains(coordinates)) {
+                    requestTime = Date().time
+                }
+                return request
+            }
+
+            override fun onDownload(download: DownloadOptions): DownloadOptions {
+                return download
+            }
+
+            override fun onResponse(response: HttpResponse): HttpResponse {
+                if (response.request.url.contains(coordinates)) {
+                    responseTime = Date().time
+                    responseSize = response.result.value?.data?.size
+                }
+                return response
+            }
+
+        }
+        HttpServiceFactory.getInstance().setInterceptor(interceptor)
+        val response: RouteRequestResult
+        val time = measureTime {
+            val routeOptions = RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .coordinates(coordinates)
+                .alternatives(false)
+                .enableRefresh(false)
+                .requestModifier()
+                .build()
+            response = mapboxNavigation.requestRoutes(routeOptions)
+        }
+        return when (response) {
+            is RouteRequestResult.Failure -> {
+                val failure = response as RouteRequestResult.Failure
+                Log.e("time-test", "error getting route for $coordinates: ${failure.reasons}")
+                Measurement.FailedMeasurement
+            }
+            is RouteRequestResult.Success -> {
+                Measurement.SuccessfulMeasurement(
+                    timeFromRequestTillFullResponse = responseTime!! - requestTime!!,
+                    deviceProcessingTime = time.inWholeMilliseconds - (responseTime!! - requestTime!!),
+                    timeFromRequestTillParsedRoute = time.inWholeMilliseconds,
+                    responseSize = responseSize!!,
+                    distance = response.routes.first().directionsRoute.distance()
+                )
+            }
         }
     }
 
     private fun writeResults(
         testRunId: String,
         coordinates: String,
-        distance: Double,
-        sdkResponseTime: Long,
-        networkResponseTime: Long,
-        responseSize: Int
+        measurements: List<Pair<String, Measurement.SuccessfulMeasurement>>,
     ) {
         val file = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
             "route-request-time-test-results-${testRunId}.csv"
         )
-        val header = if (file.createNewFile()) {
-            "coordinates,distance,time from request to parsed response in milliseconds,network request time,device processing time,response size bytes,device\n"
-        } else ""
-        val deviceProcessingTime = sdkResponseTime - networkResponseTime
-        val result =
-            "\"$coordinates\",$distance,$sdkResponseTime,$networkResponseTime,$deviceProcessingTime,${responseSize},${Build.MODEL}\n"
-        file.appendText(header + result)
-        Log.d("time-test", result + "(written to ${file.absolutePath})")
+        val resultBuilder = StringBuilder()
+        if (file.createNewFile()) {
+            resultBuilder.append("coordinates,distance,")
+            for (measurement in measurements) {
+                resultBuilder.append(
+                    "time from request to parsed response in milliseconds ${measurement.first},",
+                    "network request time ${measurement.first},",
+                    "device processing time ${measurement.first},",
+                    "response size bytes ${measurement.first},"
+                )
+            }
+            resultBuilder.append("device\n")
+        }
+        resultBuilder.append(
+            "\"", coordinates, "\","
+        )
+        resultBuilder.append(measurements.first().second.distance, ",")
+        for (measurement in measurements) {
+            resultBuilder.append(
+                measurement.second.timeFromRequestTillParsedRoute,
+                ",",
+                measurement.second.timeFromRequestTillFullResponse,
+                ",",
+                measurement.second.deviceProcessingTime,
+                ",",
+                measurement.second.responseSize,
+                ",",
+            )
+        }
+        resultBuilder.append("${Build.MODEL}\n")
+        file.appendText(resultBuilder.toString())
+        Log.d("time-test", "result for $coordinates" + "(written to ${file.absolutePath})")
     }
+}
+
+sealed class Measurement {
+    object FailedMeasurement : Measurement()
+    data class SuccessfulMeasurement(
+        val timeFromRequestTillFullResponse: Long,
+        val deviceProcessingTime: Long,
+        val responseSize: Int,
+        val distance: Double,
+        val timeFromRequestTillParsedRoute: Long
+    ) : Measurement()
 }
