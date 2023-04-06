@@ -4,7 +4,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import java.net.URI
 
@@ -13,7 +12,7 @@ inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     block: (navigation: MapboxNavigation) -> Unit
 ) {
     val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
-    val navigation = MapboxNavigationProvider.create(
+    val navigation = MapboxNavigation(
         NavigationOptions.Builder(InstrumentationRegistry.getInstrumentation().targetContext)
             .accessToken(
                 getMapboxAccessTokenFromResources(

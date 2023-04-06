@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
@@ -41,9 +42,11 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         val handler = MockDirectionsRequestHandler(
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
             lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
-            expectedCoordinates = routeOptions.coordinatesList(),
-            serverDelayMs = 12_000, // It takes time for Direction API to calculate a long route
-        )
+            expectedCoordinates = routeOptions.coordinatesList()
+        ).apply {
+            // It takes time for Direction API to calculate a long route
+            jsonResponseModifier = DelayedResponseModifier(12_000)
+        }
         mockWebServerRule.requestHandlers.add(handler)
         withMapboxNavigation { navigation ->
             val routes = navigation

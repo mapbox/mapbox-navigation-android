@@ -18,7 +18,6 @@ data class MockDirectionsRequestHandler constructor(
     val lazyJsonResponse: () -> String,
     val expectedCoordinates: List<Point>?,
     val relaxedExpectedCoordinates: Boolean = false,
-    val serverDelayMs: Long = 0,
 ) : BaseMockRequestHandler() {
 
     constructor(
@@ -38,7 +37,6 @@ data class MockDirectionsRequestHandler constructor(
         }
 
         return if (request.path!!.startsWith(prefix)) {
-            Thread.sleep(serverDelayMs)
             MockResponse().setBody(jsonResponseModifier(lazyJsonResponse()))
         } else {
             null
@@ -58,8 +56,7 @@ data class MockDirectionsRequestHandler constructor(
             "profile='$profile', " +
             "expectedCoordinates=$expectedCoordinates, " +
             "relaxedExpectedCoordinates=$relaxedExpectedCoordinates, " +
-            "lazyJsonResponse='$lazyJsonResponse', " +
-            "serverDelayMs='$serverDelayMs'" +
+            "lazyJsonResponse='$lazyJsonResponse'" +
             ")"
     }
 }
