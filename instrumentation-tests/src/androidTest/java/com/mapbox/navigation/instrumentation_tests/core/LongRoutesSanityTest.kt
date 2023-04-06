@@ -14,7 +14,6 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrTh
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
-import org.junit.Ignore
 import org.junit.Test
 
 class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
@@ -27,7 +26,6 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @Ignore("Waiting for NN-654 to be fixed")
     fun requestAndSetLongRouteWithoutOnboardTiles() = sdkTest {
         val routeOptions = RouteOptions.builder()
             .baseUrl(mockWebServerRule.baseUrl) // comment to use real Directions API
