@@ -4,16 +4,11 @@ import androidx.annotation.MainThread
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-
-internal data class RouteProgressData(
-    val legIndex: Int,
-    val routeGeometryIndex: Int,
-    val legGeometryIndex: Int?,
-)
 
 internal data class RoutesProgressData(
     val primary: RouteProgressData,

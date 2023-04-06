@@ -99,6 +99,72 @@ object RoutesProvider {
         )
     }
 
+    fun dc_short_two_legs_with_alternative(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short_two_legs_alternative)
+        val coordinates = listOf(
+            Point.fromLngLat(-77.036082, 38.887578),
+            Point.fromLngLat(-77.033625,38.891164),
+            Point.fromLngLat(-77.03002, 38.895453)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+            emptyList()
+        )
+    }
+
+    fun dc_short_two_legs_with_alternative_for_second_leg(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.route_response_dc_short_with_alternative_for_second_leg)
+        val coordinates = listOf(
+            Point.fromLngLat(-77.031957, 38.894721),
+            Point.fromLngLat(-77.029671, 38.895531),
+            Point.fromLngLat(-77.021913, 38.899821)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+            emptyList()
+        )
+    }
+
+    fun dc_short_alternative_has_more_legs(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.route_response_dc_short_alternative_has_more_legs)
+        val coordinates = listOf(
+            Point.fromLngLat(-77.031957, 38.894721),
+            Point.fromLngLat(-77.029671, 38.895531),
+            Point.fromLngLat(-77.021913, 38.899821)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+            emptyList()
+        )
+    }
+
     fun dc_short_with_alternative_reroute(context: Context): MockRoute {
         val jsonResponse =
             readRawFileText(context, R.raw.route_response_dc_short_with_alternative_reroute)

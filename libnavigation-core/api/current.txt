@@ -209,10 +209,12 @@ package com.mapbox.navigation.core.directions.session {
 
   public final class RoutesUpdatedResult {
     method public java.util.List<com.mapbox.navigation.core.directions.session.IgnoredRoute> getIgnoredRoutes();
+    method public int getInitialLegIndex();
     method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getNavigationRoutes();
     method public String getReason();
     method @Deprecated public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     property public final java.util.List<com.mapbox.navigation.core.directions.session.IgnoredRoute> ignoredRoutes;
+    property public final int initialLegIndex;
     property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes;
     property public final String reason;
     property @Deprecated public final java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> routes;

@@ -17,13 +17,22 @@ internal class RouteLineComponentContractImpl(
     private val store: Store,
     private val mapClickBehavior: ClickBehavior<Point>,
 ) : RouteLineComponentContract {
-    override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
+    override fun setRoutes(
+        mapboxNavigation: MapboxNavigation,
+        routes: List<NavigationRoute>,
+        initialLegIndex: Int?
+    ) {
         when (store.state.value.navigation) {
             is NavigationState.RoutePreview -> {
                 store.dispatch(RoutePreviewAction.Ready(routes))
             }
             is NavigationState.ActiveNavigation -> {
-                store.dispatch(RoutesAction.SetRoutes(routes))
+                val action = if (initialLegIndex == null) {
+                    RoutesAction.SetRoutes(routes)
+                } else {
+                    RoutesAction.SetRoutes(routes, initialLegIndex)
+                }
+                store.dispatch(action)
             }
             else -> {
                 // no op

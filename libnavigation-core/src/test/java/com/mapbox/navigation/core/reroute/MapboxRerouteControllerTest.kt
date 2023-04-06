@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.routerOrigin
@@ -8,8 +9,11 @@ import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.internal.AlternativeDataProvider
+import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.core.routealternatives.AlternativeMetadataProvider
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -25,6 +29,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
@@ -61,6 +66,9 @@ class MapboxRerouteControllerTest {
     @MockK
     private lateinit var rerouteOptions: RerouteOptions
 
+    @MockK(relaxed = true)
+    private lateinit var alternativeMetadataProvider: AlternativeMetadataProvider
+
     private val routeOptionsFromSuccessResult = MapboxJavaObjectsFactory.routeOptions(
         coordinates = listOf(Point.fromLngLat(53.0, 27.0), Point.fromLngLat(76.5, 34.8))
     )
@@ -72,10 +80,7 @@ class MapboxRerouteControllerTest {
     private lateinit var errorFromResult: RouteOptionsUpdater.RouteOptionsResult.Error
 
     @MockK
-    private lateinit var routeCallback: RerouteController.RoutesCallback
-
-    @MockK
-    private lateinit var navigationRouteCallback: NavigationRerouteController.RoutesCallback
+    private lateinit var routeCallback: NavigationRerouteControllerV2.RoutesCallback
 
     @MockK
     lateinit var primaryRerouteObserver: RerouteController.RerouteStateObserver
@@ -108,7 +113,8 @@ class MapboxRerouteControllerTest {
                 routeOptionsUpdater,
                 rerouteOptions,
                 threadController,
-                compositeRerouteOptionsAdapter
+                alternativeMetadataProvider,
+                compositeRerouteOptionsAdapter,
             )
         )
     }
@@ -121,7 +127,9 @@ class MapboxRerouteControllerTest {
     @Test
     fun initial_state() {
         assertEquals(RerouteState.Idle, rerouteController.state)
-        verify(exactly = 0) { rerouteController.reroute(any<RerouteController.RoutesCallback>()) }
+        verify(exactly = 0) {
+            rerouteController.reroute(any<NavigationRerouteControllerV2.RoutesCallback>())
+        }
         verify(exactly = 0) { rerouteController.interrupt() }
     }
 
@@ -181,8 +189,7 @@ class MapboxRerouteControllerTest {
         rerouteController.reroute(routeCallback)
         routeRequestCallback.captured.onRoutesReady(routes, origin)
 
-        val expectedRoutes = routes.toDirectionsRoutes()
-        verify(exactly = 1) { routeCallback.onNewRoutes(expectedRoutes) }
+        verify(exactly = 1) { routeCallback.onNewRoutes(RerouteResult(routes, 0, origin)) }
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
         }
@@ -205,48 +212,211 @@ class MapboxRerouteControllerTest {
         mockkStatic(
             NavigationRoute::routerOrigin,
         ) {
-            val routeId1 = "id_1"
-            val routeId2 = "id_2"
-            val mockRoutes = listOf<NavigationRoute>(
-                mockk {
-                    every { id } returns routeId1
-                    every {
-                        routerOrigin
-                    } throws IllegalStateException(
-                        "route 1 origin mustn't be invoked: it removes from list and is not mapped"
-                    )
-                },
-                mockk {
-                    every { id } returns routeId2
-                    every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
-                },
-            )
-            val expectedRoutes = mockRoutes.drop(1)
-            every { directionsSession.routes } returns mockRoutes
-            every { tripSession.getRouteProgress()?.routeAlternativeId } returns routeId2
-            val slotNewRoutes = slot<List<NavigationRoute>>()
-            val slotOrigin = slot<RouterOrigin>()
-            every {
-                navigationRouteCallback.onNewRoutes(capture(slotNewRoutes), capture(slotOrigin))
-            } just runs
-            addRerouteStateObserver()
-
-            rerouteController.reroute(navigationRouteCallback)
-
-            verify(exactly = 1) {
-                navigationRouteCallback.onNewRoutes(any(), any())
-            }
-            assertEquals(expectedRoutes, slotNewRoutes.captured)
-            assertEquals(RouterOrigin.Offboard, slotOrigin.captured)
-
-            verifyOrder {
-                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
-                primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
-                primaryRerouteObserver.onRerouteStateChanged(
-                    RerouteState.RouteFetched(RouterOrigin.Offboard)
+            mockkObject(AlternativeDataProvider) {
+                val initialLegIndex = 1
+                val routeId1 = "id_1"
+                val routeId2 = "id_2"
+                val mockRoutes = listOf<NavigationRoute>(
+                    mockk {
+                        every { id } returns routeId1
+                        every {
+                            routerOrigin
+                        } throws IllegalStateException(
+                            "route 1 origin mustn't be invoked: " +
+                                "it removes from list and is not mapped"
+                        )
+                    },
+                    mockk {
+                        every { id } returns routeId2
+                        every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                    },
                 )
-                navigationRouteCallback.onNewRoutes(expectedRoutes, RouterOrigin.Offboard)
-                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                val expectedRoutes = mockRoutes.drop(1)
+                every { directionsSession.routes } returns mockRoutes
+                every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+                    every { routeAlternativeId } returns routeId2
+                    every { currentRouteGeometryIndex } returns 40
+                    every { currentLegProgress } returns mockk(relaxed = true) {
+                        every { legIndex } returns 2
+                        every { geometryIndex } returns 10
+                    }
+                }
+                val alternativeMetadata = mockk<AlternativeRouteMetadata>(relaxed = true)
+                every {
+                    alternativeMetadataProvider.getMetadataFor(mockRoutes[1])
+                } returns alternativeMetadata
+                every {
+                    AlternativeDataProvider.getAlternativeLegIndex(
+                        RouteProgressData(2, 40, 10),
+                        alternativeMetadata
+                    )
+                } returns initialLegIndex
+                val slotRerouteResult = slot<RerouteResult>()
+                every {
+                    routeCallback.onNewRoutes(capture(slotRerouteResult))
+                } just runs
+                addRerouteStateObserver()
+
+                rerouteController.reroute(routeCallback)
+
+                verify(exactly = 1) {
+                    routeCallback.onNewRoutes(any())
+                }
+                assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
+                assertEquals(initialLegIndex, slotRerouteResult.captured.initialLegIndex)
+                assertEquals(RouterOrigin.Offboard, slotRerouteResult.captured.origin)
+
+                verifyOrder {
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                    primaryRerouteObserver.onRerouteStateChanged(
+                        RerouteState.RouteFetched(RouterOrigin.Offboard)
+                    )
+                    routeCallback.onNewRoutes(
+                        RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.Offboard)
+                    )
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun reroute_success_from_alternative_no_leg_progress() {
+        mockkStatic(
+            NavigationRoute::routerOrigin,
+        ) {
+            mockkObject(AlternativeDataProvider) {
+                val routeId1 = "id_1"
+                val routeId2 = "id_2"
+                val mockRoutes = listOf<NavigationRoute>(
+                    mockk {
+                        every { id } returns routeId1
+                        every {
+                            routerOrigin
+                        } throws IllegalStateException(
+                            "route 1 origin mustn't be invoked: " +
+                                "it removes from list and is not mapped"
+                        )
+                    },
+                    mockk {
+                        every { id } returns routeId2
+                        every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                    },
+                )
+                val expectedRoutes = mockRoutes.drop(1)
+                every { directionsSession.routes } returns mockRoutes
+                every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+                    every { routeAlternativeId } returns routeId2
+                    every { currentRouteGeometryIndex } returns 40
+                    every { currentLegProgress } returns null
+                }
+                val alternativeMetadata = mockk<AlternativeRouteMetadata>(relaxed = true)
+                every {
+                    alternativeMetadataProvider.getMetadataFor(mockRoutes[1])
+                } returns alternativeMetadata
+                every {
+                    AlternativeDataProvider.getAlternativeLegIndex(
+                        RouteProgressData(2, 40, 10),
+                        alternativeMetadata
+                    )
+                } returns 1
+                val slotRerouteResult = slot<RerouteResult>()
+                every {
+                    routeCallback.onNewRoutes(capture(slotRerouteResult))
+                } just runs
+                addRerouteStateObserver()
+
+                rerouteController.reroute(routeCallback)
+
+                verify(exactly = 1) {
+                    routeCallback.onNewRoutes(any())
+                }
+                assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
+                assertEquals(0, slotRerouteResult.captured.initialLegIndex)
+                assertEquals(RouterOrigin.Offboard, slotRerouteResult.captured.origin)
+
+                verifyOrder {
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                    primaryRerouteObserver.onRerouteStateChanged(
+                        RerouteState.RouteFetched(RouterOrigin.Offboard)
+                    )
+                    routeCallback.onNewRoutes(
+                        RerouteResult(expectedRoutes, 0, RouterOrigin.Offboard)
+                    )
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun reroute_success_from_alternative_no_alternative_metadata() {
+        mockkStatic(
+            NavigationRoute::routerOrigin,
+        ) {
+            mockkObject(AlternativeDataProvider) {
+                val routeId1 = "id_1"
+                val routeId2 = "id_2"
+                val mockRoutes = listOf<NavigationRoute>(
+                    mockk {
+                        every { id } returns routeId1
+                        every {
+                            routerOrigin
+                        } throws IllegalStateException(
+                            "route 1 origin mustn't be invoked: " +
+                                "it removes from list and is not mapped"
+                        )
+                    },
+                    mockk {
+                        every { id } returns routeId2
+                        every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                    },
+                )
+                val expectedRoutes = mockRoutes.drop(1)
+                every { directionsSession.routes } returns mockRoutes
+                every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+                    every { routeAlternativeId } returns routeId2
+                    every { currentRouteGeometryIndex } returns 40
+                    every { currentLegProgress } returns mockk(relaxed = true) {
+                        every { legIndex } returns 2
+                        every { geometryIndex } returns 10
+                    }
+                }
+                every { alternativeMetadataProvider.getMetadataFor(mockRoutes[1]) } returns null
+                every {
+                    AlternativeDataProvider.getAlternativeLegIndex(
+                        RouteProgressData(2, 40, 10),
+                        any()
+                    )
+                } returns 1
+                val slotRerouteResult = slot<RerouteResult>()
+                every {
+                    routeCallback.onNewRoutes(capture(slotRerouteResult))
+                } just runs
+                addRerouteStateObserver()
+
+                rerouteController.reroute(routeCallback)
+
+                verify(exactly = 1) {
+                    routeCallback.onNewRoutes(any())
+                }
+                assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
+                assertEquals(0, slotRerouteResult.captured.initialLegIndex)
+                assertEquals(RouterOrigin.Offboard, slotRerouteResult.captured.origin)
+
+                verifyOrder {
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                    primaryRerouteObserver.onRerouteStateChanged(
+                        RerouteState.RouteFetched(RouterOrigin.Offboard)
+                    )
+                    routeCallback.onNewRoutes(
+                        RerouteResult(expectedRoutes, 0, RouterOrigin.Offboard)
+                    )
+                    primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                }
             }
         }
     }
@@ -701,6 +871,52 @@ class MapboxRerouteControllerTest {
 
         verify(exactly = 1) {
             compositeRerouteOptionsAdapter.externalOptionsAdapter = null
+        }
+    }
+
+    @Test
+    fun reroute_with_legacy_callback() = coroutineRule.runBlockingTest {
+        val legacyCallback = mockk<RerouteController.RoutesCallback>(relaxed = true)
+        mockRouteOptionsResult(successFromResult)
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        rerouteController.reroute(legacyCallback)
+        val expectedRoute = mockk<DirectionsRoute>(relaxed = true)
+        val navigationRoute = mockk<NavigationRoute>(relaxed = true) {
+            every { directionsRoute } returns expectedRoute
+        }
+        routeRequestCallback.captured.onRoutesReady(listOf(navigationRoute), mockk())
+
+        verify(exactly = 1) {
+            legacyCallback.onNewRoutes(listOf(expectedRoute))
+        }
+    }
+
+    @Test
+    fun reroute_with_navigation_router_callback() = coroutineRule.runBlockingTest {
+        val legacyCallback = mockk<NavigationRerouteController.RoutesCallback>(relaxed = true)
+        mockRouteOptionsResult(successFromResult)
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        rerouteController.reroute(legacyCallback)
+        val navigationRoute = mockk<NavigationRoute>(relaxed = true)
+        val origin = RouterOrigin.Offboard
+        routeRequestCallback.captured.onRoutesReady(listOf(navigationRoute), origin)
+
+        verify(exactly = 1) {
+            legacyCallback.onNewRoutes(listOf(navigationRoute), origin)
         }
     }
 

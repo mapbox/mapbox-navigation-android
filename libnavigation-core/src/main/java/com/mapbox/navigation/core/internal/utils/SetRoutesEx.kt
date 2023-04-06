@@ -11,7 +11,7 @@ internal fun SetRoutes.mapToReason(): String =
         SetRoutes.CleanUp -> RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         is SetRoutes.NewRoutes -> RoutesExtra.ROUTES_UPDATE_REASON_NEW
         is SetRoutes.RefreshRoutes -> RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
-        SetRoutes.Reroute -> RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+        is SetRoutes.Reroute -> RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
     }
 
 internal fun SetRoutes.initialLegIndex(): Int =
@@ -20,5 +20,5 @@ internal fun SetRoutes.initialLegIndex(): Int =
         SetRoutes.CleanUp -> MapboxDirectionsSession.DEFAULT_INITIAL_LEG_INDEX
         is SetRoutes.NewRoutes -> legIndex
         is SetRoutes.RefreshRoutes -> routeProgressData.legIndex
-        SetRoutes.Reroute -> MapboxDirectionsSession.DEFAULT_INITIAL_LEG_INDEX
+        is SetRoutes.Reroute -> legIndex
     }

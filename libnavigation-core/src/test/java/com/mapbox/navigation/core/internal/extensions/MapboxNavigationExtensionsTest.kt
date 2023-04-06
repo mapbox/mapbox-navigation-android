@@ -76,7 +76,8 @@ class MapboxNavigationExtensionsTest {
         val mockRoute2 = mockk<NavigationRoute>(relaxed = true)
         var actual = createRoutesUpdatedResult(
             listOf(mockRoute1),
-            RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            RoutesExtra.ROUTES_UPDATE_REASON_NEW,
+            1
         )
 
         val flow = navigation.flowRoutesUpdated().onEach { actual = it }
@@ -84,7 +85,8 @@ class MapboxNavigationExtensionsTest {
         advanceUntilIdle()
         val expected = createRoutesUpdatedResult(
             listOf(mockRoute2),
-            RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+            RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE,
+            2
         )
         callbackSlot.captured.onRoutesChanged(expected)
         advanceUntilIdle()
@@ -283,5 +285,13 @@ class MapboxNavigationExtensionsTest {
         advanceUntilIdle()
 
         verify { navigation.unregisterRouteAlternativesObserver(callbackSlot.captured) }
+    }
+
+    @Test
+    fun initialLegIndex() {
+        val navigation = mockk<MapboxNavigation>()
+        every { navigation.initialLegIndexInternal() } returns 3
+
+        assertEquals(3, navigation.initialLegIndex())
     }
 }

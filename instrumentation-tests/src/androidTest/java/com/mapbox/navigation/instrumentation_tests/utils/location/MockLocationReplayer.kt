@@ -55,6 +55,15 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
         mapboxReplayer?.play()
     }
 
+    suspend fun loopUpdateUntil(location: Location, stopper: suspend () -> Unit) {
+        loopUpdate(location, 120)
+        stopper()
+        mapboxReplayer?.run {
+            stop()
+            clearEvents()
+        }
+    }
+
     fun loopUpdate(location: Location, times: Int) {
         val events: List<ReplayEventUpdateLocation> =
             mutableListOf<ReplayEventUpdateLocation>().apply {

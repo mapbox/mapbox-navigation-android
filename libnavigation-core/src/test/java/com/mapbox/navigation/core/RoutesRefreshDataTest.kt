@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.internal.RouteProgressData
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test

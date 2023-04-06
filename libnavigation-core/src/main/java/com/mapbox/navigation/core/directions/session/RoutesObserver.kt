@@ -30,10 +30,15 @@ fun interface RoutesObserver {
  * @param navigationRoutes list of currently maintained routes
  * @param ignoredRoutes list of alternative routes that were ignored
  *  because they are invalid for navigation. See [IgnoredRoute] for details.
+ * @param initialLegIndex the initial leg index of the primary route passed as `initialLegIndex`
+ *  parameter into `MapboxNavigation#setNavigationRoutes`.
+ *  NOTE: f the reason is [RoutesExtra.ROUTES_UPDATE_REASON_REFRESH], `initialLegIndex`
+ *  will represent the active leg index when the refresh occurred.
  * @param reason why the routes have been updated (re-route, refresh route, and etc.)
  */
 class RoutesUpdatedResult internal constructor(
     val navigationRoutes: List<NavigationRoute>,
+    val initialLegIndex: Int,
     val ignoredRoutes: List<IgnoredRoute>,
     @RoutesExtra.RoutesUpdateReason val reason: String,
 ) {
@@ -61,6 +66,7 @@ class RoutesUpdatedResult internal constructor(
         other as RoutesUpdatedResult
 
         if (navigationRoutes != other.navigationRoutes) return false
+        if (initialLegIndex != other.initialLegIndex) return false
         if (reason != other.reason) return false
 
         return true
@@ -71,15 +77,18 @@ class RoutesUpdatedResult internal constructor(
      */
     override fun hashCode(): Int {
         var result = navigationRoutes.hashCode()
+        result = 31 * result + initialLegIndex.hashCode()
         result = 31 * result + reason.hashCode()
         return result
     }
 
-    /**
-     * Returns a string representation of the object.
-     */
     override fun toString(): String {
-        return "RoutesUpdatedResult(navigationRoutes=$navigationRoutes, reason='$reason')"
+        return "RoutesUpdatedResult(" +
+            "reason='$reason', " +
+            "navigationRoutes=$navigationRoutes, " +
+            "initialLegIndex=$initialLegIndex, " +
+            "ignoredRoutes=$ignoredRoutes" +
+            ")"
     }
 }
 

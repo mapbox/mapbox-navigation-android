@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core
 
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 
@@ -24,7 +25,9 @@ internal sealed class SetRoutes {
      *
      * Currently this can only be trigger internally by a response to [NavigationRerouteController.RoutesCallback].
      */
-    internal object Reroute : SetRoutes()
+    internal data class Reroute(
+        val legIndex: Int,
+    ) : SetRoutes()
 
     /**
      * Triggered when the **alternative routes change** via the call to [MapboxNavigation.setNavigationRoutes]

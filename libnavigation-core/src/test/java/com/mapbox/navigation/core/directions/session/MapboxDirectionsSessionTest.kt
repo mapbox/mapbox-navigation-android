@@ -163,7 +163,7 @@ class MapboxDirectionsSessionTest {
         val cases = listOf(
             SetRoutes.NewRoutes(2) to 2,
             SetRoutes.CleanUp to 0,
-            SetRoutes.Reroute to 0,
+            SetRoutes.Reroute(5) to 5,
             SetRoutes.Alternatives(3) to 3,
             SetRoutes.RefreshRoutes(
                 mockk {

@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.internal.utils.initialLegIndex
 import com.mapbox.navigation.core.internal.utils.mapToReason
 
 internal interface DirectionsSession : RouteRefresh {
@@ -72,6 +73,7 @@ internal data class DirectionsSessionRoutes(
 
     fun toRoutesUpdatedResult(): RoutesUpdatedResult = RoutesUpdatedResult(
         acceptedRoutes,
+        setRoutesInfo.initialLegIndex(),
         ignoredRoutes,
         setRoutesInfo.mapToReason()
     )
