@@ -1,0 +1,3 @@
+- Fixed an issue where `NavigationRouterCallback` might have been invoked twice.
+- Fixed an issue where long route calculation might have failed.
+- Added a custom config boolean option `disableAccessToRoutingTiles` to disable all route tiles interaction.
