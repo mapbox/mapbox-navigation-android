@@ -117,10 +117,10 @@ workflows:
             - unit-tests-ui
             - unit-tests-core
   weekly-snapshot-workflow:
-    # Run workflow every Wednesday at 12pm UTC
+    # Run workflow every Friday at 23:59 UTC
     triggers:
       - schedule:
-          cron: "0 12 * * 3"
+          cron: "59 23 * * 5"
           filters:
             branches:
               only:
