@@ -20,7 +20,10 @@ import org.junit.Test
 class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     override fun setupMockLocation(): Location {
-        return mockLocationUpdatesRule.generateLocationUpdate { }
+        return mockLocationUpdatesRule.generateLocationUpdate {
+            longitude = 4.898473756907066
+            latitude = 52.37373595766587
+        }
     }
 
     @Test
@@ -30,7 +33,8 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             .baseUrl(mockWebServerRule.baseUrl) // comment to use real Directions API
             .applyDefaultNavigationOptions()
             .coordinates(
-                "4.898473756907066,52.37373595766587;5.359980783143584,43.280050656855906" +
+                "4.898473756907066,52.37373595766587" +
+                    ";5.359980783143584,43.280050656855906" +
                     ";11.571179644010442,48.145540095763664" +
                     ";13.394784408007155,52.51274942160785" +
                     ";-9.143239539655042,38.70880224984026" +
