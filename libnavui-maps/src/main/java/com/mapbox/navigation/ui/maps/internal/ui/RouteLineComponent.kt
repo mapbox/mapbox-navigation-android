@@ -10,9 +10,13 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.AlternativeDataProvider
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
+import com.mapbox.navigation.core.internal.extensions.initialLegIndex
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -26,11 +30,16 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 interface RouteLineComponentContract {
-    fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>)
+    fun setRoutes(
+        mapboxNavigation: MapboxNavigation,
+        routes: List<NavigationRoute>,
+        initialLegIndex: Int?
+    )
 
     fun getRouteInPreview(): Flow<List<NavigationRoute>?>
 
@@ -38,8 +47,16 @@ interface RouteLineComponentContract {
 }
 
 internal class MapboxRouteLineComponentContract : RouteLineComponentContract {
-    override fun setRoutes(mapboxNavigation: MapboxNavigation, routes: List<NavigationRoute>) {
-        mapboxNavigation.setNavigationRoutes(routes)
+    override fun setRoutes(
+        mapboxNavigation: MapboxNavigation,
+        routes: List<NavigationRoute>,
+        initialLegIndex: Int?
+    ) {
+        if (initialLegIndex != null) {
+            mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
+        } else {
+            mapboxNavigation.setNavigationRoutes(routes)
+        }
     }
 
     override fun getRouteInPreview(): Flow<List<NavigationRoute>?> {
@@ -60,6 +77,7 @@ class RouteLineComponent(
     contractProvider: Provider<RouteLineComponentContract>? = null
 ) : UIComponent() {
 
+    private var currentRouteProgressData: RouteProgressData? = null
     private val contractProvider: Provider<RouteLineComponentContract>
 
     init {
@@ -98,6 +116,15 @@ class RouteLineComponent(
 
         coroutineScope.launch {
             mapboxNavigation.flowRouteProgress().collect { routeProgress ->
+                if (routeProgress.currentState == RouteProgressState.TRACKING) {
+                    currentRouteProgressData = routeProgress.currentLegProgress?.let {
+                        RouteProgressData(
+                            it.legIndex,
+                            routeProgress.currentRouteGeometryIndex,
+                            it.geometryIndex
+                        )
+                    }
+                }
                 ifNonNull(mapboxMap.getStyle()) { style ->
                     routeLineApi.updateWithRouteProgress(routeProgress) { result ->
                         routeLineView.renderRouteLineUpdate(style, result).also {
@@ -112,24 +139,27 @@ class RouteLineComponent(
 
         coroutineScope.launch {
             val routesFlow = mapboxNavigation.flowRoutesUpdated()
-                .map { it.navigationRoutes }
+                .onEach { currentRouteProgressData = null }
+                .map { it.navigationRoutes to it.initialLegIndex }
                 .stateIn(
                     this,
                     SharingStarted.WhileSubscribed(),
-                    mapboxNavigation.getNavigationRoutes()
+                    mapboxNavigation.getNavigationRoutes() to mapboxNavigation.initialLegIndex()
                 )
-            val routePreviewFlow = contractProvider.get().getRouteInPreview()
-            combine(routesFlow, routePreviewFlow) { navigationRoutes, previewRoutes ->
-                if (navigationRoutes.isNotEmpty()) {
-                    navigationRoutes
-                } else if (!previewRoutes.isNullOrEmpty()) {
-                    previewRoutes
+            val routePreviewFlow = contractProvider.get().getRouteInPreview().map { it to 0 }
+            combine(routesFlow, routePreviewFlow) { navigationRoutesPair, previewRoutesPair ->
+                if (navigationRoutesPair.first.isNotEmpty()) {
+                    navigationRoutesPair
+                } else if (!previewRoutesPair.first.isNullOrEmpty()) {
+                    previewRoutesPair
                 } else {
-                    emptyList()
+                    emptyList<NavigationRoute>() to 0
                 }
-            }.collect { routes ->
+            }.collect { routesToLegIndex ->
+                val routes = routesToLegIndex.first!!
                 routeLineApi.setNavigationRoutes(
                     routes,
+                    routesToLegIndex.second,
                     mapboxNavigation.getAlternativeMetadataFor(routes)
                 ) { value ->
                     mapboxMap.getStyle()?.apply {
@@ -145,6 +175,7 @@ class RouteLineComponent(
         mapPlugins.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         routeLineApi.cancel()
         routeLineView.cancel()
+        currentRouteProgressData = null
         this.mapboxNavigation = null
     }
 
@@ -155,10 +186,24 @@ class RouteLineComponent(
                 { result ->
                     if (result.navigationRoute != routeLineApi.getPrimaryNavigationRoute()) {
                         val reOrderedRoutes = arrayListOf(result.navigationRoute)
+                        val legIndex = mapboxNavigation.getAlternativeMetadataFor(
+                            result.navigationRoute
+                        )?.let {
+                            ifNonNull(currentRouteProgressData) { routeProgressData ->
+                                AlternativeDataProvider.getAlternativeLegIndex(
+                                    routeProgressData,
+                                    it
+                                )
+                            }
+                        }
                         routeLineApi.getNavigationRoutes().filterTo(reOrderedRoutes) { route ->
                             route != result.navigationRoute
                         }
-                        contractProvider.get().setRoutes(mapboxNavigation, reOrderedRoutes)
+                        contractProvider.get().setRoutes(
+                            mapboxNavigation,
+                            reOrderedRoutes,
+                            legIndex
+                        )
                     } else {
                         contractProvider.get().onMapClicked(point)
                     }

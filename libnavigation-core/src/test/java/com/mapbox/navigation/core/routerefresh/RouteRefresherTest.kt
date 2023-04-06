@@ -3,11 +3,11 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
-import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.core.RoutesRefreshData
 import com.mapbox.navigation.core.RoutesRefreshDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute

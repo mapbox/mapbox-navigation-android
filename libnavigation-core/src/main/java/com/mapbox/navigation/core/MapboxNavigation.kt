@@ -76,6 +76,7 @@ import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
+import com.mapbox.navigation.core.reroute.RerouteResult
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
@@ -582,7 +583,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeOptionsProvider,
             navigationOptions.rerouteOptions,
             threadController,
-            evDynamicDataHolder
+            evDynamicDataHolder,
+            routeAlternativesController
         )
         rerouteController = defaultRerouteController
 
@@ -1038,6 +1040,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         CacheHandleWrapper.requestRoadGraphDataUpdate(navigator.cache, callback)
     }
 
+    internal fun initialLegIndexInternal(): Int = directionsSession.initialLegIndex
+
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
         setRoutesInfo: SetRoutes,
@@ -1049,7 +1053,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         when (setRoutesInfo) {
             SetRoutes.CleanUp,
             is SetRoutes.NewRoutes,
-            SetRoutes.Reroute -> {
+            is SetRoutes.Reroute -> {
                 rerouteController?.interrupt()
             }
             is SetRoutes.RefreshRoutes,
@@ -2019,10 +2023,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun reroute() {
-        rerouteController?.reroute { routes, _ ->
+        rerouteController?.reroute { result: RerouteResult ->
             internalSetNavigationRoutes(
-                routes,
-                SetRoutes.Reroute
+                result.routes,
+                SetRoutes.Reroute(result.initialLegIndex)
             )
         }
     }

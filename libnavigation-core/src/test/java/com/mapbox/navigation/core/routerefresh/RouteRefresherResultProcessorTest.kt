@@ -2,8 +2,8 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.core.RoutesRefreshData
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.clearAllMocks
 import io.mockk.every

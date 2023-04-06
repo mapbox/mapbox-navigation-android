@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
@@ -16,7 +16,7 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class RoutesProgressDataProviderTest {
 
     @get:Rule

@@ -15,8 +15,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
-import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
@@ -575,7 +575,7 @@ class MapboxTripSessionTest {
 
         tripSession.setRoutes(
             routes,
-            SetRoutes.Reroute
+            SetRoutes.Reroute(1)
         )
 
         parentJob.cancelAndJoin()
@@ -823,11 +823,11 @@ class MapboxTripSessionTest {
             }
             val nativeAlternatives = listOf(mockk<RouteAlternative>())
             coEvery {
-                navigator.setRoutes(any(), any(), eq(listOf(alternative)), any())
+                navigator.setRoutes(any(), 1, eq(listOf(alternative)), any())
             } returns createSetRouteResult(nativeAlternatives = nativeAlternatives)
             val result = tripSession.setRoutes(
                 routes + alternative,
-                SetRoutes.Reroute
+                SetRoutes.Reroute(1)
             )
 
             assertEquals(nativeAlternatives, (result as NativeSetRouteValue).nativeAlternatives)
