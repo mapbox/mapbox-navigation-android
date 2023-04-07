@@ -1,0 +1,1 @@
+- Added `RouteProgress#nextLegWaypoint` to be used in `ArrivalObserver#onWaypointArrival` to understand which waypoint the user has arrived at.

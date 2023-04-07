@@ -14,6 +14,8 @@ interface ArrivalObserver {
     /**
      * Triggered when the [RouteProgress.currentState] is equal to [RouteProgressState.COMPLETE],
      * once per route leg, and when there are more route legs to navigate. If we're on the last leg of the route [onFinalDestinationArrival] is called instead.
+     * If you want to provide different experiences for arriving at different types of waypoints
+     * (e. g. regular or EV), you can look up the waypoint type via [RouteLegProgress.legDestination].
      */
     fun onWaypointArrival(routeProgress: RouteProgress)
 

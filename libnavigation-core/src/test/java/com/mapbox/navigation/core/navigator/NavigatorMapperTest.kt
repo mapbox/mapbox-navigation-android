@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
 import com.mapbox.navigation.base.road.model.Road
+import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -56,6 +57,7 @@ class NavigatorMapperTest {
     fun `route progress result sanity`() {
         val bannerInstructions = navigationStatus.getCurrentBannerInstructions(route)
         val upcomingRoadObjects = listOf<UpcomingRoadObject>(mockk())
+        val legDestination = mockk<LegWaypoint>()
         val expected = RouteProgressFactory.buildRouteProgressObject(
             route = route,
             bannerInstructions = bannerInstructions,
@@ -83,7 +85,8 @@ class NavigatorMapperTest {
                     fractionTraveled = 50f,
                     durationRemaining = 3.0
                 ),
-                geometryIndex = legGeometryIndex
+                geometryIndex = legGeometryIndex,
+                legDestination = legDestination
             ),
             distanceRemaining = 80f,
             durationRemaining = 1.0,
@@ -98,7 +101,7 @@ class NavigatorMapperTest {
             remainingWaypoints = 1,
             upcomingRoadObjects = upcomingRoadObjects,
             alternativeRouteId = "alternative_id",
-            currentRouteGeometryIndex = routeGeometryIndex
+            currentRouteGeometryIndex = routeGeometryIndex,
         )
 
         val result = getRouteProgressFrom(
@@ -109,6 +112,7 @@ class NavigatorMapperTest {
             instructionIndex = 1,
             lastVoiceInstruction = null,
             upcomingRoadObjects,
+            legDestination
         )
 
         assertEquals(expected, result)
@@ -434,25 +438,6 @@ class NavigatorMapperTest {
     }
 
     @Test
-    fun `route progress is null when route is null`() {
-        val navigationStatus: NavigationStatus = mockk {
-            every { routeState } returns RouteState.TRACKING
-        }
-
-        val routeProgress = getRouteProgressFrom(
-            null,
-            navigationStatus,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            0,
-            mockk(relaxed = true),
-            emptyList(),
-        )
-
-        assertNull(routeProgress)
-    }
-
-    @Test
     fun `route progress is null when status is invalid`() {
         every { navigationStatus.routeState } returns RouteState.INVALID
 
@@ -464,6 +449,7 @@ class NavigatorMapperTest {
             0,
             mockk(relaxed = true),
             emptyList(),
+            mockk(),
         )
 
         assertNull(routeProgress)
@@ -479,6 +465,7 @@ class NavigatorMapperTest {
             0,
             mockk(relaxed = true),
             emptyList(),
+            mockk(),
         )
 
         assertNotNull(routeProgress)
@@ -495,6 +482,7 @@ class NavigatorMapperTest {
             0,
             lastVoiceInstruction = mockk(relaxed = true),
             emptyList(),
+            mockk(),
         )
 
         assertTrue(routeProgress!!.stale)
@@ -511,6 +499,7 @@ class NavigatorMapperTest {
             0,
             lastVoiceInstruction = mockk(relaxed = true),
             emptyList(),
+            mockk(),
         )
 
         assertFalse(routeProgress!!.stale)
@@ -534,6 +523,7 @@ class NavigatorMapperTest {
             0,
             mockk(relaxed = true),
             emptyList(),
+            mockk(),
         )
         val upcomingRouteAlerts = routeProgress!!.upcomingRoadObjects
 

@@ -1,6 +1,13 @@
+@file:JvmName("TripStatusEx")
+
 package com.mapbox.navigation.navigator.internal.utils
 
+import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
+import com.mapbox.navigation.base.internal.route.LegWaypointFactory
+import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
+import com.mapbox.navigation.base.route.LegWaypoint
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.navigator.internal.TripStatus
 import kotlin.math.max
 
@@ -17,6 +24,29 @@ fun TripStatus.calculateRemainingWaypoints(): Int {
     } else {
         0
     }
+}
+
+fun TripStatus.getCurrentLegDestination(route: NavigationRoute): LegWaypoint? {
+    val nextWaypointIndex = normalizeNextWaypointIndex(
+        this.navigationStatus.nextWaypointIndex
+    )
+    val waypoint = route.internalWaypoints().drop(nextWaypointIndex).firstOrNull {
+        it.isLegWaypoint()
+    }
+    if (waypoint == null) {
+        return null
+    }
+    val legWaypointType = when (waypoint.type) {
+        Waypoint.REGULAR -> LegWaypoint.REGULAR
+        Waypoint.EV_CHARGING -> LegWaypoint.EV_CHARGING_ADDED
+        else -> throw IllegalArgumentException("$waypoint is not a leg waypoint")
+    }
+    return LegWaypointFactory.createLegWaypoint(
+        waypoint.location,
+        waypoint.name,
+        waypoint.target,
+        legWaypointType
+    )
 }
 
 /**

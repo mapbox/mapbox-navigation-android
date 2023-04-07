@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.internal.factory
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 
@@ -30,6 +31,7 @@ object RouteLegProgressFactory {
      * on the last leg, this will return null since a next step doesn't exist
      * @param geometryIndex Leg-wise index representing the geometry point that starts the segment
      * the user is currently on, effectively this represents the index of last visited geometry point in the leg.
+     * @param legDestination the waypoint that marks the end of the current leg.
      */
     fun buildRouteLegProgressObject(
         legIndex: Int,
@@ -41,6 +43,7 @@ object RouteLegProgressFactory {
         currentStepProgress: RouteStepProgress?,
         upcomingStep: LegStep?,
         geometryIndex: Int,
+        legDestination: LegWaypoint?,
     ): RouteLegProgress {
         return RouteLegProgress(
             legIndex = legIndex,
@@ -51,7 +54,8 @@ object RouteLegProgressFactory {
             fractionTraveled = fractionTraveled,
             currentStepProgress = currentStepProgress,
             upcomingStep = upcomingStep,
-            geometryIndex = geometryIndex
+            geometryIndex = geometryIndex,
+            legDestination = legDestination,
         )
     }
 }

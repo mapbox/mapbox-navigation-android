@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.trip.model
 
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.route.LegWaypoint
 
 /**
  * This is a progress object specific to the current leg the user is on. If there is only one leg
@@ -26,6 +27,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  * on the last leg, this will return null since a next step doesn't exist
  * @param geometryIndex Leg-wise index representing the geometry point that starts the segment
  * the user is currently on, effectively this represents the index of last visited geometry point in the leg.
+ * @param legDestination the waypoint that marks the end of the current leg.
  */
 class RouteLegProgress internal constructor(
     val legIndex: Int,
@@ -37,6 +39,7 @@ class RouteLegProgress internal constructor(
     val currentStepProgress: RouteStepProgress?,
     val upcomingStep: LegStep?,
     val geometryIndex: Int,
+    val legDestination: LegWaypoint?,
 ) {
 
     /**
@@ -57,6 +60,7 @@ class RouteLegProgress internal constructor(
         if (currentStepProgress != other.currentStepProgress) return false
         if (upcomingStep != other.upcomingStep) return false
         if (geometryIndex != other.geometryIndex) return false
+        if (legDestination != other.legDestination) return false
 
         return true
     }
@@ -74,6 +78,7 @@ class RouteLegProgress internal constructor(
         result = 31 * result + currentStepProgress.hashCode()
         result = 31 * result + upcomingStep.hashCode()
         result = 31 * result + geometryIndex.hashCode()
+        result = 31 * result + legDestination.hashCode()
         return result
     }
 
@@ -90,7 +95,8 @@ class RouteLegProgress internal constructor(
             "fractionTraveled=$fractionTraveled, " +
             "currentStepProgress=$currentStepProgress, " +
             "upcomingStep=$upcomingStep, " +
-            "geometryIndex=$geometryIndex" +
+            "geometryIndex=$geometryIndex, " +
+            "legDestination=$legDestination" +
             ")"
     }
 }
