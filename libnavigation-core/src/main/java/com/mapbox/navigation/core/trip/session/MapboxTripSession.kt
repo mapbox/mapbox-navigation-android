@@ -31,6 +31,7 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoints
+import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -680,22 +681,26 @@ internal class MapboxTripSession(
         val upcomingRoadObjects = roadObjects.getUpdatedObjectsAhead(
             tripStatus.navigationStatus.upcomingRouteAlertUpdates
         )
-        val routeProgress = getRouteProgressFrom(
-            tripStatus.route,
-            tripStatus.navigationStatus,
-            remainingWaypoints,
-            latestBannerInstructionsWrapper?.latestBannerInstructions,
-            latestBannerInstructionsWrapper?.latestInstructionIndex,
-            lastVoiceInstruction,
-            upcomingRoadObjects,
-        ).also {
-            if (it == null) {
-                logD(
-                    "route progress update dropped - " +
-                        "currentPrimaryRoute ID: ${primaryRoute?.id}; " +
-                        "currentState: ${status.routeState}",
-                    LOG_CATEGORY
-                )
+        val routeProgress = tripStatus.route?.let {
+            val currentLegDestination = tripStatus.getCurrentLegDestination(it)
+            getRouteProgressFrom(
+                it,
+                tripStatus.navigationStatus,
+                remainingWaypoints,
+                latestBannerInstructionsWrapper?.latestBannerInstructions,
+                latestBannerInstructionsWrapper?.latestInstructionIndex,
+                lastVoiceInstruction,
+                upcomingRoadObjects,
+                currentLegDestination
+            ).also {
+                if (it == null) {
+                    logD(
+                        "route progress update dropped - " +
+                            "currentPrimaryRoute ID: ${primaryRoute?.id}; " +
+                            "currentState: ${status.routeState}",
+                        LOG_CATEGORY
+                    )
+                }
             }
         }
         updateRouteProgress(routeProgress, triggerObserver)

@@ -660,6 +660,26 @@ package com.mapbox.navigation.base.route {
     property public final String type;
   }
 
+  public final class LegWaypoint {
+    method public com.mapbox.geojson.Point getLocation();
+    method public String getName();
+    method public com.mapbox.geojson.Point? getTarget();
+    method public String getType();
+    property public final com.mapbox.geojson.Point location;
+    property public final String name;
+    property public final com.mapbox.geojson.Point? target;
+    property public final String type;
+    field public static final com.mapbox.navigation.base.route.LegWaypoint.Companion Companion;
+    field public static final String EV_CHARGING_ADDED = "EV_CHARGING_ADDED";
+    field public static final String REGULAR = "REGULAR";
+  }
+
+  public static final class LegWaypoint.Companion {
+  }
+
+  @StringDef({com.mapbox.navigation.base.route.LegWaypoint.REGULAR, com.mapbox.navigation.base.route.LegWaypoint.EV_CHARGING_ADDED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.PROPERTY, kotlin.annotation.AnnotationTarget.VALUE_PARAMETER, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.TYPE}) public static @interface LegWaypoint.Type {
+  }
+
   public final class NavigationRoute {
     method @Deprecated public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
     method public static java.util.List<com.mapbox.navigation.base.route.NavigationRoute> create(com.mapbox.api.directions.v5.models.DirectionsResponse directionsResponse, com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
@@ -888,6 +908,7 @@ package com.mapbox.navigation.base.trip.model {
     method public double getDurationRemaining();
     method public float getFractionTraveled();
     method public int getGeometryIndex();
+    method public com.mapbox.navigation.base.route.LegWaypoint? getLegDestination();
     method public int getLegIndex();
     method public com.mapbox.api.directions.v5.models.RouteLeg? getRouteLeg();
     method public com.mapbox.api.directions.v5.models.LegStep? getUpcomingStep();
@@ -897,6 +918,7 @@ package com.mapbox.navigation.base.trip.model {
     property public final double durationRemaining;
     property public final float fractionTraveled;
     property public final int geometryIndex;
+    property public final com.mapbox.navigation.base.route.LegWaypoint? legDestination;
     property public final int legIndex;
     property public final com.mapbox.api.directions.v5.models.RouteLeg? routeLeg;
     property public final com.mapbox.api.directions.v5.models.LegStep? upcomingStep;

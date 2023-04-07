@@ -9,9 +9,14 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.ApproximateCoordinates
@@ -22,16 +27,24 @@ import com.mapbox.navigation.instrumentation_tests.utils.toApproximateCoordinate
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.testing.ui.utils.coroutines.navigateNextRouteLeg
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
+import kotlin.math.abs
 
 class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
@@ -143,6 +156,146 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
         checkWaypointsPerRoute(expectedFirstNonEvWaypointsNamesAndLocations, routes[0])
         checkWaypointsPerRoute(expectedSecondNonEvWaypointsNamesAndLocations, routes[1])
+    }
+
+    @Test
+    fun leg_destination_non_ev_route() = sdkTest {
+        val coordinates = listOf(
+            Point.fromLngLat(140.025878, 35.660315),
+            Point.fromLngLat(140.02985194436837, 35.6621859075361),
+            Point.fromLngLat(140.0277017481984, 35.65792632910045),
+            Point.fromLngLat(140.03887765416835, 35.66023142441715),
+            Point.fromLngLat(140.0231453915486, 35.667495318461164),
+            Point.fromLngLat(140.03969561587877, 35.67009382118668),
+        )
+        addResponseHandler(R.raw.route_response_with_many_waypoints, coordinates)
+        stayOnPosition(coordinates[0], 270f)
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.flowLocationMatcherResult().filter {
+            abs(it.enhancedLocation.latitude - coordinates[0].latitude()) < 0.01 &&
+                abs(it.enhancedLocation.longitude - coordinates[0].longitude()) < 0.01
+        }.take(3).toList()
+        val routes = mapboxNavigation.requestRoutes(
+            generateRouteOptions(coordinates, electric = false, waypointsPerRoute = false)
+                .toBuilder()
+                .waypointIndicesList(listOf(0, 1, 3, 5))
+                .build()
+        )
+            .getSuccessfulResultOrThrowException()
+            .routes
+
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+
+        val nextWaypoints = mutableListOf<LegWaypoint?>()
+        mapboxNavigation.registerArrivalObserver(object : ArrivalObserver {
+            override fun onWaypointArrival(routeProgress: RouteProgress) {
+                nextWaypoints.add(routeProgress.currentLegProgress?.legDestination)
+            }
+
+            override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+            }
+
+            override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+            }
+        })
+        stayOnPosition(coordinates[1], 90f)
+        nextWaypoints.waitUntilHasSize(1)
+        var legWaypoint = nextWaypoints[0]!!
+
+        checkLocation(coordinates[1], legWaypoint.location)
+        assertEquals(LegWaypoint.REGULAR, legWaypoint.type)
+
+        mapboxNavigation.navigateNextRouteLeg()
+        stayOnPosition(coordinates[2], 270f)
+        delay(1000)
+        assertEquals(1, nextWaypoints.size)
+
+        stayOnPosition(coordinates[3], 180f)
+        nextWaypoints.waitUntilHasSize(2)
+        legWaypoint = nextWaypoints[1]!!
+        checkLocation(coordinates[3], legWaypoint.location)
+        assertEquals(LegWaypoint.REGULAR, legWaypoint.type)
+
+        mapboxNavigation.navigateNextRouteLeg()
+        stayOnPosition(coordinates[4], 45f)
+        delay(1000)
+        assertEquals(2, nextWaypoints.size)
+    }
+
+    @Test
+    fun leg_destination_ev_route() = sdkTest {
+        val coordinates = listOf(
+            Point.fromLngLat(48.39023, 11.063842),
+            Point.fromLngLat(49.164725, 10.340713)
+        )
+        addResponseHandler(R.raw.ev_route_response_for_refresh_with_2_waypoints, coordinates)
+        stayOnPosition(coordinates[0])
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.flowLocationMatcherResult().filter {
+            abs(it.enhancedLocation.latitude - coordinates[0].latitude()) < 0.01 &&
+                abs(it.enhancedLocation.longitude - coordinates[0].longitude()) < 0.01
+        }.take(3).toList()
+        val routes = requestRoutes(coordinates, electric = true, waypointsPerRoute = false)
+
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+
+        val nextWaypoints = mutableListOf<LegWaypoint?>()
+        mapboxNavigation.registerArrivalObserver(object : ArrivalObserver {
+            override fun onWaypointArrival(routeProgress: RouteProgress) {
+                nextWaypoints.add(routeProgress.currentLegProgress?.legDestination)
+            }
+
+            override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+            }
+
+            override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+            }
+        })
+        stayOnPosition(routes[0].directionsResponse.waypoints()!![1].location(), 315f)
+        nextWaypoints.waitUntilHasSize(1)
+        var legWaypoint = nextWaypoints[0]!!
+
+        checkLocation(
+            routes[0].directionsResponse.waypoints()!![1].location(),
+            legWaypoint.location
+        )
+        assertEquals(LegWaypoint.EV_CHARGING_ADDED, legWaypoint.type)
+
+        mapboxNavigation.navigateNextRouteLeg()
+        stayOnPosition(routes[0].directionsResponse.waypoints()!![2].location(), 0f)
+        nextWaypoints.waitUntilHasSize(2)
+        legWaypoint = nextWaypoints[1]!!
+
+        checkLocation(
+            routes[0].directionsResponse.waypoints()!![2].location(),
+            legWaypoint.location
+        )
+        assertEquals(LegWaypoint.EV_CHARGING_ADDED, legWaypoint.type)
+    }
+
+    private fun checkLocation(expected: Point, actual: Point) {
+        assertEquals(expected.latitude(), actual.latitude(), 0.00001)
+        assertEquals(expected.longitude(), actual.longitude(), 0.00001)
+    }
+
+    private suspend fun List<*>.waitUntilHasSize(size: Int) {
+        val list = this
+        withTimeout(10000) {
+            while (list.size < size) {
+                delay(50)
+            }
+        }
+    }
+
+    private fun stayOnPosition(point: Point, bearing: Float = 0f) {
+        mockLocationReplayerRule.loopUpdate(
+            mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = point.latitude()
+                longitude = point.longitude()
+                this.bearing = bearing
+            },
+            100
+        )
     }
 
     private suspend fun requestRoutes(

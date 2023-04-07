@@ -10,6 +10,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -30,6 +31,8 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import com.mapbox.navigation.navigator.internal.TripStatus
+import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoints
+import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.JobControl
@@ -149,6 +152,7 @@ class MapboxTripSessionTest {
         mockkObject(MapboxNativeNavigatorImpl)
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        mockkStatic("com.mapbox.navigation.navigator.internal.utils.TripStatusEx")
         mockkObject(BannerInstructionEvent.Companion)
         mockkObject(RoadObjectFactory)
         mockkStatic(LocationEngineProvider::class)
@@ -184,7 +188,7 @@ class MapboxTripSessionTest {
         every { routeProgress.voiceInstructions } returns null
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true)
         every {
-            getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any())
+            getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any())
         } returns routeProgress
         every { routeProgress.currentState } returns RouteProgressState.TRACKING
         every { routes[0].directionsResponse.uuid() } returns "uuid"
@@ -318,6 +322,29 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun nextWaypointsAreCalculated() = coroutineRule.runBlockingTest {
+        val nextLegWaypoint = mockk<LegWaypoint>()
+        tripSession.start(true)
+        every { tripStatus.calculateRemainingWaypoints() } returns 5
+        every { tripStatus.getCurrentLegDestination(routes[0]) } returns nextLegWaypoint
+
+        updateLocationAndJoin()
+
+        verify {
+            getRouteProgressFrom(
+                routes[0],
+                navigationStatus,
+                5,
+                any(),
+                any(),
+                any(),
+                any(),
+                nextLegWaypoint
+            )
+        }
+    }
+
+    @Test
     fun locationObserverSuccess() = coroutineRule.runBlockingTest {
         tripSession.start(true)
         val observer: LocationObserver = mockk(relaxUnitFun = true)
@@ -406,7 +433,9 @@ class MapboxTripSessionTest {
 
     @Test
     fun routeProgressObserverNotCalledWhenInFreeDrive() = coroutineRule.runBlockingTest {
-        every { getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any()) } returns null
+        every {
+            getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any())
+        } returns null
         tripSession = buildTripSession()
         tripSession.start(true)
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -1730,6 +1759,7 @@ class MapboxTripSessionTest {
         unmockkObject(MapboxNativeNavigatorImpl)
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        unmockkStatic("com.mapbox.navigation.navigator.internal.utils.TripStatusEx")
         unmockkObject(BannerInstructionEvent.Companion)
         unmockkObject(RoadObjectFactory)
         unmockkStatic(LocationEngineProvider::class)
