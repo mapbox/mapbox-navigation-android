@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.DynamicResponseModifier
@@ -48,6 +49,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 private const val KEY_ENGINE = "engine"
 private const val KEY_ENERGY_CONSUMPTION_CURVE = "energy_consumption_curve"
@@ -525,8 +527,12 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         stayOnPosition(
             geometryIndexLocation.latitude(),
             geometryIndexLocation.longitude(),
-            90f
+            45f
         )
+        mapboxNavigation.flowLocationMatcherResult().filter {
+            abs(it.enhancedLocation.longitude - geometryIndexLocation.longitude()) < 0.01 &&
+                abs(it.enhancedLocation.latitude - geometryIndexLocation.latitude()) < 0.01
+        }.take(3).toList()
         mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
 
         mapboxNavigation
