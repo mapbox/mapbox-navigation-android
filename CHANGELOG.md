@@ -40,6 +40,24 @@ Mapbox welcomes participation and contributions from everyone.
   }
   ```
 - Introduced `NavigationViewListener.onSpeedInfoClicked` that would be triggered when `MapboxSpeedInfoView` is clicked upon. [#6770](https://github.com/mapbox/mapbox-navigation-android/pull/6770)
+## Mapbox Navigation SDK 2.10.4 - 13 April, 2023
+### Changelog
+[Changes between v2.10.3 and v2.10.4](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.3...v2.10.4)
+
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.10.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.3))
+- Mapbox Navigation Native `v123.3.3`
+- Mapbox Core Common `v23.2.3`
+- Mapbox Java `v6.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.10.0))
+
+
 ## Mapbox Navigation SDK 2.10.3 - 03 March, 2023
 ### Changelog
 [Changes between v2.10.2 and v2.10.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.10.2...v2.10.3)
