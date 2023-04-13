@@ -34,6 +34,8 @@ import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
@@ -83,7 +85,7 @@ internal class MapboxTripSession(
             "routes update (reason: ${setRoutes.mapToReason()}, " +
                 "route IDs: ${routes.map { it.id }}) $suffix"
         }
-        logD(LOG_CATEGORY, logMessage("- starting"))
+        logI(LOG_CATEGORY, logMessage("- starting"))
 
         val result = when (setRoutes) {
             is SetRoutes.CleanUp -> {
@@ -158,7 +160,7 @@ internal class MapboxTripSession(
                 }
             }
         }
-        logD(LOG_CATEGORY, logMessage("- finished"))
+        logI(LOG_CATEGORY, logMessage("- finished"))
         return result
     }
 
@@ -342,65 +344,17 @@ internal class MapboxTripSession(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-            logD(
-                "navigatorObserver#onStatus; " +
-                    "fixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}, " +
-                    "state: ${status.routeState}",
-                LOG_CATEGORY
-            )
-            logD(LOG_CATEGORY) {
-                "navigatorObserver#onStatus; banner instruction: [${status.bannerInstruction}]," +
-                    " voice instruction: [${status.voiceInstruction}]"
-            }
-
-            val tripStatus = status.getTripStatusFrom(primaryRoute)
-            val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
-            val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
-            val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)
-            updateLocationMatcherResult(
-                tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
-            )
-            zLevel = status.layer
-
-            // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
-            // setting a new route
-            if (isUpdatingRoute) {
-                logD("route progress update dropped - updating routes", LOG_CATEGORY)
-                return
-            }
-
-            var triggerObserver = false
-            if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
-                val nativeBannerInstruction = tripStatus.navigationStatus.bannerInstruction
-                val bannerInstructions =
-                    tripStatus.navigationStatus.getCurrentBannerInstructions(primaryRoute)
-                triggerObserver = bannerInstructionEvent.isOccurring(
-                    bannerInstructions,
-                    nativeBannerInstruction?.index
-                )
-            }
-            val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
-            val latestBannerInstructionsWrapper = bannerInstructionEvent.latestInstructionWrapper
-            val routeProgress = getRouteProgressFrom(
-                tripStatus.route,
-                tripStatus.navigationStatus,
-                remainingWaypoints,
-                latestBannerInstructionsWrapper?.latestBannerInstructions,
-                latestBannerInstructionsWrapper?.latestInstructionIndex,
-                lastVoiceInstruction
-            ).also {
-                if (it == null) {
-                    logD(
-                        "route progress update dropped - " +
-                            "currentPrimaryRoute ID: ${primaryRoute?.id}; " +
-                            "currentState: ${status.routeState}",
-                        LOG_CATEGORY
-                    )
+            try {
+                processNativeStatus(status)
+            } catch (error: Throwable) {
+                logE(LOG_CATEGORY) {
+                    "Error processing native status update: origin=$origin, status=$status.\n" +
+                        "Error: $error\n" +
+                        "MapboxTripSession state: " +
+                        "isUpdatingRoute=$isUpdatingRoute, primaryRoute=${primaryRoute?.id}"
                 }
+                throw NativeStatusProcessingError(error)
             }
-            updateRouteProgress(routeProgress, triggerObserver)
-            triggerVoiceInstructionEvent(routeProgress, status)
-            isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
         }
     }
 
@@ -684,6 +638,69 @@ internal class MapboxTripSession(
         locationObservers.forEach { it.onNewLocationMatcherResult(locationMatcherResult) }
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    private fun processNativeStatus(status: NavigationStatus) {
+        logD(
+            "navigatorObserver#onStatus; " +
+                "fixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}, " +
+                "state: ${status.routeState}",
+            LOG_CATEGORY
+        )
+        logD(LOG_CATEGORY) {
+            "navigatorObserver#onStatus; banner instruction: [${status.bannerInstruction}]," +
+                " voice instruction: [${status.voiceInstruction}]"
+        }
+
+        val tripStatus = status.getTripStatusFrom(primaryRoute)
+        val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
+        val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
+        val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)
+        updateLocationMatcherResult(
+            tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
+        )
+        zLevel = status.layer
+
+        // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
+        // setting a new route
+        if (isUpdatingRoute) {
+            logD("route progress update dropped - updating routes", LOG_CATEGORY)
+            return
+        }
+
+        var triggerObserver = false
+        if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
+            val nativeBannerInstruction = tripStatus.navigationStatus.bannerInstruction
+            val bannerInstructions =
+                tripStatus.navigationStatus.getCurrentBannerInstructions(primaryRoute)
+            triggerObserver = bannerInstructionEvent.isOccurring(
+                bannerInstructions,
+                nativeBannerInstruction?.index
+            )
+        }
+        val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
+        val latestBannerInstructionsWrapper = bannerInstructionEvent.latestInstructionWrapper
+        val routeProgress = getRouteProgressFrom(
+            tripStatus.route,
+            tripStatus.navigationStatus,
+            remainingWaypoints,
+            latestBannerInstructionsWrapper?.latestBannerInstructions,
+            latestBannerInstructionsWrapper?.latestInstructionIndex,
+            lastVoiceInstruction
+        ).also {
+            if (it == null) {
+                logD(
+                    "route progress update dropped - " +
+                        "currentPrimaryRoute ID: ${primaryRoute?.id}; " +
+                        "currentState: ${status.routeState}",
+                    LOG_CATEGORY
+                )
+            }
+        }
+        updateRouteProgress(routeProgress, triggerObserver)
+        triggerVoiceInstructionEvent(routeProgress, status)
+        isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
+    }
+
     private fun updateRouteProgress(
         progress: RouteProgress?,
         shouldTriggerBannerInstructionsObserver: Boolean
@@ -766,3 +783,6 @@ internal class MapboxTripSession(
         }
     }
 }
+
+private class NativeStatusProcessingError(cause: Throwable) :
+    Throwable("Error processing native status update", cause)
