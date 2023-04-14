@@ -650,6 +650,7 @@ class RouteProgressExTest {
             0,
             mockk {
                 every { geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
+                every { waypointsPerRoute() } returns false
             },
             mockk {
                 every { routeInfo } returns mockk(relaxed = true)
@@ -883,7 +884,11 @@ class RouteProgressExTest {
 
         @Test
         fun refreshResponseWaypoints() {
-            val inputRoute = provideNavigationRoute(dirWaypoints = inputWaypoints, addLeg = true)
+            val inputRoute = provideNavigationRoute(
+                dirWaypoints = inputWaypoints,
+                addLeg = true,
+                waypointsPerRoute = false,
+            )
             val updatedRoute = inputRoute.refreshRoute(
                 0,
                 0,
@@ -897,7 +902,11 @@ class RouteProgressExTest {
 
         @Test
         fun routeWaypoints() {
-            val inputRoute = provideNavigationRoute(routeWaypoints = inputWaypoints, addLeg = true)
+            val inputRoute = provideNavigationRoute(
+                routeWaypoints = inputWaypoints,
+                addLeg = true,
+                waypointsPerRoute = true,
+            )
             val updatedRoute = inputRoute.refreshRoute(
                 0,
                 0,
@@ -919,6 +928,7 @@ class RouteProgressExTest {
             dirWaypoints: List<DirectionsWaypoint>? = null,
             addLeg: Boolean,
             distance: Double = 10.0,
+            waypointsPerRoute: Boolean = false,
         ): NavigationRoute {
             val twoPointGeometry = PolylineUtils.encode(
                 listOf(
@@ -982,6 +992,7 @@ class RouteProgressExTest {
                 0,
                 mockk {
                     every { geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
+                    every { waypointsPerRoute() } returns waypointsPerRoute
                 },
                 mockk {
                     every { routeInfo } returns mockk(relaxed = true)

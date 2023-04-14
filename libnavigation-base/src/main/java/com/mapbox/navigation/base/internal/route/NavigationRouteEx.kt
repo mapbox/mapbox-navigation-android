@@ -117,7 +117,10 @@ fun NavigationRoute.refreshRoute(
         toBuilder()
             .legs(updateLegs)
             .waypoints(buildNewWaypoints(this.waypoints(), waypoints))
-            .updateRouteDurationBasedOnLegsDuration(updateLegs)
+            .updateRouteDurationBasedOnLegsDurationAndChargeTime(
+                updateLegs = updateLegs,
+                waypoints = buildNewWaypoints(this@refreshRoute.waypoints, waypoints)
+            )
             .build()
     }
     val directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder = {
@@ -226,13 +229,22 @@ private fun buildNewWaypoints(
     }
 }
 
-private fun DirectionsRoute.Builder.updateRouteDurationBasedOnLegsDuration(
-    updateLegs: List<RouteLeg>?
+private fun DirectionsRoute.Builder.updateRouteDurationBasedOnLegsDurationAndChargeTime(
+    updateLegs: List<RouteLeg>?,
+    waypoints: List<DirectionsWaypoint?>?,
 ): DirectionsRoute.Builder {
     updateLegs ?: return this
     var result = 0.0
     for (leg in updateLegs) {
         result += leg.duration() ?: return this
+    }
+    waypoints?.forEach { waypoint ->
+        waypoint?.unrecognizedJsonProperties
+            ?.get("metadata")
+            ?.asJsonObject
+            ?.get("charge_time")?.asDouble?.let { chargeTime ->
+                result += chargeTime
+            }
     }
     duration(result)
     return this
