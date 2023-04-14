@@ -582,11 +582,13 @@ commands:
           command: |
             ./mbx-ci aws setup
 
-  checkout-branch:
+  prepare-snapshot:
     steps:
       - run:
-          name: Checkout branch
-          command: python3 scripts/snapshot/checkout-branch.py
+          name: Prepare snapshot
+          command: |
+            export GITHUB_TOKEN=$(./mbx-ci github writer private token)
+            python3 scripts/snapshot/prepare-snapshot.py
 
 #--------------------------
 #---------- JOBS ----------
@@ -903,7 +905,7 @@ jobs:
       WEEKLY_SNAPSHOT_WORKFLOW: true
     steps:
       - checkout
-      - checkout-branch
+      - prepare-snapshot
       - assemble-core-release
       - assemble-ui-release
       - prepare-mbx-ci

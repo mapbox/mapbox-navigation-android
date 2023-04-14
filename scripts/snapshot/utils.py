@@ -34,8 +34,9 @@ def is_snapshot_week():
 def get_dependency_version(releases_url):
     releases = requests.get(releases_url, headers=headers).json()
     for release in releases:
-        if is_current_week(release['created_at']) and not is_patch(release['name']):
-            return release['name']
+        if is_current_week(release['created_at']) and not is_patch(
+                release['name']) and not ('private' in release['name']):
+            return release['name'].replace('v', '')
     return None
 
 
