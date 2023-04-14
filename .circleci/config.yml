@@ -905,10 +905,10 @@ jobs:
       WEEKLY_SNAPSHOT_WORKFLOW: true
     steps:
       - checkout
+      - prepare-mbx-ci
       - prepare-snapshot
       - assemble-core-release
       - assemble-ui-release
-      - prepare-mbx-ci
       - setup-aws-credentials
       - upload-artifacts-snapshot
       - trigger-mobile-metrics
