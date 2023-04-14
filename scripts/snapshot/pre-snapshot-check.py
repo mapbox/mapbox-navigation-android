@@ -34,8 +34,6 @@ def build_message():
 
     message += 'Snapshot branch is *' + snapshot_branch + '*.\n'
 
-    message += 'Snapshot name is *' + str(datetime.date.today()) + '_' + snapshot_branch + '*.\n'
-
     if maps_version and nav_native_version:
         message += '*Release time is today night.*\n'
     else:
