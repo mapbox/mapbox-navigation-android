@@ -1,9 +1,9 @@
 import unittest
 
-from scripts.snapshot import utils
+import utils
 
 
-class TestCheckoutBranch(unittest.TestCase):
+class TestUtils(unittest.TestCase):
 
     def test_get_latest_tag(self):
         tags = [
@@ -25,6 +25,24 @@ class TestCheckoutBranch(unittest.TestCase):
 
     def test_get_snapshot_branch_with_latest_stable_tag(self):
         self.assertEqual(utils.get_snapshot_branch('v2.12.0'), 'main')
+
+    def test_is_rc_or_ga_true_rc(self):
+        self.assertEqual(utils.is_rc_or_ga('v1.1.0-rc.100'), True)
+
+    def test_is_rc_or_ga_true_ga(self):
+        self.assertEqual(utils.is_rc_or_ga('v1.1.0'), True)
+
+    def test_is_rc_or_ga_false_beta(self):
+        self.assertEqual(utils.is_rc_or_ga('v1.1.0-beta.123'), False)
+
+    def test_is_patch_true(self):
+        self.assertEqual(utils.is_patch('v1.1.100'), True)
+
+    def test_is_patch_false_ga(self):
+        self.assertEqual(utils.is_patch('v1.1.0'), False)
+
+    def test_is_patch_false_rc(self):
+        self.assertEqual(utils.is_patch('v1.1.0-rc.1'), False)
 
 
 if __name__ == "__main__":
