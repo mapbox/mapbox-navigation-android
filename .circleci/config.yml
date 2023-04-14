@@ -127,6 +127,17 @@ workflows:
                 - main
     jobs:
       - release-weekly-snapshot
+  pre-snapshot-workflow:
+    # Run workflow every Thursday at 23:59 UTC
+#    triggers:
+#      - schedule:
+#          cron: "59 23 * * 4"
+#          filters:
+#            branches:
+#              only:
+#                - main
+    jobs:
+      - pre-snapshot-check
 
 #------------------------------
 #---------- COMMANDS ----------
@@ -543,11 +554,19 @@ commands:
             pip3 install requests
             python3 scripts/trigger-mobile-metrics.py
 
+  pre-snapshot-check:
+    steps:
+      - run:
+          name: Pre-snapshot check
+          command: |
+            export GITHUB_TOKEN=$(./mbx-ci github reader private token)
+            python3 scripts/pre-snapshot-check.py
+
   trigger-onetap:
     steps:
       - run:
           name: Trigger onetap
-          command: python3 scripts/trigger-onetap.py
+          command: python3 scripts/snapshot/trigger-onetap.py
 
   prepare-mbx-ci:
     steps:
@@ -567,7 +586,7 @@ commands:
     steps:
       - run:
           name: Checkout branch
-          command: python3 scripts/checkout-branch.py
+          command: python3 scripts/snapshot/checkout-branch.py
 
 #--------------------------
 #---------- JOBS ----------
@@ -867,6 +886,13 @@ jobs:
       - setup-aws-credentials
       - upload-artifacts-snapshot
       - trigger-mobile-metrics
+
+  pre-snapshot-check:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - prepare-mbx-ci
+      - pre-snapshot-check
 
   release-weekly-snapshot:
     executor: ndk-r22-latest-executor
