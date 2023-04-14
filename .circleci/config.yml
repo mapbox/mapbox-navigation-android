@@ -560,7 +560,7 @@ commands:
           name: Pre-snapshot check
           command: |
             export GITHUB_TOKEN=$(./mbx-ci github reader private token)
-            python3 scripts/pre-snapshot-check.py
+            python3 scripts/snapshot/pre-snapshot-check.py
 
   trigger-onetap:
     steps:
