@@ -1,5 +1,7 @@
 import unittest
 
+from freezegun import freeze_time
+
 import utils
 
 
@@ -43,6 +45,14 @@ class TestUtils(unittest.TestCase):
 
     def test_is_patch_false_rc(self):
         self.assertEqual(utils.is_patch('v1.1.0-rc.1'), False)
+
+    @freeze_time("2023-04-14")
+    def test_is_current_week_true(self):
+        self.assertEqual(utils.is_current_week('2023-04-12T12:24:15Z'), True)
+
+    @freeze_time("2023-04-14")
+    def test_is_current_week_false(self):
+        self.assertEqual(utils.is_current_week('2023-03-12T12:24:15Z'), False)
 
 
 if __name__ == "__main__":
