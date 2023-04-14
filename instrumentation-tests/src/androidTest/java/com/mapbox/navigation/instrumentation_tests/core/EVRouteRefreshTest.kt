@@ -306,7 +306,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
     }
 
     @Test
-    fun ev_route_refresh_updates_ev_annotations_and_waypoints_for_the_whole_route() = sdkTest {
+    fun ev_route_refresh_updates_ev_annotations_duration_waypoints_for_the_whole_route() = sdkTest {
         addRefreshRequestHandler(
             R.raw.ev_route_refresh_response,
             acceptedGeometryIndex = 0
@@ -337,6 +337,22 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             listOf(null, 8097, null),
             requestedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
         )
+        assertEquals(
+            9757.0888671875,
+            requestedRoutes[0].directionsRoute.duration(),
+            0.00001
+        )
+        assertEquals(
+            8425.089,
+            requestedRoutes[0].directionsRoute.legs()!!.sumOf { it.duration()!! },
+            0.00001
+        )
+        assertEquals(
+            1332.0,
+            requestedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[1]!!,
+            0.00001
+        )
+        assertRouteDurationIncludesChargeTime(requestedRoutes[0])
 
         assertEquals(
             listOf(28, 12),
@@ -350,10 +366,26 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             listOf(null, 7286, null),
             updatedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
         )
+        assertEquals(
+            9779.66,
+            updatedRoutes[0].directionsRoute.duration(),
+            0.00001
+        )
+        assertEquals(
+            8437.66,
+            updatedRoutes[0].directionsRoute.legs()!!.sumOf { it.duration()!! },
+            0.00001
+        )
+        assertEquals(
+            1342.0,
+            updatedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[1]!!,
+            0.00001
+        )
+        assertRouteDurationIncludesChargeTime(updatedRoutes[0])
     }
 
     @Test
-    fun ev_route_refresh_updates_waypoints_per_route() = sdkTest {
+    fun ev_route_refresh_updates_duration_and_waypoints_per_route() = sdkTest {
         replaceOriginalResponseHandler(R.raw.ev_route_response_for_refresh_with_waypoints_per_route)
         addRefreshRequestHandler(
             R.raw.ev_route_refresh_response,
@@ -382,6 +414,11 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             listOf(null, 8097, null),
             requestedRoutes[0].waypoints?.extractChargeAtArrival()
         )
+        assertEquals(
+            1332.0,
+            requestedRoutes[0].waypoints!!.extractChargeTime()[1]!!,
+            0.00001
+        )
 
         assertEquals(
             listOf(null, 7286, null),
@@ -397,10 +434,16 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 it.name() to it.location().toApproximateCoordinates(tolerance)
             }
         )
+        assertEquals(
+            1342.0,
+            updatedRoutes[0].waypoints!!.extractChargeTime()[1]!!,
+            0.00001
+        )
+        assertRouteDurationIncludesChargeTime(updatedRoutes[0])
     }
 
     @Test
-    fun ev_route_refresh_updates_ev_annotations_and_waypoints_for_truncated_current_leg() =
+    fun ev_route_refresh_updates_ev_annotations_duration_waypoints_for_truncated_current_leg() =
         sdkTest {
             val geometryIndex = 384
             addRefreshRequestHandler(
@@ -437,6 +480,11 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 listOf(null, 8097, null),
                 requestedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
             )
+            assertEquals(
+                1332.0,
+                requestedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[1]!!,
+                0.00001
+            )
 
             assertEquals(
                 listOf(29, 28, 13),
@@ -450,57 +498,75 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 listOf(null, 10188, null),
                 updatedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
             )
+            assertEquals(
+                1229.0,
+                updatedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[1]!!,
+                0.00001
+            )
+            assertRouteDurationIncludesChargeTime(updatedRoutes[0])
         }
 
     @Test
-    fun ev_route_refresh_updates_ev_annotations_and_waypoints_for_truncated_next_leg() = sdkTest {
-        addRefreshRequestHandler(
-            R.raw.ev_route_refresh_response_with_truncated_next_leg,
-            acceptedGeometryIndex = 0
-        )
-        val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
-        val evData = mapOf(
-            KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
-            KEY_EV_INITIAL_CHARGE to "17000",
-            KEY_EV_PRECONDITIONING_TIME to "10",
-            KEY_AUXILIARY_CONSUMPTION to "300"
-        )
-        mapboxNavigation.onEVDataUpdated(evData)
-        mapboxNavigation.startTripSession()
-        stayOnInitialPosition()
-        mapboxNavigation.setNavigationRoutes(requestedRoutes)
+    fun ev_route_refresh_updates_ev_annotations_duration_waypoints_for_truncated_next_leg() =
+        sdkTest {
+            addRefreshRequestHandler(
+                R.raw.ev_route_refresh_response_with_truncated_next_leg,
+                acceptedGeometryIndex = 0
+            )
+            val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
+            val evData = mapOf(
+                KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                KEY_EV_INITIAL_CHARGE to "17000",
+                KEY_EV_PRECONDITIONING_TIME to "10",
+                KEY_AUXILIARY_CONSUMPTION to "300"
+            )
+            mapboxNavigation.onEVDataUpdated(evData)
+            mapboxNavigation.startTripSession()
+            stayOnInitialPosition()
+            mapboxNavigation.setNavigationRoutes(requestedRoutes)
 
-        val updatedRoutes = waitUntilRefresh().navigationRoutes
+            val updatedRoutes = waitUntilRefresh().navigationRoutes
 
-        assertEquals(
-            listOf(29, 13),
-            requestedRoutes[0].getSocAnnotationsFromLeg(0)!!.firstLastAnd()
-        )
-        assertEquals(
-            listOf(43, 10),
-            requestedRoutes[0].getSocAnnotationsFromLeg(1)!!.firstLastAnd()
-        )
-        assertEquals(
-            listOf(null, 8097, null),
-            requestedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
-        )
+            assertEquals(
+                listOf(29, 13),
+                requestedRoutes[0].getSocAnnotationsFromLeg(0)!!.firstLastAnd()
+            )
+            assertEquals(
+                listOf(43, 10),
+                requestedRoutes[0].getSocAnnotationsFromLeg(1)!!.firstLastAnd()
+            )
+            assertEquals(
+                listOf(null, 8097, null),
+                requestedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
+            )
+            assertEquals(
+                1332.0,
+                requestedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[1]!!,
+                0.00001
+            )
 
-        assertEquals(
-            listOf(28, 12),
-            updatedRoutes[0].getSocAnnotationsFromLeg(0)!!.firstLastAnd()
-        )
-        assertEquals(
-            listOf(42, 10),
-            updatedRoutes[0].getSocAnnotationsFromLeg(1)!!.firstLastAnd()
-        )
-        assertEquals(
-            listOf(null, 7286, null),
-            updatedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
-        )
-    }
+            assertEquals(
+                listOf(28, 12),
+                updatedRoutes[0].getSocAnnotationsFromLeg(0)!!.firstLastAnd()
+            )
+            assertEquals(
+                listOf(42, 10),
+                updatedRoutes[0].getSocAnnotationsFromLeg(1)!!.firstLastAnd()
+            )
+            assertEquals(
+                listOf(null, 7286, null),
+                updatedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
+            )
+            assertEquals(
+                1342.0,
+                updatedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[1]!!,
+                0.00001
+            )
+            assertRouteDurationIncludesChargeTime(updatedRoutes[0])
+        }
 
     @Test
-    fun ev_route_refresh_updates_ev_annotations_and_waypoints_for_second_leg() = sdkTest {
+    fun ev_route_refresh_updates_ev_annotations_duration_waypoints_for_second_leg() = sdkTest {
         val routeGeometryIndex = 774
         val legGeometryIndex = 26
         replaceOriginalResponseHandler(R.raw.ev_route_response_for_refresh_with_2_waypoints)
@@ -555,6 +621,16 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             listOf(null, 7911, 6000, null),
             requestedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
         )
+        assertEquals(
+            1253.0,
+            requestedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[1]!!,
+            0.00001
+        )
+        assertEquals(
+            3073.0,
+            requestedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[2]!!,
+            0.00001
+        )
 
         assertEquals(
             listOf(29, 13),
@@ -568,6 +644,17 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             listOf(null, 7911, 12845, null),
             updatedRoutes[0].directionsResponse.waypoints()?.extractChargeAtArrival()
         )
+        assertEquals(
+            1253.0,
+            updatedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[1]!!,
+            0.00001
+        )
+        assertEquals(
+            2800.0,
+            updatedRoutes[0].directionsResponse.waypoints()!!.extractChargeTime()[2]!!,
+            0.00001
+        )
+        assertRouteDurationIncludesChargeTime(updatedRoutes[0])
     }
 
     private fun stayOnInitialPosition() {
@@ -696,6 +783,14 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 ?.get("charge_at_arrival")?.asInt
         }
 
+    private fun List<DirectionsWaypoint>.extractChargeTime(): List<Double?> =
+        map {
+            it.unrecognizedJsonProperties
+                ?.get("metadata")
+                ?.asJsonObject
+                ?.get("charge_time")?.asDouble
+        }
+
     private fun addRefreshRequestHandler(
         @IdRes fileId: Int,
         acceptedGeometryIndex: Int,
@@ -719,5 +814,15 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
         mockWebServerRule.requestHandlers.remove(this.routeHandler)
         mockWebServerRule.requestHandlers.add(0, routeHandler)
+    }
+
+    private fun assertRouteDurationIncludesChargeTime(route: NavigationRoute) {
+        assertEquals(
+            route.waypoints!!.extractChargeTime().sumOf { it ?: 0.0 },
+            route.directionsRoute.duration().minus(
+                route.directionsRoute.legs()!!.sumOf { it.duration()!! }
+            ),
+            1.0
+        )
     }
 }
