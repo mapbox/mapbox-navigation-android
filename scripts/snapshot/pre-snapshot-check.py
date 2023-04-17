@@ -46,10 +46,7 @@ def build_message():
 
     message += 'Snapshot branch is *' + snapshot_branch + '*.\n'
 
-    if maps_version and nav_native_version:
-        message += '*Release time is today night.*\n'
-    else:
-        message += '*Snapshot will not be released until all necessary dependencies are released.*\n'
+    message += '*Release time is today night.*\n'
 
     return message
 
