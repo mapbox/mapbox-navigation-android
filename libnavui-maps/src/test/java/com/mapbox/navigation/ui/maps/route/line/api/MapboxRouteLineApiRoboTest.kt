@@ -28,6 +28,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
@@ -50,6 +51,7 @@ import kotlinx.coroutines.job
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -1758,6 +1760,89 @@ class MapboxRouteLineApiRoboTest {
                     "'abc#0' to hide the portion that overlaps " +
                     "with the primary route.",
                 "MapboxRouteLineUtils"
+            )
+        }
+    }
+
+    // We had a bug that when styleInactiveRouteLegsIndependently was enabled but we first
+    // got route progress update and only then routes update,
+    // there was a race that the independent legs might not have been styled independently
+    // until we switch to the next leg.
+    // The race scheme:
+    // 1. Invoke setNavigationRouteLines;
+    // 2. Set new routes;
+    // 3. Suspend before calculation routeLineExpressionData;
+    // 4. Invoke updateWithRouteProgress;
+    // 5. Change leg, set activeLegIndex to 0;
+    // 6. Invoke provideLegUpdate that styles inactive leg independently based on routeLineExpressionData;
+    // 7. Only here actually initialize the routeLineExpressionData in setNavigationRouteLines;
+    // Result: we styles independently the inactive legs based on empty data.
+    // And the state doesn't restore itself, because on the next updateWithRouteProgress leg didn't change ->
+    // we don't invoke provideLegUpdate (that's an optimization we still need).
+    @Test
+    fun updateWithRouteProgressBeforeSetNavigationRouteLines() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils) {
+            every { MapboxRouteLineUtils.getRouteLineFeatureDataProvider(any()) } answers {
+                {
+                    coroutineRule.testDispatcher.pauseDispatcher()
+                    callOriginal()()
+                }
+            }
+
+            val expectedBaseExpContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+                DoubleChecker(0.10373821458415478),
+                StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+                DoubleChecker(0.1240124365711821),
+                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+                DoubleChecker(0.2718982903427929),
+                StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+                DoubleChecker(0.32264099467350016),
+                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+                DoubleChecker(0.4897719974699625),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+
+            val realOptions = MapboxRouteLineOptions.Builder(ctx)
+                .styleInactiveRouteLegsIndependently(true)
+                .build()
+            val route = multiLegRouteTwoLegs.navigationRoute
+            val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true) {
+                every { vanishPointOffset } returns 0.0
+            }
+            val options = mockk<MapboxRouteLineOptions>(relaxed = true) {
+                every { vanishingRouteLine } returns mockVanishingRouteLine
+                every { resourceProvider } returns realOptions.resourceProvider
+                every {
+                    styleInactiveRouteLegsIndependently
+                } returns true
+                every { displayRestrictedRoadSections } returns false
+                every { displaySoftGradientForTraffic } returns false
+                every { softGradientTransition } returns 30.0
+                every { routeStyleDescriptors } returns listOf()
+            }
+            val api = MapboxRouteLineApi(options)
+            val routeProgress = multiLegRouteTwoLegs.mockRouteProgress(0, 0)
+
+            api.setNavigationRoutes(listOf(route)) {}
+
+            api.updateWithRouteProgress(routeProgress) {}
+            coroutineRule.testDispatcher.resumeDispatcher()
+
+            var result: RouteLineDynamicData? = null
+            api.updateWithRouteProgress(routeProgress) {
+                result = it.value!!.primaryRouteLineDynamicData
+            }
+
+            // this check will fail if there's a race
+            assertNotNull(result)
+            checkExpression(
+                expectedBaseExpContents,
+                result!!.trafficExpressionProvider!!.generateExpression()
             )
         }
     }

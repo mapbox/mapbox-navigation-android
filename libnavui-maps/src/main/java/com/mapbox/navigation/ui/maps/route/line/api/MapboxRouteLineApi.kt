@@ -209,6 +209,7 @@ class MapboxRouteLineApi(
         private set
     private val trafficBackfillRoadClasses = CopyOnWriteArrayList<String>()
     private var alternativesDeviationOffset = mapOf<String, Double>()
+    private var settingNewRoutes = false
 
     private val alternativelyStyleSegmentsNotInLegCache: LruCache<
         CacheResultUtils.CacheResultKey3<
@@ -459,6 +460,7 @@ class MapboxRouteLineApi(
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
+        settingNewRoutes = true
         cancel()
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
@@ -470,6 +472,7 @@ class MapboxRouteLineApi(
                     alternativeRoutesMetadata,
                     activeLegIndex
                 )
+                settingNewRoutes = false
                 consumer.accept(routeData)
             }
         }
@@ -515,7 +518,7 @@ class MapboxRouteLineApi(
         ) {
             return ExpectedFactory.createError(
                 RouteLineError(
-                    "Vanishing point state is disabled or the update doesn't fall" +
+                    "Vanishing point state is disabled or the update doesn't fall " +
                         "within the configured interval window.",
                     null
                 )
@@ -794,6 +797,14 @@ class MapboxRouteLineApi(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
+        if (settingNewRoutes) {
+            val msg = "You're calling #updateWithRouteProgress while new routes are being set."
+            consumer.accept(
+                ExpectedFactory.createError(RouteLineError(msg, throwable = null))
+            )
+            logW(msg, LOG_CATEGORY)
+            return
+        }
         val currentPrimaryRoute = primaryRoute
         if (currentPrimaryRoute == null) {
             val msg = "You're calling #updateWithRouteProgress without any routes being set."
@@ -845,7 +856,7 @@ class MapboxRouteLineApi(
                     )
                     else -> {
                         ifNonNull(routeProgress.currentLegProgress) { routeLegProgress ->
-                            if (legChange && activeLegIndex > 0) {
+                            if (legChange && activeLegIndex >= 0) {
                                 jobControl.scope.launch(Dispatchers.Main) {
                                     mutex.withLock {
                                         alternativelyStyleSegmentsNotInLeg(
@@ -1848,9 +1859,9 @@ class MapboxRouteLineApi(
     }
 
     internal val alternativelyStyleSegmentsNotInLeg: (
-        activeLegIndex: Int,
-        segments: List<RouteLineExpressionData>,
-        substitutionColor: Int
+        Int,
+        List<RouteLineExpressionData>,
+        Int
     ) -> List<RouteLineExpressionData> =
         { activeLegIndex: Int, segments: List<RouteLineExpressionData>, substitutionColor: Int ->
             segments.parallelMap(
