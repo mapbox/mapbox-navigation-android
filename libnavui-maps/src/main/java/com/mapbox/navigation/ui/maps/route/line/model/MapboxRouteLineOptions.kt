@@ -26,6 +26,8 @@ import kotlin.math.abs
  * @param tolerance the tolerance value used when configuring the underlying map source
  * @param displayRestrictedRoadSections indicates if the route line will display restricted
  * road sections with a dashed line
+ * @param displayViolatedSections indicates if the route line will display sections,
+ * where the route restrictions were violated, with a dashed line.
  * @param styleInactiveRouteLegsIndependently enabling this feature will change the color of the route
  * legs that aren't currently being navigated. See [RouteLineColorResources] to specify the color
  * used.
@@ -55,6 +57,7 @@ class MapboxRouteLineOptions private constructor(
     internal var vanishingRouteLine: VanishingRouteLine? = null,
     val tolerance: Double,
     val displayRestrictedRoadSections: Boolean = false,
+    val displayViolatedSections: Boolean = false,
     val styleInactiveRouteLegsIndependently: Boolean = false,
     val displaySoftGradientForTraffic: Boolean = false,
     val softGradientTransition: Double = RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS,
@@ -85,6 +88,7 @@ class MapboxRouteLineOptions private constructor(
             vanishingRouteLineEnabled,
             tolerance,
             displayRestrictedRoadSections,
+            displayViolatedSections,
             styleInactiveRouteLegsIndependently,
             displaySoftGradientForTraffic,
             softGradientTransition,
@@ -113,6 +117,7 @@ class MapboxRouteLineOptions private constructor(
         if (vanishingRouteLine != other.vanishingRouteLine) return false
         if (tolerance != other.tolerance) return false
         if (displayRestrictedRoadSections != other.displayRestrictedRoadSections) return false
+        if (displayViolatedSections != other.displayViolatedSections) return false
         if (styleInactiveRouteLegsIndependently != other.styleInactiveRouteLegsIndependently) {
             return false
         }
@@ -141,6 +146,7 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + vanishingRouteLine.hashCode()
         result = 31 * result + (tolerance.hashCode())
         result = 31 * result + (displayRestrictedRoadSections.hashCode())
+        result = 31 * result + (displayViolatedSections.hashCode())
         result = 31 * result + (styleInactiveRouteLegsIndependently.hashCode())
         result = 31 * result + (displaySoftGradientForTraffic.hashCode())
         result = 31 * result + (softGradientTransition.hashCode())
@@ -164,6 +170,7 @@ class MapboxRouteLineOptions private constructor(
             "vanishingRouteLine=$vanishingRouteLine, " +
             "tolerance=$tolerance, " +
             "displayRestrictedRoadSections=$displayRestrictedRoadSections, " +
+            "displayViolatedSections=$displayViolatedSections, " +
             "styleInactiveRouteLegsIndependently=$styleInactiveRouteLegsIndependently," +
             "displaySoftGradientForTraffic=$displaySoftGradientForTraffic," +
             "softGradientTransition=$softGradientTransition," +
@@ -184,6 +191,8 @@ class MapboxRouteLineOptions private constructor(
      * @param routeLineBelowLayerId determines the elevation of the route layers
      * @param routeStyleDescriptors a collection of RouteStyleDescriptor objects
      * @param vanishingRouteLineEnabled indicates if the vanishing route line feature is enabled
+     * @param displayRestrictedRoadSections indicates if the route line will display restricted
+     * road sections with a dashed line
      * @param displayRestrictedRoadSections indicates if the route line will display restricted
      * road sections with a dashed line
      * @param styleInactiveRouteLegsIndependently enabling this feature will change the color of the route
@@ -210,6 +219,7 @@ class MapboxRouteLineOptions private constructor(
         private var vanishingRouteLineEnabled: Boolean,
         private var tolerance: Double,
         private var displayRestrictedRoadSections: Boolean,
+        private var displayViolatedSections: Boolean,
         private var styleInactiveRouteLegsIndependently: Boolean,
         private var displaySoftGradientForTraffic: Boolean,
         private var softGradientTransition: Double,
@@ -235,6 +245,7 @@ class MapboxRouteLineOptions private constructor(
             listOf(),
             false,
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            false,
             false,
             false,
             false,
@@ -309,6 +320,15 @@ class MapboxRouteLineOptions private constructor(
          */
         fun displayRestrictedRoadSections(displayRestrictedRoadSections: Boolean): Builder =
             apply { this.displayRestrictedRoadSections = displayRestrictedRoadSections }
+
+        /**
+         * Indicates if the route line will display restricted
+         * road sections with a dashed line. False by default.
+         *
+         * @return the builder
+         */
+        fun displayViolatedSections(displayViolatedSections: Boolean): Builder =
+            apply { this.displayViolatedSections = displayViolatedSections }
 
         /**
          * Enabling this feature will result in route legs that aren't currently being navigated
@@ -459,6 +479,7 @@ class MapboxRouteLineOptions private constructor(
                 vanishingRouteLine,
                 tolerance,
                 displayRestrictedRoadSections,
+                displayViolatedSections,
                 styleInactiveRouteLegsIndependently,
                 displaySoftGradientForTraffic,
                 softGradientTransition,

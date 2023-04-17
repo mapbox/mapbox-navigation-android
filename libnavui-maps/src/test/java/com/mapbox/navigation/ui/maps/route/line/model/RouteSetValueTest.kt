@@ -12,16 +12,16 @@ class RouteSetValueTest {
         val original = RouteSetValue(
             RouteLineData(
                 mockk(),
-                RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+                RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
             ),
             listOf(
                 RouteLineData(
                     mockk(),
-                    RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+                    RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
                 ),
                 RouteLineData(
                     mockk(),
-                    RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+                    RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
                 )
             ),
             mockk(),
@@ -44,16 +44,16 @@ class RouteSetValueTest {
         val original = RouteSetValue(
             RouteLineData(
                 mockk(),
-                RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+                RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
             ),
             listOf(
                 RouteLineData(
                     mockk(),
-                    RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+                    RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
                 ),
                 RouteLineData(
                     mockk(),
-                    RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+                    RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
                 )
             ),
             mockk(),
@@ -61,16 +61,16 @@ class RouteSetValueTest {
         )
         val replacedPrimaryRouteData = RouteLineData(
             mockk(),
-            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
         )
         val replacedAlternativesRouteData = listOf(
             RouteLineData(
                 mockk(),
-                RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+                RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
             ),
             RouteLineData(
                 mockk(),
-                RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+                RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
             )
         )
         val replacedWaypointsSource = mockk<FeatureCollection>()

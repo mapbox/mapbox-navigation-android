@@ -13,6 +13,7 @@ class RouteLineDynamicDataTest {
             mockk(),
             mockk(),
             mockk(),
+            mockk(),
             RouteLineTrimOffset(9.9),
             mockk(),
             mockk()
@@ -35,6 +36,7 @@ class RouteLineDynamicDataTest {
     @Test
     fun toImmutableValue() {
         val original = RouteLineDynamicData(
+            mockk(),
             mockk(),
             mockk(),
             mockk(),

@@ -75,6 +75,7 @@ internal object MapboxRouteLineUtils {
     private const val LOG_CATEGORY = "MapboxRouteLineUtils"
     internal const val VANISH_POINT_STOP_GAP = .00000000001
     private const val NUMBER_OF_SUPPORTED_ROUTES = 3
+    private const val TOLERANCE = 0.00000001
 
     internal val extractRouteDataCache: LruCache<
         CacheResultUtils.CacheResultKeyRouteTraffic<
@@ -97,7 +98,8 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_1_CASING,
         RouteLayerConstants.LAYER_GROUP_1_MAIN,
         RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
-        RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
+        RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
+        RouteLayerConstants.LAYER_GROUP_1_VIOLATED,
     )
 
     // ordering is important
@@ -107,7 +109,8 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_2_CASING,
         RouteLayerConstants.LAYER_GROUP_2_MAIN,
         RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
-        RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
+        RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
+        RouteLayerConstants.LAYER_GROUP_2_VIOLATED,
     )
 
     // ordering is important
@@ -117,7 +120,8 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_3_CASING,
         RouteLayerConstants.LAYER_GROUP_3_MAIN,
         RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
-        RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
+        RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
+        RouteLayerConstants.LAYER_GROUP_3_VIOLATED,
     )
 
     // ordering is important
@@ -127,7 +131,8 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.MASKING_LAYER_CASING,
         RouteLayerConstants.MASKING_LAYER_MAIN,
         RouteLayerConstants.MASKING_LAYER_TRAFFIC,
-        RouteLayerConstants.MASKING_LAYER_RESTRICTED
+        RouteLayerConstants.MASKING_LAYER_RESTRICTED,
+        RouteLayerConstants.MASKING_LAYER_VIOLATED,
     )
 
     val sourceLayerMap = mapOf<RouteLineSourceKey, Set<String>>(
@@ -604,6 +609,59 @@ internal object MapboxRouteLineUtils {
             }
         }
         return itemsToReturn
+    }
+
+    internal fun extractViolatedSectionsData(
+        route: NavigationRoute,
+        distancesProvider: (NavigationRoute) -> RouteLineGranularDistances?
+    ): List<ExtractedRouteRestrictionData> {
+        val itemsToReturn = mutableListOf<ExtractedRouteRestrictionData>()
+        val granularDistances = distancesProvider(route)
+        route.directionsRoute.legs()?.forEachIndexed { legIndex, leg ->
+            val legNotificationIndices = extractNotificationIndices(leg)
+            val legDistances = granularDistances?.legsDistances?.getOrNull(legIndex)
+            val routeDistance = granularDistances?.completeDistance
+            legNotificationIndices.forEach { (startIndex, endIndex) ->
+                val startRouteLineDistance = legDistances?.getOrNull(startIndex)
+                val endRouteLineDistance = legDistances?.getOrNull(endIndex)
+                if (startRouteLineDistance != null && endRouteLineDistance != null) {
+                    val startOffset = 1.0 - startRouteLineDistance.distanceRemaining / routeDistance!!
+                    val endOffset = 1.0 - endRouteLineDistance.distanceRemaining / routeDistance
+                    if (startOffset in 0.0..1.0 && endOffset in 0.0..1.0) {
+                        if (itemsToReturn.isEmpty() && startIndex >= TOLERANCE) {
+                            itemsToReturn.add(ExtractedRouteRestrictionData(0.0, false, 0))
+                        }
+                        itemsToReturn.add(
+                            ExtractedRouteRestrictionData(
+                                startOffset,
+                                true,
+                                legIndex
+                            )
+                        )
+                        itemsToReturn.add(
+                            ExtractedRouteRestrictionData(
+                                endOffset,
+                                false,
+                                legIndex
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        return itemsToReturn
+    }
+
+    private fun extractNotificationIndices(leg: RouteLeg): List<Pair<Int, Int>> {
+        val result = mutableListOf<Pair<Int, Int>>()
+        leg.notifications()?.forEach { notification ->
+            val startIndex = notification.geometryIndexStart()
+            val endIndex = notification.geometryIndexEnd()
+            if (startIndex != null && endIndex != null) {
+                result.add(startIndex to endIndex)
+            }
+        }
+        return result
     }
 
     /**
@@ -1262,6 +1320,27 @@ internal object MapboxRouteLineUtils {
                     }
             }
         }
+        if (options.displayViolatedSections) {
+            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_VIOLATED)) {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_3_VIOLATED,
+                    RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                )
+                    .lineWidth(options.resourceProvider.violatedSectionLineWidth)
+                    .lineJoin(LineJoin.ROUND)
+                    .lineOpacity(options.resourceProvider.violatedSectionOpacity)
+                    .lineColor(options.resourceProvider.routeLineColorResources.violatedSectionColor)
+                    .lineDasharray(options.resourceProvider.violatedSectionDashArray)
+                    .lineCap(LineCap.ROUND)
+                    .apply {
+                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                        style.layerLineDepthOcclusionFactor(
+                            layerId,
+                            options.lineDepthOcclusionFactor
+                        )
+                    }
+            }
+        }
 
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING)) {
             LineLayer(
@@ -1340,6 +1419,26 @@ internal object MapboxRouteLineUtils {
                     .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
                     .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
                     .lineCap(LineCap.ROUND)
+                    .apply {
+                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                        style.layerLineDepthOcclusionFactor(
+                            layerId,
+                            options.lineDepthOcclusionFactor
+                        )
+                    }
+            }
+        }
+        if (options.displayViolatedSections) {
+            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_VIOLATED)) {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_2_VIOLATED,
+                    RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                )
+                    .lineWidth(options.resourceProvider.violatedSectionLineWidth)
+                    .lineJoin(LineJoin.ROUND)
+                    .lineOpacity(options.resourceProvider.violatedSectionOpacity)
+                    .lineColor(options.resourceProvider.routeLineColorResources.violatedSectionColor)
+                    .lineDasharray(options.resourceProvider.violatedSectionDashArray)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                         style.layerLineDepthOcclusionFactor(
@@ -1436,6 +1535,27 @@ internal object MapboxRouteLineUtils {
                     }
             }
         }
+        if (options.displayViolatedSections) {
+            if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_VIOLATED)) {
+                LineLayer(
+                    RouteLayerConstants.LAYER_GROUP_1_VIOLATED,
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                )
+                    .lineWidth(options.resourceProvider.violatedSectionLineWidth)
+                    .lineJoin(LineJoin.ROUND)
+                    .lineOpacity(options.resourceProvider.violatedSectionOpacity)
+                    .lineColor(options.resourceProvider.routeLineColorResources.violatedSectionColor)
+                    .lineDasharray(options.resourceProvider.violatedSectionDashArray)
+                    .lineCap(LineCap.ROUND)
+                    .apply {
+                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                        style.layerLineDepthOcclusionFactor(
+                            layerId,
+                            options.lineDepthOcclusionFactor
+                        )
+                    }
+            }
+        }
 
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAIL_CASING)) {
             LineLayer(
@@ -1513,6 +1633,27 @@ internal object MapboxRouteLineUtils {
                     .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
                     .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
                     .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineCap(LineCap.ROUND)
+                    .apply {
+                        style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                        style.layerLineDepthOcclusionFactor(
+                            layerId,
+                            options.lineDepthOcclusionFactor
+                        )
+                    }
+            }
+        }
+        if (options.displayViolatedSections) {
+            if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_VIOLATED)) {
+                LineLayer(
+                    RouteLayerConstants.MASKING_LAYER_VIOLATED,
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                )
+                    .lineWidth(options.resourceProvider.violatedSectionLineWidth)
+                    .lineJoin(LineJoin.ROUND)
+                    .lineOpacity(options.resourceProvider.violatedSectionOpacity)
+                    .lineColor(options.resourceProvider.routeLineColorResources.violatedSectionColor)
+                    .lineDasharray(options.resourceProvider.violatedSectionDashArray)
                     .lineCap(LineCap.ROUND)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
@@ -1629,6 +1770,14 @@ internal object MapboxRouteLineUtils {
                     style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)
             } else {
                 true
+            } &&
+            if (options.displayViolatedSections) {
+                style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_VIOLATED) &&
+                    style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_VIOLATED) &&
+                    style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_VIOLATED) &&
+                    style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_VIOLATED)
+            } else {
+                true
             }
     }
 
@@ -1690,12 +1839,12 @@ internal object MapboxRouteLineUtils {
         routeData: List<ExtractedRouteRestrictionData>,
         vanishingPointOffset: Double,
         activeLegIndex: Int,
-        routeLineColorResources: RouteLineColorResources
+        @ColorInt color: Int,
     ) = RouteLineExpressionProvider {
         getRestrictedLineExpression(
             vanishingPointOffset,
             activeLegIndex,
-            routeLineColorResources.restrictedRoadColor,
+            color,
             routeData
         )
     }
@@ -1912,6 +2061,8 @@ internal object MapboxRouteLineUtils {
                 RouteLineTrimExpressionProvider { trimmedOffsetExpression },
                 restrictedSectionExpressionProvider =
                 RouteLineTrimExpressionProvider { trimmedOffsetExpression },
+                violatedSectionExpressionProvider =
+                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
                 trailExpressionProvider = { trimmedOffsetExpression },
                 trailCasingExpressionProvider = { trimmedOffsetExpression },
             )
@@ -1943,24 +2094,28 @@ internal object MapboxRouteLineUtils {
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_MAIN)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_VIOLATED)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_TRAIL)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_CASING)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_MAIN)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_2_VIOLATED)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_TRAIL)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_CASING)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_MAIN)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_3_VIOLATED)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_TRAIL_CASING)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_TRAIL)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_CASING)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_MAIN)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_TRAFFIC)
         style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_RESTRICTED)
+        style.removeStyleLayer(RouteLayerConstants.MASKING_LAYER_VIOLATED)
         style.removeStyleLayer(RouteLayerConstants.WAYPOINT_LAYER_ID)
         style.removeStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME)
         style.removeStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME)

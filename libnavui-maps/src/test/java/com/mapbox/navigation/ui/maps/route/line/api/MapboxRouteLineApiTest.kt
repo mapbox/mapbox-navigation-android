@@ -311,6 +311,7 @@ class MapboxRouteLineApiTest {
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
             every { options.displayRestrictedRoadSections } returns false
+            every { options.displayViolatedSections } returns false
             every {
                 options.styleInactiveRouteLegsIndependently
             } returns realOptions.styleInactiveRouteLegsIndependently
@@ -1841,6 +1842,13 @@ class MapboxRouteLineApiTest {
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
         )
+        val expectedViolatedExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+        )
         val colors = RouteLineColorResources.Builder()
             .routeLowCongestionColor(Color.GRAY)
             .routeUnknownCongestionColor(Color.LTGRAY)
@@ -1870,6 +1878,10 @@ class MapboxRouteLineApiTest {
         checkExpression(
             expectedRestrictedExpressionContents,
             result.restrictedSectionExpressionProvider!!.generateExpression()
+        )
+        checkExpression(
+            expectedViolatedExpressionContents,
+            result.violatedSectionExpressionProvider!!.generateExpression()
         )
         checkExpression(
             expectedTrafficExpressionContents,
@@ -1958,6 +1970,13 @@ class MapboxRouteLineApiTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
             )
+            val expectedViolatedExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            )
             val colors = RouteLineColorResources.Builder()
                 .routeLowCongestionColor(Color.GRAY)
                 .routeUnknownCongestionColor(Color.LTGRAY)
@@ -1986,6 +2005,10 @@ class MapboxRouteLineApiTest {
             checkExpression(
                 expectedRestrictedExpressionContents,
                 result.restrictedSectionExpressionProvider!!.generateExpression()
+            )
+            checkExpression(
+                expectedViolatedExpressionContents,
+                result.violatedSectionExpressionProvider!!.generateExpression()
             )
             checkExpression(
                 expectedTrafficExpressionContents,
@@ -2064,6 +2087,7 @@ class MapboxRouteLineApiTest {
             every { vanishingRouteLine } returns mockk()
             every { resourceProvider } returns realOptions.resourceProvider
             every { displayRestrictedRoadSections } returns false
+            every { displayViolatedSections } returns false
             every { styleInactiveRouteLegsIndependently } returns false
             every { displaySoftGradientForTraffic } returns false
             every { softGradientTransition } returns 30.0

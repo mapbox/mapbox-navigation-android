@@ -92,6 +92,7 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
+            null,
             genericMockResourceProvider,
             -1,
             0.0,
@@ -193,6 +194,7 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             restrictedSegments,
+            null,
             genericMockResourceProvider,
             0,
             0.0,
@@ -202,6 +204,68 @@ class VanishingRouteLineRoboTest {
         checkExpression(
             expectedRestrictedExpressionContents,
             result!!.restrictedRoadExpression!!.generateExpression()
+        )
+    }
+
+    @Test
+    fun getTraveledRouteLineExpressions_withViolatedSectionExpressionData() {
+        val expectedViolatedExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.7515682978431553),
+            StringChecker("[rgba, 0.0, 0.0, 13.0, 0.0]"),
+            DoubleChecker(0.7709736343191205),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.7712833059036543),
+            StringChecker("[rgba, 0.0, 0.0, 13.0, 0.0]"),
+            DoubleChecker(0.9302099290097133),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.9303781273349865),
+            StringChecker("[rgba, 0.0, 0.0, 13.0, 0.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
+        val colorResources = RouteLineColorResources.Builder()
+            .violatedSectionColor(Color.CYAN)
+            .build()
+
+        val route = loadNavigationRoute("route-with-violations.json")
+        val lineString = LineString.fromPolyline(
+            route.directionsRoute.geometry() ?: "",
+            Constants.PRECISION_6
+        )
+        val vanishingRouteLine = VanishingRouteLine()
+        vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 1
+        val segments: List<RouteLineExpressionData> =
+            MapboxRouteLineUtils.calculateRouteLineSegments(
+                route,
+                listOf(),
+                true,
+                colorResources
+            )
+        val violatedSegments = MapboxRouteLineUtils.extractViolatedSectionsData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
+
+        val result = vanishingRouteLine.getTraveledRouteLineExpressions(
+            lineString.coordinates()[0],
+            granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
+            segments,
+            null,
+            violatedSegments,
+            genericMockResourceProvider,
+            0,
+            0.0,
+            false
+        )
+
+        checkExpression(
+            expectedViolatedExpressionContents,
+            result!!.violatedSectionExpression!!.generateExpression()
         )
     }
 
@@ -238,6 +302,7 @@ class VanishingRouteLineRoboTest {
             lineString.coordinates()[0],
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
+            null,
             null,
             genericMockResourceProvider,
             -1,
@@ -294,6 +359,7 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
+            null,
             RouteLineResources.Builder().build(),
             0,
             0.0,
@@ -328,6 +394,7 @@ class VanishingRouteLineRoboTest {
             every { routeLineTraveledCasingColor } returns 10
             every { inActiveRouteLegsColor } returns 11
             every { restrictedRoadColor } returns 12
+            every { violatedSectionColor } returns 13
         }
         every { trafficBackfillRoadClasses } returns listOf()
     }

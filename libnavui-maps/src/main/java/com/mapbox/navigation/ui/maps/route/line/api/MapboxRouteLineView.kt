@@ -32,24 +32,28 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_RES
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_VIOLATED
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_VIOLATED
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_VIOLATED
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_RESTRICTED
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_VIOLATED
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineData
@@ -155,6 +159,12 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         LAYER_GROUP_3_RESTRICTED,
         MASKING_LAYER_RESTRICTED
     )
+    private val violatedLayerIds = setOf(
+        LAYER_GROUP_1_VIOLATED,
+        LAYER_GROUP_2_VIOLATED,
+        LAYER_GROUP_3_VIOLATED,
+        MASKING_LAYER_VIOLATED
+    )
     private val maskingRouteLineLayerGroup = setOf(
         MASKING_LAYER_MAIN,
         MASKING_LAYER_CASING,
@@ -162,6 +172,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         MASKING_LAYER_TRAFFIC,
         MASKING_LAYER_TRAIL_CASING,
         MASKING_LAYER_RESTRICTED,
+        MASKING_LAYER_VIOLATED,
     )
     private val sourceToFeatureMap = mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
         Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
@@ -934,6 +945,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 in mainLayerIds -> Pair(it, routeLineData.baseExpressionProvider)
                 in trafficLayerIds -> Pair(it, routeLineData.trafficExpressionProvider)
                 in restrictedLayerIds -> Pair(it, routeLineData.restrictedSectionExpressionProvider)
+                in violatedLayerIds -> Pair(it, routeLineData.violatedSectionExpressionProvider)
                 else -> null
             }
         }.filter { it?.second != null }.map {
@@ -1122,6 +1134,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             }
             in restrictedLayerIds -> {
                 routeLineDynamicData.restrictedSectionExpressionProvider
+            }
+            in violatedLayerIds -> {
+                routeLineDynamicData.violatedSectionExpressionProvider
             }
             else -> null
         }.run {

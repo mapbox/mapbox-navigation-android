@@ -94,6 +94,9 @@ object RouteLayerConstants {
     internal const val RESTRICTED_ROAD_LINE_OPACITY = 1.0
     internal const val RESTRICTED_ROAD_LINE_WIDTH = 7.0
     internal val RESTRICTED_ROAD_DASH_ARRAY = listOf(.5, 2.0)
+    internal const val VIOLATED_SECTION_LINE_OPACITY = 1.0
+    internal const val VIOLATED_SECTION_LINE_WIDTH = 7.0
+    internal val VIOLATED_SECTION_DASH_ARRAY = listOf(.5, 2.0)
     internal const val DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO = 62_500_000L
 
     internal val LOW_CONGESTION_RANGE = 0..39
@@ -156,7 +159,13 @@ object RouteLayerConstants {
     internal val RESTRICTED_ROAD_COLOR = Color.parseColor("#000000")
 
     @ColorInt
+    internal val VIOLATED_SECTION_COLOR = Color.parseColor("#4C4E52")
+
+    @ColorInt
     internal val ALTERNATE_RESTRICTED_ROAD_COLOR = Color.parseColor("#333333")
+
+    @ColorInt
+    internal val ALTERNATE_VIOLATED_SECTION_COLOR = Color.parseColor("#708090")
 
     @DrawableRes
     internal val ORIGIN_WAYPOINT_ICON: Int = R.drawable.mapbox_ic_route_origin
@@ -192,6 +201,7 @@ object RouteLayerConstants {
     internal const val LAYER_GROUP_1_MAIN = "mapbox-layerGroup-1-main"
     internal const val LAYER_GROUP_1_TRAFFIC = "mapbox-layerGroup-1-traffic"
     internal const val LAYER_GROUP_1_RESTRICTED = "mapbox-layerGroup-1-restricted"
+    internal const val LAYER_GROUP_1_VIOLATED = "mapbox-layerGroup-1-violated"
 
     internal const val LAYER_GROUP_2_TRAIL_CASING = "mapbox-layerGroup-2-trailCasing"
     internal const val LAYER_GROUP_2_TRAIL = "mapbox-layerGroup-2-trail"
@@ -199,6 +209,7 @@ object RouteLayerConstants {
     internal const val LAYER_GROUP_2_MAIN = "mapbox-layerGroup-2-main"
     internal const val LAYER_GROUP_2_TRAFFIC = "mapbox-layerGroup-2-traffic"
     internal const val LAYER_GROUP_2_RESTRICTED = "mapbox-layerGroup-2-restricted"
+    internal const val LAYER_GROUP_2_VIOLATED = "mapbox-layerGroup-2-violated"
 
     internal const val LAYER_GROUP_3_TRAIL_CASING = "mapbox-layerGroup-3-trailCasing"
     internal const val LAYER_GROUP_3_TRAIL = "mapbox-layerGroup-3-trail"
@@ -206,6 +217,7 @@ object RouteLayerConstants {
     internal const val LAYER_GROUP_3_MAIN = "mapbox-layerGroup-3-main"
     internal const val LAYER_GROUP_3_TRAFFIC = "mapbox-layerGroup-3-traffic"
     internal const val LAYER_GROUP_3_RESTRICTED = "mapbox-layerGroup-3-restricted"
+    internal const val LAYER_GROUP_3_VIOLATED = "mapbox-layerGroup-3-violated"
 
     /*
     When a line on the map overlaps itself it appears as though the later part of the line
@@ -226,4 +238,5 @@ object RouteLayerConstants {
     internal const val MASKING_LAYER_MAIN = "mapbox-masking-layer-main"
     internal const val MASKING_LAYER_TRAFFIC = "mapbox-masking-layer-traffic"
     internal const val MASKING_LAYER_RESTRICTED = "mapbox-masking-layer-restricted"
+    internal const val MASKING_LAYER_VIOLATED = "mapbox-masking-layer-violated"
 }

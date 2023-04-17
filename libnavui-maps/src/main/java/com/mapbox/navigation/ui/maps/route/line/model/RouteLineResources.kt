@@ -10,6 +10,9 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_L
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LINE_WIDTH
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ROUNDED_LINE_CAP
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TRAFFIC_BACKFILL_ROAD_CLASSES
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.VIOLATED_SECTION_DASH_ARRAY
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.VIOLATED_SECTION_LINE_OPACITY
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.VIOLATED_SECTION_LINE_WIDTH
 
 /**
  * Contains colors an other values used to determine the appearance of the route line.
@@ -35,6 +38,9 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TRAFFIC_BACKFILL_
  * @param restrictedRoadDashArray the dash array for the [LineLayer] used for displaying restricted roads
  * @param restrictedRoadOpacity the opacity of the restricted road [LineLayer]
  * @param restrictedRoadLineWidth the width of the restricted road [LineLayer]
+ * @param violatedSectionDashArray the dash array for the [LineLayer] used for displaying violated sections
+ * @param violatedSectionOpacity the opacity of the violated section [LineLayer]
+ * @param violatedSectionLineWidth the width of the violated section [LineLayer]
  */
 class RouteLineResources private constructor(
     val routeLineColorResources: RouteLineColorResources,
@@ -50,7 +56,10 @@ class RouteLineResources private constructor(
     val alternativeRouteTrafficLineScaleExpression: Expression,
     val restrictedRoadDashArray: List<Double>,
     val restrictedRoadOpacity: Double,
-    val restrictedRoadLineWidth: Double
+    val restrictedRoadLineWidth: Double,
+    val violatedSectionDashArray: List<Double>,
+    val violatedSectionOpacity: Double,
+    val violatedSectionLineWidth: Double,
 ) {
 
     /**
@@ -72,6 +81,9 @@ class RouteLineResources private constructor(
             .restrictedRoadDashArray(restrictedRoadDashArray)
             .restrictedRoadOpacity(restrictedRoadOpacity)
             .restrictedRoadLineWidth(restrictedRoadLineWidth)
+            .violatedSectionDashArray(violatedSectionDashArray)
+            .violatedSectionOpacity(violatedSectionOpacity)
+            .violatedSectionLineWidth(violatedSectionLineWidth)
     }
 
     /**
@@ -102,7 +114,10 @@ class RouteLineResources private constructor(
             "trafficBackfillRoadClasses=$trafficBackfillRoadClasses, " +
             "restrictedRoadDashArray=$restrictedRoadDashArray, " +
             "restrictedRoadOpacity=$restrictedRoadOpacity, " +
-            "restrictedRoadLineWidth=$restrictedRoadLineWidth" +
+            "restrictedRoadLineWidth=$restrictedRoadLineWidth, " +
+            "violatedSectionDashArray=$violatedSectionDashArray, " +
+            "violatedSectionOpacity=$violatedSectionOpacity, " +
+            "violatedSectionLineWidth=$violatedSectionLineWidth" +
             ")"
     }
 
@@ -141,6 +156,9 @@ class RouteLineResources private constructor(
         if (restrictedRoadDashArray != other.restrictedRoadDashArray) return false
         if (restrictedRoadOpacity != other.restrictedRoadOpacity) return false
         if (restrictedRoadLineWidth != other.restrictedRoadLineWidth) return false
+        if (violatedSectionDashArray != other.violatedSectionDashArray) return false
+        if (violatedSectionOpacity != other.violatedSectionOpacity) return false
+        if (violatedSectionLineWidth != other.violatedSectionLineWidth) return false
 
         return true
     }
@@ -163,6 +181,9 @@ class RouteLineResources private constructor(
         result = 31 * result + restrictedRoadDashArray.hashCode()
         result = 31 * result + restrictedRoadOpacity.hashCode()
         result = 31 * result + restrictedRoadLineWidth.hashCode()
+        result = 31 * result + violatedSectionDashArray.hashCode()
+        result = 31 * result + violatedSectionOpacity.hashCode()
+        result = 31 * result + violatedSectionLineWidth.hashCode()
         return result
     }
 
@@ -178,6 +199,9 @@ class RouteLineResources private constructor(
         private var restrictedRoadDashArray: List<Double> = RESTRICTED_ROAD_DASH_ARRAY
         private var restrictedRoadOpacity: Double = RESTRICTED_ROAD_LINE_OPACITY
         private var restrictedRoadLineWidth: Double = RESTRICTED_ROAD_LINE_WIDTH
+        private var violatedSectionDashArray: List<Double> = VIOLATED_SECTION_DASH_ARRAY
+        private var violatedSectionOpacity: Double = VIOLATED_SECTION_LINE_OPACITY
+        private var violatedSectionLineWidth: Double = VIOLATED_SECTION_LINE_WIDTH
 
         private var routeLineScaleExpression: Expression = buildScalingExpression(
             listOf(
@@ -379,6 +403,32 @@ class RouteLineResources private constructor(
             apply { this.restrictedRoadLineWidth = width }
 
         /**
+         * The dash array parameter for the violated section layer.
+         * See [LineLayer] LineDashArray for more information. An empty list will show a
+         * solid line.  The default is [.5, 2.0]
+         *
+         * @param dashArray value of the LineDash array
+         */
+        fun violatedSectionDashArray(dashArray: List<Double>): Builder =
+            apply { this.violatedSectionDashArray = dashArray }
+
+        /**
+         * The opacity for the violated section line. The default is 1.0.
+         *
+         * @param opacity the opacity value
+         */
+        fun violatedSectionOpacity(opacity: Double): Builder =
+            apply { this.violatedSectionOpacity = opacity }
+
+        /**
+         * The width of the violated section line
+         *
+         * @param width the width of the line
+         */
+        fun violatedSectionLineWidth(width: Double): Builder =
+            apply { this.violatedSectionLineWidth = width }
+
+        /**
          * Creates a instance of RouteLineResources
          *
          * @return the instance
@@ -400,7 +450,10 @@ class RouteLineResources private constructor(
                 alternativeRouteTrafficLineScaleExpression,
                 restrictedRoadDashArray,
                 restrictedRoadOpacity,
-                restrictedRoadLineWidth
+                restrictedRoadLineWidth,
+                violatedSectionDashArray,
+                violatedSectionOpacity,
+                violatedSectionLineWidth,
             )
         }
     }

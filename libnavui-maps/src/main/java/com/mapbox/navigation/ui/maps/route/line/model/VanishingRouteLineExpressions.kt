@@ -4,5 +4,6 @@ internal data class VanishingRouteLineExpressions(
     val trafficLineExpression: RouteLineExpressionProvider,
     val routeLineExpression: RouteLineExpressionProvider,
     val routeLineCasingExpression: RouteLineExpressionProvider,
-    val restrictedRoadExpression: RouteLineExpressionProvider?
+    val restrictedRoadExpression: RouteLineExpressionProvider?,
+    val violatedSectionExpression: RouteLineExpressionProvider?,
 )
