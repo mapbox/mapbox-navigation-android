@@ -5,23 +5,36 @@ import requests
 
 from utils import is_snapshot_week, get_dependency_version, get_latest_tag, get_snapshot_branch
 
+github_token = os.getenv("GITHUB_TOKEN")
+headers = {"Authorization": "Bearer " + github_token}
+
 
 def build_message():
     message = '@navigation-android '
 
-    if is_snapshot_week():
+    releases_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/releases"
+    releases = requests.get(releases_url).json()
+    if is_snapshot_week(releases):
         message += 'Navigation SDK snapshot must be released today (rc or GA release was not released this week).\n'
     else:
         message += 'Navigation SDK snapshot must not be released today (rc or GA release was released this week).\n'
         return message
 
-    maps_version = get_dependency_version('https://api.github.com/repos/mapbox/mapbox-maps-android-internal/releases')
+    maps_releases = requests.get(
+        'https://api.github.com/repos/mapbox/mapbox-maps-android-internal/releases',
+        headers=headers
+    ).json()
+    maps_version = get_dependency_version(maps_releases)
     if maps_version:
         message += ':white-check-mark: Maps ' + maps_version + ' is ready.\n'
     else:
         message += ':siren: Expected Maps release was not released.\n'
 
-    nav_native_version = get_dependency_version('https://api.github.com/repos/mapbox/mapbox-navigation-native/releases')
+    nav_native_releases = requests.get(
+        'https://api.github.com/repos/mapbox/mapbox-navigation-native/releases',
+        headers=headers
+    ).json()
+    nav_native_version = get_dependency_version(nav_native_releases)
     if nav_native_version:
         message += ':white_check_mark: Nav Native ' + nav_native_version + ' is ready.\n'
     else:

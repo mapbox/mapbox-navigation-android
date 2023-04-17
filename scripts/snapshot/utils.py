@@ -1,10 +1,4 @@
 import datetime
-import os
-
-import requests
-
-github_token = os.getenv("GITHUB_TOKEN")
-headers = {"Authorization": "Bearer " + github_token}
 
 
 def is_rc_or_ga(release_name):
@@ -22,17 +16,14 @@ def is_current_week(release_created_date):
     return created_date + datetime.timedelta(days=5) > today
 
 
-def is_snapshot_week():
-    releases_url = "https://api.github.com/repos/mapbox/mapbox-navigation-android/releases"
-    releases = requests.get(releases_url).json()
+def is_snapshot_week(releases):
     for release in releases:
         if is_current_week(release['created_at']) and is_rc_or_ga(release['name']):
             return False
     return True
 
 
-def get_dependency_version(releases_url):
-    releases = requests.get(releases_url, headers=headers).json()
+def get_dependency_version(releases):
     for release in releases:
         if is_current_week(release['created_at']) and not is_patch(
                 release['name']) and not ('private' in release['name']):

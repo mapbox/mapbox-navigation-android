@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 
@@ -5,17 +6,29 @@ import requests
 
 from utils import get_latest_tag, get_snapshot_branch, is_snapshot_week, get_dependency_version
 
-if not is_snapshot_week():
+github_token = os.getenv("GITHUB_TOKEN")
+headers = {"Authorization": "Bearer " + github_token}
+
+releases = requests.get('https://api.github.com/repos/mapbox/mapbox-navigation-android/releases').json()
+if not is_snapshot_week(releases):
     print('Navigation SDK snapshot must not be released today (rc or GA release was released this week).')
     sys.exit(1)
 
-maps_version = get_dependency_version('https://api.github.com/repos/mapbox/mapbox-maps-android-internal/releases')
+maps_releases = requests.get(
+    'https://api.github.com/repos/mapbox/mapbox-maps-android-internal/releases',
+    headers=headers
+).json()
+maps_version = get_dependency_version(maps_releases)
 if not maps_version:
     print('Expected Maps release was not released.')
     sys.exit(1)
 print('Bumping Maps to ' + maps_version)
 
-nav_native_version = get_dependency_version('https://api.github.com/repos/mapbox/mapbox-navigation-native/releases')
+nav_native_releases = requests.get(
+        'https://api.github.com/repos/mapbox/mapbox-navigation-native/releases',
+        headers=headers
+    ).json()
+nav_native_version = get_dependency_version(nav_native_releases)
 if not nav_native_version:
     print('Expected Nav Native release was not released.')
     sys.exit(1)
