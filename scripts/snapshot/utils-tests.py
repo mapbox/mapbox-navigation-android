@@ -95,7 +95,37 @@ class TestUtils(unittest.TestCase):
         ]
         self.assertEqual(utils.is_snapshot_week(releases), False)
 
-    # get_dependency_version
+    @freeze_time("2023-04-14")
+    def test_get_dependency_version_beta(self):
+        releases = [
+            {'name': '1.2.0-beta.1-private', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '1.1.0-beta.1', 'created_at': '2023-04-12T12:24:15Z'},
+        ]
+        self.assertEqual(utils.get_dependency_version(releases), '1.1.0-beta.1')
+
+    @freeze_time("2023-04-14")
+    def test_get_dependency_version_rc(self):
+        releases = [
+            {'name': '1.1.1', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '1.1.0-rc.1', 'created_at': '2023-04-12T12:24:15Z'},
+        ]
+        self.assertEqual(utils.get_dependency_version(releases), '1.1.0-rc.1')
+
+    @freeze_time("2023-04-14")
+    def test_get_dependency_version_ga(self):
+        releases = [
+            {'name': '1.2.0', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '1.1.0', 'created_at': '2023-04-03T12:24:15Z'},
+        ]
+        self.assertEqual(utils.get_dependency_version(releases), '1.2.0')
+
+    @freeze_time("2023-04-14")
+    def test_get_dependency_version_no_release(self):
+        releases = [
+            {'name': '1.2.0-beta.1-private', 'created_at': '2023-03-13T12:24:15Z'},
+            {'name': '1.1.0-beta.1', 'created_at': '2023-03-12T12:24:15Z'},
+        ]
+        self.assertEqual(utils.get_dependency_version(releases), None)
 
     # get_latest_tag
 
