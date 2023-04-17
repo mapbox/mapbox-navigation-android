@@ -54,6 +54,51 @@ class TestUtils(unittest.TestCase):
     def test_is_current_week_false(self):
         self.assertEqual(utils.is_current_week('2023-03-12T12:24:15Z'), False)
 
+    @freeze_time("2023-04-14")
+    def test_is_snapshot_week_alpha_true(self):
+        releases = [
+            {'name': '1.1.0-alpha.1', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '1.0.0', 'created_at': '2023-04-02T12:24:15Z'},
+        ]
+        self.assertEqual(utils.is_snapshot_week(releases), True)
+
+    @freeze_time("2023-04-14")
+    def test_is_snapshot_week_beta_true(self):
+        releases = [
+            {'name': '1.1.0-beta.1', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '1.0.0', 'created_at': '2023-04-02T12:24:15Z'},
+            {'name': '1.0.0-rc.1', 'created_at': '2023-04-01T12:24:15Z'},
+        ]
+        self.assertEqual(utils.is_snapshot_week(releases), True)
+
+    @freeze_time("2023-04-14")
+    def test_is_snapshot_week_patch_true(self):
+        releases = [
+            {'name': '1.1.1', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '2.0.0', 'created_at': '2023-04-02T12:24:15Z'},
+        ]
+        self.assertEqual(utils.is_snapshot_week(releases), True)
+
+    @freeze_time("2023-04-14")
+    def test_is_snapshot_week_rc_false(self):
+        releases = [
+            {'name': '1.1.0-rc.1', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '1.0.0', 'created_at': '2023-04-02T12:24:15Z'},
+        ]
+        self.assertEqual(utils.is_snapshot_week(releases), False)
+
+    @freeze_time("2023-04-14")
+    def test_is_snapshot_week_ga_false(self):
+        releases = [
+            {'name': '1.1.0', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '1.0.0', 'created_at': '2023-04-02T12:24:15Z'},
+        ]
+        self.assertEqual(utils.is_snapshot_week(releases), False)
+
+    # get_dependency_version
+
+    # get_latest_tag
+
 
 if __name__ == "__main__":
     unittest.main()
