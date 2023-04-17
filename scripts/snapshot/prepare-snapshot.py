@@ -25,9 +25,9 @@ if not maps_version:
 print('Bumping Maps to ' + maps_version)
 
 nav_native_releases = requests.get(
-        'https://api.github.com/repos/mapbox/mapbox-navigation-native/releases',
-        headers=headers
-    ).json()
+    'https://api.github.com/repos/mapbox/mapbox-navigation-native/releases',
+    headers=headers
+).json()
 nav_native_version = get_dependency_version(nav_native_releases)
 if not nav_native_version:
     print('Expected Nav Native release was not released.')

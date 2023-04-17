@@ -127,8 +127,6 @@ class TestUtils(unittest.TestCase):
         ]
         self.assertEqual(utils.get_dependency_version(releases), None)
 
-    # get_latest_tag
-
 
 if __name__ == "__main__":
     unittest.main()

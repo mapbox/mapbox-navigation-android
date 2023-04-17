@@ -26,7 +26,7 @@ def build_message():
     ).json()
     maps_version = get_dependency_version(maps_releases)
     if maps_version:
-        message += ':white-check-mark: Maps ' + maps_version + ' is ready.\n'
+        message += ':white_check_mark: Maps ' + maps_version + ' is ready.\n'
     else:
         message += ':siren: Expected Maps release was not released.\n'
 
