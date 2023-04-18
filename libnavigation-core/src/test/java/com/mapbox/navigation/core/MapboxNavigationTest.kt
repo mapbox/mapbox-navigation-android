@@ -24,6 +24,7 @@ import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecording
 import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreview
+import com.mapbox.navigation.core.reroute.InternalRerouteController
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -52,6 +53,7 @@ import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.Runs
+import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -68,6 +70,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -1894,8 +1897,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `set navigation reroute controller`() = coroutineRule.runBlockingTest {
         val navigationRerouteController: NavigationRerouteController = mockk(relaxed = true)
         createMapboxNavigation()
+        val oldController = mapboxNavigation.getRerouteController()
         mapboxNavigation.setRerouteController(navigationRerouteController)
-        assertEquals(navigationRerouteController, mapboxNavigation.getRerouteController())
+        assertNotEquals(oldController, mapboxNavigation.getRerouteController())
     }
 
     @Test
@@ -2042,6 +2046,62 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             tripSession.setRoutes(routes, any())
             routesPreviewController.previewNavigationRoutes(emptyList())
         }
+    }
+
+    @Test
+    fun setRerouteEnabled() {
+        val customRerouteController = mockk<NavigationRerouteController>(relaxed = true)
+        val defaultRerouteController = mockk<InternalRerouteController>(relaxed = true)
+        every {
+            NavigationComponentProvider.createRerouteController(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns defaultRerouteController
+        every { defaultRerouteController.state } returns RerouteState.FetchingRoute
+        every { customRerouteController.state } returns RerouteState.FetchingRoute
+        createMapboxNavigation()
+
+        assertNotNull(mapboxNavigation.getRerouteController())
+        assertTrue(mapboxNavigation.isRerouteEnabled())
+
+        mapboxNavigation.setRerouteEnabled(false)
+
+        assertNull(mapboxNavigation.getRerouteController())
+        assertFalse(mapboxNavigation.isRerouteEnabled())
+        verify { defaultRerouteController.interrupt() }
+        clearAllMocks(answers = false)
+
+        mapboxNavigation.setRerouteEnabled(true)
+
+        assertEquals(defaultRerouteController, mapboxNavigation.getRerouteController())
+        assertTrue(mapboxNavigation.isRerouteEnabled())
+
+        mapboxNavigation.setRerouteController(customRerouteController)
+        verify {
+            defaultRerouteController.interrupt()
+            customRerouteController.reroute(any<NavigationRerouteController.RoutesCallback>())
+        }
+        clearAllMocks(answers = false)
+        val customRerouteControllerAdapter = mapboxNavigation.getRerouteController()
+        assertNotEquals(defaultRerouteController, customRerouteControllerAdapter)
+        assertTrue(mapboxNavigation.isRerouteEnabled())
+
+        mapboxNavigation.setRerouteEnabled(true)
+
+        verify(exactly = 0) { customRerouteController.interrupt() }
+        assertEquals(customRerouteControllerAdapter, mapboxNavigation.getRerouteController())
+        assertTrue(mapboxNavigation.isRerouteEnabled())
+
+        mapboxNavigation.setRerouteController(null)
+
+        verify { customRerouteController.interrupt() }
+        assertNull(mapboxNavigation.getRerouteController())
+        assertFalse(mapboxNavigation.isRerouteEnabled())
     }
 
     private fun interceptRefreshObserver(): RouteRefreshObserver {

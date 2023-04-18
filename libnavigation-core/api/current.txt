@@ -34,6 +34,7 @@ package com.mapbox.navigation.core {
     method public Integer? getZLevel();
     method public boolean isDestroyed();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public boolean isReplayEnabled();
+    method public boolean isRerouteEnabled();
     method public boolean isRunningForegroundService();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void moveRoutesFromPreviewToNavigator() throws java.lang.IllegalArgumentException;
     method public void navigateNextRouteLeg(com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback callback);
@@ -73,10 +74,11 @@ package com.mapbox.navigation.core {
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0);
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
-    method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController);
-    method public void setRerouteController(com.mapbox.navigation.core.reroute.NavigationRerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
-    method public void setRerouteController();
-    method public void setRerouteOptionsAdapter(com.mapbox.navigation.core.reroute.RerouteOptionsAdapter? rerouteOptionsAdapter);
+    method @Deprecated public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController);
+    method @Deprecated public void setRerouteController(com.mapbox.navigation.core.reroute.NavigationRerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
+    method @Deprecated public void setRerouteController();
+    method public void setRerouteEnabled(boolean enabled);
+    method @Deprecated public void setRerouteOptionsAdapter(com.mapbox.navigation.core.reroute.RerouteOptionsAdapter? rerouteOptionsAdapter);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, int initialLegIndex = 0);
     method @Deprecated public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setRoutesPreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int primaryRouteIndex = 0);
@@ -756,8 +758,8 @@ package com.mapbox.navigation.core.reroute {
     method public void onNewRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
   }
 
-  public interface RerouteOptionsAdapter {
-    method public com.mapbox.api.directions.v5.models.RouteOptions onRouteOptions(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+  @Deprecated public interface RerouteOptionsAdapter {
+    method @Deprecated public com.mapbox.api.directions.v5.models.RouteOptions onRouteOptions(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
   }
 
   public abstract sealed class RerouteState {

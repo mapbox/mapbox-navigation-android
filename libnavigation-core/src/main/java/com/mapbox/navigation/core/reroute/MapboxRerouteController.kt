@@ -37,7 +37,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
     private val compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter,
-) : NavigationRerouteController {
+) : InternalRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
 

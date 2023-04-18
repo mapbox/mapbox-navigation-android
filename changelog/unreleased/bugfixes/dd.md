@@ -1,0 +1,2 @@
+- Deprecated `MapboxNavigation#setRerouteController` method. Using custom rerouting logic is now deprecated. 
+- Introduced `MapboxNavigation#setRerouteEnabled` to disable/enable reroutes instead of using custom reroute controller. By default rerouting is enabled.
