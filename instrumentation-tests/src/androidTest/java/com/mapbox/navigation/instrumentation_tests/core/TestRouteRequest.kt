@@ -27,23 +27,26 @@ import java.io.File
 import java.util.Date
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import android.Manifest
 
 @OptIn(ExperimentalTime::class)
-class TestRouteRequest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
-
-    override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
-        latitude = 38.894721
-        longitude = -77.031991
-    }
+class TestRouteRequest {
 
     private lateinit var mapboxNavigation: MapboxNavigation
 
     @Before
     fun setUp() {
+        val instrumentation = getInstrumentation()
+        val packageName = instrumentation.targetContext.packageName
+        instrumentation.uiAutomation.grantRuntimePermission(packageName, Manifest.permission.READ_EXTERNAL_STORAGE)
+        instrumentation.uiAutomation.grantRuntimePermission(packageName, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        instrumentation.uiAutomation.grantRuntimePermission(packageName, Manifest.permission.ACCESS_FINE_LOCATION)
+        
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                NavigationOptions.Builder(instrumentation.targetContext)
+                    .accessToken(getMapboxAccessTokenFromResources(instrumentation.targetContext))
                     .build()
             )
         }
