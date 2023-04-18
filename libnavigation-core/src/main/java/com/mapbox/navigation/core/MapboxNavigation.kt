@@ -69,6 +69,8 @@ import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.reroute.InternalRerouteController
+import com.mapbox.navigation.core.reroute.InternalRerouteControllerAdapter
 import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
@@ -326,8 +328,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Reroute controller, by default uses [defaultRerouteController].
      */
-    private var rerouteController: NavigationRerouteController?
-    private val defaultRerouteController: NavigationRerouteController
+    private var rerouteController: InternalRerouteController?
+    private val defaultRerouteController: InternalRerouteController
 
     /**
      * [NavigationVersionSwitchObserver] is notified when navigation switches tiles version.
@@ -575,7 +577,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             )
         }
 
-        defaultRerouteController = MapboxRerouteController(
+        defaultRerouteController = NavigationComponentProvider.createRerouteController(
             directionsSession,
             tripSession,
             routeOptionsProvider,
@@ -1421,6 +1423,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Pass `null` to disable automatic reroute.
      * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
      */
+    @Deprecated(
+        "Custom rerouting logic is deprecated. Use setRerouteEnabled to enable/disable reroutes"
+    )
     fun setRerouteController(rerouteController: RerouteController?) {
         setRerouteController(
             rerouteController?.let { LegacyRerouteControllerAdapter(it) }
@@ -1435,11 +1440,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
      */
     @JvmOverloads
+    @Deprecated(
+        "Custom rerouting logic is deprecated. Use setRerouteEnabled to enable/disable reroutes."
+    )
     fun setRerouteController(
         rerouteController: NavigationRerouteController? = defaultRerouteController
     ) {
         val oldController = this.rerouteController
-        this.rerouteController = rerouteController
+        this.rerouteController = if (rerouteController is InternalRerouteController) {
+            rerouteController
+        } else {
+            rerouteController?.let { InternalRerouteControllerAdapter(it) }
+        }
         if (oldController?.state == RerouteState.FetchingRoute) {
             oldController.interrupt()
             reroute()
@@ -1450,6 +1462,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Set [RerouteOptionsAdapter]. It allows modify [RouteOptions] of default implementation of
      * [NavigationRerouteController] ([RerouteController]).
      */
+    @Deprecated(
+        "Custom rerouting logic is deprecated. Use setRerouteEnabled to enable/disable reroutes."
+    )
     fun setRerouteOptionsAdapter(
         rerouteOptionsAdapter: RerouteOptionsAdapter?
     ) {
@@ -1463,6 +1478,28 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see setRerouteController
      */
     fun getRerouteController(): NavigationRerouteController? = rerouteController
+
+    /**
+     * Enables/disables rerouting.
+     *
+     * @param enabled true if rerouting should be enabled, false otherwise
+     */
+    fun setRerouteEnabled(enabled: Boolean) {
+        if (enabled) {
+            if (rerouteController == null) {
+                setRerouteController(defaultRerouteController)
+            }
+        } else {
+            setRerouteController(null)
+        }
+    }
+
+    /**
+     * Whether rerouting is enabled. True by default.
+     * It can be disabled by invoking [setRerouteEnabled] with false as a parameter,
+     * or via a deprecated [setRerouteController] with null controller.
+     */
+    fun isRerouteEnabled(): Boolean = rerouteController != null
 
     /**
      * Registers [ArrivalObserver]. Monitor arrival at stops and destinations. For more control
