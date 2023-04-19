@@ -1,9 +1,10 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
-import android.location.Location
+import android.Manifest
 import android.os.Build
-import android.os.Environment
+import android.os.SystemClock
 import android.util.Log
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.DownloadOptions
 import com.mapbox.common.HttpRequest
@@ -14,8 +15,6 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
-import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
@@ -27,8 +26,6 @@ import java.io.File
 import java.util.Date
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
-import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import android.Manifest
 
 @OptIn(ExperimentalTime::class)
 class TestRouteRequest {
@@ -39,10 +36,19 @@ class TestRouteRequest {
     fun setUp() {
         val instrumentation = getInstrumentation()
         val packageName = instrumentation.targetContext.packageName
-        instrumentation.uiAutomation.grantRuntimePermission(packageName, Manifest.permission.READ_EXTERNAL_STORAGE)
-        instrumentation.uiAutomation.grantRuntimePermission(packageName, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        instrumentation.uiAutomation.grantRuntimePermission(packageName, Manifest.permission.ACCESS_FINE_LOCATION)
-        
+        instrumentation.uiAutomation.grantRuntimePermission(
+            packageName,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        )
+        instrumentation.uiAutomation.grantRuntimePermission(
+            packageName,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        instrumentation.uiAutomation.grantRuntimePermission(
+            packageName,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(instrumentation.targetContext)
@@ -63,17 +69,17 @@ class TestRouteRequest {
         val testCases = testCoordinates.split(" \n")
         for (coordinates in testCases) {
             val measurementFull = measureResponseTimeRetryable(coordinates) {
-                this
+                this.alternatives(true)
             }
             val measurementNoAnnotation = measureResponseTimeRetryable(coordinates) {
-                this.annotations(null)
+                this.annotations(null).alternatives(true)
             }
             writeResults(
                 testRunId = testRunId,
                 coordinates = coordinates,
                 listOf(
-                    "full" to measurementFull,
-                    "no annotations" to measurementNoAnnotation
+                    "full alternatives" to measurementFull,
+                    "no annotations alternatives" to measurementNoAnnotation
                 )
             )
         }
@@ -101,7 +107,7 @@ class TestRouteRequest {
         val interceptor = object : HttpServiceInterceptorInterface {
             override fun onRequest(request: HttpRequest): HttpRequest {
                 if (request.url.contains(coordinates)) {
-                    requestTime = Date().time
+                    requestTime = SystemClock.elapsedRealtime()
                 }
                 return request
             }
@@ -112,7 +118,7 @@ class TestRouteRequest {
 
             override fun onResponse(response: HttpResponse): HttpResponse {
                 if (response.request.url.contains(coordinates)) {
-                    responseTime = Date().time
+                    responseTime = SystemClock.elapsedRealtime()
                     responseSize = response.result.value?.data?.size
                 }
                 return response
@@ -154,8 +160,9 @@ class TestRouteRequest {
         coordinates: String,
         measurements: List<Pair<String, Measurement.SuccessfulMeasurement>>,
     ) {
+        val context = getInstrumentation().targetContext
         val file = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            context.filesDir,
             "route-request-time-test-results-${testRunId}.csv"
         )
         val resultBuilder = StringBuilder()
