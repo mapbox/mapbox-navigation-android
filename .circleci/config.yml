@@ -127,6 +127,17 @@ workflows:
                 - main
     jobs:
       - release-weekly-snapshot
+  pre-snapshot-workflow:
+    # Run workflow every Thursday at 23:59 UTC
+    triggers:
+      - schedule:
+          cron: "59 23 * * 4"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - pre-snapshot-check
 
 #------------------------------
 #---------- COMMANDS ----------
@@ -543,11 +554,19 @@ commands:
             pip3 install requests
             python3 scripts/trigger-mobile-metrics.py
 
+  pre-snapshot-check:
+    steps:
+      - run:
+          name: Pre-snapshot check
+          command: |
+            export GITHUB_TOKEN=$(./mbx-ci github writer private token)
+            python3 scripts/snapshot/pre-snapshot-check.py
+
   trigger-onetap:
     steps:
       - run:
           name: Trigger onetap
-          command: python3 scripts/trigger-onetap.py
+          command: python3 scripts/snapshot/trigger-onetap.py
 
   prepare-mbx-ci:
     steps:
@@ -563,11 +582,13 @@ commands:
           command: |
             ./mbx-ci aws setup
 
-  checkout-branch:
+  prepare-snapshot:
     steps:
       - run:
-          name: Checkout branch
-          command: python3 scripts/checkout-branch.py
+          name: Prepare snapshot
+          command: |
+            export GITHUB_TOKEN=$(./mbx-ci github writer private token)
+            python3 scripts/snapshot/prepare-snapshot.py
 
 #--------------------------
 #---------- JOBS ----------
@@ -868,6 +889,13 @@ jobs:
       - upload-artifacts-snapshot
       - trigger-mobile-metrics
 
+  pre-snapshot-check:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - prepare-mbx-ci
+      - pre-snapshot-check
+
   release-weekly-snapshot:
     executor: ndk-r22-latest-executor
     resource_class: medium+
@@ -877,10 +905,10 @@ jobs:
       WEEKLY_SNAPSHOT_WORKFLOW: true
     steps:
       - checkout
-      - checkout-branch
+      - prepare-mbx-ci
+      - prepare-snapshot
       - assemble-core-release
       - assemble-ui-release
-      - prepare-mbx-ci
       - setup-aws-credentials
       - upload-artifacts-snapshot
       - trigger-mobile-metrics
