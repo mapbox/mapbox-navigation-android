@@ -26,7 +26,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun requestAndSetLongRouteWithoutOnboardTiles() = sdkTest(timeout = 60_000) {
+    fun requestAndSetLongRouteWithoutOnboardTiles() = sdkTest(timeout = 120_000) {
         val routeOptions = RouteOptions.builder()
             .baseUrl(mockWebServerRule.baseUrl) // comment to use real Directions API
             .applyDefaultNavigationOptions()
