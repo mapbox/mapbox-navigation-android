@@ -155,6 +155,14 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         LAYER_GROUP_3_RESTRICTED,
         MASKING_LAYER_RESTRICTED
     )
+    private val maskingRouteLineLayerGroup = setOf(
+        MASKING_LAYER_MAIN,
+        MASKING_LAYER_CASING,
+        MASKING_LAYER_TRAIL,
+        MASKING_LAYER_TRAFFIC,
+        MASKING_LAYER_TRAIL_CASING,
+        MASKING_LAYER_RESTRICTED,
+    )
     private val sourceToFeatureMap = mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
         Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
         Pair(MapboxRouteLineUtils.layerGroup2SourceKey, RouteLineFeatureId(null)),
@@ -1156,7 +1164,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             .union(trafficLayerIds)
             .forEach {
                 when (it) {
-                    in primaryRouteLineLayerGroup -> {
+                    in primaryRouteLineLayerGroup + maskingRouteLineLayerGroup -> {
                         when (it) {
                             in casingLayerIds -> {
                                 options.resourceProvider.routeCasingLineScaleExpression

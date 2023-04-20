@@ -8,12 +8,9 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
-import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -41,6 +38,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 
 class InactiveRouteStylingActivity : AppCompatActivity() {
 
@@ -57,21 +55,75 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     private val mapboxReplayer = MapboxReplayer()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val mapCamera: CameraAnimationsPlugin by lazy {
-        binding.mapView.camera
-    }
-
     private val routeLineColorResources by lazy {
         RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
             .restrictedRoadColor(Color.MAGENTA)
+            .routeLineTraveledCasingColor(Color.RED)
+            .routeCasingColor(Color.GREEN)
+            .routeLineTraveledColor(Color.BLUE)
+            .routeClosureColor(Color.BLACK)
+            .routeDefaultColor(Color.LTGRAY)
             .build()
+    }
+
+    private val routeTrafficLineScaleExpression: Expression by lazy {
+        buildScalingExpression(
+            listOf(
+                RouteLineScaleValue(4f, 3f, 1.5f),
+                RouteLineScaleValue(10f, 4f, 1.5f),
+                RouteLineScaleValue(13f, 6f, 1.5f),
+                RouteLineScaleValue(16f, 10f, 1.5f),
+                RouteLineScaleValue(19f, 14f, 1.5f),
+                RouteLineScaleValue(22f, 18f, 1.5f)
+            )
+        )
+    }
+
+    private val alternativeRouteTrafficLineScaleExpression: Expression by lazy {
+        buildScalingExpression(
+            listOf(
+                RouteLineScaleValue(4f, 3f, .5f),
+                RouteLineScaleValue(10f, 4f, .5f),
+                RouteLineScaleValue(13f, 6f, .5f),
+                RouteLineScaleValue(16f, 10f, .5f),
+                RouteLineScaleValue(19f, 14f, .5f),
+                RouteLineScaleValue(22f, 18f, .5f)
+            )
+        )
     }
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder()
             .routeLineColorResources(routeLineColorResources)
+            .routeLineScaleExpression(routeTrafficLineScaleExpression)
+            .routeTrafficLineScaleExpression(routeTrafficLineScaleExpression)
+            .alternativeRouteLineScaleExpression(alternativeRouteTrafficLineScaleExpression)
+            .alternativeRouteTrafficLineScaleExpression(alternativeRouteTrafficLineScaleExpression)
             .build()
+    }
+
+    private fun buildScalingExpression(scalingValues: List<RouteLineScaleValue>): Expression {
+        val expressionBuilder = Expression.ExpressionBuilder("interpolate")
+        expressionBuilder.addArgument(Expression.exponential { literal(1.5) })
+        expressionBuilder.zoom()
+        scalingValues.forEach { routeLineScaleValue ->
+            expressionBuilder.stop {
+                this.literal(routeLineScaleValue.scaleStop.toDouble())
+                product {
+                    literal(routeLineScaleValue.scaleMultiplier.toDouble())
+                    literal(routeLineScaleValue.scale.toDouble())
+                }
+            }
+        }
+        return expressionBuilder.build()
+    }
+
+    private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        val result = routeLineApi.updateTraveledRouteLine(point)
+        binding.mapView.getMapboxMap().getStyle()?.apply {
+            routeLineView.renderRouteLineUpdate(this, result)
+        }
     }
 
     private val options: MapboxRouteLineOptions by lazy {
@@ -80,6 +132,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
             .withRouteLineBelowLayerId("road-label-navigation")
             .styleInactiveRouteLegsIndependently(true)
             .displayRestrictedRoadSections(true)
+            .withVanishingRouteLineEnabled(true)
             .build()
     }
 
@@ -139,10 +192,11 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         navigationLocationProvider.changePosition(startingLocation)
         binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
+            addOnIndicatorPositionChangedListener(onPositionChangedListener)
             enabled = true
         }
         mapboxReplayer.pushRealLocation(this, 0.0)
-        mapboxReplayer.playbackSpeed(1.5)
+        mapboxReplayer.playbackSpeed(1.0)
         mapboxReplayer.play()
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.setRerouteController(null)
@@ -185,23 +239,8 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
                     locationMatcherResult.enhancedLocation,
                     locationMatcherResult.keyPoints,
                 )
-                updateCamera(locationMatcherResult.enhancedLocation)
             }
         }
-    }
-
-    private fun updateCamera(location: Location) {
-        val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
-        mapAnimationOptionsBuilder.duration(1500L)
-        mapCamera.easeTo(
-            CameraOptions.Builder()
-                .center(Point.fromLngLat(location.longitude, location.latitude))
-                .bearing(location.bearing.toDouble())
-                .zoom(15.0)
-                .padding(EdgeInsets(1000.0, 0.0, 0.0, 0.0))
-                .build(),
-            mapAnimationOptionsBuilder.build()
-        )
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
