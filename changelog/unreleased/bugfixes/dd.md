@@ -1,0 +1,1 @@
+- Fixed an issue where the route lines didn't apply `RouteLineResources`'s custom scale expressions correctly.
