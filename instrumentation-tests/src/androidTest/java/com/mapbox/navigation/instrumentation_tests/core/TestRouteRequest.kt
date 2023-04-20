@@ -5,6 +5,9 @@ import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.MapboxDirections
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.DownloadOptions
 import com.mapbox.common.HttpRequest
@@ -20,10 +23,18 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.EventListener
+import okhttp3.OkHttpClient
 import org.junit.Before
 import org.junit.Test
+import retrofit2.Response
 import java.io.File
 import java.util.Date
+import java.util.concurrent.TimeUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -31,6 +42,8 @@ import kotlin.time.measureTime
 class TestRouteRequest {
 
     private lateinit var mapboxNavigation: MapboxNavigation
+
+    private val context get() = getInstrumentation().targetContext
 
     @Before
     fun setUp() {
@@ -64,22 +77,22 @@ class TestRouteRequest {
     }
 
     @Test
-    fun set_navigation_routes_successfully() = sdkTest(timeout = 15 * 60 * 1000) {
+    fun set_navigation_routes_successfully() = sdkTest(timeout = 20 * 60 * 1000) {
         val testRunId = Date().time.toString()
         val testCases = testCoordinates.split(" \n")
         for (coordinates in testCases) {
             val measurementFull = measureResponseTimeRetryable(coordinates) {
                 this.alternatives(true)
             }
-            val measurementNoAnnotation = measureResponseTimeRetryable(coordinates) {
-                this.annotations(null).alternatives(true)
+            val noStepsOnlyCongestionAnnotation = measureResponseTimeRetryable(coordinates) {
+                this.annotationsList(listOf(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC)).alternatives(true).steps(false)
             }
             writeResults(
                 testRunId = testRunId,
                 coordinates = coordinates,
                 listOf(
-                    "full alternatives" to measurementFull,
-                    "no annotations alternatives" to measurementNoAnnotation
+                    "full" to measurementFull,
+                    "no steps but congestion annotation" to noStepsOnlyCongestionAnnotation
                 )
             )
         }
@@ -90,14 +103,14 @@ class TestRouteRequest {
         requestModifier: RouteOptions.Builder.() -> RouteOptions.Builder
     ): Measurement.SuccessfulMeasurement {
         while (true) {
-            val measurement = measureResponseTime(coordinates, requestModifier)
+            val measurement = measureResponseTimeMapboxJava(coordinates, requestModifier)
             if (measurement is Measurement.SuccessfulMeasurement) {
                 return measurement
             }
         }
     }
 
-    private suspend fun measureResponseTime(
+    private suspend fun measureResponseTimeNavSDK(
         coordinates: String,
         requestModifier: RouteOptions.Builder.() -> RouteOptions.Builder
     ): Measurement {
@@ -145,6 +158,7 @@ class TestRouteRequest {
             }
             is RouteRequestResult.Success -> {
                 Measurement.SuccessfulMeasurement(
+                    timeFromRequestTillFirstByte = null,
                     timeFromRequestTillFullResponse = responseTime!! - requestTime!!,
                     deviceProcessingTime = time.inWholeMilliseconds - (responseTime!! - requestTime!!),
                     timeFromRequestTillParsedRoute = time.inWholeMilliseconds,
@@ -152,6 +166,69 @@ class TestRouteRequest {
                     distance = response.routes.first().directionsRoute.distance()
                 )
             }
+        }
+    }
+
+    private suspend fun measureResponseTimeMapboxJava(
+        coordinates: String,
+        requestModifier: RouteOptions.Builder.() -> RouteOptions.Builder
+    ): Measurement {
+        var requestTime: Long? = null
+        var responseBodyStart: Long? = null
+        var responseBodyEnd: Long? = null
+        var responseSize: Int? = null
+        val response: Response<DirectionsResponse>
+        val routeOptions = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinates(coordinates)
+            .alternatives(false)
+            .enableRefresh(false)
+            .requestModifier()
+            .build()
+        val directions = MapboxDirections.builder()
+            .accessToken(getMapboxAccessTokenFromResources(context))
+            .routeOptions(routeOptions)
+            .build()
+        val okHttpClient = OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .eventListener(object : EventListener() {
+                override fun callStart(call: Call) {
+                    requestTime = SystemClock.elapsedRealtime()
+                }
+
+                override fun responseBodyStart(call: Call) {
+                    responseBodyStart = SystemClock.elapsedRealtime()
+                }
+
+                override fun responseBodyEnd(call: Call, byteCount: Long) {
+                    responseBodyEnd = SystemClock.elapsedRealtime()
+                    responseSize = byteCount.toInt()
+                }
+            })
+            .build()
+        directions.setCallFactory {
+            okHttpClient.newCall(it)
+        }
+        val time = measureTime {
+            supervisorScope {
+                response =  withContext(Dispatchers.IO) { directions.executeCall() }
+            }
+        }
+        return if (response.isSuccessful) {
+            Measurement.SuccessfulMeasurement(
+                timeFromRequestTillFirstByte = responseBodyStart!! - requestTime!!,
+                timeFromRequestTillFullResponse = time.inWholeMilliseconds,
+                deviceProcessingTime = time.inWholeMilliseconds - (responseBodyEnd!! - requestTime!!),
+                timeFromRequestTillParsedRoute = time.inWholeMilliseconds,
+                responseSize = responseSize!!,
+                distance = response.body()!!.routes()!!.first().distance()
+            )
+        }
+        else {
+            val failure = response.message()
+            Log.e("time-test", "error getting route for $coordinates: ${failure}")
+            Measurement.FailedMeasurement
         }
     }
 
@@ -171,7 +248,8 @@ class TestRouteRequest {
             for (measurement in measurements) {
                 resultBuilder.append(
                     "time from request to parsed response in milliseconds ${measurement.first},",
-                    "network request time ${measurement.first},",
+                    "network request time till downloaded content ${measurement.first},",
+                    "network time till first byte ${measurement.first},",
                     "device processing time ${measurement.first},",
                     "response size bytes ${measurement.first},"
                 )
@@ -188,6 +266,8 @@ class TestRouteRequest {
                 ",",
                 measurement.second.timeFromRequestTillFullResponse,
                 ",",
+                measurement.second.timeFromRequestTillFirstByte,
+                ",",
                 measurement.second.deviceProcessingTime,
                 ",",
                 measurement.second.responseSize,
@@ -203,6 +283,7 @@ class TestRouteRequest {
 sealed class Measurement {
     object FailedMeasurement : Measurement()
     data class SuccessfulMeasurement(
+        val timeFromRequestTillFirstByte: Long?,
         val timeFromRequestTillFullResponse: Long,
         val deviceProcessingTime: Long,
         val responseSize: Int,
