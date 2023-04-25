@@ -17,7 +17,6 @@ import androidx.annotation.IntDef
  * - [RoadObjectType.RAILWAY_CROSSING]
  * - [RoadObjectType.IC]
  * - [RoadObjectType.JCT]
- * - [RoadObjectType.JCT]
  */
 object RoadObjectType {
 
