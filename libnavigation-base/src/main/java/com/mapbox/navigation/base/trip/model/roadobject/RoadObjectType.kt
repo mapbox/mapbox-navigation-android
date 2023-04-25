@@ -78,7 +78,7 @@ object RoadObjectType {
     /**
      * Not finished yet, see https://mapbox.atlassian.net/browse/NAVAND-1311
      */
-    internal const val NOTIFICATION = 10
+    internal const val NOTIFICATION = 11
 
     /**
      * Retention policy for the RoadObjectType
@@ -96,6 +96,7 @@ object RoadObjectType {
         RAILWAY_CROSSING,
         IC,
         JCT,
+        NOTIFICATION
     )
     annotation class Type
 }
