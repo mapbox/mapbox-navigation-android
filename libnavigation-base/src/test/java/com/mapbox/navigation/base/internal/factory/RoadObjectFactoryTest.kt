@@ -68,7 +68,7 @@ class RoadObjectFactoryTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)!!
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -92,7 +92,7 @@ class RoadObjectFactoryTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)!!
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -219,7 +219,7 @@ class RoadObjectFactoryTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)!!
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -285,7 +285,7 @@ class RoadObjectFactoryTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)!!
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())

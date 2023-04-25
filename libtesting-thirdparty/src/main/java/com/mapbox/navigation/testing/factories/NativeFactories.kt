@@ -3,12 +3,14 @@ package com.mapbox.navigation.testing.factories
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.ActiveGuidanceInfo
+import com.mapbox.navigator.AlternativeRouteInfo
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.MapMatcherOutput
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RoadName
+import com.mapbox.navigator.RouteIndices
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
@@ -50,6 +52,7 @@ fun createNavigationStatus(
     upcomingRouteAlertUpdates: List<UpcomingRouteAlertUpdate> = emptyList(),
     nextWaypointIndex: Int = 0,
     layer: Int = 0,
+    alternativeRouteIndices: List<RouteIndices> = emptyList()
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
@@ -65,6 +68,7 @@ fun createNavigationStatus(
         geometryIndex,
         shapeIndex,
         intersectionIndex,
+        alternativeRouteIndices,
         roads,
         voiceInstruction,
         bannerInstruction,
