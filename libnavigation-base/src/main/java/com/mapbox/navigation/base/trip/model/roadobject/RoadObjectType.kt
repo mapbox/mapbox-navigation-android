@@ -17,6 +17,7 @@ import androidx.annotation.IntDef
  * - [RoadObjectType.RAILWAY_CROSSING]
  * - [RoadObjectType.IC]
  * - [RoadObjectType.JCT]
+ * - [RoadObjectType.JCT]
  */
 object RoadObjectType {
 
@@ -74,6 +75,11 @@ object RoadObjectType {
      * Type of the [JCT] - corresponds to junction.
      */
     const val JCT = 10
+
+    /**
+     * Not finished yet, see https://mapbox.atlassian.net/browse/NAVAND-1311
+     */
+    internal const val NOTIFICATION = 10
 
     /**
      * Retention policy for the RoadObjectType

@@ -32,12 +32,14 @@ object RoadObjectFactory {
         List<UpcomingRoadObject> {
         return this
             .filter { SUPPORTED_ROAD_OBJECTS.contains(it.roadObject.type) }
-            .map {
-                buildUpcomingRoadObject(
-                    buildRoadObject(it.roadObject),
-                    it.distanceToStart,
-                    null
-                )
+            .mapNotNull { upcomingRouteAlert ->
+                buildRoadObject(upcomingRouteAlert.roadObject)?.let { roadObject ->
+                    buildUpcomingRoadObject(
+                        roadObject,
+                        upcomingRouteAlert.distanceToStart,
+                        null
+                    )
+                }
             }
     }
 

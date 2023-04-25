@@ -57,7 +57,7 @@ internal typealias SDKTunnelInfo =
 internal typealias SDKRailwayCrossingInfo =
     com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
 
-internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
+internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject? {
     val provider = provider.mapToRoadObjectProvider()
     return when (type) {
         RoadObjectType.INCIDENT ->
@@ -145,6 +145,7 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             isUrban,
             this,
         )
+        RoadObjectType.NOTIFICATION -> null
     }
 }
 
