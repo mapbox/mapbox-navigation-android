@@ -117,14 +117,6 @@ workflows:
             - unit-tests-ui
             - unit-tests-core
   weekly-snapshot-workflow:
-    # Run workflow every Friday at 23:59 UTC
-    triggers:
-      - schedule:
-          cron: "59 23 * * 5"
-          filters:
-            branches:
-              only:
-                - main
     jobs:
       - release-weekly-snapshot
   pre-snapshot-workflow:
@@ -914,7 +906,6 @@ jobs:
     steps:
       - checkout
       - prepare-mbx-ci
-      - prepare-snapshot
       - assemble-core-release
       - assemble-ui-release
       - setup-aws-credentials
