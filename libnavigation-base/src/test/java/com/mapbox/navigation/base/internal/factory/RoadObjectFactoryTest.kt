@@ -40,6 +40,7 @@ import com.mapbox.navigator.match.openlr.Standard
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Date
@@ -291,6 +292,18 @@ class RoadObjectFactoryTest {
         assertEquals(expected.hashCode(), roadObject.hashCode())
         assertEquals(expected.toString(), roadObject.toString())
         assertEquals(RoadObjectType.RAILWAY_CROSSING, roadObject.objectType)
+    }
+
+    @Test
+    fun `buildRoadObject - unsupported notification`() {
+        val nativeObject = createRoadObject(
+            type = com.mapbox.navigator.RoadObjectType.NOTIFICATION,
+            location = matchedRoadObjectLocation(location.shape)
+        )
+
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+
+        assertNull(roadObject)
     }
 
     @Test
