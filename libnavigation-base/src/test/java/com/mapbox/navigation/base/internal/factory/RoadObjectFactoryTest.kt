@@ -296,10 +296,7 @@ class RoadObjectFactoryTest {
 
     @Test
     fun `buildRoadObject - unsupported notification`() {
-        val nativeObject = createRoadObject(
-            type = com.mapbox.navigator.RoadObjectType.NOTIFICATION,
-            location = matchedRoadObjectLocation(location.shape)
-        )
+        val nativeObject = notification
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
@@ -319,14 +316,18 @@ class RoadObjectFactoryTest {
             incident,
             railwayCrossing,
             ic,
-            jct
+            jct,
+            notification
         ).mapIndexed { distanceToStart, roadObject ->
             UpcomingRouteAlert(roadObject, distanceToStart.toDouble())
         }
+        // notification object isn't supported yet,
+        // see https://mapbox.atlassian.net/browse/NAVAND-1311
+        val unsupportedObjectsCount = 1
 
         val sdkObjects = nativeObjects.toUpcomingRoadObjects()
 
-        assertEquals(nativeObjects.size, sdkObjects.size)
+        assertEquals(nativeObjects.size - unsupportedObjectsCount, sdkObjects.size)
         assertTrue(sdkObjects[0].roadObject is Tunnel)
         assertTrue(sdkObjects[1].roadObject is CountryBorderCrossing)
         assertTrue(sdkObjects[2].roadObject is TollCollection)
@@ -338,7 +339,7 @@ class RoadObjectFactoryTest {
         assertTrue(sdkObjects[8].roadObject is RailwayCrossing)
         assertTrue(sdkObjects[9].roadObject is Interchange)
         assertTrue(sdkObjects[10].roadObject is Junction)
-        sdkObjects.forEachIndexed { distanceToStart, obj ->
+        sdkObjects.dropLast(unsupportedObjectsCount).forEachIndexed { distanceToStart, obj ->
             assertEquals(distanceToStart.toDouble(), obj.distanceToStart)
         }
     }
@@ -506,6 +507,11 @@ class RoadObjectFactoryTest {
     private val restrictedArea = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
         location = matchedRoadObjectLocation(location.shape),
+    )
+
+    private val notification = createRoadObject(
+        type = com.mapbox.navigator.RoadObjectType.NOTIFICATION,
+        location = matchedRoadObjectLocation(location.shape)
     )
 
     private fun createRoadObject(
