@@ -32,9 +32,7 @@ internal class Notification internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Notification
-
-        return super.equals(other)
+        return true
     }
 
     /**
