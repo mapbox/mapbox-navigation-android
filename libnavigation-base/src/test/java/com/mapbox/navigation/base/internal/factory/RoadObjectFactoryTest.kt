@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
@@ -294,6 +295,23 @@ class RoadObjectFactoryTest {
     }
 
     @Test
+    fun `buildRoadObject - unsupported notification`() {
+        val nativeObject = notification
+
+        val expected = Notification(
+            ID,
+            LENGTH,
+            SDKRoadObjectProvider.MAPBOX,
+            false,
+            nativeObject
+        )
+
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+
+        assertEquals(expected, roadObject)
+    }
+
+    @Test
     fun `toUpcomingRoadObjects - should map native to SDK UpcomingRoadObjects`() {
         val nativeObjects: List<com.mapbox.navigator.UpcomingRouteAlert> = listOf(
             tunnel,
@@ -306,14 +324,18 @@ class RoadObjectFactoryTest {
             incident,
             railwayCrossing,
             ic,
-            jct
+            jct,
+            notification
         ).mapIndexed { distanceToStart, roadObject ->
             UpcomingRouteAlert(roadObject, distanceToStart.toDouble())
         }
+        // notification object isn't supported yet,
+        // see https://mapbox.atlassian.net/browse/NAVAND-1311
+        val unsupportedObjectsCount = 1
 
         val sdkObjects = nativeObjects.toUpcomingRoadObjects()
 
-        assertEquals(nativeObjects.size, sdkObjects.size)
+        assertEquals(nativeObjects.size - unsupportedObjectsCount, sdkObjects.size)
         assertTrue(sdkObjects[0].roadObject is Tunnel)
         assertTrue(sdkObjects[1].roadObject is CountryBorderCrossing)
         assertTrue(sdkObjects[2].roadObject is TollCollection)
@@ -325,7 +347,7 @@ class RoadObjectFactoryTest {
         assertTrue(sdkObjects[8].roadObject is RailwayCrossing)
         assertTrue(sdkObjects[9].roadObject is Interchange)
         assertTrue(sdkObjects[10].roadObject is Junction)
-        sdkObjects.forEachIndexed { distanceToStart, obj ->
+        sdkObjects.dropLast(unsupportedObjectsCount).forEachIndexed { distanceToStart, obj ->
             assertEquals(distanceToStart.toDouble(), obj.distanceToStart)
         }
     }
@@ -493,6 +515,11 @@ class RoadObjectFactoryTest {
     private val restrictedArea = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
         location = matchedRoadObjectLocation(location.shape),
+    )
+
+    private val notification = createRoadObject(
+        type = com.mapbox.navigator.RoadObjectType.NOTIFICATION,
+        location = matchedRoadObjectLocation(location.shape)
     )
 
     private fun createRoadObject(

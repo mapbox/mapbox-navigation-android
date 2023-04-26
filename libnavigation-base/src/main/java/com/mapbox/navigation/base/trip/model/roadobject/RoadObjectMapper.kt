@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.custom.Custom
 import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
@@ -144,6 +145,13 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             provider,
             isUrban,
             this,
+        )
+        RoadObjectType.NOTIFICATION -> Notification(
+            id,
+            length,
+            provider,
+            isUrban,
+            this
         )
     }
 }
