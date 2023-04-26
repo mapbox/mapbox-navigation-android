@@ -38,6 +38,7 @@ internal class EHorizonMapperMapToRoadObjectTypeTest(
                 arrayOf<Any>(RoadObjectType.RAILWAY_CROSSING, SDKRoadObjectType.RAILWAY_CROSSING),
                 arrayOf<Any>(RoadObjectType.IC, SDKRoadObjectType.IC),
                 arrayOf<Any>(RoadObjectType.JCT, SDKRoadObjectType.JCT),
+                arrayOf<Any>(RoadObjectType.NOTIFICATION, SDKRoadObjectType.NOTIFICATION),
             )
             assertEquals(RoadObjectType.values().size, result.size)
             return result

@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
@@ -40,7 +41,6 @@ import com.mapbox.navigator.match.openlr.Standard
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Date
@@ -69,7 +69,7 @@ class RoadObjectFactoryTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)!!
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -93,7 +93,7 @@ class RoadObjectFactoryTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)!!
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -220,7 +220,7 @@ class RoadObjectFactoryTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)!!
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -286,7 +286,7 @@ class RoadObjectFactoryTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)!!
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -298,9 +298,17 @@ class RoadObjectFactoryTest {
     fun `buildRoadObject - unsupported notification`() {
         val nativeObject = notification
 
+        val expected = Notification(
+            ID,
+            LENGTH,
+            SDKRoadObjectProvider.MAPBOX,
+            false,
+            nativeObject
+        )
+
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
-        assertNull(roadObject)
+        assertEquals(expected, roadObject)
     }
 
     @Test

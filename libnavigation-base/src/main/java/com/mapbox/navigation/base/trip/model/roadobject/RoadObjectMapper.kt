@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.custom.Custom
 import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
@@ -57,7 +58,7 @@ internal typealias SDKTunnelInfo =
 internal typealias SDKRailwayCrossingInfo =
     com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
 
-internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject? {
+internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
     val provider = provider.mapToRoadObjectProvider()
     return when (type) {
         RoadObjectType.INCIDENT ->
@@ -145,7 +146,13 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject? {
             isUrban,
             this,
         )
-        RoadObjectType.NOTIFICATION -> null
+        RoadObjectType.NOTIFICATION -> Notification(
+            id,
+            length,
+            provider,
+            isUrban,
+            this
+        )
     }
 }
 

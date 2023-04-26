@@ -6,7 +6,6 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
 import com.mapbox.navigation.base.trip.model.roadobject.mapToRoadObject
 import com.mapbox.navigator.RoadObjectType
-import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.UpcomingRouteAlertUpdate
 
 /**
@@ -32,14 +31,12 @@ object RoadObjectFactory {
         List<UpcomingRoadObject> {
         return this
             .filter { SUPPORTED_ROAD_OBJECTS.contains(it.roadObject.type) }
-            .mapNotNull { upcomingRouteAlert ->
-                buildRoadObject(upcomingRouteAlert.roadObject)?.let { roadObject ->
-                    buildUpcomingRoadObject(
-                        roadObject,
-                        upcomingRouteAlert.distanceToStart,
-                        null
-                    )
-                }
+            .map {
+                buildUpcomingRoadObject(
+                    buildRoadObject(it.roadObject),
+                    it.distanceToStart,
+                    null
+                )
             }
     }
 
