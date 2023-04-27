@@ -17,6 +17,7 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
+import com.mapbox.navigation.base.internal.CoalescingBlockingQueue
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toDirectionsRoutes
@@ -69,7 +70,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.util.concurrent.CancellationException
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -205,6 +205,7 @@ class MapboxRouteLineApi(
     private var lastPointUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
     private val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
+    private val mutex = Mutex()
 
     // We had a bug that when styleInactiveRouteLegsIndependently was enabled but we first
     // got route progress update and only then routes update,
@@ -224,9 +225,12 @@ class MapboxRouteLineApi(
     // The solution was to use mutex in updateWithRouteProgress, and this JobControl handles the coalescing queue:
     // since we might wait some time for the mutex, we want to cancel the update that waits for the mutex
     // if a newer one arrives.
-    private val routeProgressJobControl = InternalJobControlFactory.createDefaultScopeJobControl()
-
-    private val mutex = Mutex()
+    private val routeProgressUpdatesJobControl =
+        InternalJobControlFactory.createImmediateMainScopeJobControl()
+    private val routeProgressUpdatesQueue = CoalescingBlockingQueue(
+        routeProgressUpdatesJobControl.scope,
+        mutex
+    )
     internal var activeLegIndex = INVALID_ACTIVE_LEG_INDEX
         private set
     private val trafficBackfillRoadClasses = CopyOnWriteArrayList<String>()
@@ -816,100 +820,101 @@ class MapboxRouteLineApi(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
-        routeProgressJobControl.job.cancelChildren()
-        routeProgressJobControl.scope.launch(Dispatchers.Main.immediate) {
-            try {
-                mutex.lock()
-            } catch (ex: CancellationException) {
-                val msg = "Skipping #updateWithRouteProgress because a newer one is available."
-                consumer.accept(
-                    ExpectedFactory.createError(RouteLineError(msg, throwable = null))
-                )
-                logW(msg, LOG_CATEGORY)
-                throw ex
-            }
-            try {
-                val currentPrimaryRoute = primaryRoute
-                if (currentPrimaryRoute == null) {
-                    val msg =
-                        "You're calling #updateWithRouteProgress without any routes being set."
+        routeProgressUpdatesQueue.addJob(
+            CoalescingBlockingQueue.Item(
+                {
+                    val currentPrimaryRoute = primaryRoute
+                    if (currentPrimaryRoute == null) {
+                        val msg =
+                            "You're calling #updateWithRouteProgress without any routes being set."
+                        consumer.accept(
+                            ExpectedFactory.createError(RouteLineError(msg, throwable = null))
+                        )
+                        logW(msg, LOG_CATEGORY)
+                    } else if (currentPrimaryRoute.id != routeProgress.navigationRoute.id) {
+                        val msg = "Provided primary route (#setNavigationRoutes, ID: " +
+                            "${currentPrimaryRoute.id}) and navigated route " +
+                            "(#updateWithRouteProgress, ID: ${routeProgress.navigationRoute.id}) " +
+                            "are not the same. Aborting the update."
+                        consumer.accept(
+                            ExpectedFactory.createError(RouteLineError(msg, throwable = null))
+                        )
+                        logE(msg, LOG_CATEGORY)
+                    } else {
+                        updateUpcomingRoutePointIndex(routeProgress)
+                        updateVanishingPointState(routeProgress.currentState)
+
+                        val currentLegIndex = routeProgress.currentLegProgress?.legIndex
+                        val routeLineMaskingLayerDynamicData =
+                            when ((currentLegIndex ?: INVALID_ACTIVE_LEG_INDEX) != activeLegIndex) {
+                                true -> getRouteLineDynamicDataForMaskingLayers(
+                                    currentPrimaryRoute,
+                                    routeProgress
+                                )
+                                false -> null
+                            }
+                        val legChange = (currentLegIndex ?: 0) > activeLegIndex
+                        activeLegIndex = currentLegIndex ?: INVALID_ACTIVE_LEG_INDEX
+
+                        // If the de-emphasize inactive route legs feature is enabled and the vanishing route line
+                        // feature is enabled and the active leg index has changed, then calling the
+                        // alternativelyStyleSegmentsNotInLeg() method here will get the resulting calculation cached so
+                        // that calls to alternativelyStyleSegmentsNotInLeg() made by updateTraveledRouteLine()
+                        // won't have to wait for the result. The updateTraveledRouteLine method is much
+                        // more time sensitive.
+                        when {
+                            routeLineOptions.styleInactiveRouteLegsIndependently -> {
+                                when (routeLineOptions.vanishingRouteLine) {
+                                    // If the styleInactiveRouteLegsIndependently feature is enabled but the
+                                    // vanishingRouteLine feature is not enabled then side effects are generated and
+                                    // need to be rendered.
+                                    null -> highlightActiveLeg(
+                                        routeProgress,
+                                        routeLineMaskingLayerDynamicData,
+                                        consumer
+                                    )
+                                    else -> {
+                                        ifNonNull(
+                                            routeProgress.currentLegProgress
+                                        ) { routeLegProgress ->
+                                            if (legChange && activeLegIndex >= 0) {
+                                                jobControl.scope.launch(Dispatchers.Main) {
+                                                    mutex.withLock {
+                                                        alternativelyStyleSegmentsNotInLeg(
+                                                            routeLegProgress.legIndex,
+                                                            routeLineExpressionData,
+                                                            routeLineOptions
+                                                                .resourceProvider
+                                                                .routeLineColorResources
+                                                                .inActiveRouteLegsColor
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        provideRouteLegUpdate(
+                                            routeLineMaskingLayerDynamicData,
+                                            consumer
+                                        )
+                                    }
+                                }
+                            }
+                            else -> provideRouteLegUpdate(
+                                routeLineMaskingLayerDynamicData,
+                                consumer
+                            )
+                        }
+                    }
+                },
+                {
+                    val msg = "Skipping #updateWithRouteProgress because a newer one is available."
                     consumer.accept(
                         ExpectedFactory.createError(RouteLineError(msg, throwable = null))
                     )
                     logW(msg, LOG_CATEGORY)
-                    return@launch
-                } else if (currentPrimaryRoute.id != routeProgress.navigationRoute.id) {
-                    val msg = "Provided primary route (#setNavigationRoutes, ID: " +
-                        "${currentPrimaryRoute.id}) and navigated route " +
-                        "(#updateWithRouteProgress, ID: ${routeProgress.navigationRoute.id}) " +
-                        "are not the same. Aborting the update."
-                    consumer.accept(
-                        ExpectedFactory.createError(RouteLineError(msg, throwable = null))
-                    )
-                    logE(msg, LOG_CATEGORY)
-                    return@launch
                 }
-
-                updateUpcomingRoutePointIndex(routeProgress)
-                updateVanishingPointState(routeProgress.currentState)
-
-
-                val currentLegIndex = routeProgress.currentLegProgress?.legIndex
-                val routeLineMaskingLayerDynamicData =
-                    when ((currentLegIndex ?: INVALID_ACTIVE_LEG_INDEX) != activeLegIndex) {
-                        true -> getRouteLineDynamicDataForMaskingLayers(
-                            currentPrimaryRoute,
-                            routeProgress
-                        )
-                        false -> null
-                    }
-                val legChange = (currentLegIndex ?: 0) > activeLegIndex
-                activeLegIndex = currentLegIndex ?: INVALID_ACTIVE_LEG_INDEX
-
-                // If the de-emphasize inactive route legs feature is enabled and the vanishing route line
-                // feature is enabled and the active leg index has changed, then calling the
-                // alternativelyStyleSegmentsNotInLeg() method here will get the resulting calculation cached so
-                // that calls to alternativelyStyleSegmentsNotInLeg() made by updateTraveledRouteLine()
-                // won't have to wait for the result. The updateTraveledRouteLine method is much
-                // more time sensitive.
-                when {
-                    routeLineOptions.styleInactiveRouteLegsIndependently -> {
-                        when (routeLineOptions.vanishingRouteLine) {
-                            // If the styleInactiveRouteLegsIndependently feature is enabled but the
-                            // vanishingRouteLine feature is not enabled then side effects are generated and
-                            // need to be rendered.
-                            null -> highlightActiveLeg(
-                                routeProgress,
-                                routeLineMaskingLayerDynamicData,
-                                consumer
-                            )
-                            else -> {
-                                ifNonNull(routeProgress.currentLegProgress) { routeLegProgress ->
-                                    if (legChange && activeLegIndex >= 0) {
-                                        jobControl.scope.launch(Dispatchers.Main) {
-                                            mutex.withLock {
-                                                alternativelyStyleSegmentsNotInLeg(
-                                                    routeLegProgress.legIndex,
-                                                    routeLineExpressionData,
-                                                    routeLineOptions
-                                                        .resourceProvider
-                                                        .routeLineColorResources
-                                                        .inActiveRouteLegsColor
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                provideRouteLegUpdate(routeLineMaskingLayerDynamicData, consumer)
-                            }
-                        }
-                    }
-                    else -> provideRouteLegUpdate(routeLineMaskingLayerDynamicData, consumer)
-                }
-            } finally {
-                mutex.unlock()
-            }
-        }
+            )
+        )
     }
 
     // The purpose of this is to provide the correct masking layer data to be rendered in the view.
@@ -1259,7 +1264,7 @@ class MapboxRouteLineApi(
      */
     fun cancel() {
         jobControl.job.cancelChildren()
-        routeProgressJobControl.job.cancelChildren()
+        routeProgressUpdatesJobControl.job.cancelChildren()
     }
 
     private suspend fun findClosestRoute(
@@ -1643,10 +1648,9 @@ class MapboxRouteLineApi(
         // If the route has multiple legs the route line expression data is needed immediately
         // to draw the masking line correctly.  If not the calculation can be deferred.
         segmentsDef?.let { deferred ->
-            when (
-                (partitionedRoutes.first.firstOrNull()?.route?.directionsRoute?.legs()?.size ?: 0)
-                    > 1
-            ) {
+            val legsCount = partitionedRoutes.first.firstOrNull()
+                ?.route?.directionsRoute?.legs()?.size ?: 0
+            when (legsCount > 1) {
                 true -> {
                     routeLineExpressionData = deferred.await()
                 }

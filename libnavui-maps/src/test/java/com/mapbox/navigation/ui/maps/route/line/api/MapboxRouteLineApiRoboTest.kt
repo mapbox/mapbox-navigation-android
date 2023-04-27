@@ -97,6 +97,12 @@ class MapboxRouteLineApiRoboTest {
             val defaultScope = coroutineRule.createTestScope()
             JobControl(defaultScope.coroutineContext.job, defaultScope)
         }
+        every {
+            InternalJobControlFactory.createImmediateMainScopeJobControl()
+        } answers {
+            val defaultScope = coroutineRule.createTestScope()
+            JobControl(defaultScope.coroutineContext.job, defaultScope)
+        }
     }
 
     @After
