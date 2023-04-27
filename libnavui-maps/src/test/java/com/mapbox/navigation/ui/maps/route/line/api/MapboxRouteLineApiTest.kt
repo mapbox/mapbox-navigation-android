@@ -106,6 +106,9 @@ class MapboxRouteLineApiTest {
         every {
             InternalJobControlFactory.createDefaultScopeJobControl()
         } returns JobControl(parentJob, testScope)
+        every {
+            InternalJobControlFactory.createImmediateMainScopeJobControl()
+        } returns JobControl(parentJob, testScope)
         mockkStatic(AppCompatResources::class)
         every { AppCompatResources.getDrawable(any(), any()) } returns mockk()
     }
@@ -397,6 +400,39 @@ class MapboxRouteLineApiTest {
         verify {
             mockVanishingRouteLine.updateVanishingPointState(RouteProgressState.TRACKING)
         }
+    }
+
+    @Test
+    fun updateWithRouteProgressGetsCancelled() = coroutineRule.runBlockingTest {
+        val routeProgressScope = coroutineRule.createTestScope()
+        every {
+            InternalJobControlFactory.createImmediateMainScopeJobControl()
+        } returns JobControl(parentJob, routeProgressScope)
+        val route = shortRoute.navigationRoute
+        val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
+            every { vanishPointOffset } returns 0.0
+        }
+        val options = mockRouteOptions()
+        every { options.vanishingRouteLine } returns mockVanishingRouteLine
+        val api = MapboxRouteLineApi(options)
+        val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
+        api.setNavigationRoutes(listOf(route))
+        val consumer = mockk<
+            MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
+            >(relaxed = true)
+
+        routeProgressScope.pauseDispatcher {
+            api.updateWithRouteProgress(routeProgress, consumer)
+            api.updateWithRouteProgress(routeProgress) {}
+        }
+
+        val errorCaptor = slot<Expected<RouteLineError, RouteLineUpdateValue>>()
+        verify(exactly = 1) { consumer.accept(capture(errorCaptor)) }
+
+        assertEquals(
+            "Skipping #updateWithRouteProgress because a newer one is available.",
+            errorCaptor.captured.error!!.errorMessage
+        )
     }
 
     @Test
