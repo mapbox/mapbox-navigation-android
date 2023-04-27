@@ -96,7 +96,6 @@ object RoadObjectType {
         RAILWAY_CROSSING,
         IC,
         JCT,
-        NOTIFICATION
     )
     annotation class Type
 }
