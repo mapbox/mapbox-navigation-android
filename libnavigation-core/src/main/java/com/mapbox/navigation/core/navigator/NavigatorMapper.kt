@@ -286,7 +286,7 @@ internal fun NavigationStatus.prepareSpeedLimit(): SpeedLimit? {
             else -> com.mapbox.navigation.base.speed.model.SpeedLimitSign.VIENNA
         }
         SpeedLimit(
-            limit.speedKmph,
+            0, //limit.speedKmph,
             speedLimitUnit,
             speedLimitSign
         )

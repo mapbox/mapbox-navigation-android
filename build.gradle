@@ -44,6 +44,7 @@ allprojects {
   repositories {
     google()
     mavenCentral()
+    mavenLocal()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication {

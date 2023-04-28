@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -165,6 +166,56 @@ class NavigationRoute internal constructor(
             return coroutineScope {
                 val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
                     DirectionsResponse.fromJson(directionsResponseJson).also {
+                        logD(
+                            "parsed directions response to java model for ${it.uuid()}",
+                            LOG_CATEGORY
+                        )
+                    }
+                }
+                val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
+                    routeParser.parseDirectionsResponse(
+                        directionsResponseJson,
+                        routeRequestUrl,
+                        routerOrigin,
+                    ).also {
+                        logD(
+                            "parsed directions response to RouteInterface " +
+                                "for ${it.value?.firstOrNull()?.responseUuid}",
+                            LOG_CATEGORY
+                        )
+                    }
+                }
+                val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
+                    RouteOptions.fromUrl(URL(routeRequestUrl)).also {
+                        logD(LOG_CATEGORY) {
+                            "parsed request url to RouteOptions: ${it.toUrl("***")}"
+                        }
+                    }
+                }
+                create(
+                    deferredNativeParsing.await(),
+                    deferredResponseParsing.await(),
+                    deferredRouteOptionsParsing.await()
+                ).also {
+                    logD(
+                        "NavigationRoute.createAsync finished " +
+                            "for ${it.firstOrNull()?.directionsResponse?.uuid()}",
+                        LOG_CATEGORY
+                    )
+                }
+            }
+        }
+
+        internal suspend fun createAsync(
+            directionsResponseJson: DataRef,
+            routeRequestUrl: String,
+            routerOrigin: RouterOrigin,
+            routeParser: SDKRouteParser = NativeRouteParserWrapper
+        ): List<NavigationRoute> {
+            logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
+            return coroutineScope {
+                val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
+                    DirectionsResponse.fromJson(directionsResponseJson.buffer, Charsets.UTF_8).also {
                         logD(
                             "parsed directions response to java model for ${it.uuid()}",
                             LOG_CATEGORY

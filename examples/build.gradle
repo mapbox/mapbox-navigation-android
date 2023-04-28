@@ -95,6 +95,7 @@ task downloadUnstrippedNativeLibsDir(type: com.mapbox.gradle.NativeDownloadTask)
 dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
+    implementation dependenciesList.mapboxCommonNative
 
     // test
     androidTestImplementation project(':libtesting-ui')

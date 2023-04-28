@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -429,6 +430,15 @@ class MapboxNavigationActivity : AppCompatActivity() {
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set, also receiving route progress updates
         mapboxNavigation.startTripSession()
+
+        binding.buildRouteButton.setOnClickListener {
+            findRoute(Point.fromLngLat(105.123533,9.199432))
+        }
+        binding.rerouteButton.setOnClickListener {
+            mapboxNavigation.getRerouteController()?.reroute { routes, _ ->
+                mapboxNavigation.setNavigationRoutes(routes)
+            }
+        }
     }
 
     override fun onStart() {
@@ -469,6 +479,10 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .coordinatesList(listOf(origin, destination))
+                .alternatives(true)
+                .unrecognizedProperties(mapOf(
+                    "dataref" to "true"
+                ))
                 .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .build(),
             object : NavigationRouterCallback {

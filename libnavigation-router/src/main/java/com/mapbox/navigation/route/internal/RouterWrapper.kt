@@ -8,6 +8,7 @@ import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
@@ -38,6 +39,7 @@ import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.GetRouteOptions
 import com.mapbox.navigator.RouteRefreshOptions
+import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RoutingProfile
@@ -55,88 +57,161 @@ class RouterWrapper(
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
 
     override fun getRoute(routeOptions: RouteOptions, callback: NavigationRouterCallback): Long {
-        val routeUrl = routeOptions.toUrl(accessToken).toString()
+        val routeUrl = routeOptions.toBuilder().unrecognizedProperties(emptyMap()).build().toUrl(accessToken).toString()
         val requestOptions = GetRouteOptions(null) // using default timeout (5 seconds)
 
         val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
         logD(LOG_CATEGORY) { "requesting route for $urlWithoutToken" }
-        return router.getRoute(routeUrl, requestOptions) { result, origin ->
-            logD(LOG_CATEGORY) {
-                "received result from router.getRoute for $urlWithoutToken; origin: $origin"
-            }
-            result.fold(
-                {
-                    mainJobControl.scope.launch {
-                        if (it.type == RouterErrorType.REQUEST_CANCELLED) {
+        val useDataRef = routeOptions.getUnrecognizedProperty("dataref") != null
+        return if (useDataRef) {
+            router.getRoute(routeUrl, requestOptions,  com.mapbox.navigator.RouterDataRefCallback { result, origin ->
+                logD(LOG_CATEGORY) {
+                    "received result from router.getRoute for $urlWithoutToken; origin: $origin"
+                }
+                result.fold(
+                    {
+                        handleError(it, routeOptions, origin, callback, urlWithoutToken)
+                    },
+                    {
+                        mainJobControl.scope.launch {
                             logI(
-                                """
-                                    Route request cancelled:
-                                    $routeOptions
-                                    $origin
-                                """.trimIndent(),
+                                "processing successful response " +
+                                    "from router.getRoute for $urlWithoutToken",
                                 LOG_CATEGORY
                             )
-                            callback.onCanceled(routeOptions, origin.mapToSdkRouteOrigin())
-                        } else {
-                            val failureReasons = listOf(
-                                RouterFailure(
-                                    url = urlWithoutToken,
-                                    routerOrigin = origin.mapToSdkRouteOrigin(),
-                                    message = it.message,
-                                    code = it.code
-                                )
+                            parseDirectionsResponse(
+                                ThreadController.DefaultDispatcher,
+                                it,
+                                routeUrl,
+                                origin.mapToSdkRouteOrigin(),
+                            ).fold(
+                                { throwable ->
+                                    handleParsingError(
+                                        callback,
+                                        urlWithoutToken,
+                                        origin,
+                                        throwable,
+                                        routeOptions
+                                    )
+                                },
+                                { routes ->
+                                    val metadata = routes.firstOrNull()?.directionsResponse?.metadata()
+                                    logI("Response metadata: $metadata", LOG_CATEGORY)
+                                    callback.onRoutesReady(
+                                        routes,
+                                        origin.mapToSdkRouteOrigin()
+                                    )
+                                }
                             )
-
-                            logW(
-                                """
-                                    Route request failed with:
-                                    $failureReasons
-                                """.trimIndent(),
-                                LOG_CATEGORY
-                            )
-
-                            callback.onFailure(failureReasons, routeOptions)
                         }
                     }
-                },
-                {
-                    mainJobControl.scope.launch {
-                        logI(
-                            "processing successful response " +
-                                "from router.getRoute for $urlWithoutToken",
-                            LOG_CATEGORY
-                        )
-                        parseDirectionsResponse(
-                            ThreadController.DefaultDispatcher,
-                            it,
-                            routeUrl,
-                            origin.mapToSdkRouteOrigin(),
-                        ).fold(
-                            { throwable ->
-                                callback.onFailure(
-                                    listOf(
-                                        RouterFailure(
-                                            urlWithoutToken,
-                                            origin.mapToSdkRouteOrigin(),
-                                            "failed for response: $it",
-                                            throwable = throwable
-                                        )
-                                    ),
-                                    routeOptions
-                                )
-                            },
-                            { routes ->
-                                val metadata = routes.firstOrNull()?.directionsResponse?.metadata()
-                                logI("Response metadata: $metadata", LOG_CATEGORY)
-                                callback.onRoutesReady(
-                                    routes,
-                                    origin.mapToSdkRouteOrigin()
-                                )
-                            }
-                        )
-                    }
+                )
+            })
+        } else {
+            router.getRoute(routeUrl, requestOptions,  com.mapbox.navigator.RouterCallback { result, origin ->
+                logD(LOG_CATEGORY) {
+                    "received result from router.getRoute for $urlWithoutToken; origin: $origin"
                 }
-            )
+                result.fold(
+                    {
+                        handleError(it, routeOptions, origin, callback, urlWithoutToken)
+                    },
+                    {
+                        mainJobControl.scope.launch {
+                            logI(
+                                "processing successful response " +
+                                    "from router.getRoute for $urlWithoutToken",
+                                LOG_CATEGORY
+                            )
+                            parseDirectionsResponse(
+                                ThreadController.DefaultDispatcher,
+                                it,
+                                routeUrl,
+                                origin.mapToSdkRouteOrigin(),
+                            ).fold(
+                                { throwable ->
+                                    handleParsingError(
+                                        callback,
+                                        urlWithoutToken,
+                                        origin,
+                                        throwable,
+                                        routeOptions
+                                    )
+                                },
+                                { routes ->
+                                    val metadata = routes.firstOrNull()?.directionsResponse?.metadata()
+                                    logI("Response metadata: $metadata", LOG_CATEGORY)
+                                    callback.onRoutesReady(
+                                        routes,
+                                        origin.mapToSdkRouteOrigin()
+                                    )
+                                }
+                            )
+                        }
+                    }
+                )
+            })
+        }
+    }
+
+    private fun handleParsingError(
+        callback: NavigationRouterCallback,
+        urlWithoutToken: URL,
+        origin: com.mapbox.navigator.RouterOrigin,
+        throwable: Throwable,
+        routeOptions: RouteOptions
+    ) {
+        callback.onFailure(
+            listOf(
+                RouterFailure(
+                    urlWithoutToken,
+                    origin.mapToSdkRouteOrigin(),
+                    "failed for response: ",
+                    throwable = throwable
+                )
+            ),
+            routeOptions
+        )
+    }
+
+    private fun handleError(
+        it: RouterError,
+        routeOptions: RouteOptions,
+        origin: com.mapbox.navigator.RouterOrigin,
+        callback: NavigationRouterCallback,
+        urlWithoutToken: URL
+    ) {
+        mainJobControl.scope.launch {
+            if (it.type == RouterErrorType.REQUEST_CANCELLED) {
+                logI(
+                    """
+                                        Route request cancelled:
+                                        $routeOptions
+                                        $origin
+                                    """.trimIndent(),
+                    LOG_CATEGORY
+                )
+                callback.onCanceled(routeOptions, origin.mapToSdkRouteOrigin())
+            } else {
+                val failureReasons = listOf(
+                    RouterFailure(
+                        url = urlWithoutToken,
+                        routerOrigin = origin.mapToSdkRouteOrigin(),
+                        message = it.message,
+                        code = it.code
+                    )
+                )
+
+                logW(
+                    """
+                                        Route request failed with:
+                                        $failureReasons
+                                    """.trimIndent(),
+                    LOG_CATEGORY
+                )
+
+                callback.onFailure(failureReasons, routeOptions)
+            }
         }
     }
 
