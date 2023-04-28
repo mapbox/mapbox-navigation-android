@@ -10,6 +10,7 @@ import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_FRAME_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_STATE_TRANSITION_OPT
+import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
 import com.mapbox.navigation.ui.maps.camera.utils.constraintDurationTo
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSetWith
@@ -64,7 +65,7 @@ class MapboxNavigationCameraTransitionTest {
         val mockAnimators: Array<CameraAnimator<*>> = arrayOf()
         val cameraPluginImpl = mockk<CameraAnimationsPluginImpl> {
             every { cameraAnimationsFactory } returns mockk {
-                every { getFlyTo(cameraOptions) } returns mockAnimators
+                every { getFlyTo(cameraOptions, NAVIGATION_CAMERA_OWNER) } returns mockAnimators
             }
         }
         every { constrainedSet.duration } returns min(0.0, 1300.0).toLong()

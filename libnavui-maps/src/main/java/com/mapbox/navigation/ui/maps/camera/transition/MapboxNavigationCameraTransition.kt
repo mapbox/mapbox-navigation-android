@@ -304,7 +304,10 @@ class MapboxNavigationCameraTransition(
         val currentZL = currentMapCameraState.zoom
         val targetCenter = cameraOptions.center
         val targetZoom = cameraOptions.zoom
-        val animators = pluginImpl.cameraAnimationsFactory.getFlyTo(cameraOptions)
+        val animators = pluginImpl.cameraAnimationsFactory.getFlyTo(
+            cameraOptions = cameraOptions,
+            owner = NAVIGATION_CAMERA_OWNER
+        )
         ifNonNull(targetCenter, targetZoom) { targetPoint, targetZL ->
             val projection = projectedDistance(
                 mapboxMap = mapboxMap,
