@@ -220,8 +220,12 @@ class MapboxTripSessionTest {
         tripSession.start(true)
 
         assertTrue(tripSession.isRunningWithForegroundService())
-        verify { tripService.startService() }
-        verify { tripSessionLocationEngine.startLocationUpdates(any(), any()) }
+
+        verifyOrder {
+            navigator.startNavigationSession()
+            tripService.startService()
+            tripSessionLocationEngine.startLocationUpdates(any(), any())
+        }
 
         tripSession.stop()
     }
@@ -234,7 +238,10 @@ class MapboxTripSessionTest {
 
         assertFalse(tripSession.isRunningWithForegroundService())
         verify(exactly = 0) { tripService.startService() }
-        verify { tripSessionLocationEngine.startLocationUpdates(any(), any()) }
+        verifyOrder {
+            navigator.startNavigationSession()
+            tripSessionLocationEngine.startLocationUpdates(any(), any())
+        }
 
         tripSession.stop()
     }
@@ -249,9 +256,11 @@ class MapboxTripSessionTest {
 
         verifyOrder {
             navigator.addNavigatorObserver(any())
+            navigator.startNavigationSession()
             tripService.startService()
             tripSessionLocationEngine.startLocationUpdates(any(), any())
             tripSessionLocationEngine.startLocationUpdates(any(), any())
+            navigator.stopNavigationSession()
             navigator.removeNavigatorObserver(any())
             tripSession.stop()
             tripSessionLocationEngine.stopLocationUpdates()
@@ -267,10 +276,12 @@ class MapboxTripSessionTest {
 
         verifyOrder {
             navigator.addNavigatorObserver(any())
+            navigator.startNavigationSession()
             tripService.startService()
             tripSessionLocationEngine.startLocationUpdates(false, any())
             tripSessionLocationEngine.startLocationUpdates(true, any())
             tripSessionLocationEngine.startLocationUpdates(false, any())
+            navigator.stopNavigationSession()
             navigator.removeNavigatorObserver(any())
             tripSession.stop()
             tripSessionLocationEngine.stopLocationUpdates()
@@ -284,6 +295,15 @@ class MapboxTripSessionTest {
         tripSession.stop()
 
         verify { tripService.stopService() }
+    }
+
+    @Test
+    fun stopSessionStoppingNativeNavigationSession() {
+        tripSession.start(true)
+
+        tripSession.stop()
+
+        verify(exactly = 1) { navigator.stopNavigationSession() }
     }
 
     @Test
@@ -1444,31 +1464,45 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `routeProgress updates ignored while primary route is being set`() = coroutineRule.runBlockingTest {
-        val primary = mockNavigationRoute()
-        val alternative = mockNavigationRoute()
-        coEvery { navigator.setRoutes(primary, legIndex, listOf(alternative), any()) } coAnswers {
-            delay(100)
-            createSetRouteResult()
+    fun `routeProgress updates ignored while primary route is being set`() =
+        coroutineRule.runBlockingTest {
+            val primary = mockNavigationRoute()
+            val alternative = mockNavigationRoute()
+            coEvery {
+                navigator.setRoutes(
+                    primary,
+                    legIndex,
+                    listOf(alternative),
+                    any()
+                )
+            } coAnswers {
+                delay(100)
+                createSetRouteResult()
+            }
+
+            val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
+
+            val tripSession = buildTripSession()
+            tripSession.registerRouteProgressObserver(observer)
+            tripSession.start(withTripService = true)
+
+            pauseDispatcher {
+                launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
+                runCurrent()
+                advanceTimeBy(delayTimeMillis = 50)
+                navigatorObserverImplSlot.captured.onStatus(
+                    navigationStatusOrigin,
+                    navigationStatus
+                )
+                verify(exactly = 0) { observer.onRouteProgressChanged(any()) }
+                advanceTimeBy(delayTimeMillis = 100)
+                navigatorObserverImplSlot.captured.onStatus(
+                    navigationStatusOrigin,
+                    navigationStatus
+                )
+                verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
+            }
         }
-
-        val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
-
-        val tripSession = buildTripSession()
-        tripSession.registerRouteProgressObserver(observer)
-        tripSession.start(withTripService = true)
-
-        pauseDispatcher {
-            launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
-            runCurrent()
-            advanceTimeBy(delayTimeMillis = 50)
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-            verify(exactly = 0) { observer.onRouteProgressChanged(any()) }
-            advanceTimeBy(delayTimeMillis = 100)
-            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-            verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
-        }
-    }
 
     @Test
     fun `routeProgress updates not ignored while only alternative route is being set`() =

@@ -58,6 +58,10 @@ interface MapboxNativeNavigator {
 
     suspend fun resetRideSession()
 
+    fun startNavigationSession()
+
+    fun stopNavigationSession()
+
     // Route following
 
     /**

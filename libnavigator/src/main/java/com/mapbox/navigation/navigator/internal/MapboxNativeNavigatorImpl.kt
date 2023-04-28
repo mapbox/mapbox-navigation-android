@@ -113,9 +113,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
         accessToken: String,
-        router: RouterInterface,
+        router: RouterInterface
     ) {
+        val storeNavSessionState = navigator!!.storeNavigationSession()
         create(config, historyRecorderComposite, tilesConfig, accessToken, router)
+        navigator!!.restoreNavigationSession(storeNavSessionState)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -125,6 +127,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigator!!.reset {
             it.resume(Unit)
         }
+    }
+
+    override fun startNavigationSession() {
+        navigator!!.startNavigationSession()
+    }
+
+    override fun stopNavigationSession() {
+        navigator!!.stopNavigationSession()
     }
 
     /**

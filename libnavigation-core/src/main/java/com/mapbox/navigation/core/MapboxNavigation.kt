@@ -1992,6 +1992,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigatorConfig,
         )
         historyRecorderHandles = createHistoryRecorderHandles(config)
+
         mainJobController.scope.launch {
             navigator.recreate(
                 config,
