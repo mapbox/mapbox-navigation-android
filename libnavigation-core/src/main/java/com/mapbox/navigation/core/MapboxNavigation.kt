@@ -1992,8 +1992,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigatorConfig,
         )
         historyRecorderHandles = createHistoryRecorderHandles(config)
+
+        val navSessionState = navigator.restoreNavigationSession()
         mainJobController.scope.launch {
             navigator.recreate(
+                navSessionState,
                 config,
                 historyRecorderHandles.composite,
                 createTilesConfig(isFallback, tilesVersion),

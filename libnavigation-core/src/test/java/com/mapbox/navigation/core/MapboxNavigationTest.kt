@@ -46,6 +46,7 @@ import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigator.FallbackVersionsObserver
+import com.mapbox.navigator.NavigationSessionState
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
@@ -1162,7 +1163,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun `verify tile config tilesVersion and isFallback on fallback`() {
+    fun `verify tile config tilesVersion, isFallback, and restoreNavigationSession invoke on fallback`() {
         threadController.cancelAllUICoroutines()
 
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
@@ -1174,12 +1175,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         )
         every { tripSession.getRouteProgress() } returns mockk()
+        val mockkNavSessionState = mockk<NavigationSessionState>()
+        every { navigator.restoreNavigationSession() } returns mockkNavSessionState
 
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         val tileConfigSlot = slot<TilesConfig>()
         every {
             navigator.recreate(
+                mockkNavSessionState,
                 any(),
                 any(),
                 capture(tileConfigSlot),
@@ -1196,10 +1200,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         assertEquals(latestTilesVersion, tileConfigSlot.captured.endpointConfig?.version)
         assertTrue(tileConfigSlot.captured.endpointConfig?.isFallback!!)
+        verifyOrder {
+            navigator.restoreNavigationSession()
+            navigator.recreate(any(), any(), any(), any(), any(), any())
+        }
     }
 
     @Test
-    fun `verify tile config tilesVersion and isFallback on return to latest tiles version`() =
+    fun `verify tile config tilesVersion, isFallback, and restoreNavigationSession invoke on return to latest tiles version`() =
         runBlocking {
             threadController.cancelAllUICoroutines()
 
@@ -1214,12 +1222,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 directionsSession.routes
             } returns listOf(mockPrimaryNavigationRoute, mockAlternativeNavigationRoute)
             every { tripSession.getRouteProgress()?.currentLegProgress?.legIndex } returns index
+            val mockkNavSessionState = mockk<NavigationSessionState>()
+            every { navigator.restoreNavigationSession() } returns mockkNavSessionState
 
             mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
             val tileConfigSlot = slot<TilesConfig>()
             every {
                 navigator.recreate(
+                    mockkNavSessionState,
                     any(),
                     any(),
                     capture(tileConfigSlot),
@@ -1239,6 +1250,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     listOf(mockAlternativeNavigationRoute),
                     SetRoutesReason.RESTORE_TO_ONLINE,
                 )
+            }
+            verifyOrder {
+                navigator.restoreNavigationSession()
+                navigator.recreate(any(), any(), any(), any(), any(), any())
             }
         }
 
@@ -1263,6 +1278,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coEvery { navigator.setRoutes(any(), any(), any(), any()) } answers {
             createSetRouteResult()
         }
+        every { navigator.restoreNavigationSession() } returns mockk()
 
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 

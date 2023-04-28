@@ -27,6 +27,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.NavigationSessionState
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorObserver
@@ -109,13 +110,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Recreate native objects and notify listeners.
      */
     override fun recreate(
+        navigationSessionState: NavigationSessionState,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
         accessToken: String,
-        router: RouterInterface,
+        router: RouterInterface
     ) {
         create(config, historyRecorderComposite, tilesConfig, accessToken, router)
+        navigator!!.restoreNavigationSession(navigationSessionState)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -126,6 +129,17 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             it.resume(Unit)
         }
     }
+
+    override fun startNavigationSession() {
+        navigator!!.startNavigationSession()
+    }
+
+    override fun stopNavigationSession() {
+        navigator!!.stopNavigationSession()
+    }
+
+    override fun restoreNavigationSession(): NavigationSessionState =
+        navigator!!.storeNavigationSession()
 
     /**
      * Passes in the current raw location of the user.

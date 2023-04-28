@@ -16,6 +16,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.NavigationSessionState
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
@@ -49,6 +50,7 @@ interface MapboxNativeNavigator {
      * Reinitialize the navigator with a device profile
      */
     fun recreate(
+        navigationSessionState: NavigationSessionState,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
@@ -57,6 +59,12 @@ interface MapboxNativeNavigator {
     )
 
     suspend fun resetRideSession()
+
+    fun startNavigationSession()
+
+    fun stopNavigationSession()
+
+    fun restoreNavigationSession(): NavigationSessionState
 
     // Route following
 
