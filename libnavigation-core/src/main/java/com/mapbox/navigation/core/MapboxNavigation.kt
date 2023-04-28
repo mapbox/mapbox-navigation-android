@@ -90,8 +90,6 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCall
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
-import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.telemetry.ApplicationLifecycleMonitor
 import com.mapbox.navigation.core.telemetry.NavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
