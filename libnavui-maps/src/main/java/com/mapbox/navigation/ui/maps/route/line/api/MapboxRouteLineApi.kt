@@ -59,6 +59,7 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
 import kotlinx.coroutines.Deferred
@@ -637,9 +638,11 @@ class MapboxRouteLineApi(
                 lastLocationPoint = null
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
+                logI("Updated leg index to $activeLegIndex (from clearRouteLine)", LOG_CATEGORY)
                 routes.clear()
                 routeFeatureData.clear()
                 routeLineExpressionData = emptyList()
+                logI("Cleared route line expression data (from clearRouteLine)", LOG_CATEGORY)
                 resetCaches()
 
                 consumer.accept(
@@ -794,6 +797,12 @@ class MapboxRouteLineApi(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
+        logI(
+            "Update with route progress. " +
+                "Leg index: ${routeProgress.currentLegProgress?.legIndex}, " +
+                "state: ${routeProgress.currentState}",
+            LOG_CATEGORY
+        )
         val currentPrimaryRoute = primaryRoute
         if (currentPrimaryRoute == null) {
             val msg = "You're calling #updateWithRouteProgress without any routes being set."
@@ -816,6 +825,12 @@ class MapboxRouteLineApi(
         updateUpcomingRoutePointIndex(routeProgress)
         updateVanishingPointState(routeProgress.currentState)
 
+        logI(
+            "Calculate routeLineMaskingLayerDynamicData. " +
+                "Leg index: ${routeProgress.currentLegProgress?.legIndex}, " +
+                "state: ${routeProgress.currentState}, activeLegIndex: $activeLegIndex",
+            LOG_CATEGORY
+        )
         val routeLineMaskingLayerDynamicData = when (
             (routeProgress.currentLegProgress?.legIndex ?: INVALID_ACTIVE_LEG_INDEX) !=
                 activeLegIndex
@@ -825,6 +840,7 @@ class MapboxRouteLineApi(
         }
         val legChange = (routeProgress.currentLegProgress?.legIndex ?: 0) > activeLegIndex
         activeLegIndex = routeProgress.currentLegProgress?.legIndex ?: INVALID_ACTIVE_LEG_INDEX
+        logI("Update leg index to $activeLegIndex (from route progress update)", LOG_CATEGORY)
 
         // If the de-emphasize inactive route legs feature is enabled and the vanishing route line
         // feature is enabled and the active leg index has changed, then calling the
@@ -987,6 +1003,11 @@ class MapboxRouteLineApi(
         return ifNonNull(route, routeProgress.currentLegProgress) { navRoute, currentLegProgress ->
             val numLegs = navRoute.directionsRoute.legs()?.size ?: 0
             val legIndex = currentLegProgress.legIndex
+            logI(
+                "getRouteLineDynamicDataForMaskingLayers for legIndex: $legIndex, " +
+                    "numLegs: $numLegs, data size: ${routeLineExpressionData.size}",
+                LOG_CATEGORY
+            )
             if (numLegs > 1 && legIndex < numLegs) {
                 getRouteLineDynamicDataForMaskingLayers(routeLineExpressionData, legIndex)
             } else {
@@ -1371,6 +1392,7 @@ class MapboxRouteLineApi(
         primaryRoute = distinctNewRoutes.firstOrNull()
         MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
         this.activeLegIndex = INVALID_ACTIVE_LEG_INDEX
+        logI("Updated activeLegIndex to $activeLegIndex (from setNewRouteData)", LOG_CATEGORY)
 
         preWarmRouteCaches(
             distinctNewRoutes,
@@ -1604,10 +1626,18 @@ class MapboxRouteLineApi(
             ) {
                 true -> {
                     routeLineExpressionData = deferred.await()
+                    logI(
+                        "Inited route line expression data: ${routeLineExpressionData.size} sync",
+                        LOG_CATEGORY
+                    )
                 }
                 false -> {
                     jobControl.scope.launch(Dispatchers.Main) {
                         routeLineExpressionData = deferred.await()
+                        logI(
+                            "Inited route line expression data: ${routeLineExpressionData.size} async",
+                            LOG_CATEGORY
+                        )
                     }
                 }
             }
