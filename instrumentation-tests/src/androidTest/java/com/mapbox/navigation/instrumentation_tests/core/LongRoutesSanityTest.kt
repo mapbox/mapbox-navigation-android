@@ -25,8 +25,67 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    //@Test
+    fun coreMemoryConsumptionTest() = sdkTest(timeout = 120_000) {
+        Thread.sleep(10_000) // time to connect profiler
+        val routeOptions = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinates(
+                "4.898473756907066,52.37373595766587" +
+                    ";5.359980783143584,43.280050656855906" +
+                    ";11.571179644010442,48.145540095763664" +
+                    ";13.394784408007155,52.51274942160785" +
+                    ";-9.143239539655042,38.70880224984026" +
+                    ";9.21595128801522,45.4694220491258"
+            )
+            // comment out to use string
+            .unrecognizedProperties(mapOf(
+                "dataref" to "true"
+            ))
+            .alternatives(true)
+            .enableRefresh(true)
+            .build()
+        withMapboxNavigation { navigation ->
+            val routes = navigation
+                .requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException().routes
+        }
+    }
+
     @Test
-    fun requestAndSetLongRouteWithoutOnboardTiles() = sdkTest(timeout = 120_000) {
+    fun dataRef() = sdkTest(timeout = 120_000) {
+        val routeOptions = RouteOptions.builder()
+            .baseUrl(mockWebServerRule.baseUrl) // comment to use real Directions API
+            .applyDefaultNavigationOptions()
+            .coordinates(
+                "4.898473756907066,52.37373595766587" +
+                    ";5.359980783143584,43.280050656855906" +
+                    ";11.571179644010442,48.145540095763664" +
+                    ";13.394784408007155,52.51274942160785" +
+                    ";-9.143239539655042,38.70880224984026" +
+                    ";9.21595128801522,45.4694220491258"
+            )
+            .unrecognizedProperties(mapOf(
+                "dataref" to "true"
+            ))
+            .alternatives(true)
+            .enableRefresh(true)
+            .build()
+        val handler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
+            expectedCoordinates = routeOptions.coordinatesList()
+        )
+        mockWebServerRule.requestHandlers.add(handler)
+        withMapboxNavigation { navigation ->
+            val routes = navigation
+                .requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException().routes
+        }
+    }
+
+    @Test
+    fun string() = sdkTest(timeout = 120_000) {
         val routeOptions = RouteOptions.builder()
             .baseUrl(mockWebServerRule.baseUrl) // comment to use real Directions API
             .applyDefaultNavigationOptions()
@@ -45,16 +104,12 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
             lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
             expectedCoordinates = routeOptions.coordinatesList()
-        ).apply {
-            // It takes time for Direction API to calculate a long route
-            jsonResponseModifier = DelayedResponseModifier(12_000)
-        }
+        )
         mockWebServerRule.requestHandlers.add(handler)
         withMapboxNavigation { navigation ->
             val routes = navigation
                 .requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException().routes
-            navigation.setNavigationRoutesAsync(routes)
         }
     }
 }
