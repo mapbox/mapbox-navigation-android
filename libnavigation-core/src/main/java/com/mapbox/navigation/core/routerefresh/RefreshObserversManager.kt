@@ -1,11 +1,11 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.navigation.core.RoutesProgressData
+import com.mapbox.navigation.core.RoutesRefreshData
 import java.util.concurrent.CopyOnWriteArraySet
 
 internal fun interface RouteRefreshObserver {
 
-    fun onRoutesRefreshed(routeInfo: RoutesProgressData)
+    fun onRoutesRefreshed(routeInfo: RoutesRefreshData)
 }
 
 internal class RefreshObserversManager {

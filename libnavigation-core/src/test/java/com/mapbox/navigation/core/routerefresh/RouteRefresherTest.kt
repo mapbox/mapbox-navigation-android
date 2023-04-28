@@ -4,8 +4,8 @@ import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.RouteProgressData
-import com.mapbox.navigation.core.RoutesProgressData
-import com.mapbox.navigation.core.RoutesProgressDataProvider
+import com.mapbox.navigation.core.RoutesRefreshData
+import com.mapbox.navigation.core.RoutesRefreshDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -60,18 +60,18 @@ class RouteRefresherTest {
     private val routesProgressData1 = RouteProgressData(legIndex1, 2, 3)
     private val routesProgressData2 = RouteProgressData(legIndex2, 5, 6)
     private val routesProgressData3 = RouteProgressData(legIndex3, 8, 9)
-    private val routesProgressData = RoutesProgressData(
+    private val routesRefreshData = RoutesRefreshData(
         route1,
         routesProgressData1,
         listOf(route2 to routesProgressData2)
     )
 
-    private val routesProgressDataProvider = mockk<RoutesProgressDataProvider>(relaxed = true)
+    private val routesRefreshDataProvider = mockk<RoutesRefreshDataProvider>(relaxed = true)
     private val evRefreshDataProvider = mockk<EVRefreshDataProvider>(relaxed = true)
     private val routeDiffProvider = mockk<DirectionsRouteDiffProvider>(relaxed = true)
     private val routeRefresh = mockk<RouteRefresh>(relaxed = true)
     private val sut = RouteRefresher(
-        routesProgressDataProvider,
+        routesRefreshDataProvider,
         evRefreshDataProvider,
         routeDiffProvider,
         routeRefresh,
@@ -81,8 +81,8 @@ class RouteRefresherTest {
     fun setUp() {
         mockkObject(RouteRefreshValidator)
         coEvery {
-            routesProgressDataProvider.getRoutesProgressData(listOf(route1, route2))
-        } returns routesProgressData
+            routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
+        } returns routesRefreshData
     }
 
     @After
@@ -93,7 +93,7 @@ class RouteRefresherTest {
     @Test(expected = IllegalArgumentException::class)
     fun refresh_emptyList() = coroutineRule.runBlockingTest {
         coEvery {
-            routesProgressDataProvider.getRoutesProgressData(emptyList())
+            routesRefreshDataProvider.getRoutesRefreshData(emptyList())
         } throws IllegalArgumentException()
 
         sut.refresh(emptyList(), 0)
@@ -122,7 +122,7 @@ class RouteRefresherTest {
         )
         val expected = RouteRefresherResult(
             true,
-            RoutesProgressData(
+            RoutesRefreshData(
                 newRoute1,
                 routesProgressData1,
                 listOf(newRoute2 to routesProgressData2)
@@ -195,7 +195,7 @@ class RouteRefresherTest {
         )
         val expected = RouteRefresherResult(
             true,
-            RoutesProgressData(
+            RoutesRefreshData(
                 route1,
                 routesProgressData1,
                 listOf(newRoute2 to routesProgressData2)
@@ -282,14 +282,14 @@ class RouteRefresherTest {
             )
         )
         val route3 = createNavigationRoute(directionsRoute = createDirectionsRoute(legs = null))
-        val routesProgressData = RoutesProgressData(
+        val routesRefreshData = RoutesRefreshData(
             route1,
             routesProgressData1,
             listOf(route2 to routesProgressData2, route3 to routesProgressData3)
         )
         coEvery {
-            routesProgressDataProvider.getRoutesProgressData(listOf(route1, route2, route3))
-        } returns routesProgressData
+            routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2, route3))
+        } returns routesRefreshData
         every {
             RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
@@ -320,7 +320,7 @@ class RouteRefresherTest {
             )
             0
         }
-        val expected = RouteRefresherResult(false, routesProgressData)
+        val expected = RouteRefresherResult(false, routesRefreshData)
 
         val actual = sut.refresh(listOf(route1, route2, route3), 10)
 
@@ -356,7 +356,7 @@ class RouteRefresherTest {
         }
         val expected = RouteRefresherResult(
             true,
-            RoutesProgressData(
+            RoutesRefreshData(
                 route1,
                 routesProgressData1,
                 listOf(newRoute2 to routesProgressData2)
@@ -390,7 +390,7 @@ class RouteRefresherTest {
         }
         val expected = RouteRefresherResult(
             true,
-            RoutesProgressData(
+            RoutesRefreshData(
                 route1,
                 routesProgressData1,
                 listOf(newRoute2 to routesProgressData2)
@@ -477,15 +477,15 @@ class RouteRefresherTest {
         every {
             RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Invalid(reason2)
-        val routesProgressData = RoutesProgressData(
+        val routesRefreshData = RoutesRefreshData(
             route1,
             routesProgressData1,
             listOf(route2 to routesProgressData2)
         )
         coEvery {
-            routesProgressDataProvider.getRoutesProgressData(listOf(route1, route2))
-        } returns routesProgressData
-        val expected = RouteRefresherResult(false, routesProgressData)
+            routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
+        } returns routesRefreshData
+        val expected = RouteRefresherResult(false, routesRefreshData)
 
         val actual = sut.refresh(listOf(route1, route2), 10)
         assertEquals(expected, actual)

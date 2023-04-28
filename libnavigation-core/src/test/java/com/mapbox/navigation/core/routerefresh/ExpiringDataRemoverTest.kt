@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.core.RouteProgressData
-import com.mapbox.navigation.core.RoutesProgressData
+import com.mapbox.navigation.core.RoutesRefreshData
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createNavigationRoute
@@ -168,7 +168,7 @@ class ExpiringDataRemoverTest {
         val route1RouteProgressData = RouteProgressData(1, 2, 3)
         val route2RouteProgressData = RouteProgressData(2, 5, 6)
         val route3RouteProgressData = RouteProgressData(0, 5, 7)
-        val input = RoutesProgressData(
+        val input = RoutesRefreshData(
             route1,
             route1RouteProgressData,
             listOf(
@@ -176,7 +176,7 @@ class ExpiringDataRemoverTest {
                 route3 to route3RouteProgressData
             )
         )
-        val expected = RoutesProgressData(
+        val expected = RoutesRefreshData(
             expectedNewRoute1,
             route1RouteProgressData,
             listOf(

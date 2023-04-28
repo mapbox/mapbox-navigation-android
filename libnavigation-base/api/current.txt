@@ -671,13 +671,14 @@ package com.mapbox.navigation.base.route {
     property public final String type;
     field public static final com.mapbox.navigation.base.route.LegWaypoint.Companion Companion;
     field public static final String EV_CHARGING_ADDED = "EV_CHARGING_ADDED";
+    field public static final String EV_CHARGING_USER_PROVIDED = "EV_CHARGING_USER_PROVIDED";
     field public static final String REGULAR = "REGULAR";
   }
 
   public static final class LegWaypoint.Companion {
   }
 
-  @StringDef({com.mapbox.navigation.base.route.LegWaypoint.REGULAR, com.mapbox.navigation.base.route.LegWaypoint.EV_CHARGING_ADDED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.PROPERTY, kotlin.annotation.AnnotationTarget.VALUE_PARAMETER, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.TYPE}) public static @interface LegWaypoint.Type {
+  @StringDef({com.mapbox.navigation.base.route.LegWaypoint.REGULAR, com.mapbox.navigation.base.route.LegWaypoint.EV_CHARGING_ADDED, com.mapbox.navigation.base.route.LegWaypoint.EV_CHARGING_USER_PROVIDED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.PROPERTY, kotlin.annotation.AnnotationTarget.VALUE_PARAMETER, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.TYPE}) public static @interface LegWaypoint.Type {
   }
 
   public final class NavigationRoute {

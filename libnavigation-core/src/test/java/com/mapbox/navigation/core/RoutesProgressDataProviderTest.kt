@@ -1,137 +1,249 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.routealternatives.AlternativeMetadataProvider
-import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
-import com.mapbox.navigation.core.routealternatives.AlternativeRouteProgressDataProvider
-import io.mockk.coEvery
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
+import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import kotlinx.coroutines.test.runBlockingTest
-import org.junit.After
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Before
+import org.junit.Assert.assertNull
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class RoutesProgressDataProviderTest {
 
-    private val primaryRouteProgressDataProvider =
-        mockk<PrimaryRouteProgressDataProvider>(relaxed = true)
-    private val alternativeMetadataProvider = mockk<AlternativeMetadataProvider>(relaxed = true)
-    private val sut = RoutesProgressDataProvider(
-        primaryRouteProgressDataProvider,
-        alternativeMetadataProvider
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+    private val provider = RoutesProgressDataProvider()
+    private val currentLegIndex = 9
+    private val routeGeometryIndex = 44
+    private val legGeometryIndex = 33
+    private val altLegIndex1 = 3
+    private val altRouteGeometryIndex1 = 67
+    private val altLegGeometryIndex1 = 36
+    private val altLegIndex2 = 7
+    private val altRouteGeometryIndex2 = 59
+    private val altLegGeometryIndex2 = 28
+    private val altId1 = "altid#1"
+    private val altId2 = "altid#2"
+    private val routeProgress = mockk<RouteProgress> {
+        every { currentRouteGeometryIndex } returns routeGeometryIndex
+        every { currentLegProgress } returns mockk {
+            every { legIndex } returns currentLegIndex
+            every { geometryIndex } returns legGeometryIndex
+        }
+        every { internalAlternativeRouteIndices() } returns mapOf(
+            altId1 to RouteIndicesFactory.buildRouteIndices(
+                altLegIndex1,
+                0,
+                altRouteGeometryIndex1,
+                altLegGeometryIndex1,
+                1
+            ),
+            altId2 to RouteIndicesFactory.buildRouteIndices(
+                altLegIndex2,
+                1,
+                altRouteGeometryIndex2,
+                altLegGeometryIndex2,
+                2
+            ),
+        )
+    }
+    private val expected = RoutesProgressData(
+        RouteProgressData(
+            currentLegIndex,
+            routeGeometryIndex,
+            legGeometryIndex
+        ),
+        mapOf(
+            altId1 to RouteProgressData(altLegIndex1, altRouteGeometryIndex1, altLegGeometryIndex1),
+            altId2 to RouteProgressData(altLegIndex2, altRouteGeometryIndex2, altLegGeometryIndex2),
+        )
     )
 
-    @Before
-    fun setUp() {
-        mockkObject(AlternativeRouteProgressDataProvider)
-    }
+    @Test
+    fun stateAfterUpdate() = runBlocking {
+        provider.onRouteProgressChanged(routeProgress)
 
-    @After
-    fun tearDown() {
-        unmockkObject(AlternativeRouteProgressDataProvider)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun `getRoutesProgressData for empty routes`() = runBlockingTest {
-        sut.getRoutesProgressData(emptyList())
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
-    fun `getRoutesProgressData for primary route only`() = runBlockingTest {
-        val primaryRouteProgressData = RouteProgressData(4, 5, 6)
-        val primaryRoute = mockk<NavigationRoute>(relaxed = true)
-        coEvery {
-            primaryRouteProgressDataProvider.getRouteRefreshRequestDataOrWait()
-        } returns primaryRouteProgressData
-        val expected = RoutesProgressData(primaryRoute, primaryRouteProgressData, emptyList())
+    fun updateDuringRetrieval() = runBlocking {
+        launch {
+            delay(100)
+            provider.onRouteProgressChanged(routeProgress)
+        }
 
-        val actual = sut.getRoutesProgressData(listOf(primaryRoute))
-
-        assertEquals(expected, actual)
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
-    fun `getRoutesProgressData for valid alternatives`() = runBlockingTest {
-        val primaryRouteProgressData = RouteProgressData(4, 5, 6)
-        val alternativeRoute1ProgressData = RouteProgressData(7, 8, 9)
-        val alternativeRoute2ProgressData = RouteProgressData(10, 11, 12)
-        val primaryRoute = mockk<NavigationRoute>(relaxed = true)
-        val alternativeRoute1 = mockk<NavigationRoute>(relaxed = true)
-        val alternativeRoute2 = mockk<NavigationRoute>(relaxed = true)
-        val alternativeMetadata1 = mockk<AlternativeRouteMetadata>(relaxed = true)
-        val alternativeMetadata2 = mockk<AlternativeRouteMetadata>(relaxed = true)
-        coEvery {
-            primaryRouteProgressDataProvider.getRouteRefreshRequestDataOrWait()
-        } returns primaryRouteProgressData
-        every {
-            alternativeMetadataProvider.getMetadataFor(alternativeRoute1)
-        } returns alternativeMetadata1
-        every {
-            alternativeMetadataProvider.getMetadataFor(alternativeRoute2)
-        } returns alternativeMetadata2
-        coEvery {
-            AlternativeRouteProgressDataProvider.getRouteProgressData(
-                primaryRouteProgressData,
-                alternativeMetadata1
-            )
-        } returns alternativeRoute1ProgressData
-        coEvery {
-            AlternativeRouteProgressDataProvider.getRouteProgressData(
-                primaryRouteProgressData,
-                alternativeMetadata2
-            )
-        } returns alternativeRoute2ProgressData
+    fun updateDuringRetrieval_async() = coroutineRule.runBlockingTest {
+        pauseDispatcher {
+            launch {
+                delay(100)
+                provider.onRouteProgressChanged(routeProgress)
+            }
+            var value: RoutesProgressData? = null
+            val update = launch {
+                value = provider.getRouteRefreshRequestDataOrWait()
+                throw AssertionError()
+            }
+            advanceTimeBy(50)
+            update.cancel()
+            advanceTimeBy(50)
+            assertNull(value)
+            assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+        }
+    }
+
+    @Test
+    fun stateAfterUpdateLegProgressIsNull() = runBlocking {
+        val routeIndex = 50
+        val routeProgress = mockk<RouteProgress> {
+            every { currentRouteGeometryIndex } returns routeIndex
+            every { currentLegProgress } returns null
+            every { internalAlternativeRouteIndices() } returns emptyMap()
+        }
         val expected = RoutesProgressData(
-            primaryRoute,
-            primaryRouteProgressData,
-            listOf(
-                alternativeRoute1 to alternativeRoute1ProgressData,
-                alternativeRoute2 to alternativeRoute2ProgressData
-            )
+            RouteProgressData(0, routeIndex, null),
+            emptyMap()
         )
 
-        val actual = sut.getRoutesProgressData(
-            listOf(primaryRoute, alternativeRoute1, alternativeRoute2)
-        )
+        provider.onRouteProgressChanged(routeProgress)
 
-        assertEquals(expected, actual)
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 
     @Test
-    fun `getRoutesProgressData for one invalid alternative`() = runBlockingTest {
-        val primaryRouteProgressData = RouteProgressData(4, 5, 6)
-        val alternativeRoute2ProgressData = RouteProgressData(10, 11, 12)
-        val primaryRoute = mockk<NavigationRoute>(relaxed = true)
-        val alternativeRoute1 = mockk<NavigationRoute>(relaxed = true)
-        val alternativeRoute2 = mockk<NavigationRoute>(relaxed = true)
-        val alternativeMetadata2 = mockk<AlternativeRouteMetadata>(relaxed = true)
-        coEvery {
-            primaryRouteProgressDataProvider.getRouteRefreshRequestDataOrWait()
-        } returns primaryRouteProgressData
-        every { alternativeMetadataProvider.getMetadataFor(alternativeRoute1) } returns null
-        every {
-            alternativeMetadataProvider.getMetadataFor(alternativeRoute2)
-        } returns alternativeMetadata2
-        coEvery {
-            AlternativeRouteProgressDataProvider.getRouteProgressData(
-                primaryRouteProgressData,
-                alternativeMetadata2
-            )
-        } returns alternativeRoute2ProgressData
+    fun stateAfterUpdateTwice() = runBlocking {
+        val legIndex1 = 5
+        val routeGeometryIndex1 = 78
+        val legGeometryIndex1 = 61
+        val routeProgress1 = mockk<RouteProgress> {
+            every { currentRouteGeometryIndex } returns routeGeometryIndex1
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns legIndex1
+                every { geometryIndex } returns legGeometryIndex1
+            }
+            every { internalAlternativeRouteIndices() } returns emptyMap()
+        }
+        val legIndex2 = 9
+        val routeGeometryIndex2 = 44
+        val legGeometryIndex2 = 33
+        val routeProgress2 = mockk<RouteProgress> {
+            every { currentRouteGeometryIndex } returns routeGeometryIndex2
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns legIndex2
+                every { geometryIndex } returns legGeometryIndex2
+                every { internalAlternativeRouteIndices() } returns emptyMap()
+            }
+        }
         val expected = RoutesProgressData(
-            primaryRoute,
-            primaryRouteProgressData,
-            listOf(alternativeRoute1 to null, alternativeRoute2 to alternativeRoute2ProgressData)
+            RouteProgressData(
+                legIndex2,
+                routeGeometryIndex2,
+                legGeometryIndex2
+            ),
+            emptyMap()
         )
 
-        val actual = sut.getRoutesProgressData(
-            listOf(primaryRoute, alternativeRoute1, alternativeRoute2)
-        )
+        provider.onRouteProgressChanged(routeProgress1)
+        provider.onRouteProgressChanged(routeProgress2)
 
-        assertEquals(expected, actual)
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+    }
+
+    @Test
+    fun doesNotWaitForUpdateIfAlreadyHasValue() = runBlocking {
+        val legIndex1 = 5
+        val routeGeometryIndex1 = 78
+        val legGeometryIndex1 = 61
+        val routeProgress1 = mockk<RouteProgress> {
+            every { currentRouteGeometryIndex } returns routeGeometryIndex1
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns legIndex1
+                every { geometryIndex } returns legGeometryIndex1
+                every { internalAlternativeRouteIndices() } returns emptyMap()
+            }
+        }
+        val legIndex2 = 9
+        val routeGeometryIndex2 = 44
+        val legGeometryIndex2 = 33
+        val routeProgress2 = mockk<RouteProgress> {
+            every { currentRouteGeometryIndex } returns routeGeometryIndex2
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns legIndex2
+                every { geometryIndex } returns legGeometryIndex2
+                every { internalAlternativeRouteIndices() } returns emptyMap()
+            }
+        }
+        val expected = RoutesProgressData(
+            RouteProgressData(
+                legIndex1,
+                routeGeometryIndex1,
+                legGeometryIndex1
+            ),
+            emptyMap()
+        )
+        provider.onRouteProgressChanged(routeProgress1)
+
+        launch {
+            delay(500)
+            provider.onRouteProgressChanged(routeProgress2)
+        }
+
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
+    }
+
+    @Test
+    fun waitsForUpdateIfValueIsCleared() = runBlocking {
+        val legIndex1 = 5
+        val routeGeometryIndex1 = 78
+        val legGeometryIndex1 = 61
+        val routeProgress1 = mockk<RouteProgress> {
+            every { currentRouteGeometryIndex } returns routeGeometryIndex1
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns legIndex1
+                every { geometryIndex } returns legGeometryIndex1
+                every { internalAlternativeRouteIndices() } returns emptyMap()
+            }
+        }
+        val legIndex2 = 9
+        val routeGeometryIndex2 = 44
+        val legGeometryIndex2 = 33
+        val routeProgress2 = mockk<RouteProgress> {
+            every { currentRouteGeometryIndex } returns routeGeometryIndex2
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns legIndex2
+                every { geometryIndex } returns legGeometryIndex2
+                every { internalAlternativeRouteIndices() } returns emptyMap()
+            }
+        }
+        val expected = RoutesProgressData(
+            RouteProgressData(
+                legIndex2,
+                routeGeometryIndex2,
+                legGeometryIndex2
+            ),
+            emptyMap()
+        )
+        provider.onRouteProgressChanged(routeProgress1)
+
+        provider.onNewRoutes()
+        launch {
+            delay(100)
+            provider.onRouteProgressChanged(routeProgress2)
+        }
+
+        assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
 }

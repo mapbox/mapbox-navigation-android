@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
+import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
@@ -102,6 +103,10 @@ class NavigatorMapperTest {
             upcomingRoadObjects = upcomingRoadObjects,
             alternativeRouteId = "alternative_id",
             currentRouteGeometryIndex = routeGeometryIndex,
+            alternativeRoutesIndices = mapOf(
+                "id#2" to RouteIndicesFactory.buildRouteIndices(2, 4, 6, 8, 10),
+                "id#3" to RouteIndicesFactory.buildRouteIndices(3, 7, 5, 11, 9),
+            )
         )
 
         val result = getRouteProgressFrom(
@@ -655,6 +660,10 @@ class NavigatorMapperTest {
         every { locatedAlternativeRouteId } returns "alternative_id"
         every { geometryIndex } returns routeGeometryIndex
         every { shapeIndex } returns legGeometryIndex
+        every { alternativeRouteIndices } returns listOf(
+            com.mapbox.navigator.RouteIndices("id#2", 2, 4, 6, 8, 10),
+            com.mapbox.navigator.RouteIndices("id#3", 3, 7, 5, 11, 9),
+        )
     }
 
     val routeAlertLocation: RouteAlertLocation = mockk()

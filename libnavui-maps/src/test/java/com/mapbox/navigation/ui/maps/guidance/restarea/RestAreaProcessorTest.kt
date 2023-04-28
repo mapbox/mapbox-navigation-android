@@ -336,7 +336,8 @@ class RestAreaProcessorTest {
         upcomingRoadObjects = upcomingRoadObjects,
         stale = false,
         alternativeRouteId = null,
-        currentRouteGeometryIndex = 0
+        currentRouteGeometryIndex = 0,
+        alternativeRoutesIndices = emptyMap(),
     )
 
     private fun nativeRestAreaObjectWith(name: String, location: Point, mapUri: String) =

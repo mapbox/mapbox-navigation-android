@@ -1,49 +1,64 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.routealternatives.AlternativeMetadataProvider
-import com.mapbox.navigation.core.routealternatives.AlternativeRouteProgressDataProvider
+import androidx.annotation.MainThread
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+
+internal data class RouteProgressData(
+    val legIndex: Int,
+    val routeGeometryIndex: Int,
+    val legGeometryIndex: Int?,
+)
 
 internal data class RoutesProgressData(
-    val primaryRoute: NavigationRoute,
-    val primaryRouteProgressData: RouteProgressData,
-    val alternativeRoutesProgressData: List<Pair<NavigationRoute, RouteProgressData?>>
-) {
-    val allRoutesProgressData = listOf(primaryRoute to primaryRouteProgressData) +
-        alternativeRoutesProgressData
-}
+    val primary: RouteProgressData,
+    val alternatives: Map<String, RouteProgressData>,
+)
 
-internal class RoutesProgressDataProvider(
-    private val primaryRouteProgressDataProvider: PrimaryRouteProgressDataProvider,
-    private val alternativeMetadataProvider: AlternativeMetadataProvider,
-) {
+/**
+ * Accumulates and provides route refresh model data from different sources.
+ */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@MainThread
+internal class RoutesProgressDataProvider : RouteProgressObserver {
+
+    private val defaultRouteProgressData = RouteProgressData(0, 0, null)
+    private var routesProgressData: RoutesProgressData? = null
+    private var continuation: CancellableContinuation<RoutesProgressData>? = null
 
     /**
-     * Retrieved progress data for passed routes.
-     *
-     * @throws IllegalArgumentException if routes are empty
+     * Returns either last saved value (if has one) or waits for the next update.
      */
-    @Throws(IllegalArgumentException::class)
-    suspend fun getRoutesProgressData(
-        routes: List<NavigationRoute>
-    ): RoutesProgressData {
-        if (routes.isEmpty()) {
-            throw IllegalArgumentException("Routes must not be empty")
+    suspend fun getRouteRefreshRequestDataOrWait(): RoutesProgressData {
+        return (routesProgressData ?: suspendCancellableCoroutine { continuation = it })
+    }
+
+    fun onNewRoutes() {
+        routesProgressData = null
+    }
+
+    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        val primary = RouteProgressData(
+            legIndex = routeProgress.currentLegProgress?.legIndex
+                ?: defaultRouteProgressData.legIndex,
+            routeGeometryIndex = routeProgress.currentRouteGeometryIndex,
+            legGeometryIndex = routeProgress.currentLegProgress?.geometryIndex,
+        )
+        val alternatives = routeProgress.internalAlternativeRouteIndices().entries.associate {
+            it.key to RouteProgressData(
+                it.value.legIndex,
+                it.value.routeGeometryIndex,
+                it.value.legGeometryIndex
+            )
         }
-        val primaryRouteProgressData = primaryRouteProgressDataProvider
-            .getRouteRefreshRequestDataOrWait()
-        val primary = routes.first()
-        val alternatives = routes.drop(1)
-        val alternativeRouteProgressDatas = alternatives.map { route ->
-            val alternativeMetadata = alternativeMetadataProvider.getMetadataFor(route)
-            val alternativeRouteProgressData = alternativeMetadata?.let {
-                AlternativeRouteProgressDataProvider.getRouteProgressData(
-                    primaryRouteProgressData,
-                    it
-                )
-            }
-            route to alternativeRouteProgressData
+        routesProgressData = RoutesProgressData(primary, alternatives).also {
+            continuation?.resume(it)
+            continuation = null
         }
-        return RoutesProgressData(primary, primaryRouteProgressData, alternativeRouteProgressDatas)
     }
 }
