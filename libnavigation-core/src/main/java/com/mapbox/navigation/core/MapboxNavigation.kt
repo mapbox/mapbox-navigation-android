@@ -291,7 +291,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     // native Router Interface
     private val nativeRouter: RouterInterface
 
-    private val routeRefreshRequestDataProvider =
+    private val routesProgressDataProvider =
         NavigationComponentProvider.createRouteRefreshRequestDataProvider()
 
     private val evDynamicDataHolder = NavigationComponentProvider.createEVDynamicDataHolder()
@@ -506,7 +506,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
 
-        tripSession.registerRouteProgressObserver(routeRefreshRequestDataProvider)
+        tripSession.registerRouteProgressObserver(routesProgressDataProvider)
         tripSession.registerStateObserver(navigationSession)
         tripSession.registerStateObserver(historyRecordingStateHandler)
 
@@ -564,15 +564,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             Dispatchers.Main.immediate,
             navigationOptions.routeRefreshOptions,
             directionsSession,
-            routeRefreshRequestDataProvider,
-            routeAlternativesController,
+            routesProgressDataProvider,
             evDynamicDataHolder,
             Time.SystemImpl
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController.registerRouteRefreshObserver {
             internalSetNavigationRoutes(
-                it.allRoutesProgressData.map { pair -> pair.first },
+                it.allRoutesRefreshData.map { pair -> pair.first },
                 SetRoutes.RefreshRoutes(it.primaryRouteProgressData)
             )
         }
@@ -1933,7 +1932,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
-        routeRefreshRequestDataProvider.onNewRoutes()
+        routesProgressDataProvider.onNewRoutes()
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController.requestPlannedRouteRefresh(result.navigationRoutes)
     }

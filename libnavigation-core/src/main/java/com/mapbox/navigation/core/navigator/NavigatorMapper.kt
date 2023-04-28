@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
@@ -183,6 +184,16 @@ private fun NavigationStatus.getRouteProgress(
         currentLegDestination
     )
 
+    val alternativeRouteIndicesMap = alternativeRouteIndices.associate {
+        it.routeId to RouteIndicesFactory.buildRouteIndices(
+            it.legIndex,
+            it.stepIndex,
+            it.geometryIndex,
+            it.shapeIndex,
+            it.intersectionIndex,
+        )
+    }
+
     return buildRouteProgressObject(
         route,
         bannerInstructions,
@@ -200,6 +211,7 @@ private fun NavigationStatus.getRouteProgress(
         stale,
         locatedAlternativeRouteId,
         geometryIndex,
+        alternativeRouteIndicesMap
     )
 }
 

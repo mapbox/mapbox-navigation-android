@@ -5,7 +5,7 @@ import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class RoutesProgressDataTest {
+class RoutesRefreshDataTest {
 
     @Test
     fun `allRoutesProgressData for no alternatives`() {
@@ -13,9 +13,9 @@ class RoutesProgressDataTest {
         val primaryRouteProgressData = RouteProgressData(1, 2, 3)
         val expected = listOf(primaryRoute to primaryRouteProgressData)
 
-        val actual = RoutesProgressData(primaryRoute, primaryRouteProgressData, emptyList())
+        val actual = RoutesRefreshData(primaryRoute, primaryRouteProgressData, emptyList())
 
-        assertEquals(expected, actual.allRoutesProgressData)
+        assertEquals(expected, actual.allRoutesRefreshData)
     }
 
     @Test
@@ -29,12 +29,12 @@ class RoutesProgressDataTest {
             alternativeRoute to alternativeRouteProgressData
         )
 
-        val actual = RoutesProgressData(
+        val actual = RoutesRefreshData(
             primaryRoute,
             primaryRouteProgressData,
             listOf(alternativeRoute to alternativeRouteProgressData)
         )
 
-        assertEquals(expected, actual.allRoutesProgressData)
+        assertEquals(expected, actual.allRoutesRefreshData)
     }
 }

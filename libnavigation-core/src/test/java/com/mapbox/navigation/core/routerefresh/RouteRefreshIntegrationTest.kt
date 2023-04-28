@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -16,8 +17,8 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.NavigationComponentProvider
-import com.mapbox.navigation.core.PrimaryRouteProgressDataProvider
-import com.mapbox.navigation.core.RoutesProgressData
+import com.mapbox.navigation.core.RoutesProgressDataProvider
+import com.mapbox.navigation.core.RoutesRefreshData
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -52,7 +53,7 @@ internal open class RouteRefreshIntegrationTest {
     private val mapboxReplayer = MapboxReplayer()
     private val threadController = ThreadController()
     val router = mockk<NavigationRouterV2>(relaxed = true)
-    private val primaryRouteProgressDataProvider = PrimaryRouteProgressDataProvider()
+    private val routesProgressDataProvider = RoutesProgressDataProvider()
     private val tripSession = NavigationComponentProvider.createTripSession(
         tripService = mockk(relaxed = true),
         TripSessionLocationEngine(mockk()) { ReplayLocationEngine(mapboxReplayer) },
@@ -74,9 +75,9 @@ internal open class RouteRefreshIntegrationTest {
 
     class TestRefreshObserver : RouteRefreshObserver {
 
-        val refreshes = mutableListOf<RoutesProgressData>()
+        val refreshes = mutableListOf<RoutesRefreshData>()
 
-        override fun onRoutesRefreshed(routeInfo: RoutesProgressData) {
+        override fun onRoutesRefreshed(routeInfo: RoutesRefreshData) {
             refreshes.add(routeInfo)
         }
     }
@@ -103,13 +104,14 @@ internal open class RouteRefreshIntegrationTest {
             CoroutineUtils.createScope(any(), any())
         } answers { coroutineRule.createTestScope() }
 
-        primaryRouteProgressDataProvider.onRouteProgressChanged(
+        routesProgressDataProvider.onRouteProgressChanged(
             mockk {
                 every { currentLegProgress } returns mockk {
                     every { legIndex } returns 0
                     every { geometryIndex } returns 0
                 }
                 every { currentRouteGeometryIndex } returns 0
+                every { internalAlternativeRouteIndices() } returns emptyMap()
             }
         )
     }
@@ -127,8 +129,7 @@ internal open class RouteRefreshIntegrationTest {
             testDispatcher,
             options,
             directionsSession,
-            primaryRouteProgressDataProvider,
-            routesAlternativeController,
+            routesProgressDataProvider,
             EVDynamicDataHolder(),
             object : Time {
                 override fun nanoTime() = System.nanoTime()

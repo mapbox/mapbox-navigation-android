@@ -7,6 +7,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.trip.model.RouteIndices
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -50,7 +52,9 @@ object RouteProgressFactory {
      * @param currentRouteGeometryIndex route-wise index representing the geometry point that starts the segment
      * the user is currently on, effectively this represents the index of last visited geometry point in the route
      * (see [DirectionsRoute.geometry] or [DecodeUtils.completeGeometryToPoints] if [RouteOptions.overview] is [DirectionsCriteria.OVERVIEW_FULL]).
+     * @param alternativeRoutesIndices map of alternative route id to route indices for specified route (see [RouteIndices]). No primary route indices data is available here.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun buildRouteProgressObject(
         route: NavigationRoute,
         bannerInstructions: BannerInstructions?,
@@ -68,6 +72,7 @@ object RouteProgressFactory {
         stale: Boolean,
         alternativeRouteId: String?,
         currentRouteGeometryIndex: Int,
+        alternativeRoutesIndices: Map<String, RouteIndices>
     ): RouteProgress {
         return RouteProgress(
             navigationRoute = route,
@@ -86,6 +91,7 @@ object RouteProgressFactory {
             stale = stale,
             alternativeRouteId,
             currentRouteGeometryIndex = currentRouteGeometryIndex,
+            alternativeRoutesIndices = alternativeRoutesIndices,
         )
     }
 }

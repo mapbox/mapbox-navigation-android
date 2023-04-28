@@ -103,7 +103,7 @@ internal open class MapboxNavigationBaseTest {
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxed = true)
     val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)
     val threadController = mockk<ThreadController>(relaxed = true)
-    val routeProgressDataProvider = mockk<PrimaryRouteProgressDataProvider>(relaxed = true)
+    val routeProgressDataProvider = mockk<RoutesProgressDataProvider>(relaxed = true)
     val routesPreviewController = mockk<RoutesPreviewController>(relaxed = true)
     val routesCacheClearer = mockk<RoutesCacheClearer>(relaxed = true)
 
@@ -175,7 +175,6 @@ internal open class MapboxNavigationBaseTest {
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
-                any(),
                 any(),
                 any(),
                 any(),

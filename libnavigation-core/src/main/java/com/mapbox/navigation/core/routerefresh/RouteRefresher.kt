@@ -6,8 +6,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.core.RouteProgressData
-import com.mapbox.navigation.core.RoutesProgressData
-import com.mapbox.navigation.core.RoutesProgressDataProvider
+import com.mapbox.navigation.core.RoutesRefreshData
+import com.mapbox.navigation.core.RoutesRefreshDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.utils.internal.logE
@@ -21,11 +21,11 @@ import kotlin.coroutines.resume
 
 internal data class RouteRefresherResult(
     val success: Boolean,
-    val refreshedRoutesData: RoutesProgressData,
+    val refreshedRoutesData: RoutesRefreshData,
 )
 
 internal class RouteRefresher(
-    private val routesProgressDataProvider: RoutesProgressDataProvider,
+    private val routesRefreshDataProvider: RoutesRefreshDataProvider,
     private val evRefreshDataProvider: EVRefreshDataProvider,
     private val routeDiffProvider: DirectionsRouteDiffProvider,
     private val routeRefresh: RouteRefresh,
@@ -41,36 +41,36 @@ internal class RouteRefresher(
         routes: List<NavigationRoute>,
         routeRefreshTimeout: Long
     ): RouteRefresherResult {
-        val routesProgressData = routesProgressDataProvider.getRoutesProgressData(routes)
-        val refreshedRoutes = refreshRoutesOrNull(routesProgressData, routeRefreshTimeout)
+        val routesRefreshData = routesRefreshDataProvider.getRoutesRefreshData(routes)
+        val refreshedRoutes = refreshRoutesOrNull(routesRefreshData, routeRefreshTimeout)
         return if (refreshedRoutes.any { it != null }) {
             val primaryRoute = refreshedRoutes.first() ?: routes.first()
             val alternativeRoutesProgressData =
-                routesProgressData.alternativeRoutesProgressData.mapIndexed { index, pair ->
+                routesRefreshData.alternativeRoutesProgressData.mapIndexed { index, pair ->
                     (refreshedRoutes[index + 1] ?: routes[index + 1]) to pair.second
                 }
             RouteRefresherResult(
                 success = true,
-                RoutesProgressData(
+                RoutesRefreshData(
                     primaryRoute,
-                    routesProgressData.primaryRouteProgressData,
+                    routesRefreshData.primaryRouteProgressData,
                     alternativeRoutesProgressData
                 )
             )
         } else {
             RouteRefresherResult(
                 success = false,
-                routesProgressData
+                routesRefreshData
             )
         }
     }
 
     private suspend fun refreshRoutesOrNull(
-        routesData: RoutesProgressData,
+        routesData: RoutesRefreshData,
         timeout: Long
     ): List<NavigationRoute?> {
         return coroutineScope {
-            routesData.allRoutesProgressData.map { routeData ->
+            routesData.allRoutesRefreshData.map { routeData ->
                 async {
                     withTimeoutOrNull(timeout) {
                         val routeProgressData = routeData.second
