@@ -135,6 +135,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         ) { routes, routeAlternativeId ->
             val relevantAlternative = routes.find { it.id == routeAlternativeId }
             if (relevantAlternative != null) {
+                // TODO switch to NN index calculation ================================================================
                 val alternativeLegIndex = ifNonNull(
                     tripSession.getRouteProgress(),
                     alternativeMetadataProvider.getMetadataFor(relevantAlternative)

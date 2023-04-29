@@ -194,5 +194,3 @@ fun MapboxNavigation.flowRouteAlternativeObserver():
         registerRouteAlternativesObserver(alternativesObserver)
         awaitClose { unregisterRouteAlternativesObserver(alternativesObserver) }
     }
-
-fun MapboxNavigation.initialLegIndex(): Int = initialLegIndexInternal()

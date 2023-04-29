@@ -16,7 +16,6 @@ import com.mapbox.navigation.core.internal.AlternativeDataProvider
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
-import com.mapbox.navigation.core.internal.extensions.initialLegIndex
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -140,11 +139,11 @@ class RouteLineComponent(
         coroutineScope.launch {
             val routesFlow = mapboxNavigation.flowRoutesUpdated()
                 .onEach { currentRouteProgressData = null }
-                .map { it.navigationRoutes to it.initialLegIndex }
+                .map { it.navigationRoutes to mapboxNavigation.currentLegIndex() }
                 .stateIn(
                     this,
                     SharingStarted.WhileSubscribed(),
-                    mapboxNavigation.getNavigationRoutes() to mapboxNavigation.initialLegIndex()
+                    mapboxNavigation.getNavigationRoutes() to mapboxNavigation.currentLegIndex()
                 )
             val routePreviewFlow = contractProvider.get().getRouteInPreview().map { it to 0 }
             combine(routesFlow, routePreviewFlow) { navigationRoutesPair, previewRoutesPair ->

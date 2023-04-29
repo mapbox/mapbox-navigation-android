@@ -65,7 +65,6 @@ class RouteAlternativeComponent(
                             updatedRoutes.addAll(alternatives)
                         }
                     }
-                    // TODO use leg index for alternative
                     val currentLegIndex = routeProgress.currentLegProgress?.legIndex ?: 0
                     contractProvider.get().onAlternativeRoutesUpdated(
                         legIndex = currentLegIndex,

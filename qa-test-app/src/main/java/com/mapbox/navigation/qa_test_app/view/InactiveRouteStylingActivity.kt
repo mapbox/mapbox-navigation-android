@@ -7,17 +7,22 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
@@ -28,7 +33,6 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.InactiveRouteActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
 import com.mapbox.navigation.ui.maps.NavigationStyles
@@ -144,21 +148,23 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         MapboxRouteLineApi(options)
     }
 
-    private val navigationRoute: NavigationRoute by lazy {
-        val routeAsString = Utils.readRawFileText(this, R.raw.multileg_route_two_legs)
-        DirectionsRoute.fromJson(routeAsString).toNavigationRoute(RouterOrigin.Offboard)
-    }
+    private val routeOrigin = Point.fromLngLat(-122.523179, 37.974972)
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private var routesObserver: RoutesObserver? = null
+
     private val mapboxNavigation by requireMapboxNavigation(
         onCreatedObserver = object : MapboxNavigationObserver {
             override fun onAttached(mapboxNavigation: MapboxNavigation) {
+                initRoutesObserver(mapboxNavigation)
+                mapboxNavigation.registerRoutesObserver(routesObserver!!)
                 mapboxNavigation.registerLocationObserver(locationObserver)
                 mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
                 mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
             }
 
             override fun onDetached(mapboxNavigation: MapboxNavigation) {
+                mapboxNavigation.unregisterRoutesObserver(routesObserver!!)
+                routesObserver = null
                 mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
                 mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
                 mapboxNavigation.unregisterLocationObserver(locationObserver)
@@ -174,6 +180,19 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         )
     }
 
+    private fun initRoutesObserver(mapboxNavigation: MapboxNavigation) {
+        routesObserver = RoutesObserver {
+            routeLineApi.setNavigationRoutes(
+                it.navigationRoutes,
+                mapboxNavigation.currentLegIndex()
+            ) {
+                binding.mapView.getMapboxMap().getStyle()?.let { style ->
+                    routeLineView.renderRouteDrawData(style, it)
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -185,7 +204,6 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         val startingLocation = Location("ReplayRoute").also {
-            val routeOrigin = Utils.getRouteOriginPoint(navigationRoute.directionsRoute)
             it.latitude = routeOrigin.latitude()
             it.longitude = routeOrigin.longitude()
         }
@@ -201,9 +219,37 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.setRerouteController(null)
             mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutes(listOf(navigationRoute))
+            mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                    .coordinates(
+                        "-122.523179,37.974972;-122.524257,37.970785;-122.518925,37.970548"
+                    )
+                    .annotations("congestion,maxspeed,speed,duration,distance,closure")
+                    .build(),
+                object : NavigationRouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<NavigationRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        mapboxNavigation.setNavigationRoutes(routes)
+                        startSimulation(routes.first().directionsRoute)
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions
+                    ) {
+                    }
+
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        routerOrigin: RouterOrigin
+                    ) {
+                    }
+                }
+            )
             binding.startNavigation.visibility = View.GONE
-            startSimulation(navigationRoute.directionsRoute)
         }
     }
 
@@ -217,12 +263,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     private fun initStyle() {
         binding.mapView.getMapboxMap().loadStyleUri(
             NavigationStyles.NAVIGATION_DAY_STYLE
-        ) { style ->
-            routeLineApi.setNavigationRoutes(listOf(navigationRoute)) {
-                routeLineView.renderRouteDrawData(style, it)
-            }
-
-            val routeOrigin = Utils.getRouteOriginPoint(navigationRoute.directionsRoute)
+        ) {
             val cameraOptions = CameraOptions.Builder().center(routeOrigin).zoom(14.0).build()
             binding.mapView.getMapboxMap().setCamera(cameraOptions)
         }

@@ -36,7 +36,7 @@ interface NavigationRouteAlternativesObserver {
      *             addAll(alternatives)
      *         }
      *
-     *         mapboxNavigation.setNavigationRoutes(newRoutes)
+     *         mapboxNavigation.setNavigationRoutes(newRoutes, mapboxNavigation.currentLegIndex())
      *     }
      *
      *     override fun onRouteAlternativesError(error: RouteAlternativesError) {
@@ -72,7 +72,7 @@ interface NavigationRouteAlternativesObserver {
      *                 val updatedRoutes = mutableListOf<NavigationRoute>()
      *                 updatedRoutes.add(primaryRoute)
      *                 updatedRoutes.addAll(offboardAlternatives)
-     *                 mapboxNavigation.setNavigationRoutes(updatedRoutes)
+     *                 mapboxNavigation.setNavigationRoutes(updatedRoutes, mapboxNavigation.currentLegIndex())
      *             }
      *             isPrimaryRouteOffboard.not() && offboardAlternatives.isNotEmpty() -> {
      *                 // if the current route is onboard, and there's an offboard route available
@@ -86,7 +86,7 @@ interface NavigationRouteAlternativesObserver {
      *                 val updatedRoutes = mutableListOf<NavigationRoute>()
      *                 updatedRoutes.add(primaryRoute)
      *                 updatedRoutes.addAll(alternatives)
-     *                 mapboxNavigation.setNavigationRoutes(updatedRoutes)
+     *                 mapboxNavigation.setNavigationRoutes(updatedRoutes, mapboxNavigation.currentLegIndex())
      *             }
      *         }
      *     }

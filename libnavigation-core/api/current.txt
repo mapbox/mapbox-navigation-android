@@ -14,6 +14,7 @@ package com.mapbox.navigation.core {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void cancelRouteRequest(long requestId);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void changeRoutesPreviewPrimaryRoute(com.mapbox.navigation.base.route.NavigationRoute newPrimaryRoute) throws java.lang.IllegalArgumentException;
+    method public int currentLegIndex();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata? getAlternativeMetadataFor(com.mapbox.navigation.base.route.NavigationRoute navigationRoute);
     method public java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> getAlternativeMetadataFor(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes);
     method public com.mapbox.navigator.Experimental getExperimental();
@@ -209,12 +210,10 @@ package com.mapbox.navigation.core.directions.session {
 
   public final class RoutesUpdatedResult {
     method public java.util.List<com.mapbox.navigation.core.directions.session.IgnoredRoute> getIgnoredRoutes();
-    method public int getInitialLegIndex();
     method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getNavigationRoutes();
     method public String getReason();
     method @Deprecated public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     property public final java.util.List<com.mapbox.navigation.core.directions.session.IgnoredRoute> ignoredRoutes;
-    property public final int initialLegIndex;
     property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes;
     property public final String reason;
     property @Deprecated public final java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> routes;

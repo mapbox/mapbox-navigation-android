@@ -778,6 +778,123 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             )
         }
 
+    @Test
+    fun refreshAlternativeWithMoreLegsUsesInitialLegIndexZeroForPrimaryRoute() = sdkTest {
+        setupMockRequestHandlers(
+            multilegCoordinates,
+            R.raw.route_response_single_route_multileg,
+            R.raw.route_response_single_route_multileg_refreshed,
+            "route_response_single_route_multileg",
+            acceptedGeometryIndex = 70
+        )
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_response_single_route_multileg_alternative",
+                    readRawFileText(
+                        activity,
+                        R.raw.route_response_single_route_multileg_alternative_refreshed
+                    ),
+                    acceptedGeometryIndex = 11
+                )
+            )
+        )
+        val routeOptions = generateRouteOptions(multilegCoordinates)
+        val alternativeRoutes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        // In this test setup we are considering a case where user was driving along the route,
+        // started the second leg and received an alternative, and selected it before the fork.
+        // This means that the primary route is shorter than the alternative route (former primary route).
+        val primaryRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
+
+        // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
+        mockLocationUpdatesRule.pushLocationUpdate(
+            mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.581798
+                longitude = -121.476146
+            }
+        )
+
+        mapboxNavigation.setNavigationRoutes(
+            listOf(primaryRoute) + alternativeRoutes,
+            initialLegIndex = 0
+        )
+        mapboxNavigation.startTripSession()
+
+        mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentRouteGeometryIndex == 11
+            }
+            .first()
+
+        mapboxNavigation.routesUpdates()
+            .filter {
+                (it.reason == ROUTES_UPDATE_REASON_REFRESH).also {
+                    if (it) {
+                        assertEquals(0, mapboxNavigation.currentLegIndex())
+                    }
+                }
+            }
+            .first()
+    }
+
+    @Test
+    fun refreshAlternativeWithLessLegsUsesInitialLegIndexOneForPrimaryRoute() = sdkTest {
+        setupMockRequestHandlers(
+            multilegCoordinates,
+            R.raw.route_response_single_route_multileg,
+            R.raw.route_response_single_route_multileg_refreshed,
+            "route_response_single_route_multileg",
+            acceptedGeometryIndex = 70
+        )
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_response_single_route_multileg_alternative",
+                    readRawFileText(
+                        activity,
+                        R.raw.route_response_single_route_multileg_alternative_refreshed
+                    ),
+                    acceptedGeometryIndex = 11
+                )
+            )
+        )
+        val routeOptions = generateRouteOptions(multilegCoordinates)
+        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        // alternative which was requested on the second leg of the original route,
+        // so the alternative has only one leg while the original route has two
+        val alternativeRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
+
+        mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
+        mapboxNavigation.startTripSession()
+
+        // corresponds to currentRouteGeometryIndex = 70 for primary route and 11 for alternative route
+        stayOnPosition(38.581798, -121.476146)
+        mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentRouteGeometryIndex == 70
+            }
+            .first()
+
+        mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
+            requestedRoutes + alternativeRoute,
+            initialLegIndex = 1
+        )
+
+        mapboxNavigation.routesUpdates()
+            .filter {
+                (it.reason == ROUTES_UPDATE_REASON_REFRESH).also {
+                    if (it) {
+                        assertEquals(1, mapboxNavigation.currentLegIndex())
+                    }
+                }
+            }
+            .first()
+    }
+
     private fun List<Incident>.extract(vararg extractors: Incident.() -> Any?): List<List<Any?>> {
         return map { incident ->
             extractors.map { extractor ->
