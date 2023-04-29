@@ -1281,6 +1281,7 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final int INCIDENT = 6; // 0x6
     field public static final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType INSTANCE;
     field public static final int JCT = 10; // 0xa
+    field public static final int NOTIFICATION = 11; // 0xb
     field public static final int RAILWAY_CROSSING = 8; // 0x8
     field public static final int RESTRICTED_AREA = 4; // 0x4
     field public static final int REST_STOP = 3; // 0x3
@@ -1288,7 +1289,7 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final int TUNNEL = 0; // 0x0
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RAILWAY_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.IC, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.JCT}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RoadObjectType.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RAILWAY_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.IC, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.JCT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.NOTIFICATION}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RoadObjectType.Type {
   }
 
   public final class UpcomingRoadObject {
@@ -1634,6 +1635,46 @@ package com.mapbox.navigation.base.trip.model.roadobject.location {
     property public final java.util.Map<java.lang.Long,com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphEdge> edges;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> entries;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> exits;
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.notification {
+
+  public final class Notification extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo getInfo();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo info;
+  }
+
+  public final class NotificationInfo {
+    method public String? getActualValue();
+    method public String? getMessage();
+    method public String? getRequestedValue();
+    method public String? getSubtype();
+    method public String getType();
+    method public String? getUnit();
+    property public final String? actualValue;
+    property public final String? message;
+    property public final String? requestedValue;
+    property public final String? subtype;
+    property public final String type;
+    property public final String? unit;
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo.Companion Companion;
+    field public static final String NOTIFICATION_SUBTYPE_MAX_HEIGHT = "maxHeight";
+    field public static final String NOTIFICATION_SUBTYPE_MAX_WEIGHT = "maxWeight";
+    field public static final String NOTIFICATION_SUBTYPE_MAX_WIDTH = "maxWidth";
+    field public static final String NOTIFICATION_SUBTYPE_POINT_EXCLUSION = "pointExclusion";
+    field public static final String NOTIFICATION_SUBTYPE_UNPAVED = "unpaved";
+    field public static final String NOTIFICATION_TYPE_VIOLATION = "violation";
+  }
+
+  public static final class NotificationInfo.Companion {
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo.NOTIFICATION_SUBTYPE_MAX_HEIGHT, com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo.NOTIFICATION_SUBTYPE_MAX_WIDTH, com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo.NOTIFICATION_SUBTYPE_MAX_WEIGHT, com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo.NOTIFICATION_SUBTYPE_UNPAVED, com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo.NOTIFICATION_SUBTYPE_POINT_EXCLUSION}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface NotificationInfo.Companion.NotificationsSubtype {
+  }
+
+  @StringDef(com.mapbox.navigation.base.trip.model.roadobject.notification.NotificationInfo.NOTIFICATION_TYPE_VIOLATION) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface NotificationInfo.Companion.NotificationsType {
   }
 
 }

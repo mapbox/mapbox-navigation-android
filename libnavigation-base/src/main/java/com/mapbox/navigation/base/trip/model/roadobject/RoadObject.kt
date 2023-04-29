@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  * - [RoadObjectType.CUSTOM]
  * - [RoadObjectType.IC]
  * - [RoadObjectType.JCT]
+ * - [RoadObjectType.NOTIFICATION]
  *
  * @param length length of the object, null if the object is point-like.
  * @param provider provider of the road object
