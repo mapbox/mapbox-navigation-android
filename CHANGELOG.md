@@ -6,6 +6,38 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.13.0-rc.1 - 29 April, 2023
+### Changelog
+[Changes between v2.13.0-beta.1 and v2.13.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0-beta.1...v2.13.0-rc.1)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Improved quality of continuous alternatives, now the mechanism respects routes from current navigation session. [#7137](https://github.com/mapbox/mapbox-navigation-android/pull/7137)
+- Improved EV offline navigation, now it fallbacks to a regular onboard routing. [#7137](https://github.com/mapbox/mapbox-navigation-android/pull/7137)
+- Improved location simulation when DR ends, i.e. when a driver leaves a tunnel. [#7137](https://github.com/mapbox/mapbox-navigation-android/pull/7137)
+- Fixed an issue where the route lines didn't apply `RouteLineResources`'s custom scale expressions correctly. [#7132](https://github.com/mapbox/mapbox-navigation-android/pull/7132)
+- Fixed an issue where route lines could flicker when `MapboxRouteLineOptions` where changed and re-applied to rebuilt `MapboxRouteLineView` and `MapboxRouteLineApi` instances. [#7140](https://github.com/mapbox/mapbox-navigation-android/pull/7140)
+- Deprecated `MapboxNavigation#setRerouteController` method. Using custom rerouting logic is now deprecated.  [#7129](https://github.com/mapbox/mapbox-navigation-android/pull/7129)
+- Introduced `MapboxNavigation#setRerouteEnabled` to disable/enable reroutes instead of using custom reroute controller. By default rerouting is enabled. [#7129](https://github.com/mapbox/mapbox-navigation-android/pull/7129)
+- Fixed an issue where `NavigationCamera` animations would stop executing if experimental `AnimationThreadController.useBackgroundThread()` option was enabled. [#7143](https://github.com/mapbox/mapbox-navigation-android/pull/7143)
+- Fixed an issue where `DirectionsRoute#duration` ignored charge time after refresh operation. [#7121](https://github.com/mapbox/mapbox-navigation-android/pull/7121)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.13.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.13.0-rc.1))
+- Mapbox Navigation Native `v132.0.0`
+- Mapbox Core Common `v23.5.0-rc.1`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.13.0-beta.1 - 14 April, 2023
 ### Changelog
 [Changes between v2.12.0 and v2.13.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0...v2.13.0-beta.1)
