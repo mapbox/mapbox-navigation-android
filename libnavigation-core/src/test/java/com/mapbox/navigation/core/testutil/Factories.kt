@@ -8,6 +8,5 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 fun createRoutesUpdatedResult(
     routes: List<NavigationRoute>,
     @RoutesExtra.RoutesUpdateReason reason: String,
-    initialLegIndex: Int = 0,
     ignoredRoutes: List<IgnoredRoute> = emptyList(),
-): RoutesUpdatedResult = RoutesUpdatedResult(routes, initialLegIndex, ignoredRoutes, reason)
+): RoutesUpdatedResult = RoutesUpdatedResult(routes, ignoredRoutes, reason)

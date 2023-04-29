@@ -246,7 +246,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             val updatedRoutes = mutableListOf<NavigationRoute>()
             updatedRoutes.add(routeProgress.navigationRoute)
             updatedRoutes.addAll(alternatives)
-            mapboxNavigation.setNavigationRoutes(updatedRoutes)
+            mapboxNavigation.setNavigationRoutes(updatedRoutes, mapboxNavigation.currentLegIndex())
         }
 
         override fun onRouteAlternativesError(error: RouteAlternativesError) {

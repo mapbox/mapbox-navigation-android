@@ -554,10 +554,13 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                 .first()
         }
 
-        val rerouteResult = mapboxNavigation.routesUpdates().filter {
-            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+        mapboxNavigation.routesUpdates().filter {
+            (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                if (it) {
+                    assertEquals(0, mapboxNavigation.currentLegIndex())
+                }
+            }
         }.first()
-        assertEquals(0, rerouteResult.initialLegIndex)
     }
 
     @Test
@@ -615,10 +618,13 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                 .first()
         }
 
-        val rerouteResult = mapboxNavigation.routesUpdates().filter {
-            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+        mapboxNavigation.routesUpdates().filter {
+            (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                if (it) {
+                    assertEquals(0, mapboxNavigation.currentLegIndex())
+                }
+            }
         }.first()
-        assertEquals(0, rerouteResult.initialLegIndex)
     }
 
     @Test
@@ -650,9 +656,12 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         }
 
         val rerouteResult = mapboxNavigation.routesUpdates().filter {
-            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                if (it) {
+                    assertEquals(0, mapboxNavigation.currentLegIndex())
+                }
+            }
         }.first()
-        assertEquals(0, rerouteResult.initialLegIndex)
         assertEquals(routes[1], rerouteResult.navigationRoutes.first())
     }
 
@@ -685,9 +694,12 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         }
 
         val rerouteResult = mapboxNavigation.routesUpdates().filter {
-            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                if (it) {
+                    assertEquals(0, mapboxNavigation.currentLegIndex())
+                }
+            }
         }.first()
-        assertEquals(0, rerouteResult.initialLegIndex)
         assertEquals(routes[1], rerouteResult.navigationRoutes.first())
     }
 
@@ -732,9 +744,12 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         }
 
         val rerouteResult = mapboxNavigation.routesUpdates().filter {
-            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                if (it) {
+                    assertEquals(1, mapboxNavigation.currentLegIndex())
+                }
+            }
         }.first()
-        assertEquals(1, rerouteResult.initialLegIndex)
         assertEquals(routes[1], rerouteResult.navigationRoutes.first())
     }
 
@@ -778,9 +793,12 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         }
 
         val rerouteResult = mapboxNavigation.routesUpdates().filter {
-            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                if (it) {
+                    assertEquals(1, mapboxNavigation.currentLegIndex())
+                }
+            }
         }.first()
-        assertEquals(1, rerouteResult.initialLegIndex)
         assertEquals(routes[1], rerouteResult.navigationRoutes.first())
     }
 
@@ -826,9 +844,12 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         }
 
         val rerouteResult = mapboxNavigation.routesUpdates().filter {
-            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                if (it) {
+                    assertEquals(0, mapboxNavigation.currentLegIndex())
+                }
+            }
         }.first()
-        assertEquals(0, rerouteResult.initialLegIndex)
         assertEquals(routes[1], rerouteResult.navigationRoutes.first())
     }
 

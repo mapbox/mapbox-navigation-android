@@ -80,7 +80,7 @@ class MapboxRerouteControllerTest {
     private lateinit var errorFromResult: RouteOptionsUpdater.RouteOptionsResult.Error
 
     @MockK
-    private lateinit var routeCallback: NavigationRerouteControllerV2.RoutesCallback
+    private lateinit var routeCallback: InternalRerouteController.RoutesCallback
 
     @MockK
     lateinit var primaryRerouteObserver: RerouteController.RerouteStateObserver
@@ -128,7 +128,7 @@ class MapboxRerouteControllerTest {
     fun initial_state() {
         assertEquals(RerouteState.Idle, rerouteController.state)
         verify(exactly = 0) {
-            rerouteController.reroute(any<NavigationRerouteControllerV2.RoutesCallback>())
+            rerouteController.reroute(any<InternalRerouteController.RoutesCallback>())
         }
         verify(exactly = 0) { rerouteController.interrupt() }
     }

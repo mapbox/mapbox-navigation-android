@@ -24,7 +24,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreviewController
-import com.mapbox.navigation.core.reroute.NavigationRerouteControllerV2
+import com.mapbox.navigation.core.reroute.InternalRerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
@@ -94,7 +94,7 @@ internal open class MapboxNavigationBaseTest {
     val routeProgress: RouteProgress = mockk(relaxed = true)
     val navigationSession: NavigationSession = mockk(relaxed = true)
     val billingController: BillingController = mockk(relaxUnitFun = true)
-    val rerouteController: NavigationRerouteControllerV2 = mockk(relaxUnitFun = true) {
+    val rerouteController: InternalRerouteController = mockk(relaxUnitFun = true) {
         every { state } returns RerouteState.Idle
     }
     val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true)
@@ -317,7 +317,6 @@ internal open class MapboxNavigationBaseTest {
         every { directionsSession.routesUpdatedResult } returns createRoutesUpdatedResult(
             emptyList(),
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
-            0
         )
         every { directionsSession.routes } returns emptyList()
     }
