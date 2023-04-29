@@ -1462,9 +1462,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Set [RerouteOptionsAdapter]. It allows modify [RouteOptions] of default implementation of
      * [NavigationRerouteController] ([RerouteController]).
      */
-    @Deprecated(
-        "Custom rerouting logic is deprecated. Use setRerouteEnabled to enable/disable reroutes."
-    )
     fun setRerouteOptionsAdapter(
         rerouteOptionsAdapter: RerouteOptionsAdapter?
     ) {
