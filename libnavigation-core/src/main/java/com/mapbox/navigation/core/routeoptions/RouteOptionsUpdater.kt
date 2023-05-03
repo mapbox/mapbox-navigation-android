@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.routeoptions
 
+import com.google.gson.JsonElement
+import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -142,6 +144,12 @@ class RouteOptionsUpdater {
                         nextCoordinateIndex
                     )
                 )
+                .unrecognizedJsonProperties(
+                    getUpdatedUnrecognizedJsonProperties(
+                        routeOptions.unrecognizedJsonProperties,
+                        nextCoordinateIndex
+                    )
+                )
 
             if (
                 routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING ||
@@ -215,6 +223,46 @@ class RouteOptionsUpdater {
                 }
             }
         }
+    }
+
+    private fun getUpdatedUnrecognizedJsonProperties(
+        originalUnrecognizedJsonProperties: Map<String, JsonElement>?,
+        nextCoordinateIndex: Int
+    ): Map<String, JsonElement>? {
+        if (originalUnrecognizedJsonProperties == null) {
+            return null
+        }
+        val newUnrecognizedJsonProperties = originalUnrecognizedJsonProperties.toMutableMap()
+        if (originalUnrecognizedJsonProperties.isEVRoute()) {
+            listOf(
+                "waypoints.charging_station_id",
+                "waypoints.charging_station_power",
+                "waypoints.charging_station_current_type"
+            ).forEach {
+                updateCoordinateRelatedListProperty(
+                    newUnrecognizedJsonProperties,
+                    originalUnrecognizedJsonProperties,
+                    it,
+                    nextCoordinateIndex
+                )
+            }
+        }
+        return newUnrecognizedJsonProperties
+    }
+
+    private fun updateCoordinateRelatedListProperty(
+        newMap: MutableMap<String, JsonElement>,
+        oldMap: Map<String, JsonElement>,
+        key: String,
+        nextCoordinateIndex: Int,
+    ) {
+        if (key !in oldMap) {
+            return
+        }
+        val oldValue = oldMap[key]!!.asString
+        val elements = oldValue.split(";")
+        val newValue = ";" + elements.drop(nextCoordinateIndex).joinToString(";")
+        newMap[key] = JsonPrimitive(newValue)
     }
 
     private fun <T> getUpdatedWaypointsList(

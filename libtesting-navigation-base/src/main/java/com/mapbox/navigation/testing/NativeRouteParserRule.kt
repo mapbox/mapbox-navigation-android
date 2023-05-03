@@ -54,7 +54,10 @@ class NativeRouteParserRule : TestRule {
                                 when {
                                     directionsWaypoint.getUnrecognizedProperty("metadata")
                                         ?.asJsonObject?.get("type")
-                                        ?.asString == "charging-station" -> WaypointType.EV_CHARGING
+                                        ?.asString == "charging-station" -> WaypointType.EV_CHARGING_SERVER
+                                    directionsWaypoint.getUnrecognizedProperty("metadata")
+                                        ?.asJsonObject?.get("type")
+                                        ?.asString == "user-provided-charging-station" -> WaypointType.EV_CHARGING_USER
                                     routeOptions.waypointIndicesList()
                                         ?.contains(index)?.not() == true -> WaypointType.SILENT
                                     else -> WaypointType.REGULAR

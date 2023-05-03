@@ -20,15 +20,20 @@ import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.testing.ui.utils.coroutines.navigateNextRouteLeg
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
+import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import okhttp3.HttpUrl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -43,11 +48,19 @@ private const val KEY_EV_INITIAL_CHARGE = "ev_initial_charge"
 private const val KEY_AUXILIARY_CONSUMPTION = "auxiliary_consumption"
 private const val KEY_EV_PRECONDITIONING_TIME = "ev_pre_conditioning_time"
 private const val VALUE_ELECTRIC = "electric"
+private const val KEY_WAYPOINTS_POWER = "waypoints.charging_station_power"
+private const val KEY_WAYPOINTS_CURRENT_TYPE = "waypoints.charging_station_current_type"
+private const val KEY_WAYPOINTS_STATION_ID = "waypoints.charging_station_id"
 private val evDataKeys = setOf(
     KEY_EV_INITIAL_CHARGE,
     KEY_ENERGY_CONSUMPTION_CURVE,
     KEY_EV_PRECONDITIONING_TIME,
     KEY_AUXILIARY_CONSUMPTION
+)
+private val userProvidedCpoiKeys = setOf(
+    KEY_WAYPOINTS_POWER,
+    KEY_WAYPOINTS_CURRENT_TYPE,
+    KEY_WAYPOINTS_STATION_ID
 )
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -125,7 +138,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
         checkDoesNotHaveParameters(
             routeHandler.handledRequests.last().requestUrl!!,
-            evDataKeys + KEY_ENGINE
+            evDataKeys + userProvidedCpoiKeys + KEY_ENGINE
         )
     }
 
@@ -139,8 +152,9 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
 
+        val url1 = routeHandler.handledRequests.last().requestUrl!!
         checkHasParameters(
-            routeHandler.handledRequests.last().requestUrl!!,
+            url1,
             mapOf(
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
@@ -149,6 +163,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                 KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
             )
         )
+        checkDoesNotHaveParameters(url1, userProvidedCpoiKeys)
 
         val newInitialCharge = "17900"
         val newRequestedRoutes = requestRoutes(
@@ -158,8 +173,10 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         )
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(newRequestedRoutes)
         waitForReroute()
+
+        val url2 = routeHandler.handledRequests.last().requestUrl!!
         checkHasParameters(
-            routeHandler.handledRequests.last().requestUrl!!,
+            url2,
             mapOf(
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
@@ -168,6 +185,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                 KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
             )
         )
+        checkDoesNotHaveParameters(url2, userProvidedCpoiKeys)
     }
 
     @Test
@@ -192,10 +210,12 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
 
+        val url = routeHandler.handledRequests.last().requestUrl!!
         checkHasParameters(
-            routeHandler.handledRequests.last().requestUrl!!,
+            url,
             evData + (KEY_ENGINE to VALUE_ELECTRIC)
         )
+        checkDoesNotHaveParameters(url, userProvidedCpoiKeys)
     }
 
     @Test
@@ -235,10 +255,12 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         stayOnInitialPosition()
         waitForNewRequest(oldRequestsCount)
 
+        val firstUrl = routeHandler.handledRequests.last().requestUrl!!
         checkHasParameters(
-            routeHandler.handledRequests.last().requestUrl!!,
+            firstUrl,
             firstEvData + (KEY_ENGINE to VALUE_ELECTRIC)
         )
+        checkDoesNotHaveParameters(firstUrl, userProvidedCpoiKeys)
 
         val newInitialCharge = "60"
         mapboxNavigation.onEVDataUpdated(
@@ -259,6 +281,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                 KEY_EV_PRECONDITIONING_TIME to preconditioningTime,
             )
         )
+        checkDoesNotHaveParameters(urlWithTwiceUpdatedData, userProvidedCpoiKeys)
 
         mapboxNavigation.onEVDataUpdated(emptyMap())
         oldRequestsCount = routeHandler.handledRequests.size
@@ -276,16 +299,161 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                 KEY_EV_PRECONDITIONING_TIME to preconditioningTime,
             )
         )
+        checkDoesNotHaveParameters(urlAfterEmptyUpdate, userProvidedCpoiKeys)
+    }
+
+    @Test
+    fun ev_reroute_parameters_with_user_provided_cpoi_data() = sdkTest {
+        val stationPower = ";3000;6500"
+        val stationCurrentType = ";dc;dc"
+        val stationIds = ";ocm-176357;ocm-190632"
+        val threeCoordinates = listOf(
+            Point.fromLngLat(11.585226, 48.176099),
+            Point.fromLngLat(11.063842, 48.39023),
+            Point.fromLngLat(10.32645, 49.069138),
+        )
+
+        mockWebServerRule.requestHandlers.clear()
+        routeHandler = MockDirectionsRequestHandler(
+            "driving-traffic",
+            readRawFileText(activity, R.raw.ev_route_response_custom_station_data),
+            threeCoordinates,
+            relaxedExpectedCoordinates = true
+        )
+        mockWebServerRule.requestHandlers.add(routeHandler)
+
+        val requestedRoutes = requestRoutes(
+            threeCoordinates,
+            electric = true,
+            stationPower = stationPower,
+            stationCurrentType = stationCurrentType,
+            stationIds = stationIds,
+            waypointsPerRoute = true,
+        )
+
+        mapboxNavigation.startTripSession()
+        stayOnPosition(threeCoordinates[0].latitude(), threeCoordinates[0].longitude(), 135f)
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
+        waitForReroute()
+
+        val url1 = routeHandler.handledRequests.last().requestUrl!!
+        checkHasParameters(
+            url1,
+            mapOf(
+                KEY_ENGINE to VALUE_ELECTRIC,
+                KEY_WAYPOINTS_POWER to stationPower,
+                KEY_WAYPOINTS_CURRENT_TYPE to stationCurrentType,
+                KEY_WAYPOINTS_STATION_ID to stationIds,
+            )
+        )
+
+        val offRouteLocationUpdate2 = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = offRouteLocationUpdate.latitude + 0.002
+            longitude = offRouteLocationUpdate.longitude
+        }
+        stayOnPosition(offRouteLocationUpdate2.latitude, offRouteLocationUpdate2.longitude)
+
+        waitForNewReroute()
+
+        val url2 = routeHandler.handledRequests.last().requestUrl!!
+        checkHasParameters(
+            url2,
+            mapOf(
+                KEY_ENGINE to VALUE_ELECTRIC,
+                KEY_WAYPOINTS_POWER to stationPower,
+                KEY_WAYPOINTS_CURRENT_TYPE to stationCurrentType,
+                KEY_WAYPOINTS_STATION_ID to stationIds,
+            )
+        )
+    }
+
+    @Test
+    fun ev_reroute_parameters_on_second_leg_with_user_provided_cpoi_data() = sdkTest {
+        val stationPower = ";3000;6500"
+        val stationCurrentType = ";dc;dc"
+        val stationIds = ";ocm-176357;ocm-190632"
+        val threeCoordinates = listOf(
+            Point.fromLngLat(11.585226, 48.176099),
+            Point.fromLngLat(11.063842, 48.39023),
+            Point.fromLngLat(10.32645, 49.069138),
+        )
+        val offRouteSecondLegLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = threeCoordinates[1].latitude() + 0.002
+            longitude = threeCoordinates[1].longitude()
+        }
+
+        mockWebServerRule.requestHandlers.clear()
+        routeHandler = MockDirectionsRequestHandler(
+            "driving-traffic",
+            readRawFileText(activity, R.raw.ev_route_response_custom_station_data),
+            threeCoordinates,
+            relaxedExpectedCoordinates = false
+        )
+        mockWebServerRule.requestHandlers.add(routeHandler)
+
+        val requestedRoutes = requestRoutes(
+            threeCoordinates,
+            electric = true,
+            stationPower = stationPower,
+            stationCurrentType = stationCurrentType,
+            stationIds = stationIds,
+            waypointsPerRoute = true,
+        )
+
+        mapboxNavigation.startTripSession()
+        stayOnPosition(threeCoordinates[0].latitude(), threeCoordinates[0].longitude(), 135f)
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+
+        mapboxNavigation.routeProgressUpdates().first()
+        mapboxNavigation.navigateNextRouteLeg()
+
+        val rerouteHandler = MockDirectionsRequestHandler(
+            "driving-traffic",
+            readRawFileText(
+                activity,
+                R.raw.ev_reroute_from_second_leg_response_custom_station_data
+            ),
+            listOf(offRouteSecondLegLocation.toPoint(), threeCoordinates[1]),
+            relaxedExpectedCoordinates = true
+        )
+        mockWebServerRule.requestHandlers.add(rerouteHandler)
+
+        stayOnPosition(offRouteSecondLegLocation.latitude, offRouteSecondLegLocation.longitude)
+        waitForReroute()
+
+        checkHasParameters(
+            rerouteHandler.handledRequests.last().requestUrl!!,
+            mapOf(
+                KEY_ENGINE to VALUE_ELECTRIC,
+                KEY_WAYPOINTS_POWER to ";6500",
+                KEY_WAYPOINTS_CURRENT_TYPE to ";dc",
+                KEY_WAYPOINTS_STATION_ID to ";ocm-190632"
+            )
+        )
     }
 
     private suspend fun requestRoutes(
         coordinates: List<Point>,
         electric: Boolean,
         minChargeAtDestination: Int = 6000,
-        initialCharge: String = initialInitialCharge
+        initialCharge: String = initialInitialCharge,
+        stationIds: String? = null,
+        stationPower: String? = null,
+        stationCurrentType: String? = null,
+        waypointsPerRoute: Boolean? = null,
     ): List<NavigationRoute> {
         return mapboxNavigation.requestRoutes(
-            generateRouteOptions(coordinates, electric, minChargeAtDestination, initialCharge)
+            generateRouteOptions(
+                coordinates,
+                electric,
+                minChargeAtDestination,
+                initialCharge,
+                stationIds,
+                stationPower,
+                stationCurrentType,
+                waypointsPerRoute,
+            )
         )
             .getSuccessfulResultOrThrowException()
             .routes
@@ -296,18 +464,23 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         electric: Boolean,
         minChargeAtDestination: Int,
         initialCharge: String,
+        stationIds: String?,
+        stationPower: String?,
+        stationCurrentType: String?,
+        waypointsPerRoute: Boolean?,
     ): RouteOptions {
         return RouteOptions.builder().applyDefaultNavigationOptions()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .alternatives(true)
             .enableRefresh(true)
             .coordinatesList(coordinates)
+            .waypointsPerRoute(waypointsPerRoute)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
             .apply {
                 if (electric) {
                     annotations("state_of_charge")
                     unrecognizedProperties(
-                        mapOf(
+                        mutableMapOf(
                             KEY_ENGINE to VALUE_ELECTRIC,
                             KEY_EV_INITIAL_CHARGE to initialCharge,
                             KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
@@ -321,7 +494,17 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                             "ev_max_ac_charging_power" to "14400",
                             "ev_unconditioned_charging_curve" to
                                 "0,50000;42000,35000;60000,15000;80000,5000",
-                        )
+                        ).also {
+                            if (stationIds != null) {
+                                it[KEY_WAYPOINTS_STATION_ID] = stationIds
+                            }
+                            if (stationPower != null) {
+                                it[KEY_WAYPOINTS_POWER] = stationPower
+                            }
+                            if (stationCurrentType != null) {
+                                it[KEY_WAYPOINTS_CURRENT_TYPE] = stationCurrentType
+                            }
+                        }
                     )
                 }
             }
@@ -335,11 +518,13 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     private fun stayOnPosition(
         latitude: Double,
         longitude: Double,
+        bearing: Float = 0f
     ) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
                 this.latitude = latitude
                 this.longitude = longitude
+                this.bearing = bearing
             },
             times = 120
         )
@@ -349,6 +534,13 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
             .first()
+    }
+
+    private suspend fun waitForNewReroute() {
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
+            .take(2)
+            .toList()
     }
 
     private fun checkHasParameters(url: HttpUrl, expectedParameters: Map<String, String>) {

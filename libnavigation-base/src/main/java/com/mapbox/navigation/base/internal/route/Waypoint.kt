@@ -14,13 +14,15 @@ class Waypoint internal constructor(
     val type: Int = when (internalType) {
         InternalType.Regular -> REGULAR
         InternalType.Silent -> SILENT
-        InternalType.EvCharging -> EV_CHARGING
+        InternalType.EvChargingServer -> EV_CHARGING_SERVER
+        InternalType.EvChargingUser -> EV_CHARGING_USER
     }
 
     companion object {
         const val REGULAR = 1
         const val SILENT = 2
-        const val EV_CHARGING = 3
+        const val EV_CHARGING_SERVER = 3
+        const val EV_CHARGING_USER = 4
     }
 
     @Target(
@@ -30,7 +32,7 @@ class Waypoint internal constructor(
         AnnotationTarget.TYPE
     )
     @Retention(AnnotationRetention.BINARY)
-    @IntDef(REGULAR, SILENT, EV_CHARGING)
+    @IntDef(REGULAR, SILENT, EV_CHARGING_SERVER, EV_CHARGING_USER)
     annotation class Type
 
     override fun equals(other: Any?): Boolean {
@@ -62,6 +64,7 @@ class Waypoint internal constructor(
     internal enum class InternalType {
         Regular,
         Silent,
-        EvCharging,
+        EvChargingServer,
+        EvChargingUser,
     }
 }

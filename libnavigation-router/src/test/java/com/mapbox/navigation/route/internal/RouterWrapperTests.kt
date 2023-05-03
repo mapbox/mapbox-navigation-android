@@ -170,7 +170,9 @@ class RouterWrapperTests {
         routerWrapper.getRoute(routerOptions, routerCallback)
         val requestOptions = GetRouteOptions(null)
 
-        verify { router.getRoute(routeUrl, requestOptions, any()) }
+        verify {
+            router.getRoute(routeUrl, requestOptions, any<com.mapbox.navigator.RouterCallback>())
+        }
     }
 
     @Test
@@ -189,7 +191,7 @@ class RouterWrapperTests {
             )
         )
 
-        verify { router.getRoute(routeUrl, any(), any()) }
+        verify { router.getRoute(routeUrl, any(), any<com.mapbox.navigator.RouterCallback>()) }
         verify { routerCallback.onFailure(expected, routerOptions) }
     }
 
@@ -199,7 +201,7 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any(), any()) }
+            verify { router.getRoute(routeUrl, any(), any<com.mapbox.navigator.RouterCallback>()) }
 
             val expected = DirectionsResponse.fromJson(
                 testRouteFixtures.loadTwoLegRoute(),
@@ -216,7 +218,7 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccessEmptyRoutes, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any(), any()) }
+            verify { router.getRoute(routeUrl, any(), any<com.mapbox.navigator.RouterCallback>()) }
 
             val expected = RouterFailure(
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
@@ -244,7 +246,7 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccessErroneousValue, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any(), any()) }
+            verify { router.getRoute(routeUrl, any(), any<com.mapbox.navigator.RouterCallback>()) }
 
             val expected = RouterFailure(
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)

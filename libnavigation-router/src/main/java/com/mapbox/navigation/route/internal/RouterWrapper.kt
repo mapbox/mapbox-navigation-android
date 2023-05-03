@@ -60,84 +60,89 @@ class RouterWrapper(
 
         val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
         logD(LOG_CATEGORY) { "requesting route for $urlWithoutToken" }
-        return router.getRoute(routeUrl, requestOptions) { result, origin ->
-            logD(LOG_CATEGORY) {
-                "received result from router.getRoute for $urlWithoutToken; origin: $origin"
-            }
-            result.fold(
-                {
-                    mainJobControl.scope.launch {
-                        if (it.type == RouterErrorType.REQUEST_CANCELLED) {
-                            logI(
-                                """
-                                    Route request cancelled:
-                                    $routeOptions
-                                    $origin
-                                """.trimIndent(),
-                                LOG_CATEGORY
-                            )
-                            callback.onCanceled(routeOptions, origin.mapToSdkRouteOrigin())
-                        } else {
-                            val failureReasons = listOf(
-                                RouterFailure(
-                                    url = urlWithoutToken,
-                                    routerOrigin = origin.mapToSdkRouteOrigin(),
-                                    message = it.message,
-                                    code = it.code
+        return router.getRoute(
+            routeUrl,
+            requestOptions,
+            com.mapbox.navigator.RouterCallback { result, origin ->
+                logD(LOG_CATEGORY) {
+                    "received result from router.getRoute for $urlWithoutToken; origin: $origin"
+                }
+                result.fold(
+                    {
+                        mainJobControl.scope.launch {
+                            if (it.type == RouterErrorType.REQUEST_CANCELLED) {
+                                logI(
+                                    """
+                                        Route request cancelled:
+                                        $routeOptions
+                                        $origin
+                                    """.trimIndent(),
+                                    LOG_CATEGORY
                                 )
-                            )
+                                callback.onCanceled(routeOptions, origin.mapToSdkRouteOrigin())
+                            } else {
+                                val failureReasons = listOf(
+                                    RouterFailure(
+                                        url = urlWithoutToken,
+                                        routerOrigin = origin.mapToSdkRouteOrigin(),
+                                        message = it.message,
+                                        code = it.code
+                                    )
+                                )
 
-                            logW(
-                                """
-                                    Route request failed with:
-                                    $failureReasons
-                                """.trimIndent(),
+                                logW(
+                                    """
+                                        Route request failed with:
+                                        $failureReasons
+                                    """.trimIndent(),
+                                    LOG_CATEGORY
+                                )
+
+                                callback.onFailure(failureReasons, routeOptions)
+                            }
+                        }
+                    },
+                    {
+                        mainJobControl.scope.launch {
+                            logI(
+                                "processing successful response " +
+                                    "from router.getRoute for $urlWithoutToken",
                                 LOG_CATEGORY
                             )
-
-                            callback.onFailure(failureReasons, routeOptions)
+                            parseDirectionsResponse(
+                                ThreadController.DefaultDispatcher,
+                                it,
+                                routeUrl,
+                                origin.mapToSdkRouteOrigin(),
+                            ).fold(
+                                { throwable ->
+                                    callback.onFailure(
+                                        listOf(
+                                            RouterFailure(
+                                                urlWithoutToken,
+                                                origin.mapToSdkRouteOrigin(),
+                                                "failed for response: $it",
+                                                throwable = throwable
+                                            )
+                                        ),
+                                        routeOptions
+                                    )
+                                },
+                                { routes ->
+                                    val metadata =
+                                        routes.firstOrNull()?.directionsResponse?.metadata()
+                                    logI("Response metadata: $metadata", LOG_CATEGORY)
+                                    callback.onRoutesReady(
+                                        routes,
+                                        origin.mapToSdkRouteOrigin()
+                                    )
+                                }
+                            )
                         }
                     }
-                },
-                {
-                    mainJobControl.scope.launch {
-                        logI(
-                            "processing successful response " +
-                                "from router.getRoute for $urlWithoutToken",
-                            LOG_CATEGORY
-                        )
-                        parseDirectionsResponse(
-                            ThreadController.DefaultDispatcher,
-                            it,
-                            routeUrl,
-                            origin.mapToSdkRouteOrigin(),
-                        ).fold(
-                            { throwable ->
-                                callback.onFailure(
-                                    listOf(
-                                        RouterFailure(
-                                            urlWithoutToken,
-                                            origin.mapToSdkRouteOrigin(),
-                                            "failed for response: $it",
-                                            throwable = throwable
-                                        )
-                                    ),
-                                    routeOptions
-                                )
-                            },
-                            { routes ->
-                                val metadata = routes.firstOrNull()?.directionsResponse?.metadata()
-                                logI("Response metadata: $metadata", LOG_CATEGORY)
-                                callback.onRoutesReady(
-                                    routes,
-                                    origin.mapToSdkRouteOrigin()
-                                )
-                            }
-                        )
-                    }
-                }
-            )
-        }
+                )
+            }
+        )
     }
 
     override fun getRoute(routeOptions: RouteOptions, callback: RouterCallback): Long {

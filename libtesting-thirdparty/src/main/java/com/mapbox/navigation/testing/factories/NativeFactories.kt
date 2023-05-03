@@ -1,6 +1,7 @@
 package com.mapbox.navigation.testing.factories
 
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.bindgen.DataRef
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.ActiveGuidanceInfo
 import com.mapbox.navigator.AlternativeRouteInfo
@@ -9,6 +10,7 @@ import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.MapMatcherOutput
 import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.OffRoadStateProvider
 import com.mapbox.navigator.RoadName
 import com.mapbox.navigator.RouteIndices
 import com.mapbox.navigator.RouteInfo
@@ -16,6 +18,8 @@ import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.SpeedLimit
+import com.mapbox.navigator.SpeedLimitSign
+import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
@@ -27,6 +31,7 @@ import java.util.Date
 fun createNavigationStatus(
     routeState: RouteState = RouteState.TRACKING,
     locatedAlternativeId: String? = null,
+    primaryRouteId: String? = null,
     stale: Boolean = false,
     location: FixLocation = createFixedLocation(),
     routeSequenceNumber: Int = 0,
@@ -35,6 +40,7 @@ fun createNavigationStatus(
     stepIndex: Int = 0,
     isFallback: Boolean = false,
     isTunnel: Boolean = false,
+    isParkingAisle: Boolean = false,
     predicted: Long = 0,
     geometryIndex: Int = 0,
     shapeIndex: Int = 0,
@@ -43,10 +49,11 @@ fun createNavigationStatus(
     voiceInstruction: VoiceInstruction? = null,
     // default banner instruction workarounds the direct usage of the MapboxNativeNavigatorImpl
     bannerInstruction: BannerInstruction? = createBannerInstruction(),
-    speedLimit: SpeedLimit? = null,
+    speedLimit: SpeedLimit = SpeedLimit(null, SpeedLimitUnit.KILOMETRES_PER_HOUR, SpeedLimitSign.VIENNA),
     keyPoints: List<FixLocation> = emptyList(),
     mapMatcherOutput: MapMatcherOutput = createMapMatcherOutput(),
     offRoadProba: Float = 0f,
+    offRoadStateProvider: OffRoadStateProvider = OffRoadStateProvider.UNKNOWN,
     activeGuidanceInfo: ActiveGuidanceInfo? = null,
     upcomingRouteAlerts: List<UpcomingRouteAlert> = emptyList(),
     upcomingRouteAlertUpdates: List<UpcomingRouteAlertUpdate> = emptyList(),
@@ -57,6 +64,7 @@ fun createNavigationStatus(
     return NavigationStatus(
         routeState,
         locatedAlternativeId,
+        primaryRouteId,
         stale,
         location,
         routeIndex,
@@ -64,6 +72,7 @@ fun createNavigationStatus(
         stepIndex,
         isFallback,
         isTunnel,
+        isParkingAisle,
         predicted,
         geometryIndex,
         shapeIndex,
@@ -76,6 +85,7 @@ fun createNavigationStatus(
         keyPoints,
         mapMatcherOutput,
         offRoadProba,
+        offRoadStateProvider,
         activeGuidanceInfo,
         upcomingRouteAlerts,
         upcomingRouteAlertUpdates,
@@ -185,6 +195,10 @@ fun createRouteInterface(
     override fun getResponseUuid() = responseUUID
 
     override fun getRouteIndex() = routeIndex
+
+    override fun getResponseJsonRef(): DataRef {
+        throw UnsupportedOperationException()
+    }
 
     override fun getResponseJson() = responseJson
 

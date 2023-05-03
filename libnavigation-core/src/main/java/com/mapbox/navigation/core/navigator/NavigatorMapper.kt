@@ -30,6 +30,7 @@ import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.VoiceInstruction
+import kotlin.math.roundToInt
 
 private const val ONE_INDEX = 1
 private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
@@ -285,10 +286,20 @@ internal fun NavigationStatus.prepareSpeedLimit(): SpeedLimit? {
             SpeedLimitSign.MUTCD -> com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             else -> com.mapbox.navigation.base.speed.model.SpeedLimitSign.VIENNA
         }
+        // TODO: https://mapbox.atlassian.net/browse/NAVAND-1349
+        val speedKmph = when (speedLimitUnit) {
+            com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR -> limit.speed
+            com.mapbox.navigation.base.speed.model.SpeedLimitUnit.MILES_PER_HOUR ->
+                mphToKmph(limit.speed)
+        }
         SpeedLimit(
-            limit.speedKmph,
+            speedKmph,
             speedLimitUnit,
             speedLimitSign
         )
     }
+}
+
+private fun mphToKmph(mph: Int?): Int? {
+    return mph?.let { it * 1.60934 }?.roundToInt()
 }

@@ -71,7 +71,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4183, 37.7653),
             ),
@@ -151,7 +151,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4183, 37.7652),
             ),
@@ -194,13 +194,13 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4183, 37.7652),
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4145, 37.7653),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4146, 37.7655),
             ),
@@ -243,7 +243,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4145, 37.7653),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4146, 37.7655),
             ),
@@ -274,7 +274,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4183, 37.7652),
             ),
@@ -330,7 +330,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4145, 37.7653),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4146, 37.7655),
             ),
@@ -417,7 +417,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 null,
             ),
@@ -453,7 +453,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 null,
             ),
@@ -508,7 +508,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4145, 37.7653),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 null,
             ),
@@ -588,7 +588,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 null,
             ),
@@ -625,7 +625,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 null,
             ),
@@ -668,7 +668,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4145, 37.7653),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 null,
             ),
@@ -766,7 +766,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4183, 37.7652),
             ),
@@ -803,7 +803,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 Point.fromLngLat(-122.4183, 37.7652),
             ),
@@ -882,7 +882,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 null,
             ),
@@ -961,7 +961,7 @@ class BuildingProcessorTest {
             ),
             provideWaypoint(
                 Point.fromLngLat(-122.4182, 37.7651),
-                Waypoint.EV_CHARGING,
+                Waypoint.EV_CHARGING_SERVER,
                 "",
                 null,
             ),
