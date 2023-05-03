@@ -20,7 +20,8 @@ object WaypointFactory {
         when (type) {
             Waypoint.REGULAR -> Waypoint.InternalType.Regular
             Waypoint.SILENT -> Waypoint.InternalType.Silent
-            Waypoint.EV_CHARGING -> Waypoint.InternalType.EvCharging
+            Waypoint.EV_CHARGING_SERVER -> Waypoint.InternalType.EvChargingServer
+            Waypoint.EV_CHARGING_USER -> Waypoint.InternalType.EvChargingUser
             else -> throw IllegalStateException("Unknown waypoint type $type")
         },
     )

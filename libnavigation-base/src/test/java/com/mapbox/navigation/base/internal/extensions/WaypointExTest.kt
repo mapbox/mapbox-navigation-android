@@ -38,36 +38,48 @@ class WaypointExTest {
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Silent,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Silent,
                         Waypoint.InternalType.Regular
                     ),
                     listOf(
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Silent,
                         Waypoint.InternalType.Regular
                     ),
                     listOf(
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Regular
                     ),
                 ),
                 arrayOf(
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
-                        Waypoint.InternalType.EvCharging,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Regular
                     ),
-                    listOf(Waypoint.InternalType.Regular, Waypoint.InternalType.Regular),
                     listOf(
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
-                        Waypoint.InternalType.EvCharging,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Regular
+                    ),
+                    listOf(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Regular
                     ),
                 ),
@@ -77,7 +89,8 @@ class WaypointExTest {
                         Waypoint.InternalType.Silent,
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Regular
                     ),
                     listOf(
@@ -85,13 +98,15 @@ class WaypointExTest {
                         Waypoint.InternalType.Silent,
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Regular
                     ),
                     listOf(
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Regular
                     ),
                 ),
@@ -186,44 +201,117 @@ class WaypointExTest {
                     "Next index: 1 for 2 relevant waypoints (1 is EV) and remaining waypoint 2",
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
                         Waypoint.InternalType.Regular
                     ),
                     2,
                     1,
                 ),
                 arrayOf(
+                    "Next index: 1 for 3 relevant waypoints and remaining waypoint 2",
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Regular
+                    ),
+                    2,
+                    1,
+                ),
+                arrayOf(
+                    "Next index: 2 for 3 relevant waypoints " +
+                        "(1 is EV server-provided) and remaining waypoint 2",
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.Regular
+                    ),
+                    2,
+                    2,
+                ),
+                arrayOf(
                     "Next index: 1 for 3 relevant waypoints (2 is EV) and remaining waypoint 4",
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
                         Waypoint.InternalType.Silent,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
                         Waypoint.InternalType.Regular
                     ),
                     4,
                     1,
                 ),
                 arrayOf(
-                    "Next index: 1 for 3 relevant waypoints (2 is EV) and remaining waypoint 2",
+                    "Next index: 1 for 5 relevant waypoints and remaining waypoint 4",
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Silent,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Regular
+                    ),
+                    4,
+                    1,
+                ),
+                arrayOf(
+                    "Next index: 1 for 4 relevant waypoints " +
+                        "(1 is EV server-provided) and remaining waypoint 4",
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.Regular
+                    ),
+                    4,
+                    1,
+                ),
+                arrayOf(
+                    "Next index: 2 for 3 relevant waypoints (2 is EV) and remaining waypoint 2",
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingServer,
                         Waypoint.InternalType.Regular
                     ),
                     2,
                     2,
                 ),
                 arrayOf(
-                    "Next index: null for non-valid case - 3 relevant waypoints (2 is EV) and " +
-                        "remaining waypoint 7",
+                    "Next index: 3 for 5 relevant waypoints and remaining waypoint 2",
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Silent,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Regular
+                    ),
+                    2,
+                    3,
+                ),
+                arrayOf(
+                    "Next index: 3 for 4 relevant waypoints " +
+                        "(1 is EV server-provided) and remaining waypoint 2",
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.Regular
+                    ),
+                    2,
+                    3,
+                ),
+                arrayOf(
+                    "Next index: null for non-valid case - 4 relevant waypoints " +
+                        "(2 is EV server-provided) and remaining waypoint 7",
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Regular
                     ),
                     7,
@@ -233,9 +321,34 @@ class WaypointExTest {
                     "Next index: 0 for 3 relevant waypoints (2 is EV) and remaining waypoint 5",
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
                         Waypoint.InternalType.Silent,
-                        Waypoint.InternalType.EvCharging,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.Regular
+                    ),
+                    5,
+                    0,
+                ),
+                arrayOf(
+                    "Next index: 0 for 5 relevant waypoints and remaining waypoint 5",
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Regular
+                    ),
+                    5,
+                    0,
+                ),
+                arrayOf(
+                    "Next index: 0 for 4 relevant waypoints " +
+                        "(1 is EV server-provided) and remaining waypoint 5",
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingUser,
                         Waypoint.InternalType.Regular
                     ),
                     5,
@@ -251,6 +364,31 @@ class WaypointExTest {
                 expectedIndex,
                 indexOfNextRequestedCoordinate(waypoints, remainingWaypoints)
             )
+        }
+    }
+
+    @RunWith(Parameterized::class)
+    class IsServerAddedWaypointTest internal constructor(
+        private val waypointType: Waypoint.InternalType,
+        private val expected: Boolean,
+    ) {
+
+        companion object {
+
+            @JvmStatic
+            @Parameterized.Parameters(name = "{1} for {0}")
+            fun data() = listOf(
+                arrayOf(Waypoint.InternalType.Silent, false),
+                arrayOf(Waypoint.InternalType.EvChargingServer, true),
+                arrayOf(Waypoint.InternalType.EvChargingUser, false),
+                arrayOf(Waypoint.InternalType.Regular, false),
+            )
+        }
+
+        @Test
+        fun testCases() {
+            val waypoint = provideWaypoints(waypointType).first()
+            assertEquals(expected, waypoint.isServerAddedWaypoint())
         }
     }
 }

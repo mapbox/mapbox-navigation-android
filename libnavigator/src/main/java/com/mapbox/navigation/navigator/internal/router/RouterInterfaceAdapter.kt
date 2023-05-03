@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.navigator.internal.mapToDirectionsResponse
 import com.mapbox.navigator.GetRouteOptions
 import com.mapbox.navigator.RouteRefreshOptions
+import com.mapbox.navigator.RouterDataRefCallback
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterInterface
@@ -124,6 +125,20 @@ class RouterInterfaceAdapter(
                 }
             )
         return requestId
+    }
+
+    override fun getRoute(
+        directionsUri: String,
+        options: GetRouteOptions,
+        callbackDataRef: RouterDataRefCallback
+    ): Long {
+        callbackDataRef.run(
+            ExpectedFactory.createError(
+                RouterError("Not supported yet", 0, RouterErrorType.UNKNOWN, 0)
+            ),
+            com.mapbox.navigator.RouterOrigin.ONBOARD
+        )
+        return 0
     }
 
     override fun getRouteRefresh(

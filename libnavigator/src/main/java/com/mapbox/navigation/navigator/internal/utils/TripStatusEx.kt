@@ -38,7 +38,8 @@ fun TripStatus.getCurrentLegDestination(route: NavigationRoute): LegWaypoint? {
     }
     val legWaypointType = when (waypoint.type) {
         Waypoint.REGULAR -> LegWaypoint.REGULAR
-        Waypoint.EV_CHARGING -> LegWaypoint.EV_CHARGING_ADDED
+        Waypoint.EV_CHARGING_SERVER -> LegWaypoint.EV_CHARGING_ADDED
+        Waypoint.EV_CHARGING_USER -> LegWaypoint.EV_CHARGING_USER_PROVIDED
         else -> throw IllegalArgumentException("$waypoint is not a leg waypoint")
     }
     return LegWaypointFactory.createLegWaypoint(

@@ -44,7 +44,7 @@ class BillingControllerWaypointsComparisonTest(
         fun data(): Collection<Array<Any>> {
             return listOf(
                 arrayOf(
-                    "Route start, non EV + non EV with non-matching size",
+                    "Route start, regular + regular with non-matching size",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -58,7 +58,7 @@ class BillingControllerWaypointsComparisonTest(
                     true
                 ),
                 arrayOf(
-                    "Route start, non EV + EV with non-matching size",
+                    "Route start, regular + user EV with non-matching size",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -66,24 +66,68 @@ class BillingControllerWaypointsComparisonTest(
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
-                        waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
                         waypoint(4.4, 5.5, WaypointType.REGULAR),
                     ),
                     true
                 ),
                 arrayOf(
-                    "Route start, EV + non EV with non-matching size",
+                    "Route start, regular + EV with non-matching size",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route start, regular and user EV + EV with non-matching size",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route start, EV + regular with non-matching size",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route start, EV + regular and user EV with non-matching size",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER),
                     ),
                     true
                 ),
@@ -92,19 +136,35 @@ class BillingControllerWaypointsComparisonTest(
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     true
                 ),
                 arrayOf(
-                    "Route start, non EV + non EV with matching size and non-matching locations",
+                    "Route start, EV and user EV + EV with non-matching size",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route start, regular + regular with matching size and non-matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -119,7 +179,7 @@ class BillingControllerWaypointsComparisonTest(
                     true
                 ),
                 arrayOf(
-                    "Route start, non EV + EV with matching size and non-matching locations",
+                    "Route start, regular + user EV with matching size and non-matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -128,24 +188,73 @@ class BillingControllerWaypointsComparisonTest(
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route start, regular + EV with matching size and non-matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_SERVER),
                         waypoint(5.5, 6.6, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR),
                     ),
                     true
                 ),
                 arrayOf(
-                    "Route start, EV + non EV with matching size and non-matching locations",
+                    "Route start, regular and user EV + EV " +
+                        "with matching size and non-matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route start, EV + regular with matching size and non-matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route start, EV + regular and EV " +
+                        "with matching size and non-matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_USER),
                         waypoint(4.4, 5.5, WaypointType.REGULAR),
                     ),
                     true
@@ -155,20 +264,38 @@ class BillingControllerWaypointsComparisonTest(
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR),
                     ),
                     true
                 ),
                 arrayOf(
-                    "Route start, non EV + non EV with matching size and matching locations",
+                    "Route start, EV + EV and user EV " +
+                        "with matching size and non-matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(6.6, 7.7, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route start, regular + regular with matching size and matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -183,27 +310,60 @@ class BillingControllerWaypointsComparisonTest(
                     false
                 ),
                 arrayOf(
-                    "Route start, non EV + EV with matching size and matching locations",
+                    "Route start, regular and user EV + regular " +
+                        "with matching size and matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(3.3, 4.4, WaypointType.REGULAR),
-                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
                     ),
                     listOf(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     false
                 ),
                 arrayOf(
-                    "Route start, EV + non EV with matching size and matching locations",
+                    "Route start, regular + EV with matching size and matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route start, regular and user EV + EV " +
+                        "with matching size and matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route start, EV + regular with matching size and matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
@@ -211,6 +371,23 @@ class BillingControllerWaypointsComparisonTest(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route start, EV + regular and user EV " +
+                        "with matching size and matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
                     ),
                     false
                 ),
@@ -219,13 +396,30 @@ class BillingControllerWaypointsComparisonTest(
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route start, EV and user EV + EV with matching size and matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
@@ -233,7 +427,7 @@ class BillingControllerWaypointsComparisonTest(
                 ),
 
                 arrayOf(
-                    "Route middle, non EV + non EV with non-matching size",
+                    "Route middle, regular + regular with non-matching size",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -248,7 +442,22 @@ class BillingControllerWaypointsComparisonTest(
                     true
                 ),
                 arrayOf(
-                    "Route middle, non EV + EV with non-matching size",
+                    "Route middle, regular and user EV + regular with non-matching size",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.EV_CHARGING_USER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route middle, regular + EV with non-matching size",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -258,20 +467,52 @@ class BillingControllerWaypointsComparisonTest(
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     true
                 ),
                 arrayOf(
-                    "Route middle, EV + non EV with non-matching size",
+                    "Route middle, regular + EV and user EV with non-matching size",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route middle, EV + regular with non-matching size",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR),
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route middle, EV and user EV + regular with non-matching size",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.EV_CHARGING_USER),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -285,19 +526,36 @@ class BillingControllerWaypointsComparisonTest(
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     true
                 ),
                 arrayOf(
-                    "Route middle, non EV + non EV with matching size and non-matching locations",
+                    "Route middle, EV and user EV + EV with non-matching size",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route middle, regular + regular with matching size and non-matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -313,7 +571,24 @@ class BillingControllerWaypointsComparisonTest(
                     true
                 ),
                 arrayOf(
-                    "Route middle, non EV + EV with matching size and non-matching locations",
+                    "Route middle, regular and user EV + regular " +
+                        "with matching size and non-matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route middle, regular + EV with matching size and non-matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -323,21 +598,57 @@ class BillingControllerWaypointsComparisonTest(
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     true
                 ),
                 arrayOf(
-                    "Route middle, EV + non EV with matching size and non-matching locations",
+                    "Route middle, regular and user EV + EV " +
+                        "with matching size and non-matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.EV_CHARGING_USER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route middle, EV + regular with matching size and non-matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route middle, EV and user EV + regular " +
+                        "with matching size and non-matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -352,20 +663,39 @@ class BillingControllerWaypointsComparisonTest(
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     true
                 ),
                 arrayOf(
-                    "Route middle, non EV + non EV with matching size and matching locations",
+                    "Route middle, EV and user EV + EV " +
+                        "with matching size and non-matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.EV_CHARGING_USER),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
+                    ),
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route middle, regular + regular with matching size and matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
@@ -381,35 +711,88 @@ class BillingControllerWaypointsComparisonTest(
                     false
                 ),
                 arrayOf(
-                    "Route middle, non EV + EV with matching size and matching locations",
+                    "Route middle, regular and user EV + regular " +
+                        "with matching size and matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
-                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     false
                 ),
                 arrayOf(
-                    "Route middle, EV + non EV with matching size and matching locations",
+                    "Route middle, regular + EV with matching size and matching locations",
                     2,
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route middle, regular + EV and user EV " +
+                        "with matching size and matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route middle, EV + regular with matching size and matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route middle, EV + regular and user EV " +
+                        "with matching size and matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     false
@@ -420,20 +803,38 @@ class BillingControllerWaypointsComparisonTest(
                     listOf(
                         waypoint(2.2, 3.3, WaypointType.REGULAR),
                         waypoint(6.6, 7.7, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     listOf(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
-                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
                     ),
                     false
                 ),
                 arrayOf(
-                    "Route finished, non EV + non EV with matching size and matching locations",
+                    "Route middle, EV + EV and user EV with matching size and matching locations",
+                    2,
+                    listOf(
+                        waypoint(2.2, 3.3, WaypointType.REGULAR),
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.EV_CHARGING_SERVER),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route finished, regular + regular with matching size and matching locations",
                     0,
                     listOf(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
@@ -448,7 +849,24 @@ class BillingControllerWaypointsComparisonTest(
                     true
                 ),
                 arrayOf(
-                    "Route not started, non EV + non EV with matching size and matching locations",
+                    "Route finished, regular and user EV + regular " +
+                        "with matching size and matching locations",
+                    0,
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.EV_CHARGING_USER),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    true
+                ),
+                arrayOf(
+                    "Route not started, regular + regular " +
+                        "with matching size and matching locations",
                     3,
                     listOf(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
@@ -463,13 +881,45 @@ class BillingControllerWaypointsComparisonTest(
                     false
                 ),
                 arrayOf(
-                    "Route not started, non EV + non EV with matching size " +
+                    "Route not started, regular and user EV + regular " +
+                        "with matching size and matching locations",
+                    3,
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
+                    ),
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route not started, regular + regular with matching size " +
                         "and matching locations but different origin",
                     3,
                     listOf(
                         waypoint(1.1, 2.2, WaypointType.REGULAR),
                         waypoint(3.3, 4.4, WaypointType.REGULAR),
                         waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(6.6, 7.7, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route not started, regular and user EV + regular with matching size " +
+                        "and matching locations but different origin",
+                    3,
+                    listOf(
+                        waypoint(1.1, 2.2, WaypointType.REGULAR),
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.EV_CHARGING_USER)
                     ),
                     listOf(
                         waypoint(6.6, 7.7, WaypointType.REGULAR),

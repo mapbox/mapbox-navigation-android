@@ -549,10 +549,53 @@ class NavigatorMapperTest {
         )
     }
 
-    private fun createSpeedLimit(): com.mapbox.navigator.SpeedLimit {
+    @Test
+    fun `prepareSpeedLimit kmph non null`() {
+        every {
+            navigationStatus.speedLimit
+        } returns createSpeedLimit(speed = 80, unit = SpeedLimitUnit.KILOMETRES_PER_HOUR)
+        val actual = navigationStatus.prepareSpeedLimit()!!
+
+        assertEquals(80, actual.speedKmph)
+    }
+
+    @Test
+    fun `prepareSpeedLimit kmph null`() {
+        every {
+            navigationStatus.speedLimit
+        } returns createSpeedLimit(speed = null, unit = SpeedLimitUnit.KILOMETRES_PER_HOUR)
+        val actual = navigationStatus.prepareSpeedLimit()!!
+
+        assertNull(actual.speedKmph)
+    }
+
+    @Test
+    fun `prepareSpeedLimit mph non null`() {
+        every {
+            navigationStatus.speedLimit
+        } returns createSpeedLimit(speed = 60, unit = SpeedLimitUnit.MILES_PER_HOUR)
+        val actual = navigationStatus.prepareSpeedLimit()!!
+
+        assertEquals(97, actual.speedKmph)
+    }
+
+    @Test
+    fun `prepareSpeedLimit mph null`() {
+        every {
+            navigationStatus.speedLimit
+        } returns createSpeedLimit(speed = null, unit = SpeedLimitUnit.MILES_PER_HOUR)
+        val actual = navigationStatus.prepareSpeedLimit()!!
+
+        assertNull(actual.speedKmph)
+    }
+
+    private fun createSpeedLimit(
+        speed: Int? = 10,
+        unit: SpeedLimitUnit = SpeedLimitUnit.KILOMETRES_PER_HOUR
+    ): com.mapbox.navigator.SpeedLimit {
         return com.mapbox.navigator.SpeedLimit(
-            10,
-            SpeedLimitUnit.KILOMETRES_PER_HOUR,
+            speed,
+            unit,
             SpeedLimitSign.MUTCD
         )
     }

@@ -3,8 +3,11 @@ package com.mapbox.navigation.base.internal.utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigator.Waypoint
+import com.mapbox.navigator.WaypointType
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -81,6 +84,35 @@ class DirectionsRouteExTest {
                 assertFalse(route1.isSameRoute(route2))
             }
         }
+    }
+
+    @Test
+    fun waypointsMapToSdk() {
+        val nativeWaypoints = listOf(
+            mockk<Waypoint>(relaxed = true) {
+                every { type } returns WaypointType.EV_CHARGING_USER
+            },
+            mockk(relaxed = true) {
+                every { type } returns WaypointType.SILENT
+            },
+            mockk(relaxed = true) {
+                every { type } returns WaypointType.EV_CHARGING_SERVER
+            },
+            mockk(relaxed = true) {
+                every { type } returns WaypointType.REGULAR
+            },
+        )
+        assertEquals(WaypointType.values().size, nativeWaypoints.size)
+
+        assertEquals(
+            listOf(
+                com.mapbox.navigation.base.internal.route.Waypoint.EV_CHARGING_USER,
+                com.mapbox.navigation.base.internal.route.Waypoint.SILENT,
+                com.mapbox.navigation.base.internal.route.Waypoint.EV_CHARGING_SERVER,
+                com.mapbox.navigation.base.internal.route.Waypoint.REGULAR,
+            ),
+            nativeWaypoints.mapToSdk().map { it.type }
+        )
     }
 
     private fun getDirectionRouteBuilder(): DirectionsRoute.Builder =

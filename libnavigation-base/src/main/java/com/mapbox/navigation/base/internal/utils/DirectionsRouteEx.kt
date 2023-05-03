@@ -5,7 +5,6 @@ package com.mapbox.navigation.base.internal.utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.navigation.base.internal.route.Waypoint
-import com.mapbox.navigation.base.internal.route.Waypoint.Companion.REGULAR
 import com.mapbox.navigation.base.utils.ifNonNull
 
 /**
@@ -53,5 +52,7 @@ private fun com.mapbox.navigator.WaypointType.mapToSdk(): Waypoint.InternalType 
     when (this) {
         com.mapbox.navigator.WaypointType.REGULAR -> Waypoint.InternalType.Regular
         com.mapbox.navigator.WaypointType.SILENT -> Waypoint.InternalType.Silent
-        com.mapbox.navigator.WaypointType.EV_CHARGING -> Waypoint.InternalType.EvCharging
+        com.mapbox.navigator.WaypointType.EV_CHARGING_SERVER ->
+            Waypoint.InternalType.EvChargingServer
+        com.mapbox.navigator.WaypointType.EV_CHARGING_USER -> Waypoint.InternalType.EvChargingUser
     }

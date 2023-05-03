@@ -11,8 +11,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 fun Waypoint.isRequestedWaypoint(): Boolean =
     when (this.internalType) {
         Waypoint.InternalType.Regular,
-        Waypoint.InternalType.Silent -> true
-        Waypoint.InternalType.EvCharging -> false
+        Waypoint.InternalType.Silent,
+        Waypoint.InternalType.EvChargingUser -> true
+        Waypoint.InternalType.EvChargingServer -> false
     }
 
 /**
@@ -22,14 +23,16 @@ fun Waypoint.isRequestedWaypoint(): Boolean =
 fun Waypoint.isLegWaypoint(): Boolean =
     when (this.internalType) {
         Waypoint.InternalType.Regular,
-        Waypoint.InternalType.EvCharging -> true
+        Waypoint.InternalType.EvChargingServer,
+        Waypoint.InternalType.EvChargingUser -> true
         Waypoint.InternalType.Silent -> false
     }
 
 /**
- * Return true if the waypoint corresponds to EV charging station. False otherwise.
+ * Return true if the waypoint was added by the server. False otherwise.
  */
-fun Waypoint.isEVChargingWaypoint(): Boolean = this.internalType == Waypoint.InternalType.EvCharging
+fun Waypoint.isServerAddedWaypoint(): Boolean =
+    this.internalType == Waypoint.InternalType.EvChargingServer
 
 /**
  * Return the index of **next requested** coordinate. See [RouteOptions.coordinatesList]

@@ -57,13 +57,13 @@ class TripStatusExTest {
                         } returns provideMockListOfWaypoints(
                             Waypoint.REGULAR,
                             Waypoint.SILENT,
-                            Waypoint.EV_CHARGING,
+                            Waypoint.EV_CHARGING_SERVER,
                             Waypoint.SILENT,
                             Waypoint.REGULAR,
                             Waypoint.REGULAR,
                             Waypoint.SILENT,
-                            Waypoint.EV_CHARGING,
-                            Waypoint.EV_CHARGING,
+                            Waypoint.EV_CHARGING_SERVER,
+                            Waypoint.EV_CHARGING_SERVER,
                             Waypoint.REGULAR,
                             Waypoint.REGULAR,
                         )
@@ -127,6 +127,12 @@ class TripStatusExTest {
                     Point.fromLngLat(1.1, 1.1),
                     Waypoint.REGULAR
                 )
+                val userEvWaypoint = WaypointFactory.provideWaypoint(
+                    Point.fromLngLat(4.0, 4.0),
+                    "user ev waypoint",
+                    Point.fromLngLat(4.1, 4.1),
+                    Waypoint.EV_CHARGING_USER
+                )
                 val silentWaypoint = WaypointFactory.provideWaypoint(
                     Point.fromLngLat(2.0, 2.0),
                     "",
@@ -137,7 +143,7 @@ class TripStatusExTest {
                     Point.fromLngLat(3.0, 3.0),
                     "ev waypoint",
                     Point.fromLngLat(3.1, 3.1),
-                    Waypoint.EV_CHARGING
+                    Waypoint.EV_CHARGING_SERVER
                 )
                 return listOf(
                     arrayOf(
@@ -153,10 +159,11 @@ class TripStatusExTest {
                         mockk<NavigationRoute> {
                             every { internalWaypoints() } returns listOf(
                                 regularWaypoint1,
-                                regularWaypoint2
+                                regularWaypoint2,
+                                userEvWaypoint,
                             )
                         },
-                        2,
+                        3,
                         null
                     ),
                     arrayOf(
@@ -164,11 +171,12 @@ class TripStatusExTest {
                         mockk<NavigationRoute> {
                             every { internalWaypoints() } returns listOf(
                                 regularWaypoint1,
+                                userEvWaypoint,
                                 regularWaypoint2,
                                 silentWaypoint,
                             )
                         },
-                        2,
+                        3,
                         null
                     ),
                     arrayOf(
@@ -176,12 +184,13 @@ class TripStatusExTest {
                         mockk<NavigationRoute> {
                             every { internalWaypoints() } returns listOf(
                                 regularWaypoint1,
+                                userEvWaypoint,
                                 silentWaypoint,
                                 evWaypoint,
                                 regularWaypoint2
                             )
                         },
-                        3,
+                        4,
                         LegWaypointFactory.createLegWaypoint(
                             Point.fromLngLat(1.0, 1.0),
                             "regular waypoint",
@@ -194,19 +203,39 @@ class TripStatusExTest {
                         mockk<NavigationRoute> {
                             every { internalWaypoints() } returns listOf(
                                 regularWaypoint1,
+                                userEvWaypoint,
                                 silentWaypoint,
                                 regularWaypoint2,
                                 evWaypoint,
                             )
                         },
-                        3,
+                        4,
                         LegWaypointFactory.createLegWaypoint(
                             Point.fromLngLat(3.0, 3.0),
                             "ev waypoint",
                             Point.fromLngLat(3.1, 3.1),
                             LegWaypoint.EV_CHARGING_ADDED
                         )
-                    )
+                    ),
+                    arrayOf(
+                        "next waypoint is user EV",
+                        mockk<NavigationRoute> {
+                            every { internalWaypoints() } returns listOf(
+                                regularWaypoint1,
+                                evWaypoint,
+                                silentWaypoint,
+                                regularWaypoint2,
+                                userEvWaypoint,
+                            )
+                        },
+                        4,
+                        LegWaypointFactory.createLegWaypoint(
+                            Point.fromLngLat(4.0, 4.0),
+                            "user ev waypoint",
+                            Point.fromLngLat(4.1, 4.1),
+                            LegWaypoint.EV_CHARGING_USER_PROVIDED
+                        )
+                    ),
                 )
             }
         }

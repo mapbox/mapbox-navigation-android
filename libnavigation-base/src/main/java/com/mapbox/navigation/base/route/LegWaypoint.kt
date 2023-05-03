@@ -28,6 +28,11 @@ class LegWaypoint internal constructor(
          * EV charging station waypoint type: the waypoint that was added by server for an EV route.
          */
         const val EV_CHARGING_ADDED = "EV_CHARGING_ADDED"
+
+        /**
+         * EV charging station waypoint type: the waypoint that was added explicitly by the user for an EV route.
+         */
+        const val EV_CHARGING_USER_PROVIDED = "EV_CHARGING_USER_PROVIDED"
     }
 
     /**
@@ -40,7 +45,7 @@ class LegWaypoint internal constructor(
         AnnotationTarget.TYPE
     )
     @Retention(AnnotationRetention.BINARY)
-    @StringDef(REGULAR, EV_CHARGING_ADDED)
+    @StringDef(REGULAR, EV_CHARGING_ADDED, EV_CHARGING_USER_PROVIDED)
     annotation class Type
 
     /**

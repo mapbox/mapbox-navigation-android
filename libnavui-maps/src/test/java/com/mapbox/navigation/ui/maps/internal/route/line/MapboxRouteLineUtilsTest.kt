@@ -1581,7 +1581,7 @@ class MapboxRouteLineUtilsTest {
                 WaypointFactory.provideWaypoint(
                     name = "w1",
                     location = Point.fromLngLat(-77.157347, 38.783004),
-                    type = Waypoint.EV_CHARGING,
+                    type = Waypoint.EV_CHARGING_SERVER,
                     target = null
                 ),
                 WaypointFactory.provideWaypoint(
