@@ -3,19 +3,16 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.OfflineRegion
-import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.loadRegion
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.withoutInternet
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
@@ -68,7 +65,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     @Test
     fun startTripWithoutInternetThenTurnItOn() = sdkTest {
         withMapboxNavigationAndOfflineTilesForRegion(
-            BERLIN_OFFLINE_REGION
+            OfflineRegions.Berlin
         ) { navigation ->
             navigation.startTripSession()
             withoutInternet {
@@ -103,7 +100,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         mockWebServerRule.requestHandlers.add(newRouteOnlineRouteRequestHandler)
 
         withMapboxNavigationAndOfflineTilesForRegion(
-            BERLIN_OFFLINE_REGION
+            OfflineRegions.Berlin
         ) { navigation ->
             navigation.startTripSession()
             val requestResult = navigation.requestRoutes(evRouteInBerlin())
@@ -154,69 +151,3 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         )
         .build()
 }
-
-private suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForRegion(
-    region: OfflineRegion,
-    block: (MapboxNavigation) -> Unit
-) {
-    withMapboxNavigation(
-        useRealTiles = true, //TODO: host saved files using mock web server
-        tileStore = createTileStore()
-    ) { navigation ->
-        downloadBerlinRoutingTiles(navigation, region)
-        block(navigation)
-    }
-}
-
-
-private suspend fun downloadBerlinRoutingTiles(
-    navigation: MapboxNavigation,
-    region: OfflineRegion
-) {
-    loadRegion(navigation, region)
-}
-
-
-private val BERLIN_GEOMETRY = FeatureCollection.fromJson(
-    "{\n" +
-        "  \"type\": \"FeatureCollection\",\n" +
-        "  \"features\": [\n" +
-        "    {\n" +
-        "      \"type\": \"Feature\",\n" +
-        "      \"properties\": {},\n" +
-        "      \"geometry\": {\n" +
-        "        \"coordinates\": [\n" +
-        "          [\n" +
-        "            [\n" +
-        "              13.03807042990934,\n" +
-        "              52.70072965030741\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.03807042990934,\n" +
-        "              52.32726294794662\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.818542568562549,\n" +
-        "              52.32726294794662\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.818542568562549,\n" +
-        "              52.70072965030741\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.03807042990934,\n" +
-        "              52.70072965030741\n" +
-        "            ]\n" +
-        "          ]\n" +
-        "        ],\n" +
-        "        \"type\": \"Polygon\"\n" +
-        "      }\n" +
-        "    }\n" +
-        "  ]\n" +
-        "}"
-).features()!!.first().geometry()!!
-
-private val BERLIN_OFFLINE_REGION = OfflineRegion(
-    id = "berlin-test-tiles",
-    geometry = BERLIN_GEOMETRY
-)

@@ -1,9 +1,12 @@
-package com.mapbox.navigation.instrumentation_tests.utils
+package com.mapbox.navigation.instrumentation_tests.utils.tiles
 
 import android.util.Log
 import com.mapbox.common.TileRegionLoadOptions
 import com.mapbox.geojson.Geometry
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
+import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
+import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -39,4 +42,17 @@ suspend fun loadRegion(navigation: MapboxNavigation, region: OfflineRegion) {
         )
     }
 
+}
+
+suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForRegion(
+    region: OfflineRegion,
+    block: (MapboxNavigation) -> Unit
+) {
+    withMapboxNavigation(
+        useRealTiles = true, //TODO: host local tiles using mock web server?
+        tileStore = createTileStore()
+    ) { navigation ->
+        loadRegion(navigation, region)
+        block(navigation)
+    }
 }
