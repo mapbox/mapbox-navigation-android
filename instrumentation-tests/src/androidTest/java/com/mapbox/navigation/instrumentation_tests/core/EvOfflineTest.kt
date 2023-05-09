@@ -14,6 +14,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.OfflineRegion
 import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.loadRegion
+import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.withoutInternet
@@ -26,12 +27,9 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -132,29 +130,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     .filter { it.routerOrigin == RouterOrigin.Offboard }
                     .first()
                 assertNotEquals(0, firstOnlineAlternative.alternatives.size)
-            }
-        }
-    }
-
-    private suspend fun stayOnPosition(
-        latitude: Double,
-        longitude: Double,
-        block: suspend () -> Unit
-    ) {
-        coroutineScope {
-            val updateLocations = launch {
-                while (true) {
-                    mockLocationUpdatesRule.pushLocationUpdate {
-                        this.latitude = latitude
-                        this.longitude = longitude
-                    }
-                    delay(100)
-                }
-            }
-            try {
-                block()
-            } finally {
-                updateLocations.cancel()
             }
         }
     }
