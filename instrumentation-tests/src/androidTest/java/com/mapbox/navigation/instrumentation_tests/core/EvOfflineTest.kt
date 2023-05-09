@@ -5,16 +5,27 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
 import com.mapbox.navigation.instrumentation_tests.utils.loadRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.withoutInternet
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.NavigationRouteAlternativesResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
+import com.mapbox.navigation.testing.ui.utils.coroutines.alternativesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -22,53 +33,74 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     override fun setupMockLocation(): Location {
         return mockLocationUpdatesRule.generateLocationUpdate {
-            longitude = 4.898473756907066
-            latitude = 52.37373595766587
+            longitude = 13.361378213031003
+            latitude = 52.49813341962201
         }
     }
 
     @Test
     fun requestRouteWithoutInternetAndTiles() = sdkTest {
-        val routeOptions = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .coordinates(
-                "4.898473756907066,52.37373595766587" +
-                    ";5.359980783143584,43.280050656855906"
-            )
-            .alternatives(true)
-            .enableRefresh(true)
-            .build()
-
         withMapboxNavigation { navigation ->
             withoutInternet {
-                val routes = navigation.requestRoutes(routeOptions)
+                val routes = navigation.requestRoutes(routeInBerlin())
                 assertTrue(routes is RouteRequestResult.Failure)
             }
         }
     }
 
     @Test
-    fun requestRouteWithoutInternetHavingTiles() = sdkTest {
-        val routeOptions = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .coordinates("13.361378213031003,52.49813341962201;13.393450988895268,52.50913924804004")
-            .alternatives(true)
-            .enableRefresh(true)
-            .build()
-
+    fun startTripWithoutInternetThenTurnItOn() = sdkTest {
         withMapboxNavigation(
             useRealTiles = true,
             tileStore = createTileStore()
         ) { navigation ->
-            loadRegion(navigation, BERLIN_GEOMETRY)
+            downloadBerlinRoutingTiles(navigation)
+            navigation.startTripSession()
+            val firstOnlineAlternative = async {
+                navigation.alternativesUpdates()
+                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                    .filter { it.routerOrigin == RouterOrigin.Offboard }
+                    .first()
+            }
             withoutInternet {
-                val routes = navigation.requestRoutes(routeOptions)
+                val requestResult = navigation.requestRoutes(routeInBerlin())
                     .getSuccessfulResultOrThrowException()
-                assertEquals(RouterOrigin.Onboard, routes.routerOrigin)
+                assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
+                navigation.setNavigationRoutesAsync(requestResult.routes)
+            }
+            stayOnPosition(
+                longitude = 13.361378213031003,
+                latitude = 52.49813341962201
+            )
+            val onlineAlternative = firstOnlineAlternative.await()
+            assertNotEquals(0, onlineAlternative.alternatives.size)
+        }
+    }
+
+
+    private fun CoroutineScope.stayOnPosition(
+        latitude: Double,
+        longitude: Double,
+    ) {
+        launch {
+            mockLocationUpdatesRule.pushLocationUpdate {
+                this.latitude = latitude
+                this.longitude = longitude
             }
         }
     }
+
 }
+
+private suspend fun downloadBerlinRoutingTiles(navigation: MapboxNavigation) {
+    loadRegion(navigation, BERLIN_GEOMETRY)
+}
+private fun routeInBerlin() = RouteOptions.builder()
+    .applyDefaultNavigationOptions()
+    .coordinates("13.361378213031003,52.49813341962201;13.393450988895268,52.50913924804004")
+    .alternatives(true)
+    .enableRefresh(true)
+    .build()
 
 private val BERLIN_GEOMETRY = FeatureCollection.fromJson(
     "{\n" +

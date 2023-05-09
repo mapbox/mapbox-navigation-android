@@ -26,6 +26,8 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
+import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -111,6 +113,49 @@ fun MapboxNavigation.rawLocationUpdates(): Flow<Location> {
         { unregisterLocationObserver(it) },
         "RawLocation"
     )
+}
+
+sealed interface NavigationRouteAlternativesResult {
+    data class OnRouteAlternatives(
+        val routeProgress: RouteProgress,
+        val alternatives: List<NavigationRoute>,
+        val routerOrigin: RouterOrigin
+    ) : NavigationRouteAlternativesResult
+
+    data class OnRouteAlternativeError(
+        val error: RouteAlternativesError
+    ) : NavigationRouteAlternativesResult
+}
+
+fun MapboxNavigation.alternativesUpdates(): Flow<NavigationRouteAlternativesResult> = callbackFlow {
+    val observer = object : NavigationRouteAlternativesObserver {
+        override fun onRouteAlternatives(
+            routeProgress: RouteProgress,
+            alternatives: List<NavigationRoute>,
+            routerOrigin: RouterOrigin
+        ) {
+            trySend(
+                NavigationRouteAlternativesResult.OnRouteAlternatives(
+                    routeProgress,
+                    alternatives,
+                    routerOrigin
+                )
+            )
+        }
+
+        override fun onRouteAlternativesError(error: RouteAlternativesError) {
+            trySend(
+                NavigationRouteAlternativesResult.OnRouteAlternativeError(
+                    error
+                )
+            )
+        }
+
+    }
+    registerRouteAlternativesObserver(observer)
+    awaitClose {
+        unregisterRouteAlternativesObserver(observer)
+    }
 }
 
 suspend fun MapboxNavigation.requestRoutes(options: RouteOptions) =
