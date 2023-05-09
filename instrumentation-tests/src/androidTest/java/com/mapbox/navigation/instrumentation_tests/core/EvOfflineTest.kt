@@ -3,7 +3,6 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.Geometry
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
@@ -47,7 +46,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     fun requestRouteWithoutInternetAndTiles() = sdkTest {
         withMapboxNavigation { navigation ->
             withoutInternet {
-                val routes = navigation.requestRoutes(routeInBerlin())
+                val routes = navigation.requestRoutes(evRouteInBerlin())
                 assertTrue(routes is RouteRequestResult.Failure)
             }
         }
@@ -60,7 +59,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             navigation.startTripSession()
             withoutInternet {
-                val requestResult = navigation.requestRoutes(routeInBerlin())
+                val requestResult = navigation.requestRoutes(evRouteInBerlin())
                     .getSuccessfulResultOrThrowException()
                 assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
                 navigation.setNavigationRoutesAsync(requestResult.routes)
@@ -85,7 +84,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             BERLIN_OFFLINE_REGION
         ) { navigation ->
             navigation.startTripSession()
-            val requestResult = navigation.requestRoutes(routeInBerlin())
+            val requestResult = navigation.requestRoutes(evRouteInBerlin())
                 .getSuccessfulResultOrThrowException()
             assertEquals(RouterOrigin.Offboard, requestResult.routerOrigin)
             navigation.setNavigationRoutesAsync(requestResult.routes)
@@ -151,11 +150,21 @@ private suspend fun downloadBerlinRoutingTiles(navigation: MapboxNavigation, reg
     loadRegion(navigation, region)
 }
 
-private fun routeInBerlin() = RouteOptions.builder()
+private fun evRouteInBerlin() = RouteOptions.builder()
     .applyDefaultNavigationOptions()
     .coordinates("13.361378213031003,52.49813341962201;13.393450988895268,52.50913924804004")
+    .annotations("state_of_charge")
     .alternatives(true)
-    .enableRefresh(true)
+    .waypointsPerRoute(true)
+    .unrecognizedProperties(mapOf(
+        "engine" to "electric",
+        "ev_initial_charge" to "6000",
+        "ev_max_charge" to "50000",
+        "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
+        "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
+        "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
+        "ev_min_charge_at_charging_station" to "1"
+    ))
     .build()
 
 private val BERLIN_GEOMETRY = FeatureCollection.fromJson(
