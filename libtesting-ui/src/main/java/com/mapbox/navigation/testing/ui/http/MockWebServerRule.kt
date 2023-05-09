@@ -1,5 +1,7 @@
 package com.mapbox.navigation.testing.ui.http
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -16,7 +18,8 @@ import java.lang.StringBuilder
  */
 class MockWebServerRule : TestWatcher() {
 
-    val webServer = MockWebServer()
+    var webServer = MockWebServer()
+        private set
 
     /**
      * @see [MockWebServer.url]
@@ -33,6 +36,10 @@ class MockWebServerRule : TestWatcher() {
     val requestHandlers = mutableListOf<MockRequestHandler>()
 
     init {
+        initDispatcher()
+    }
+
+    private fun initDispatcher() {
         webServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 requestHandlers.forEach {
@@ -44,13 +51,15 @@ class MockWebServerRule : TestWatcher() {
                     formattedHandlersBuilder.append("$it\n|")
                 }
                 return MockResponse().setResponseCode(500)
-                    .setBody("""Request url:
-                      |${request.path}
-                      |is not handled.
-                      |
-                      |Available handlers:
-                      |$formattedHandlersBuilder
-                    """.trimMargin())
+                    .setBody(
+                        """Request url:
+                          |${request.path}
+                          |is not handled.
+                          |
+                          |Available handlers:
+                          |$formattedHandlersBuilder
+                        """.trimMargin()
+                    )
             }
         }
     }
@@ -63,5 +72,20 @@ class MockWebServerRule : TestWatcher() {
     override fun finished(description: Description?) {
         requestHandlers.clear()
         webServer.shutdown()
+    }
+
+    private var previousPort: Int? = null
+
+    fun stop() {
+        previousPort = webServer.port
+        webServer.shutdown()
+    }
+
+    suspend fun restart() {
+        withContext(Dispatchers.IO) {
+            webServer = MockWebServer()
+            initDispatcher()
+            webServer.start(previousPort!!)
+        }
     }
 }

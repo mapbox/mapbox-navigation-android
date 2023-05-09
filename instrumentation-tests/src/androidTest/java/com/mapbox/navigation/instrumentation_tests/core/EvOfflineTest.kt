@@ -94,8 +94,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest(timeout = 60_000) {
-
+    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest {
         val newRouteOnlineRouteRequestHandler = MockDirectionsRequestHandler(
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
             jsonResponse = readRawFileText(context, R.raw.ev_routes_berlin_reroute),
@@ -130,7 +129,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 longitude = 13.36742058325467,
                 latitude = 52.49745756017697
             )
-            //TODO: use mock web server response
             val firstOnlineAlternative = navigation.alternativesUpdates()
                 .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
                 .filter { it.routerOrigin == RouterOrigin.Offboard }
