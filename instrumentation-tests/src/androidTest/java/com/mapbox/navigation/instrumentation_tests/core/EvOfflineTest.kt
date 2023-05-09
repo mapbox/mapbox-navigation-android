@@ -56,6 +56,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             downloadBerlinRoutingTiles(navigation)
             navigation.startTripSession()
+            //TODO: use mock web server response
             val firstOnlineAlternative = async {
                 navigation.alternativesUpdates()
                     .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
