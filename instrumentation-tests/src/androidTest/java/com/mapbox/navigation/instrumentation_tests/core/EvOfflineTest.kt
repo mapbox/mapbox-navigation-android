@@ -59,25 +59,23 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             BERLIN_OFFLINE_REGION
         ) { navigation ->
             navigation.startTripSession()
-            //TODO: use mock web server response
-            val firstOnlineAlternative = async {
-                navigation.alternativesUpdates()
-                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-                    .filter { it.routerOrigin == RouterOrigin.Offboard }
-                    .first()
-            }
             withoutInternet {
                 val requestResult = navigation.requestRoutes(routeInBerlin())
                     .getSuccessfulResultOrThrowException()
                 assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
                 navigation.setNavigationRoutesAsync(requestResult.routes)
             }
-            stayOnPositionAsync(
+            val locationUpdates = stayOnPositionAsync(
                 longitude = 13.361378213031003,
                 latitude = 52.49813341962201
             )
-            val onlineAlternative = firstOnlineAlternative.await()
+            // TODO: use mock server
+            val onlineAlternative = navigation.alternativesUpdates()
+                .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                .filter { it.routerOrigin == RouterOrigin.Offboard }
+                .first()
             assertNotEquals(0, onlineAlternative.alternatives.size)
+            locationUpdates.cancel()
         }
     }
 
