@@ -7,6 +7,7 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
 import com.mapbox.navigation.instrumentation_tests.utils.loadRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
@@ -17,10 +18,13 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.alternativesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
+import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
@@ -54,7 +58,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         withMapboxNavigationAndOfflineTilesForRegion(
             BERLIN_OFFLINE_REGION
         ) { navigation ->
-            downloadBerlinRoutingTiles(navigation)
             navigation.startTripSession()
             //TODO: use mock web server response
             val firstOnlineAlternative = async {
@@ -69,7 +72,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
                 navigation.setNavigationRoutesAsync(requestResult.routes)
             }
-            stayOnPosition(
+            stayOnPositionAsync(
                 longitude = 13.361378213031003,
                 latitude = 52.49813341962201
             )
@@ -78,15 +81,54 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Test
+    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest(timeout = 60_000) {
+        withMapboxNavigationAndOfflineTilesForRegion(
+            BERLIN_OFFLINE_REGION
+        ) { navigation ->
+            navigation.startTripSession()
+            val requestResult = navigation.requestRoutes(routeInBerlin())
+                .getSuccessfulResultOrThrowException()
+            assertEquals(RouterOrigin.Offboard, requestResult.routerOrigin)
+            navigation.setNavigationRoutesAsync(requestResult.routes)
 
-    private fun CoroutineScope.stayOnPosition(
+            withoutInternet {
+                //TODO: cancel location updates?
+                val updates = stayOnPositionAsync( //off route position
+                    longitude = 13.36742058325467,
+                    latitude = 52.49745756017697
+                )
+                val newRoutes = navigation.routesUpdates()
+                    .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
+                assertEquals(RouterOrigin.Onboard, newRoutes.navigationRoutes.first().origin)
+                updates.cancel()
+            }
+            val updates = stayOnPositionAsync( //origin position
+                longitude = 13.36742058325467,
+                latitude = 52.49745756017697
+            )
+            //TODO: use mock web server response
+            val firstOnlineAlternative = navigation.alternativesUpdates()
+                .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                .filter { it.routerOrigin == RouterOrigin.Offboard }
+                .first()
+            assertNotEquals(0, firstOnlineAlternative.alternatives.size)
+            updates.cancel()
+        }
+    }
+
+
+    private fun CoroutineScope.stayOnPositionAsync(
         latitude: Double,
         longitude: Double,
-    ) {
-        launch {
-            mockLocationUpdatesRule.pushLocationUpdate {
-                this.latitude = latitude
-                this.longitude = longitude
+    ): Job {
+        return launch {
+            while (true) {
+                mockLocationUpdatesRule.pushLocationUpdate {
+                    this.latitude = latitude
+                    this.longitude = longitude
+                }
+                delay(100)
             }
         }
     }
