@@ -26,8 +26,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
@@ -80,16 +79,16 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
                 navigation.setNavigationRoutesAsync(requestResult.routes)
             }
-            val locationUpdates = stayOnPositionAsync(
+            stayOnPosition(
                 longitude = 13.361378213031003,
                 latitude = 52.49813341962201
-            )
-            val onlineAlternative = navigation.alternativesUpdates()
-                .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-                .filter { it.routerOrigin == RouterOrigin.Offboard }
-                .first()
-            assertNotEquals(0, onlineAlternative.alternatives.size)
-            locationUpdates.cancel()
+            ) {
+                val onlineAlternative = navigation.alternativesUpdates()
+                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                    .filter { it.routerOrigin == RouterOrigin.Offboard }
+                    .first()
+                assertNotEquals(0, onlineAlternative.alternatives.size)
+            }
         }
     }
 
@@ -113,43 +112,49 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 .getSuccessfulResultOrThrowException()
             assertEquals(RouterOrigin.Offboard, requestResult.routerOrigin)
             navigation.setNavigationRoutesAsync(requestResult.routes)
-
             withoutInternet {
-                //TODO: cancel location updates?
-                val updates = stayOnPositionAsync( //off route position
+                stayOnPosition( //off route position
                     longitude = 13.36742058325467,
                     latitude = 52.49745756017697
-                )
-                val newRoutes = navigation.routesUpdates()
-                    .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
-                assertEquals(RouterOrigin.Onboard, newRoutes.navigationRoutes.first().origin)
-                updates.cancel()
+                ) {
+                    val newRoutes = navigation.routesUpdates()
+                        .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
+                    assertEquals(RouterOrigin.Onboard, newRoutes.navigationRoutes.first().origin)
+                }
             }
-            val updates = stayOnPositionAsync( // origin position after reroute
+            stayOnPosition( // origin position after reroute
                 longitude = 13.36742058325467,
                 latitude = 52.49745756017697
-            )
-            val firstOnlineAlternative = navigation.alternativesUpdates()
-                .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-                .filter { it.routerOrigin == RouterOrigin.Offboard }
-                .first()
-            assertNotEquals(0, firstOnlineAlternative.alternatives.size)
-            updates.cancel()
+            ) {
+                // TODO: NN doesn't respect base url and always uses api.mapbox.com
+                val firstOnlineAlternative = navigation.alternativesUpdates()
+                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                    .filter { it.routerOrigin == RouterOrigin.Offboard }
+                    .first()
+                assertNotEquals(0, firstOnlineAlternative.alternatives.size)
+            }
         }
     }
 
-
-    private fun CoroutineScope.stayOnPositionAsync(
+    private suspend fun stayOnPosition(
         latitude: Double,
         longitude: Double,
-    ): Job {
-        return launch {
-            while (true) {
-                mockLocationUpdatesRule.pushLocationUpdate {
-                    this.latitude = latitude
-                    this.longitude = longitude
+        block: suspend () -> Unit
+    ) {
+        coroutineScope {
+            val updateLocations = launch {
+                while (true) {
+                    mockLocationUpdatesRule.pushLocationUpdate {
+                        this.latitude = latitude
+                        this.longitude = longitude
+                    }
+                    delay(100)
                 }
-                delay(100)
+            }
+            try {
+                block()
+            } finally {
+                updateLocations.cancel()
             }
         }
     }
@@ -161,15 +166,17 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         .annotations("state_of_charge")
         .alternatives(true)
         .waypointsPerRoute(true)
-        .unrecognizedProperties(mapOf(
-            "engine" to "electric",
-            "ev_initial_charge" to "6000",
-            "ev_max_charge" to "50000",
-            "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
-            "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
-            "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
-            "ev_min_charge_at_charging_station" to "1"
-        ))
+        .unrecognizedProperties(
+            mapOf(
+                "engine" to "electric",
+                "ev_initial_charge" to "6000",
+                "ev_max_charge" to "50000",
+                "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
+                "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
+                "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
+                "ev_min_charge_at_charging_station" to "1"
+            )
+        )
         .build()
 }
 
@@ -187,10 +194,12 @@ private suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineT
 }
 
 
-private suspend fun downloadBerlinRoutingTiles(navigation: MapboxNavigation, region: OfflineRegion) {
+private suspend fun downloadBerlinRoutingTiles(
+    navigation: MapboxNavigation,
+    region: OfflineRegion
+) {
     loadRegion(navigation, region)
 }
-
 
 
 private val BERLIN_GEOMETRY = FeatureCollection.fromJson(
