@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.Geometry
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
@@ -50,9 +51,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun startTripWithoutInternetThenTurnItOn() = sdkTest {
-        withMapboxNavigation(
-            useRealTiles = true,
-            tileStore = createTileStore()
+        withMapboxNavigationAndOfflineTilesForRegion(
+            BERLIN_OFFLINE_REGION
         ) { navigation ->
             downloadBerlinRoutingTiles(navigation)
             navigation.startTripSession()
@@ -92,9 +92,31 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
 }
 
+private suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForRegion(
+    region: OfflineRegion,
+    block: (MapboxNavigation) -> Unit
+) {
+    withMapboxNavigation(
+        useRealTiles = true, //TODO: replace by offline tiles
+        tileStore = createTileStore()
+    ) { navigation ->
+        downloadBerlinRoutingTiles(navigation)
+        block(navigation)
+    }
+}
+
+
 private suspend fun downloadBerlinRoutingTiles(navigation: MapboxNavigation) {
     loadRegion(navigation, BERLIN_GEOMETRY)
 }
+
+private data class OfflineRegion(
+    val id: String,
+    val geometry: Geometry
+)
+
+
+
 private fun routeInBerlin() = RouteOptions.builder()
     .applyDefaultNavigationOptions()
     .coordinates("13.361378213031003,52.49813341962201;13.393450988895268,52.50913924804004")
@@ -140,3 +162,8 @@ private val BERLIN_GEOMETRY = FeatureCollection.fromJson(
         "  ]\n" +
         "}"
 ).features()!!.first().geometry()!!
+
+private val BERLIN_OFFLINE_REGION = OfflineRegion(
+    id = "berlin-test-tiles",
+    geometry = BERLIN_GEOMETRY
+)
