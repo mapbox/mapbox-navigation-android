@@ -43,7 +43,6 @@ inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     }
 }
 
-
 fun createTileStore(): TileStore {
     val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
     val tileStore = TileStore.create()

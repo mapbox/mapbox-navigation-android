@@ -108,7 +108,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             assertEquals(RouterOrigin.Offboard, requestResult.routerOrigin)
             navigation.setNavigationRoutesAsync(requestResult.routes)
             withoutInternet {
-                stayOnPosition( //off route position
+                stayOnPosition( // off route position
                     longitude = 13.36742058325467,
                     latitude = 52.49745756017697
                 ) {

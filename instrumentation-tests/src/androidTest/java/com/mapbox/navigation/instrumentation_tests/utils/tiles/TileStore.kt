@@ -16,7 +16,6 @@ data class OfflineRegion(
     val geometry: Geometry
 )
 suspend fun loadRegion(navigation: MapboxNavigation, region: OfflineRegion) {
-
     val navTilesetDescriptor = navigation.tilesetDescriptorFactory.getLatest()
 
     val tileRegionLoadOptions = TileRegionLoadOptions.Builder()
@@ -41,7 +40,6 @@ suspend fun loadRegion(navigation: MapboxNavigation, region: OfflineRegion) {
             }
         )
     }
-
 }
 
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForRegion(
@@ -49,7 +47,7 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForR
     block: (MapboxNavigation) -> Unit
 ) {
     withMapboxNavigation(
-        useRealTiles = true, //TODO: host local tiles using mock web server?
+        useRealTiles = true, // TODO: host local tiles using mock web server?
         tileStore = createTileStore()
     ) { navigation ->
         loadRegion(navigation, region)
