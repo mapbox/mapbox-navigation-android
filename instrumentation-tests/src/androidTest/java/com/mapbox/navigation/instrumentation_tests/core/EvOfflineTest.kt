@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.instrumentation_tests.utils.OfflineRegion
 import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
 import com.mapbox.navigation.instrumentation_tests.utils.loadRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
@@ -23,7 +24,6 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
@@ -138,25 +138,18 @@ private suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineT
     block: (MapboxNavigation) -> Unit
 ) {
     withMapboxNavigation(
-        useRealTiles = true, //TODO: replace by offline tiles
+        useRealTiles = true, //TODO: host saved files using mock web server
         tileStore = createTileStore()
     ) { navigation ->
-        downloadBerlinRoutingTiles(navigation)
+        downloadBerlinRoutingTiles(navigation, region)
         block(navigation)
     }
 }
 
 
-private suspend fun downloadBerlinRoutingTiles(navigation: MapboxNavigation) {
-    loadRegion(navigation, BERLIN_GEOMETRY)
+private suspend fun downloadBerlinRoutingTiles(navigation: MapboxNavigation, region: OfflineRegion) {
+    loadRegion(navigation, region)
 }
-
-private data class OfflineRegion(
-    val id: String,
-    val geometry: Geometry
-)
-
-
 
 private fun routeInBerlin() = RouteOptions.builder()
     .applyDefaultNavigationOptions()

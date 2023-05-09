@@ -8,19 +8,23 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-suspend fun loadRegion(navigation: MapboxNavigation, geometry: Geometry) {
+data class OfflineRegion(
+    val id: String,
+    val geometry: Geometry
+)
+suspend fun loadRegion(navigation: MapboxNavigation, region: OfflineRegion) {
 
     val navTilesetDescriptor = navigation.tilesetDescriptorFactory.getLatest()
 
     val tileRegionLoadOptions = TileRegionLoadOptions.Builder()
-        .geometry(geometry)
+        .geometry(region.geometry)
         .descriptors(listOf(navTilesetDescriptor))
         .build()
     val tileStore = navigation.navigationOptions.routingTilesOptions.tileStore!!
 
     suspendCancellableCoroutine<Unit> { continuation ->
         tileStore.loadTileRegion(
-            "test",
+            region.id,
             tileRegionLoadOptions,
             { progress ->
                 Log.d("loadRegion", progress.toString())
