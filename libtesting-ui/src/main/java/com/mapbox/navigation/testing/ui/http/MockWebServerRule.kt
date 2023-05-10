@@ -74,18 +74,17 @@ class MockWebServerRule : TestWatcher() {
         webServer.shutdown()
     }
 
-    private var previousPort: Int? = null
-
-    fun stop() {
-        previousPort = webServer.port
+    suspend fun withoutWebServer(block: suspend () -> Unit) {
+        val previousPort = webServer.port
         webServer.shutdown()
-    }
-
-    suspend fun restart() {
-        withContext(Dispatchers.IO) {
-            webServer = MockWebServer()
-            initDispatcher()
-            webServer.start(previousPort!!)
+        try {
+            block()
+        } finally {
+            withContext(Dispatchers.IO) {
+                webServer = MockWebServer()
+                initDispatcher()
+                webServer.start(previousPort)
+            }
         }
     }
 }
