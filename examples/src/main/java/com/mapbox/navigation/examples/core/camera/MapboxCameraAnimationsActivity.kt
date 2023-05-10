@@ -32,6 +32,7 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.maps.threading.AnimationSynchronizer
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -255,6 +256,9 @@ class MapboxCameraAnimationsActivity :
         binding = LayoutActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
+
+        AnimationSynchronizer.enableFor(mapboxMap)
+
         locationComponent = binding.mapView.location.apply {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
@@ -448,6 +452,9 @@ class MapboxCameraAnimationsActivity :
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS,
             { style ->
+                AnimationSynchronizer.get(mapboxMap)?.let {
+                    it.style = style
+                }
                 binding.mapView.gestures.addOnMapLongClickListener(
                     this@MapboxCameraAnimationsActivity
                 )
