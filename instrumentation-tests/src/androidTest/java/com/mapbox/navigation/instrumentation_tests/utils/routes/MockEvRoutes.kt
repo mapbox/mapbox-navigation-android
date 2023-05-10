@@ -18,7 +18,7 @@ data class MockedEvRoutes(
 }
 
 object EvRoutesProvider {
-    fun getBerlinEvRoute(context: Context, baseUrl: String? = null) : MockedEvRoutes {
+    fun getBerlinEvRoute(context: Context, baseUrl: String? = null): MockedEvRoutes {
         val routeOptions = berlinEvRouteOptions(baseUrl)
         val jsonResponse = readRawFileText(context, R.raw.ev_routes_berlin)
         val evRouteRequestHandler = MockDirectionsRequestHandler(

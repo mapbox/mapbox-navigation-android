@@ -74,8 +74,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
     }
 
-
-
     @Test
     fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest {
         val originalTestRoute = setupBerlinEvRoute()
