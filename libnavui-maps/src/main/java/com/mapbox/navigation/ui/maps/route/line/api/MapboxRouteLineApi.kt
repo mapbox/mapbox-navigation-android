@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
 import android.util.LruCache
+import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -29,6 +30,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.extractRouteRestrictionData
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.extractViolatedSectionsData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getMatchingColors
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.granularDistancesProvider
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
@@ -201,6 +203,7 @@ class MapboxRouteLineApi(
     private val routes: MutableList<NavigationRoute> = mutableListOf()
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
     private var restrictedExpressionData: List<ExtractedRouteRestrictionData> = emptyList()
+    private var violatedExpressionData: List<ExtractedRouteRestrictionData> = emptyList()
     private var lastIndexUpdateTimeNano: Long = 0
     private var lastPointUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
@@ -580,6 +583,7 @@ class MapboxRouteLineApi(
                         granularDistances,
                         workingRouteLineExpressionData,
                         restrictedExpressionData,
+                        violatedExpressionData,
                         routeLineOptions.resourceProvider,
                         activeLegIndex,
                         stopGap,
@@ -622,20 +626,23 @@ class MapboxRouteLineApi(
                             routeLineExpressionProviders.routeLineExpression,
                             routeLineExpressionProviders.routeLineCasingExpression,
                             routeLineExpressionProviders.trafficLineExpression,
-                            routeLineExpressionProviders.restrictedRoadExpression
+                            routeLineExpressionProviders.restrictedRoadExpression,
+                            routeLineExpressionProviders.violatedSectionExpression,
                         ),
                         alternativeRouteLinesDynamicData = listOf(
                             RouteLineDynamicData(
                                 alternativesProvider,
                                 alternativesProvider,
                                 alternativesProvider,
-                                alternativesProvider
+                                alternativesProvider,
+                                alternativesProvider,
                             ),
                             RouteLineDynamicData(
                                 alternativesProvider,
                                 alternativesProvider,
                                 alternativesProvider,
-                                alternativesProvider
+                                alternativesProvider,
+                                alternativesProvider,
                             )
                         ),
                         routeLineMaskingLayerDynamicData = maskingLayerDynamicData
@@ -759,6 +766,23 @@ class MapboxRouteLineApi(
                 }
             }
 
+            val violatedSectionExpressionProvider = when (violatedExpressionData.isEmpty()) {
+                true -> null
+                false -> {
+                    {
+                        MapboxRouteLineUtils.getRestrictedLineExpression(
+                            offset,
+                            -1,
+                            routeLineOptions
+                                .resourceProvider
+                                .routeLineColorResources
+                                .violatedSectionColor,
+                            violatedExpressionData
+                        )
+                    }
+                }
+            }
+
             val alternativesProvider = {
                 throw UnsupportedOperationException(
                     "alternative routes do not support dynamic updates yet"
@@ -776,20 +800,23 @@ class MapboxRouteLineApi(
                         routeLineExpressionProvider,
                         routeLineCasingExpressionProvider,
                         trafficLineExpressionProvider,
-                        restrictedLineExpressionProvider
+                        restrictedLineExpressionProvider,
+                        violatedSectionExpressionProvider,
                     ),
                     alternativeRouteLinesDynamicData = listOf(
                         RouteLineDynamicData(
                             alternativesProvider,
                             alternativesProvider,
                             alternativesProvider,
-                            alternativesProvider
+                            alternativesProvider,
+                            alternativesProvider,
                         ),
                         RouteLineDynamicData(
                             alternativesProvider,
                             alternativesProvider,
                             alternativesProvider,
-                            alternativesProvider
+                            alternativesProvider,
+                            alternativesProvider,
                         )
                     ),
                     routeLineMaskingLayerDynamicData = maskingLayerDynamicData
@@ -1005,12 +1032,18 @@ class MapboxRouteLineApi(
             routeLineOptions.resourceProvider.routeLineColorResources,
             restrictedExpressionData
         )
+        val violatedExpProvider = getViolatedSectionExpressionProducerForLegIndex(
+            legIndex,
+            routeLineOptions.resourceProvider.routeLineColorResources,
+            violatedExpressionData
+        )
 
         return RouteLineDynamicData(
             { mainExp },
             { casingExp },
             { trafficExp },
             restrictedSectionExpressionProvider = restrictedExpProvider,
+            violatedSectionExpressionProvider = violatedExpProvider,
             trailExpressionProvider = { trailExp },
             trailCasingExpressionProvider = { trailCasingExp }
         )
@@ -1178,6 +1211,25 @@ class MapboxRouteLineApi(
                                             routeLineOptions
                                                 .resourceProvider
                                                 .routeLineColorResources
+                                                .restrictedRoadColor
+                                        )
+                                    }
+                                }
+                            }
+
+                        val violatedSectionExpressionProvider =
+                            when (violatedExpressionData.isEmpty()) {
+                                true -> null
+                                false -> {
+                                    {
+                                        MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
+                                            violatedExpressionData,
+                                            0.0,
+                                            legIndexToHighlight,
+                                            routeLineOptions
+                                                .resourceProvider
+                                                .routeLineColorResources
+                                                .violatedSectionColor
                                         )
                                     }
                                 }
@@ -1194,20 +1246,23 @@ class MapboxRouteLineApi(
                                     routeLineExpressionProvider,
                                     casingLineExpressionProvider,
                                     trafficLineExpressionProvider,
-                                    restrictedLineExpressionProvider?.invoke()
+                                    restrictedLineExpressionProvider?.invoke(),
+                                    violatedSectionExpressionProvider?.invoke(),
                                 ),
                                 alternativeRouteLinesDynamicData = listOf(
                                     RouteLineDynamicData(
                                         alternativesProvider,
                                         alternativesProvider,
                                         alternativesProvider,
-                                        alternativesProvider
+                                        alternativesProvider,
+                                        alternativesProvider,
                                     ),
                                     RouteLineDynamicData(
                                         alternativesProvider,
                                         alternativesProvider,
                                         alternativesProvider,
-                                        alternativesProvider
+                                        alternativesProvider,
+                                        alternativesProvider,
                                     )
                                 ),
                                 routeLineMaskingLayerDynamicData = maskingLayerData
@@ -1457,6 +1512,11 @@ class MapboxRouteLineApi(
         } else {
             listOf()
         }
+        violatedExpressionData = if (routeLineOptions.displayViolatedSections) {
+            extractViolatedSectionsData(routes.first(), granularDistancesProvider)
+        } else {
+            listOf()
+        }
     }
 
     private suspend fun buildDrawRoutesState(
@@ -1595,6 +1655,16 @@ class MapboxRouteLineApi(
                     legIndex,
                     routeLineOptions.resourceProvider.routeLineColorResources,
                     restrictedExpressionData
+                )
+            }?.generateExpression()
+        }
+
+        val primaryRouteViolatedSectionsExpressionDef = jobControl.scope.async {
+            primaryRoute?.route?.run {
+                getViolatedSectionExpressionProducerForLegIndex(
+                    legIndex,
+                    routeLineOptions.resourceProvider.routeLineColorResources,
+                    violatedExpressionData
                 )
             }?.generateExpression()
         }
@@ -1776,6 +1846,15 @@ class MapboxRouteLineApi(
                 )
             }
 
+        val alternateRoute1ViolatedSectionsExpressionProducer =
+            RouteLineExpressionProvider {
+                MapboxRouteLineUtils.getRouteLineExpression(
+                    alternative1PercentageTraveled,
+                    Color.TRANSPARENT,
+                    Color.TRANSPARENT
+                )
+            }
+
         val alternateRoute2BaseExpressionProducer =
             RouteLineExpressionProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
@@ -1821,8 +1900,22 @@ class MapboxRouteLineApi(
                 )
             }
 
+        val alternateRoute2ViolatedSectionsExpressionProducer =
+            RouteLineExpressionProvider {
+                MapboxRouteLineUtils.getRouteLineExpression(
+                    alternative2PercentageTraveled,
+                    Color.TRANSPARENT,
+                    Color.TRANSPARENT
+                )
+            }
+
         val primaryRouteRestrictedSectionsExpressionProducer =
             ifNonNull(primaryRouteRestrictedSectionsExpressionDef.await()) { exp ->
+                RouteLineExpressionProvider { exp }
+            }
+
+        val primaryRouteViolatedSectionsExpressionProducer =
+            ifNonNull(primaryRouteViolatedSectionsExpressionDef.await()) { exp ->
                 RouteLineExpressionProvider { exp }
             }
 
@@ -1839,6 +1932,7 @@ class MapboxRouteLineApi(
                 casingExpressionProvider = { exp },
                 trafficExpressionProvider = { exp },
                 restrictedSectionExpressionProvider = { exp },
+                violatedSectionExpressionProvider = { exp },
                 trimOffset = RouteLineTrimOffset(vanishingPointOffset),
                 trailExpressionProvider = { exp },
                 trailCasingExpressionProvider = { exp },
@@ -1854,6 +1948,7 @@ class MapboxRouteLineApi(
                         primaryRouteCasingExpressionProducer,
                         primaryRouteTrafficLineExpressionProducer,
                         primaryRouteRestrictedSectionsExpressionProducer,
+                        primaryRouteViolatedSectionsExpressionProducer,
                         RouteLineTrimOffset(vanishingPointOffset),
                         primaryRouteTrailExpressionProducer,
                         primaryRouteTrailCasingExpressionProducer
@@ -1867,6 +1962,7 @@ class MapboxRouteLineApi(
                             alternateRoute1CasingExpressionProducer,
                             alternateRoute1TrafficExpressionProducer,
                             alternateRoute1RestrictedSectionsExpressionProducer,
+                            alternateRoute1ViolatedSectionsExpressionProducer,
                             RouteLineTrimOffset(alternative1PercentageTraveled),
                             alternateRoute1TrailExpressionProducer,
                             alternateRoute1TrailCasingExpressionProducer
@@ -1879,6 +1975,7 @@ class MapboxRouteLineApi(
                             alternateRoute2CasingExpressionProducer,
                             alternateRoute2TrafficExpressionProducer,
                             alternateRoute2RestrictedSectionsExpressionProducer,
+                            alternateRoute2ViolatedSectionsExpressionProducer,
                             RouteLineTrimOffset(alternative2PercentageTraveled),
                             alternateRoute2TrailExpressionProducer,
                             alternateRoute2TrailCasingExpressionProducer
@@ -1926,13 +2023,34 @@ class MapboxRouteLineApi(
                 restrictedRouteExpressionData,
                 vanishingPointOffset = 0.0,
                 activeLegIndex = legIndex,
-                colorResources
+                colorResources.restrictedRoadColor
             )
         } else {
             MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer(
                 0.0,
                 legIndex,
                 colorResources.restrictedRoadColor
+            )
+        }
+    }
+
+    private fun getViolatedSectionExpressionProducerForLegIndex(
+        legIndex: Int,
+        colorResources: RouteLineColorResources,
+        violatedSectionExpressionData: List<ExtractedRouteRestrictionData>
+    ): RouteLineExpressionProvider {
+        return if (routeLineOptions.displayViolatedSections) {
+            MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
+                violatedSectionExpressionData,
+                vanishingPointOffset = 0.0,
+                activeLegIndex = legIndex,
+                colorResources.violatedSectionColor
+            )
+        } else {
+            MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer(
+                0.0,
+                legIndex,
+                colorResources.violatedSectionColor
             )
         }
     }

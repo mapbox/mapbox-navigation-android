@@ -20,6 +20,7 @@ import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleAct
 import com.mapbox.navigation.qa_test_app.view.RoadObjectsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteLineFeaturesActivity
 import com.mapbox.navigation.qa_test_app.view.RouteLineScalingActivity
+import com.mapbox.navigation.qa_test_app.view.RouteNotificationsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteNumericTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRefreshActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
@@ -255,6 +256,12 @@ object TestActivitySuite {
             R.string.description_route_refresh,
         ) { activity ->
             activity.startActivity<RouteRefreshActivity>()
+        },
+        TestActivityDescription(
+            "Route Notifications Example",
+            R.string.description_route_notifications,
+        ) { activity ->
+            activity.startActivity<RouteNotificationsActivity>()
         },
     )
 

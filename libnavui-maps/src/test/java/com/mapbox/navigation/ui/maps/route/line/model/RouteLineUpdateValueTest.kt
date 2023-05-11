@@ -10,7 +10,7 @@ class RouteLineUpdateValueTest {
     @Test
     fun toMutableValue() {
         val original = RouteLineUpdateValue(
-            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
             listOf(),
             mockk()
         ).also {
@@ -34,14 +34,14 @@ class RouteLineUpdateValueTest {
     @Test
     fun toImmutableValue() {
         val original = RouteLineUpdateValue(
-            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk()),
+            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk()),
             listOf(),
             mockk()
         ).also {
             it.ignorePrimaryRouteLineData = true
         }
         val replacementPrimaryRouteLineDynamicData =
-            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk())
         val replacementList = listOf<RouteLineDynamicData>()
         val mutable = original.toMutableValue()
         val replacementMaskingData = mockk<RouteLineDynamicData>()

@@ -42,6 +42,7 @@ task testReport(type: TestReport, group: 'Build') {
 
 allprojects {
   repositories {
+    mavenLocal()
     google()
     mavenCentral()
     maven {

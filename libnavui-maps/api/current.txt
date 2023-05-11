@@ -1087,6 +1087,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public android.graphics.drawable.Drawable getDestinationIcon();
     method public boolean getDisplayRestrictedRoadSections();
     method public boolean getDisplaySoftGradientForTraffic();
+    method public boolean getDisplayViolatedSections();
     method public com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment getIconPitchAlignment();
     method public double getLineDepthOcclusionFactor();
     method public android.graphics.drawable.Drawable getOriginIcon();
@@ -1104,6 +1105,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final android.graphics.drawable.Drawable destinationIcon;
     property public final boolean displayRestrictedRoadSections;
     property public final boolean displaySoftGradientForTraffic;
+    property public final boolean displayViolatedSections;
     property public final com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment;
     property public final double lineDepthOcclusionFactor;
     property public final android.graphics.drawable.Drawable originIcon;
@@ -1124,6 +1126,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions build();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displayRestrictedRoadSections(boolean displayRestrictedRoadSections);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displaySoftGradientForTraffic(boolean enable);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displayViolatedSections(boolean displayViolatedSections);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder iconPitchAlignment(com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder lineDepthOcclusionFactor(@FloatRange(from=0.0, to=1.0) double lineDepthOcclusionFactor);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder shareLineGeometrySources(boolean shareLineGeometrySources);
@@ -1199,6 +1202,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public int getAlternativeRouteRestrictedRoadColor();
     method public int getAlternativeRouteSevereCongestionColor();
     method public int getAlternativeRouteUnknownCongestionColor();
+    method public int getAlternativeRouteViolatedSectionColor();
     method public kotlin.ranges.IntRange getHeavyCongestionRange();
     method public int getInActiveRouteLegsColor();
     method public kotlin.ranges.IntRange getLowCongestionRange();
@@ -1215,6 +1219,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public int getRouteSevereCongestionColor();
     method public int getRouteUnknownCongestionColor();
     method public kotlin.ranges.IntRange getSevereCongestionRange();
+    method public int getViolatedSectionColor();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder toBuilder();
     property public final int alternativeRouteCasingColor;
     property public final int alternativeRouteClosureColor;
@@ -1225,6 +1230,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final int alternativeRouteRestrictedRoadColor;
     property public final int alternativeRouteSevereCongestionColor;
     property public final int alternativeRouteUnknownCongestionColor;
+    property public final int alternativeRouteViolatedSectionColor;
     property public final kotlin.ranges.IntRange heavyCongestionRange;
     property public final int inActiveRouteLegsColor;
     property public final kotlin.ranges.IntRange lowCongestionRange;
@@ -1241,6 +1247,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final int routeSevereCongestionColor;
     property public final int routeUnknownCongestionColor;
     property public final kotlin.ranges.IntRange severeCongestionRange;
+    property public final int violatedSectionColor;
   }
 
   public static final class RouteLineColorResources.Builder {
@@ -1254,6 +1261,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteRestrictedRoadColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteSevereCongestionColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteUnknownCongestionColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteViolatedSectionColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources build();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder heavyCongestionRange(kotlin.ranges.IntRange range);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder inActiveRouteLegsColor(@ColorInt int color);
@@ -1271,6 +1279,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeSevereCongestionColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeUnknownCongestionColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder severeCongestionRange(kotlin.ranges.IntRange range);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder violatedSectionColor(@ColorInt int color);
   }
 
   public final class RouteLineData {
@@ -1310,6 +1319,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailCasingExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? getTrimOffset();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getViolatedSectionExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData.MutableRouteLineDynamicData toMutableValue();
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
@@ -1318,6 +1328,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailCasingExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? trimOffset;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? violatedSectionExpressionProvider;
   }
 
   public static final class RouteLineDynamicData.MutableRouteLineDynamicData {
@@ -1328,6 +1339,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailCasingExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrailExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? getTrimOffset();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getViolatedSectionExpressionProvider();
     method public void setBaseExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider);
     method public void setCasingExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider);
     method public void setRestrictedSectionExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
@@ -1335,6 +1347,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public void setTrailCasingExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
     method public void setTrailExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
     method public void setTrimOffset(com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset?);
+    method public void setViolatedSectionExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider?);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData toImmutableValue();
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
@@ -1343,6 +1356,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailCasingExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trailExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset? trimOffset;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? violatedSectionExpressionProvider;
   }
 
   public final class RouteLineError {
@@ -1382,6 +1396,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineScaleExpression();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteTrafficLineScaleExpression();
     method public java.util.List<java.lang.String> getTrafficBackfillRoadClasses();
+    method public java.util.List<java.lang.Double> getViolatedSectionDashArray();
+    method public double getViolatedSectionLineWidth();
+    method public double getViolatedSectionOpacity();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder toBuilder();
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteCasingLineScaleExpression;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteLineScaleExpression;
@@ -1397,6 +1414,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineScaleExpression;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeTrafficLineScaleExpression;
     property public final java.util.List<java.lang.String> trafficBackfillRoadClasses;
+    property public final java.util.List<java.lang.Double> violatedSectionDashArray;
+    property public final double violatedSectionLineWidth;
+    property public final double violatedSectionOpacity;
   }
 
   public static final class RouteLineResources.Builder {
@@ -1416,6 +1436,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeTrafficLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder trafficBackfillRoadClasses(java.util.List<java.lang.String> roadClasses);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder violatedSectionDashArray(java.util.List<java.lang.Double> dashArray);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder violatedSectionLineWidth(double width);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder violatedSectionOpacity(double opacity);
   }
 
   public final class RouteLineScaleValue {

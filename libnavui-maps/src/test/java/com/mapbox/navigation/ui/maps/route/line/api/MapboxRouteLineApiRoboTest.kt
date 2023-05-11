@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -79,6 +80,9 @@ class MapboxRouteLineApiRoboTest {
     private val shortRoute by lazy { TestRoute(fileName = "short_route.json") }
     private val routeWithRestrictions by lazy {
         TestRoute(fileName = "route-with-restrictions.json")
+    }
+    private val routeWithViolations by lazy {
+        TestRoute(fileName = "route-with-violations.json")
     }
     private val multiLegRouteTwoLegs by lazy {
         TestRoute(fileName = "multileg-route-two-legs.json")
@@ -447,6 +451,44 @@ class MapboxRouteLineApiRoboTest {
     }
 
     @Test
+    fun `setRoutes with violations across legs`() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .displayViolatedSections(true)
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(
+                        RouteLineColorResources.Builder()
+                            .violatedSectionColor(Color.CYAN)
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
+        val api = MapboxRouteLineApi(options)
+        val expectedViolatedSectionsExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.6994472183920875),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.8301242847833759),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+        )
+        val route = loadRoute("multileg_route_two_legs_with_violations.json")
+            .toTestNavigationRoute(RouterOrigin.Offboard)
+
+        val result = api.setNavigationRoutes(listOf(route))
+
+        checkExpression(
+            expectedViolatedSectionsExpressionContents,
+            result.value!!.primaryRouteLineData.dynamicData.violatedSectionExpressionProvider!!
+                .generateExpression()
+        )
+    }
+
+    @Test
     fun setRoutesTrafficExpressionsWithAlternativeRoutes() = coroutineRule.runBlockingTest {
         val expectedPrimaryTrafficLineExpressionContents = listOf(
             StringChecker("step"),
@@ -722,6 +764,7 @@ class MapboxRouteLineApiRoboTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
             .displayRestrictedRoadSections(false)
+            .displayViolatedSections(false)
             .vanishingRouteLineUpdateInterval(0)
             .build()
         val api = MapboxRouteLineApi(options)
@@ -738,6 +781,10 @@ class MapboxRouteLineApiRoboTest {
             ListChecker(DoubleChecker(0.0), DoubleChecker(0.324076944))
         )
         val expectedRestrictedExpressionContents = listOf(
+            StringChecker("literal"),
+            ListChecker(DoubleChecker(0.0), DoubleChecker(0.32407694))
+        )
+        val expectedViolatedSectionsExpressionContents = listOf(
             StringChecker("literal"),
             ListChecker(DoubleChecker(0.0), DoubleChecker(0.32407694))
         )
@@ -776,6 +823,12 @@ class MapboxRouteLineApiRoboTest {
                 .primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
                 .generateExpression()
         )
+        checkExpression(
+            expectedViolatedSectionsExpressionContents,
+            result.value!!
+                .primaryRouteLineDynamicData.violatedSectionExpressionProvider!!
+                .generateExpression()
+        )
     }
 
     @Test
@@ -784,6 +837,7 @@ class MapboxRouteLineApiRoboTest {
             val options = MapboxRouteLineOptions.Builder(ctx)
                 .withVanishingRouteLineEnabled(true)
                 .displayRestrictedRoadSections(false)
+                .displayViolatedSections(false)
                 .vanishingRouteLineUpdateInterval(TimeUnit.MILLISECONDS.toNanos(1200))
                 .build()
             val api = MapboxRouteLineApi(options)
@@ -820,6 +874,7 @@ class MapboxRouteLineApiRoboTest {
             val options = MapboxRouteLineOptions.Builder(ctx)
                 .withVanishingRouteLineEnabled(true)
                 .displayRestrictedRoadSections(false)
+                .displayViolatedSections(false)
                 .vanishingRouteLineUpdateInterval(TimeUnit.MILLISECONDS.toNanos(1200))
                 .build()
             val api = MapboxRouteLineApi(options)
@@ -888,7 +943,48 @@ class MapboxRouteLineApiRoboTest {
         }
 
     @Test
-    fun updateTraveledRouteLine_whenRouteRestrictionsEnabledButHasNone() =
+    fun `updateTraveledRouteLine when route has violations and legs not styled independently`() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .withVanishingRouteLineEnabled(true)
+                .displayViolatedSections(true)
+                .vanishingRouteLineUpdateInterval(0)
+                .build()
+            val api = MapboxRouteLineApi(options)
+            val expectedViolatedSectionsExpressionContents = listOf(
+                StringChecker("literal"),
+                ListChecker(DoubleChecker(0.0), DoubleChecker(0.44391584687098673))
+            )
+            val route = routeWithViolations.navigationRoute
+            val lineString = LineString.fromPolyline(
+                route.directionsRoute.geometry() ?: "",
+                Constants.PRECISION_6
+            )
+            val routeProgress = routeWithViolations.mockRouteProgress(stepIndexValue = 1)
+
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setNavigationRoutes(listOf(route))
+            api.updateUpcomingRoutePointIndex(routeProgress)
+
+            mockkObject(MapboxRouteLineUtils)
+            val result = api.updateTraveledRouteLine(lineString.coordinates()[347])
+
+            checkExpression(
+                expectedViolatedSectionsExpressionContents,
+                result.value!!.primaryRouteLineDynamicData.violatedSectionExpressionProvider!!
+                    .generateExpression()
+            )
+
+            verify(exactly = 0) {
+                // the cache key is based on the full hash of the Directions Route
+                // and is not suited to be used as frequently as the vanishing route line needs it
+                MapboxRouteLineUtils.extractRouteData(any(), any())
+            }
+            unmockkObject(MapboxRouteLineUtils)
+        }
+
+    @Test
+    fun updateTraveledRouteLine_whenRouteRestrictionsAndViolationsEnabledButHasNone() =
         coroutineRule.runBlockingTest {
             val expectedCasingExpressionContents = listOf(
                 StringChecker("literal"),
@@ -906,9 +1002,15 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("literal"),
                 ListChecker(DoubleChecker(0.0), DoubleChecker(0.3240769))
             )
+            val violatedSectionsTrafficExpressionContents = listOf(
+                StringChecker("literal"),
+                ListChecker(DoubleChecker(0.0), DoubleChecker(0.3240769))
+            )
+
             val options = MapboxRouteLineOptions.Builder(ctx)
                 .withVanishingRouteLineEnabled(true)
                 .displayRestrictedRoadSections(true)
+                .displayViolatedSections(true)
                 .vanishingRouteLineUpdateInterval(0)
                 .build()
             val api = MapboxRouteLineApi(options)
@@ -947,6 +1049,12 @@ class MapboxRouteLineApiRoboTest {
                     .primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
                     .generateExpression()
             )
+            checkExpression(
+                violatedSectionsTrafficExpressionContents,
+                result.value!!
+                    .primaryRouteLineDynamicData.violatedSectionExpressionProvider!!
+                    .generateExpression()
+            )
         }
 
     @Test
@@ -983,6 +1091,7 @@ class MapboxRouteLineApiRoboTest {
                     styleInactiveRouteLegsIndependently
                 } returns realOptions.styleInactiveRouteLegsIndependently
                 every { displayRestrictedRoadSections } returns false
+                every { displayViolatedSections } returns false
                 every { displaySoftGradientForTraffic } returns false
                 every { softGradientTransition } returns 30.0
                 every { routeStyleDescriptors } returns listOf()
@@ -1239,6 +1348,58 @@ class MapboxRouteLineApiRoboTest {
     }
 
     @Test
+    fun setVanishingOffset_withViolationsEnabledPrimaryRouteNull() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .displayViolatedSections(true)
+            .build()
+        val trafficExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+        )
+        val routeLineExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+        )
+        val casingExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]")
+        )
+
+        val api = MapboxRouteLineApi(
+            options
+        )
+
+        val result = api.setVanishingOffset(.5)
+
+        checkExpression(
+            trafficExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .trafficExpressionProvider!!.generateExpression()
+        )
+        checkExpression(
+            routeLineExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .baseExpressionProvider.generateExpression()
+        )
+        checkExpression(
+            casingExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .casingExpressionProvider.generateExpression()
+        )
+        assertNull(result.value!!.primaryRouteLineDynamicData.violatedSectionExpressionProvider)
+    }
+
+    @Test
     fun setVanishingOffset_withRestrictionsEnabled() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
@@ -1318,6 +1479,83 @@ class MapboxRouteLineApiRoboTest {
     }
 
     @Test
+    fun setVanishingOffset_withViolationsEnabled() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .displayViolatedSections(true)
+            .build()
+        val trafficExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
+        val routeLineExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
+        val casingExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+        )
+        val violatedExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.7515682978431553),
+            StringChecker("[rgba, 76.0, 78.0, 82.0, 1.0]"),
+            DoubleChecker(0.7709736343191205),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.7712833059036543),
+            StringChecker("[rgba, 76.0, 78.0, 82.0, 1.0]"),
+            DoubleChecker(0.9302099290097133),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.9303781273349865),
+            StringChecker("[rgba, 76.0, 78.0, 82.0, 1.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
+        val route = loadRoute("route-with-violations.json")
+
+        val api = MapboxRouteLineApi(
+            options
+        )
+        api.setRoutes(listOf(RouteLine(route, null)))
+
+        val result = api.setVanishingOffset(.5)
+
+        checkExpression(
+            trafficExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .trafficExpressionProvider!!.generateExpression()
+        )
+        checkExpression(
+            routeLineExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .baseExpressionProvider.generateExpression()
+        )
+        checkExpression(
+            casingExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .casingExpressionProvider.generateExpression()
+        )
+        checkExpression(
+            violatedExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .violatedSectionExpressionProvider!!.generateExpression()
+        )
+    }
+
+    @Test
     fun setVanishingOffset_whenHasRestrictionsButDisabled() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
@@ -1375,6 +1613,60 @@ class MapboxRouteLineApiRoboTest {
                 .casingExpressionProvider.generateExpression()
         )
         assertNull(result.value!!.primaryRouteLineDynamicData.restrictedSectionExpressionProvider)
+    }
+
+    @Test
+    fun setVanishingOffset_whenHasViolationsButDisabled() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .displayViolatedSections(false)
+            .build()
+        val trafficExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
+        val routeLineExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
+        val casingExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5),
+            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+        )
+        val route = loadRoute("route-with-violations.json")
+
+        val api = MapboxRouteLineApi(
+            options
+        )
+        api.setRoutes(listOf(RouteLine(route, null)))
+
+        val result = api.setVanishingOffset(.5)
+
+        checkExpression(
+            trafficExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .trafficExpressionProvider!!.generateExpression()
+        )
+        checkExpression(
+            routeLineExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .baseExpressionProvider.generateExpression()
+        )
+        checkExpression(
+            casingExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .casingExpressionProvider.generateExpression()
+        )
+        assertNull(result.value!!.primaryRouteLineDynamicData.violatedSectionExpressionProvider)
     }
 
     @Test

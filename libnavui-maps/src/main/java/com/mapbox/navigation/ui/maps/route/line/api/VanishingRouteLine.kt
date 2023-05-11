@@ -134,11 +134,15 @@ internal class VanishingRouteLine {
                 val restrictedRoadExpressionProvider = RouteLineTrimExpressionProvider {
                     trimmedOffsetExpression
                 }
+                val violatedSectionExpressionProvider = RouteLineTrimExpressionProvider {
+                    trimmedOffsetExpression
+                }
                 VanishingRouteLineExpressions(
                     trafficLineExpressionProvider,
                     routeLineExpressionProvider,
                     routeLineCasingExpressionProvider,
-                    restrictedRoadExpressionProvider
+                    restrictedRoadExpressionProvider,
+                    violatedSectionExpressionProvider,
                 )
             }
         }
@@ -149,6 +153,7 @@ internal class VanishingRouteLine {
         granularDistances: RouteLineGranularDistances,
         routeLineExpressionData: List<RouteLineExpressionData>,
         restrictedLineExpressionData: List<ExtractedRouteRestrictionData>?,
+        violatedSectionExpressionData: List<ExtractedRouteRestrictionData>?,
         routeResourceProvider: RouteLineResources,
         activeLegIndex: Int,
         softGradientTransition: Double,
@@ -202,12 +207,24 @@ internal class VanishingRouteLine {
                             )
                         }
                     }
+                val violatedSectionExpressionProvider =
+                    ifNonNull(violatedSectionExpressionData) { expressionData ->
+                        {
+                            MapboxRouteLineUtils.getRestrictedLineExpression(
+                                offset,
+                                activeLegIndex,
+                                routeResourceProvider.routeLineColorResources.violatedSectionColor,
+                                expressionData
+                            )
+                        }
+                    }
 
                 VanishingRouteLineExpressions(
                     trafficLineExpressionProvider,
                     routeLineExpressionProvider,
                     routeLineCasingExpressionProvider,
-                    restrictedRoadExpressionProvider
+                    restrictedRoadExpressionProvider,
+                    violatedSectionExpressionProvider
                 )
             }
         }

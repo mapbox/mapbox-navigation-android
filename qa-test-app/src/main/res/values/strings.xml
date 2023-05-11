@@ -53,6 +53,7 @@
     <string name="speed_info_activity_description" translatable="false">Example of how to use Mapbox SpeedInfo View</string>
     <string name="rest_area_activity_description" translatable="false">Demonstrates the use of Rest Area API</string>
     <string name="description_route_refresh" translatable="false" tools:ignore="ExtraTranslation">Lets you play with route refreshes and check various scenarios</string>
+    <string name="description_route_notifications" translatable="false" tools:ignore="ExtraTranslation">Tests basic route notifications UI</string>
     <string name="label_clear_traffic" translatable="false">Clear traffic</string>
     <string name="route_line_active_leg_above_others_description" translatable="false">The active leg of the route should be above the inactive leg. \n\nThis example also sets the inactive leg color to more clearly differentiate it from the active leg. \n\nThe active leg including the vansished section of the line should be above the inactive leg and when the puck transitions from the first active leg to the second there should be a visual change that continues to indicate the active leg is above the inactive leg.</string>
 

@@ -12,7 +12,7 @@ class RouteLineDataTest {
     fun toMutableValue() {
         val original = RouteLineData(
             mockk(),
-            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk())
         )
 
         val result = original.toMutableValue()
@@ -25,10 +25,10 @@ class RouteLineDataTest {
     fun toImmutableValue() {
         val original = RouteLineData(
             mockk(),
-            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+            RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk())
         )
         val replacementFeatureCollection = mockk<FeatureCollection>()
-        val replacementDynamicData = RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+        val replacementDynamicData = RouteLineDynamicData(mockk(), mockk(), mockk(), mockk(), mockk())
         val replacementNavigationRoute = mockk<NavigationRoute>()
         val mutable = original.toMutableValue()
 
