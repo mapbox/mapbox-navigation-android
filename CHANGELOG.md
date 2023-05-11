@@ -6,6 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.12.1 - 11 May, 2023
+### Changelog
+[Changes between v2.12.0 and v2.12.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0...v2.12.1)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Internal improvements. 
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.12.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.12.1))
+- Mapbox Navigation Native `v130.2.0`
+- Mapbox Core Common `v23.4.0`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.13.0-rc.1 - 29 April, 2023
 ### Changelog
 [Changes between v2.13.0-beta.1 and v2.13.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0-beta.1...v2.13.0-rc.1)
