@@ -19,6 +19,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
@@ -26,6 +27,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+
+const val INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE = 80_000L
 
 class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
@@ -48,12 +51,21 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun startTripWithoutInternetThenTurnItOn() = sdkTest {
+    fun startTripWithoutInternetThenTurnItOn() = sdkTest(
+        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
+    ) {
         val originalTestRoute = setupBerlinEvRoute()
         withMapboxNavigationAndOfflineTilesForRegion(
             OfflineRegions.Berlin
         ) { navigation ->
             navigation.startTripSession()
+            // TODO: NN doesn't respect base url and always uses api.mapbox.com
+            val firstOnlineAlternative = async {
+                navigation.alternativesUpdates()
+                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                    .filter { it.routerOrigin == RouterOrigin.Offboard }
+                    .first()
+            }
             withoutInternet {
                 val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
                     .getSuccessfulResultOrThrowException()
@@ -65,17 +77,16 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 longitude = originalTestRoute.origin.longitude(),
                 latitude = originalTestRoute.origin.latitude()
             ) {
-                val onlineAlternative = navigation.alternativesUpdates()
-                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-                    .filter { it.routerOrigin == RouterOrigin.Offboard }
-                    .first()
+                val onlineAlternative = firstOnlineAlternative.await()
                 assertNotEquals(0, onlineAlternative.alternatives.size)
             }
         }
     }
 
     @Test
-    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest {
+    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest(
+        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
+    ) {
         val originalTestRoute = setupBerlinEvRoute()
         val testRouteAfterReroute = setupBerlinEvRouteAfterReroute()
 
@@ -87,7 +98,19 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 .getSuccessfulResultOrThrowException()
             assertEquals(RouterOrigin.Offboard, requestResult.routerOrigin)
             navigation.setNavigationRoutesAsync(requestResult.routes)
+
+            // TODO: NN doesn't respect base url and always uses api.mapbox.com
+            val firstOnlineAlternativeDeferred = async {
+                navigation.alternativesUpdates()
+                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                    .filter { it.routerOrigin == RouterOrigin.Offboard }
+                    .first()
+            }
             withoutInternet {
+                assertTrue(
+                    "no online alternatives should be received by this time",
+                    firstOnlineAlternativeDeferred.isActive
+                )
                 stayOnPosition(
                     // off route position
                     latitude = testRouteAfterReroute.origin.latitude(),
@@ -102,11 +125,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 latitude = testRouteAfterReroute.origin.latitude(),
                 longitude = testRouteAfterReroute.origin.longitude(),
             ) {
-                // TODO: NN doesn't respect base url and always uses api.mapbox.com
-                val firstOnlineAlternative = navigation.alternativesUpdates()
-                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-                    .filter { it.routerOrigin == RouterOrigin.Offboard }
-                    .first()
+                val firstOnlineAlternative = firstOnlineAlternativeDeferred.await()
                 assertNotEquals(0, firstOnlineAlternative.alternatives.size)
             }
         }
