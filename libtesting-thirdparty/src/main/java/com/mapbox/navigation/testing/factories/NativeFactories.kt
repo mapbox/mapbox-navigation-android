@@ -8,6 +8,7 @@ import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.MapMatcherOutput
 import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.OffRoadStateProvider
 import com.mapbox.navigator.RoadName
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
@@ -45,6 +46,7 @@ fun createNavigationStatus(
     keyPoints: List<FixLocation> = emptyList(),
     mapMatcherOutput: MapMatcherOutput = createMapMatcherOutput(),
     offRoadProba: Float = 0f,
+    offRoadStateProvider: OffRoadStateProvider = OffRoadStateProvider.UNKNOWN,
     activeGuidanceInfo: ActiveGuidanceInfo? = null,
     upcomingRouteAlerts: List<UpcomingRouteAlert> = emptyList(),
     upcomingRouteAlertUpdates: List<UpcomingRouteAlertUpdate> = emptyList(),
@@ -72,6 +74,7 @@ fun createNavigationStatus(
         keyPoints,
         mapMatcherOutput,
         offRoadProba,
+        offRoadStateProvider,
         activeGuidanceInfo,
         upcomingRouteAlerts,
         upcomingRouteAlertUpdates,
