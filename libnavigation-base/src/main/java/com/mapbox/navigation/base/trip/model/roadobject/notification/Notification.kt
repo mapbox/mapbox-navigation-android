@@ -9,9 +9,12 @@ import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
  *
  * @see RoadObject
  * @see RoadObjectType.NOTIFICATION
+ *
+ * @param info notification details, see [NotificationInfo]
  */
-internal class Notification internal constructor(
+class Notification internal constructor(
     id: String,
+    val info: NotificationInfo,
     length: Double?,
     @RoadObjectProvider.Type provider: String,
     isUrban: Boolean?,
@@ -33,6 +36,10 @@ internal class Notification internal constructor(
         if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
 
+        other as Notification
+
+        if (info != other.info) return false
+
         return true
     }
 
@@ -40,13 +47,17 @@ internal class Notification internal constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        return super.hashCode()
+        var result = super.hashCode()
+        result = 31 * result + info.hashCode()
+        return result
     }
+
 
     /**
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "Notification"
+        return "Notification(info=$info) ${super.toString()}"
     }
+
 }

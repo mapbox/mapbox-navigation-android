@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
@@ -18,6 +19,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCros
 import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
@@ -28,6 +30,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
@@ -502,6 +506,162 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         checkRoadObjects(expectedObjectsAfterFirstRefresh, updateAfterRefresh.upcomingRoadObjects)
     }
 
+    // TODO up NN when they add unique id
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun roadObjectNotificationsTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation(
+            // only refresh on demand
+            RouteRefreshOptions.Builder().intervalMillis(300000).build()
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(-115.574669, 49.586752),
+            Point.fromLngLat(-115.243927, 49.419375),
+            Point.fromLngLat(-115.333568, 49.444112),
+        )
+        mockWebServerRule.requestHandlers.clear()
+        val routeHandler = MockDirectionsRequestHandler(
+            "driving-traffic",
+            readRawFileText(context, R.raw.route_with_notifications),
+            coordinates,
+            relaxedExpectedCoordinates = true
+        )
+        mockWebServerRule.requestHandlers.add(routeHandler)
+        mockWebServerRule.requestHandlers.add(
+            FailByRequestMockRequestHandler(
+                MockDirectionsRefreshHandler(
+                    "route_with_notifications",
+                    readRawFileText(context, R.raw.route_with_notifications_refresh1),
+                    acceptedGeometryIndex = 400
+                )
+            )
+        )
+
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder().applyDefaultNavigationOptions()
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .alternatives(false)
+                .enableRefresh(true)
+                .coordinatesList(coordinates)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .build()
+        ).getSuccessfulResultOrThrowException().routes
+
+        val originalRoadObjects = routes.first().upcomingRoadObjects
+        val expectedOriginalRoadObjectClasses = listOf(
+            Notification::class.java,
+            Notification::class.java,
+            Notification::class.java,
+            Notification::class.java,
+            Notification::class.java,
+        )
+
+        assertEquals(
+            expectedOriginalRoadObjectClasses,
+            originalRoadObjects.map { it.roadObject::class.java }
+        )
+
+        mapboxNavigation.startTripSession()
+
+        stayOnPosition(coordinates[0], 90f)
+        mapboxNavigation.flowLocationMatcherResult()
+            .filter {
+                abs(it.enhancedLocation.latitude - coordinates[0].latitude()) < 0.01 &&
+                    abs(it.enhancedLocation.longitude - coordinates[0].longitude()) < 0.01
+            }.first()
+        mapboxNavigation.setNavigationRoutes(routes)
+
+        // no road objects passed
+        val geometryIndex400Point = routes.first().directionsRoute.completeGeometryToPoints()[400]
+        stayOnPosition(geometryIndex400Point, 320f)
+        val routeProgress1 = mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.currentRouteGeometryIndex == 400
+            }
+            .first()
+        val expectedObjects1 = originalRoadObjects.map {
+            it.roadObject::class.java to it.distanceToStart!! - routeProgress1.distanceTraveled
+        }
+
+//        checkRoadObjects(expectedObjects1, routeProgress1.upcomingRoadObjects)
+
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .first()
+
+        val routeProgress2 = mapboxNavigation.routeProgressUpdates()
+            .take(2).toList().first()
+        val expectedObjects2 = originalRoadObjects.map {
+            it.roadObject::class.java to it.distanceToStart!! - routeProgress1.distanceTraveled
+        }
+
+//        checkRoadObjects(expectedObjects2, routeProgress2.upcomingRoadObjects)
+
+        // in the middle of the first notification
+        val firstLegSize = routes.first().directionsRoute.legs()?.firstOrNull()?.annotation()?.duration()?.size
+        val geometryIndex600Point = routes.first().directionsRoute.completeGeometryToPoints()[600]
+        stayOnPosition(geometryIndex600Point, 340f)
+        val routeProgress3 = mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.currentRouteGeometryIndex == 600
+            }
+            .first()
+        val expectedObjects3 = originalRoadObjects.map {
+            it.roadObject::class.java to it.distanceToStart!! - routeProgress1.distanceTraveled
+        }
+
+//        checkRoadObjects(expectedObjects3, routeProgress3.upcomingRoadObjects)
+
+        // after first notification
+        val geometryIndex634Point = routes.first().directionsRoute.completeGeometryToPoints()[634]
+        stayOnPosition(geometryIndex634Point, 0f)
+        mapboxNavigation.navigateNextRouteLeg()
+
+        val routeProgress4 = mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.currentRouteGeometryIndex == 634
+            }
+            .first()
+        val expectedObjects4 = originalRoadObjects.drop(1).map {
+            it.roadObject::class.java to it.distanceToStart!! - routeProgress1.distanceTraveled
+        }
+//        checkRoadObjects(expectedObjects4, routeProgress4.upcomingRoadObjects)
+
+        // 3 notifications passed
+        val geometryIndex659Point = routes.first().directionsRoute.completeGeometryToPoints()[659]
+        stayOnPosition(geometryIndex659Point, 0f)
+
+        val routeProgress5 = mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.currentRouteGeometryIndex == 659
+            }
+            .first()
+        val expectedObjects5 = originalRoadObjects.drop(3).map {
+            it.roadObject::class.java to it.distanceToStart!! - routeProgress1.distanceTraveled
+        }
+//        checkRoadObjects(expectedObjects5, routeProgress5.upcomingRoadObjects)
+
+        // 4 notifications passed
+        val geometryIndex760Point = routes.first().directionsRoute.completeGeometryToPoints()[760]
+        stayOnPosition(geometryIndex760Point, 0f)
+
+        val routeProgress6 = mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.currentRouteGeometryIndex == 760
+            }
+            .first()
+        val expectedObjects6 = originalRoadObjects.drop(4).map {
+            it.roadObject::class.java to it.distanceToStart!! - routeProgress1.distanceTraveled
+        }
+//        checkRoadObjects(expectedObjects6, routeProgress6.upcomingRoadObjects)
+    }
+
     private fun stayOnPosition(position: Point, bearing: Float = 0f) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
@@ -601,7 +761,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         }
     }
 
-    private fun createMapboxNavigation(): MapboxNavigation = MapboxNavigationProvider.create(
+    private fun createMapboxNavigation(
+        routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build()
+    ): MapboxNavigation = MapboxNavigationProvider.create(
         NavigationOptions.Builder(context)
             .accessToken(getMapboxAccessTokenFromResources(context))
             .routingTilesOptions(
@@ -609,6 +771,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                     .tilesBaseUri(URI(mockWebServerRule.baseUrl))
                     .build()
             )
+            .routeRefreshOptions(routeRefreshOptions)
             .build()
     )
 

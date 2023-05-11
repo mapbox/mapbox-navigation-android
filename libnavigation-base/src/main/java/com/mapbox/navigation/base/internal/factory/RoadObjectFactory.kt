@@ -25,6 +25,7 @@ object RoadObjectFactory {
         RoadObjectType.RAILWAY_CROSSING,
         RoadObjectType.IC,
         RoadObjectType.JCT,
+        RoadObjectType.NOTIFICATION,
     )
 
     fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRoadObjects():
