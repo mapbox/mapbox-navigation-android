@@ -6,6 +6,45 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.13.0 - 12 May, 2023
+### Changelog
+[Changes between v2.12.0 and v2.13.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0...v2.13.0)
+
+#### Features
+
+- Added `RouteProgress#nextLegWaypoint` to be used in `ArrivalObserver#onWaypointArrival` to understand which waypoint the user has arrived at. [#7096](https://github.com/mapbox/mapbox-navigation-android/pull/7096)
+
+#### Bug fixes and improvements
+
+- Improved quality of continuous alternatives, now the mechanism respects routes from current navigation session. [#7137](https://github.com/mapbox/mapbox-navigation-android/pull/7137)
+- Improved EV offline navigation, now it fallbacks to a regular onboard routing. [#7137](https://github.com/mapbox/mapbox-navigation-android/pull/7137)
+- Improved location simulation when DR ends, i.e. when a driver leaves a tunnel. [#7137](https://github.com/mapbox/mapbox-navigation-android/pull/7137)
+- Fixed an issue where the route lines didn't apply `RouteLineResources`'s custom scale expressions correctly. [#7132](https://github.com/mapbox/mapbox-navigation-android/pull/7132)
+- Fixed an issue where route lines could flicker when `MapboxRouteLineOptions` where changed and re-applied to rebuilt `MapboxRouteLineView` and `MapboxRouteLineApi` instances. [#7140](https://github.com/mapbox/mapbox-navigation-android/pull/7140)
+- Deprecated `MapboxNavigation#setRerouteController` method. Using custom rerouting logic is now deprecated.  [#7129](https://github.com/mapbox/mapbox-navigation-android/pull/7129)
+- Introduced `MapboxNavigation#setRerouteEnabled` to disable/enable reroutes instead of using custom reroute controller. By default rerouting is enabled. [#7129](https://github.com/mapbox/mapbox-navigation-android/pull/7129)
+- Fixed an issue where `NavigationCamera` animations would stop executing if experimental `AnimationThreadController.useBackgroundThread()` option was enabled. [#7143](https://github.com/mapbox/mapbox-navigation-android/pull/7143)
+- Fixed an issue where `DirectionsRoute#duration` ignored charge time after refresh operation. [#7121](https://github.com/mapbox/mapbox-navigation-android/pull/7121)
+- Fixed first voice instruction being pronounced in offline mode when using either Drop-In UI or `MapboxAudioGuidance`. [#7072](https://github.com/mapbox/mapbox-navigation-android/pull/7072)
+- Corrected a bug that mistakenly identified off-road movement when users exited tunnels or moved alongside the road. [#7111](https://github.com/mapbox/mapbox-navigation-android/pull/7111)
+- Enabled dead reckoning for the auto profile in case of signal loss on a bridge. [#7111](https://github.com/mapbox/mapbox-navigation-android/pull/7111)
+- Improved the accuracy of active guidance for the auto profile by increasing the route stickiness. [#7111](https://github.com/mapbox/mapbox-navigation-android/pull/7111)
+- Introduced a custom configuration option to disable interactions with all route tiles. [#7111](https://github.com/mapbox/mapbox-navigation-android/pull/7111)
+- Implemented a mechanism that allows the local road graph data updates to be rolled back in case of data problems. [#7111](https://github.com/mapbox/mapbox-navigation-android/pull/7111)
+- Fixed an issue where `NavigationRouterCallback` might have been invoked twice. [#7086](https://github.com/mapbox/mapbox-navigation-android/pull/7086)
+- Fixed an issue where long route calculation might have failed. [#7086](https://github.com/mapbox/mapbox-navigation-android/pull/7086)
+- Added a custom config boolean option `disableAccessToRoutingTiles` to disable all route tiles interaction. [#7086](https://github.com/mapbox/mapbox-navigation-android/pull/7086)
+- Improved inactive leg independent styling: now the inactive leg will be styled differently right away, not only when the route progress updates begin. [#7078](https://github.com/mapbox/mapbox-navigation-android/pull/7078)
+- Added optional parameter `initialLegIndex` to `MapboxRouteLineAPI#setNavigationRouteLines` and `MapboxRouteLineAPI#setNavigationRoutes` to explicitly specify which leg is active, 0 by default. [#7078](https://github.com/mapbox/mapbox-navigation-android/pull/7078)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.13.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.13.0))
+- Mapbox Navigation Native `v132.2.0`
+- Mapbox Core Common `v23.5.0`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.13.0-rc.1 - 29 April, 2023
 ### Changelog
 [Changes between v2.13.0-beta.1 and v2.13.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0-beta.1...v2.13.0-rc.1)
