@@ -2,7 +2,6 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.IdlingPolicies
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -22,6 +21,7 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
+import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteAlternativesIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
@@ -58,6 +58,9 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
+
+    @get:Rule
+    val idlingPolicyRule = IdlingPolicyTimeoutRule(1, TimeUnit.MINUTES)
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private val coordinates = listOf(
@@ -193,108 +196,103 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
      */
     @Test
     fun additional_alternative_is_not_force_to_invoke_alternatives_observer() {
-        IdlingPolicies.setIdlingResourceTimeout(1, TimeUnit.MINUTES)
-        try {
-            // Prepare with alternative routes.
-            setupMockRequestHandlers(coordinates)
-            val routes = requestDirectionsRouteSync(coordinates)
+        // Prepare with alternative routes.
+        setupMockRequestHandlers(coordinates)
+        val routes = requestDirectionsRouteSync(coordinates)
 
-            // Play primary route
-            runOnMainSync {
-                mapboxNavigation.historyRecorder.startRecording()
-                mockLocationReplayerRule.playRoute(routes.first())
-                mapboxNavigation.startTripSession()
-            }
-
-            // Wait for enhanced locations to start and then set the routes.
-            val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
-            firstLocationIdlingResource.firstLocationSync()
-            runOnMainSync {
-                // infinity subscription to avoid triggering NN on every new observer
-                mapboxNavigation.registerRouteAlternativesObserver(
-                    object : NavigationRouteAlternativesObserver {
-                        override fun onRouteAlternatives(
-                            routeProgress: RouteProgress,
-                            alternatives: List<NavigationRoute>,
-                            routerOrigin: RouterOrigin
-                        ) = Unit
-
-                        override fun onRouteAlternativesError(error: RouteAlternativesError) = Unit
-                    }
-                )
-                mapboxNavigation.setRoutes(routes)
-            }
-
-            // Subscribing for alternatives
-            val firstAlternative = RouteAlternativesIdlingResource(
-                mapboxNavigation
-            ) { _, alternatives, _ ->
-                alternatives.isNotEmpty()
-            }
-            firstAlternative.register()
-            mapboxHistoryTestRule.stopRecordingOnCrash("alternatives failed") {
-                Espresso.onIdle()
-            }
-            firstAlternative.unregister()
-
-            assertNotNull(firstAlternative.alternatives)
-
-            val nextAlternativeObserver = RouteAlternativesIdlingResource(
-                mapboxNavigation
-            ) { _, alternatives, _ ->
-                alternatives.isNotEmpty()
-            }
-            nextAlternativeObserver.register()
-
-            val externalAlternatives = DirectionsResponse.fromJson(
-                readRawFileText(activity, R.raw.route_response_alternative_continue)
-            ).routes().also {
-                assertEquals(1, it.size)
-            }
-
-            lateinit var setRoutes: List<DirectionsRoute>
-            runOnMainSync {
-                setRoutes = (
-                    mutableListOf(
-                        mapboxNavigation.getRoutes().first()
-                    ) + firstAlternative.alternatives!! + externalAlternatives
-                    ).also {
-                    assertTrue(
-                        "Primary route + >=1 alternatives + external alternatives",
-                        it.size >= 3
-                    )
-                }
-                mapboxNavigation.setRoutes(setRoutes)
-            }
-
-            mapboxHistoryTestRule.stopRecordingOnCrash("next alternatives failed") {
-                Espresso.onIdle()
-            }
-            nextAlternativeObserver.unregister()
-
-            runBlocking(Dispatchers.Main) {
-                mapboxNavigation.historyRecorder.stopRecording {
-                    logE("history path=$it", LOG_CATEGORY)
-                }
-            }
-
-            // Verify alternative routes events were triggered.
-            firstAlternative.verifyOnRouteAlternativesAndProgressReceived()
-
-            // Verify next alternative routes events were triggered
-            nextAlternativeObserver.verifyOnRouteAlternativesAndProgressReceived()
-
-            // verify that set routes with  alternatives + 1 external alternatives is not triggered
-            // alternative observer
-            assertNotEquals(
-                "Alternative are not the same as setRoutes (alternatives might have " +
-                    "additional routes or remove one or a few but not equal)",
-                setRoutes.drop(1).sortedBy { it.hashCode() }, // drop primary route
-                nextAlternativeObserver.alternatives!!.sortedBy { it.hashCode() }
-            )
-        } finally {
-            IdlingPolicies.setIdlingResourceTimeout(30, TimeUnit.SECONDS)
+        // Play primary route
+        runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
+            mockLocationReplayerRule.playRoute(routes.first())
+            mapboxNavigation.startTripSession()
         }
+
+        // Wait for enhanced locations to start and then set the routes.
+        val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
+        firstLocationIdlingResource.firstLocationSync()
+        runOnMainSync {
+            // infinity subscription to avoid triggering NN on every new observer
+            mapboxNavigation.registerRouteAlternativesObserver(
+                object : NavigationRouteAlternativesObserver {
+                    override fun onRouteAlternatives(
+                        routeProgress: RouteProgress,
+                        alternatives: List<NavigationRoute>,
+                        routerOrigin: RouterOrigin
+                    ) = Unit
+
+                    override fun onRouteAlternativesError(error: RouteAlternativesError) = Unit
+                }
+            )
+            mapboxNavigation.setRoutes(routes)
+        }
+
+        // Subscribing for alternatives
+        val firstAlternative = RouteAlternativesIdlingResource(
+            mapboxNavigation
+        ) { _, alternatives, _ ->
+            alternatives.isNotEmpty()
+        }
+        firstAlternative.register()
+        mapboxHistoryTestRule.stopRecordingOnCrash("alternatives failed") {
+            Espresso.onIdle()
+        }
+        firstAlternative.unregister()
+
+        assertNotNull(firstAlternative.alternatives)
+
+        val nextAlternativeObserver = RouteAlternativesIdlingResource(
+            mapboxNavigation
+        ) { _, alternatives, _ ->
+            alternatives.isNotEmpty()
+        }
+        nextAlternativeObserver.register()
+
+        val externalAlternatives = DirectionsResponse.fromJson(
+            readRawFileText(activity, R.raw.route_response_alternative_continue)
+        ).routes().also {
+            assertEquals(1, it.size)
+        }
+
+        lateinit var setRoutes: List<DirectionsRoute>
+        runOnMainSync {
+            setRoutes = (
+                mutableListOf(
+                    mapboxNavigation.getRoutes().first()
+                ) + firstAlternative.alternatives!! + externalAlternatives
+                ).also {
+                assertTrue(
+                    "Primary route + >=1 alternatives + external alternatives",
+                    it.size >= 3
+                )
+            }
+            mapboxNavigation.setRoutes(setRoutes)
+        }
+
+        mapboxHistoryTestRule.stopRecordingOnCrash("next alternatives failed") {
+            Espresso.onIdle()
+        }
+        nextAlternativeObserver.unregister()
+
+        runBlocking(Dispatchers.Main) {
+            mapboxNavigation.historyRecorder.stopRecording {
+                logE("history path=$it", LOG_CATEGORY)
+            }
+        }
+
+        // Verify alternative routes events were triggered.
+        firstAlternative.verifyOnRouteAlternativesAndProgressReceived()
+
+        // Verify next alternative routes events were triggered
+        nextAlternativeObserver.verifyOnRouteAlternativesAndProgressReceived()
+
+        // verify that set routes with  alternatives + 1 external alternatives is not triggered
+        // alternative observer
+        assertNotEquals(
+            "Alternative are not the same as setRoutes (alternatives might have " +
+                "additional routes or remove one or a few but not equal)",
+            setRoutes.drop(1).sortedBy { it.hashCode() }, // drop primary route
+            nextAlternativeObserver.alternatives!!.sortedBy { it.hashCode() }
+        )
     }
 
     private fun setupMockRequestHandlers(coordinates: List<Point>) {
