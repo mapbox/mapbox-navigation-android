@@ -62,7 +62,7 @@ object EvRoutesProvider {
         .unrecognizedProperties(
             mapOf(
                 "engine" to "electric",
-                "ev_initial_charge" to "6000",
+                "ev_initial_charge" to "1000",
                 "ev_max_charge" to "50000",
                 "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
                 "energy_consumption_curve" to "0,300;20,160;80,140;120,180",

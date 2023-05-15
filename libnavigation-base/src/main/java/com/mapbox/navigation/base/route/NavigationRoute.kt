@@ -303,7 +303,11 @@ class NavigationRoute internal constructor(
      */
     val waypoints: List<DirectionsWaypoint>? by lazy {
         if (routeOptions.waypointsPerRoute() == true) {
-            directionsRoute.waypoints()
+            if (directionsRoute.waypoints() != null) {
+                directionsRoute.waypoints()
+            } else { // TODO: remove this fallback when NN-731 is fixed
+                directionsResponse.waypoints()
+            }
         } else {
             directionsResponse.waypoints()
         }

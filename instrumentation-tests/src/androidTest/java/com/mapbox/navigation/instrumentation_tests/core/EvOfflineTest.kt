@@ -22,6 +22,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+// TODO: remove in the scope of NAVAND-1351
 const val INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE = 80_000L
 
 class EvOfflineTest : BaseCoreNoCleanUpTest() {
@@ -58,6 +59,12 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     .getSuccessfulResultOrThrowException()
                 assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
                 navigation.setNavigationRoutesAsync(requestResult.routes)
+
+                assertEquals(
+                    "onboard router doesn't add charging waypoints",
+                    requestResult.routes.map { 2 },
+                    requestResult.routes.map { it.waypoints?.size }
+                )
             }
         }
     }
@@ -76,6 +83,11 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
                 .getSuccessfulResultOrThrowException()
             assertEquals(RouterOrigin.Offboard, requestResult.routerOrigin)
+            assertEquals(
+                "online route for this case is expected to add charging station",
+                listOf(3, 3),
+                requestResult.routes.map { it.waypoints?.size }
+            )
             navigation.setNavigationRoutesAsync(requestResult.routes)
 
             withoutInternet {
@@ -87,6 +99,11 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     val newRoutes = navigation.routesUpdates()
                         .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
                     assertEquals(RouterOrigin.Onboard, newRoutes.navigationRoutes.first().origin)
+                    assertEquals(
+                        "onboard router doesn't add waypoints",
+                        newRoutes.navigationRoutes.map { 2 },
+                        newRoutes.navigationRoutes.map { it.waypoints?.size }
+                    )
                 }
             }
         }
