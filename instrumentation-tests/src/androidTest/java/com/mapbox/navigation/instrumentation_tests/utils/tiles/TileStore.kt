@@ -47,7 +47,7 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForR
     block: (MapboxNavigation) -> Unit
 ) {
     withMapboxNavigation(
-        useRealTiles = true, // TODO: host local tiles using mock web server?
+        useRealTiles = true, // TODO: use mocked tiles instead of real NAVAND-1351
         tileStore = createTileStore()
     ) { navigation ->
         loadRegion(navigation, region)
