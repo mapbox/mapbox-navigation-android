@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
     latitude: Double,
     longitude: Double,
+    bearing: Float,
     frequencyHz: Int = 10,
     block: suspend () -> Unit
 ) {
@@ -17,6 +18,7 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
                 mockLocationUpdatesRule.pushLocationUpdate {
                     this.latitude = latitude
                     this.longitude = longitude
+                    this.bearing = bearing
                 }
                 delay(1000L / frequencyHz)
             }

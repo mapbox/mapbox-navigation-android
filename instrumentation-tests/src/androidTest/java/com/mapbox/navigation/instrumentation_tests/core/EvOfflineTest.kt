@@ -95,6 +95,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     // off route position
                     latitude = testRouteAfterReroute.origin.latitude(),
                     longitude = testRouteAfterReroute.origin.longitude(),
+                    bearing = 280.0f
                 ) {
                     val newRoutes = navigation.routesUpdates()
                         .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
