@@ -1,6 +1,10 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.examples.core
 
+import android.R
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
@@ -10,6 +14,7 @@ import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
@@ -21,6 +26,7 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -35,6 +41,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
@@ -73,7 +80,11 @@ import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.util.Locale
+
 
 class MapboxNavigationActivity : AppCompatActivity() {
 
@@ -268,6 +279,11 @@ class MapboxNavigationActivity : AppCompatActivity() {
         logD("sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}", LOG_CATEGORY)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private val replayRoutesObserver by lazy {
+        ReplayProgressObserver(mapboxNavigation.mapboxReplayer)
+    }
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -277,12 +293,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
         // initialize the location puck
         binding.mapView.location.apply {
-            this.locationPuck = LocationPuck2D(
-                bearingImage = ContextCompat.getDrawable(
-                    this@MapboxNavigationActivity,
-                    R.drawable.mapbox_navigation_puck_icon
-                )
-            )
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -428,7 +438,32 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set, also receiving route progress updates
-        mapboxNavigation.startTripSession()
+        mapboxNavigation.startReplayTripSession()
+        val directionsResponse = DirectionsResponse.fromJson(
+            readTextFromRaw(this, resources.getIdentifier("only_congestion_cut", "raw", packageName))
+        )
+        val fakeRouteOptions =  RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(this)
+            .coordinatesList(
+                listOf(
+                    directionsResponse.waypoints()!!.first().location(),
+                    directionsResponse.waypoints()!!.last().location()
+                )
+            )
+            .layersList(listOf(mapboxNavigation.getZLevel(), null))
+            .build()
+        val route = NavigationRoute.create(directionsResponse, fakeRouteOptions)
+        mapboxNavigation.setNavigationRoutes(route)
+    }
+
+    fun readTextFromRaw(context: Context, resourceId: Int): String {
+        val inputStream = context.resources.openRawResource(resourceId)
+        val byteArray = ByteArray(inputStream.available())
+        inputStream.read(byteArray)
+        inputStream.close()
+
+        return String(byteArray)
     }
 
     override fun onStart() {
@@ -438,6 +473,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.registerRouteProgressObserver(replayRoutesObserver)
     }
 
     override fun onStop() {
@@ -447,6 +483,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(replayRoutesObserver)
     }
 
     override fun onDestroy() {
