@@ -1,6 +1,9 @@
 package com.mapbox.navigation.instrumentation_tests.utils.tiles
 
+import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 
 object OfflineRegions {
     val Berlin = OfflineRegion(
@@ -10,40 +13,8 @@ object OfflineRegions {
 }
 
 private val BERLIN_GEOMETRY = FeatureCollection.fromJson(
-    "{\n" +
-        "  \"type\": \"FeatureCollection\",\n" +
-        "  \"features\": [\n" +
-        "    {\n" +
-        "      \"type\": \"Feature\",\n" +
-        "      \"properties\": {},\n" +
-        "      \"geometry\": {\n" +
-        "        \"coordinates\": [\n" +
-        "          [\n" +
-        "            [\n" +
-        "              13.03807042990934,\n" +
-        "              52.70072965030741\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.03807042990934,\n" +
-        "              52.32726294794662\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.818542568562549,\n" +
-        "              52.32726294794662\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.818542568562549,\n" +
-        "              52.70072965030741\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.03807042990934,\n" +
-        "              52.70072965030741\n" +
-        "            ]\n" +
-        "          ]\n" +
-        "        ],\n" +
-        "        \"type\": \"Polygon\"\n" +
-        "      }\n" +
-        "    }\n" +
-        "  ]\n" +
-        "}"
+    readRawFileText(
+        InstrumentationRegistry.getInstrumentation().targetContext,
+        R.raw.geometry_berlin
+    )
 ).features()!!.first().geometry()!!
