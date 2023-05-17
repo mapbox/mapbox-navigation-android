@@ -2,7 +2,6 @@
 
 package com.mapbox.navigation.examples.core
 
-import android.R
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
@@ -13,7 +12,6 @@ import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -22,7 +20,6 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
-import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -42,6 +39,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
@@ -80,9 +78,6 @@ import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
 import java.util.Locale
 
 
@@ -440,7 +435,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         // and later when a route is set, also receiving route progress updates
         mapboxNavigation.startReplayTripSession()
         val directionsResponse = DirectionsResponse.fromJson(
-            readTextFromRaw(this, resources.getIdentifier("only_congestion_cut", "raw", packageName))
+            readTextFromRaw(this, resources.getIdentifier("polyline_and_steps", "raw", packageName))
         )
         val fakeRouteOptions =  RouteOptions.builder()
             .applyDefaultNavigationOptions()
@@ -453,8 +448,12 @@ class MapboxNavigationActivity : AppCompatActivity() {
             )
             .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .build()
-        val route = NavigationRoute.create(directionsResponse, fakeRouteOptions)
-        mapboxNavigation.setNavigationRoutes(route)
+        val navigaitonRoutes = NavigationRoute.create(directionsResponse, fakeRouteOptions)
+        mapboxNavigation.setNavigationRoutes(navigaitonRoutes)
+        mapboxNavigation.mapboxReplayer.pushEvents(
+            listOf(ReplayRouteMapper.mapToUpdateLocation(0.0, directionsResponse.waypoints()!!.first().location()))
+        )
+        mapboxNavigation.mapboxReplayer.play()
     }
 
     fun readTextFromRaw(context: Context, resourceId: Int): String {
