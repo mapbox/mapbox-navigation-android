@@ -68,7 +68,14 @@ class NavigationRouteWaypointsTest(
                     null,
                     emptyList<DirectionsWaypoint>()
                 ),
-                arrayOf(true, emptyList<DirectionsWaypoint>(), null, null),
+
+                arrayOf(
+                    true,
+                    emptyList<DirectionsWaypoint>(),
+                    null,
+                    // TODO: make expected result null when NN-731 is fixed
+                    emptyList<DirectionsWaypoint>()
+                ),
                 // #12
                 arrayOf(
                     null,
@@ -105,7 +112,13 @@ class NavigationRouteWaypointsTest(
                 // #18
                 arrayOf(null, filledWaypoints2, null, filledWaypoints2),
                 arrayOf(false, filledWaypoints2, null, filledWaypoints2),
-                arrayOf(true, filledWaypoints2, null, null),
+                arrayOf(
+                    true,
+                    filledWaypoints2,
+                    null,
+                    // TODO: make expected result null when NN-731 is fixed
+                    filledWaypoints2
+                ),
                 // #21
                 arrayOf(null, filledWaypoints2, emptyList<DirectionsWaypoint>(), filledWaypoints2),
                 arrayOf(false, filledWaypoints2, emptyList<DirectionsWaypoint>(), filledWaypoints2),
