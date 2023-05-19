@@ -45,6 +45,12 @@ for line in versions_lines:
         nav_native_version_line = line
 
 versions_file = open(versions_file_name, 'r').read()
+
+ignore_snapshot_dependencies = sys.argv[1]
+if (not maps_version or not nav_native_version) and ignore_snapshot_dependencies == 'false':
+    print('Cancel workflow. Not all dependencies are ready')
+    sys.exit(1)
+
 if maps_version:
     print('Bumping Maps to ' + maps_version)
     versions_file = versions_file.replace(
