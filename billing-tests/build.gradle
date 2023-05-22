@@ -5,6 +5,11 @@ apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.maps.token'
 apply from: "../gradle/ktlint.gradle"
 
+def mapboxBillingTestsApiToken = System.getenv('MAPBOX_BILLING_TESTS_ACCESS_TOKEN') ?: System.getenv('MAPBOX_ACCESS_TOKEN')
+if (mapboxBillingTestsApiToken == null) {
+    throw new Exception("Billing tests token is not specified.")
+}
+
 android {
     compileSdkVersion androidVersions.compileSdkVersion
 
@@ -22,6 +27,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
         vectorDrawables.useSupportLibrary = true
+
+        resValue "string", "mapbox_billing_tests_access_token", mapboxBillingTestsApiToken
     }
 
     testOptions {

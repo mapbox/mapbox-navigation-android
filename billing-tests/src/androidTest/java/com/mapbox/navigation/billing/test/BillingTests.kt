@@ -1,5 +1,6 @@
 package com.mapbox.navigation.billing.test
 
+import android.content.Context
 import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -19,7 +20,6 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.startTripSessionAndWaitForActiveGuidanceState
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import kotlinx.coroutines.delay
 import org.junit.After
@@ -65,7 +65,7 @@ class BillingTests : BaseCoreNoCleanUpTest() {
 
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(context)
-                    .accessToken(getMapboxAccessTokenFromResources(context))
+                    .accessToken(getBillingTestsToken(context))
                     .routingTilesOptions(
                         RoutingTilesOptions.Builder()
                             .tilesBaseUri(URI(mockWebServerRule.baseUrl))
@@ -115,4 +115,12 @@ class BillingTests : BaseCoreNoCleanUpTest() {
     private suspend fun delayForNetworkEvents() {
         delay(TimeUnit.SECONDS.toMillis(10))
     }
+
+    private fun getBillingTestsToken(context: Context) = context.getString(
+        context.resources.getIdentifier(
+            "mapbox_billing_tests_access_token",
+            "string",
+            context.packageName
+        )
+    )
 }
