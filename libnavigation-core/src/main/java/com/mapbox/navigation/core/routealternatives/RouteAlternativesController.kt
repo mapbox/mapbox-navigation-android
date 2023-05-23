@@ -172,6 +172,14 @@ internal class RouteAlternativesController constructor(
 
         override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) = Unit
 
+        override fun onRouteAlternativesUpdated(
+            onlinePrimaryRoute: RouteInterface?,
+            alternatives: MutableList<RouteAlternative>,
+            removedAlternatives: MutableList<RouteAlternative>
+        ) {
+            // See https://github.com/mapbox/mapbox-navigation-android/pull/7195
+        }
+
         override fun onError(message: String) {
             observers.forEach {
                 // NN should expose origin of a failed alternatives request and the used URL,
