@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
+import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -41,10 +42,16 @@ import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedResult
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.utils.internal.toPoint
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -113,6 +120,21 @@ fun MapboxNavigation.rawLocationUpdates(): Flow<Location> {
         { unregisterLocationObserver(it) },
         "RawLocation"
     )
+}
+
+fun Flow<Location>.passed(meters: Double): Flow<Boolean> {
+    return runningFold(mutableListOf<Point>()) { acc, location ->
+        acc.apply {
+            add(location.toPoint())
+        }
+    }
+        .sample(periodMillis = 500)
+        .map { points ->
+            TurfMeasurement.length(points, TurfConstants.UNIT_METERS)
+        }
+        .map { passedDistance ->
+            meters <= passedDistance
+        }
 }
 
 sealed interface NavigationRouteAlternativesResult {

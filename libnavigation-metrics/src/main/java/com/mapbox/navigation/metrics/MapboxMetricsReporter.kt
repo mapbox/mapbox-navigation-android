@@ -36,7 +36,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private const val LOG_CATEGORY = "MapboxMetricsReporter"
 
     private val gson = Gson()
-//    private lateinit var eventsManager: EventsServiceInterfacesManager
+    private lateinit var eventsManager: EventsServiceInterfacesManager
     private lateinit var telemetryService: TelemetryService
 
     @Volatile
@@ -86,10 +86,10 @@ object MapboxMetricsReporter : MetricsReporter {
         userAgent: String
     ) {
         isTelemetryInitialized = true
-//        eventsManager = TelemetryEventsProvider.getOrCreateTelemetryEventsManager(accessToken)
+        eventsManager = TelemetryEventsProvider.getOrCreateEventsServiceInterfacesManager(accessToken, userAgent)
         val eventsServerOptions = EventsServerOptions(accessToken, userAgent, null)
         telemetryService = TelemetryServiceProvider.provideTelemetryService(eventsServerOptions)
-//        eventsManager.nativeEventsServiceInterface.registerObserver(eventsServiceObserver)
+        eventsManager.nativeEventsServiceInterface.registerObserver(eventsServiceObserver)
     }
 
     /**
@@ -111,7 +111,7 @@ object MapboxMetricsReporter : MetricsReporter {
     fun disable() {
         isTelemetryInitialized = false
         removeObserver()
-//        eventsManager.nativeEventsServiceInterface.unregisterObserver(eventsServiceObserver)
+        eventsManager.nativeEventsServiceInterface.unregisterObserver(eventsServiceObserver)
         ioJobController.job.cancelChildren()
     }
 
@@ -127,13 +127,13 @@ object MapboxMetricsReporter : MetricsReporter {
                 )
                 return
             }
-//            eventsManager.nativeEventsServiceInterface.sendEvent(
-//                Event(eventsPriority, metricEvent.toValue(), null)
-//            ) {
-//                if (it != null) {
-//                    logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
-//                }
-//            }
+            eventsManager.nativeEventsServiceInterface.sendEvent(
+                Event(eventsPriority, metricEvent.toValue(), null)
+            ) {
+                if (it != null) {
+                    logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
+                }
+            }
 
             ioJobController.scope.launch {
                 metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))

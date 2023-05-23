@@ -24,7 +24,6 @@ class EventsServiceInterfacesManager(
         override fun didSendEvents(events: Value) {
             observers.forEach { it.onEvents(events) }
         }
-
     }
 
     fun registerEventsObserver(eventsObserver: EventsObserver) {
@@ -49,4 +48,3 @@ class EventsServiceInterfacesManager(
         }
     }
 }
-

@@ -4,10 +4,13 @@ import com.mapbox.common.EventsServerOptions
 import com.mapbox.common.EventsService
 
 object TelemetryEventsProvider {
-    fun getOrCreateEventsServiceInterfacesManager(accessToken: String): EventsServiceInterfacesManager =
+    fun getOrCreateEventsServiceInterfacesManager(
+        accessToken: String,
+        userAgent: String,
+    ): EventsServiceInterfacesManager =
         EventsServiceInterfacesManager(
             EventsService.getOrCreate(
-                EventsServerOptions(accessToken, "MapboxNavigationNative", null)
+                EventsServerOptions(accessToken, userAgent, null)
             )
         )
 }

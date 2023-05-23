@@ -138,6 +138,7 @@ import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
+import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.RouterInterface
@@ -551,7 +552,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             MapboxMetricsReporter.init(
                 navigationOptions.applicationContext,
                 token,
-                USER_AGENT,
+                Navigator.getUserAgentFragment(),
             )
             MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
         }
