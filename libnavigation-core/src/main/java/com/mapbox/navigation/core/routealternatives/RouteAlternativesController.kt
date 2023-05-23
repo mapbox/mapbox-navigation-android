@@ -177,7 +177,7 @@ internal class RouteAlternativesController constructor(
             alternatives: MutableList<RouteAlternative>,
             removedAlternatives: MutableList<RouteAlternative>
         ) {
-            // See https://github.com/mapbox/mapbox-navigation-android/pull/7195
+            // Will be integrated in https://github.com/mapbox/mapbox-navigation-android/pull/7195
         }
 
         override fun onError(message: String) {
