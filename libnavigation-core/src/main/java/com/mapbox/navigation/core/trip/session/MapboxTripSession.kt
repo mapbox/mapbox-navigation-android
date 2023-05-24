@@ -667,6 +667,14 @@ internal class MapboxTripSession(
             logD("route progress update dropped - updating routes", LOG_CATEGORY)
             return
         }
+        if (status.primaryRouteId != primaryRoute?.id) {
+            logE(LOG_CATEGORY) {
+                "Primary routes are desynchronised between platform SDK and NN:" +
+                    "platform primary route id is ${primaryRoute?.id} while" +
+                    "native navigator tracks ${status.primaryRouteId}"
+            }
+            return
+        }
 
         var triggerObserver = false
         if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
