@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.utils
 
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileDataDomain
@@ -8,12 +9,15 @@ import com.mapbox.common.TileStoreOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import java.net.URI
 
-inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
+suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     useRealTiles: Boolean = false,
     tileStore: TileStore? = null,
+    historyRecorderRule: MapboxHistoryTestRule? = null, //TODO: copy features to new infra
     block: (navigation: MapboxNavigation) -> Unit
 ) {
     val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
@@ -36,9 +40,13 @@ inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
             }
             .build()
     )
+    historyRecorderRule?.historyRecorder = navigation.historyRecorder
+    navigation.historyRecorder.startRecording()
     try {
         block(navigation)
     } finally {
+        val path = navigation.historyRecorder.stopRecording()
+        Log.i("Test history file", "history file recorder: $path")
         navigation.onDestroy()
     }
 }
