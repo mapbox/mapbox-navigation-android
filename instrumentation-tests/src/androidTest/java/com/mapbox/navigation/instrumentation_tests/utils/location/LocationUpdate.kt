@@ -9,7 +9,7 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
     latitude: Double,
     longitude: Double,
     bearing: Float,
-    frequencyHz: Int = 10,
+    frequencyHz: Int = 1,
     block: suspend () -> Unit
 ) {
     coroutineScope {
