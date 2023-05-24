@@ -17,7 +17,7 @@ import java.net.URI
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     useRealTiles: Boolean = false,
     tileStore: TileStore? = null,
-    historyRecorderRule: MapboxHistoryTestRule? = null, //TODO: copy features to new infra
+    historyRecorderRule: MapboxHistoryTestRule? = null, // TODO: copy features to new infra
     block: (navigation: MapboxNavigation) -> Unit
 ) {
     val targetContext = InstrumentationRegistry.getInstrumentation().targetContext

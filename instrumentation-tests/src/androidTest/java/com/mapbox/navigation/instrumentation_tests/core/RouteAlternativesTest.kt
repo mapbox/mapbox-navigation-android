@@ -109,22 +109,24 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             mockLocationReplayerRule.playRoute(testRoutes.first().directionsRoute)
             mapboxNavigation.startTripSession()
             mapboxNavigation.flowLocationMatcherResult().first()
-            mapboxNavigation.registerRouteAlternativesObserver(object : NavigationRouteAlternativesObserver {
-                override fun onRouteAlternatives(
-                    routeProgress: RouteProgress,
-                    alternatives: List<NavigationRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    val newRoutes = mutableListOf<NavigationRoute>().apply {
-                         add(mapboxNavigation.getNavigationRoutes().first())
-                         addAll(alternatives)
-                     }
-                    mapboxNavigation.setNavigationRoutes(newRoutes)
-                }
+            mapboxNavigation.registerRouteAlternativesObserver(
+                object : NavigationRouteAlternativesObserver {
+                    override fun onRouteAlternatives(
+                        routeProgress: RouteProgress,
+                        alternatives: List<NavigationRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        val newRoutes = mutableListOf<NavigationRoute>().apply {
+                            add(mapboxNavigation.getNavigationRoutes().first())
+                            addAll(alternatives)
+                        }
+                        mapboxNavigation.setNavigationRoutes(newRoutes)
+                    }
 
-                override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                    override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                    }
                 }
-            })
+            )
             mapboxNavigation.setNavigationRoutes(testRoutes)
 
             val newAlternatives = mapboxNavigation.routesUpdates()
@@ -187,7 +189,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
      * inconsistent
      */
     @Test
-    fun alternative_observer_is_called_with_current_alternatives_upon_subscription_if_routes_were_set_without_active_subscription() =
+    fun alternatives_observer_is_called_upon_subscription_if_route_was_set_without_subscription() =
         sdkTest {
             setupMockRequestHandlers()
             withMapboxNavigation(
@@ -205,19 +207,20 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                     mapboxNavigation.routeProgressUpdates().first()
 
                     var firstSubscriberResult: List<NavigationRoute>? = null
-                    mapboxNavigation.registerRouteAlternativesObserver(object :
-                        NavigationRouteAlternativesObserver {
-                        override fun onRouteAlternatives(
-                            routeProgress: RouteProgress,
-                            alternatives: List<NavigationRoute>,
-                            routerOrigin: RouterOrigin
-                        ) {
-                            firstSubscriberResult = alternatives
-                        }
+                    mapboxNavigation.registerRouteAlternativesObserver(
+                        object : NavigationRouteAlternativesObserver {
+                            override fun onRouteAlternatives(
+                                routeProgress: RouteProgress,
+                                alternatives: List<NavigationRoute>,
+                                routerOrigin: RouterOrigin
+                            ) {
+                                firstSubscriberResult = alternatives
+                            }
 
-                        override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                            override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                            }
                         }
-                    })
+                    )
 
                     val secondSubscriber = mapboxNavigation.alternativesUpdates()
                         .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
@@ -227,7 +230,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 }
             }
         }
-
 
     @Test
     fun external_alternatives_set_do_not_affect_observers() =
@@ -306,7 +308,9 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         )
     }
 
-    private suspend fun MapboxNavigation.requestNavigationRoutes(coordinates: List<Point>): List<NavigationRoute> {
+    private suspend fun MapboxNavigation.requestNavigationRoutes(
+        coordinates: List<Point>
+    ): List<NavigationRoute> {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .alternatives(true)
