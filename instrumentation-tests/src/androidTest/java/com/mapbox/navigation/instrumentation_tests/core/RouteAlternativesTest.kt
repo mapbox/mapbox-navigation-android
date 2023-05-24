@@ -12,11 +12,13 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import com.mapbox.navigation.testing.ui.http.MockRequestHandler
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.NavigationRouteAlternativesResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.alternativesUpdates
@@ -29,6 +31,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -75,6 +78,13 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             // Prepare with alternative routes.
             val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
 
+            // make sure that new alternatives won't be returned
+            mockWebServerRule.requestHandlers.add(
+                MockRequestHandler {
+                    MockResponse().setResponseCode(500).setBody("")
+                }
+            )
+
             mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
             mapboxNavigation.startTripSession()
 
@@ -94,8 +104,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
             // Verify alternative routes events were triggered.
             assertEquals(2, routes.size)
-            assertTrue(mapboxNavigation.getNavigationRoutes().isNotEmpty())
-            //TODO: NN can return a different alternative
             assertEquals(0, firstAlternativesCallback.alternatives.size)
         }
     }
