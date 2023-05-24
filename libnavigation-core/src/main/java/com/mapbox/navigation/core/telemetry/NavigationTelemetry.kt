@@ -4,17 +4,14 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.telemetry.TelemetryAndroidAutoInterface
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
+import com.mapbox.navigation.core.internal.telemetry.UserFeedbackInternal.Companion.toInternal
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackSubscriber
 import com.mapbox.navigation.core.internal.telemetry.event.AndroidAutoEvent
-import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
-import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
-import com.mapbox.navigation.core.trip.session.MapboxTripSession
+import com.mapbox.navigation.core.telemetry.events.UserFeedback.Companion.toNative
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigator.Telemetry
-import com.mapbox.navigator.UserFeedback
 import java.util.concurrent.CopyOnWriteArraySet
 
 internal class NavigationTelemetry private constructor(
@@ -33,10 +30,11 @@ internal class NavigationTelemetry private constructor(
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
-    fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper  =
+    fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper =
         when (tripSession.getState()) {
             TripSessionState.STARTED ->
                 FeedbackMetadataWrapper(nativeTelemetry().startBuildUserFeedbackMetadata())
+
             TripSessionState.STOPPED -> throw IllegalStateException(
                 "Feedback Metadata might be provided when trip session is started only"
             )
@@ -44,43 +42,27 @@ internal class NavigationTelemetry private constructor(
 
     @ExperimentalPreviewMapboxNavigationAPI
     fun postUserFeedback(
-        feedbackType: String,
-        description: String,
-        @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String,
-        feedbackSubType: Array<String>?,
-        feedbackMetadata: FeedbackMetadata?,
+        userFeedback: com.mapbox.navigation.core.telemetry.events.UserFeedback,
         userFeedbackCallback: UserFeedbackCallback?,
     ) {
         fun notifyUserFeedbackCallbacks(location: Point) {
-            val userFeedback = com.mapbox.navigation.core.internal.telemetry.UserFeedback(
+            val userFeedbackInternal = userFeedback.toInternal(
                 "-1",
-                feedbackType,
-                feedbackSource,
-                description,
-                screenshot,
-                feedbackSubType,
                 location,
             )
-            userFeedbackCallback?.onNewUserFeedback(userFeedback)
+            userFeedbackCallback?.onNewUserFeedback(userFeedbackInternal)
             for (callback in userFeedbackCallbacks) {
-                callback.onNewUserFeedback(userFeedback)
+                callback.onNewUserFeedback(userFeedbackInternal)
             }
         }
 
         nativeTelemetry().postUserFeedback(
-            feedbackMetadata?.userFeedbackMetadata
+            userFeedback.feedbackMetadata?.userFeedbackMetadata
                 ?: nativeTelemetry().startBuildUserFeedbackMetadata().metadata,
-            UserFeedback(
-                feedbackType,
-                feedbackSubType?.toList() ?: emptyList(),
-                feedbackSource,
-                description,
-                screenshot,
-            )
+            userFeedback.toNative(),
         ) { result ->
             result.fold({
-
+                // do nothing
             }, {
                 notifyUserFeedbackCallbacks(it)
             })

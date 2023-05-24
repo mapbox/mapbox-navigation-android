@@ -25,8 +25,13 @@ internal fun EventBase.checkIfSubOf(value: Value): List<String> {
 
 internal fun Collection<EventBase>.verifyEvents(events: List<Value>): List<String> {
     if (this.size != events.size) {
-        return listOf("Events lists must have same sizes: List<EventBase> is ${this.size}, " +
-            "List<Value> is ${events.size}")
+        return listOf(
+            """---
+            Events lists must have same sizes: expected List<EventBase> is ${this.size} actual List<Value> is ${events.size}
+            expected: ${this.joinToString { it.event }}
+            actual: ${events.joinToString { (it.contents as Map<String, Value>)["event"]?.contents as String }}
+            ---"""
+        )
     }
 
     return this.foldIndexed(mutableListOf<String>()) { index, accumulateList, eventBase ->

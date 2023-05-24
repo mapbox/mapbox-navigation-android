@@ -9,7 +9,7 @@ fun interface UserFeedbackCallback {
     /**
      * Notifies that a new user feedback has been posted.
      *
-     * @param userFeedback the posted [UserFeedback]
+     * @param userFeedbackInternal the posted [UserFeedbackInternal]
      */
-    fun onNewUserFeedback(userFeedback: UserFeedback)
+    fun onNewUserFeedback(userFeedbackInternal: UserFeedbackInternal)
 }

@@ -25,7 +25,7 @@ import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.retrieveCopilotHistoryRecorder
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
-import com.mapbox.navigation.core.internal.telemetry.UserFeedback
+import com.mapbox.navigation.core.internal.telemetry.UserFeedbackInternal
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
@@ -505,9 +505,9 @@ class MapboxCopilotImplTest {
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             freeDriveHistoryRecordingSessionState
         )
-        val mockedUserFeedback = mockk<UserFeedback>(relaxed = true)
+        val mockedUserFeedbackInternal = mockk<UserFeedbackInternal>(relaxed = true)
 
-        userFeedbackCallback.captured.onNewUserFeedback(mockedUserFeedback)
+        userFeedbackCallback.captured.onNewUserFeedback(mockedUserFeedbackInternal)
 
         verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(NAV_FEEDBACK_SUBMITTED_EVENT_NAME, any())
@@ -539,9 +539,9 @@ class MapboxCopilotImplTest {
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             activeGuidanceHistoryRecordingSessionState
         )
-        val mockedUserFeedback = mockk<UserFeedback>(relaxed = true)
+        val mockedUserFeedbackInternal = mockk<UserFeedbackInternal>(relaxed = true)
 
-        userFeedbackCallback.captured.onNewUserFeedback(mockedUserFeedback)
+        userFeedbackCallback.captured.onNewUserFeedback(mockedUserFeedbackInternal)
 
         verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(NAV_FEEDBACK_SUBMITTED_EVENT_NAME, any())
@@ -630,8 +630,8 @@ class MapboxCopilotImplTest {
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             mockedHistoryRecordingSessionState
         )
-        val mockedUserFeedback = mockk<UserFeedback>(relaxed = true)
-        userFeedbackCallback.captured.onNewUserFeedback(mockedUserFeedback)
+        val mockedUserFeedbackInternal = mockk<UserFeedbackInternal>(relaxed = true)
+        userFeedbackCallback.captured.onNewUserFeedback(mockedUserFeedbackInternal)
         historyRecordingStateChangeObserver.captured.onShouldStopRecording(
             mockedHistoryRecordingSessionState
         )
@@ -761,8 +761,8 @@ class MapboxCopilotImplTest {
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             mockedHistoryRecordingSessionState
         )
-        val mockedUserFeedback = mockk<UserFeedback>(relaxed = true)
-        userFeedbackCallback.captured.onNewUserFeedback(mockedUserFeedback)
+        val mockedUserFeedbackInternal = mockk<UserFeedbackInternal>(relaxed = true)
+        userFeedbackCallback.captured.onNewUserFeedback(mockedUserFeedbackInternal)
         historyRecordingStateChangeObserver.captured.onShouldStopRecording(
             mockedHistoryRecordingSessionState
         )

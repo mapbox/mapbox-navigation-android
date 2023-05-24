@@ -96,6 +96,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
+import com.mapbox.navigation.core.telemetry.events.UserFeedback
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
@@ -1624,12 +1625,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         feedbackSubType: Array<String>? = emptyArray(),
     ) {
         postUserFeedback(
-            feedbackType,
-            description,
-            feedbackSource,
-            screenshot,
-            feedbackSubType,
-            feedbackMetadata = null,
+            UserFeedback.Builder(
+                feedbackType,
+                description,
+            ).apply {
+                // FIXME encoded screenshot to bitmap
+//                screenshot(screenshot)
+                feedbackSubTypes(feedbackSubType ?: emptyArray())
+            }
+                .build(),
             userFeedbackCallback = null,
         )
     }
@@ -1657,41 +1661,21 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     @JvmOverloads
     fun postUserFeedback(
-        feedbackType: String,
-        description: String,
-        @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String,
-        feedbackSubType: Array<String>? = emptyArray(),
-        feedbackMetadata: FeedbackMetadata,
+        userFeedback: UserFeedback,
     ) {
         postUserFeedback(
-            feedbackType,
-            description,
-            feedbackSource,
-            screenshot,
-            feedbackSubType,
-            feedbackMetadata,
+            userFeedback = userFeedback,
             userFeedbackCallback = null,
         )
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
     internal fun postUserFeedback(
-        feedbackType: String,
-        description: String,
-        @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String,
-        feedbackSubType: Array<String>?,
-        feedbackMetadata: FeedbackMetadata?,
+        userFeedback: UserFeedback,
         userFeedbackCallback: UserFeedbackCallback?,
     ) {
         navigationTelemetry.postUserFeedback(
-            feedbackType,
-            description,
-            feedbackSource,
-            screenshot,
-            feedbackSubType,
-            feedbackMetadata,
+            userFeedback,
             userFeedbackCallback
         )
     }

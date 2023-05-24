@@ -8,6 +8,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
+import com.mapbox.navigation.core.telemetry.events.UserFeedback
 
 /**
  * Register a [UserFeedbackCallback] to be notified when a new user feedback is posted.
@@ -56,21 +57,11 @@ fun unregisterUserFeedbackCallback(
 @ExperimentalPreviewMapboxNavigationAPI
 @JvmOverloads
 fun MapboxNavigation.postUserFeedback(
-    feedbackType: String,
-    description: String,
-    @FeedbackEvent.Source feedbackSource: String,
-    screenshot: String,
-    feedbackSubType: Array<String>? = emptyArray(),
-    feedbackMetadata: FeedbackMetadata? = null,
+    userFeedback: UserFeedback,
     userFeedbackCallback: UserFeedbackCallback,
 ) {
     postUserFeedback(
-        feedbackType,
-        description,
-        feedbackSource,
-        screenshot,
-        feedbackSubType,
-        feedbackMetadata,
+        userFeedback,
         userFeedbackCallback,
     )
 }
