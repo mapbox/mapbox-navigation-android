@@ -151,7 +151,9 @@ internal class RouteAlternativesController constructor(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
         ) {
-            logI("${routeAlternatives.size} native alternatives available", LOG_CATEGORY)
+            logI(LOG_CATEGORY) {
+                "native alternatives available: ${routeAlternatives.map { it.route.routeId }}"
+            }
 
             observerProcessingJob?.cancel()
             observerProcessingJob =
@@ -171,6 +173,14 @@ internal class RouteAlternativesController constructor(
         }
 
         override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) = Unit
+
+        override fun onRouteAlternativesUpdated(
+            onlinePrimaryRoute: RouteInterface?,
+            alternatives: MutableList<RouteAlternative>,
+            removedAlternatives: MutableList<RouteAlternative>
+        ) {
+            // Will be integrated in https://github.com/mapbox/mapbox-navigation-android/pull/7195
+        }
 
         override fun onError(message: String) {
             observers.forEach {
