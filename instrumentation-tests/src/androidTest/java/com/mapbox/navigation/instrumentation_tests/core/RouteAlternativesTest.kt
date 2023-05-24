@@ -27,12 +27,14 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -50,6 +52,10 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
     private val startCoordinates = listOf(
         Point.fromLngLat(-122.2750659, 37.8052036),
+        Point.fromLngLat(-122.2647245, 37.8138895)
+    )
+    private val continueCoordinates = listOf(
+        Point.fromLngLat(-122.275220, 37.805862),
         Point.fromLngLat(-122.2647245, 37.8138895)
     )
 
@@ -75,11 +81,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             mockLocationReplayerRule.playRoute(testRoutes.first().directionsRoute)
             mapboxNavigation.startTripSession()
             mapboxNavigation.flowLocationMatcherResult().first()
-            val firstAlternative = async(start = CoroutineStart.UNDISPATCHED) {
-                mapboxNavigation.alternativesUpdates()
-                    .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-                    .first()
-            }
+            val firstAlternative = firstAlternativesUpdateDeferred(mapboxNavigation)
             mapboxNavigation.setNavigationRoutes(testRoutes)
 
             val firstAlternativesCallback = firstAlternative.await()
@@ -93,13 +95,50 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Test
+    fun alternative_observer_is_not_called_with_current_alternatives_upon_subscription() =
+        sdkTest {
+            setupMockRequestHandlers()
+            withMapboxNavigation(
+                historyRecorderRule = mapboxHistoryTestRule
+            ) { mapboxNavigation ->
+                val testRoutes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
+                val originOfTestRoute = testRoutes.first().routeOptions.coordinatesList().first()
+                stayOnPosition(
+                    latitude = originOfTestRoute.latitude(),
+                    longitude = originOfTestRoute.longitude(),
+                    bearing = 30.0f
+                ) {
+                    mapboxNavigation.startTripSession()
+
+                    val alternativesCallbackResultBeforeSetRoute =
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
+                    mapboxNavigation.setNavigationRoutesAsync(testRoutes)
+                    mapboxNavigation.routeProgressUpdates().first()
+                    val alternativesCallbackResultAfterSetRoute =
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
+
+                    assertTrue(
+                        "the test expects that alternative routes are present",
+                        mapboxNavigation.getNavigationRoutes().size > 1
+                    )
+                    assertTrue(alternativesCallbackResultBeforeSetRoute.isActive)
+                    alternativesCallbackResultBeforeSetRoute.cancel()
+                    assertTrue(alternativesCallbackResultAfterSetRoute.isActive)
+                    alternativesCallbackResultAfterSetRoute.cancel()
+                }
+            }
+        }
+
     /**
-     * The fact that the SDK triggers a callback on alternatives subscription I consider as bug.
-     * We recommend users to set updated alternatives back, and it doesn't make sense to trigger
-     * the callback with the same alternative as it's now.
+     * The fact that the SDK triggers a callback on alternatives subscription I consider as a bug:
+     * 1. We recommend users to set updated alternatives back, and it doesn't make sense to trigger
+     * the callback with the same alternative as they are now.
+     * 2. The SDK doesn't trigger callback if routes were set already, so in general it feels
+     * inconsistent
      */
     @Test
-    fun alternative_observer_is_called_with_current_state_upon_subscription_if_routes_were_set() =
+    fun alternative_observer_is_called_with_current_alternatives_upon_subscription_if_routes_were_set_without_active_subscription() =
         sdkTest {
             setupMockRequestHandlers()
             withMapboxNavigation(
@@ -140,105 +179,61 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             }
         }
 
-//    /**
-//     * The test verifies that if set routes to Navigation that are come from alternatives + n
-//     * (where n >= 1) external routes, alternatives routes observer is not triggered with these routes.
-//     * That was happening in legacy versions of NN.
-//     */
-//    @Test
-//    fun additional_alternative_is_not_force_to_invoke_alternatives_observer() = sdkTest {
-//        // Prepare with alternative routes.
-//        setupMockRequestHandlers()
-//        val routes = requestNavigationRoutes(startCoordinates)
-//
-//
-//       // mapboxNavigation.historyRecorder.startRecording()
-//        mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
-//        mapboxNavigation.startTripSession()
-//
-//
-//        // Wait for enhanced locations to start and then set the routes.
-//        // Wait for enhanced locations to start and then set the routes.
-//        mapboxNavigation.flowLocationMatcherResult().first()
-//
-//        // infinity subscription to avoid triggering NN on every new observer
-//        // TODO: is that behaviour okay? I think no
-//        mapboxNavigation.registerRouteAlternativesObserver(
-//            object : NavigationRouteAlternativesObserver {
-//                override fun onRouteAlternatives(
-//                    routeProgress: RouteProgress,
-//                    alternatives: List<NavigationRoute>,
-//                    routerOrigin: RouterOrigin
-//                ) = Unit
-//
-//                override fun onRouteAlternativesError(error: RouteAlternativesError) = Unit
-//            }
-//        )
-//        mapboxNavigation.setNavigationRoutes(routes)
-//
-//
-//        // Subscribing for alternatives
-//        val firstAlternative = mapboxNavigation.alternativesUpdates()
-//                .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-//                .filter { it.alternatives.isNotEmpty() } // TODO: why do we need to ignore empty callback in this case?
-//                .first()
-//
-//        assertNotNull(firstAlternative.alternatives)
-//
-//        val nextAlternativeObserver = RouteAlternativesIdlingResource(
-//            mapboxNavigation
-//        ) { _, alternatives, _ ->
-//            alternatives.isNotEmpty()
-//        }
-//        nextAlternativeObserver.register()
-//
-//        val externalAlternatives = DirectionsResponse.fromJson(
-//            readRawFileText(context, R.raw.route_response_alternative_continue)
-//        ).routes().also {
-//            assertEquals(1, it.size)
-//        }
-//
-//        lateinit var setRoutes: List<DirectionsRoute>
-//        runOnMainSync {
-//            setRoutes = (
-//                mutableListOf(
-//                    mapboxNavigation.getRoutes().first()
-//                ) + firstAlternative.alternatives!! + externalAlternatives
-//                ).also {
-//                    assertTrue(
-//                        "Primary route + >=1 alternatives + external alternatives",
-//                        it.size >= 3
-//                    )
-//                }
-//            mapboxNavigation.setRoutes(setRoutes)
-//        }
-//
-//        mapboxHistoryTestRule.stopRecordingOnCrash("next alternatives failed") {
-//            Espresso.onIdle()
-//        }
-//        nextAlternativeObserver.unregister()
-//
-//        runBlocking(Dispatchers.Main) {
-//            mapboxNavigation.historyRecorder.stopRecording {
-//                logE("history path=$it", LOG_CATEGORY)
-//            }
-//        }
-//
-//        // Verify alternative routes events were triggered.
-//        firstAlternative.verifyOnRouteAlternativesAndProgressReceived()
-//
-//        // Verify next alternative routes events were triggered
-//        nextAlternativeObserver.verifyOnRouteAlternativesAndProgressReceived()
-//
-//        // verify that set routes with  alternatives + 1 external alternatives is not triggered
-//        // alternative observer
-//        assertNotEquals(
-//            "Alternative are not the same as setRoutes (alternatives might have " +
-//                "additional routes or remove one or a few but not equal)",
-//            setRoutes.drop(1).sortedBy { it.hashCode() }, // drop primary route
-//            nextAlternativeObserver.alternatives!!.sortedBy { it.hashCode() }
-//        )
-//    }
+
+    @Test
+    fun external_alternatives_set_do_not_affect_observers() =
+        sdkTest {
+            setupMockRequestHandlers()
+            withMapboxNavigation(
+                historyRecorderRule = mapboxHistoryTestRule
+            ) { mapboxNavigation ->
+                val testRoutes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
+                val originOfTestRoute = testRoutes.first().routeOptions.coordinatesList().first()
+                stayOnPosition(
+                    latitude = originOfTestRoute.latitude(),
+                    longitude = originOfTestRoute.longitude(),
+                    bearing = 30.0f
+                ) {
+                    mapboxNavigation.startTripSession()
+
+                    val alternativesCallbackResultBeforeSetRoute =
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
+                    mapboxNavigation.setNavigationRoutesAsync(testRoutes)
+                    mapboxNavigation.routeProgressUpdates().first()
+                    val alternativesCallbackResultAfterSetRoute =
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
+                    val externalAlternatives = createExternalAlternatives()
+                    mapboxNavigation.setNavigationRoutesAsync(
+                        testRoutes + externalAlternatives
+                    )
+                    mapboxNavigation.routeProgressUpdates().first()
+
+                    val currentRoutes = mapboxNavigation.getNavigationRoutes()
+                    assertTrue(
+                        "initial and one of external alternatives should be present," +
+                            " actual ${currentRoutes.map { it.id }}",
+                        mapboxNavigation.getNavigationRoutes().size > 2
+                    )
+                    assertTrue(alternativesCallbackResultBeforeSetRoute.isActive)
+                    alternativesCallbackResultBeforeSetRoute.cancel()
+                    assertTrue(alternativesCallbackResultAfterSetRoute.isActive)
+                    alternativesCallbackResultAfterSetRoute.cancel()
+                }
+            }
+        }
+
+    private fun createExternalAlternatives(): List<NavigationRoute> {
+        return NavigationRoute.create(
+            readRawFileText(context, R.raw.route_response_alternative_continue),
+            "https://api.mapbox.com/directions/v5/mapbox/driving/" +
+                "-122.27522%2C37.805862%3B-122.2647245%2C37.8138895" +
+                "?alternatives=true&annotations=congestion" +
+                "%2Ccongestion_numeric&banner_instructions=true&geometries=polyline6" +
+                "&language=en&overview=full&steps=true&voice_instructions=true" +
+                "&voice_units=metric&access_token=YOUR_MAPBOX_ACCESS_TOKEN",
+            RouterOrigin.Offboard
+        )
+    }
 
     private fun setupMockRequestHandlers() {
         // Nav-native requests alternate routes, so we are only
@@ -248,6 +243,13 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_alternative_start),
                 startCoordinates
+            )
+        )
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_alternative_continue),
+                continueCoordinates
             )
         )
     }
@@ -264,3 +266,10 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             .routes
     }
 }
+
+private fun CoroutineScope.firstAlternativesUpdateDeferred(mapboxNavigation: MapboxNavigation) =
+    async(start = CoroutineStart.UNDISPATCHED) {
+        mapboxNavigation.alternativesUpdates()
+            .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+            .first()
+    }
