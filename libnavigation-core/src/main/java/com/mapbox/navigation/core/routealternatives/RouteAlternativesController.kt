@@ -151,7 +151,7 @@ internal class RouteAlternativesController constructor(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
         ) {
-            logI("${routeAlternatives.size} native alternatives available", LOG_CATEGORY)
+            logI("${routeAlternatives.size} native alternatives available: ${routeAlternatives.map { it.route.routeId }}", LOG_CATEGORY)
 
             observerProcessingJob?.cancel()
             observerProcessingJob =
