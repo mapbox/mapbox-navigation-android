@@ -66,22 +66,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         longitude = startCoordinates[0].longitude()
     }
 
-//    @Before
-//    fun setup() {
-//        runOnMainSync {
-//            val routeAlternativesOptions = RouteAlternativesOptions.Builder()
-//                .intervalMillis(TimeUnit.SECONDS.toMillis(30))
-//                .build()
-//            mapboxNavigation = MapboxNavigationProvider.create(
-//                NavigationOptions.Builder(context)
-//                    .accessToken(getMapboxAccessTokenFromResources(context))
-//                    .routeAlternativesOptions(routeAlternativesOptions)
-//                    .build()
-//            )
-//            mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
-//        }
-//    }
-
     @Test
     fun expect_initial_alternative_route_removed_after_passing_a_fork_point() = sdkTest {
         setupMockRequestHandlers()
