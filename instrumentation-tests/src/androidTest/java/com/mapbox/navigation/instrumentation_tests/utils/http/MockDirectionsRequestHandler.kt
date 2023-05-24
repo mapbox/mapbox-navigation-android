@@ -42,7 +42,9 @@ data class MockDirectionsRequestHandler constructor(
 
     override fun handleInternal(request: RecordedRequest): MockResponse? {
         val routeOptions = try {
-            RouteOptions.fromUrl(request.requestUrl!!.toUrl())
+            val result = RouteOptions.fromUrl(request.requestUrl!!.toUrl())
+            result.coordinatesList() // checks that coordinates are parsable
+            result
         } catch (t: Throwable) {
             null
         }
