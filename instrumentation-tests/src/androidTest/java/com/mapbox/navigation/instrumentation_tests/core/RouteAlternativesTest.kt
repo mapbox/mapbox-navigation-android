@@ -84,18 +84,15 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun expect_initial_alternative_route_removed_after_passing_a_fork_point() = sdkTest {
+        setupMockRequestHandlers()
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { mapboxNavigation ->
             // Prepare with alternative routes.
-            setupMockRequestHandlers()
             val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
 
-            // Play primary route
-            //mapboxNavigation.historyRecorder.startRecording()
             mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
             mapboxNavigation.startTripSession()
-
 
             // Wait for enhanced locations to start and then set the routes.
             mapboxNavigation.flowLocationMatcherResult().first()
@@ -107,20 +104,9 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                     .first()
             }
 
-
             mapboxNavigation.setNavigationRoutes(routes)
 
             val firstAlternativesCallback = firstAlternative.await()
-
-//        mapboxHistoryTestRule.stopRecordingOnCrash("alternatives failed") {
-//            Espresso.onIdle()
-//        }
-
-
-//        runBlocking(Dispatchers.Main) {
-//            val historyPath = mapboxNavigation.historyRecorder.stopRecording()
-//            logE("history path=$historyPath", LOG_CATEGORY)
-//        }
 
             // Verify alternative routes events were triggered.
             assertEquals(2, routes.size)
