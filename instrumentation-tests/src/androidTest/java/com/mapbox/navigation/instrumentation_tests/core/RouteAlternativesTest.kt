@@ -4,40 +4,30 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
-import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.http.MockRequestHandler
-import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.NavigationRouteAlternativesResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.alternativesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
-import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.concurrent.TimeUnit
 
 /**
  * This test ensures that alternative route recommendations
@@ -54,7 +44,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
-   // private lateinit var mapboxNavigation: MapboxNavigation
+    // private lateinit var mapboxNavigation: MapboxNavigation
     private val startCoordinates = listOf(
         Point.fromLngLat(-122.2750659, 37.8052036),
         Point.fromLngLat(-122.2647245, 37.8138895)
@@ -70,7 +60,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun expect_initial_alternative_route_removed_after_passing_a_fork_point() = sdkTest {
+    fun expect_initial_alternative_route_removed_after_passing_the_fork_point() = sdkTest {
         setupMockRequestHandlers()
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
@@ -80,6 +70,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
             // make sure that new alternatives won't be returned
             mockWebServerRule.requestHandlers.add(
+                0,
                 MockRequestHandler {
                     MockResponse().setResponseCode(500).setBody("")
                 }
