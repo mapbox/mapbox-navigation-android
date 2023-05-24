@@ -35,24 +35,16 @@ import org.junit.Test
  */
 class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
-//    @get:Rule
-//    val mapboxNavigationRule = MapboxNavigationRule()
-
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
-    // private lateinit var mapboxNavigation: MapboxNavigation
     private val startCoordinates = listOf(
         Point.fromLngLat(-122.2750659, 37.8052036),
         Point.fromLngLat(-122.2647245, 37.8138895)
     )
-
-    private companion object {
-        private const val LOG_CATEGORY = "RouteAlternativesTest"
-    }
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = startCoordinates[0].latitude()
@@ -65,9 +57,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { mapboxNavigation ->
-            // Prepare with alternative routes.
-            val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
-
+            val testRoutes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
             // make sure that new alternatives won't be returned
             mockWebServerRule.requestHandlers.add(
                 0,
@@ -75,27 +65,25 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                     MockResponse().setResponseCode(500).setBody("")
                 }
             )
-
-            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
+            mockLocationReplayerRule.playRoute(testRoutes.first().directionsRoute)
             mapboxNavigation.startTripSession()
-
-            // Wait for enhanced locations to start and then set the routes.
             mapboxNavigation.flowLocationMatcherResult().first()
-
             // TODO: add case when the SDK subscribes after set routes
             val firstAlternative = async(start = CoroutineStart.UNDISPATCHED) {
                 mapboxNavigation.alternativesUpdates()
                     .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
                     .first()
             }
-
-            mapboxNavigation.setNavigationRoutes(routes)
+            mapboxNavigation.setNavigationRoutes(testRoutes)
 
             val firstAlternativesCallback = firstAlternative.await()
 
-            // Verify alternative routes events were triggered.
-            assertEquals(2, routes.size)
-            assertEquals(0, firstAlternativesCallback.alternatives.size)
+            assertEquals(2, testRoutes.size)
+            assertEquals(
+                "Existing alternative should be remove after passing the fork point",
+                0,
+                firstAlternativesCallback.alternatives.size
+            )
         }
     }
 
