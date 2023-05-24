@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
@@ -25,15 +26,18 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.alternativesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
+import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -92,6 +96,51 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 0,
                 firstAlternativesCallback.alternatives.size
             )
+        }
+    }
+
+    @Test
+    fun alternatives_are_updated_after_passing_fork_point() = sdkTest {
+        setupMockRequestHandlers()
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { mapboxNavigation ->
+            val testRoutes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
+            mockLocationReplayerRule.playRoute(testRoutes.first().directionsRoute)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.flowLocationMatcherResult().first()
+            mapboxNavigation.registerRouteAlternativesObserver(object : NavigationRouteAlternativesObserver {
+                override fun onRouteAlternatives(
+                    routeProgress: RouteProgress,
+                    alternatives: List<NavigationRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    val newRoutes = mutableListOf<NavigationRoute>().apply {
+                         add(mapboxNavigation.getNavigationRoutes().first())
+                         addAll(alternatives)
+                     }
+                    mapboxNavigation.setNavigationRoutes(newRoutes)
+                }
+
+                override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                }
+            })
+            mapboxNavigation.setNavigationRoutes(testRoutes)
+
+            val newAlternatives = mapboxNavigation.routesUpdates()
+                .filter { it.navigationRoutes != testRoutes } // skip initial routes
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE }
+                .filter { it.navigationRoutes.size > 1 }
+                .first()
+                .navigationRoutes
+                .drop(1)
+
+            newAlternatives.forEach {
+                assertNotNull(
+                    "alternative route $it doesn't have metadata",
+                    mapboxNavigation.getAlternativeMetadataFor(it)
+                )
+            }
         }
     }
 
@@ -249,7 +298,10 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_alternative_continue),
-                continueCoordinates
+                continueCoordinates,
+                // TODO: replace by comparison with accuracy
+                // in https://github.com/mapbox/mapbox-navigation-android/pull/7195
+                relaxedExpectedCoordinates = true
             )
         )
     }
