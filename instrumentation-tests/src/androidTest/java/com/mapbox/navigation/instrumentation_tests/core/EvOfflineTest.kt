@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
+import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
@@ -33,12 +34,16 @@ import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 
 // TODO: remove in the scope of NAVAND-1351
 const val INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE = 80_000L
 
 class EvOfflineTest : BaseCoreNoCleanUpTest() {
+
+    @get:Rule
+    val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
     override fun setupMockLocation(): Location {
         return mockLocationUpdatesRule.generateLocationUpdate {
@@ -50,7 +55,9 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     @Test
     fun requestRouteWithoutInternetAndTiles() = sdkTest {
         val testRoute = setupBerlinEvRoute()
-        withMapboxNavigation { navigation ->
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { navigation ->
             withoutInternet {
                 val routes = navigation.requestRoutes(testRoute.routeOptions)
                 assertTrue(routes is RouteRequestResult.Failure)
@@ -64,7 +71,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     ) {
         val originalTestRoute = setupBerlinEvRoute()
         withMapboxNavigationAndOfflineTilesForRegion(
-            OfflineRegions.Berlin
+            OfflineRegions.Berlin,
+            historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
             navigation.registerRouteAlternativesObserver(
                 AdvancedAlternativesObserverFromDocumentation(navigation)
@@ -110,7 +118,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             mockWebServerRule.baseUrl
         )
         withMapboxNavigationAndOfflineTilesForRegion(
-            OfflineRegions.Berlin
+            OfflineRegions.Berlin,
+            historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
             navigation.registerRouteAlternativesObserver(
                 AdvancedAlternativesObserverFromDocumentation(navigation)
@@ -154,7 +163,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 mockWebServerRule.baseUrl
             )
             withMapboxNavigationAndOfflineTilesForRegion(
-                OfflineRegions.Berlin
+                OfflineRegions.Berlin,
+                historyRecorderRule = mapboxHistoryTestRule
             ) { navigation ->
                 val firstAlternativesUpdatedCallbackWithOnlineRoutesDeferred = async {
                     navigation.alternativesUpdates()
@@ -219,7 +229,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         val testRouteAfterReroute = setupBerlinEvRouteAfterReroute()
 
         withMapboxNavigationAndOfflineTilesForRegion(
-            OfflineRegions.Berlin
+            OfflineRegions.Berlin,
+            historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
             navigation.startTripSession()
             val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
