@@ -306,9 +306,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_alternative_continue),
                 continueCoordinates,
-                // TODO: replace by comparison with accuracy
-                // in https://github.com/mapbox/mapbox-navigation-android/pull/7195
-                relaxedExpectedCoordinates = true
             )
         )
     }
