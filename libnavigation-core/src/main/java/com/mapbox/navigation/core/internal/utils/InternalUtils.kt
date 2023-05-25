@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.internal.utils
 
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigator.Navigator
 
 object InternalUtils {
 
@@ -30,4 +31,6 @@ object InternalUtils {
     fun setUnconditionalPollingInterval(intervalInMillis: Long?) {
         UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS = intervalInMillis ?: 1000L
     }
+
+    fun getNativeUserAgentFragment(): String = Navigator.getUserAgentFragment()
 }
