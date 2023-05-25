@@ -255,6 +255,8 @@ class MapboxRouteLineApi(
         trafficBackfillRoadClasses.addAll(
             routeLineOptions.resourceProvider.trafficBackfillRoadClasses
         )
+        logI("BelowLayerId: ${routeLineOptions.routeLineBelowLayerId}", LOG_CATEGORY)
+        logI("All options: $routeLineOptions", LOG_CATEGORY)
     }
 
     /**
@@ -1021,6 +1023,8 @@ class MapboxRouteLineApi(
             routeLineOptions.resourceProvider.routeLineColorResources,
             restrictedExpressionData
         )
+        logI("Masking layer main exp: $mainExp", LOG_CATEGORY)
+        logI("Masking layer traffic exp: $trafficExp", LOG_CATEGORY)
 
         return RouteLineDynamicData(
             { mainExp },

@@ -75,38 +75,6 @@ class RouteLineResources private constructor(
     }
 
     /**
-     * Returns a string representation of the object.
-     */
-    override fun toString(): String {
-        return "RouteLineResources(" +
-            "routeLineColorResources=$routeLineColorResources, " +
-            "roundedLineCap=$roundedLineCap, " +
-            "originWaypointIcon=$originWaypointIcon, " +
-            "destinationWaypointIcon=$destinationWaypointIcon, " +
-            "routeLineScaleExpression=$routeLineScaleExpression, " +
-            "routeCasingLineScaleExpression=$routeCasingLineScaleExpression, " +
-            "routeTrafficLineScaleExpression=$routeTrafficLineScaleExpression, " +
-            "trafficBackfillRoadClasses=$trafficBackfillRoadClasses, " +
-            "alternativeRouteLineScaleExpression=$alternativeRouteLineScaleExpression, " +
-            "alternativeRouteCasingLineScaleExpression=" +
-            "$alternativeRouteCasingLineScaleExpression, " +
-            "alternativeRouteTrafficLineScaleExpression=" +
-            "$alternativeRouteTrafficLineScaleExpression, " +
-            "routeLineColorResources=$routeLineColorResources, " +
-            "roundedLineCap=$roundedLineCap, " +
-            "originWaypointIcon=$originWaypointIcon, " +
-            "destinationWaypointIcon=$destinationWaypointIcon, " +
-            "routeLineScaleExpression=$routeLineScaleExpression, " +
-            "routeCasingLineScaleExpression=$routeCasingLineScaleExpression, " +
-            "routeTrafficLineScaleExpression=$routeTrafficLineScaleExpression, " +
-            "trafficBackfillRoadClasses=$trafficBackfillRoadClasses, " +
-            "restrictedRoadDashArray=$restrictedRoadDashArray, " +
-            "restrictedRoadOpacity=$restrictedRoadOpacity, " +
-            "restrictedRoadLineWidth=$restrictedRoadLineWidth" +
-            ")"
-    }
-
-    /**
      * Indicates whether some other object is "equal to" this one.
      */
     override fun equals(other: Any?): Boolean {
@@ -164,6 +132,27 @@ class RouteLineResources private constructor(
         result = 31 * result + restrictedRoadOpacity.hashCode()
         result = 31 * result + restrictedRoadLineWidth.hashCode()
         return result
+    }
+
+    override fun toString(): String {
+        return "RouteLineResources(" +
+            "routeLineColorResources=$routeLineColorResources, " +
+            "roundedLineCap=$roundedLineCap, " +
+            "originWaypointIcon=$originWaypointIcon, " +
+            "destinationWaypointIcon=$destinationWaypointIcon, " +
+            "trafficBackfillRoadClasses=$trafficBackfillRoadClasses, " +
+            "routeLineScaleExpression=$routeLineScaleExpression, " +
+            "routeCasingLineScaleExpression=$routeCasingLineScaleExpression, " +
+            "routeTrafficLineScaleExpression=$routeTrafficLineScaleExpression, " +
+            "alternativeRouteLineScaleExpression=$alternativeRouteLineScaleExpression, " +
+            "alternativeRouteCasingLineScaleExpression=" +
+            "$alternativeRouteCasingLineScaleExpression, " +
+            "alternativeRouteTrafficLineScaleExpression=" +
+            "$alternativeRouteTrafficLineScaleExpression, " +
+            "restrictedRoadDashArray=$restrictedRoadDashArray, " +
+            "restrictedRoadOpacity=$restrictedRoadOpacity, " +
+            "restrictedRoadLineWidth=$restrictedRoadLineWidth" +
+            ")"
     }
 
     /**

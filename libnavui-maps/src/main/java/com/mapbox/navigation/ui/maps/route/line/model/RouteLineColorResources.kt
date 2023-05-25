@@ -138,39 +138,6 @@ class RouteLineColorResources private constructor(
     }
 
     /**
-     * Returns a string representation of the object.
-     */
-    override fun toString(): String {
-        return "RouteLineColorResources(" +
-            "lowCongestionRange=$lowCongestionRange, " +
-            "heavyCongestionRange=$heavyCongestionRange, " +
-            "severeCongestionRange=$severeCongestionRange, " +
-            "moderateCongestionRange=$moderateCongestionRange, " +
-            "routeDefaultColor=$routeDefaultColor, " +
-            "routeLowCongestionColor=$routeLowCongestionColor, " +
-            "routeModerateCongestionColor=$routeModerateCongestionColor, " +
-            "routeHeavyCongestionColor=$routeHeavyCongestionColor, " +
-            "routeSevereCongestionColor=$routeSevereCongestionColor, " +
-            "routeUnknownCongestionColor=$routeUnknownCongestionColor, " +
-            "routeClosureColor=$routeClosureColor, " +
-            "restrictedRoadColor=$restrictedRoadColor, " +
-            "alternativeRouteDefaultColor=$alternativeRouteDefaultColor, " +
-            "alternativeRouteLowCongestionColor=$alternativeRouteLowCongestionColor, " +
-            "alternativeRouteModerateCongestionColor=$alternativeRouteModerateCongestionColor, " +
-            "alternativeRouteHeavyCongestionColor=$alternativeRouteHeavyCongestionColor, " +
-            "alternativeRouteSevereCongestionColor=$alternativeRouteSevereCongestionColor, " +
-            "alternativeRouteUnknownCongestionColor=$alternativeRouteUnknownCongestionColor, " +
-            "alternativeRouteRestrictedRoadColor=$alternativeRouteRestrictedRoadColor, " +
-            "alternativeRouteClosureColor=$alternativeRouteClosureColor, " +
-            "routeLineTraveledColor=$routeLineTraveledColor, " +
-            "routeLineTraveledCasingColor=$routeLineTraveledCasingColor, " +
-            "routeCasingColor=$routeCasingColor, " +
-            "alternativeRouteCasingColor=$alternativeRouteCasingColor, " +
-            "inActiveRouteLegsColor=$inActiveRouteLegsColor" +
-            ")"
-    }
-
-    /**
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
@@ -254,6 +221,36 @@ class RouteLineColorResources private constructor(
         if (alternativeRouteCasingColor != other.alternativeRouteCasingColor) return false
 
         return true
+    }
+
+    override fun toString(): String {
+        return "RouteLineColorResources(" +
+            "lowCongestionRange=$lowCongestionRange, " +
+            "moderateCongestionRange=$moderateCongestionRange, " +
+            "heavyCongestionRange=$heavyCongestionRange, " +
+            "severeCongestionRange=$severeCongestionRange, " +
+            "routeDefaultColor=$routeDefaultColor, " +
+            "routeLowCongestionColor=$routeLowCongestionColor, " +
+            "routeModerateCongestionColor=$routeModerateCongestionColor, " +
+            "routeHeavyCongestionColor=$routeHeavyCongestionColor, " +
+            "routeSevereCongestionColor=$routeSevereCongestionColor, " +
+            "routeUnknownCongestionColor=$routeUnknownCongestionColor, " +
+            "alternativeRouteDefaultColor=$alternativeRouteDefaultColor, " +
+            "alternativeRouteLowCongestionColor=$alternativeRouteLowCongestionColor, " +
+            "alternativeRouteModerateCongestionColor=$alternativeRouteModerateCongestionColor, " +
+            "alternativeRouteHeavyCongestionColor=$alternativeRouteHeavyCongestionColor, " +
+            "alternativeRouteSevereCongestionColor=$alternativeRouteSevereCongestionColor, " +
+            "alternativeRouteUnknownCongestionColor=$alternativeRouteUnknownCongestionColor, " +
+            "restrictedRoadColor=$restrictedRoadColor, " +
+            "routeClosureColor=$routeClosureColor, " +
+            "alternativeRouteRestrictedRoadColor=$alternativeRouteRestrictedRoadColor, " +
+            "alternativeRouteClosureColor=$alternativeRouteClosureColor, " +
+            "routeLineTraveledColor=$routeLineTraveledColor, " +
+            "routeLineTraveledCasingColor=$routeLineTraveledCasingColor, " +
+            "routeCasingColor=$routeCasingColor, " +
+            "alternativeRouteCasingColor=$alternativeRouteCasingColor, " +
+            "inActiveRouteLegsColor=$inActiveRouteLegsColor" +
+            ")"
     }
 
     /**
