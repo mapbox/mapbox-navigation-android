@@ -1,9 +1,8 @@
 package com.mapbox.navigation.base.options
 
 import android.content.Context
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.common.location.LiveTrackingClient
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -49,7 +48,7 @@ class NavigationOptions
 private constructor(
     val applicationContext: Context,
     val accessToken: String?,
-    val locationEngine: LocationEngine,
+    val locationEngine: LiveTrackingClient?,
     val locationEngineRequest: LocationEngineRequest,
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
@@ -189,7 +188,7 @@ private constructor(
 
         private val applicationContext = applicationContext.applicationContext
         private var accessToken: String? = null
-        private var locationEngine: LocationEngine? = null // Default is created when built
+        private var locationEngine: LiveTrackingClient? = null
         private var locationEngineRequest = LocationEngineRequest
             .Builder(1000L)
             .setFastestInterval(500L)
@@ -226,7 +225,7 @@ private constructor(
         /**
          * Override the mechanism responsible for providing location approximations to navigation
          */
-        fun locationEngine(locationEngine: LocationEngine): Builder =
+        fun locationEngine(locationEngine: LiveTrackingClient?): Builder =
             apply { this.locationEngine = locationEngine }
 
         /**
@@ -337,8 +336,7 @@ private constructor(
             return NavigationOptions(
                 applicationContext = applicationContext,
                 accessToken = accessToken,
-                locationEngine = locationEngine
-                    ?: LocationEngineProvider.getBestLocationEngine(applicationContext),
+                locationEngine = locationEngine,
                 locationEngineRequest = locationEngineRequest,
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,

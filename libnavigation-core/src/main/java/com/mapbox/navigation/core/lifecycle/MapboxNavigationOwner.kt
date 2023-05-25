@@ -1,9 +1,12 @@
 package com.mapbox.navigation.core.lifecycle
 
+import android.os.Debug
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.internal.location.NavLocationService
 import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.jvm.Throws
@@ -26,6 +29,7 @@ internal class MapboxNavigationOwner {
             }
             val navigationOptions = navigationOptionsProvider.createNavigationOptions()
             val mapboxNavigation = MapboxNavigationProvider.create(navigationOptions)
+
             this@MapboxNavigationOwner.mapboxNavigation = mapboxNavigation
             attached = true
             services.forEach { it.onAttached(mapboxNavigation) }

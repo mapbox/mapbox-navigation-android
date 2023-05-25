@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.common.TelemetrySystemUtils.generateCreateDateFormatted
 import com.mapbox.common.TurnstileEvent
 import com.mapbox.common.UserSKUIdentifier
+import com.mapbox.common.location.LiveTrackingClient
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
@@ -341,7 +342,7 @@ internal object MapboxNavigationTelemetry {
         this.locationsCollector = locationsCollector
         navigationOptions = options
         applicationContext = options.applicationContext
-        locationEngineNameExternal = options.locationEngine.javaClass.name
+        locationEngineNameExternal = options.locationEngine?.javaClass?.name ?: LiveTrackingClient::class.java.name
         sdkIdentifier = SDK_IDENTIFIER
         metricsReporter = reporter
         feedbackEventCacheMap.clear()

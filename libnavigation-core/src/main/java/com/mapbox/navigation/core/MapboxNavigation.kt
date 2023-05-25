@@ -6,6 +6,7 @@ package com.mapbox.navigation.core
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.os.Debug
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -17,6 +18,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TilesetDescriptor
+import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -56,6 +58,7 @@ import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
+import com.mapbox.navigation.core.internal.location.NavLocationService
 import com.mapbox.navigation.core.internal.telemetry.CustomEvent
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.utils.InternalUtils
@@ -246,6 +249,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 ) {
 
     constructor(navigationOptions: NavigationOptions) : this(navigationOptions, ThreadController())
+    init {
+        println("LocationServiceFactory.setUserDefined(NavLocationService)")
+        LocationServiceFactory.setUserDefined(NavLocationService)
+        navigationOptions.locationEngine?.let { userDefinedLiveTrackingClient ->
+            NavLocationService.addUserLiveTrackingClient(userDefinedLiveTrackingClient)
+            // TODO: If setup is called again should we clean up things?
+        }
+    }
 
     private val accessToken: String? = navigationOptions.accessToken
     private val mainJobController = threadController.getMainScopeAndRootJob()

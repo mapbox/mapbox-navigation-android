@@ -354,10 +354,11 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         mapboxMap.loadStyleUri(
             NavigationStyles.NAVIGATION_DAY_STYLE,
             { style: Style ->
+                // TODO: For real, we need get last location in client
                 // Get the last known location and move the map to that location.
-                mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
-                    locationEngineCallback
-                )
+//                mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
+//                    locationEngineCallback
+//                )
                 viewBinding.mapView.gestures.addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
