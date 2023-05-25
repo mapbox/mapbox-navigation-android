@@ -10,6 +10,7 @@ import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.SessionSKUIdentifier
 import com.mapbox.common.UserSKUIdentifier
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
 import com.mapbox.navigation.base.internal.extensions.isServerAddedWaypoint
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
@@ -275,13 +276,15 @@ internal class BillingController(
      * A route is considered the same if the waypoints count is the same and each pair of [`old waypoint` and `new waypoint`] are within [MAX_WAYPOINTS_DISTANCE_DIFF_METERS] of each other.
      * This method is also accounting for progress - if there's a multi-leg route, we'll only compare remaining legs of the current route against the new route.
      */
-    fun onExternalRouteSet(navigationRoute: NavigationRoute) {
+    fun onExternalRouteSet(navigationRoute: NavigationRoute, initialLegIndex: Int) {
         val runningSessionSkuId = getRunningOrPausedSessionSkuId()
         if (runningSessionSkuId == SessionSKUIdentifier.NAV2_SES_TRIP) {
             val currentRemainingWaypoints = getRemainingNonEVWaypointsOnRoute(
                 tripSession.getRouteProgress()
             )
-            val newWaypoints = getNonServerAddedWaypointsOnRoute(navigationRoute) { 1 }
+            val newWaypoints = getNonServerAddedWaypointsOnRoute(navigationRoute) {
+                countWaypointsUntilLegIndex(this, initialLegIndex) + 1
+            }
 
             if (!waypointsWithinRange(currentRemainingWaypoints, newWaypoints)) {
                 val wasSessionPaused = billingService.getSessionStatus(
@@ -296,6 +299,17 @@ internal class BillingController(
                 }
             }
         }
+    }
+
+    private fun countWaypointsUntilLegIndex(waypoints: List<Waypoint>, initialLegIndex: Int): Int {
+        if (initialLegIndex == 0) return 0
+        var currentLegWaypointIndex = 0
+        var currentWaypointIndex = 0
+        while (currentLegWaypointIndex < initialLegIndex) {
+            currentWaypointIndex++
+            if (waypoints[currentWaypointIndex].isLegWaypoint()) currentLegWaypointIndex++
+        }
+        return currentWaypointIndex
     }
 
     fun onDestroy() {

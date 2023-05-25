@@ -411,7 +411,7 @@ class BillingControllerTest {
     fun `when idle and external route set, do nothing`() {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
         every { navigationSession.state } returns NavigationSessionState.Idle
-        billingController.onExternalRouteSet(mockk())
+        billingController.onExternalRouteSet(mockk(), 0)
         verify(exactly = 0) {
             billingService.beginBillingSession(any(), any(), any(), any(), any())
         }
@@ -421,7 +421,7 @@ class BillingControllerTest {
     fun `when free drive and external route set, do nothing`() {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
         every { navigationSession.state } returns NavigationSessionState.FreeDrive("1")
-        billingController.onExternalRouteSet(mockk())
+        billingController.onExternalRouteSet(mockk(), 0)
         verify(exactly = 0) {
             billingService.beginBillingSession(
                 accessToken,
@@ -468,7 +468,7 @@ class BillingControllerTest {
             every { internalWaypoints() } returns newWaypoints
         }
 
-        billingController.onExternalRouteSet(newRoute)
+        billingController.onExternalRouteSet(newRoute, 0)
 
         verifyOrder {
             billingService.beginBillingSession(
@@ -525,7 +525,7 @@ class BillingControllerTest {
             every { internalWaypoints() } returns newWaypoints
         }
 
-        billingController.onExternalRouteSet(newRoute)
+        billingController.onExternalRouteSet(newRoute, 0)
 
         verify(exactly = 1) {
             billingService.beginBillingSession(
@@ -579,7 +579,7 @@ class BillingControllerTest {
             every { internalWaypoints() } returns newWaypoints
         }
 
-        billingController.onExternalRouteSet(newRoute)
+        billingController.onExternalRouteSet(newRoute, 0)
 
         verifyOrder {
             billingService.beginBillingSession(
@@ -639,7 +639,7 @@ class BillingControllerTest {
             every { internalWaypoints() } returns newWaypoints
         }
 
-        billingController.onExternalRouteSet(newRoute)
+        billingController.onExternalRouteSet(newRoute, 0)
 
         verifyOrder {
             billingService.beginBillingSession(
@@ -699,7 +699,7 @@ class BillingControllerTest {
             every { internalWaypoints() } returns newWaypoints
         }
 
-        billingController.onExternalRouteSet(newRoute)
+        billingController.onExternalRouteSet(newRoute, 0)
 
         verify(exactly = 1) {
             billingService.beginBillingSession(
@@ -750,7 +750,7 @@ class BillingControllerTest {
             every { internalWaypoints() } returns newWaypoints
         }
 
-        billingController.onExternalRouteSet(newRoute)
+        billingController.onExternalRouteSet(newRoute, 0)
 
         verifyOrder {
             billingService.beginBillingSession(
@@ -810,7 +810,7 @@ class BillingControllerTest {
             every { internalWaypoints() } returns newWaypoints
         }
 
-        billingController.onExternalRouteSet(newRoute)
+        billingController.onExternalRouteSet(newRoute, 0)
 
         verify(exactly = 1) {
             billingService.beginBillingSession(
@@ -865,7 +865,7 @@ class BillingControllerTest {
             every { internalWaypoints() } returns newWaypoints
         }
 
-        billingController.onExternalRouteSet(newRoute)
+        billingController.onExternalRouteSet(newRoute, 0)
 
         verifyOrder {
             billingService.beginBillingSession(
