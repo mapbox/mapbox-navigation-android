@@ -904,7 +904,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         callback: RoutesSetCallback? = null
     ) {
         if (routes.isNotEmpty()) {
-            billingController.onExternalRouteSet(routes.first())
+            billingController.onExternalRouteSet(routes.first(), initialLegIndex)
         }
 
         // Telemetry uses this field to determine what type of event should be triggered.

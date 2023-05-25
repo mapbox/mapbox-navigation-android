@@ -1421,7 +1421,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.setNavigationRoutes(emptyList())
 
-        verify(exactly = 0) { billingController.onExternalRouteSet(any()) }
+        verify(exactly = 0) { billingController.onExternalRouteSet(any(), any()) }
     }
 
     @Test
@@ -1433,7 +1433,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation.setNavigationRoutes(routes)
 
             verifyOrder {
-                billingController.onExternalRouteSet(routes.first())
+                billingController.onExternalRouteSet(routes.first(), 0)
                 directionsSession.setRoutes(
                     DirectionsSessionRoutes(
                         routes,
@@ -1441,6 +1441,19 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                         SetRoutes.NewRoutes(0)
                     )
                 )
+            }
+        }
+
+    @Test
+    fun `external route is set with correct initial leg index`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            val routes = listOf(mockk<NavigationRoute>(relaxed = true))
+
+            mapboxNavigation.setNavigationRoutes(routes, 2)
+
+            verify {
+                billingController.onExternalRouteSet(routes.first(), 2)
             }
         }
 
