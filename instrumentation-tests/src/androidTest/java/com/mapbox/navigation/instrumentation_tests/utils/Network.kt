@@ -53,7 +53,9 @@ private suspend fun assumeNetworkIsNotReachable(reachability: ReachabilityInterf
     )
 }
 
-suspend fun ReachabilityInterface.waitForNetworkStatus(condition: (NetworkStatus) -> Boolean) {
+private suspend fun ReachabilityInterface.waitForNetworkStatus(
+    condition: (NetworkStatus) -> Boolean
+) {
     val currentStatus = currentNetworkStatus()
     if (condition(currentNetworkStatus())) {
         Log.d(LOG_TAG, "Network status $currentStatus is ok")
