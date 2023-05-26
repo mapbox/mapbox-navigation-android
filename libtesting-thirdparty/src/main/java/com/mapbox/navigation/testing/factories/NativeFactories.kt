@@ -180,8 +180,8 @@ fun createMapMatcherOutput() = MapMatcherOutput(emptyList(), false)
 fun createRouteInterface(
     responseUUID: String = "testResponseUUID",
     routeIndex: Int = 0,
-    responseJson: String = "",
-    requestURI: String = "",
+    responseJson: String = createDirectionsResponse().toJson(),
+    requestURI: String = createRouteOptions().toUrl("***").toString(),
     routerOrigin: RouterOrigin = RouterOrigin.ONLINE,
     routeInfo: RouteInfo = RouteInfo(emptyList()),
     waypoints: List<Waypoint> = emptyList(),
