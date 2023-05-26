@@ -125,7 +125,8 @@ internal class RouteAlternativesController constructor(
                     )
                 },
                 { value ->
-                    // TODO: is online primary route filtered?
+                    // Switch from offline to online primary route isn't implemented for the case
+                    // when user manually triggers alternatives refresh
                     processRouteAlternatives(null, value) { alternatives, origin ->
                         listener?.onRouteAlternativeRequestFinished(
                             routeProgress,
