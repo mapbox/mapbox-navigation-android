@@ -52,7 +52,7 @@ suspend fun withoutWifiAndMobileData(block: suspend () -> Unit) {
 suspend fun ReachabilityInterface.waitForNetworkStatus(condition: (NetworkStatus) -> Boolean) {
     val currentStatus = currentNetworkStatus()
     if (condition(currentNetworkStatus())) {
-        Log.d(LOG_TAG, "Network status ${currentStatus} is ok")
+        Log.d(LOG_TAG, "Network status $currentStatus is ok")
         return
     }
     suspendCancellableCoroutine<Unit> { continuation ->
