@@ -2,6 +2,7 @@ package com.mapbox.navigation.core
 
 import android.content.Context
 import com.mapbox.navigation.base.internal.NavigationRouterV2
+import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -15,6 +16,8 @@ import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.InternalRerouteController
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.telemetry.ApplicationLifecycleMonitor
+import com.mapbox.navigation.core.telemetry.EventsMetadataInterfaceImpl
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
@@ -26,6 +29,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.ConfigHandle
+import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
@@ -43,12 +47,14 @@ internal object NavigationComponentProvider {
         tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface,
+        eventsMetadataInterface: EventsMetadataInterface,
     ): MapboxNativeNavigator = MapboxNativeNavigatorImpl.create(
         config,
         historyRecorderComposite,
         tilesConfig,
         accessToken,
         router,
+        eventsMetadataInterface,
     )
 
     fun createTripService(
@@ -120,6 +126,16 @@ internal object NavigationComponentProvider {
     fun createEVDynamicDataHolder(): EVDynamicDataHolder = EVDynamicDataHolder()
 
     fun createRoutesCacheClearer(): RoutesCacheClearer = RoutesCacheClearer()
+
+    fun createEventsMetadataInterface(
+        appContext: Context,
+        lifecycleMonitor: ApplicationLifecycleMonitor,
+        eventsAppMetadata: EventsAppMetadata?,
+    ): EventsMetadataInterface = EventsMetadataInterfaceImpl(
+        appContext,
+        lifecycleMonitor,
+        eventsAppMetadata
+    )
 
     fun createRerouteController(
         directionsSession: DirectionsSession,

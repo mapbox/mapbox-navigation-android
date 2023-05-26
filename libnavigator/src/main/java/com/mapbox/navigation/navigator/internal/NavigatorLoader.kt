@@ -20,6 +20,8 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterType
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
+import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * This class is expected to gain more responsibility as we define [customConfig].
@@ -34,7 +36,7 @@ object NavigatorLoader {
         ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            deviceProfile.customConfig,
+            enableNativeTelemetryEventsAndSwitchToImmediatePriority(deviceProfile.customConfig),
         )
 
     fun createHistoryRecorderHandles(
@@ -152,4 +154,40 @@ object NavigatorLoader {
         val router: RouterInterface,
         val routeAlternativesController: RouteAlternativesControllerInterface,
     )
+
+    private fun enableNativeTelemetryEventsAndSwitchToImmediatePriority(config: String): String {
+        val rootJsonObj = if (config.isNotBlank()) {
+            try {
+                JSONObject(config)
+            } catch (e: JSONException) {
+                logE(msg = "custom config json does not valid: $e")
+                logE(msg = "custom config: [$config]")
+                JSONObject()
+            }
+        } else {
+            JSONObject()
+        }
+
+        val featuresJsonObj = if (rootJsonObj.has("features")) {
+            rootJsonObj.getJSONObject("features")
+        } else {
+            JSONObject().also {
+                rootJsonObj.put("features", it)
+            }
+        }
+
+        featuresJsonObj.put("useTelemetryNavigationEvents", true)
+
+        val telemetryJsonObj = if (rootJsonObj.has("telemetry")) {
+            rootJsonObj.getJSONObject("telemetry")
+        } else {
+            JSONObject().also {
+                rootJsonObj.put("telemetry", it)
+            }
+        }
+
+        telemetryJsonObj.put("eventsPriority", "Immediate")
+
+        return rootJsonObj.toString()
+    }
 }

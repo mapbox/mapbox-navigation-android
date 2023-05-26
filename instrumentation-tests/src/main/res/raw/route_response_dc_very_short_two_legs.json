@@ -1,1 +1,388 @@
-{"routes":[{"weight_name":"auto","weight":40.077,"duration":28.029,"distance":175.999,"legs":[{"via_waypoints":[],"admins":[{"iso_3166_1_alpha3":"USA","iso_3166_1":"US"}],"weight":13.988,"duration":9.967,"steps":[{"intersections":[{"entry":[true],"bearings":[0],"duration":8.52,"mapbox_streets_v8":{"class":"secondary"},"is_urban":true,"admin_index":0,"out":0,"weight":10.224,"geometry_index":0,"location":[-77.031957,38.894721]},{"bearings":[1,180],"entry":[true,false],"in":1,"turn_weight":2,"lanes":[{"indications":["left"],"valid":false,"active":false},{"indications":["straight"],"valid_indication":"straight","valid":true,"active":false},{"indications":["straight"],"valid_indication":"straight","valid":true,"active":false},{"indications":["straight"],"valid_indication":"straight","valid":true,"active":true}],"turn_duration":0.007,"mapbox_streets_v8":{"class":"secondary"},"is_urban":true,"admin_index":0,"out":0,"geometry_index":1,"location":[-77.031952,38.895356]}],"maneuver":{"type":"depart","instruction":"Drive north on 14th Street Northwest.","bearing_after":0,"bearing_before":0,"location":[-77.031957,38.894721]},"name":"14th Street Northwest","duration":9.967,"distance":82.999,"driving_side":"right","weight":13.988,"mode":"driving","geometry":"ag}diAh`t|qCuf@IoEC"},{"intersections":[{"bearings":[181],"entry":[true],"in":0,"admin_index":0,"geometry_index":2,"location":[-77.03195,38.89546]}],"maneuver":{"type":"arrive","instruction":"You have arrived at your destination.","bearing_after":0,"bearing_before":1,"location":[-77.03195,38.89546]},"name":"14th Street Northwest","duration":0,"distance":0,"driving_side":"right","weight":0,"mode":"driving","geometry":"gu~diAz_t|qC??"}],"distance":82.999,"summary":"14th Street Northwest"},{"via_waypoints":[],"admins":[{"iso_3166_1_alpha3":"USA","iso_3166_1":"US"}],"weight":26.089,"duration":18.062,"steps":[{"intersections":[{"bearings":[91],"entry":[true],"mapbox_streets_v8":{"class":"secondary"},"is_urban":true,"admin_index":0,"out":0,"geometry_index":0,"location":[-77.03195,38.89546]},{"lanes":[{"indications":["left"],"valid":false,"active":false},{"indications":["straight"],"valid_indication":"straight","valid":true,"active":false},{"indications":["straight"],"valid_indication":"straight","valid":true,"active":false},{"indications":["straight"],"valid_indication":"straight","valid":true,"active":true}],"location":[-77.03195,38.89546],"geometry_index":1,"admin_index":0,"weight":12.307,"is_urban":true,"mapbox_streets_v8":{"class":"primary"},"turn_duration":4.105,"turn_weight":9,"duration":6.805,"bearings":[91,271],"out":0,"in":1,"entry":[true,false]},{"entry":[true,false],"in":1,"bearings":[90,271],"duration":6.907,"turn_duration":0.007,"mapbox_streets_v8":{"class":"primary"},"is_urban":true,"admin_index":0,"out":0,"weight":8.453,"geometry_index":2,"location":[-77.031746,38.895456]},{"bearings":[89,270],"entry":[true,false],"in":1,"mapbox_streets_v8":{"class":"primary"},"is_urban":true,"admin_index":0,"out":0,"geometry_index":3,"location":[-77.031214,38.895455]}],"maneuver":{"type":"depart","instruction":"Drive east on 14th Street Northwest.","bearing_after":91,"bearing_before":0,"location":[-77.03195,38.89546]},"name":"14th Street Northwest","duration":18.062,"distance":93,"driving_side":"right","weight":26.089,"mode":"driving","geometry":"gu~diAz_t|qC??FwK@g`@CsPVmB"},{"intersections":[{"bearings":[273],"entry":[true],"in":0,"admin_index":0,"geometry_index":5,"location":[-77.030877,38.895445]}],"maneuver":{"type":"arrive","instruction":"You have arrived at your destination.","bearing_after":0,"bearing_before":93,"location":[-77.030877,38.895445]},"name":"14th Street Northwest","duration":0,"distance":0,"driving_side":"right","weight":0,"mode":"driving","geometry":"it~diAx|q|qC??"}],"distance":93,"summary":"14th Street Northwest"}],"geometry":"ag}diAh`t|qCuf@IoEC??FwK@g`@CsPVmB"}],"waypoints":[{"distance":2.923,"name":"14th Street Northwest","location":[-77.031957,38.894721]},{"distance":4.653,"name":"14th Street Northwest","location":[-77.03195,38.89546]},{"distance":4.203,"name":"Pennsylvania Avenue Northwest","location":[-77.030877,38.895445]}],"code":"Ok","uuid":"-gwFFMMQec5DWP_57ZYK6p2R0FupsxNYJfNCP6IICk2zWNGRGsMZvg=="}
+{
+  "routes": [
+    {
+      "weight_name": "auto",
+      "weight": 40.077,
+      "duration": 28.029,
+      "distance": 175.999,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "USA",
+              "iso_3166_1": "US"
+            }
+          ],
+          "weight": 13.988,
+          "duration": 9.967,
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    0
+                  ],
+                  "duration": 8.52,
+                  "mapbox_streets_v8": {
+                    "class": "secondary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 10.224,
+                  "geometry_index": 0,
+                  "location": [
+                    -77.031957,
+                    38.894721
+                  ]
+                },
+                {
+                  "bearings": [
+                    1,
+                    180
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "turn_weight": 2,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "secondary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 1,
+                  "location": [
+                    -77.031952,
+                    38.895356
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive north on 14th Street Northwest.",
+                "bearing_after": 0,
+                "bearing_before": 0,
+                "location": [
+                  -77.031957,
+                  38.894721
+                ]
+              },
+              "name": "14th Street Northwest",
+              "duration": 9.967,
+              "distance": 82.999,
+              "driving_side": "right",
+              "weight": 13.988,
+              "mode": "driving",
+              "geometry": "ag}diAh`t|qCuf@IoEC"
+            },
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    181
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 2,
+                  "location": [
+                    -77.03195,
+                    38.89546
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "You have arrived at your destination.",
+                "bearing_after": 0,
+                "bearing_before": 1,
+                "location": [
+                  -77.03195,
+                  38.89546
+                ]
+              },
+              "name": "14th Street Northwest",
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "gu~diAz_t|qC??"
+            }
+          ],
+          "distance": 82.999,
+          "summary": "14th Street Northwest"
+        },
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "USA",
+              "iso_3166_1": "US"
+            }
+          ],
+          "weight": 26.089,
+          "duration": 18.062,
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    91
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "secondary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 0,
+                  "location": [
+                    -77.03195,
+                    38.89546
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "location": [
+                    -77.03195,
+                    38.89546
+                  ],
+                  "geometry_index": 1,
+                  "admin_index": 0,
+                  "weight": 12.307,
+                  "is_urban": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "turn_duration": 4.105,
+                  "turn_weight": 9,
+                  "duration": 6.805,
+                  "bearings": [
+                    91,
+                    271
+                  ],
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    90,
+                    271
+                  ],
+                  "duration": 6.907,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 8.453,
+                  "geometry_index": 2,
+                  "location": [
+                    -77.031746,
+                    38.895456
+                  ]
+                },
+                {
+                  "bearings": [
+                    89,
+                    270
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 3,
+                  "location": [
+                    -77.031214,
+                    38.895455
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive east on 14th Street Northwest.",
+                "bearing_after": 91,
+                "bearing_before": 0,
+                "location": [
+                  -77.03195,
+                  38.89546
+                ]
+              },
+              "name": "14th Street Northwest",
+              "duration": 18.062,
+              "distance": 93,
+              "driving_side": "right",
+              "weight": 26.089,
+              "mode": "driving",
+              "geometry": "gu~diAz_t|qC??FwK@g`@CsPVmB"
+            },
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    273
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 5,
+                  "location": [
+                    -77.030877,
+                    38.895445
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "You have arrived at your destination.",
+                "bearing_after": 0,
+                "bearing_before": 93,
+                "location": [
+                  -77.030877,
+                  38.895445
+                ]
+              },
+              "name": "14th Street Northwest",
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "it~diAx|q|qC??"
+            }
+          ],
+          "distance": 93,
+          "summary": "14th Street Northwest"
+        }
+      ],
+      "geometry": "ag}diAh`t|qCuf@IoEC??FwK@g`@CsPVmB"
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 2.923,
+      "name": "14th Street Northwest",
+      "location": [
+        -77.031957,
+        38.894721
+      ]
+    },
+    {
+      "distance": 4.653,
+      "name": "14th Street Northwest",
+      "location": [
+        -77.03195,
+        38.89546
+      ]
+    },
+    {
+      "distance": 4.203,
+      "name": "Pennsylvania Avenue Northwest",
+      "location": [
+        -77.030877,
+        38.895445
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "-gwFFMMQec5DWP_57ZYK6p2R0FupsxNYJfNCP6IICk2zWNGRGsMZvg=="
+}

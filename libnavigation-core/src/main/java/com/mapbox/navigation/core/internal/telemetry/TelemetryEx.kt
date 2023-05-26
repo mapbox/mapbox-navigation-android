@@ -2,45 +2,23 @@
 
 package com.mapbox.navigation.core.internal.telemetry
 
-import android.location.Location
-import android.os.Build
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
-import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
-
-internal fun List<Location>.toTelemetryLocations(): Array<TelemetryLocation> {
-    return Array(size) { get(it).toTelemetryLocation() }
-}
-
-internal fun Location.toTelemetryLocation(): TelemetryLocation {
-    return TelemetryLocation(
-        latitude,
-        longitude,
-        speed,
-        bearing,
-        altitude,
-        time.toString(),
-        accuracy,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            verticalAccuracyMeters
-        } else {
-            0f
-        },
-    )
-}
+import com.mapbox.navigation.core.telemetry.events.UserFeedback
 
 /**
  * Register a [UserFeedbackCallback] to be notified when a new user feedback is posted.
  *
  * @param userFeedbackCallback UserFeedbackCallback
  */
-fun registerUserFeedbackCallback(userFeedbackCallback: UserFeedbackCallback) {
-    MapboxNavigationTelemetry.registerUserFeedbackCallback(userFeedbackCallback)
+fun registerUserFeedbackCallback(
+    mapboxNavigation: MapboxNavigation, userFeedbackCallback: UserFeedbackCallback
+) {
+    mapboxNavigation.userFeedbackSubscriber.registerUserFeedbackCallback(userFeedbackCallback)
 }
 
 /**
@@ -48,8 +26,10 @@ fun registerUserFeedbackCallback(userFeedbackCallback: UserFeedbackCallback) {
  *
  * @param userFeedbackCallback UserFeedbackCallback
  */
-fun unregisterUserFeedbackCallback(userFeedbackCallback: UserFeedbackCallback) {
-    MapboxNavigationTelemetry.unregisterUserFeedbackCallback(userFeedbackCallback)
+fun unregisterUserFeedbackCallback(
+    mapboxNavigation: MapboxNavigation, userFeedbackCallback: UserFeedbackCallback
+) {
+    mapboxNavigation.userFeedbackSubscriber.unregisterUserFeedbackCallback(userFeedbackCallback)
 }
 
 /**
@@ -77,21 +57,11 @@ fun unregisterUserFeedbackCallback(userFeedbackCallback: UserFeedbackCallback) {
 @ExperimentalPreviewMapboxNavigationAPI
 @JvmOverloads
 fun MapboxNavigation.postUserFeedback(
-    feedbackType: String,
-    description: String,
-    @FeedbackEvent.Source feedbackSource: String,
-    screenshot: String,
-    feedbackSubType: Array<String>? = emptyArray(),
-    feedbackMetadata: FeedbackMetadata? = null,
+    userFeedback: UserFeedback,
     userFeedbackCallback: UserFeedbackCallback,
 ) {
     postUserFeedback(
-        feedbackType,
-        description,
-        feedbackSource,
-        screenshot,
-        feedbackSubType,
-        feedbackMetadata,
+        userFeedback,
         userFeedbackCallback,
     )
 }
@@ -104,3 +74,6 @@ fun MapboxNavigation.sendCustomEvent(
 ) {
     postCustomEvent(payload, customEventType, customEventVersion)
 }
+
+fun MapboxNavigation.telemetryAndroidAutoInterface(): TelemetryAndroidAutoInterface =
+    telemetryAndroidAutoInterface

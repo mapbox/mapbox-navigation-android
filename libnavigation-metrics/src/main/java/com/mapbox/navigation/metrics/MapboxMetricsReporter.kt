@@ -1,6 +1,7 @@
 package com.mapbox.navigation.metrics
 
 import android.content.Context
+import android.os.Handler
 import com.google.gson.Gson
 import com.mapbox.bindgen.Value
 import com.mapbox.common.Event
@@ -16,6 +17,8 @@ import com.mapbox.navigation.base.internal.metric.extractEventsNames
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
+import com.mapbox.navigation.metrics.events.EventsServiceInterfacesManager
+import com.mapbox.navigation.metrics.events.TelemetryEventsProvider
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
@@ -33,7 +36,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private const val LOG_CATEGORY = "MapboxMetricsReporter"
 
     private val gson = Gson()
-    private lateinit var eventsService: EventsServiceInterface
+    private lateinit var eventsManager: EventsServiceInterfacesManager
     private lateinit var telemetryService: TelemetryService
 
     @Volatile
@@ -63,6 +66,12 @@ object MapboxMetricsReporter : MetricsReporter {
         }
 
     /**
+     * Events priority. See [EventPriority]
+     */
+    @Volatile
+    var eventsPriority: EventPriority = EventPriority.IMMEDIATE
+
+    /**
      * Initialize [EventsServiceInterface] and [TelemetryService] that need to send event to
      * Mapbox Telemetry server.
      *
@@ -77,10 +86,10 @@ object MapboxMetricsReporter : MetricsReporter {
         userAgent: String
     ) {
         isTelemetryInitialized = true
+        eventsManager = TelemetryEventsProvider.getOrCreateEventsServiceInterfacesManager(accessToken, userAgent)
         val eventsServerOptions = EventsServerOptions(accessToken, userAgent, null)
-        eventsService = EventsServiceProvider.provideEventsService(eventsServerOptions)
         telemetryService = TelemetryServiceProvider.provideTelemetryService(eventsServerOptions)
-        eventsService.registerObserver(eventsServiceObserver)
+        eventsManager.nativeEventsServiceInterface.registerObserver(eventsServiceObserver)
     }
 
     /**
@@ -102,7 +111,7 @@ object MapboxMetricsReporter : MetricsReporter {
     fun disable() {
         isTelemetryInitialized = false
         removeObserver()
-        eventsService.unregisterObserver(eventsServiceObserver)
+        eventsManager.nativeEventsServiceInterface.unregisterObserver(eventsServiceObserver)
         ioJobController.job.cancelChildren()
     }
 
@@ -118,8 +127,8 @@ object MapboxMetricsReporter : MetricsReporter {
                 )
                 return
             }
-            eventsService.sendEvent(
-                Event(EventPriority.QUEUED, metricEvent.toValue(), null)
+            eventsManager.nativeEventsServiceInterface.sendEvent(
+                Event(eventsPriority, metricEvent.toValue(), null)
             ) {
                 if (it != null) {
                     logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
@@ -137,11 +146,11 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     override fun sendTurnstileEvent(turnstileEvent: TurnstileEvent) {
         ifTelemetryIsRunning {
-            eventsService.sendTurnstileEvent(turnstileEvent) {
-                if (it != null) {
-                    logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
-                }
-            }
+//            eventsManager.nativeEventsServiceInterface.sendTurnstileEvent(turnstileEvent) {
+//                if (it != null) {
+//                    logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
+//                }
+//            }
         }
     }
 
@@ -157,6 +166,20 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     override fun removeObserver() {
         this.metricsObserver = null
+    }
+
+    /**
+     * Register [EventsServiceObserver]
+     */
+    fun registerEventsServiceObserver(observer: EventsServiceObserver) {
+//        eventsManager.nativeEventsServiceInterface.registerObserver(observer)
+    }
+
+    /**
+     * Unregister [EventsServiceObserver]
+     */
+    fun unregisterEventsServiceObserver(observer: EventsServiceObserver) {
+//        eventsManager.nativeEventsServiceInterface.unregisterObserver(observer)
     }
 
     private inline fun ifTelemetryIsRunning(func: () -> Unit) {

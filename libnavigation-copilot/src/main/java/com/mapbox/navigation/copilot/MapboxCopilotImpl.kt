@@ -30,7 +30,7 @@ import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.retrieveCopilotHistoryRecorder
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
-import com.mapbox.navigation.core.internal.telemetry.UserFeedback
+import com.mapbox.navigation.core.internal.telemetry.UserFeedbackInternal
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
@@ -131,7 +131,7 @@ internal class MapboxCopilotImpl(
      * start
      */
     fun start() {
-        registerUserFeedbackCallback(userFeedbackCallback)
+        registerUserFeedbackCallback(mapboxNavigation, userFeedbackCallback)
         if (isMapboxNavigationAppSetup) {
             MapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(
                 foregroundBackgroundLifecycleObserver
@@ -148,7 +148,7 @@ internal class MapboxCopilotImpl(
      * stop
      */
     fun stop() {
-        unregisterUserFeedbackCallback(userFeedbackCallback)
+        unregisterUserFeedbackCallback(mapboxNavigation, userFeedbackCallback)
         if (isMapboxNavigationAppSetup) {
             MapboxNavigationApp.lifecycleOwner.lifecycle.removeObserver(
                 foregroundBackgroundLifecycleObserver
@@ -217,12 +217,12 @@ internal class MapboxCopilotImpl(
         copilotHistoryRecorder.pushHistory(eventType, eventJson)
     }
 
-    private fun pushFeedbackEvent(userFeedback: UserFeedback) {
-        val lat = userFeedback.location.latitude()
-        val lng = userFeedback.location.longitude()
-        val feedbackId = userFeedback.feedbackId
-        val feedbackType = userFeedback.feedbackType
-        val feedbackSubType = userFeedback.feedbackSubType?.toHashSet().orEmpty()
+    private fun pushFeedbackEvent(userFeedbackInternal: UserFeedbackInternal) {
+        val lat = userFeedbackInternal.location.latitude()
+        val lng = userFeedbackInternal.location.longitude()
+        val feedbackId = userFeedbackInternal.feedbackId
+        val feedbackType = userFeedbackInternal.feedbackType
+        val feedbackSubType = userFeedbackInternal.feedbackSubType?.toHashSet().orEmpty()
         val feedbackEvent = NavFeedbackSubmitted(
             feedbackId,
             feedbackType,

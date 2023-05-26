@@ -36,6 +36,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
+import com.mapbox.navigation.core.telemetry.events.UserFeedback
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -245,12 +246,13 @@ class FeedbackActivity : AppCompatActivity() {
                     return@let
                 }
                 mapboxNavigation.postUserFeedback(
-                    FeedbackEvent.POSITIONING_ISSUE,
-                    "Test feedback",
-                    FeedbackEvent.UI,
-                    screenshot,
-                    emptyArray(),
-                    feedbackMetadata
+                    UserFeedback.Builder(
+                        FeedbackEvent.POSITIONING_ISSUE,
+                        "Test feedback",
+                    )
+                        .feedbackMetadata(feedbackMetadata)
+                        .build()
+
                 )
                 Toast.makeText(
                     this,

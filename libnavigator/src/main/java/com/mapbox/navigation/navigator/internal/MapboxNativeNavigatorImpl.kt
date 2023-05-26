@@ -22,6 +22,7 @@ import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
@@ -43,6 +44,7 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
+import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -67,6 +69,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
     override lateinit var router: RouterInterface
+    override lateinit var telemetry: Telemetry
     override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
@@ -84,6 +87,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface,
+        eventsMetadataInterface: EventsMetadataInterface,
     ): MapboxNativeNavigator {
         navigator?.shutdown()
 
@@ -100,6 +104,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
         this.router = nativeComponents.router
+        this.telemetry = nativeComponents.navigator.getTelemetry(eventsMetadataInterface)
         routeAlternativesController = nativeComponents.routeAlternativesController
         this.accessToken = accessToken
         return this
@@ -113,10 +118,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
         accessToken: String,
-        router: RouterInterface
+        router: RouterInterface,
+        eventsMetadataInterface: EventsMetadataInterface,
     ) {
         val storeNavSessionState = navigator!!.storeNavigationSession()
-        create(config, historyRecorderComposite, tilesConfig, accessToken, router)
+        create(config, historyRecorderComposite, tilesConfig, accessToken, router, eventsMetadataInterface)
         navigator!!.restoreNavigationSession(storeNavSessionState)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()

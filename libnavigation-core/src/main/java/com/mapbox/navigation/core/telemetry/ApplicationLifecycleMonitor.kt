@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.telemetry
 
 import android.app.Activity
 import android.app.Application
+import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import java.util.ArrayList
@@ -9,12 +10,15 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
-internal class ApplicationLifecycleMonitor(
-    application: Application
+internal class ApplicationLifecycleMonitor private constructor(
+    appContext: Context
 ) : Application.ActivityLifecycleCallbacks {
 
     companion object {
         private const val ONE_HUNDRED_PERCENT = 100
+
+        internal operator fun invoke(appContext: Context): ApplicationLifecycleMonitor =
+            ApplicationLifecycleMonitor(appContext)
     }
 
     private val startSessionTime: Long = System.currentTimeMillis()
@@ -25,8 +29,8 @@ internal class ApplicationLifecycleMonitor(
     private val portraitTimeInMillis = AtomicReference(0.0)
 
     init {
-        application.registerActivityLifecycleCallbacks(this)
-        initCurrentOrientation(application)
+        (appContext as Application).registerActivityLifecycleCallbacks(this)
+        initCurrentOrientation(appContext)
     }
 
     override fun onActivityStarted(activity: Activity) {
@@ -98,8 +102,8 @@ internal class ApplicationLifecycleMonitor(
         return (ONE_HUNDRED_PERCENT * (foregroundTime / (currentTime - startSessionTime))).toInt()
     }
 
-    private fun initCurrentOrientation(application: Application) {
-        currentOrientation.set(application.resources.configuration.orientation)
+    private fun initCurrentOrientation(appContext: Context) {
+        currentOrientation.set(appContext.resources.configuration.orientation)
         // If starting in portrait, set the portrait start time
         if (currentOrientation.get() == Configuration.ORIENTATION_PORTRAIT) {
             portraitStartTime.set(System.currentTimeMillis())
