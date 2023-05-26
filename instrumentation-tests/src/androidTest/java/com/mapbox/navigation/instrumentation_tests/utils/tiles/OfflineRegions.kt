@@ -12,6 +12,7 @@ object OfflineRegions {
     )
 }
 
+// covers Berlin partially to support EvRoutesProvider.getBerlinEvRoute
 private val BERLIN_GEOMETRY = FeatureCollection.fromJson(
     readRawFileText(
         InstrumentationRegistry.getInstrumentation().targetContext,
