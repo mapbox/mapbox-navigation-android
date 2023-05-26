@@ -250,12 +250,12 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 ) {
                     mapboxNavigation.startTripSession()
 
-                    // TODO remove non-empty filter after NN-754 is done
+                    // TODO remove non-empty filter after NN-757 is done
                     val alternativesCallbackResultBeforeSetRoute =
                         firstNonEmptyAlternativesUpdateDeferred(mapboxNavigation)
                     mapboxNavigation.setNavigationRoutesAsync(testRoutes)
                     mapboxNavigation.routeProgressUpdates().first()
-                    // TODO remove non-empty filter after NN-754 is done
+                    // TODO remove non-empty filter after NN-757 is done
                     val alternativesCallbackResultAfterSetRoute =
                         firstNonEmptyAlternativesUpdateDeferred(mapboxNavigation)
                     val externalAlternatives = createExternalAlternatives()
