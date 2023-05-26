@@ -9,11 +9,12 @@ import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.internal.AlternativeDataProvider
 import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.core.internal.RoutesProgressData
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -76,7 +77,7 @@ class RouteLineComponent(
     contractProvider: Provider<RouteLineComponentContract>? = null
 ) : UIComponent() {
 
-    private var currentRouteProgressData: RouteProgressData? = null
+    private var currentRoutesProgressData: RoutesProgressData? = null
     private val contractProvider: Provider<RouteLineComponentContract>
 
     init {
@@ -116,11 +117,20 @@ class RouteLineComponent(
         coroutineScope.launch {
             mapboxNavigation.flowRouteProgress().collect { routeProgress ->
                 if (routeProgress.currentState == RouteProgressState.TRACKING) {
-                    currentRouteProgressData = routeProgress.currentLegProgress?.let {
-                        RouteProgressData(
-                            it.legIndex,
-                            routeProgress.currentRouteGeometryIndex,
-                            it.geometryIndex
+                    currentRoutesProgressData = routeProgress.currentLegProgress?.let {
+                        RoutesProgressData(
+                            RouteProgressData(
+                                it.legIndex,
+                                routeProgress.currentRouteGeometryIndex,
+                                it.geometryIndex
+                            ),
+                            routeProgress.internalAlternativeRouteIndices().mapValues { entry ->
+                                RouteProgressData(
+                                    entry.value.legIndex,
+                                    entry.value.routeGeometryIndex,
+                                    entry.value.legGeometryIndex
+                                )
+                            }
                         )
                     }
                 }
@@ -138,7 +148,7 @@ class RouteLineComponent(
 
         coroutineScope.launch {
             val routesFlow = mapboxNavigation.flowRoutesUpdated()
-                .onEach { currentRouteProgressData = null }
+                .onEach { currentRoutesProgressData = null }
                 .map { it.navigationRoutes to mapboxNavigation.currentLegIndex() }
                 .stateIn(
                     this,
@@ -174,7 +184,7 @@ class RouteLineComponent(
         mapPlugins.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         routeLineApi.cancel()
         routeLineView.cancel()
-        currentRouteProgressData = null
+        currentRoutesProgressData = null
         this.mapboxNavigation = null
     }
 
@@ -185,16 +195,8 @@ class RouteLineComponent(
                 { result ->
                     if (result.navigationRoute != routeLineApi.getPrimaryNavigationRoute()) {
                         val reOrderedRoutes = arrayListOf(result.navigationRoute)
-                        val legIndex = mapboxNavigation.getAlternativeMetadataFor(
-                            result.navigationRoute
-                        )?.let {
-                            ifNonNull(currentRouteProgressData) { routeProgressData ->
-                                AlternativeDataProvider.getAlternativeLegIndex(
-                                    routeProgressData,
-                                    it
-                                )
-                            }
-                        }
+                        val legIndex = currentRoutesProgressData?.alternatives
+                            ?.get(result.navigationRoute.id)?.legIndex
                         routeLineApi.getNavigationRoutes().filterTo(reOrderedRoutes) { route ->
                             route != result.navigationRoute
                         }

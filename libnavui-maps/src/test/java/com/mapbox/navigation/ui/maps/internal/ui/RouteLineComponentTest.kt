@@ -15,14 +15,13 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.core.internal.AlternativeDataProvider
-import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -40,7 +39,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkStatic
@@ -395,200 +393,197 @@ class RouteLineComponentTest {
 
     @Test
     fun `selectRoute use correct leg index`() {
-        mockkObject(AlternativeDataProvider) {
-            val clickSlot = slot<OnMapClickListener>()
-            val oldRoute = mockk<NavigationRoute> { every { directionsRoute } returns mockk() }
-            val newRoute = mockk<NavigationRoute> { every { directionsRoute } returns mockk() }
-            val newClickPoint = Point.fromLngLat(0.0, 0.0)
-            val oldClickPoint = Point.fromLngLat(1.0, 1.0)
-            var oldRouteIsPrimary = true
+        val clickSlot = slot<OnMapClickListener>()
+        val oldRoute = mockk<NavigationRoute> {
+            every { directionsRoute } returns mockk()
+            every { id } returns "oldid"
+        }
+        val newRoute = mockk<NavigationRoute> {
+            every { directionsRoute } returns mockk()
+            every { id } returns "newid"
+        }
+        val newClickPoint = Point.fromLngLat(0.0, 0.0)
+        val oldClickPoint = Point.fromLngLat(1.0, 1.0)
+        var oldRouteIsPrimary = true
 
-            val mockApi = mockk<MapboxRouteLineApi>(relaxed = true) {
-                every { getPrimaryNavigationRoute() } answers {
-                    if (oldRouteIsPrimary) {
-                        oldRoute
-                    } else {
-                        newRoute
-                    }
-                }
-                every { getNavigationRoutes() } answers {
-                    listOf(
-                        oldRoute,
-                        newRoute
-                    ).apply {
-                        if (!oldRouteIsPrimary) reversed()
-                    }
-                }
-                every { findClosestRoute(newClickPoint, any(), any(), any()) } answers {
-                    val consumer = args[3]
-                        as MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>
-                    consumer.accept(
-                        ExpectedFactory.createValue(
-                            ClosestRouteValue(
-                                newRoute
-                            )
-                        )
-                    )
-                }
-                every { findClosestRoute(oldClickPoint, any(), any(), any()) } answers {
-                    val consumer = args[3]
-                        as MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>
-                    consumer.accept(
-                        ExpectedFactory.createValue(
-                            ClosestRouteValue(
-                                oldRoute
-                            )
-                        )
-                    )
+        val mockApi = mockk<MapboxRouteLineApi>(relaxed = true) {
+            every { getPrimaryNavigationRoute() } answers {
+                if (oldRouteIsPrimary) {
+                    oldRoute
+                } else {
+                    newRoute
                 }
             }
-
-            val customContract = mockk<RouteLineComponentContract>(relaxed = true)
-            val sut = RouteLineComponent(mockMap, mapPluginProvider, options, mockApi) {
-                customContract
+            every { getNavigationRoutes() } answers {
+                listOf(
+                    oldRoute,
+                    newRoute
+                ).apply {
+                    if (!oldRouteIsPrimary) reversed()
+                }
             }
-            val routesObserverSlot = slot<RoutesObserver>()
-            val routeProgressObserverSlot = slot<RouteProgressObserver>()
-            sut.onAttached(mockMapboxNavigation)
-            verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
-            val clickListener = clickSlot.captured
-            verify { mockMapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) }
-            verify {
-                mockMapboxNavigation.registerRouteProgressObserver(
-                    capture(
-                        routeProgressObserverSlot
+            every { findClosestRoute(newClickPoint, any(), any(), any()) } answers {
+                val consumer = args[3]
+                    as MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>
+                consumer.accept(
+                    ExpectedFactory.createValue(
+                        ClosestRouteValue(
+                            newRoute
+                        )
                     )
                 )
             }
-
-            clickListener.onMapClick(newClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
-            }
-
-            val alternativeMetadata = mockk<AlternativeRouteMetadata>(relaxed = true)
-            every {
-                mockMapboxNavigation.getAlternativeMetadataFor(any<NavigationRoute>())
-            } returns alternativeMetadata
-            every {
-                AlternativeDataProvider.getAlternativeLegIndex(
-                    RouteProgressData(1, 2, 3),
-                    alternativeMetadata
+            every { findClosestRoute(oldClickPoint, any(), any(), any()) } answers {
+                val consumer = args[3]
+                    as MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>
+                consumer.accept(
+                    ExpectedFactory.createValue(
+                        ClosestRouteValue(
+                            oldRoute
+                        )
+                    )
                 )
-            } returns 5
-            routeProgressObserverSlot.captured.onRouteProgressChanged(
-                mockk {
-                    every { currentRouteGeometryIndex } returns 2
-                    every { currentLegProgress } returns mockk {
-                        every { legIndex } returns 1
-                        every { geometryIndex } returns 3
-                    }
-                    every { currentState } returns RouteProgressState.TRACKING
-                }
+            }
+        }
+
+        val customContract = mockk<RouteLineComponentContract>(relaxed = true)
+        val sut = RouteLineComponent(mockMap, mapPluginProvider, options, mockApi) {
+            customContract
+        }
+        val routesObserverSlot = slot<RoutesObserver>()
+        val routeProgressObserverSlot = slot<RouteProgressObserver>()
+        sut.onAttached(mockMapboxNavigation)
+        verify { mockGestures.addOnMapClickListener(capture(clickSlot)) }
+        val clickListener = clickSlot.captured
+        verify { mockMapboxNavigation.registerRoutesObserver(capture(routesObserverSlot)) }
+        verify {
+            mockMapboxNavigation.registerRouteProgressObserver(
+                capture(
+                    routeProgressObserverSlot
+                )
             )
+        }
 
-            oldRouteIsPrimary = false
-            clearAllMocks(answers = false)
-            clickListener.onMapClick(oldClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(oldRoute, newRoute), 5)
-            }
+        clickListener.onMapClick(newClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
+        }
 
-            every {
-                mockMapboxNavigation.getAlternativeMetadataFor(any<NavigationRoute>())
-            } returns null
-            oldRouteIsPrimary = true
-            clearAllMocks(answers = false)
-            clickListener.onMapClick(newClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
-            }
-
-            every {
-                mockMapboxNavigation.getAlternativeMetadataFor(any<NavigationRoute>())
-            } returns alternativeMetadata
-            oldRouteIsPrimary = false
-            clearAllMocks(answers = false)
-            clickListener.onMapClick(oldClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(oldRoute, newRoute), 5)
-            }
-
-            oldRouteIsPrimary = true
-            clearAllMocks(answers = false)
-            routesObserverSlot.captured.onRoutesChanged(
-                mockk {
-                    every { navigationRoutes } returns listOf(oldRoute, newRoute)
+        routeProgressObserverSlot.captured.onRouteProgressChanged(
+            mockk {
+                every { currentRouteGeometryIndex } returns 2
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 1
+                    every { geometryIndex } returns 3
                 }
-            )
-            every { mockMapboxNavigation.currentLegIndex() } returns 4
-            clickListener.onMapClick(newClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
+                every { currentState } returns RouteProgressState.TRACKING
+                every {
+                    internalAlternativeRouteIndices()
+                } returns mapOf("oldid" to mockk(relaxed = true) { every { legIndex } returns 5 })
             }
+        )
 
-            routeProgressObserverSlot.captured.onRouteProgressChanged(
-                mockk {
-                    every { currentRouteGeometryIndex } returns 2
-                    every { currentLegProgress } returns mockk {
-                        every { legIndex } returns 1
-                        every { geometryIndex } returns 3
-                    }
-                    every { currentState } returns RouteProgressState.OFF_ROUTE
-                }
-            )
-            oldRouteIsPrimary = false
-            clearAllMocks(answers = false)
-            clickListener.onMapClick(oldClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(oldRoute, newRoute), null)
-            }
+        oldRouteIsPrimary = false
+        clearAllMocks(answers = false)
+        clickListener.onMapClick(oldClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(oldRoute, newRoute), 5)
+        }
 
-            routeProgressObserverSlot.captured.onRouteProgressChanged(
-                mockk {
-                    every { currentRouteGeometryIndex } returns 2
-                    every { currentLegProgress } returns null
-                    every { currentState } returns RouteProgressState.TRACKING
-                }
-            )
-            oldRouteIsPrimary = true
-            clearAllMocks(answers = false)
-            routesObserverSlot.captured.onRoutesChanged(
-                mockk {
-                    every { navigationRoutes } returns listOf(oldRoute, newRoute)
-                }
-            )
-            every { mockMapboxNavigation.currentLegIndex() } returns 4
-            clickListener.onMapClick(newClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
-            }
+        every {
+            mockMapboxNavigation.getAlternativeMetadataFor(any<NavigationRoute>())
+        } returns null
+        oldRouteIsPrimary = true
+        clearAllMocks(answers = false)
+        clickListener.onMapClick(newClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
+        }
 
-            routeProgressObserverSlot.captured.onRouteProgressChanged(
-                mockk {
-                    every { currentRouteGeometryIndex } returns 2
-                    every { currentLegProgress } returns mockk {
-                        every { legIndex } returns 1
-                        every { geometryIndex } returns 3
-                    }
-                    every { currentState } returns RouteProgressState.TRACKING
-                }
-            )
-            oldRouteIsPrimary = false
-            clearAllMocks(answers = false)
-            clickListener.onMapClick(oldClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(oldRoute, newRoute), 5)
-            }
+        oldRouteIsPrimary = false
+        clearAllMocks(answers = false)
+        clickListener.onMapClick(oldClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(oldRoute, newRoute), 5)
+        }
 
-            oldRouteIsPrimary = true
-            clearAllMocks(answers = false)
-            sut.onDetached(mockMapboxNavigation)
-            sut.onAttached(mockMapboxNavigation)
-            clickListener.onMapClick(newClickPoint)
-            verify(exactly = 1) {
-                customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
+        oldRouteIsPrimary = true
+        clearAllMocks(answers = false)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(oldRoute, newRoute)
             }
+        )
+        every { mockMapboxNavigation.currentLegIndex() } returns 4
+        clickListener.onMapClick(newClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
+        }
+
+        routeProgressObserverSlot.captured.onRouteProgressChanged(
+            mockk {
+                every { currentRouteGeometryIndex } returns 2
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 1
+                    every { geometryIndex } returns 3
+                }
+                every { currentState } returns RouteProgressState.OFF_ROUTE
+            }
+        )
+        oldRouteIsPrimary = false
+        clearAllMocks(answers = false)
+        clickListener.onMapClick(oldClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(oldRoute, newRoute), null)
+        }
+
+        routeProgressObserverSlot.captured.onRouteProgressChanged(
+            mockk {
+                every { currentRouteGeometryIndex } returns 2
+                every { currentLegProgress } returns null
+                every { currentState } returns RouteProgressState.TRACKING
+            }
+        )
+        oldRouteIsPrimary = true
+        clearAllMocks(answers = false)
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk {
+                every { navigationRoutes } returns listOf(oldRoute, newRoute)
+            }
+        )
+        every { mockMapboxNavigation.currentLegIndex() } returns 4
+        clickListener.onMapClick(newClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
+        }
+
+        routeProgressObserverSlot.captured.onRouteProgressChanged(
+            mockk {
+                every { currentRouteGeometryIndex } returns 2
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 1
+                    every { geometryIndex } returns 3
+                }
+                every { currentState } returns RouteProgressState.TRACKING
+                every {
+                    internalAlternativeRouteIndices()
+                } returns mapOf("oldid" to mockk(relaxed = true) { every { legIndex } returns 5 })
+            }
+        )
+        oldRouteIsPrimary = false
+        clearAllMocks(answers = false)
+        clickListener.onMapClick(oldClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(oldRoute, newRoute), 5)
+        }
+
+        oldRouteIsPrimary = true
+        clearAllMocks(answers = false)
+        sut.onDetached(mockMapboxNavigation)
+        sut.onAttached(mockMapboxNavigation)
+        clickListener.onMapClick(newClickPoint)
+        verify(exactly = 1) {
+            customContract.setRoutes(mockMapboxNavigation, listOf(newRoute, oldRoute), null)
         }
     }
 

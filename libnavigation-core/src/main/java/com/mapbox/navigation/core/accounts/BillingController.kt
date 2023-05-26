@@ -283,7 +283,7 @@ internal class BillingController(
                 tripSession.getRouteProgress()
             )
             val newWaypoints = getNonServerAddedWaypointsOnRoute(navigationRoute) {
-                countWaypointsUntilLegIndex(this, initialLegIndex) + 1
+                countWaypointsUpToLegIndex(this, initialLegIndex)
             }
 
             if (!waypointsWithinRange(currentRemainingWaypoints, newWaypoints)) {
@@ -301,13 +301,13 @@ internal class BillingController(
         }
     }
 
-    private fun countWaypointsUntilLegIndex(waypoints: List<Waypoint>, initialLegIndex: Int): Int {
-        if (initialLegIndex == 0) return 0
+    private fun countWaypointsUpToLegIndex(waypoints: List<Waypoint>, initialLegIndex: Int): Int {
+        if (initialLegIndex >= waypoints.size) return 1
         var currentLegWaypointIndex = 0
         var currentWaypointIndex = 0
-        while (currentLegWaypointIndex < initialLegIndex) {
-            currentWaypointIndex++
+        while (currentLegWaypointIndex <= initialLegIndex) {
             if (waypoints[currentWaypointIndex].isLegWaypoint()) currentLegWaypointIndex++
+            currentWaypointIndex++
         }
         return currentWaypointIndex
     }

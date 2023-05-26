@@ -14,7 +14,6 @@ import com.mapbox.navigation.core.preview.NativeRoutesDataParser
 import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.InternalRerouteController
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
-import com.mapbox.navigation.core.routealternatives.AlternativeMetadataProvider
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
@@ -129,14 +128,12 @@ internal object NavigationComponentProvider {
         rerouteOptions: RerouteOptions,
         threadController: ThreadController,
         evDynamicDataHolder: EVDynamicDataHolder,
-        alternativeMetadataProvider: AlternativeMetadataProvider,
     ): InternalRerouteController = MapboxRerouteController(
         directionsSession,
         tripSession,
         routeOptionsProvider,
         rerouteOptions,
         threadController,
-        evDynamicDataHolder,
-        alternativeMetadataProvider,
+        evDynamicDataHolder
     )
 }

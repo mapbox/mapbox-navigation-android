@@ -583,8 +583,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeOptionsProvider,
             navigationOptions.rerouteOptions,
             threadController,
-            evDynamicDataHolder,
-            routeAlternativesController
+            evDynamicDataHolder
         )
         rerouteController = defaultRerouteController
 

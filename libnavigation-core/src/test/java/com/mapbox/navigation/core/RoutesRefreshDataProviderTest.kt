@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.core.internal.RoutesProgressData
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.internal.RouteProgressData
 
 internal data class RoutesRefreshData(
     val primaryRoute: NavigationRoute,
