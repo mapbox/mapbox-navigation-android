@@ -34,7 +34,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
@@ -250,14 +249,12 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 ) {
                     mapboxNavigation.startTripSession()
 
-                    // TODO remove non-empty filter after NN-754 is done
                     val alternativesCallbackResultBeforeSetRoute =
-                        firstNonEmptyAlternativesUpdateDeferred(mapboxNavigation)
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
                     mapboxNavigation.setNavigationRoutesAsync(testRoutes)
                     mapboxNavigation.routeProgressUpdates().first()
-                    // TODO remove non-empty filter after NN-754 is done
                     val alternativesCallbackResultAfterSetRoute =
-                        firstNonEmptyAlternativesUpdateDeferred(mapboxNavigation)
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
                     val externalAlternatives = createExternalAlternatives()
                     mapboxNavigation.setNavigationRoutesAsync(
                         testRoutes + externalAlternatives
@@ -329,15 +326,5 @@ private fun CoroutineScope.firstAlternativesUpdateDeferred(mapboxNavigation: Map
     async(start = CoroutineStart.UNDISPATCHED) {
         mapboxNavigation.alternativesUpdates()
             .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-            .first()
-    }
-
-private fun CoroutineScope.firstNonEmptyAlternativesUpdateDeferred(
-    mapboxNavigation: MapboxNavigation
-) =
-    async(start = CoroutineStart.UNDISPATCHED) {
-        mapboxNavigation.alternativesUpdates()
-            .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-            .filterNot { it.alternatives.isEmpty() }
             .first()
     }
