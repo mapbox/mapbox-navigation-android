@@ -4,6 +4,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.route.routerOrigin
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.options.RerouteOptions
@@ -14,9 +15,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
-import com.mapbox.navigation.core.internal.AlternativeDataProvider
-import com.mapbox.navigation.core.internal.RouteProgressData
-import com.mapbox.navigation.core.routealternatives.AlternativeMetadataProvider
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
@@ -39,7 +37,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val routeOptionsUpdater: RouteOptionsUpdater,
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
-    private val alternativeMetadataProvider: AlternativeMetadataProvider,
     private val compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter,
 ) : InternalRerouteController {
 
@@ -56,14 +53,12 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         rerouteOptions: RerouteOptions,
         threadController: ThreadController,
         evDynamicDataHolder: EVDynamicDataHolder,
-        alternativeMetadataProvider: AlternativeMetadataProvider,
     ) : this(
         directionsSession,
         tripSession,
         routeOptionsUpdater,
         rerouteOptions,
         threadController,
-        alternativeMetadataProvider,
         MapboxRerouteOptionsAdapter(evDynamicDataHolder)
     )
 
@@ -135,21 +130,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         ) { routes, routeAlternativeId ->
             val relevantAlternative = routes.find { it.id == routeAlternativeId }
             if (relevantAlternative != null) {
-                // TODO switch to NN index calculation ================================================================
-                val alternativeLegIndex = ifNonNull(
-                    tripSession.getRouteProgress(),
-                    alternativeMetadataProvider.getMetadataFor(relevantAlternative)
-                ) { routeProgress, alternativeMetadata ->
-                    val legIndex = routeProgress.currentLegProgress?.legIndex
-                    val routeGeometryIndex = routeProgress.currentRouteGeometryIndex
-                    val legGeometryIndex = routeProgress.currentLegProgress?.geometryIndex
-                    ifNonNull(legIndex, legGeometryIndex) { legIndex, legGeometryIndex ->
-                        AlternativeDataProvider.getAlternativeLegIndex(
-                            RouteProgressData(legIndex, routeGeometryIndex, legGeometryIndex),
-                            alternativeMetadata
-                        )
-                    }
-                }
+                val alternativeLegIndex = tripSession.getRouteProgress()
+                    ?.internalAlternativeRouteIndices()?.get(routeAlternativeId)?.legIndex ?: 0
                 val newList = mutableListOf(relevantAlternative).apply {
                     addAll(
                         routes.toMutableList().apply {

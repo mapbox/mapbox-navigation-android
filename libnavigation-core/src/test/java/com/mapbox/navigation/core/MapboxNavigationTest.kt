@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.core.internal.RoutesProgressData
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.telemetry.NavigationCustomEventType
@@ -2161,7 +2162,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val defaultRerouteController = mockk<InternalRerouteController>(relaxed = true)
         every {
             NavigationComponentProvider.createRerouteController(
-                any(),
                 any(),
                 any(),
                 any(),

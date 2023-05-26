@@ -316,7 +316,7 @@ internal open class MapboxNavigationBaseTest {
         // TODO Needed for telemetry - Free Drive (empty list) for now
         every { directionsSession.routesUpdatedResult } returns createRoutesUpdatedResult(
             emptyList(),
-            RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
+            RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         )
         every { directionsSession.routes } returns emptyList()
     }

@@ -697,6 +697,46 @@ class BillingControllerWaypointsComparisonTest(
                     ),
                     false
                 ),
+                arrayOf(
+                    "Route start, has waypoints + empty waypoints",
+                    1,
+                    0,
+                    listOf(
+                        waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    emptyList<Waypoint>(),
+                    true
+                ),
+                arrayOf(
+                    "Route start, invalid leg index - sizes match",
+                    1,
+                    2,
+                    listOf(
+                        waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    false
+                ),
+                arrayOf(
+                    "Route start, invalid leg index - sizes don't match",
+                    1,
+                    3,
+                    listOf(
+                        waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    listOf(
+                        waypoint(3.3, 4.4, WaypointType.REGULAR),
+                        waypoint(5.5, 6.6, WaypointType.REGULAR),
+                        waypoint(4.4, 5.5, WaypointType.REGULAR)
+                    ),
+                    true
+                ),
 
                 arrayOf(
                     "Route middle, regular + regular with non-matching size",

@@ -2,8 +2,8 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
-import com.mapbox.navigation.core.RouteProgressData
 import com.mapbox.navigation.core.RoutesRefreshData
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createNavigationRoute

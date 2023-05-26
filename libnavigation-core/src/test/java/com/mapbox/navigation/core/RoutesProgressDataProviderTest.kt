@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIn
 import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.core.internal.RoutesProgressData
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
