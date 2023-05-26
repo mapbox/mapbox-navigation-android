@@ -9,7 +9,6 @@
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <!-- usesCleartextTraffic is a workaround for Android security requirement when using mocked
     web server and local host possible to resolve with and additional keystore and key generator
