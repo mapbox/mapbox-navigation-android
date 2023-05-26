@@ -30,15 +30,8 @@ suspend fun withoutWifiAndMobileData(block: suspend () -> Unit) {
     Log.d(LOG_TAG, "turning off wifi and mobile data")
     uiAutomation.executeShellCommand("svc wifi disable")
     uiAutomation.executeShellCommand("svc data disable")
-    val networkIsReachable = withTimeoutOrNull(3000) {
-        reachability.waitForNetworkStatus { it == NetworkStatus.NOT_REACHABLE }
-        false
-    } ?: true
-    assumeFalse(
-        "network should be reachable if it's turned off on device",
-        networkIsReachable
-    )
     try {
+        assumeNetworkIsNotReachable(reachability)
         block()
     } finally {
         Log.d(LOG_TAG, "turning on wifi and mobile data")
@@ -47,6 +40,17 @@ suspend fun withoutWifiAndMobileData(block: suspend () -> Unit) {
     }
     Log.d(LOG_TAG, "Waiting for network to become reachable")
     reachability.waitForNetworkStatus { it != NetworkStatus.NOT_REACHABLE }
+}
+
+private suspend fun assumeNetworkIsNotReachable(reachability: ReachabilityInterface) {
+    val networkIsReachable = withTimeoutOrNull(3000) {
+        reachability.waitForNetworkStatus { it == NetworkStatus.NOT_REACHABLE }
+        false
+    } ?: true
+    assumeFalse(
+        "network should not be reachable if it's turned off on device",
+        networkIsReachable
+    )
 }
 
 suspend fun ReachabilityInterface.waitForNetworkStatus(condition: (NetworkStatus) -> Boolean) {
