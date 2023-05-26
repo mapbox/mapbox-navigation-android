@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routealternatives
 
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
+import com.mapbox.navigation.base.internal.utils.parseRouteInterface
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -18,6 +19,7 @@ import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteIntersection
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 
@@ -123,7 +125,9 @@ internal class RouteAlternativesController constructor(
                     )
                 },
                 { value ->
-                    processRouteAlternatives(value) { alternatives, origin ->
+                    // Switch from offline to online primary route isn't implemented for the case
+                    // when user manually triggers alternatives refresh
+                    processRouteAlternatives(null, value) { alternatives, origin ->
                         listener?.onRouteAlternativeRequestFinished(
                             routeProgress,
                             alternatives,
@@ -150,6 +154,14 @@ internal class RouteAlternativesController constructor(
         override fun onRouteAlternativesChanged(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
+        ) { }
+
+        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) {}
+
+        override fun onRouteAlternativesUpdated(
+            onlinePrimaryRoute: RouteInterface?,
+            routeAlternatives: MutableList<RouteAlternative>,
+            removedAlternatives: MutableList<RouteAlternative>
         ) {
             logI(LOG_CATEGORY) {
                 "native alternatives available: ${routeAlternatives.map { it.route.routeId }}"
@@ -157,7 +169,10 @@ internal class RouteAlternativesController constructor(
 
             observerProcessingJob?.cancel()
             observerProcessingJob =
-                processRouteAlternatives(routeAlternatives) { alternatives, origin ->
+                processRouteAlternatives(
+                    onlinePrimaryRoute,
+                    routeAlternatives
+                ) { alternatives, origin ->
                     logD("${alternatives.size} alternatives available", LOG_CATEGORY)
 
                     val routeProgress = tripSession.getRouteProgress()
@@ -170,16 +185,6 @@ internal class RouteAlternativesController constructor(
                         it.onRouteAlternatives(routeProgress, alternatives, origin)
                     }
                 }
-        }
-
-        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) = Unit
-
-        override fun onRouteAlternativesUpdated(
-            onlinePrimaryRoute: RouteInterface?,
-            alternatives: MutableList<RouteAlternative>,
-            removedAlternatives: MutableList<RouteAlternative>
-        ) {
-            // Will be integrated in https://github.com/mapbox/mapbox-navigation-android/pull/7195
         }
 
         override fun onError(message: String) {
@@ -198,15 +203,15 @@ internal class RouteAlternativesController constructor(
      * @param block invoked with results (on the main thread)
      */
     private fun processRouteAlternatives(
+        onlinePrimaryRoute: RouteInterface?,
         nativeAlternatives: List<RouteAlternative>,
-        block: (List<NavigationRoute>, RouterOrigin) -> Unit,
+        block: suspend (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) = mainJobControl.scope.launch {
         val alternatives: List<NavigationRoute> =
             nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
-                val expected = parseNativeDirectionsAlternative(
-                    ThreadController.DefaultDispatcher,
-                    routeAlternative
-                )
+                val expected = withContext(ThreadController.DefaultDispatcher) {
+                    parseNativeDirectionsAlternative(routeAlternative)
+                }
                 if (expected.isValue) {
                     expected.value
                 } else {
@@ -221,13 +226,13 @@ internal class RouteAlternativesController constructor(
                 }
             }
         processAlternativesMetadata(alternatives, nativeAlternatives)
-
+        val newAlternatives = parseRouteInterfaceOrEmptyList(onlinePrimaryRoute) + alternatives
         val origin = nativeAlternatives.find {
             // looking for the first new route,
             // assuming all new routes come from the same request
             it.isNew
         }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-        block(alternatives, origin)
+        block(newAlternatives, origin)
         lastUpdateOrigin = origin
     }
 
@@ -278,3 +283,6 @@ private fun com.mapbox.navigator.AlternativeRouteInfo.mapToPlatform(): Alternati
         duration = duration,
     )
 }
+
+private fun parseRouteInterfaceOrEmptyList(onlinePrimaryRoute: RouteInterface?) =
+    onlinePrimaryRoute?.let(::parseRouteInterface)?.value?.let { listOf(it) } ?: emptyList()

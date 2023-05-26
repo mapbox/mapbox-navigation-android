@@ -13,6 +13,7 @@ import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.testing.factories.createRouteInterface
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
@@ -179,7 +180,8 @@ class RouteAlternativesControllerTest {
             val secondObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
             routeAlternativesController.register(firstObserver)
             routeAlternativesController.register(secondObserver)
-            nativeObserver.captured.onRouteAlternativesChanged(
+            nativeObserver.captured.onRouteAlternativesUpdated(
+                null,
                 listOf(
                     createNativeAlternativeMock()
                 ),
@@ -196,6 +198,38 @@ class RouteAlternativesControllerTest {
                 secondObserver.onRouteAlternatives(routeProgress, capture(secondRoutesSlot), any())
             }
             assertEquals(1, secondRoutesSlot.captured.size)
+
+            unmockkStatic(RouteOptions::fromUrl)
+        }
+
+    @Test
+    fun `should broadcast alternative routes changes from nav-native with online primary route`() =
+        coroutineRule.runBlockingTest {
+            mockkStatic(RouteOptions::fromUrl)
+            every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+            val routeAlternativesController = createRouteAlternativesController()
+            val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
+            every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
+            val routeProgress = mockk<RouteProgress>()
+            every { tripSession.getRouteProgress() } returns routeProgress
+
+            val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
+            routeAlternativesController.register(firstObserver)
+            val testOnlinePrimaryRoute = createRouteInterface(responseUUID = "test")
+            nativeObserver.captured.onRouteAlternativesUpdated(
+                testOnlinePrimaryRoute,
+                listOf(
+                    createNativeAlternativeMock()
+                ),
+                emptyList()
+            )
+
+            val firstRoutesSlot = slot<List<NavigationRoute>>()
+            verify(exactly = 1) {
+                firstObserver.onRouteAlternatives(routeProgress, capture(firstRoutesSlot), any())
+            }
+            assertEquals(2, firstRoutesSlot.captured.size)
+            assertEquals(testOnlinePrimaryRoute.routeId, firstRoutesSlot.captured.first().id)
 
             unmockkStatic(RouteOptions::fromUrl)
         }
@@ -218,7 +252,8 @@ class RouteAlternativesControllerTest {
 
         val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
-        nativeObserver.captured.onRouteAlternativesChanged(
+        nativeObserver.captured.onRouteAlternativesUpdated(
+            null,
             listOf(
                 createNativeAlternativeMock()
             ),
@@ -267,7 +302,8 @@ class RouteAlternativesControllerTest {
 
         val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
-        nativeObserver.captured.onRouteAlternativesChanged(
+        nativeObserver.captured.onRouteAlternativesUpdated(
+            null,
             listOf(
                 createNativeAlternativeMock()
             ),
@@ -304,7 +340,8 @@ class RouteAlternativesControllerTest {
 
         val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
-        nativeObserver.captured.onRouteAlternativesChanged(
+        nativeObserver.captured.onRouteAlternativesUpdated(
+            null,
             listOf(
                 createNativeAlternativeMock()
             ),
@@ -343,7 +380,8 @@ class RouteAlternativesControllerTest {
         routeAlternativesController.register(observer)
 
         val firstAlternative: RouteAlternative = createNativeAlternativeMock()
-        nativeObserver.captured.onRouteAlternativesChanged(
+        nativeObserver.captured.onRouteAlternativesUpdated(
+            null,
             listOf(
                 firstAlternative
             ),
@@ -352,7 +390,8 @@ class RouteAlternativesControllerTest {
         val secondAlternative: RouteAlternative = createNativeAlternativeMock().apply {
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
         }
-        nativeObserver.captured.onRouteAlternativesChanged(
+        nativeObserver.captured.onRouteAlternativesUpdated(
+            null,
             listOf(
                 secondAlternative
             ),
@@ -394,13 +433,15 @@ class RouteAlternativesControllerTest {
             val firstAlternative: RouteAlternative = createNativeAlternativeMock().apply {
                 every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
             }
-            nativeObserver.captured.onRouteAlternativesChanged(
+            nativeObserver.captured.onRouteAlternativesUpdated(
+                null,
                 listOf(
                     firstAlternative
                 ),
                 emptyList()
             )
-            nativeObserver.captured.onRouteAlternativesChanged(
+            nativeObserver.captured.onRouteAlternativesUpdated(
+                null,
                 emptyList(),
                 listOf(
                     firstAlternative.apply {
@@ -537,13 +578,15 @@ class RouteAlternativesControllerTest {
 
             routeAlternativesController.register(observer)
             pauseDispatcher {
-                nativeObserver.captured.onRouteAlternativesChanged(
+                nativeObserver.captured.onRouteAlternativesUpdated(
+                    null,
                     listOf(
                         createNativeAlternativeMock()
                     ),
                     emptyList()
                 )
-                nativeObserver.captured.onRouteAlternativesChanged(
+                nativeObserver.captured.onRouteAlternativesUpdated(
+                    null,
                     listOf(
                         createNativeAlternativeMock().apply {
                             every {
@@ -577,7 +620,8 @@ class RouteAlternativesControllerTest {
 
             val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
             routeAlternativesController.register(firstObserver)
-            nativeObserver.captured.onRouteAlternativesChanged(
+            nativeObserver.captured.onRouteAlternativesUpdated(
+                null,
                 listOf(
                     createNativeAlternativeMock(alternativeId = 4)
                 ),
@@ -681,7 +725,8 @@ class RouteAlternativesControllerTest {
                 routes = listOf(navigationRoute),
                 nativeAlternatives = listOf(nativeAlternative)
             )
-            nativeObserver.captured.onRouteAlternativesChanged(
+            nativeObserver.captured.onRouteAlternativesUpdated(
+                null,
                 emptyList(),
                 listOf(nativeAlternative)
             )

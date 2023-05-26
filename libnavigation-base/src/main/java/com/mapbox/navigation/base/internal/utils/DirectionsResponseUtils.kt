@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.json.JSONException
@@ -40,20 +41,22 @@ suspend fun parseDirectionsResponse(
         }
     }
 
-suspend fun parseNativeDirectionsAlternative(
-    dispatcher: CoroutineDispatcher,
+fun parseNativeDirectionsAlternative(
     routeAlternative: RouteAlternative
-): Expected<Throwable, NavigationRoute> =
-    withContext(dispatcher) {
-        return@withContext try {
-            val navigationRoute = routeAlternative.route.toNavigationRoute()
-            ExpectedFactory.createValue(navigationRoute)
-        } catch (ex: Exception) {
-            when (ex) {
-                is JSONException,
-                is IllegalStateException,
-                is IllegalArgumentException -> ExpectedFactory.createError(ex)
-                else -> throw ex
-            }
+): Expected<Throwable, NavigationRoute> {
+    return parseRouteInterface(routeAlternative.route)
+}
+
+fun parseRouteInterface(route: RouteInterface): Expected<Throwable, NavigationRoute> {
+    return try {
+        val navigationRoute = route.toNavigationRoute()
+        ExpectedFactory.createValue(navigationRoute)
+    } catch (ex: Exception) {
+        when (ex) {
+            is JSONException,
+            is IllegalStateException,
+            is IllegalArgumentException -> ExpectedFactory.createError(ex)
+            else -> throw ex
         }
     }
+}
