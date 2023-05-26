@@ -6,6 +6,43 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.14.0-beta.1 - 26 May, 2023
+### Changelog
+[Changes between v2.13.0 and v2.14.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0...v2.14.0-beta.1)
+
+#### Features
+- Added support for uncompressed memory mapped tiles that could be enabled via config options(turned off by default). [#7197](https://github.com/mapbox/mapbox-navigation-android/pull/7197)
+
+#### Bug fixes and improvements
+- Improved road snapping for the case when GPS signal is unstable. When GPS signal becomes unstable, LocationMatcherResult#isOffRoad stays false and LocationMatcherResult#enhancedLocation is snapped to a road, the effect takes place until stabilisation of GPS signal. [#7197](https://github.com/mapbox/mapbox-navigation-android/pull/7197)
+- Added `MapboxNavigation#currentLegIndex`. Use this method to correctly pass leg index to `MapboxRouteLineAPI#setNavigationRoutes` method, this is especially important if you use independent inactive leg styling: [#7102](https://github.com/mapbox/mapbox-navigation-android/pull/7102)
+```kotlin
+val routesObserver = RoutesObserver {
+    routeLineAPI.setNavigationRoutes(result.navigationRoutes, mapboxNavigation.currentLegIndex()).apply {
+        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
+    }    
+}
+```
+- Fixed offline-online routes switch via route alternative observer for the case when new online route is the same as current offline. [#7195](https://github.com/mapbox/mapbox-navigation-android/pull/7195)
+- Fixed `NavigationRoutes#waypoints` being null for EV offline fallback.  [#7165](https://github.com/mapbox/mapbox-navigation-android/pull/7165)
+
+#### Known issues :warning:
+- `NavigationRouteAlternativesObserver#onRouteAlternatives` could be called with an online alternative that is the same as current offline route except for its origin and annotations.
+`MapboxNavigation#getAlternativeMetadataFor` will return null for that alternative.
+Calling `MapboxNavigation#setNavigationRoutes(listOf(currentOfflinePrimaryRoute, newOnlineAlternative))` for that case won't make any effect as the alternative will be ignored.
+Make sure that you implemented routes alternatives observers with respect to offline-online scenarios as documentation suggests.
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.14.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.14.0-beta.1))
+- Mapbox Navigation Native `v135.0.0`
+- Mapbox Core Common `v23.6.0-beta.1`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.13.0 - 12 May, 2023
 ### Changelog
 [Changes between v2.12.0 and v2.13.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.12.0...v2.13.0)
