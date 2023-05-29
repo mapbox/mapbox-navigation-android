@@ -62,6 +62,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     private val routeLineColorResources by lazy {
         RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
+            .inActiveRouteLegsCasingColor(Color.BLACK)
             .restrictedRoadColor(Color.MAGENTA)
             .routeLineTraveledCasingColor(Color.RED)
             .routeCasingColor(Color.GREEN)
@@ -74,12 +75,12 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     private val routeTrafficLineScaleExpression: Expression by lazy {
         buildScalingExpression(
             listOf(
-                RouteLineScaleValue(4f, 3f, 1.5f),
-                RouteLineScaleValue(10f, 4f, 1.5f),
-                RouteLineScaleValue(13f, 6f, 1.5f),
-                RouteLineScaleValue(16f, 10f, 1.5f),
-                RouteLineScaleValue(19f, 14f, 1.5f),
-                RouteLineScaleValue(22f, 18f, 1.5f)
+                RouteLineScaleValue(4f, 3f, .5f),
+                RouteLineScaleValue(10f, 4f, .5f),
+                RouteLineScaleValue(13f, 6f, .5f),
+                RouteLineScaleValue(16f, 10f, .5f),
+                RouteLineScaleValue(19f, 14f, .5f),
+                RouteLineScaleValue(22f, 18f, .5f)
             )
         )
     }

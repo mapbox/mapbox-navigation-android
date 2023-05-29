@@ -179,6 +179,9 @@ object RouteLayerConstants {
     @ColorInt
     internal val IN_ACTIVE_ROUTE_LEG_COLOR = Color.TRANSPARENT
 
+    @ColorInt
+    internal val IN_ACTIVE_ROUTE_LEG_CASING_COLOR = Color.TRANSPARENT
+
     @DrawableRes
     internal val MANEUVER_ARROWHEAD_ICON_DRAWABLE: Int = R.drawable.mapbox_ic_arrow_head
 

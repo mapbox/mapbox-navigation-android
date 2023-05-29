@@ -44,6 +44,8 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
  * is positioned below the route line giving the line the appearance of a boarder
  * @param inActiveRouteLegsColor the color used for route legs that aren't currently
  * being navigated.
+ * @param inActiveRouteLegsCasingColor the color used for casing of route legs hat aren't currently
+ * being navigated.
  *
  * The congestion range is to be used if when making a route request you use
  * `DirectionCriteria.ANNOTATION_CONGESTION_NUMERIC` annotation. The congestion values obtained
@@ -102,7 +104,8 @@ class RouteLineColorResources private constructor(
     @ColorInt val routeLineTraveledCasingColor: Int,
     @ColorInt val routeCasingColor: Int,
     @ColorInt val alternativeRouteCasingColor: Int,
-    @ColorInt val inActiveRouteLegsColor: Int
+    @ColorInt val inActiveRouteLegsColor: Int,
+    @ColorInt val inActiveRouteLegsCasingColor: Int,
 ) {
 
     /**
@@ -135,6 +138,7 @@ class RouteLineColorResources private constructor(
             .routeCasingColor(routeCasingColor)
             .alternativeRouteCasingColor(alternativeRouteCasingColor)
             .inActiveRouteLegsColor(inActiveRouteLegsColor)
+            .inActiveRouteLegsCasingColor(inActiveRouteLegsCasingColor)
     }
 
     /**
@@ -166,7 +170,8 @@ class RouteLineColorResources private constructor(
             "routeLineTraveledCasingColor=$routeLineTraveledCasingColor, " +
             "routeCasingColor=$routeCasingColor, " +
             "alternativeRouteCasingColor=$alternativeRouteCasingColor, " +
-            "inActiveRouteLegsColor=$inActiveRouteLegsColor" +
+            "inActiveRouteLegsColor=$inActiveRouteLegsColor, " +
+            "inActiveRouteLegsCasingColor=$inActiveRouteLegsCasingColor" +
             ")"
     }
 
@@ -199,6 +204,7 @@ class RouteLineColorResources private constructor(
         result = 31 * result + routeCasingColor
         result = 31 * result + alternativeRouteCasingColor
         result = 31 * result + inActiveRouteLegsColor
+        result = 31 * result + inActiveRouteLegsCasingColor
         return result
     }
 
@@ -251,6 +257,7 @@ class RouteLineColorResources private constructor(
         if (routeLineTraveledCasingColor != other.routeLineTraveledCasingColor) return false
         if (routeCasingColor != other.routeCasingColor) return false
         if (inActiveRouteLegsColor != other.inActiveRouteLegsColor) return false
+        if (inActiveRouteLegsCasingColor != other.inActiveRouteLegsCasingColor) return false
         if (alternativeRouteCasingColor != other.alternativeRouteCasingColor) return false
 
         return true
@@ -299,6 +306,8 @@ class RouteLineColorResources private constructor(
             RouteLayerConstants.ALTERNATE_ROUTE_CASING_COLOR
         private var inActiveRouteLegsColor: Int =
             RouteLayerConstants.IN_ACTIVE_ROUTE_LEG_COLOR
+        private var inActiveRouteLegsCasingColor: Int =
+            RouteLayerConstants.IN_ACTIVE_ROUTE_LEG_CASING_COLOR
 
         /**
          * The default range for low traffic congestion
@@ -592,6 +601,16 @@ class RouteLineColorResources private constructor(
             apply { this.inActiveRouteLegsColor = color }
 
         /**
+         * The color used for casing of route legs that aren't currently being navigated.
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inActiveRouteLegsCasingColor(@ColorInt color: Int): Builder =
+            apply { this.inActiveRouteLegsCasingColor = color }
+
+        /**
          * Creates a instance of RouteLineResources
          *
          * @return the instance
@@ -628,7 +647,8 @@ class RouteLineColorResources private constructor(
                 routeLineTraveledCasingColor,
                 routeCasingColor,
                 alternativeRouteCasingColor,
-                inActiveRouteLegsColor
+                inActiveRouteLegsColor,
+                inActiveRouteLegsCasingColor,
             )
         }
 

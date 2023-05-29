@@ -1378,6 +1378,198 @@ class MapboxRouteLineApiRoboTest {
     }
 
     @Test
+    fun setVanishingOffset_inactiveLegsStylingEnabled() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(
+                        RouteLineColorResources.Builder()
+                            .inActiveRouteLegsColor(Color.YELLOW)
+                            .inActiveRouteLegsCasingColor(Color.BLUE)
+                            .build()
+                    )
+                    .build()
+            )
+            .styleInactiveRouteLegsIndependently(true)
+            .withVanishingRouteLineEnabled(true)
+            .build()
+        val trafficExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.1),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.10373821458415478),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.1240124365711821),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.2718982903427929),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.32264099467350016),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4897719974699625),
+            StringChecker("[rgba, 255.0, 255.0, 0.0, 1.0]")
+        )
+        val routeLineExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.1),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
+        val casingExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.1),
+            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+            DoubleChecker(0.4897719974699625),
+            StringChecker("[rgba, 0.0, 0.0, 255.0, 1.0]")
+        )
+
+        var api = MapboxRouteLineApi(
+            options
+        )
+        api.setNavigationRoutes(listOf(multiLegRouteTwoLegs.navigationRoute))
+        api.updateWithRouteProgress(multiLegRouteTwoLegs.mockRouteProgress()) {}
+
+        val result = api.setVanishingOffset(.1)
+
+        checkExpression(
+            trafficExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .trafficExpressionProvider!!.generateExpression()
+        )
+        checkExpression(
+            routeLineExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .baseExpressionProvider.generateExpression()
+        )
+        checkExpression(
+            casingExpressionContents,
+            result.value!!.primaryRouteLineDynamicData
+                .casingExpressionProvider.generateExpression()
+        )
+
+        api = MapboxRouteLineApi(
+            options.toBuilder(ctx).styleInactiveRouteLegsIndependently(false).build()
+        )
+        api.setNavigationRoutes(listOf(multiLegRouteTwoLegs.navigationRoute))
+        api.updateWithRouteProgress(multiLegRouteTwoLegs.mockRouteProgress()) {}
+
+        val result2 = api.setVanishingOffset(.1)
+
+        assertNotEquals(
+            result.value!!.primaryRouteLineDynamicData
+                .trafficExpressionProvider!!.generateExpression(),
+            result2.value!!.primaryRouteLineDynamicData
+                .trafficExpressionProvider!!.generateExpression(),
+        )
+        assertNotEquals(
+            result.value!!.primaryRouteLineDynamicData
+                .casingExpressionProvider.generateExpression(),
+            result2.value!!.primaryRouteLineDynamicData
+                .casingExpressionProvider.generateExpression(),
+        )
+    }
+
+    @Test
+    fun setVanishingOffset_inactiveLegsStylingEnabled_activeLegIndex1() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .withRouteLineResources(
+                    RouteLineResources.Builder()
+                        .routeLineColorResources(
+                            RouteLineColorResources.Builder()
+                                .inActiveRouteLegsColor(Color.YELLOW)
+                                .inActiveRouteLegsCasingColor(Color.BLUE)
+                                .routeLineTraveledColor(Color.RED)
+                                .build()
+                        )
+                        .build()
+                )
+                .styleInactiveRouteLegsIndependently(true)
+                .withVanishingRouteLineEnabled(true)
+                .build()
+            val trafficExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5),
+                StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+                DoubleChecker(0.5421388243827154),
+                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+                DoubleChecker(0.5710651139490561),
+                StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+                DoubleChecker(0.5916095976376619),
+                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+                DoubleChecker(0.88674421638117),
+                StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+                DoubleChecker(0.9423002251348892),
+                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            )
+            val routeLineExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.5),
+                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            )
+            val casingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5),
+                StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+            )
+
+            var api = MapboxRouteLineApi(
+                options
+            )
+            api.setNavigationRoutes(listOf(multiLegRouteTwoLegs.navigationRoute))
+            api.updateWithRouteProgress(multiLegRouteTwoLegs.mockRouteProgress(legIndexValue = 1)) {}
+
+            val result = api.setVanishingOffset(.5)
+
+            checkExpression(
+                trafficExpressionContents,
+                result.value!!.primaryRouteLineDynamicData
+                    .trafficExpressionProvider!!.generateExpression()
+            )
+            checkExpression(
+                routeLineExpressionContents,
+                result.value!!.primaryRouteLineDynamicData
+                    .baseExpressionProvider.generateExpression()
+            )
+            checkExpression(
+                casingExpressionContents,
+                result.value!!.primaryRouteLineDynamicData
+                    .casingExpressionProvider.generateExpression()
+            )
+
+            api = MapboxRouteLineApi(
+                options.toBuilder(ctx).styleInactiveRouteLegsIndependently(false).build()
+            )
+            api.setNavigationRoutes(listOf(multiLegRouteTwoLegs.navigationRoute))
+            api.updateWithRouteProgress(multiLegRouteTwoLegs.mockRouteProgress()) {}
+
+            val result2 = api.setVanishingOffset(.1)
+
+            assertNotEquals(
+                result.value!!.primaryRouteLineDynamicData
+                    .trafficExpressionProvider!!.generateExpression(),
+                result2.value!!.primaryRouteLineDynamicData
+                    .trafficExpressionProvider!!.generateExpression(),
+            )
+            assertNotEquals(
+                result.value!!.primaryRouteLineDynamicData
+                    .casingExpressionProvider.generateExpression(),
+                result2.value!!.primaryRouteLineDynamicData
+                    .casingExpressionProvider.generateExpression(),
+            )
+        }
+
+    @Test
     fun setRouteAsyncCallsReturnsCorrectRouteSuspend() = coroutineRule.runBlockingTest {
         val shortRoute = listOf(RouteLine(loadRoute("short_route.json"), null))
         val longRoute = listOf(RouteLine(loadRoute("cross-country-route.json"), null))

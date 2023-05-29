@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import android.graphics.Color
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -187,7 +186,7 @@ internal class VanishingRouteLine {
                         routeLineExpressionData,
                         routeResourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
                         routeResourceProvider.routeLineColorResources.routeCasingColor,
-                        Color.TRANSPARENT,
+                        routeResourceProvider.routeLineColorResources.inActiveRouteLegsCasingColor,
                         activeLegIndex
                     )
                 }

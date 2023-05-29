@@ -1200,6 +1200,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public int getAlternativeRouteSevereCongestionColor();
     method public int getAlternativeRouteUnknownCongestionColor();
     method public kotlin.ranges.IntRange getHeavyCongestionRange();
+    method public int getInActiveRouteLegsCasingColor();
     method public int getInActiveRouteLegsColor();
     method public kotlin.ranges.IntRange getLowCongestionRange();
     method public kotlin.ranges.IntRange getModerateCongestionRange();
@@ -1226,6 +1227,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final int alternativeRouteSevereCongestionColor;
     property public final int alternativeRouteUnknownCongestionColor;
     property public final kotlin.ranges.IntRange heavyCongestionRange;
+    property public final int inActiveRouteLegsCasingColor;
     property public final int inActiveRouteLegsColor;
     property public final kotlin.ranges.IntRange lowCongestionRange;
     property public final kotlin.ranges.IntRange moderateCongestionRange;
@@ -1256,6 +1258,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteUnknownCongestionColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources build();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder heavyCongestionRange(kotlin.ranges.IntRange range);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder inActiveRouteLegsCasingColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder inActiveRouteLegsColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder lowCongestionRange(kotlin.ranges.IntRange range);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder moderateCongestionRange(kotlin.ranges.IntRange range);

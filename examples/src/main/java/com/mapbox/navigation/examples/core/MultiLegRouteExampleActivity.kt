@@ -95,7 +95,10 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
 
     private val routeColorResources: RouteLineColorResources by lazy {
         // This options is transparent by default.
-        RouteLineColorResources.Builder().inActiveRouteLegsColor(Color.GRAY).build()
+        RouteLineColorResources.Builder()
+            .inActiveRouteLegsColor(Color.GRAY)
+            .inActiveRouteLegsCasingColor(Color.BLACK)
+            .build()
     }
 
     private val routeLineResources: RouteLineResources by lazy {

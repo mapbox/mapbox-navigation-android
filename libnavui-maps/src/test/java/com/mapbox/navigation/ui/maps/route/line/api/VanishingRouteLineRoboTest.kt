@@ -271,7 +271,7 @@ class VanishingRouteLineRoboTest {
             "[rgba, 0.0, 0.0, 0.0, 0.0]]"
         val expectedCasingExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
             " 0.13240839439705454, [rgba, 47.0, 122.0, 198.0, 1.0], 0.4891841628737826," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0]]"
+            " [rgba, 255.0, 255.0, 0.0, 1.0]]"
         val route = loadNavigationRoute("multileg-route-two-legs.json")
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 7
@@ -294,7 +294,13 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
-            RouteLineResources.Builder().build(),
+            RouteLineResources.Builder()
+                .routeLineColorResources(
+                    RouteLineColorResources.Builder()
+                        .inActiveRouteLegsCasingColor(Color.YELLOW)
+                        .build()
+                )
+                .build(),
             0,
             0.0,
             false
@@ -328,6 +334,7 @@ class VanishingRouteLineRoboTest {
             every { routeLineTraveledCasingColor } returns 10
             every { inActiveRouteLegsColor } returns 11
             every { restrictedRoadColor } returns 12
+            every { inActiveRouteLegsCasingColor } returns 13
         }
         every { trafficBackfillRoadClasses } returns listOf()
     }

@@ -39,6 +39,7 @@ class RouteLineColorResourcesTest :
             .routeCasingColor(9)
             .alternativeRouteCasingColor(16)
             .inActiveRouteLegsColor(21)
+            .inActiveRouteLegsCasingColor(22)
     }
 
     @Test
@@ -212,6 +213,14 @@ class RouteLineColorResourcesTest :
     }
 
     @Test
+    fun inActiveRouteLegsCasingColor() {
+        val resources =
+            RouteLineColorResources.Builder().inActiveRouteLegsCasingColor(5).build()
+
+        assertEquals(5, resources.inActiveRouteLegsCasingColor)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineColorResources = RouteLineColorResources.Builder()
             .lowCongestionRange(1..4)
@@ -239,6 +248,7 @@ class RouteLineColorResourcesTest :
             .routeCasingColor(9)
             .alternativeRouteCasingColor(16)
             .inActiveRouteLegsColor(21)
+            .inActiveRouteLegsCasingColor(22)
             .build()
 
         val result = routeLineColorResources.toBuilder().build()
@@ -268,6 +278,7 @@ class RouteLineColorResourcesTest :
         assertEquals(19, result.routeClosureColor)
         assertEquals(20, result.alternativeRouteClosureColor)
         assertEquals(21, result.inActiveRouteLegsColor)
+        assertEquals(22, result.inActiveRouteLegsCasingColor)
     }
 
     @Test
