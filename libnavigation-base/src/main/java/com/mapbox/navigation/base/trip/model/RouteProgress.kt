@@ -51,6 +51,7 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
  * @param currentRouteGeometryIndex route-wise index representing the geometry point that starts the segment
  * the user is currently on, effectively this represents the index of last visited geometry point in the route
  * (see [DirectionsRoute.geometry] or [DecodeUtils.completeGeometryToPoints] if [RouteOptions.overview] is [DirectionsCriteria.OVERVIEW_FULL]).
+ * @param inParkingAisle whether the current location belongs to a parking aisle.
  * @param alternativeRoutesIndices map of alternative route id to route indices for specified route (see [RouteIndices]). No primary route indices data is available here.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -71,6 +72,8 @@ class RouteProgress internal constructor(
     val stale: Boolean,
     val routeAlternativeId: String?,
     val currentRouteGeometryIndex: Int,
+    @ExperimentalPreviewMapboxNavigationAPI
+    val inParkingAisle: Boolean,
     internal val alternativeRoutesIndices: Map<String, RouteIndices>,
 ) {
 
@@ -107,6 +110,7 @@ class RouteProgress internal constructor(
         if (stale != other.stale) return false
         if (routeAlternativeId != other.routeAlternativeId) return false
         if (currentRouteGeometryIndex != other.currentRouteGeometryIndex) return false
+        if (inParkingAisle != other.inParkingAisle) return false
         if (alternativeRoutesIndices != other.alternativeRoutesIndices) return false
 
         return true
@@ -132,6 +136,7 @@ class RouteProgress internal constructor(
         result = 31 * result + stale.hashCode()
         result = 31 * result + routeAlternativeId.hashCode()
         result = 31 * result + currentRouteGeometryIndex.hashCode()
+        result = 31 * result + inParkingAisle.hashCode()
         result = 31 * result + alternativeRoutesIndices.hashCode()
         return result
     }
@@ -157,6 +162,7 @@ class RouteProgress internal constructor(
             "upcomingStepPoints=$upcomingStepPoints, " +
             "remainingWaypoints=$remainingWaypoints, " +
             "upcomingRoadObjects=$upcomingRoadObjects" +
+            "isParkingAisle=$inParkingAisle" +
             "alternativeRoutesIndices=$alternativeRoutesIndices" +
             ")"
     }

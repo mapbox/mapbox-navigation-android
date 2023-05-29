@@ -1,0 +1,1 @@
+- Added `RouteProgress#inParkingAisle` field indicating whether the current location belongs to a parking aisle. 

@@ -103,6 +103,7 @@ class NavigatorMapperTest {
             upcomingRoadObjects = upcomingRoadObjects,
             alternativeRouteId = "alternative_id",
             currentRouteGeometryIndex = routeGeometryIndex,
+            inParkingAisle = true,
             alternativeRoutesIndices = mapOf(
                 "id#2" to RouteIndicesFactory.buildRouteIndices(2, 4, 6, 8, 10),
                 "id#3" to RouteIndicesFactory.buildRouteIndices(3, 7, 5, 11, 9),
@@ -660,6 +661,7 @@ class NavigatorMapperTest {
         every { locatedAlternativeRouteId } returns "alternative_id"
         every { geometryIndex } returns routeGeometryIndex
         every { shapeIndex } returns legGeometryIndex
+        every { inParkingAisle } returns true
         every { alternativeRouteIndices } returns listOf(
             com.mapbox.navigator.RouteIndices("id#2", 2, 4, 6, 8, 10),
             com.mapbox.navigator.RouteIndices("id#3", 3, 7, 5, 11, 9),
