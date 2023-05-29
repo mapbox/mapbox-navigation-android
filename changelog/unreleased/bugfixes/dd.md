@@ -1,0 +1,1 @@
+- Deprecated SpeedLimit class and introduced SpeedLimitInfo instead. The latter uses speed in the corresponding units (as opposed to speedKmph in SpeedLimit) and provides unit and sign info even if the limit itself is unknown.

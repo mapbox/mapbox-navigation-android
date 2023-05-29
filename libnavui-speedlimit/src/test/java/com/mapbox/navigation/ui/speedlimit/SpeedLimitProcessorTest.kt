@@ -38,9 +38,42 @@ class SpeedLimitProcessorTest {
         val locationMatcherResult = mockk<LocationMatcherResult> {
             every { enhancedLocation } returns mockk {
                 every { speed } returns 12f
-                every { speedLimit } returns mockk {
-                    every { speedKmph } returns 64
-                    every { speedLimitSign } returns SpeedLimitSign.MUTCD
+                every { speedLimitInfo } returns mockk {
+                    every { speed } returns 64
+                    every { unit } returns SpeedUnit.MILES_PER_HOUR
+                    every { sign } returns SpeedLimitSign.MUTCD
+                }
+            }
+        }
+        val formatter = PostedAndCurrentSpeedFormatter()
+        val distanceFormatterOptions = mockk<DistanceFormatterOptions> {
+            every { unitType } returns UnitType.IMPERIAL
+        }
+
+        val result =
+            SpeedLimitProcessor().process(
+                SpeedLimitAction.FindPostedAndCurrentSpeed(
+                    formatter,
+                    locationMatcherResult,
+                    distanceFormatterOptions
+                )
+            ) as SpeedLimitResult.PostedAndCurrentSpeed
+
+        assertEquals(result.currentSpeed, 27)
+        assertEquals(result.postedSpeed, 64)
+        assertEquals(result.speedSignConvention, SpeedLimitSign.MUTCD)
+        assertEquals(result.postedSpeedUnit, SpeedUnit.MILES_PER_HOUR)
+    }
+
+    @Test
+    fun `process posted speed and current speed update different unit`() {
+        val locationMatcherResult = mockk<LocationMatcherResult> {
+            every { enhancedLocation } returns mockk {
+                every { speed } returns 12f
+                every { speedLimitInfo } returns mockk {
+                    every { speed } returns 64
+                    every { unit } returns SpeedUnit.KILOMETERS_PER_HOUR
+                    every { sign } returns SpeedLimitSign.MUTCD
                 }
             }
         }
@@ -69,9 +102,10 @@ class SpeedLimitProcessorTest {
         val locationMatcherResult = mockk<LocationMatcherResult> {
             every { enhancedLocation } returns mockk {
                 every { speed } returns 12f
-                every { speedLimit } returns mockk {
-                    every { speedKmph } returns null
-                    every { speedLimitSign } returns SpeedLimitSign.MUTCD
+                every { speedLimitInfo } returns mockk {
+                    every { speed } returns null
+                    every { unit } returns SpeedUnit.MILES_PER_HOUR
+                    every { sign } returns SpeedLimitSign.MUTCD
                 }
             }
         }

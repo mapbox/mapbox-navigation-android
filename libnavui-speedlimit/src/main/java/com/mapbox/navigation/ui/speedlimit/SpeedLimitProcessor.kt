@@ -40,11 +40,11 @@ internal class SpeedLimitProcessor {
             )
         )
 
-        val formattedPostedSpeed = locationMatcher.speedLimit?.speedKmph?.let { speedKmph ->
+        val formattedPostedSpeed = locationMatcher.speedLimitInfo.speed?.let { speed ->
             action.formatter.format(
                 SpeedData(
-                    speedKmph.toDouble(),
-                    SpeedUnit.KILOMETERS_PER_HOUR,
+                    speed.toDouble(),
+                    locationMatcher.speedLimitInfo.unit,
                     action.distanceFormatterOptions.unitType
                 )
             )
@@ -55,7 +55,7 @@ internal class SpeedLimitProcessor {
             UnitType.IMPERIAL -> SpeedUnit.MILES_PER_HOUR
         }
 
-        val speedSign = locationMatcher.speedLimit?.speedLimitSign
+        val speedSign = locationMatcher.speedLimitInfo.sign
 
         return SpeedLimitResult.PostedAndCurrentSpeed(
             formattedPostedSpeed,

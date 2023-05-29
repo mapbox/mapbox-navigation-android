@@ -1105,7 +1105,8 @@ package com.mapbox.navigation.core.trip.session {
     method public float getOffRoadProbability();
     method public com.mapbox.navigation.base.road.model.Road getRoad();
     method public float getRoadEdgeMatchProbability();
-    method public com.mapbox.navigation.base.speed.model.SpeedLimit? getSpeedLimit();
+    method @Deprecated public com.mapbox.navigation.base.speed.model.SpeedLimit? getSpeedLimit();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitInfo getSpeedLimitInfo();
     method public Integer? getZLevel();
     method public boolean isDegradedMapMatching();
     method public boolean isOffRoad();
@@ -1119,7 +1120,8 @@ package com.mapbox.navigation.core.trip.session {
     property public final float offRoadProbability;
     property public final com.mapbox.navigation.base.road.model.Road road;
     property public final float roadEdgeMatchProbability;
-    property public final com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit;
+    property @Deprecated public final com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit;
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitInfo speedLimitInfo;
     property public final Integer? zLevel;
   }
 

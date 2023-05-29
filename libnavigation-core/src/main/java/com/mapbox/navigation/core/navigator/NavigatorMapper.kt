@@ -13,10 +13,12 @@ import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
+import com.mapbox.navigation.base.internal.factory.SpeedLimitInfoFactory
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimit
+import com.mapbox.navigation.base.speed.model.SpeedLimitInfo
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -267,7 +269,6 @@ internal fun RouteState.convertState(): RouteProgressState {
     }
 }
 
-@OptIn(ExperimentalMapboxNavigationAPI::class)
 internal fun TripStatus.getLocationMatcherResult(
     enhancedLocation: Location,
     keyPoints: List<Location>,
@@ -280,6 +281,7 @@ internal fun TripStatus.getLocationMatcherResult(
         navigationStatus.offRoadProba,
         navigationStatus.mapMatcherOutput.isTeleport,
         navigationStatus.prepareSpeedLimit(),
+        navigationStatus.prepareSpeedLimitInfo(),
         navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f,
         navigationStatus.layer,
         road,
@@ -295,11 +297,7 @@ internal fun NavigationStatus.prepareSpeedLimit(): SpeedLimit? {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR
             else -> com.mapbox.navigation.base.speed.model.SpeedLimitUnit.MILES_PER_HOUR
         }
-        val speedLimitSign = when (limit.localeSign) {
-            SpeedLimitSign.MUTCD -> com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
-            else -> com.mapbox.navigation.base.speed.model.SpeedLimitSign.VIENNA
-        }
-        // TODO: https://mapbox.atlassian.net/browse/NAVAND-1349
+        val speedLimitSign = convertSign(limit.localeSign)
         val speedKmph = when (speedLimitUnit) {
             com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR -> limit.speed
             com.mapbox.navigation.base.speed.model.SpeedLimitUnit.MILES_PER_HOUR ->
@@ -310,6 +308,30 @@ internal fun NavigationStatus.prepareSpeedLimit(): SpeedLimit? {
             speedLimitUnit,
             speedLimitSign
         )
+    }
+}
+
+internal fun NavigationStatus.prepareSpeedLimitInfo(): SpeedLimitInfo {
+    val speedLimitUnit = when (speedLimit.localeUnit) {
+        SpeedLimitUnit.KILOMETRES_PER_HOUR ->
+            com.mapbox.navigation.base.speed.model.SpeedUnit.KILOMETERS_PER_HOUR
+        SpeedLimitUnit.MILES_PER_HOUR ->
+            com.mapbox.navigation.base.speed.model.SpeedUnit.MILES_PER_HOUR
+    }
+    val speedLimitSign = convertSign(speedLimit.localeSign)
+    return SpeedLimitInfoFactory.createSpeedLimitInfo(
+        speedLimit.speed,
+        speedLimitUnit,
+        speedLimitSign
+    )
+}
+
+private fun convertSign(
+    nativeSign: SpeedLimitSign
+): com.mapbox.navigation.base.speed.model.SpeedLimitSign {
+    return when (nativeSign) {
+        SpeedLimitSign.MUTCD -> com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+        SpeedLimitSign.VIENNA -> com.mapbox.navigation.base.speed.model.SpeedLimitSign.VIENNA
     }
 }
 

@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.trip.session
 import android.location.Location
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.speed.model.SpeedLimit
+import com.mapbox.navigation.base.speed.model.SpeedLimitInfo
 
 /**
  * Provides information about the status of the enhanced location updates generated
@@ -16,7 +17,8 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
  * @param isTeleport returns true if map matcher changed its opinion about most probable path on last update.
  * In practice it means we don't need to animate puck movement from previous to current location
  * and just do an immediate transition instead.
- * @param speedLimit current speed limit during free drive and active navigation session.
+ * @param speedLimit deprecated, use speedLimitInfo.
+ * @param speedLimitInfo current speed limit during free drive and active navigation session.
  * In order to receive the speed limit make sure you add annotationsList with
  * DirectionsCriteria.ANNOTATION_MAXSPEED annotation to the route request.
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
@@ -32,7 +34,9 @@ class LocationMatcherResult internal constructor(
     val isOffRoad: Boolean,
     val offRoadProbability: Float,
     val isTeleport: Boolean,
+    @Deprecated("Use speedLimitInfo")
     val speedLimit: SpeedLimit?,
+    val speedLimitInfo: SpeedLimitInfo,
     val roadEdgeMatchProbability: Float,
     val zLevel: Int?,
     val road: Road,
@@ -55,6 +59,7 @@ class LocationMatcherResult internal constructor(
         if (offRoadProbability != other.offRoadProbability) return false
         if (isTeleport != other.isTeleport) return false
         if (speedLimit != other.speedLimit) return false
+        if (speedLimitInfo != other.speedLimitInfo) return false
         if (roadEdgeMatchProbability != other.roadEdgeMatchProbability) return false
         if (road != other.road) return false
         if (isDegradedMapMatching != other.isDegradedMapMatching) return false
@@ -72,6 +77,7 @@ class LocationMatcherResult internal constructor(
         result = 31 * result + offRoadProbability.hashCode()
         result = 31 * result + isTeleport.hashCode()
         result = 31 * result + speedLimit.hashCode()
+        result = 31 * result + speedLimitInfo.hashCode()
         result = 31 * result + roadEdgeMatchProbability.hashCode()
         result = 31 * result + road.hashCode()
         result = 31 * result + isDegradedMapMatching.hashCode()
@@ -85,7 +91,7 @@ class LocationMatcherResult internal constructor(
     override fun toString(): String {
         return "LocationMatcherResult(enhancedLocation=$enhancedLocation, " +
             "keyPoints=$keyPoints, isOffRoad=$isOffRoad, offRoadProbability=$offRoadProbability, " +
-            "isTeleport=$isTeleport, speedLimit=$speedLimit, " +
+            "isTeleport=$isTeleport, speedLimit=$speedLimit, speedLimitInfo=$speedLimitInfo, " +
             "roadEdgeMatchProbability=$roadEdgeMatchProbability, road=$road, " +
             "isDegradedMapMatching=$isDegradedMapMatching, " +
             "inTunnel=$inTunnel)"

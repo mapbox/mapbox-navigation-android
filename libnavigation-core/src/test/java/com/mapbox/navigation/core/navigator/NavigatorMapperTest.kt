@@ -9,10 +9,12 @@ import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
+import com.mapbox.navigation.base.internal.factory.SpeedLimitInfoFactory
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimit
+import com.mapbox.navigation.base.speed.model.SpeedUnit
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
@@ -158,6 +160,11 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
+            ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
             road = road,
@@ -203,6 +210,11 @@ class NavigatorMapperTest {
                 10,
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
@@ -250,6 +262,11 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
+            ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
             road = road,
@@ -296,6 +313,11 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
+            ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
             road = road,
@@ -338,6 +360,11 @@ class NavigatorMapperTest {
                 10,
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 0f,
             zLevel = null,
@@ -385,6 +412,11 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
+            ),
             roadEdgeMatchProbability = 1f,
             zLevel = 2,
             road = road,
@@ -430,6 +462,11 @@ class NavigatorMapperTest {
                 10,
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
@@ -566,6 +603,27 @@ class NavigatorMapperTest {
     }
 
     @Test
+    fun `prepareSpeedLimitInfo kmph non null`() {
+        every {
+            navigationStatus.speedLimit
+        } returns createSpeedLimit(
+            speed = 80,
+            unit = SpeedLimitUnit.KILOMETRES_PER_HOUR,
+            sign = SpeedLimitSign.VIENNA
+        )
+        val actual = navigationStatus.prepareSpeedLimitInfo()
+
+        assertEquals(
+            SpeedLimitInfoFactory.createSpeedLimitInfo(
+                80,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.VIENNA,
+            ),
+            actual
+        )
+    }
+
+    @Test
     fun `prepareSpeedLimit kmph null`() {
         every {
             navigationStatus.speedLimit
@@ -573,6 +631,27 @@ class NavigatorMapperTest {
         val actual = navigationStatus.prepareSpeedLimit()!!
 
         assertNull(actual.speedKmph)
+    }
+
+    @Test
+    fun `prepareSpeedLimitInfo kmph null`() {
+        every {
+            navigationStatus.speedLimit
+        } returns createSpeedLimit(
+            speed = null,
+            unit = SpeedLimitUnit.KILOMETRES_PER_HOUR,
+            sign = SpeedLimitSign.MUTCD
+        )
+        val actual = navigationStatus.prepareSpeedLimitInfo()
+
+        assertEquals(
+            SpeedLimitInfoFactory.createSpeedLimitInfo(
+                null,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
+            ),
+            actual
+        )
     }
 
     @Test
@@ -586,6 +665,27 @@ class NavigatorMapperTest {
     }
 
     @Test
+    fun `prepareSpeedLimitInfo mph non null`() {
+        every {
+            navigationStatus.speedLimit
+        } returns createSpeedLimit(
+            speed = 60,
+            unit = SpeedLimitUnit.MILES_PER_HOUR,
+            sign = SpeedLimitSign.MUTCD
+        )
+        val actual = navigationStatus.prepareSpeedLimitInfo()
+
+        assertEquals(
+            SpeedLimitInfoFactory.createSpeedLimitInfo(
+                60,
+                SpeedUnit.MILES_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
+            ),
+            actual
+        )
+    }
+
+    @Test
     fun `prepareSpeedLimit mph null`() {
         every {
             navigationStatus.speedLimit
@@ -595,15 +695,33 @@ class NavigatorMapperTest {
         assertNull(actual.speedKmph)
     }
 
+    @Test
+    fun `prepareSpeedLimitInfo mph null`() {
+        every {
+            navigationStatus.speedLimit
+        } returns createSpeedLimit(
+            speed = null,
+            unit = SpeedLimitUnit.MILES_PER_HOUR,
+            sign = SpeedLimitSign.VIENNA
+        )
+        val actual = navigationStatus.prepareSpeedLimitInfo()
+
+        assertEquals(
+            SpeedLimitInfoFactory.createSpeedLimitInfo(
+                null,
+                SpeedUnit.MILES_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.VIENNA,
+            ),
+            actual
+        )
+    }
+
     private fun createSpeedLimit(
         speed: Int? = 10,
-        unit: SpeedLimitUnit = SpeedLimitUnit.KILOMETRES_PER_HOUR
+        unit: SpeedLimitUnit = SpeedLimitUnit.KILOMETRES_PER_HOUR,
+        sign: SpeedLimitSign = SpeedLimitSign.MUTCD,
     ): com.mapbox.navigator.SpeedLimit {
-        return com.mapbox.navigator.SpeedLimit(
-            speed,
-            unit,
-            SpeedLimitSign.MUTCD
-        )
+        return com.mapbox.navigator.SpeedLimit(speed, unit, sign)
     }
 
     private val nativeBannerInstructions = mockk<BannerInstruction> {
