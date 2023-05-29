@@ -934,6 +934,7 @@ package com.mapbox.navigation.base.trip.model {
     method public float getDistanceTraveled();
     method public double getDurationRemaining();
     method public float getFractionTraveled();
+    method public boolean getInParkingAisle();
     method public boolean getInTunnel();
     method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
     method public int getRemainingWaypoints();
@@ -951,6 +952,7 @@ package com.mapbox.navigation.base.trip.model {
     property public final float distanceTraveled;
     property public final double durationRemaining;
     property public final float fractionTraveled;
+    property public final boolean inParkingAisle;
     property public final boolean inTunnel;
     property public final com.mapbox.navigation.base.route.NavigationRoute navigationRoute;
     property public final int remainingWaypoints;

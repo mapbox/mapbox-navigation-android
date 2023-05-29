@@ -52,6 +52,7 @@ object RouteProgressFactory {
      * @param currentRouteGeometryIndex route-wise index representing the geometry point that starts the segment
      * the user is currently on, effectively this represents the index of last visited geometry point in the route
      * (see [DirectionsRoute.geometry] or [DecodeUtils.completeGeometryToPoints] if [RouteOptions.overview] is [DirectionsCriteria.OVERVIEW_FULL]).
+     * @param inParkingAisle whether the current location belongs to a parking aisle.
      * @param alternativeRoutesIndices map of alternative route id to route indices for specified route (see [RouteIndices]). No primary route indices data is available here.
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -72,6 +73,7 @@ object RouteProgressFactory {
         stale: Boolean,
         alternativeRouteId: String?,
         currentRouteGeometryIndex: Int,
+        inParkingAisle: Boolean,
         alternativeRoutesIndices: Map<String, RouteIndices>
     ): RouteProgress {
         return RouteProgress(
@@ -91,6 +93,7 @@ object RouteProgressFactory {
             stale = stale,
             alternativeRouteId,
             currentRouteGeometryIndex = currentRouteGeometryIndex,
+            inParkingAisle = inParkingAisle,
             alternativeRoutesIndices = alternativeRoutesIndices,
         )
     }

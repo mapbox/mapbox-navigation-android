@@ -337,6 +337,7 @@ class RestAreaProcessorTest {
         stale = false,
         alternativeRouteId = null,
         currentRouteGeometryIndex = 0,
+        inParkingAisle = false,
         alternativeRoutesIndices = emptyMap(),
     )
 

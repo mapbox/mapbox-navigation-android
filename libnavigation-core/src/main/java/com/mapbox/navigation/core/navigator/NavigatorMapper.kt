@@ -211,6 +211,7 @@ private fun NavigationStatus.getRouteProgress(
         stale,
         locatedAlternativeRouteId,
         geometryIndex,
+        inParkingAisle,
         alternativeRouteIndicesMap
     )
 }
