@@ -861,18 +861,27 @@ package com.mapbox.navigation.base.route {
 
 package com.mapbox.navigation.base.speed.model {
 
-  public final class SpeedLimit {
-    ctor public SpeedLimit(Integer? speedKmph, com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedLimitUnit, com.mapbox.navigation.base.speed.model.SpeedLimitSign speedLimitSign);
-    method public Integer? component1();
-    method public com.mapbox.navigation.base.speed.model.SpeedLimitUnit component2();
-    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign component3();
-    method public com.mapbox.navigation.base.speed.model.SpeedLimit copy(Integer? speedKmph, com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedLimitUnit, com.mapbox.navigation.base.speed.model.SpeedLimitSign speedLimitSign);
-    method public Integer? getSpeedKmph();
-    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign getSpeedLimitSign();
-    method public com.mapbox.navigation.base.speed.model.SpeedLimitUnit getSpeedLimitUnit();
+  @Deprecated public final class SpeedLimit {
+    ctor @Deprecated public SpeedLimit(Integer? speedKmph, com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedLimitUnit, com.mapbox.navigation.base.speed.model.SpeedLimitSign speedLimitSign);
+    method @Deprecated public Integer? component1();
+    method @Deprecated public com.mapbox.navigation.base.speed.model.SpeedLimitUnit component2();
+    method @Deprecated public com.mapbox.navigation.base.speed.model.SpeedLimitSign component3();
+    method @Deprecated public com.mapbox.navigation.base.speed.model.SpeedLimit copy(Integer? speedKmph, com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedLimitUnit, com.mapbox.navigation.base.speed.model.SpeedLimitSign speedLimitSign);
+    method @Deprecated public Integer? getSpeedKmph();
+    method @Deprecated public com.mapbox.navigation.base.speed.model.SpeedLimitSign getSpeedLimitSign();
+    method @Deprecated public com.mapbox.navigation.base.speed.model.SpeedLimitUnit getSpeedLimitUnit();
     property public final Integer? speedKmph;
     property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign speedLimitSign;
     property public final com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedLimitUnit;
+  }
+
+  public final class SpeedLimitInfo {
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign getSign();
+    method public Integer? getSpeed();
+    method public com.mapbox.navigation.base.speed.model.SpeedUnit getUnit();
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign sign;
+    property public final Integer? speed;
+    property public final com.mapbox.navigation.base.speed.model.SpeedUnit unit;
   }
 
   public enum SpeedLimitSign {

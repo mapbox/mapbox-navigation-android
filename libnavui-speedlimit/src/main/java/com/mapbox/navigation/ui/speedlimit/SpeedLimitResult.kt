@@ -15,6 +15,6 @@ internal sealed class SpeedLimitResult {
         val postedSpeed: Int?,
         val currentSpeed: Int,
         val postedSpeedUnit: SpeedUnit,
-        val speedSignConvention: SpeedLimitSign?,
+        val speedSignConvention: SpeedLimitSign,
     ) : SpeedLimitResult()
 }
