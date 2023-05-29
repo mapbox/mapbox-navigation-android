@@ -1,0 +1,1 @@
+- Fixed an issue where no `MapboxRouteLineApi` callbacks or suspensions for any function would have been invoked if map instance was destroyed while `MapboxRouteLineApi#findClosestRoute` was in progress.
