@@ -1252,9 +1252,31 @@ class MapboxRouteLineApi(
         resultConsumer: MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
-            mutex.withLock {
-                val state = findClosestRoute(target, mapboxMap, padding)
-                resultConsumer.accept(state)
+            if (!mapboxMap.isValid()) {
+                resultConsumer.accept(
+                    ExpectedFactory.createError(
+                        RouteNotFound("MapboxMap instance is invalid", null)
+                    )
+                )
+            } else {
+                val featuresDataCopy: List<RouteFeatureData>
+                mutex.withLock {
+                    featuresDataCopy = routeFeatureData.toList()
+                }
+                val state = findClosestRoute(target, mapboxMap, padding, featuresDataCopy)
+                mutex.withLock {
+                    if (
+                        featuresDataCopy.map { it.route.id } == routeFeatureData.map { it.route.id }
+                    ) {
+                        resultConsumer.accept(state)
+                    } else {
+                        resultConsumer.accept(
+                            ExpectedFactory.createError(
+                                RouteNotFound("Routes have changed", null)
+                            )
+                        )
+                    }
+                }
             }
         }
     }
@@ -1271,6 +1293,7 @@ class MapboxRouteLineApi(
         target: Point,
         mapboxMap: MapboxMap,
         padding: Float,
+        featuresData: List<RouteFeatureData>,
     ): Expected<RouteNotFound, ClosestRouteValue> {
         val mapClickPoint = mapboxMap.pixelForCoordinate(target)
         val leftFloat = (mapClickPoint.x - padding)
@@ -1281,7 +1304,7 @@ class MapboxRouteLineApi(
             ScreenCoordinate(leftFloat, topFloat),
             ScreenCoordinate(rightFloat, bottomFloat)
         )
-        val routesAndFeatures = routeFeatureData.toList()
+        val routesAndFeatures = featuresData.toList()
         val features = routesAndFeatures.map { it.featureCollection }
 
         val primaryRouteLineLayers = ifNonNull(mapboxMap.getStyle()) { style ->
