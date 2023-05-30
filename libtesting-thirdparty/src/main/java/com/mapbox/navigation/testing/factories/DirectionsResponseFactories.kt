@@ -26,6 +26,7 @@ fun createDirectionsResponse(
     uuid: String? = "testUUID",
     routes: List<DirectionsRoute> = listOf(createDirectionsRoute()),
     unrecognizedProperties: Map<String, JsonElement>? = null,
+    responseWaypoints: List<DirectionsWaypoint> = listOf(createWaypoint(), createWaypoint())
 ): DirectionsResponse {
     val processedRoutes = routes.map {
         it.toBuilder().requestUuid(uuid).build()
@@ -35,6 +36,7 @@ fun createDirectionsResponse(
         .code("Ok")
         .routes(processedRoutes)
         .unrecognizedJsonProperties(unrecognizedProperties)
+        .waypoints(responseWaypoints)
         .build()
 }
 

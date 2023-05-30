@@ -4,68 +4,31 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
 import com.mapbox.navigation.base.internal.route.toTestNavigationRoutes
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
-import com.mapbox.navigator.RouteInterface
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
-import org.json.JSONObject
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.net.URL
-import java.util.UUID
 
 class NavigationRouteTest {
 
-    @Before
-    fun setup() {
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val response = JSONObject(this.firstArg<String>())
-            val routesCount = response.getJSONArray("routes").length()
-            val idBase = if (response.has("uuid")) {
-                response.getString("uuid")
-            } else {
-                "local@${UUID.randomUUID()}"
-            }
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "$idBase#$it"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                            every { waypoints } returns emptyList()
-                        }
-                    )
-                }
-            }
-            ExpectedFactory.createValue(nativeRoutes)
-        }
-    }
-
-    @After
-    fun tearDown() {
-        unmockkObject(NativeRouteParserWrapper)
-    }
+    @get:Rule
+    val routeParserRule = NativeRouteParserRule()
 
     @Test
     fun `toNavigationRoute - waypoints back filled from route legs`() {
@@ -137,54 +100,50 @@ class NavigationRouteTest {
 
     @Test
     fun `toNavigationRoute - uuid from route used`() {
-        val directionsRoute = spyk(MapboxJavaObjectsFactory.directionsRoute()) {
-            every { requestUuid() } returns "asdf"
-            every { routeIndex() } returns "0"
-            every { routeOptions() } returns RouteOptions.builder()
-                .profile("driving")
-                .coordinatesList(
-                    listOf(
-                        Point.fromLngLat(1.1, 1.1),
-                        Point.fromLngLat(2.2, 2.2),
+        val directionsRoute = MapboxJavaObjectsFactory.directionsRoute().toBuilder()
+            .requestUuid("asdf")
+            .routeIndex("0")
+            .legs(null)
+            .routeOptions(
+                RouteOptions.builder()
+                    .profile("driving")
+                    .coordinatesList(
+                        listOf(
+                            Point.fromLngLat(1.1, 1.1),
+                            Point.fromLngLat(2.2, 2.2),
+                        )
                     )
-                )
-                .build()
-            every { legs() } returns null
-        }
+                    .build()
+            )
+            .build()
 
         val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Offboard)
 
-        val responseJsonSlot = slot<String>()
-        verify {
-            NativeRouteParserWrapper.parseDirectionsResponse(
-                capture(responseJsonSlot),
-                any(),
-                any()
-            )
-        }
-        assertEquals("asdf", DirectionsResponse.fromJson(responseJsonSlot.captured).uuid())
         assertEquals("asdf#0", navigationRoute.id)
     }
 
     @Test
     fun `toNavigationRoute - waypoints back filled from route options ignoring silent`() {
-        val directionsRoute = spyk(MapboxJavaObjectsFactory.directionsRoute()) {
-            every { requestUuid() } returns "asdf"
-            every { routeIndex() } returns "0"
-            every { routeOptions() } returns RouteOptions.builder()
-                .profile("driving")
-                .coordinatesList(
-                    listOf(
-                        Point.fromLngLat(1.1, 1.1),
-                        Point.fromLngLat(2.2, 2.2),
-                        Point.fromLngLat(3.3, 3.3),
-                        Point.fromLngLat(4.4, 4.4),
+        val directionsRoute = MapboxJavaObjectsFactory.directionsRoute()
+            .toBuilder()
+            .requestUuid("asdf")
+            .routeIndex("0")
+            .routeOptions(
+                RouteOptions.builder()
+                    .profile("driving")
+                    .coordinatesList(
+                        listOf(
+                            Point.fromLngLat(1.1, 1.1),
+                            Point.fromLngLat(2.2, 2.2),
+                            Point.fromLngLat(3.3, 3.3),
+                            Point.fromLngLat(4.4, 4.4),
+                        )
                     )
-                )
-                .waypointIndicesList(listOf(0, 2, 3))
-                .build()
-            every { legs() } returns null
-        }
+                    .waypointIndicesList(listOf(0, 2, 3))
+                    .build()
+            )
+            .legs(null)
+            .build()
 
         val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Custom())
 
@@ -289,26 +248,6 @@ class NavigationRouteTest {
 
     @Test
     fun `id access`() {
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val routesCount = JSONObject(this.firstArg<String>())
-                .getJSONArray("routes")
-                .length()
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "some_id"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                            every { waypoints } returns emptyList()
-                        }
-                    )
-                }
-            }
-            ExpectedFactory.createValue(nativeRoutes)
-        }
         val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
         val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
 
@@ -318,7 +257,12 @@ class NavigationRouteTest {
             routerOrigin = RouterOrigin.Onboard
         )
 
-        assertTrue(navigationRoute.all { it.id == "some_id" })
+        assertEquals(
+            listOf(
+                "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==#0"
+            ),
+            navigationRoute.map { it.id }
+        )
     }
 
     @Test

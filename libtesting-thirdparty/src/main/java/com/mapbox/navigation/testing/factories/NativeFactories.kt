@@ -4,7 +4,6 @@ import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.DataRef
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.ActiveGuidanceInfo
-import com.mapbox.navigator.AlternativeRouteInfo
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.FixLocation
@@ -25,6 +24,7 @@ import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
+import java.nio.ByteBuffer
 import java.time.Instant
 import java.util.Date
 
@@ -155,23 +155,20 @@ fun createFixedLocation(
     true
 )
 
-fun createWaypoints(): List<Waypoint> = listOf(
-    Waypoint(
-        "name_1",
-        Point.fromLngLat(1.1, 1.2),
-        null,
-        null,
-        null,
-        WaypointType.REGULAR,
-    ),
-    Waypoint(
-        "name_2",
-        Point.fromLngLat(2.1, 2.2),
-        null,
-        null,
-        null,
-        WaypointType.REGULAR,
-    ),
+fun createNativeWaypoint(
+    name: String = "testWaypoint",
+    location: Point = Point.fromLngLat(2.1, 2.2),
+    distance: Double? = null,
+    metadata: String? = null,
+    target: Point? = null,
+    type: WaypointType = WaypointType.REGULAR
+) = Waypoint(
+    name,
+    location,
+    distance,
+    metadata,
+    target,
+    type
 )
 
 // Add default parameters if you define properties
@@ -197,7 +194,7 @@ fun createRouteInterface(
     override fun getRouteIndex() = routeIndex
 
     override fun getResponseJsonRef(): DataRef {
-        throw UnsupportedOperationException()
+        return responseJson.toDataRef()
     }
 
     override fun getResponseJson() = responseJson
@@ -215,4 +212,11 @@ fun createRouteInterface(
     override fun getExpirationTimeMs(): Long? = expirationTimeMs
 
     override fun getLastRefreshTimestamp(): Date? = lastRefreshTimestamp
+}
+
+fun String.toDataRef(): DataRef {
+    val responseBytes = encodeToByteArray()
+    val buffer = ByteBuffer.allocateDirect(responseBytes.size)
+    buffer.put(responseBytes)
+    return DataRef(buffer)
 }

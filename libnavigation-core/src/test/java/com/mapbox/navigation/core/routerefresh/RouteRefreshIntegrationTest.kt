@@ -3,10 +3,8 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
@@ -28,6 +26,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.every
@@ -46,6 +45,9 @@ internal open class RouteRefreshIntegrationTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
+
+    @get:Rule
+    val routeParserRule = NativeRouteParserRule()
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -95,10 +97,6 @@ internal open class RouteRefreshIntegrationTest {
 
     @Before
     fun setUp() {
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } returns ExpectedFactory.createValue(listOf(mockk(relaxed = true)))
         mockkObject(CoroutineUtils)
         every {
             CoroutineUtils.createScope(any(), any())
@@ -118,7 +116,6 @@ internal open class RouteRefreshIntegrationTest {
 
     @After
     fun tearDown() {
-        unmockkObject(NativeRouteParserWrapper)
         unmockkObject(CoroutineUtils)
     }
 

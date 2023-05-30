@@ -63,7 +63,7 @@ class RouterWrapper(
         return router.getRoute(
             routeUrl,
             requestOptions,
-            com.mapbox.navigator.RouterCallback { result, origin ->
+            com.mapbox.navigator.RouterDataRefCallback { result, origin ->
                 logD(LOG_CATEGORY) {
                     "received result from router.getRoute for $urlWithoutToken; origin: $origin"
                 }

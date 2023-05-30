@@ -1698,7 +1698,7 @@ class BillingControllerWaypointsComparisonTest(
         routeProgress = mockk(relaxed = true) {
             every { navigationRoute } returns createNavigationRoute(
                 directionsRoute = createDirectionsRoute(),
-                waypoints = oldWaypoints
+                nativeWaypoints = oldWaypoints
             )
             every {
                 remainingWaypoints
@@ -1706,7 +1706,7 @@ class BillingControllerWaypointsComparisonTest(
         }
         newRoute = createNavigationRoute(
             directionsRoute = createDirectionsRoute(),
-            waypoints = newWaypoints
+            nativeWaypoints = newWaypoints
         )
 
         tripSession = mockk(relaxed = true) {

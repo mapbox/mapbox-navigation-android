@@ -3,12 +3,12 @@ package com.mapbox.navigation.route.internal
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -24,9 +24,10 @@ import com.mapbox.navigation.route.internal.util.TestRouteFixtures
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
-import com.mapbox.navigation.testing.factories.createRouteInterfacesFromDirectionRequestResponse
+import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.GetRouteOptions
 import com.mapbox.navigator.RouteRefreshOptions
@@ -67,6 +68,9 @@ class RouterWrapperTests {
     val loggerRule = LoggingFrontendTestRule()
 
     @get:Rule
+    val routeParserRule = NativeRouteParserRule()
+
+    @get:Rule
     var coroutineRule = MainCoroutineRule()
 
     private lateinit var routerWrapper: RouterWrapper
@@ -85,8 +89,8 @@ class RouterWrapperTests {
 
     private val testRouteFixtures = TestRouteFixtures()
 
-    private val routerResultSuccess: Expected<RouterError, String> = ExpectedFactory.createValue(
-        testRouteFixtures.loadTwoLegRoute()
+    private val routerResultSuccess: Expected<RouterError, DataRef> = ExpectedFactory.createValue(
+        testRouteFixtures.loadTwoLegRoute().toDataRef()
     )
     private val routerResultFailure: Expected<RouterError, String> = ExpectedFactory.createError(
         RouterError(
@@ -96,19 +100,29 @@ class RouterWrapperTests {
             REQUEST_ID
         )
     )
-    private val routerResultCancelled: Expected<RouterError, String> = ExpectedFactory.createError(
-        RouterError(
-            CANCELLED_MESSAGE,
-            FAILURE_CODE,
-            CANCELED_TYPE,
-            REQUEST_ID
+    private val routerResultFailureDataRef: Expected<RouterError, DataRef> = ExpectedFactory
+        .createError(
+            RouterError(
+                FAILURE_MESSAGE,
+                FAILURE_CODE,
+                FAILURE_TYPE,
+                REQUEST_ID
+            )
         )
-    )
-    private val routerResultSuccessEmptyRoutes: Expected<RouterError, String> = ExpectedFactory
-        .createValue(testRouteFixtures.loadEmptyRoutesResponse())
-    private val routerResultSuccessErroneousValue: Expected<RouterError, String> =
+    private val routerResultCancelled: Expected<RouterError, DataRef> = ExpectedFactory
+        .createError(
+            RouterError(
+                CANCELLED_MESSAGE,
+                FAILURE_CODE,
+                CANCELED_TYPE,
+                REQUEST_ID
+            )
+        )
+    private val routerResultSuccessEmptyRoutes: Expected<RouterError, DataRef> = ExpectedFactory
+        .createValue(testRouteFixtures.loadEmptyRoutesResponse().toDataRef())
+    private val routerResultSuccessErroneousValue: Expected<RouterError, DataRef> =
         ExpectedFactory.createValue(
-            "{\"message\":\"should be >= 1\",\"code\":\"InvalidInput\"}"
+            "{\"message\":\"should be >= 1\",\"code\":\"InvalidInput\"}".toDataRef()
         )
 
     private val routerRefreshSuccess: Expected<RouterError, String> = ExpectedFactory.createValue(
@@ -118,7 +132,7 @@ class RouterWrapperTests {
         .createValue(testRouteFixtures.loadRefreshForMultiLegRouteSecondLeg())
     private val nativeOriginOnline: RouterOrigin = RouterOrigin.ONLINE
     private val nativeOriginOnboard: RouterOrigin = RouterOrigin.ONBOARD
-    private val getRouteSlot = slot<com.mapbox.navigator.RouterCallback>()
+    private val getRouteSlot = slot<com.mapbox.navigator.RouterDataRefCallback>()
     private val refreshRouteSlot = slot<RouterRefreshCallback>()
     private val routeSlot = slot<NavigationRoute>()
 
@@ -136,17 +150,6 @@ class RouterWrapperTests {
         every { route.routeIndex() } returns "index"
         every { route.routeOptions() } returns routerOptions
 
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val nativeRoutes = createRouteInterfacesFromDirectionRequestResponse(
-                response = firstArg(),
-                requestUri = secondArg(),
-            )
-            ExpectedFactory.createValue(nativeRoutes)
-        }
-
         routerWrapper = RouterWrapper(
             accessToken,
             mapboxNativeNavigator.router,
@@ -157,7 +160,6 @@ class RouterWrapperTests {
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
-        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test
@@ -171,14 +173,18 @@ class RouterWrapperTests {
         val requestOptions = GetRouteOptions(null)
 
         verify {
-            router.getRoute(routeUrl, requestOptions, any<com.mapbox.navigator.RouterCallback>())
+            router.getRoute(
+                routeUrl,
+                requestOptions,
+                any<com.mapbox.navigator.RouterDataRefCallback>()
+            )
         }
     }
 
     @Test
     fun `check callback called on failure with redacted token`() {
         routerWrapper.getRoute(routerOptions, routerCallback)
-        getRouteSlot.captured.run(routerResultFailure, nativeOriginOnline)
+        getRouteSlot.captured.run(routerResultFailureDataRef, nativeOriginOnline)
 
         val expected = listOf(
             RouterFailure(
@@ -191,7 +197,13 @@ class RouterWrapperTests {
             )
         )
 
-        verify { router.getRoute(routeUrl, any(), any<com.mapbox.navigator.RouterCallback>()) }
+        verify {
+            router.getRoute(
+                routeUrl,
+                any(),
+                any<com.mapbox.navigator.RouterDataRefCallback>()
+            )
+        }
         verify { routerCallback.onFailure(expected, routerOptions) }
     }
 
@@ -201,7 +213,13 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any(), any<com.mapbox.navigator.RouterCallback>()) }
+            verify {
+                router.getRoute(
+                    routeUrl,
+                    any(),
+                    any<com.mapbox.navigator.RouterDataRefCallback>()
+                )
+            }
 
             val expected = DirectionsResponse.fromJson(
                 testRouteFixtures.loadTwoLegRoute(),
@@ -218,7 +236,13 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccessEmptyRoutes, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any(), any<com.mapbox.navigator.RouterCallback>()) }
+            verify {
+                router.getRoute(
+                    routeUrl,
+                    any(),
+                    any<com.mapbox.navigator.RouterDataRefCallback>()
+                )
+            }
 
             val expected = RouterFailure(
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
@@ -246,7 +270,13 @@ class RouterWrapperTests {
             routerWrapper.getRoute(routerOptions, routerCallback)
             getRouteSlot.captured.run(routerResultSuccessErroneousValue, nativeOriginOnboard)
 
-            verify { router.getRoute(routeUrl, any(), any<com.mapbox.navigator.RouterCallback>()) }
+            verify {
+                router.getRoute(
+                    routeUrl,
+                    any(),
+                    any<com.mapbox.navigator.RouterDataRefCallback>()
+                )
+            }
 
             val expected = RouterFailure(
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)

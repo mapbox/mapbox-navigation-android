@@ -13,7 +13,6 @@ import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
@@ -34,7 +33,7 @@ val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
 @VisibleForTesting(otherwise = VisibleForTesting.NONE)
 fun DirectionsRoute.toTestNavigationRoute(
     routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
-    sdkRouteParser: SDKRouteParser = NativeRouteParserWrapper,
+    sdkRouteParser: SDKRouteParser = SDKRouteParser.default,
 ): NavigationRoute = toNavigationRoute(sdkRouteParser, routerOrigin, false)
 
 /**
@@ -44,7 +43,7 @@ fun DirectionsRoute.toTestNavigationRoute(
 @VisibleForTesting(otherwise = VisibleForTesting.NONE)
 fun List<DirectionsRoute>.toTestNavigationRoutes(
     routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
-    sdkRouteParser: SDKRouteParser = NativeRouteParserWrapper,
+    sdkRouteParser: SDKRouteParser = SDKRouteParser.default,
 ) = map { it.toTestNavigationRoute(routerOrigin, sdkRouteParser) }
 
 /**

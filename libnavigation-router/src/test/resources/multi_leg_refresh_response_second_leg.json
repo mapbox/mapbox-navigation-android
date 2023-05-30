@@ -1277,7 +1277,7 @@
       },
       {
         "name": "another name2",
-        "location": [39.8608],
+        "location": [-77.028263, 39.8608],
         "distance": 73.0568
       }
     ]
