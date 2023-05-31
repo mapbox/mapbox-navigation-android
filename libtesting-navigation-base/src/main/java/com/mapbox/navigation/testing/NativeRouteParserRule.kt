@@ -3,8 +3,6 @@ package com.mapbox.navigation.testing
 import android.annotation.SuppressLint
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.testing.factories.TestSDKRouteParser
-import io.mockk.every
-import io.mockk.mockkObject
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -14,9 +12,11 @@ class NativeRouteParserRule : TestRule {
         return object : Statement() {
             @SuppressLint("VisibleForTests")
             override fun evaluate() {
-                mockkObject(SDKRouteParser) {
-                    every { SDKRouteParser.default } returns TestSDKRouteParser()
+                SDKRouteParser.default = TestSDKRouteParser()
+                try {
                     base.evaluate()
+                } finally {
+                    SDKRouteParser.resetDefault()
                 }
             }
         }
