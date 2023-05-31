@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.internal
 
-import androidx.annotation.VisibleForTesting
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
@@ -22,13 +21,7 @@ interface SDKRouteParser {
     ): Expected<String, List<RouteInterface>>
 
     companion object {
-        var default: SDKRouteParser = NativeRouteParserWrapper()
-            @VisibleForTesting set
-
-        @VisibleForTesting
-        fun resetDefault() {
-            default = NativeRouteParserWrapper()
-        }
+        val default: SDKRouteParser = NativeRouteParserWrapper()
     }
 }
 
