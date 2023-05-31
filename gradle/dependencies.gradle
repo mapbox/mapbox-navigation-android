@@ -19,7 +19,7 @@ ext {
 
   version = [
       mapboxMapSdk              : '10.14.0-beta.1',
-      mapboxSdkServices         : '6.11.0',
+      mapboxSdkServices         : '6.12.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '23.6.0-beta.1',
       mapboxCrashMonitor        : '2.0.0',

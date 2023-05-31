@@ -39,7 +39,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.net.URL
-import java.util.UUID
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -387,9 +386,9 @@ class RouteAlternativesControllerTest {
             ),
             emptyList()
         )
-        val secondAlternative: RouteAlternative = createNativeAlternativeMock().apply {
-            every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
-        }
+        val secondAlternative: RouteAlternative = createNativeAlternativeMock(
+            routerOrigin = com.mapbox.navigator.RouterOrigin.ONLINE
+        )
         nativeObserver.captured.onRouteAlternativesUpdated(
             null,
             listOf(
@@ -430,9 +429,9 @@ class RouteAlternativesControllerTest {
             val observer: NavigationRouteAlternativesObserver = mockk(relaxed = true)
             routeAlternativesController.register(observer)
 
-            val firstAlternative: RouteAlternative = createNativeAlternativeMock().apply {
-                every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
-            }
+            val firstAlternative: RouteAlternative = createNativeAlternativeMock(
+                routerOrigin = com.mapbox.navigator.RouterOrigin.ONLINE
+            )
             nativeObserver.captured.onRouteAlternativesUpdated(
                 null,
                 listOf(
@@ -588,11 +587,9 @@ class RouteAlternativesControllerTest {
                 nativeObserver.captured.onRouteAlternativesUpdated(
                     null,
                     listOf(
-                        createNativeAlternativeMock().apply {
-                            every {
-                                route.routerOrigin
-                            } returns com.mapbox.navigator.RouterOrigin.ONLINE
-                        }
+                        createNativeAlternativeMock(
+                            routerOrigin = com.mapbox.navigator.RouterOrigin.ONLINE
+                        )
                     ),
                     emptyList()
                 )
@@ -781,18 +778,17 @@ class RouteAlternativesControllerTest {
 
     private fun createNativeAlternativeMock(
         alternativeId: Int = 0,
+        routerOrigin: com.mapbox.navigator.RouterOrigin = com.mapbox.navigator.RouterOrigin.ONBOARD
     ): RouteAlternative {
-        return mockk {
-            every { route.routeId } returns UUID.randomUUID().toString()
-            every { route.responseJson } returns FileUtils.loadJsonFixture(
+        val nativeRoute = createRouteInterface(
+            responseJson = FileUtils.loadJsonFixture(
                 "route_alternative_from_native.json"
-            )
-            every { route.routeInfo } returns mockk(relaxed = true)
-            every { route.requestUri } returns genericURL.toString()
-            every { route.routeIndex } returns 0
-            every {
-                route.routerOrigin
-            } returns com.mapbox.navigator.RouterOrigin.ONBOARD
+            ),
+            requestURI = genericURL.toString(),
+            routerOrigin = routerOrigin
+        )
+        return mockk {
+            every { route } returns nativeRoute
             every { isNew } returns true
             every { alternativeRouteFork } returns nativeForkAlt
             every { mainRouteFork } returns nativeForkMain

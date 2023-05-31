@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.internal
 
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -12,9 +13,19 @@ interface SDKRouteParser {
         request: String,
         routerOrigin: RouterOrigin,
     ): Expected<String, List<RouteInterface>>
+
+    fun parseDirectionsResponse(
+        response: DataRef,
+        request: String,
+        routerOrigin: RouterOrigin,
+    ): Expected<String, List<RouteInterface>>
+
+    companion object {
+        val default: SDKRouteParser = NativeRouteParserWrapper()
+    }
 }
 
-object NativeRouteParserWrapper : SDKRouteParser {
+private class NativeRouteParserWrapper : SDKRouteParser {
     override fun parseDirectionsResponse(
         response: String,
         request: String,
@@ -25,4 +36,16 @@ object NativeRouteParserWrapper : SDKRouteParser {
             request,
             routerOrigin.mapToNativeRouteOrigin()
         )
+
+    override fun parseDirectionsResponse(
+        response: DataRef,
+        request: String,
+        routerOrigin: RouterOrigin
+    ): Expected<String, List<RouteInterface>> {
+        return RouteParser.parseDirectionsResponse(
+            response,
+            request,
+            routerOrigin.mapToNativeRouteOrigin()
+        )
+    }
 }

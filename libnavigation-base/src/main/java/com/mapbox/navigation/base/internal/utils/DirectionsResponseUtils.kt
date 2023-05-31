@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.internal.utils
 
 import com.google.gson.JsonSyntaxException
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.route.toNavigationRoute
@@ -14,7 +15,7 @@ import org.json.JSONException
 
 suspend fun parseDirectionsResponse(
     dispatcher: CoroutineDispatcher,
-    responseJson: String,
+    responseJson: DataRef,
     requestUrl: String,
     routerOrigin: RouterOrigin,
 ): Expected<Throwable, List<NavigationRoute>> =

@@ -20,13 +20,13 @@ import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.WaypointFactory
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.CLOSURE_CONGESTION_VALUE
@@ -79,15 +79,11 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
-import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -99,7 +95,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.UUID
 import kotlin.reflect.full.declaredMemberProperties
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -108,6 +103,9 @@ class MapboxRouteLineUtilsTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
+
+    @get:Rule
+    val routeParserRule = NativeRouteParserRule()
 
     private val ctx: Context = mockk()
     private val tolerance = 0.000001
@@ -119,36 +117,11 @@ class MapboxRouteLineUtilsTest {
             every { intrinsicWidth } returns 24
             every { intrinsicHeight } returns 24
         }
-        mockkObject(NativeRouteParserWrapper)
-        every {
-            NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
-        } answers {
-            val response = JSONObject(this.firstArg<String>())
-            val routesCount = response.getJSONArray("routes").length()
-            val idBase = if (response.has("uuid")) {
-                response.getString("uuid")
-            } else {
-                "local@${UUID.randomUUID()}"
-            }
-            val nativeRoutes = mutableListOf<RouteInterface>().apply {
-                repeat(routesCount) {
-                    add(
-                        mockk {
-                            every { routeInfo } returns mockk(relaxed = true)
-                            every { routeId } returns "$idBase#$it"
-                            every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
-                        }
-                    )
-                }
-            }
-            ExpectedFactory.createValue(nativeRoutes)
-        }
     }
 
     @After
     fun cleanUp() {
         unmockkStatic(AppCompatResources::class)
-        unmockkObject(NativeRouteParserWrapper)
     }
 
     @Test

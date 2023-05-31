@@ -10,10 +10,10 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
@@ -29,7 +29,12 @@ import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import okhttp3.internal.and
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.Reader
 import java.net.URL
+import java.nio.ByteBuffer
 
 /**
  * Wraps a route object used across the Navigation SDK features.
@@ -156,15 +161,15 @@ class NavigationRoute internal constructor(
          * @param routeRequestUrl URL used to generate the [directionsResponse]
          */
         internal suspend fun createAsync(
-            directionsResponseJson: String,
+            directionsResponseJson: DataRef,
             routeRequestUrl: String,
             routerOrigin: RouterOrigin,
-            routeParser: SDKRouteParser = NativeRouteParserWrapper
+            routeParser: SDKRouteParser = SDKRouteParser.default
         ): List<NavigationRoute> {
             logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
             return coroutineScope {
                 val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
-                    DirectionsResponse.fromJson(directionsResponseJson).also {
+                    DirectionsResponse.fromJson(directionsResponseJson.asReader()).also {
                         logD(
                             "parsed directions response to java model for ${it.uuid()}",
                             LOG_CATEGORY
@@ -227,7 +232,7 @@ class NavigationRoute internal constructor(
             routeOptions: RouteOptions,
             routeOptionsUrlString: String,
             routerOrigin: RouterOrigin,
-            routeParser: SDKRouteParser = NativeRouteParserWrapper
+            routeParser: SDKRouteParser = SDKRouteParser.default
         ): List<NavigationRoute> {
             return routeParser.parseDirectionsResponse(
                 directionsResponseJson,
@@ -451,7 +456,7 @@ fun List<DirectionsRoute>.toNavigationRoutes(
     ReplaceWith("toNavigationRoute(routerOrigin)")
 )
 fun DirectionsRoute.toNavigationRoute(): NavigationRoute = this.toNavigationRoute(
-    NativeRouteParserWrapper,
+    SDKRouteParser.default,
     RouterOrigin.Custom(),
     true,
 )
@@ -476,7 +481,7 @@ fun DirectionsRoute.toNavigationRoute(): NavigationRoute = this.toNavigationRout
  */
 fun DirectionsRoute.toNavigationRoute(
     routerOrigin: RouterOrigin,
-): NavigationRoute = this.toNavigationRoute(NativeRouteParserWrapper, routerOrigin, true)
+): NavigationRoute = this.toNavigationRoute(SDKRouteParser.default, routerOrigin, true)
 
 internal fun DirectionsRoute.toNavigationRoute(
     sdkRouteParser: SDKRouteParser,
@@ -536,7 +541,7 @@ internal fun DirectionsRoute.toNavigationRoute(
 
 internal fun RouteInterface.toNavigationRoute(): NavigationRoute {
     return NavigationRoute(
-        directionsResponse = DirectionsResponse.fromJson(responseJson),
+        directionsResponse = DirectionsResponse.fromJson(responseJsonRef.asReader()),
         routeOptions = RouteOptions.fromUrl(URL(requestUri)),
         routeIndex = routeIndex,
         nativeRoute = this
@@ -642,4 +647,37 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
         .duration(0.0)
         .legs(fakeLegs)
         .build()
+}
+
+private fun DataRef.asReader(): Reader =
+    InputStreamReader(ByteBufferBackedInputStream(buffer))
+
+private class ByteBufferBackedInputStream(
+    private val buffer: ByteBuffer
+) : InputStream() {
+
+    init {
+        buffer.position(0)
+    }
+
+    override fun read(): Int {
+        return if (!buffer.hasRemaining()) {
+            -1
+        } else {
+            buffer.get() and 0xFF
+        }
+    }
+
+    override fun available(): Int {
+        return buffer.remaining()
+    }
+
+    override fun read(bytes: ByteArray, off: Int, len: Int): Int {
+        if (!buffer.hasRemaining()) {
+            return -1
+        }
+        val bytesToRead = len.coerceAtMost(buffer.remaining())
+        buffer.get(bytes, off, bytesToRead)
+        return bytesToRead
+    }
 }
