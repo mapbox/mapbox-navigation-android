@@ -10,14 +10,17 @@ import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
 import com.mapbox.navigation.base.internal.route.toTestNavigationRoutes
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.testing.factories.toDataRef
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -29,6 +32,9 @@ class NavigationRouteTest {
 
     @get:Rule
     val routeParserRule = NativeRouteParserRule()
+
+    @get:Rule
+    val loggerFrontendTestRule = LoggingFrontendTestRule()
 
     @Test
     fun `toNavigationRoute - waypoints back filled from route legs`() {
@@ -295,4 +301,35 @@ class NavigationRouteTest {
             }
         }
     }
+
+    @Test
+    fun `navigation routes serialised from string, data_ref, and model are equals`() =
+        runBlocking<Unit> {
+            val responseString = FileUtils.loadJsonFixture("test_directions_response.json")
+            val responseModel = DirectionsResponse.fromJson(
+                FileUtils.loadJsonFixture("test_directions_response.json")
+            )
+            val responseDataRef = responseString.toDataRef()
+            val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
+            val testRouteOptions = RouteOptions.fromUrl(URL(requestUrl))
+
+            val serialisedFromModel = NavigationRoute.create(
+                responseModel,
+                testRouteOptions,
+                RouterOrigin.Offboard
+            )
+            val serialisedFromString = NavigationRoute.create(
+                responseString,
+                requestUrl,
+                RouterOrigin.Offboard
+            )
+            val serialisedFromDataRef = NavigationRoute.createAsync(
+                responseDataRef,
+                requestUrl,
+                RouterOrigin.Offboard
+            )
+
+            assertEquals(serialisedFromModel, serialisedFromString)
+            assertEquals(serialisedFromModel, serialisedFromDataRef)
+        }
 }
