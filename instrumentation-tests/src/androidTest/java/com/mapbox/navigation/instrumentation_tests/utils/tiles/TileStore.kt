@@ -5,6 +5,7 @@ import com.mapbox.common.TileRegionLoadOptions
 import com.mapbox.geojson.Geometry
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
+import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -44,11 +45,13 @@ suspend fun loadRegion(navigation: MapboxNavigation, region: OfflineRegion) {
 
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForRegion(
     region: OfflineRegion,
+    historyRecorderRule: MapboxHistoryTestRule? = null,
     block: (MapboxNavigation) -> Unit
 ) {
     withMapboxNavigation(
         useRealTiles = true, // TODO: use mocked tiles instead of real NAVAND-1351
-        tileStore = createTileStore()
+        tileStore = createTileStore(),
+        historyRecorderRule = historyRecorderRule
     ) { navigation ->
         loadRegion(navigation, region)
         block(navigation)

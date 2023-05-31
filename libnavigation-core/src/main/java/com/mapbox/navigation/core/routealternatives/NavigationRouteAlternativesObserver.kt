@@ -45,6 +45,8 @@ interface NavigationRouteAlternativesObserver {
      * }
      * mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
      * ```
+     * Please note that the example above doesn't properly handle offline-online route switching.
+     * Consider it as a basic example for demonstration purpose.
      *
      * You can filter the alternatives out before setting them back to [MapboxNavigation] based on requirements.
      *
