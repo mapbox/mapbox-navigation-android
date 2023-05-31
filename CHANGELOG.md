@@ -6,6 +6,32 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.13.1 - 31 May, 2023
+### Changelog
+[Changes between v2.13.0 and v2.13.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0...v2.13.1)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed offline-online routes switch via route alternative observer for the case when new online route is the same as current offline. [#7215](https://github.com/mapbox/mapbox-navigation-android/pull/7215)
+- Improved road snapping for the case when GPS signal is unstable. When GPS signal becomes unstable, LocationMatcherResult#isOffRoad stays false and LocationMatcherResult#enhancedLocation is snapped to a road, the effect takes place until stabilisation of GPS signal. [#7215](https://github.com/mapbox/mapbox-navigation-android/pull/7215)
+- Fixed `NavigationRoutes#waypoints` being null for EV offline fallback.  [#7165](https://github.com/mapbox/mapbox-navigation-android/pull/7165)
+
+#### Known issues :warning:
+- `NavigationRouteAlternativesObserver#onRouteAlternatives` could be called with an online alternative that is the same as current offline route except for its origin and annotations.
+`MapboxNavigation#getAlternativeMetadataFor` will return null for that alternative.
+Calling `MapboxNavigation#setNavigationRoutes(listOf(currentOfflinePrimaryRoute, newOnlineAlternative))` for that case won't make any effect as the alternative will be ignored.
+Make sure that you implemented routes alternatives observers with respect to offline-online scenarios as documentation suggests.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.13.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.13.0))
+- Mapbox Navigation Native `v132.3.0`
+- Mapbox Core Common `v23.5.0`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.14.0-beta.1 - 26 May, 2023
 ### Changelog
 [Changes between v2.13.0 and v2.14.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0...v2.14.0-beta.1)
