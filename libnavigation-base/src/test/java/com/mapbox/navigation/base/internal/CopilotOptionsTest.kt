@@ -11,6 +11,9 @@ class CopilotOptionsTest : BuilderTest<CopilotOptions, CopilotOptions.Builder>()
 
     override fun getFilledUpBuilder() = CopilotOptions.Builder()
         .shouldSendHistoryOnlyWithFeedback(true)
+        .maxHistoryFileLengthMillis(180000)
+        .maxHistoryFilesPerSession(2)
+        .maxTotalHistoryFilesSizePerSession(250000)
         .shouldRecordFreeDriveHistories(false)
 
     @Test

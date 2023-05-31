@@ -18,6 +18,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.copilot.CopilotTestUtils.prepareLifecycleOwnerMockk
 import com.mapbox.navigation.copilot.CopilotTestUtils.retrieveAttachments
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.copyToAndRemove
+import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.size
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
@@ -36,6 +37,7 @@ import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallb
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.logD
+import io.mockk.Ordering
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
@@ -313,6 +315,51 @@ class MapboxCopilotImplTest {
         )
 
         verify(exactly = 1) {
+            mockedHistoryRecorder.stopRecording(any())
+        }
+    }
+
+    @Test
+    fun `recording is restarted when a session is longer than maxHistoryFileLengthMillis`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val copilotOptions = CopilotOptions.Builder()
+            .maxHistoryFileLengthMillis(180000)
+            .build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val activeGuidanceHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            activeGuidanceHistoryRecordingSessionState
+        )
+
+        coroutineRule.testDispatcher.advanceTimeBy(560000)
+
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            activeGuidanceHistoryRecordingSessionState
+        )
+
+        verify(ordering = Ordering.SEQUENCE) {
+            mockedHistoryRecorder.startRecording()
+            mockedHistoryRecorder.stopRecording(any())
+            mockedHistoryRecorder.startRecording()
+            mockedHistoryRecorder.stopRecording(any())
+            mockedHistoryRecorder.startRecording()
+            mockedHistoryRecorder.stopRecording(any())
+            mockedHistoryRecorder.startRecording()
+            mockedHistoryRecorder.pushHistory(DRIVE_ENDS_EVENT_NAME, any())
             mockedHistoryRecorder.stopRecording(any())
         }
     }
@@ -824,6 +871,183 @@ class MapboxCopilotImplTest {
     }
 
     @Test
+    fun `some history files are not uploaded if their number exceeds maxHistoryFilesPerSession`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val copilotOptions = CopilotOptions.Builder()
+            .maxHistoryFileLengthMillis(180000)
+            .maxHistoryFilesPerSession(2)
+            .build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
+        prepareUploadMockks()
+        mockkObject(HistoryUploadWorker)
+        every {
+            HistoryUploadWorker.uploadHistory(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just Runs
+        val saveHistoryCallback = slot<SaveHistoryCallback>()
+        var historyFileNumber = 0
+        every { mockedHistoryRecorder.stopRecording(capture(saveHistoryCallback)) } answers {
+            saveHistoryCallback.captured.onSaved("path/to/history/file/${historyFileNumber++}")
+        }
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val mockedHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            mockedHistoryRecordingSessionState
+        )
+        coroutineRule.testDispatcher.advanceTimeBy(560000)
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockedHistoryRecordingSessionState
+        )
+
+        verify(exactly = 2) {
+            HistoryUploadWorker.uploadHistory(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `some history files are not uploaded if their total size exceeds maxTotalHistoryFilesSizePerSession`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val copilotOptions = CopilotOptions.Builder()
+            .maxHistoryFileLengthMillis(180000)
+            .maxTotalHistoryFilesSizePerSession(3200)
+            .build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
+        prepareUploadMockks()
+        mockkObject(HistoryUploadWorker)
+        every {
+            HistoryUploadWorker.uploadHistory(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just Runs
+        val saveHistoryCallback = slot<SaveHistoryCallback>()
+        var historyFileNumber = 0
+        every { mockedHistoryRecorder.stopRecording(capture(saveHistoryCallback)) } answers {
+            saveHistoryCallback.captured.onSaved("path/to/history/file/${historyFileNumber++}")
+        }
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val mockedHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            mockedHistoryRecordingSessionState
+        )
+        coroutineRule.testDispatcher.advanceTimeBy(560000)
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockedHistoryRecordingSessionState
+        )
+
+        verify(exactly = 3) {
+            HistoryUploadWorker.uploadHistory(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `one history file is uploaded even if its size exceeds maxTotalHistoryFilesSizePerSession`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val copilotOptions = CopilotOptions.Builder()
+            .maxHistoryFileLengthMillis(180000)
+            .maxTotalHistoryFilesSizePerSession(200)
+            .build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
+        every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
+        prepareUploadMockks()
+        mockkObject(HistoryUploadWorker)
+        every {
+            HistoryUploadWorker.uploadHistory(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just Runs
+        val saveHistoryCallback = slot<SaveHistoryCallback>()
+        var historyFileNumber = 0
+        every { mockedHistoryRecorder.stopRecording(capture(saveHistoryCallback)) } answers {
+            saveHistoryCallback.captured.onSaved("path/to/history/file/${historyFileNumber++}")
+        }
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val mockedHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            mockedHistoryRecordingSessionState
+        )
+        coroutineRule.testDispatcher.advanceTimeBy(560000)
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockedHistoryRecordingSessionState
+        )
+
+        verify(exactly = 1) {
+            HistoryUploadWorker.uploadHistory(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `InitRouteEvent is pushed when startRecordingHistory and initial route`() {
         val mockedMapboxNavigation = prepareBasicMockks()
         prepareLifecycleOwnerMockk()
@@ -854,6 +1078,9 @@ class MapboxCopilotImplTest {
             mockedHistoryRecordingSessionState
         )
         routesObserver.captured.onRoutesChanged(mockedRoutesResult)
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockedHistoryRecordingSessionState,
+        )
 
         verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(INIT_ROUTE_EVENT_NAME, any())
@@ -891,6 +1118,9 @@ class MapboxCopilotImplTest {
             mockedHistoryRecordingSessionState
         )
         routesObserver.captured.onRoutesChanged(mockedRoutesResult)
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockedHistoryRecordingSessionState,
+        )
 
         verify(exactly = 0) {
             mockedHistoryRecorder.pushHistory(INIT_ROUTE_EVENT_NAME, any())
@@ -927,6 +1157,9 @@ class MapboxCopilotImplTest {
             mockedHistoryRecordingSessionState
         )
         routesObserver.captured.onRoutesChanged(mockedRoutesResult)
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockedHistoryRecordingSessionState,
+        )
 
         verify(exactly = 0) {
             mockedHistoryRecorder.pushHistory(INIT_ROUTE_EVENT_NAME, any())
@@ -965,6 +1198,9 @@ class MapboxCopilotImplTest {
         routesObserver.captured.onRoutesChanged(mockedRoutesResult)
 
         routesObserver.captured.onRoutesChanged(mockedRoutesResult)
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            mockedHistoryRecordingSessionState,
+        )
 
         verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(INIT_ROUTE_EVENT_NAME, any())
@@ -1200,6 +1436,8 @@ class MapboxCopilotImplTest {
     @Test
     fun `AttachmentMetadata sessionId - debug appMode`() {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val copilotOptions = CopilotOptions.Builder().build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
         val mockedContext = mockk<Context>(relaxed = true)
         val mockedApplicationContext = mockk<Context>(relaxed = true)
         every {
@@ -1278,6 +1516,8 @@ class MapboxCopilotImplTest {
     @Test
     fun `AttachmentMetadata sessionId - prod appMode`() {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val copilotOptions = CopilotOptions.Builder().build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
         val mockedContext = mockk<Context>(relaxed = true)
         val mockedApplicationContext = mockk<Context>(relaxed = true)
         every {
@@ -1839,6 +2079,8 @@ class MapboxCopilotImplTest {
     @Test
     fun `UploadOptions URL is staging if DEBUG`() {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val copilotOptions = CopilotOptions.Builder().build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
         val mockedContext = mockk<Context>(relaxed = true)
         val mockedApplicationContext = mockk<Context>(relaxed = true)
         every {
@@ -2032,6 +2274,9 @@ class MapboxCopilotImplTest {
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             activeGuidanceHistoryRecordingSessionState
         )
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            activeGuidanceHistoryRecordingSessionState,
+        )
         val expectedEventJson = """
             {"provider":"mapbox","request":"https://mapbox.com","searchQuery":"?query\u003dtest1"}
         """.trimIndent()
@@ -2072,6 +2317,9 @@ class MapboxCopilotImplTest {
             SearchResults("mapbox", "https://mapbox.com", null, null, "?query=test1", null)
 
         mapboxCopilot.push(SearchResultsEvent(searchResults))
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            activeGuidanceHistoryRecordingSessionState,
+        )
 
         val expectedEventJson = """
             {"provider":"mapbox","request":"https://mapbox.com","searchQuery":"?query\u003dtest1"}
@@ -2113,6 +2361,9 @@ class MapboxCopilotImplTest {
         mapboxCopilot.push(SearchResultsEvent(secondSearchResults))
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             activeGuidanceHistoryRecordingSessionState
+        )
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            activeGuidanceHistoryRecordingSessionState,
         )
 
         val expectedEventJson = """
@@ -2234,6 +2485,9 @@ class MapboxCopilotImplTest {
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             activeGuidanceHistoryRecordingSessionState
         )
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            activeGuidanceHistoryRecordingSessionState,
+        )
 
         val expectedEventJson = """
             {"provider":"mapbox","request":"https://mapbox.com","searchQuery":"?query\u003dtest1"}
@@ -2311,6 +2565,9 @@ class MapboxCopilotImplTest {
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             activeGuidanceHistoryRecordingSessionState
         )
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            activeGuidanceHistoryRecordingSessionState,
+        )
 
         val expectedEventJson = """
             {"provider":"mapbox","request":"https://mapbox.com","searchQuery":"?query\u003dtest1"}
@@ -2357,6 +2614,9 @@ class MapboxCopilotImplTest {
             )
 
         mapboxCopilot.push(SearchResultUsedEvent(searchResultUsed))
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            activeGuidanceHistoryRecordingSessionState,
+        )
 
         val expectedEventJson = """
             {"provider":"mapbox","id":"test_id","name":"mapbox_poi","address":"mapbox_address","coordinates":{"latitude":0.0,"longitude":0.0}}
@@ -2412,6 +2672,9 @@ class MapboxCopilotImplTest {
         mapboxCopilot.push(SearchResultUsedEvent(secondSearchResultUsed))
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             activeGuidanceHistoryRecordingSessionState
+        )
+        historyRecordingStateChangeObserver.captured.onShouldStopRecording(
+            activeGuidanceHistoryRecordingSessionState,
         )
 
         val expectedEventJson = """
@@ -2600,7 +2863,7 @@ class MapboxCopilotImplTest {
             mockk<HistoryRecordingSessionState.FreeDrive>(relaxed = true)
         )
 
-        verify(exactly = 2) {
+        verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(INIT_ROUTE_EVENT_NAME, any())
         }
     }
@@ -2659,6 +2922,7 @@ class MapboxCopilotImplTest {
             every { mockedFile.absolutePath } returns fileSlot.captured.toString()
             mockedFile
         }
+        every { size(any()) } returns 1000
     }
 
     private fun createMapboxCopilotImplementation(
