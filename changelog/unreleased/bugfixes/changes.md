@@ -1,0 +1,1 @@
+- Fixed an issue with Copilot that caused history files without user feedback to remain on disk when using `shouldSendHistoryOnlyWithFeedback` option.

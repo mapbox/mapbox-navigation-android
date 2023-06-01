@@ -1,6 +1,7 @@
 package com.mapbox.navigation.copilot
 
 import android.content.pm.ApplicationInfo
+import android.os.SystemClock
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -118,9 +119,7 @@ internal class MapboxCopilotImpl(
         }
 
         override fun onShouldCancelRecording(state: HistoryRecordingSessionState) {
-            stopRecording { historyFilePath ->
-                delete(File(historyFilePath))
-            }
+            cancelRecordingHistory()
         }
     }
     private var initRoute = false
@@ -237,7 +236,7 @@ internal class MapboxCopilotImpl(
     ) {
         copilotHistoryRecorder.startRecording()
         currentHistoryRecordingSessionState = historyRecordingSessionState
-        startSessionTime = System.currentTimeMillis()
+        startSessionTime = SystemClock.elapsedRealtime()
         startedAt = currentUtcTime()
         driveId = historyRecordingSessionState.sessionId
         driveMode = when (historyRecordingSessionState) {
@@ -301,16 +300,24 @@ internal class MapboxCopilotImpl(
         if (currentHistoryRecordingSessionState is Idle) {
             return
         }
-        endedAt = currentUtcTime()
-        val diffTime = System.currentTimeMillis() - startSessionTime
-        push(DriveEndsEvent(DriveEnds(DriveEndsType.CanceledManually.type, diffTime)))
-        val drive = buildNavigationSession()
-        stopRecording { historyFilePath ->
-            if (hasFeedback || !shouldSendHistoryOnlyWithFeedback) {
+        if (hasFeedback || !shouldSendHistoryOnlyWithFeedback) {
+            endedAt = currentUtcTime()
+            val diffTime = SystemClock.elapsedRealtime() - startSessionTime
+            push(DriveEndsEvent(DriveEnds(DriveEndsType.CanceledManually.type, diffTime)))
+            val drive = buildNavigationSession()
+            stopRecording { historyFilePath ->
                 mainJobController.scope.launch {
                     pushHistoryFile(historyFilePath, drive)
                 }
             }
+        } else {
+            cancelRecordingHistory()
+        }
+    }
+
+    private fun cancelRecordingHistory() {
+        stopRecording { historyFilePath ->
+            delete(File(historyFilePath))
         }
     }
 
