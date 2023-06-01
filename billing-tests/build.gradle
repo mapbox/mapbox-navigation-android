@@ -8,7 +8,7 @@ apply from: "../gradle/ktlint.gradle"
 def mapboxBillingTestsApiToken = System.getenv('MAPBOX_BILLING_TESTS_ACCESS_TOKEN') ?: "null"
 
 android {
-    compileSdkVersion androidVersions.compileSdkVersion
+    compileSdkPreview  androidVersions.compileSdkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -18,7 +18,7 @@ android {
     defaultConfig {
         applicationId "com.mapbox.navigation.billing.tests"
         minSdkVersion androidVersions.minSdkVersion
-        targetSdkVersion androidVersions.targetSdkVersion
+        targetSdkPreview  androidVersions.targetSdkVersion
         multiDexEnabled true
         versionCode 1
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

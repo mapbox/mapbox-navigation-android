@@ -5,7 +5,7 @@ apply from: "../gradle/script-git-version.gradle"
 apply from: "../gradle/ktlint.gradle"
 
 android {
-    compileSdkVersion androidVersions.compileSdkVersion
+    compileSdkPreview  androidVersions.compileSdkVersion
 
     def getGitHash = { ->
         try {
@@ -27,7 +27,7 @@ android {
     defaultConfig {
         applicationId "com.mapbox.navigation.examples.androidauto"
         minSdkVersion androidVersions.carMinSdkVersion
-        targetSdkVersion androidVersions.targetSdkVersion
+        targetSdkPreview  androidVersions.targetSdkVersion
         versionCode gitVersionCode
         versionName gitVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

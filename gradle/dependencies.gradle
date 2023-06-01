@@ -3,8 +3,8 @@ ext {
 
   androidVersions = [
       minSdkVersion           : 21,
-      targetSdkVersion        : 33,
-      compileSdkVersion       : 33,
+      targetSdkVersion        : "UpsideDownCake",
+      compileSdkVersion       : "UpsideDownCake",
       carMinSdkVersion        : 23
   ]
 
@@ -18,7 +18,7 @@ ext {
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
   version = [
-      mapboxMapSdk              : '10.14.0-beta.1',
+      mapboxMapSdk              : '10.14.0-rc.1',
       mapboxSdkServices         : '6.12.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '23.6.0-beta.1',

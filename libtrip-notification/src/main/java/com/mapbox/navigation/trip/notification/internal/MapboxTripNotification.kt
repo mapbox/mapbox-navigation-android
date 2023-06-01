@@ -187,10 +187,19 @@ class MapboxTripNotification constructor(
     }
 
     private fun registerReceiver() {
-        applicationContext.registerReceiver(
-            notificationReceiver,
-            IntentFilter(END_NAVIGATION_ACTION)
-        )
+        // TODO change to UpsideDownCake when available
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            applicationContext.registerReceiver(
+                notificationReceiver,
+                IntentFilter(END_NAVIGATION_ACTION),
+                Context.RECEIVER_NOT_EXPORTED
+            )
+        } else {
+            applicationContext.registerReceiver(
+                notificationReceiver,
+                IntentFilter(END_NAVIGATION_ACTION)
+            )
+        }
     }
 
     private fun unregisterReceiver() {
@@ -241,7 +250,7 @@ class MapboxTripNotification constructor(
      * @return [PendingIntent] for stopping trip session
      */
     private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {
-        val endNavigationBtn = Intent(END_NAVIGATION_ACTION)
+        val endNavigationBtn = Intent(END_NAVIGATION_ACTION).setPackage(applicationContext.packageName)
         return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, flags)
     }
 

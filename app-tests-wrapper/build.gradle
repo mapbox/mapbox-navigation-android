@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion androidVersions.compileSdkVersion
+    compileSdkPreview  androidVersions.compileSdkVersion
 
     compileOptions {
         sourceCompatibility 1.8
@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId "com.mapbox.navigation.testswrapper"
         minSdkVersion androidVersions.minSdkVersion
-        targetSdkVersion androidVersions.targetSdkVersion
+        targetSdkPreview  androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 }

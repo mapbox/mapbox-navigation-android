@@ -7,7 +7,7 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply from: "gradle/task_generate_icons_preview.gradle"
 
 android {
-    compileSdkVersion androidVersions.compileSdkVersion
+    compileSdkPreview  androidVersions.compileSdkVersion
 
     def getGitHash = { ->
         try {
@@ -29,7 +29,7 @@ android {
     defaultConfig {
         applicationId "com.mapbox.navigation.qa_test_app"
         minSdkVersion androidVersions.carMinSdkVersion
-        targetSdkVersion androidVersions.targetSdkVersion
+        targetSdkPreview  androidVersions.targetSdkVersion
         multiDexEnabled true
         versionCode gitVersionCode
         versionName gitVersionName
