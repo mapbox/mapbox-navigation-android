@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
+import android.os.SystemClock
 import android.util.Base64
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -48,6 +49,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
@@ -65,6 +67,12 @@ class MapboxCopilotImplTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
+
+    @Before
+    fun setUp() {
+        mockkStatic(SystemClock::elapsedRealtime)
+        every { SystemClock.elapsedRealtime() } answers { System.currentTimeMillis() }
+    }
 
     @After
     fun teardown() {
@@ -647,7 +655,7 @@ class MapboxCopilotImplTest {
     }
 
     @Test
-    fun `History file is uploaded - shouldSendHistoryOnlyWithFeedback = true, hasFeedback = true`() {
+    fun `History file is uploaded - shouldSendHistoryOnlyWithFeedback = true, hasFeedback = false`() {
         val mockedMapboxNavigation = prepareBasicMockks()
         prepareLifecycleOwnerMockk()
         val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
@@ -708,10 +716,13 @@ class MapboxCopilotImplTest {
                 any(),
             )
         }
+        verify(exactly = 1) {
+            HistoryAttachmentsUtils.delete(File("path/to/history/file"))
+        }
     }
 
     @Test
-    fun `History file is not uploaded - shouldSendHistoryOnlyWithFeedback = true, hasFeedback = false`() {
+    fun `History file is not uploaded - shouldSendHistoryOnlyWithFeedback = true, hasFeedback = true`() {
         val mockedMapboxNavigation = prepareBasicMockks()
         prepareLifecycleOwnerMockk()
         val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
