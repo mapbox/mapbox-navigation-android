@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.lifecycle
+package com.mapbox.navigation.core.internal.lifecycle
 
 import android.app.Activity
 import android.app.Application
@@ -11,7 +11,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.navigation.utils.internal.logI
 
-internal class CarAppLifecycleOwner : LifecycleOwner {
+class CarAppLifecycleOwner : LifecycleOwner {
 
     // Keeps track of the activities created and foregrounded
     private val activitiesCreated = hashSetOf<Activity>()
@@ -167,7 +167,7 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
 
     override fun getLifecycle(): Lifecycle = lifecycleRegistry
 
-    internal fun attachAllActivities(application: Application) {
+    fun attachAllActivities(application: Application) {
         logI("attachAllActivities", LOG_CATEGORY)
         application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)

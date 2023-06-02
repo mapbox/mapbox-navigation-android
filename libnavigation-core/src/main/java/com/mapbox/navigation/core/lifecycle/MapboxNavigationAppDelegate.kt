@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.lifecycle
 import android.app.Application
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.lifecycle.CarAppLifecycleOwner
 import kotlin.jvm.Throws
 import kotlin.reflect.KClass
 

@@ -137,7 +137,6 @@ ext {
       androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",
       androidXLifecycleLivedata : "androidx.lifecycle:lifecycle-livedata-ktx:${version.androidXLifecycle}",
       androidXLifecycleViewmodel: "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.androidXLifecycle}",
-      androidXLifecycleProcess  : "androidx.lifecycle:lifecycle-process:${version.androidXLifecycle}",
       androidXLifecycleTesting  : "androidx.lifecycle:lifecycle-runtime-testing:${version.androidXLifecycle}",
 
       // square crew

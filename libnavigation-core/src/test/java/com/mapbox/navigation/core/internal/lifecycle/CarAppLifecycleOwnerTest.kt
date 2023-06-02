@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.lifecycle
+package com.mapbox.navigation.core.internal.lifecycle
 
 import android.app.Activity
 import androidx.core.app.ComponentActivity

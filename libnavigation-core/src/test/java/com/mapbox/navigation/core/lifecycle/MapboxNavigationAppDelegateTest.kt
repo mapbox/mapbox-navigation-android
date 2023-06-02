@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.internal.lifecycle.CarAppLifecycleOwnerTest
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.every
 import io.mockk.just
