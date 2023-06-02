@@ -548,6 +548,11 @@ class RouteProgressExTest {
                     navRoute.directionsResponse.waypoints()?.size,
                     updatedNavRoute.directionsResponse.waypoints()?.size
                 )
+                assertEquals(
+                    description,
+                    navRoute.unavoidableClosures,
+                    updatedNavRoute.unavoidableClosures
+                )
 
                 val capturedOldAnnotations = mutableListOf<LegAnnotation?>()
                 val capturedNewAnnotations = mutableListOf<LegAnnotation?>()

@@ -2,6 +2,7 @@
 
 package com.mapbox.navigation.base.route
 
+import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
@@ -48,7 +49,23 @@ class NavigationRoute internal constructor(
     val routeIndex: Int,
     val routeOptions: RouteOptions,
     internal val nativeRoute: RouteInterface,
+    internal val unavoidableClosures: List<List<Closure>>,
 ) {
+
+    internal constructor(
+        directionsResponse: DirectionsResponse,
+        routeIndex: Int,
+        routeOptions: RouteOptions,
+        nativeRoute: RouteInterface,
+    ) : this(
+        directionsResponse,
+        routeIndex,
+        routeOptions,
+        nativeRoute,
+        directionsResponse.routes().getOrNull(routeIndex)?.legs()
+            ?.map { leg -> leg.closures().orEmpty() }
+            .orEmpty()
+    )
 
     companion object {
 
@@ -364,8 +381,13 @@ class NavigationRoute internal constructor(
         routeIndex: Int = this.routeIndex,
         routeOptions: RouteOptions = this.routeOptions,
         nativeRoute: RouteInterface = this.nativeRoute,
-    ): NavigationRoute =
-        NavigationRoute(directionsResponse, routeIndex, routeOptions, nativeRoute).cache()
+    ): NavigationRoute = NavigationRoute(
+        directionsResponse,
+        routeIndex,
+        routeOptions,
+        nativeRoute,
+        this.unavoidableClosures
+    ).cache()
 }
 
 /**
