@@ -96,36 +96,61 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(utils.is_snapshot_week(releases), False)
 
     @freeze_time("2023-04-14")
-    def test_get_dependency_version_beta(self):
+    def test_get_maps_version_beta(self):
         releases = [
             {'name': '1.2.0-beta.1-private', 'created_at': '2023-04-13T12:24:15Z'},
             {'name': '1.1.0-beta.1', 'created_at': '2023-04-12T12:24:15Z'},
         ]
-        self.assertEqual(utils.get_dependency_version(releases), '1.1.0-beta.1')
+        self.assertEqual(utils.get_maps_version(releases), '1.1.0-beta.1')
 
     @freeze_time("2023-04-14")
-    def test_get_dependency_version_rc(self):
+    def test_get_maps_version_rc(self):
         releases = [
             {'name': '1.1.1', 'created_at': '2023-04-13T12:24:15Z'},
             {'name': '1.1.0-rc.1', 'created_at': '2023-04-12T12:24:15Z'},
         ]
-        self.assertEqual(utils.get_dependency_version(releases), '1.1.0-rc.1')
+        self.assertEqual(utils.get_maps_version(releases), '1.1.0-rc.1')
 
     @freeze_time("2023-04-14")
-    def test_get_dependency_version_ga(self):
+    def test_get_maps_version_ga(self):
         releases = [
             {'name': '1.2.0', 'created_at': '2023-04-12T12:24:15Z'},
             {'name': '1.1.0', 'created_at': '2023-04-03T12:24:15Z'},
         ]
-        self.assertEqual(utils.get_dependency_version(releases), '1.2.0')
+        self.assertEqual(utils.get_maps_version(releases), '1.2.0')
 
     @freeze_time("2023-04-14")
-    def test_get_dependency_version_no_release(self):
+    def test_get_maps_version_no_release(self):
         releases = [
             {'name': '1.2.0-beta.1-private', 'created_at': '2023-03-13T12:24:15Z'},
             {'name': '1.1.0-beta.1', 'created_at': '2023-03-12T12:24:15Z'},
         ]
-        self.assertEqual(utils.get_dependency_version(releases), None)
+        self.assertEqual(utils.get_maps_version(releases), None)
+
+    @freeze_time("2023-04-14")
+    def test_get_nav_native_version(self):
+        releases = [
+            {'name': '2.2.0', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '3.1.1', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '1.3.1', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '3.1.0', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '3.0.0', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '2.0.0', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '1.2.0', 'created_at': '2023-04-11T12:24:15Z'},
+        ]
+        self.assertEqual(utils.get_nav_native_version(releases), '3.1.1')
+
+    @freeze_time("2023-04-14")
+    def test_get_nav_native_version_no_release(self):
+        releases = [
+            {'name': '2.2.0', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '1.3.1', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '3.1.0', 'created_at': '2023-03-13T12:24:15Z'},
+            {'name': '3.0.0', 'created_at': '2023-03-12T12:24:15Z'},
+            {'name': '2.0.0', 'created_at': '2023-03-12T12:24:15Z'},
+            {'name': '1.2.0', 'created_at': '2023-03-11T12:24:15Z'},
+        ]
+        self.assertEqual(utils.get_nav_native_version(releases), None)
 
 
 if __name__ == "__main__":

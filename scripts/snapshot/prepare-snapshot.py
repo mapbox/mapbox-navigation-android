@@ -4,7 +4,7 @@ import sys
 
 import requests
 
-from utils import get_latest_tag, get_snapshot_branch, is_snapshot_week, get_dependency_version
+from utils import get_latest_tag, get_snapshot_branch, is_snapshot_week, get_maps_version, get_nav_native_version
 
 github_token = os.getenv("GITHUB_TOKEN")
 headers = {"Authorization": "Bearer " + github_token}
@@ -26,13 +26,13 @@ maps_releases = requests.get(
     'https://api.github.com/repos/mapbox/mapbox-maps-android-internal/releases',
     headers=headers
 ).json()
-maps_version = get_dependency_version(maps_releases)
+maps_version = get_maps_version(maps_releases)
 
 nav_native_releases = requests.get(
     'https://api.github.com/repos/mapbox/mapbox-navigation-native/releases',
     headers=headers
 ).json()
-nav_native_version = get_dependency_version(nav_native_releases)
+nav_native_version = get_nav_native_version(nav_native_releases)
 
 versions_file_name = 'gradle/dependencies.gradle'
 versions_lines = open(versions_file_name, 'r').readlines()

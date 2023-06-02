@@ -10,6 +10,10 @@ def is_patch(release_name):
         '.0'))
 
 
+def is_major(release_name):
+    return release_name.endswith('.0.0')
+
+
 def is_current_week(release_created_date):
     created_date = datetime.date.fromisoformat(release_created_date.partition('T')[0])
     today = datetime.date.today()
@@ -23,11 +27,35 @@ def is_snapshot_week(releases):
     return True
 
 
-def get_dependency_version(releases):
+def get_maps_version(releases):
     for release in releases:
-        if is_current_week(release['created_at']) and not is_patch(
-                release['name']) and not ('private' in release['name']):
+        if is_current_week(release['created_at']) \
+                and not is_patch(release['name']) \
+                and not ('private' in release['name']):
             return release['name'].replace('v', '')
+    return None
+
+
+def get_nav_native_version(releases):
+    biggest_major = None
+    for release in releases:
+        major = int(release['name'].replace('v', '').split('.')[0])
+        if biggest_major is None or major > biggest_major:
+            biggest_major = major
+
+    latest_version = None
+    for release in releases:
+        if not is_current_week(release['created_at']):
+            break
+        major, minor, patch = release['name'].replace('v', '').split('.')
+        if int(major) == biggest_major \
+                and (
+                latest_version is None
+                or int(minor) > int(latest_version[1])
+                or (int(minor) == int(latest_version[1]) and int(patch) == int(latest_version[2]))):
+            latest_version = (major, minor, patch)
+    if latest_version:
+        return '.'.join(latest_version)
     return None
 
 
