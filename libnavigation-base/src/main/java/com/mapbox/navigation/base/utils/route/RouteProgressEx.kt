@@ -24,7 +24,8 @@ private const val LOG_CATEGORY = "NavigationRouteUtils"
  *
  * `true` is returned whenever there's any upcoming [RouteLeg.closures] outside of a direct region around a coordinate from [RouteOptions.coordinatesList]
  * that was allowed for snapping to closures with [RouteOptions.snappingIncludeClosuresList] or [RouteOptions.snappingIncludeStaticClosuresList].
- * flags. Otherwise, `false` is returned.
+ * flags and the closure was not present in the original route response (in that case closure is considered expected).
+ * Otherwise, `false` is returned.
  */
 @ExperimentalPreviewMapboxNavigationAPI
 suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
@@ -45,8 +46,14 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
             }
 
             val silentWaypoints = routeLeg.silentWaypoints()
+            val unavoidableLegClosures = navigationRoute.unavoidableClosures
+                .getOrNull(routeLegIndex).orEmpty()
 
             routeLeg.closures()?.forEach { closure ->
+                if (closure in unavoidableLegClosures) {
+                    // skipping expected closures
+                    return@forEach
+                }
                 if (routeProgressData != null) {
                     if (routeProgressData.currentLegIndex > routeLegIndex) {
                         // skipping passed legs
