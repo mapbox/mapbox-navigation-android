@@ -1,0 +1,1 @@
+- Changed `RouteProgress#hasUnexpectedUpcomingClosures` behavior: now it returns false if there are only "expected" closures. A closure is considered expected if it was present in the original route response. An unexpected closure is the one that appears after route refresh. 
