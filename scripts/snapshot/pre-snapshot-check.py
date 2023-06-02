@@ -3,7 +3,7 @@ import os
 
 import requests
 
-from utils import is_snapshot_week, get_dependency_version, get_latest_tag, get_snapshot_branch
+from utils import is_snapshot_week, get_maps_version, get_latest_tag, get_snapshot_branch, get_nav_native_version
 
 github_token = os.getenv("GITHUB_TOKEN")
 headers = {"Authorization": "Bearer " + github_token}
@@ -24,7 +24,7 @@ def build_message():
         'https://api.github.com/repos/mapbox/mapbox-maps-android-internal/releases',
         headers=headers
     ).json()
-    maps_version = get_dependency_version(maps_releases)
+    maps_version = get_maps_version(maps_releases)
     if maps_version:
         message += ':white_check_mark: Maps ' + maps_version + ' is ready.\n'
     else:
@@ -34,7 +34,7 @@ def build_message():
         'https://api.github.com/repos/mapbox/mapbox-navigation-native/releases',
         headers=headers
     ).json()
-    nav_native_version = get_dependency_version(nav_native_releases, only_major=True)
+    nav_native_version = get_nav_native_version(nav_native_releases)
     if nav_native_version:
         message += ':white_check_mark: Nav Native ' + nav_native_version + ' is ready.\n'
     else:
