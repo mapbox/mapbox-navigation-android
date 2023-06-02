@@ -127,6 +127,16 @@ class TestUtils(unittest.TestCase):
         ]
         self.assertEqual(utils.get_dependency_version(releases), None)
 
+    @freeze_time("2023-04-14")
+    def test_get_dependency_version_only_major(self):
+        releases = [
+            {'name': '2.2.0', 'created_at': '2023-04-13T12:24:15Z'},
+            {'name': '2.1.1', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '2.0.0', 'created_at': '2023-04-12T12:24:15Z'},
+            {'name': '1.2.0', 'created_at': '2023-04-11T12:24:15Z'},
+        ]
+        self.assertEqual(utils.get_dependency_version(releases, only_major=True), '2.0.0')
+
 
 if __name__ == "__main__":
     unittest.main()

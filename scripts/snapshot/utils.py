@@ -10,6 +10,10 @@ def is_patch(release_name):
         '.0'))
 
 
+def is_major(release_name):
+    return release_name.endswith('.0.0')
+
+
 def is_current_week(release_created_date):
     created_date = datetime.date.fromisoformat(release_created_date.partition('T')[0])
     today = datetime.date.today()
@@ -23,10 +27,12 @@ def is_snapshot_week(releases):
     return True
 
 
-def get_dependency_version(releases):
+def get_dependency_version(releases, only_major=False):
     for release in releases:
-        if is_current_week(release['created_at']) and not is_patch(
-                release['name']) and not ('private' in release['name']):
+        if is_current_week(release['created_at']) \
+                and not is_patch(release['name']) \
+                and not ('private' in release['name']) \
+                and (is_major(release['name']) or not only_major):
             return release['name'].replace('v', '')
     return None
 

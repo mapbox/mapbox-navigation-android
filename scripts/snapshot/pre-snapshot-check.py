@@ -34,7 +34,7 @@ def build_message():
         'https://api.github.com/repos/mapbox/mapbox-navigation-native/releases',
         headers=headers
     ).json()
-    nav_native_version = get_dependency_version(nav_native_releases)
+    nav_native_version = get_dependency_version(nav_native_releases, only_major=True)
     if nav_native_version:
         message += ':white_check_mark: Nav Native ' + nav_native_version + ' is ready.\n'
     else:
