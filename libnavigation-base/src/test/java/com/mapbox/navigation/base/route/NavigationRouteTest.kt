@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
@@ -13,6 +14,7 @@ import com.mapbox.navigation.base.internal.route.toTestNavigationRoutes
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
+import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigator.RouteInterface
 import io.mockk.every
 import io.mockk.mockk
@@ -350,5 +352,57 @@ class NavigationRouteTest {
                 listOf(mockDirectionsRoute).toTestNavigationRoutes(RouterOrigin.Offboard)
             }
         }
+    }
+
+    @Test
+    fun `fill expected closures on original route creation`() {
+        val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
+        val actual = NavigationRoute(
+            DirectionsResponse.builder()
+                .routes(listOf(DirectionsRoute.fromJson(routeJson)))
+                .uuid("uuid")
+                .code("Ok")
+                .build(),
+            0,
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .coordinates("0.0,0.0;1.1,1.1")
+                .build(),
+            mockk(relaxed = true)
+        )
+
+        assertEquals(
+            listOf(listOf(createClosure(5, 8)), listOf(createClosure(0, 8))),
+            actual.unavoidableClosures
+        )
+    }
+
+    @Test
+    fun `copy expected closures form original route`() {
+        val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
+        val original = NavigationRoute(
+            DirectionsResponse.builder()
+                .routes(listOf(DirectionsRoute.fromJson(routeJson)))
+                .uuid("uuid")
+                .code("Ok")
+                .build(),
+            0,
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .coordinates("0.0,0.0;1.1,1.1")
+                .build(),
+            mockk(relaxed = true)
+        )
+
+        val newRouteJson = FileUtils.loadJsonFixture("route_closure_second_silent_waypoint.json")
+        val copied = original.copy(
+            directionsResponse = DirectionsResponse.builder()
+                .routes(listOf(DirectionsRoute.fromJson(newRouteJson)))
+                .uuid("uuid")
+                .code("Ok")
+                .build()
+        )
+
+        assertEquals(original.unavoidableClosures, copied.unavoidableClosures)
     }
 }
