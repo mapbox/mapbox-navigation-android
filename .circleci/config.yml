@@ -76,6 +76,7 @@ workflows:
               ignore: /.*/
   daily-billing-tests:
     jobs:
+      - check-billing-tests-session-events
       - billing-tests
     triggers:
       - schedule:
@@ -855,6 +856,14 @@ jobs:
             - run-firebase-billing:
                 variant: "debug"
       - run: exit 0
+
+  check-billing-tests-session-events:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - run:
+          name: Verify number of billing session events generated this month
+          command: python3 scripts/validate_billing_e2e_sessions.py
 
   androidauto-test:
     executor:

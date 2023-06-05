@@ -1,5 +1,6 @@
 package com.mapbox.navigation.billing.test
 
+import android.content.Context
 import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -10,8 +11,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
-import com.mapbox.navigation.testing.ui.http.HttpServiceEventsObserver
-import com.mapbox.navigation.testing.ui.http.billingRequests
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -19,11 +18,9 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.startTripSessionAndWaitForActiveGuidanceState
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import kotlinx.coroutines.delay
-import org.junit.After
-import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -45,8 +42,6 @@ class BillingTests : BaseCoreNoCleanUpTest() {
 
     private lateinit var mapboxNavigation: MapboxNavigation
 
-    private lateinit var httpEventsObserver: HttpServiceEventsObserver
-
     private val source = Point.fromLngLat(-77.031991, 38.894721)
     private val destination = Point.fromLngLat(-77.030923, 38.895433)
 
@@ -58,14 +53,15 @@ class BillingTests : BaseCoreNoCleanUpTest() {
 
     @Before
     fun setup() {
-        httpEventsObserver = HttpServiceEventsObserver.register()
+        val accessToken = getBillingTestsToken(context)
+        if (accessToken == "null") {
+            fail("Billing tests token is not available")
+        }
 
         runOnMainSync {
-            assertTrue(httpEventsObserver.billingRequests().isEmpty())
-
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(context)
-                    .accessToken(getMapboxAccessTokenFromResources(context))
+                    .accessToken(accessToken)
                     .routingTilesOptions(
                         RoutingTilesOptions.Builder()
                             .tilesBaseUri(URI(mockWebServerRule.baseUrl))
@@ -76,11 +72,6 @@ class BillingTests : BaseCoreNoCleanUpTest() {
         }
     }
 
-    @After
-    fun cleanUp() {
-        HttpServiceEventsObserver.unregister()
-    }
-
     @Test
     fun test30SecondsLongActiveGuidanceTrip() = sdkTest(TimeUnit.MINUTES.toMillis(1)) {
         val routes = requestRoutes(source, destination)
@@ -88,7 +79,7 @@ class BillingTests : BaseCoreNoCleanUpTest() {
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
         mapboxNavigation.startTripSessionAndWaitForActiveGuidanceState()
 
-        delay(TimeUnit.SECONDS.toMillis(30))
+        delay(TimeUnit.SECONDS.toMillis(35))
 
         mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
 
@@ -115,4 +106,12 @@ class BillingTests : BaseCoreNoCleanUpTest() {
     private suspend fun delayForNetworkEvents() {
         delay(TimeUnit.SECONDS.toMillis(10))
     }
+
+    private fun getBillingTestsToken(context: Context) = context.getString(
+        context.resources.getIdentifier(
+            "mapbox_billing_tests_access_token",
+            "string",
+            context.packageName
+        )
+    )
 }
