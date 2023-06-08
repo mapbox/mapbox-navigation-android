@@ -26,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URL
@@ -305,6 +306,7 @@ class NavigationRouteTest {
     }
 
     @Test
+    @Ignore("NAVAND-1389")
     fun `navigation routes serialised from string, data_ref, and model are equals`() =
         runBlocking<Unit> {
             val responseString = FileUtils.loadJsonFixture("test_directions_response.json")

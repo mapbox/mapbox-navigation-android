@@ -184,15 +184,8 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             }
         }
 
-    /**
-     * The fact that the SDK triggers a callback on alternatives subscription I consider as a bug:
-     * 1. We recommend users to set updated alternatives back, and it doesn't make sense to trigger
-     * the callback with the same alternative as they are now.
-     * 2. The SDK doesn't trigger callback if routes were set already, so in general it feels
-     * inconsistent
-     */
     @Test
-    fun alternatives_observer_is_called_upon_subscription_if_route_was_set_without_subscription() =
+    fun alternatives_observer_is_not_called_upon_subscription_if_route_was_set_before() =
         sdkTest {
             setupMockRequestHandlers()
             withMapboxNavigation(
@@ -209,27 +202,15 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                     mapboxNavigation.setNavigationRoutesAsync(testRoutes)
                     mapboxNavigation.routeProgressUpdates().first()
 
-                    var firstSubscriberResult: List<NavigationRoute>? = null
-                    mapboxNavigation.registerRouteAlternativesObserver(
-                        object : NavigationRouteAlternativesObserver {
-                            override fun onRouteAlternatives(
-                                routeProgress: RouteProgress,
-                                alternatives: List<NavigationRoute>,
-                                routerOrigin: RouterOrigin
-                            ) {
-                                firstSubscriberResult = alternatives
-                            }
+                    val alternativesCallbackResultAfterSetRoute =
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
 
-                            override fun onRouteAlternativesError(error: RouteAlternativesError) {
-                            }
-                        }
+                    assertTrue(
+                        "the test expects that alternative routes are present",
+                        mapboxNavigation.getNavigationRoutes().size > 1
                     )
-
-                    val secondSubscriber = mapboxNavigation.alternativesUpdates()
-                        .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-                        .first()
-                    assertEquals(testRoutes[1].id, firstSubscriberResult?.single()?.id)
-                    assertEquals(testRoutes[1].id, secondSubscriber.alternatives.single().id)
+                    assertTrue(alternativesCallbackResultAfterSetRoute.isActive)
+                    alternativesCallbackResultAfterSetRoute.cancel()
                 }
             }
         }
@@ -250,14 +231,12 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 ) {
                     mapboxNavigation.startTripSession()
 
-                    // TODO remove non-empty filter after NN-757 is done
                     val alternativesCallbackResultBeforeSetRoute =
-                        firstNonEmptyAlternativesUpdateDeferred(mapboxNavigation)
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
                     mapboxNavigation.setNavigationRoutesAsync(testRoutes)
                     mapboxNavigation.routeProgressUpdates().first()
-                    // TODO remove non-empty filter after NN-757 is done
                     val alternativesCallbackResultAfterSetRoute =
-                        firstNonEmptyAlternativesUpdateDeferred(mapboxNavigation)
+                        firstAlternativesUpdateDeferred(mapboxNavigation)
                     val externalAlternatives = createExternalAlternatives()
                     mapboxNavigation.setNavigationRoutesAsync(
                         testRoutes + externalAlternatives
