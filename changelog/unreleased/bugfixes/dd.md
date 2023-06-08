@@ -1,0 +1,1 @@
+- Fixed an issue where first device location was not used when replay was active either in Drop-In or when using `ReplayRouteSession` directly. 
