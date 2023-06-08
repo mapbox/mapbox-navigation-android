@@ -22,6 +22,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -113,6 +114,51 @@ class ReplayRouteSessionTest {
         sut.onAttached(mapboxNavigation)
 
         assertTrue(eventsObserver.isCaptured)
+    }
+
+    @Test
+    fun `onAttached - should push first device location if enabled`() {
+        val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
+        every { bestLocationEngine.getLastLocation(capture(locationCallbackSlot)) } just runs
+        every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
+        val replayEventsSlot = slot<List<ReplayEventBase>>()
+        every { replayer.pushEvents(capture(replayEventsSlot)) } returns replayer
+
+        sut.setOptions(ReplayRouteSessionOptions.Builder().locationResetEnabled(true).build())
+        sut.onAttached(mapboxNavigation)
+        locationCallbackSlot.captured.onSuccess(
+            mockk {
+                every { lastLocation } returns mockk(relaxed = true) {
+                    every { latitude } returns 1.0
+                    every { longitude } returns -2.0
+                    every { provider } returns "ReplayRouteSessionTest"
+                }
+            }
+        )
+
+        verifyOrder {
+            mapboxNavigation.startReplayTripSession()
+            replayer.play()
+            replayer.pushEvents(any())
+        }
+        val capturedLocation = (replayEventsSlot.captured[0] as ReplayEventUpdateLocation)
+        assertEquals(1.0, capturedLocation.location.lat, 0.0)
+        assertEquals(-2.0, capturedLocation.location.lon, 0.0)
+    }
+
+    @Test
+    fun `onAttached - should not push first device location if disabled`() {
+        every { bestLocationEngine.getLastLocation(any()) } just runs
+        every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
+        val replayEventsSlot = slot<List<ReplayEventBase>>()
+        every { replayer.pushEvents(capture(replayEventsSlot)) } returns replayer
+
+        sut.setOptions(ReplayRouteSessionOptions.Builder().locationResetEnabled(false).build())
+        sut.onAttached(mapboxNavigation)
+
+        verify(exactly = 0) {
+            bestLocationEngine.getLastLocation(any())
+        }
     }
 
     @Test
@@ -347,6 +393,7 @@ class ReplayRouteSessionTest {
         }
 
         sut.onAttached(mapboxNavigation)
+        clearAllMocks(answers = false)
         routesObserver.captured.onRoutesChanged(firstRoutesUpdatedResult)
         progressObserver.captured.onRouteProgressChanged(firstRouteProgress)
         progressObserver.captured.onRouteProgressChanged(firstRouteProgress)

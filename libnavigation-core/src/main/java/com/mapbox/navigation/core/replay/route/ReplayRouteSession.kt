@@ -107,6 +107,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
         this.replayRouteMapper = ReplayRouteMapper(options.replayRouteOptions)
         this.mapboxNavigation = mapboxNavigation
         mapboxNavigation.startReplayTripSession()
+        mapboxNavigation.resetReplayLocation()
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.mapboxReplayer.registerObserver(replayEventsObserver)
