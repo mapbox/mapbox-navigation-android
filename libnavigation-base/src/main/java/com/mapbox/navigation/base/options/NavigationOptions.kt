@@ -333,6 +333,7 @@ private constructor(
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         fun build(): NavigationOptions {
             return NavigationOptions(
                 applicationContext = applicationContext,

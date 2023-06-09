@@ -1,5 +1,5 @@
 ext {
-  def kotlinVersion = "1.5.31"
+  def kotlinVersion = "1.7.22"
 
   androidVersions = [
       minSdkVersion           : 21,
@@ -159,7 +159,7 @@ ext {
       robolectric               : "org.robolectric:robolectric:${version.robolectric}",
       mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
       json                      : "org.json:json:${version.json}",
-      androidxTestCore          : "androidx.test:core:${version.androidxTest}",
+      androidxTestCore          : "androidx.test:core:1.6.0-alpha01",
 
       // play services
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",

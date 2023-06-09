@@ -47,6 +47,7 @@ dependencies {
     implementation project(":libnavui-util")
 
     // test
+    androidTestImplementation dependenciesList.androidxTestCore
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
     androidTestUtil dependenciesList.testOrchestrator
