@@ -6,6 +6,38 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.14.0-rc.1 - 09 June, 2023
+### Changelog
+[Changes between v2.14.0-beta.1 and v2.14.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.14.0-beta.1...v2.14.0-rc.1)
+
+#### Features
+- Added `RouteProgress#inParkingAisle` field indicating whether the current location belongs to a parking aisle.  [#7212](https://github.com/mapbox/mapbox-navigation-android/pull/7212)
+
+#### Bug fixes and improvements
+- Fixed an issue with Copilot that caused history files without user feedback to remain on disk when using `shouldSendHistoryOnlyWithFeedback` option. [#7233](https://github.com/mapbox/mapbox-navigation-android/pull/7233)
+- Fixed an issue with too high alternative route requests frequency in case of only one route being present in the route response. [#7247](https://github.com/mapbox/mapbox-navigation-android/pull/7247)
+- Fixed an issue with positioning lag in tunnels.  [#7247](https://github.com/mapbox/mapbox-navigation-android/pull/7247)
+- Fixed an issue where no `MapboxRouteLineApi` callbacks or suspensions for any function would have been invoked if map instance was destroyed while `MapboxRouteLineApi#findClosestRoute` was in progress. [#7213](https://github.com/mapbox/mapbox-navigation-android/pull/7213)
+- Decreased java memory usage for route requests, alternatives requests, reroutes. [#7201](https://github.com/mapbox/mapbox-navigation-android/pull/7201)
+- Deprecated SpeedLimit class and introduced SpeedLimitInfo instead. The latter uses speed in the corresponding units (as opposed to speedKmph in SpeedLimit) and provides unit and sign info even if the limit itself is unknown. [#7214](https://github.com/mapbox/mapbox-navigation-android/pull/7214)
+- Fixed an issue where first device location was not used when replay was active either in Drop-In or when using `ReplayRouteSession` directly.  [#7246](https://github.com/mapbox/mapbox-navigation-android/pull/7246)
+- Supported displaying distances in yards for imperial UnitType in the UK locale. [#6786](https://github.com/mapbox/mapbox-navigation-android/pull/6786)
+- Changed `RouteProgress#hasUnexpectedUpcomingClosures` behavior: now it returns false if there are only "expected" closures. A closure is considered expected if it was present in the original route response. An unexpected closure is the one that appears after route refresh.  [#7237](https://github.com/mapbox/mapbox-navigation-android/pull/7237)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.14.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.14.0-rc.1))
+- Mapbox Navigation Native `v136.0.1`
+- Mapbox Core Common `v23.6.0-rc.1`
+- Mapbox Java `v6.12.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.12.0))
+
+
 ## Mapbox Navigation SDK 2.13.1 - 31 May, 2023
 ### Changelog
 [Changes between v2.13.0 and v2.13.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0...v2.13.1)
