@@ -185,14 +185,9 @@ class NavigationRoute internal constructor(
         ): List<NavigationRoute> {
             logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
             return coroutineScope {
-                val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
-                    DirectionsResponse.fromJson(directionsResponseJson.asReader()).also {
-                        logD(
-                            "parsed directions response to java model for ${it.uuid()}",
-                            LOG_CATEGORY
-                        )
-                    }
-                }
+                val parsedResponse = async(ThreadController.DefaultDispatcher) {
+                    directionsResponseJson.toDirectionsResponse()
+                }.await()
                 val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
                     routeParser.parseDirectionsResponse(
                         directionsResponseJson,
@@ -215,7 +210,7 @@ class NavigationRoute internal constructor(
                 }
                 create(
                     deferredNativeParsing.await(),
-                    deferredResponseParsing.await(),
+                    parsedResponse,
                     deferredRouteOptionsParsing.await()
                 ).also {
                     logD(
@@ -563,7 +558,7 @@ internal fun DirectionsRoute.toNavigationRoute(
 
 internal fun RouteInterface.toNavigationRoute(): NavigationRoute {
     return NavigationRoute(
-        directionsResponse = DirectionsResponse.fromJson(responseJsonRef.asReader()),
+        directionsResponse = responseJsonRef.toDirectionsResponse(),
         routeOptions = RouteOptions.fromUrl(URL(requestUri)),
         routeIndex = routeIndex,
         nativeRoute = this
@@ -671,8 +666,13 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
         .build()
 }
 
-private fun DataRef.asReader(): Reader =
-    InputStreamReader(ByteBufferBackedInputStream(buffer))
+private fun DataRef.toDirectionsResponse(): DirectionsResponse {
+    val stream = ByteBufferBackedInputStream(buffer)
+    val reader = InputStreamReader(stream)
+    val response = DirectionsResponse.fromJson(reader)
+    reader.close()
+    return response
+}
 
 private class ByteBufferBackedInputStream(
     private val buffer: ByteBuffer
@@ -701,5 +701,10 @@ private class ByteBufferBackedInputStream(
         val bytesToRead = len.coerceAtMost(buffer.remaining())
         buffer.get(bytes, off, bytesToRead)
         return bytesToRead
+    }
+
+    override fun close() {
+        buffer.rewind()
+        super.close()
     }
 }

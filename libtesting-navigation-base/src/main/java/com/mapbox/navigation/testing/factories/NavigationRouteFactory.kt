@@ -80,7 +80,8 @@ class TestSDKRouteParser(
         routerOrigin: RouterOrigin
     ): Expected<String, List<RouteInterface>> {
         response.buffer.position(0)
-        val stringResponse = StandardCharsets.UTF_8.decode(response.buffer).toString();
+        val stringResponse = StandardCharsets.UTF_8.decode(response.buffer).toString()
+        response.buffer.rewind()
         val result = createRouteInterfacesFromDirectionRequestResponse(
             requestUri = request,
             response = stringResponse,
