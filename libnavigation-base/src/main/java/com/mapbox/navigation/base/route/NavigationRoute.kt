@@ -33,7 +33,6 @@ import kotlinx.coroutines.coroutineScope
 import okhttp3.internal.and
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.io.Reader
 import java.net.URL
 import java.nio.ByteBuffer
 
@@ -185,9 +184,14 @@ class NavigationRoute internal constructor(
         ): List<NavigationRoute> {
             logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
             return coroutineScope {
-                val parsedResponse = async(ThreadController.DefaultDispatcher) {
-                    directionsResponseJson.toDirectionsResponse()
-                }.await()
+                val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
+                    directionsResponseJson.toDirectionsResponse().also {
+                        logD(
+                            "parsed directions response to java model for ${it.uuid()}",
+                            LOG_CATEGORY
+                        )
+                    }
+                }
                 val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
                     routeParser.parseDirectionsResponse(
                         directionsResponseJson,
@@ -210,7 +214,7 @@ class NavigationRoute internal constructor(
                 }
                 create(
                     deferredNativeParsing.await(),
-                    parsedResponse,
+                    deferredResponseParsing.await(),
                     deferredRouteOptionsParsing.await()
                 ).also {
                     logD(
@@ -669,9 +673,9 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
 private fun DataRef.toDirectionsResponse(): DirectionsResponse {
     val stream = ByteBufferBackedInputStream(buffer)
     val reader = InputStreamReader(stream)
-    val response = DirectionsResponse.fromJson(reader)
-    reader.close()
-    return response
+    return reader.use { reader ->
+        DirectionsResponse.fromJson(reader)
+    }
 }
 
 private class ByteBufferBackedInputStream(
@@ -701,10 +705,5 @@ private class ByteBufferBackedInputStream(
         val bytesToRead = len.coerceAtMost(buffer.remaining())
         buffer.get(bytes, off, bytesToRead)
         return bytesToRead
-    }
-
-    override fun close() {
-        buffer.rewind()
-        super.close()
     }
 }
