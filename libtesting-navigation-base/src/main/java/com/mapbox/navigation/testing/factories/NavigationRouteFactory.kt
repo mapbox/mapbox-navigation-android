@@ -1,5 +1,6 @@
 package com.mapbox.navigation.testing.factories
 
+import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
@@ -21,11 +22,13 @@ import java.util.UUID
 fun createNavigationRoute(
     directionsRoute: DirectionsRoute = createDirectionsRoute(),
     routeInfo: RouteInfo = RouteInfo(emptyList()),
-    nativeWaypoints: List<Waypoint>? = null
+    nativeWaypoints: List<Waypoint>? = null,
+    routerOrigin: RouterOrigin = RouterOrigin.Offboard
 ): NavigationRoute {
     val response = createDirectionsResponse(
         routes = listOf(directionsRoute),
-        uuid = directionsRoute.requestUuid()
+        uuid = directionsRoute.requestUuid(),
+        routeOptions = directionsRoute.routeOptions()
     )
     return createNavigationRoutes(
         response = response,
@@ -33,6 +36,7 @@ fun createNavigationRoute(
         waypointsMapper = { waypoints, routeOptions ->
             nativeWaypoints ?: mapToNativeWaypoints(waypoints, routeOptions)
         },
+        routerOrigin = routerOrigin
     ).first()
 }
 
@@ -145,3 +149,11 @@ fun mapToNativeWaypoints(
         )
     }
 }
+
+fun createBearing(
+    angle: Double = 20.0,
+    degrees: Double = 45.0
+) = Bearing.builder()
+    .angle(angle)
+    .degrees(degrees)
+    .build()

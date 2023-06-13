@@ -23,7 +23,9 @@ internal class MapboxDirectionsSession(
     private val router: NavigationRouterV2,
 ) : DirectionsSession {
 
-    private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
+    private val onSetNavigationRoutesFinishedObservers = CopyOnWriteArraySet<RoutesObserver>()
+    private val onSetNavigationRoutesStartedObservers =
+        CopyOnWriteArraySet<SetNavigationRoutesStartedObserver>()
 
     override var routesUpdatedResult: RoutesUpdatedResult? = null
     override val routes: List<NavigationRoute>
@@ -36,7 +38,7 @@ internal class MapboxDirectionsSession(
         internal const val DEFAULT_INITIAL_LEG_INDEX = 0
     }
 
-    override fun setRoutes(routes: DirectionsSessionRoutes) {
+    override fun setNavigationRoutesFinished(routes: DirectionsSessionRoutes) {
         this.initialLegIndex = routes.setRoutesInfo.initialLegIndex()
         if (
             routesUpdatedResult?.navigationRoutes?.isEmpty() == true &&
@@ -47,9 +49,13 @@ internal class MapboxDirectionsSession(
         RouteCompatibilityCache.setDirectionsSessionResult(routes.acceptedRoutes)
 
         val result = routes.toRoutesUpdatedResult().also { routesUpdatedResult = it }
-        routesObservers.forEach {
+        onSetNavigationRoutesFinishedObservers.forEach {
             it.onRoutesChanged(result)
         }
+    }
+
+    override fun setNavigationRoutesStarted(params: RoutesSetStartedParams) {
+        onSetNavigationRoutesStartedObservers.forEach { it.onRoutesSetStarted(params) }
     }
 
     /**
@@ -93,7 +99,7 @@ internal class MapboxDirectionsSession(
      *
      * @param routeOptions RouteOptions
      * @param routerCallback Callback that gets notified with the results of the request(optional),
-     * see [registerRoutesObserver]
+     * see [registerSetNavigationRoutesFinishedObserver]
      *
      * @return requestID, see [cancelRouteRequest]
      */
@@ -111,23 +117,35 @@ internal class MapboxDirectionsSession(
     /**
      * Registers [RoutesObserver]. Updated on each change of [routesUpdatedResult]
      */
-    override fun registerRoutesObserver(routesObserver: RoutesObserver) {
-        routesObservers.add(routesObserver)
+    override fun registerSetNavigationRoutesFinishedObserver(routesObserver: RoutesObserver) {
+        onSetNavigationRoutesFinishedObservers.add(routesObserver)
         routesUpdatedResult?.let { routesObserver.onRoutesChanged(it) }
     }
 
     /**
      * Unregisters [RoutesObserver]
      */
-    override fun unregisterRoutesObserver(routesObserver: RoutesObserver) {
-        routesObservers.remove(routesObserver)
+    override fun unregisterSetNavigationRoutesFinishedObserver(routesObserver: RoutesObserver) {
+        onSetNavigationRoutesFinishedObservers.remove(routesObserver)
     }
 
     /**
      * Unregisters all [RoutesObserver]
      */
-    override fun unregisterAllRoutesObservers() {
-        routesObservers.clear()
+    override fun unregisterAllSetNavigationRoutesFinishedObserver() {
+        onSetNavigationRoutesFinishedObservers.clear()
+    }
+
+    override fun registerSetNavigationRoutesStartedObserver(
+        observer: SetNavigationRoutesStartedObserver
+    ) {
+        onSetNavigationRoutesStartedObservers.add(observer)
+    }
+
+    override fun unregisterSetNavigationRoutesStartedObserver(
+        observer: SetNavigationRoutesStartedObserver
+    ) {
+        onSetNavigationRoutesStartedObservers.remove(observer)
     }
 
     /**

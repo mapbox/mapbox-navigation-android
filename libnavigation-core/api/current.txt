@@ -735,6 +735,9 @@ package com.mapbox.navigation.core.replay.route {
 
 package com.mapbox.navigation.core.reroute {
 
+  public final class MapboxRerouteControllerKt {
+  }
+
   @UiThread public interface NavigationRerouteController extends com.mapbox.navigation.core.reroute.RerouteController {
     method public void reroute(com.mapbox.navigation.core.reroute.NavigationRerouteController.RoutesCallback callback);
   }
@@ -852,6 +855,15 @@ package com.mapbox.navigation.core.routealternatives {
   public interface NavigationRouteAlternativesRequestCallback {
     method public void onRouteAlternativeRequestFinished(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> alternatives, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onRouteAlternativesRequestError(com.mapbox.navigation.core.routealternatives.RouteAlternativesError error);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class OnlineRouteAlternativesSwitch implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public OnlineRouteAlternativesSwitch(int connectTimeoutMilliseconds = 10_000, int readTimeoutMilliseconds = 30_000, int minimumRetryInterval = 60_000, int avoidManeuverSeconds = DEFAULT_AVOID_MANEUVER_SECONDS_FOR_ROUTE_ALTERNATIVES);
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+  }
+
+  public final class OnlineRouteAlternativesSwitchKt {
   }
 
   public final class RouteAlternativesControllerKt {
