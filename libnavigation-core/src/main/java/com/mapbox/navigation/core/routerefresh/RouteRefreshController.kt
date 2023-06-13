@@ -49,6 +49,7 @@ class RouteRefreshController internal constructor(
      * [requestImmediateRouteRefresh] invocations cannot be coupled with
      * [RoutesObserver.onRoutesChanged] callbacks for state management.
      * You can use [registerRouteRefreshStateObserver] to monitor refresh statuses independently.
+     * NOTE: the invocation will have no effect if another route refresh request is in progress.
      */
     fun requestImmediateRouteRefresh() {
         val routes = plannedRouteRefreshController.routesToRefresh
