@@ -61,8 +61,8 @@ private const val LOG_CATEGORY = "OnlineRouteAlternativesSwitch"
  * offline-online switch even if platform's reachability API doesn't work.
  *
  * To enable automatic online-offline switch functionality, attach an instance of this class
- * to [MapboxNavigation] using [MapboxNavigationApp.registerObserver], followed by
- * [MapboxNavigationApp.unregisterObserver] to disable automatic switch.
+ * to [MapboxNavigation] using [MapboxNavigationApp.registerObserver]. If you want to disable
+ * automatic switch at runtime, detach it by invoking [MapboxNavigationApp.unregisterObserver].
  *
  * Example:
  * ```kotlin
@@ -70,8 +70,8 @@ private const val LOG_CATEGORY = "OnlineRouteAlternativesSwitch"
  * ```
  *
  * If you don't use [MapboxNavigationApp], you can enable the switch logic by calling
- * [OnlineRouteAlternativesSwitch.onAttached] directly, and then
- * [OnlineRouteAlternativesSwitch.onDetached] to disable.
+ * [OnlineRouteAlternativesSwitch.onAttached] when `MapboxNavigation` instance is created, and then
+ * [OnlineRouteAlternativesSwitch.onDetached] when it is destroyed.
  *
  * Known limitations: this class doesn't use user provided router.
  * Warning: this is a temporary solution and will be removed in the next versions of the SDK.
