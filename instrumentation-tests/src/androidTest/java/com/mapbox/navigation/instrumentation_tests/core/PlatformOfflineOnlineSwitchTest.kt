@@ -26,7 +26,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -133,7 +132,6 @@ class PlatformOfflineOnlineSwitchTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @Ignore("tests execution takes too long, run them locally")
     fun requestingOnlineRoutesAfterServerError() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE +
             EXPECTED_RETRY_TIME_AFTER_SERVER_ERROR +
@@ -205,7 +203,6 @@ class PlatformOfflineOnlineSwitchTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @Ignore("tests execution takes too long, run them locally")
     fun requestingOnlineRoutesForInvalidRouteRequest() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE +
             EXPECTED_RETRY_TIME_AFTER_SERVER_ERROR +
