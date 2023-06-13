@@ -28,7 +28,7 @@ internal class WaypointTest(
 
     @Test
     fun waypointType() {
-        val waypoint = Waypoint(mockk(), "name", null, internalType)
+        val waypoint = Waypoint(mockk(), "name", null, internalType, emptyMap())
         assertEquals(expected, waypoint.type)
     }
 }

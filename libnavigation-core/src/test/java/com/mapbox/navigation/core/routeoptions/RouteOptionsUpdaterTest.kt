@@ -113,25 +113,29 @@ class RouteOptionsUpdaterTest {
                     Point.fromLngLat(1.0, 1.0),
                     "",
                     null,
-                    Waypoint.REGULAR
+                    Waypoint.REGULAR,
+                    emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     Point.fromLngLat(2.0, 2.0),
                     "",
                     null,
-                    Waypoint.REGULAR
+                    Waypoint.REGULAR,
+                    emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     Point.fromLngLat(3.0, 3.0),
                     "",
                     null,
-                    Waypoint.REGULAR
+                    Waypoint.REGULAR,
+                    emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     Point.fromLngLat(4.0, 4.0),
                     "",
                     null,
-                    Waypoint.REGULAR
+                    Waypoint.REGULAR,
+                    emptyMap(),
                 ),
             )
 

@@ -2,10 +2,13 @@
 
 package com.mapbox.navigation.base.internal.utils
 
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.utils.ifNonNull
+import com.mapbox.navigation.utils.internal.logE
 
 /**
  * Compare routes as geometries (if exist) or as a names of [LegStep] of the [DirectionsRoute].
@@ -45,8 +48,25 @@ internal fun List<com.mapbox.navigator.Waypoint>.mapToSdk(): List<Waypoint> =
             internalType = nativeWaypoint.type.mapToSdk(),
             name = nativeWaypoint.name,
             target = nativeWaypoint.target,
+            metadata = nativeWaypoint.metadata?.parseMetadata()
         )
     }
+
+private fun String.parseMetadata(): Map<String, JsonElement>? {
+    return try {
+        val map = mutableMapOf<String, JsonElement>()
+        val json = JsonParser.parseString(this).asJsonObject
+        for (entry in json.entrySet()) {
+            map[entry.key] = entry.value
+        }
+        map.toMap()
+    } catch (ex: Throwable) {
+        logE(null) {
+            "Could not parse $this to metadata: ${ex.message}"
+        }
+        null
+    }
+}
 
 private fun com.mapbox.navigator.WaypointType.mapToSdk(): Waypoint.InternalType =
     when (this) {

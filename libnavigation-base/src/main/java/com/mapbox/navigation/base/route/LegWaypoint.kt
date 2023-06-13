@@ -1,7 +1,9 @@
 package com.mapbox.navigation.base.route
 
 import androidx.annotation.StringDef
+import com.google.gson.JsonElement
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.route.LegWaypoint.Type
 
 /**
@@ -10,12 +12,15 @@ import com.mapbox.navigation.base.route.LegWaypoint.Type
  * @param name waypoint name provided in the route request via `waypoint_names` parameter.
  * @param target waypoint target provided in the route request via `waypoint_targets` parameter.
  * @param type waypoint type (see [Type]]).
+ * @param metadata waypoint metadata as in `DirectionsWaypoint#metadata`.
  */
 class LegWaypoint internal constructor(
     val location: Point,
     val name: String,
     val target: Point?,
     @Type val type: String,
+    @ExperimentalMapboxNavigationAPI
+    val metadata: Map<String, JsonElement>?,
 ) {
 
     companion object {
@@ -51,6 +56,7 @@ class LegWaypoint internal constructor(
     /**
      * Indicates whether some other object is "equal to" this one.
      */
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -61,6 +67,7 @@ class LegWaypoint internal constructor(
         if (name != other.name) return false
         if (target != other.target) return false
         if (type != other.type) return false
+        if (metadata != other.metadata) return false
 
         return true
     }
@@ -68,18 +75,27 @@ class LegWaypoint internal constructor(
     /**
      * Returns a hash code value for the object.
      */
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun hashCode(): Int {
         var result = location.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + target.hashCode()
         result = 31 * result + type.hashCode()
+        result = 31 * result + metadata.hashCode()
         return result
     }
 
     /**
      * Returns a string representation of the object.
      */
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun toString(): String {
-        return "LegWaypoint(location=$location, name='$name', target=$target, type='$type')"
+        return "LegWaypoint(" +
+            "location=$location, " +
+            "name='$name', " +
+            "target=$target, " +
+            "type='$type', " +
+            "metadata=$metadata" +
+            ")"
     }
 }

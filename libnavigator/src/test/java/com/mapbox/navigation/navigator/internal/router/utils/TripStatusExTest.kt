@@ -81,7 +81,8 @@ class TripStatusExTest {
                         Point.fromLngLat(0.0, 0.0),
                         "",
                         null,
-                        type
+                        type,
+                        emptyMap(),
                     )
                 }
         }
@@ -119,31 +120,36 @@ class TripStatusExTest {
                     Point.fromLngLat(0.0, 0.0),
                     "",
                     null,
-                    Waypoint.REGULAR
+                    Waypoint.REGULAR,
+                    null,
                 )
                 val regularWaypoint2 = WaypointFactory.provideWaypoint(
                     Point.fromLngLat(1.0, 1.0),
                     "regular waypoint",
                     Point.fromLngLat(1.1, 1.1),
-                    Waypoint.REGULAR
+                    Waypoint.REGULAR,
+                    null,
                 )
                 val userEvWaypoint = WaypointFactory.provideWaypoint(
                     Point.fromLngLat(4.0, 4.0),
                     "user ev waypoint",
                     Point.fromLngLat(4.1, 4.1),
-                    Waypoint.EV_CHARGING_USER
+                    Waypoint.EV_CHARGING_USER,
+                    null,
                 )
                 val silentWaypoint = WaypointFactory.provideWaypoint(
                     Point.fromLngLat(2.0, 2.0),
                     "",
                     null,
-                    Waypoint.SILENT
+                    Waypoint.SILENT,
+                    null,
                 )
                 val evWaypoint = WaypointFactory.provideWaypoint(
                     Point.fromLngLat(3.0, 3.0),
                     "ev waypoint",
                     Point.fromLngLat(3.1, 3.1),
-                    Waypoint.EV_CHARGING_SERVER
+                    Waypoint.EV_CHARGING_SERVER,
+                    null,
                 )
                 return listOf(
                     arrayOf(
@@ -195,7 +201,8 @@ class TripStatusExTest {
                             Point.fromLngLat(1.0, 1.0),
                             "regular waypoint",
                             Point.fromLngLat(1.1, 1.1),
-                            LegWaypoint.REGULAR
+                            LegWaypoint.REGULAR,
+                            null,
                         )
                     ),
                     arrayOf(
@@ -214,7 +221,8 @@ class TripStatusExTest {
                             Point.fromLngLat(3.0, 3.0),
                             "ev waypoint",
                             Point.fromLngLat(3.1, 3.1),
-                            LegWaypoint.EV_CHARGING_ADDED
+                            LegWaypoint.EV_CHARGING_ADDED,
+                            null,
                         )
                     ),
                     arrayOf(
@@ -233,7 +241,8 @@ class TripStatusExTest {
                             Point.fromLngLat(4.0, 4.0),
                             "user ev waypoint",
                             Point.fromLngLat(4.1, 4.1),
-                            LegWaypoint.EV_CHARGING_USER_PROVIDED
+                            LegWaypoint.EV_CHARGING_USER_PROVIDED,
+                            null,
                         )
                     ),
                 )

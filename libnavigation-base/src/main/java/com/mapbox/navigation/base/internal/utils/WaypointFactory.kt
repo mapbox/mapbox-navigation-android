@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.internal.utils
 
 import androidx.annotation.VisibleForTesting
+import com.google.gson.JsonElement
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.Waypoint
 import org.jetbrains.annotations.TestOnly
@@ -13,6 +14,7 @@ object WaypointFactory {
         name: String,
         target: Point?,
         @Waypoint.Type type: Int,
+        metadata: Map<String, JsonElement>?,
     ): Waypoint = Waypoint(
         location,
         name,
@@ -24,5 +26,6 @@ object WaypointFactory {
             Waypoint.EV_CHARGING_USER -> Waypoint.InternalType.EvChargingUser
             else -> throw IllegalStateException("Unknown waypoint type $type")
         },
+        metadata,
     )
 }

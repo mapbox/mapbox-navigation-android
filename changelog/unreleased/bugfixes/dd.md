@@ -1,0 +1,1 @@
+- Added experimental `metadata` property to `LegWaypoint` class. This property exposes the corresponding `DirectionsWaypoint#metadata`.
