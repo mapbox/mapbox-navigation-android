@@ -29,7 +29,6 @@ dependencies {
     implementation dependenciesList.coroutinesAndroid
 
     implementation dependenciesList.androidXWorkManager
-    implementation dependenciesList.androidXLifecycleProcess
 
     testImplementation project(':libtesting-navigation-util')
     testImplementation project(':libtesting-utils')

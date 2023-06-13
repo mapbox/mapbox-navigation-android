@@ -1,14 +1,16 @@
 package com.mapbox.navigation.copilot
 
 import android.app.AlarmManager
+import android.app.Application
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
+import android.os.Looper
 import android.os.SystemClock
 import android.util.Base64
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ProcessLifecycleOwner
 import com.mapbox.common.UploadOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.CopilotOptions
@@ -26,6 +28,7 @@ import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.retrieveCopilotHistoryRecorder
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
+import com.mapbox.navigation.core.internal.lifecycle.CarAppLifecycleOwner
 import com.mapbox.navigation.core.internal.telemetry.UserFeedback
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
@@ -38,8 +41,10 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -60,7 +65,7 @@ import java.util.Locale
  *
  * NOTE FOR FUTURE SECURITY AUDITS:
  * The fakeAccessToken used below in the tests, although it seems legitimate it is a
- * fake one manually generated so that the owner associated to is is copilot-test-owner.
+ * fake one manually generated so that the owner associated to is copilot-test-owner.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxCopilotImplTest {
@@ -103,15 +108,14 @@ class MapboxCopilotImplTest {
     }
 
     @Test
-    fun `foregroundBackgroundLifecycleObserver is added to ProcessLifecycleOwner when start if MapboxNavigationApp is not setup`() {
+    fun `foregroundBackgroundLifecycleObserver is added to CarAppLifecycleOwner when start if MapboxNavigationApp is not setup`() {
         val mockedMapboxNavigation = prepareBasicMockks()
-        val mockedProcessLifecycleOwner = prepareProcessLifecycleOwnerMockk()
+        val mockedAppLifecycle = prepareCarAppLifecycleOwnerMockk()
         val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
 
         mapboxCopilot.start()
 
-        val lifecycle = mockedProcessLifecycleOwner.lifecycle
-        verify(exactly = 1) { lifecycle.addObserver(any()) }
+        verify(exactly = 1) { mockedAppLifecycle.addObserver(any()) }
     }
 
     @Test
@@ -362,7 +366,7 @@ class MapboxCopilotImplTest {
     @Test
     fun `foregroundBackgroundLifecycleObserver is removed from ProcessLifecycleOwner when stop if MapboxNavigationApp is not setup`() {
         val mockedMapboxNavigation = prepareBasicMockks()
-        val mockedProcessLifecycleOwner = prepareProcessLifecycleOwnerMockk()
+        val mockedAppLifecycle = prepareCarAppLifecycleOwnerMockk()
         val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
         every {
             mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
@@ -379,8 +383,7 @@ class MapboxCopilotImplTest {
 
         mapboxCopilot.stop()
 
-        val lifecycle = mockedProcessLifecycleOwner.lifecycle
-        verify(exactly = 1) { lifecycle.removeObserver(any()) }
+        verify(exactly = 1) { mockedAppLifecycle.removeObserver(any()) }
     }
 
     @Test
@@ -2539,11 +2542,10 @@ class MapboxCopilotImplTest {
 
     private fun prepareBasicMockks(): MapboxNavigation {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val mockedContext = mockk<Context>(relaxed = true)
-        val mockedApplicationContext = mockk<Context>(relaxed = true)
+        val mockedContext = mockk<Application>(relaxed = true)
         every {
             mockedContext.applicationContext
-        } returns mockedApplicationContext
+        } returns mockedContext
         val packageInfo = PackageInfo()
         packageInfo.versionName = "1.0"
         every {
@@ -2553,7 +2555,7 @@ class MapboxCopilotImplTest {
             )
         } returns packageInfo
         every {
-            mockedApplicationContext.getSystemService(Context.ALARM_SERVICE)
+            mockedContext.getSystemService(Context.ALARM_SERVICE)
         } returns mockk<AlarmManager>()
         every {
             mockedMapboxNavigation.navigationOptions.applicationContext
@@ -2564,13 +2566,18 @@ class MapboxCopilotImplTest {
         return mockedMapboxNavigation
     }
 
-    private fun prepareProcessLifecycleOwnerMockk(): ProcessLifecycleOwner {
+    private fun prepareCarAppLifecycleOwnerMockk(): Lifecycle {
         mockkStatic(MapboxNavigationApp::class)
         every { MapboxNavigationApp.isSetup() } returns false
-        mockkStatic(ProcessLifecycleOwner::class)
-        val mockedProcessLifecycleOwner = mockk<ProcessLifecycleOwner>(relaxed = true)
-        every { ProcessLifecycleOwner.get() } returns mockedProcessLifecycleOwner
-        return mockedProcessLifecycleOwner
+        mockkConstructor(CarAppLifecycleOwner::class)
+        every { anyConstructed<CarAppLifecycleOwner>().attachAllActivities(any()) } just runs
+        val appLifecycle = mockk<Lifecycle>(relaxed = true)
+        every { anyConstructed<CarAppLifecycleOwner>().lifecycle } returns appLifecycle
+        mockkStatic(Looper::class)
+        every { Looper.getMainLooper() } returns mockk {
+            every { thread } returns Thread.currentThread()
+        }
+        return appLifecycle
     }
 
     private fun prepareUploadMockks() {

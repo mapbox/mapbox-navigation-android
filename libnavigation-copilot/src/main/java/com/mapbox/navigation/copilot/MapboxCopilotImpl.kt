@@ -1,17 +1,21 @@
 package com.mapbox.navigation.copilot
 
+import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.SystemClock
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.gson.GsonBuilder
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory
 import com.mapbox.common.UploadOptions
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.copyToAndRemove
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.delete
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.generateFilename
@@ -22,6 +26,7 @@ import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveOwnerFrom
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.utcTimeNow
 import com.mapbox.navigation.copilot.internal.CopilotMetadata
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState.ActiveGuidance
@@ -31,6 +36,7 @@ import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.retrieveCopilotHistoryRecorder
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
+import com.mapbox.navigation.core.internal.lifecycle.CarAppLifecycleOwner
 import com.mapbox.navigation.core.internal.telemetry.UserFeedback
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
@@ -38,15 +44,12 @@ import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallb
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
-
-private const val TAG = "MapboxCopilotImpl"
 
 /**
  * MapboxCopilot.
@@ -97,7 +100,8 @@ internal class MapboxCopilotImpl(
             push(GoingToBackgroundEvent)
         }
     }
-    private val accessToken: String = mapboxNavigation.navigationOptions.accessToken ?: ""
+    private val accessToken = mapboxNavigation.navigationOptions.accessToken.orEmpty()
+    private val deviceType = mapboxNavigation.navigationOptions.deviceProfile.deviceType
 
     private val shouldSendHistoryOnlyWithFeedback =
         mapboxNavigation.navigationOptions.copilotOptions.shouldSendHistoryOnlyWithFeedback
@@ -123,21 +127,50 @@ internal class MapboxCopilotImpl(
         }
     }
     private var initRoute = false
-    private lateinit var routesObserver: RoutesObserver
-    private val isMapboxNavigationAppSetup = MapboxNavigationApp.isSetup()
+    private val routesObserver = RoutesObserver { routesResult ->
+        val navigationRoutes = routesResult.navigationRoutes
+        if (initialRoute(navigationRoutes)) {
+            initRouteSerializationJob = mainJobController.scope.launch {
+                val route = navigationRoutes.first().directionsRoute
+                val initRoute = InitRoute(route.requestUuid(), route)
+                val preSerializedInitRoute = withContext(computationDispatcher) {
+                    toEventJson(initRoute)
+                }
+                push(InitRouteEvent(initRoute, preSerializedInitRoute))
+            }
+            initRoute = true
+        }
+    }
+    private var arrivedAtFinalDestination = false
+    private val arrivalObserver = object : ArrivalObserver {
+
+        override fun onWaypointArrival(routeProgress: RouteProgress) {
+            // Nothing to do
+        }
+
+        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+            // Nothing to do
+        }
+
+        override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+            arrivedAtFinalDestination = true
+        }
+    }
+    private val appLifecycleOwner = if (MapboxNavigationApp.isSetup()) {
+        MapboxNavigationApp.lifecycleOwner
+    } else {
+        CarAppLifecycleOwner().apply {
+            val applicationContext = mapboxNavigation.navigationOptions.applicationContext
+            attachAllActivities(applicationContext as Application)
+        }
+    }
 
     /**
      * start
      */
     fun start() {
         registerUserFeedbackCallback(userFeedbackCallback)
-        if (isMapboxNavigationAppSetup) {
-            MapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(
-                foregroundBackgroundLifecycleObserver
-            )
-        } else {
-            ProcessLifecycleOwner.get().lifecycle.addObserver(foregroundBackgroundLifecycleObserver)
-        }
+        appLifecycleOwner.lifecycle.addObserver(foregroundBackgroundLifecycleObserver)
         mapboxNavigation.registerHistoryRecordingStateChangeObserver(
             historyRecordingStateChangeObserver
         )
@@ -148,15 +181,7 @@ internal class MapboxCopilotImpl(
      */
     fun stop() {
         unregisterUserFeedbackCallback(userFeedbackCallback)
-        if (isMapboxNavigationAppSetup) {
-            MapboxNavigationApp.lifecycleOwner.lifecycle.removeObserver(
-                foregroundBackgroundLifecycleObserver
-            )
-        } else {
-            ProcessLifecycleOwner.get().lifecycle.removeObserver(
-                foregroundBackgroundLifecycleObserver
-            )
-        }
+        appLifecycleOwner.lifecycle.removeObserver(foregroundBackgroundLifecycleObserver)
         mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(
             historyRecordingStateChangeObserver
         )
@@ -244,37 +269,8 @@ internal class MapboxCopilotImpl(
             is FreeDrive -> "free-drive"
             else -> throw IllegalArgumentException("Should not try and track idle state")
         }
-        routesObserver = RoutesObserver { routesResult ->
-            val navigationRoutes = routesResult.navigationRoutes
-            if (initialRoute(navigationRoutes)) {
-                initRouteSerializationJob?.let {
-                    logW(TAG) {
-                        "initRouteSerializationJob isn't null:" +
-                            "Active: ${it.isActive}, cancelled: ${it.isCancelled}" +
-                            "Only one init route is possible per session by design."
-                    }
-                    it.cancel()
-                }
-                initRouteSerializationJob = mainJobController.scope.launch {
-                    val initRoute = InitRoute(
-                        routesResult.navigationRoutes.first().directionsRoute.requestUuid(),
-                        routesResult.navigationRoutes.first().directionsRoute,
-                    )
-                    val preSerializedInitRoute = withContext(computationDispatcher) {
-                        toEventJson(initRoute)
-                    }
-                    push(
-                        InitRouteEvent(
-                            initRoute,
-                            preSerializedInitRoute
-                        ),
-                    )
-                }
-                initRoute = true
-            }
-        }.also {
-            mapboxNavigation.registerRoutesObserver(it)
-        }
+        mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerArrivalObserver(arrivalObserver)
     }
 
     private fun currentUtcTime(
@@ -303,7 +299,19 @@ internal class MapboxCopilotImpl(
         if (hasFeedback || !shouldSendHistoryOnlyWithFeedback) {
             endedAt = currentUtcTime()
             val diffTime = SystemClock.elapsedRealtime() - startSessionTime
-            push(DriveEndsEvent(DriveEnds(DriveEndsType.CanceledManually.type, diffTime)))
+            val driveEndsType = when {
+                arrivedAtFinalDestination -> when (deviceType) {
+                    DeviceType.HANDHELD -> DriveEndsType.Arrived
+                    DeviceType.AUTOMOBILE -> DriveEndsType.VehicleParked
+                }
+                appLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) -> {
+                    DriveEndsType.CanceledManually
+                }
+                else -> {
+                    DriveEndsType.ApplicationClosed
+                }
+            }
+            push(DriveEndsEvent(DriveEnds(driveEndsType.type, diffTime)))
             val drive = buildNavigationSession()
             stopRecording { historyFilePath ->
                 mainJobController.scope.launch {
@@ -409,6 +417,8 @@ internal class MapboxCopilotImpl(
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         initRoute = false
         hasFeedback = false
+        mapboxNavigation.unregisterArrivalObserver(arrivalObserver)
+        arrivedAtFinalDestination = false
         if (currentHistoryRecordingSessionState is ActiveGuidance) {
             activeGuidanceHistoryEvents.clear()
         }
