@@ -54,6 +54,9 @@ dependencies {
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidStartup
 
+    // TODO: get rid of dependency removing workaround https://github.com/mapbox/mapbox-navigation-android/pull/7245
+    implementation dependenciesList.mapboxSdkServices
+
     api dependenciesList.androidXLifecycleRuntime
     implementation dependenciesList.androidXFragment
     testImplementation dependenciesList.androidXCore

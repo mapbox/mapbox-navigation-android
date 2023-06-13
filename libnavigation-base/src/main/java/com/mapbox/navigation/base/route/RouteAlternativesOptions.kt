@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.route
 
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.DEFAULT_AVOID_MANEUVER_SECONDS_FOR_ROUTE_ALTERNATIVES
 import com.mapbox.navigator.RouteAlternativesObserver
 import java.util.concurrent.TimeUnit
 
@@ -70,7 +71,7 @@ class RouteAlternativesOptions private constructor(
      */
     class Builder {
         private var intervalMillis: Long = TimeUnit.MINUTES.toMillis(5)
-        private var avoidManeuverSeconds = 8
+        private var avoidManeuverSeconds = DEFAULT_AVOID_MANEUVER_SECONDS_FOR_ROUTE_ALTERNATIVES
 
         /**
          * Update the route refresh interval in milliseconds.

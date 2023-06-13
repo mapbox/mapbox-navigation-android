@@ -56,6 +56,7 @@
     <string name="label_clear_traffic" translatable="false">Clear traffic</string>
     <string name="route_line_active_leg_above_others_description" translatable="false">The active leg of the route should be above the inactive leg. \n\nThis example also sets the inactive leg color to more clearly differentiate it from the active leg. \n\nThe active leg including the vansished section of the line should be above the inactive leg and when the puck transitions from the first active leg to the second there should be a visual change that continues to indicate the active leg is above the inactive leg.</string>
 
+    <string name="navigation_view_offline_online_route_switch" translatable="false">Utility for testing offline-online route switching</string>
 
     <string-array name="drop_in_info_panel_overrides" translatable="false">
         <item>--</item>
