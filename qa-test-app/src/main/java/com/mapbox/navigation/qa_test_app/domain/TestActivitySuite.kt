@@ -15,6 +15,7 @@ import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingWithRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewFragmentActivity
+import com.mapbox.navigation.qa_test_app.view.MapboxNavigationViewOfflineOnlineRouteSwitchActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.NavigationViewFragmentLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.RoadObjectsActivity
@@ -256,6 +257,14 @@ object TestActivitySuite {
         ) { activity ->
             activity.startActivity<RouteRefreshActivity>()
         },
+        TestActivityDescription(
+            "Switch from offline to online route",
+            R.string.navigation_view_offline_online_route_switch,
+            category = CATEGORY_DROP_IN,
+            launchAfterPermissionResult = false
+        ) { activity ->
+            MapboxNavigationViewOfflineOnlineRouteSwitchActivity.startActivity(activity)
+        }
     )
 
     fun getTestActivities(category: String): List<TestActivityDescription> {

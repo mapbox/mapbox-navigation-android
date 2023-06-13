@@ -16,7 +16,8 @@ import com.mapbox.navigator.Waypoint
 fun createNavigationRoute(
     directionsRoute: DirectionsRoute = createDirectionsRoute(),
     routeInfo: RouteInfo = RouteInfo(emptyList()),
-    waypoints: List<Waypoint> = createWaypoints()
+    waypoints: List<Waypoint> = createWaypoints(),
+    routerOrigin: RouterOrigin = RouterOrigin.Offboard
 ): NavigationRoute {
     return createNavigationRoutes(
         response = createDirectionsResponse(
@@ -25,6 +26,7 @@ fun createNavigationRoute(
         ),
         routesInfoMapper = { routeInfo },
         waypointsMapper = { waypoints },
+        routerOrigin = routerOrigin
     ).first()
 }
 

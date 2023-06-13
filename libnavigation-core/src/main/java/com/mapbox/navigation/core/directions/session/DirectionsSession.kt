@@ -13,7 +13,8 @@ internal interface DirectionsSession : RouteRefresh {
 
     val initialLegIndex: Int
 
-    fun setRoutes(routes: DirectionsSessionRoutes)
+    fun setNavigationRoutesStarted(params: RoutesSetStartedParams)
+    fun setNavigationRoutesFinished(routes: DirectionsSessionRoutes)
 
     /**
      * Provide route options for current primary route.
@@ -46,17 +47,21 @@ internal interface DirectionsSession : RouteRefresh {
     /**
      * Registers [RoutesObserver]. Updated on each change of [routes]
      */
-    fun registerRoutesObserver(routesObserver: RoutesObserver)
+    fun registerSetNavigationRoutesFinishedObserver(routesObserver: RoutesObserver)
 
     /**
      * Unregisters [RoutesObserver]
      */
-    fun unregisterRoutesObserver(routesObserver: RoutesObserver)
+    fun unregisterSetNavigationRoutesFinishedObserver(routesObserver: RoutesObserver)
 
     /**
      * Unregisters all [RoutesObserver]
      */
-    fun unregisterAllRoutesObservers()
+    fun unregisterAllSetNavigationRoutesFinishedObserver()
+
+    fun registerSetNavigationRoutesStartedObserver(observer: SetNavigationRoutesStartedObserver)
+
+    fun unregisterSetNavigationRoutesStartedObserver(observer: SetNavigationRoutesStartedObserver)
 
     /**
      * Interrupts the route-fetching request

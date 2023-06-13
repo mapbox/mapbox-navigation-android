@@ -498,9 +498,25 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the auto-value-gson-runtime.
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the autotransient (A transient annotation for AutoValue extensions.).
+URL: [https://github.com/ZacSweers/AutoTransient/](https://github.com/ZacSweers/AutoTransient/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Collections Kotlin Extensions (Kotlin extensions for 'collection' artifact).
 URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Converter: Gson.
+License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -623,9 +639,20 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the okhttp-logging-interceptor (Square’s meticulous HTTP client for Java and Kotlin.).
+URL: [https://square.github.io/okhttp/](https://square.github.io/okhttp/)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Okio (A modern I/O API for Java).
 URL: [https://github.com/square/okio/](https://github.com/square/okio/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Retrofit.
+License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
