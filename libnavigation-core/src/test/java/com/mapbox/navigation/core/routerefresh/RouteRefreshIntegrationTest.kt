@@ -225,4 +225,17 @@ internal open class RouteRefreshIntegrationTest {
             0
         }
     }
+
+    fun updateProgressWithGeometryIndex(index: Int) {
+        routesProgressDataProvider.onRouteProgressChanged(
+            mockk {
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 0
+                    every { geometryIndex } returns 0
+                }
+                every { currentRouteGeometryIndex } returns index
+                every { internalAlternativeRouteIndices() } returns emptyMap()
+            }
+        )
+    }
 }

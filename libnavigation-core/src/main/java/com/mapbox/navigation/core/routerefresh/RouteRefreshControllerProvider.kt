@@ -31,9 +31,11 @@ internal object RouteRefreshControllerProvider {
             DirectionsRouteDiffProvider(),
             directionsSession,
         )
+        val routeRefreshParentJob = SupervisorJob()
         val routeRefresherExecutor = RouteRefresherExecutor(
             routeRefresher,
-            routeRefreshOptions.intervalMillis
+            routeRefreshOptions.intervalMillis,
+            CoroutineUtils.createScope(routeRefreshParentJob, dispatcher),
         )
         val stateHolder = RouteRefreshStateHolder()
         val refreshObserversManager = RefreshObserversManager()
@@ -45,7 +47,6 @@ internal object RouteRefreshControllerProvider {
             routeRefreshOptions.intervalMillis * 3
         )
 
-        val routeRefreshParentJob = SupervisorJob()
         val plannedRouteRefreshController = PlannedRouteRefreshController(
             routeRefresherExecutor,
             routeRefreshOptions,
