@@ -334,7 +334,7 @@ class NavigationRoute internal constructor(
         }
     }
 
-    internal val nativeWaypoints: List<Waypoint> by lazy { nativeRoute.waypoints.mapToSdk() }
+    internal val nativeWaypoints: List<Waypoint> = nativeRoute.waypoints.mapToSdk()
 
     /**
      * Indicates whether some other object is "equal to" this one.

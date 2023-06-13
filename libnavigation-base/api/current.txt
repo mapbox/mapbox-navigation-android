@@ -665,10 +665,12 @@ package com.mapbox.navigation.base.route {
 
   public final class LegWaypoint {
     method public com.mapbox.geojson.Point getLocation();
+    method public java.util.Map<java.lang.String,com.google.gson.JsonElement>? getMetadata();
     method public String getName();
     method public com.mapbox.geojson.Point? getTarget();
     method public String getType();
     property public final com.mapbox.geojson.Point location;
+    property public final java.util.Map<java.lang.String,com.google.gson.JsonElement>? metadata;
     property public final String name;
     property public final com.mapbox.geojson.Point? target;
     property public final String type;

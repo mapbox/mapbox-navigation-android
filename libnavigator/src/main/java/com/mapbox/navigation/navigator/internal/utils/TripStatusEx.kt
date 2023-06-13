@@ -46,7 +46,8 @@ fun TripStatus.getCurrentLegDestination(route: NavigationRoute): LegWaypoint? {
         waypoint.location,
         waypoint.name,
         waypoint.target,
-        legWaypointType
+        legWaypointType,
+        waypoint.metadata,
     )
 }
 

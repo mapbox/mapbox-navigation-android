@@ -1475,19 +1475,22 @@ class MapboxRouteLineUtilsTest {
                     name = "w1",
                     location = Point.fromLngLat(-77.157347, 38.783004),
                     type = Waypoint.REGULAR,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     name = "w2",
                     location = Point.fromLngLat(-77.167276, 38.775717),
                     type = Waypoint.REGULAR,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     name = "w3",
                     location = Point.fromLngLat(-77.153468, 38.77091),
                     type = Waypoint.REGULAR,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
             )
             val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)
@@ -1517,19 +1520,22 @@ class MapboxRouteLineUtilsTest {
                     name = "w1",
                     location = Point.fromLngLat(-77.157347, 38.783004),
                     type = Waypoint.REGULAR,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     name = "w2",
                     location = Point.fromLngLat(-77.167276, 38.775717),
                     type = Waypoint.SILENT,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     name = "w3",
                     location = Point.fromLngLat(-77.153468, 38.77091),
                     type = Waypoint.REGULAR,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
             )
             val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)
@@ -1555,19 +1561,22 @@ class MapboxRouteLineUtilsTest {
                     name = "w1",
                     location = Point.fromLngLat(-77.157347, 38.783004),
                     type = Waypoint.EV_CHARGING_SERVER,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     name = "w2",
                     location = Point.fromLngLat(-77.167276, 38.775717),
                     type = Waypoint.SILENT,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
                 WaypointFactory.provideWaypoint(
                     name = "w3",
                     location = Point.fromLngLat(-77.153468, 38.77091),
                     type = Waypoint.REGULAR,
-                    target = null
+                    target = null,
+                    metadata = emptyMap(),
                 ),
             )
             val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)

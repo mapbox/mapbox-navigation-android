@@ -1,13 +1,15 @@
 package com.mapbox.navigation.base.internal.route
 
 import androidx.annotation.IntDef
+import com.google.gson.JsonElement
 import com.mapbox.geojson.Point
 
 class Waypoint internal constructor(
     val location: Point,
     val name: String,
     val target: Point?,
-    internal val internalType: InternalType
+    internal val internalType: InternalType,
+    val metadata: Map<String, JsonElement>?,
 ) {
 
     @Type
@@ -45,6 +47,7 @@ class Waypoint internal constructor(
         if (type != other.type) return false
         if (name != other.name) return false
         if (target != other.target) return false
+        if (metadata != other.metadata) return false
 
         return true
     }
@@ -54,11 +57,18 @@ class Waypoint internal constructor(
         result = 31 * result + type
         result = 31 * result + name.hashCode()
         result = 31 * result + target.hashCode()
+        result = 31 * result + metadata.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "Waypoint(location=$location, type=$type, name='$name', target=$target)"
+        return "Waypoint(" +
+            "location=$location, " +
+            "type=$type, " +
+            "name='$name', " +
+            "target=$target, " +
+            "metadata=$metadata" +
+            ")"
     }
 
     internal enum class InternalType {

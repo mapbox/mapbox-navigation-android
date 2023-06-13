@@ -176,6 +176,7 @@ class NavigationRouteEqualsTest(
                 every { responseUuid } returns "uuid#0"
                 every { routerOrigin } returns RouterOrigin.ONBOARD
                 every { routeInfo } returns RouteInfo(listOf(mockk(relaxed = true)))
+                every { waypoints } returns emptyList()
             }
         )
         route2 = NavigationRoute(
@@ -189,6 +190,7 @@ class NavigationRouteEqualsTest(
                 every {
                     routeInfo
                 } returns RouteInfo(listOf(mockk(relaxed = true), mockk(relaxed = true)))
+                every { waypoints } returns emptyList()
             }
         )
     }

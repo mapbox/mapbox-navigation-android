@@ -1022,6 +1022,7 @@ class BuildingProcessorTest {
         location,
         name,
         target,
-        type
+        type,
+        emptyMap(),
     )
 }
