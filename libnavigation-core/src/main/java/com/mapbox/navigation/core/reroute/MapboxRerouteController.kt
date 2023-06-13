@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
+import com.mapbox.navigation.core.reroute.MapboxRerouteController.Companion.applyRerouteOptions
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
@@ -75,11 +76,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         private const val LOG_CATEGORY = "MapboxRerouteController"
 
         /**
-         * Max dangerous maneuvers radius meters. See [RouteOptions.avoidManeuverRadius]
-         */
-        private const val MAX_DANGEROUS_MANEUVERS_RADIUS = 1000.0
-
-        /**
          * Apply reroute options. Speed must be provided as **m/s**
          */
         private fun RouteOptions?.applyRerouteOptions(
@@ -89,21 +85,10 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             if (this == null || speed == null) {
                 return this
             }
-
-            val builder = toBuilder()
-
-            if (this.profile() == DirectionsCriteria.PROFILE_DRIVING ||
-                this.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
-            ) {
-                val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds
-                    .let { speed * it }.toDouble()
-                    .takeIf { it >= 1 }
-                    ?.coerceAtMost(MAX_DANGEROUS_MANEUVERS_RADIUS)
-
-                builder.avoidManeuverRadius(avoidManeuverRadius)
-            }
-
-            return builder.build()
+            return this.applyAvoidManeuvers(
+                rerouteOptions.avoidManeuverSeconds,
+                speed
+            )
         }
     }
 
@@ -298,4 +283,29 @@ private sealed class RouteRequestResult {
     class Failure(val reasons: List<RouterFailure>) : RouteRequestResult()
 
     object Cancellation : RouteRequestResult()
+}
+
+/**
+ * Max dangerous maneuvers radius meters. See [RouteOptions.avoidManeuverRadius]
+ */
+private const val MAX_DANGEROUS_MANEUVERS_RADIUS = 1000.0
+
+internal fun RouteOptions.applyAvoidManeuvers(
+    avoidManeuverSeconds: Int,
+    speed: Float
+): RouteOptions {
+    val builder = toBuilder()
+
+    if (this.profile() == DirectionsCriteria.PROFILE_DRIVING ||
+        this.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+    ) {
+        val avoidManeuverRadius = avoidManeuverSeconds
+            .let { speed * it }.toDouble()
+            .takeIf { it >= 1 }
+            ?.coerceAtMost(MAX_DANGEROUS_MANEUVERS_RADIUS)
+
+        builder.avoidManeuverRadius(avoidManeuverRadius)
+    }
+
+    return builder.build()
 }

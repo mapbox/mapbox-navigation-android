@@ -154,14 +154,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         // + 1 for navigationSession
         // + 1 for routesCacheClearer
-        verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
+        verify(exactly = 3) { directionsSession.registerSetNavigationRoutesFinishedObserver(any()) }
     }
 
     @Test
     fun init_registersRoutesCacheClearerAsObservers() {
         createMapboxNavigation()
         verify(exactly = 1) {
-            directionsSession.registerRoutesObserver(routesCacheClearer)
+            directionsSession.registerSetNavigationRoutesFinishedObserver(routesCacheClearer)
             routesPreviewController.registerRoutesPreviewObserver(routesCacheClearer)
         }
     }
@@ -244,7 +244,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { directionsSession.unregisterAllRoutesObservers() }
+        verify(exactly = 1) { directionsSession.unregisterAllSetNavigationRoutesFinishedObserver() }
     }
 
     @Test
@@ -311,7 +311,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) {
-            directionsSession.setRoutes(
+            directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
                     emptyList(),
                     emptyList(),
@@ -330,7 +330,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 0) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -548,7 +548,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             it.onOffRouteStateChanged(true)
         }
         coVerify(exactly = 1) {
-            directionsSession.setRoutes(
+            directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
                     newAcceptedRoutes,
                     newIgnoredRoutes,
@@ -580,7 +580,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             it.onOffRouteStateChanged(true)
         }
         coVerify(exactly = 0) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -616,7 +616,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setRerouteController(oldController)
         mapboxNavigation.setRerouteController(navigationRerouteController)
         coVerify(exactly = 1) {
-            directionsSession.setRoutes(
+            directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
                     newAcceptedRoutes,
                     newIgnoredRoutes,
@@ -646,7 +646,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setRerouteController(oldController)
         mapboxNavigation.setRerouteController(navigationRerouteController)
         coVerify(exactly = 0) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -669,7 +669,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setRerouteController(oldController)
         mapboxNavigation.setRerouteController(rerouteController)
         coVerify(exactly = 1) {
-            directionsSession.setRoutes(
+            directionsSession.setNavigationRoutesFinished(
                 match { it.setRoutesInfo == SetRoutes.Reroute(0) },
             )
         }
@@ -695,7 +695,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setRerouteController(oldController)
         mapboxNavigation.setRerouteController(rerouteController)
         coVerify(exactly = 1) {
-            directionsSession.setRoutes(
+            directionsSession.setNavigationRoutesFinished(
                 match { it.setRoutesInfo == SetRoutes.Reroute(0) },
             )
         }
@@ -720,7 +720,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setRerouteController(oldController)
         mapboxNavigation.setRerouteController(rerouteController)
         coVerify(exactly = 0) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -744,7 +744,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setRerouteController(oldController)
         mapboxNavigation.setRerouteController(rerouteController)
         coVerify(exactly = 0) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -787,7 +787,11 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
         val routeObserversSlot = mutableListOf<RoutesObserver>()
         every { tripSession.getState() } returns TripSessionState.STARTED
-        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+        verify {
+            directionsSession.registerSetNavigationRoutesFinishedObserver(
+                capture(routeObserversSlot)
+            )
+        }
 
         routeObserversSlot.forEach {
             it.onRoutesChanged(RoutesUpdatedResult(routes, ignoredRoutes, reason))
@@ -807,7 +811,11 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         val routeObserversSlot = mutableListOf<RoutesObserver>()
         every { tripSession.getState() } returns TripSessionState.STARTED
-        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+        verify {
+            directionsSession.registerSetNavigationRoutesFinishedObserver(
+                capture(routeObserversSlot)
+            )
+        }
 
         routeObserversSlot.forEach {
             it.onRoutesChanged(RoutesUpdatedResult(routes, ignoredRoutes, reason))
@@ -1017,7 +1025,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
 
         verify(exactly = 1) {
-            directionsSession.setRoutes(
+            directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
                     acceptedRoutes,
                     ignoredRoutes,
@@ -1041,7 +1049,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation.setNavigationRoutes(emptyList())
 
             verify(exactly = 1) {
-                directionsSession.setRoutes(
+                directionsSession.setNavigationRoutesFinished(
                     DirectionsSessionRoutes(
                         emptyList(),
                         emptyList(),
@@ -1073,7 +1081,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex)
 
             verify(exactly = 0) {
-                directionsSession.setRoutes(any())
+                directionsSession.setNavigationRoutesFinished(any())
             }
         }
 
@@ -1100,7 +1108,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation.setRoutes(routes, initialLegIndex)
 
             verify(exactly = 1) {
-                directionsSession.setRoutes(
+                directionsSession.setNavigationRoutesFinished(
                     DirectionsSessionRoutes(
                         acceptedRoutes,
                         listOf(
@@ -1129,7 +1137,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation.setRoutes(routes, initialLegIndex)
 
             verify(exactly = 0) {
-                directionsSession.setRoutes(any())
+                directionsSession.setNavigationRoutesFinished(any())
             }
         }
 
@@ -1174,7 +1182,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         possibleInternalCallbackSlot.captured.onRoutesReady(routes, origin)
 
         verify(exactly = 0) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -1435,7 +1443,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
             verifyOrder {
                 billingController.onExternalRouteSet(routes.first(), 0)
-                directionsSession.setRoutes(
+                directionsSession.setNavigationRoutesFinished(
                     DirectionsSessionRoutes(
                         routes,
                         emptyList(),
@@ -1470,8 +1478,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setNavigationRoutes(listOf(primaryRoute))
 
         verifyOrder {
-            directionsSession.setRoutes(match { it.setRoutesInfo is SetRoutes.Alternatives })
-            directionsSession.setRoutes(match { it.setRoutesInfo is SetRoutes.Alternatives })
+            directionsSession.setNavigationRoutesFinished(
+                match { it.setRoutesInfo is SetRoutes.Alternatives }
+            )
+            directionsSession.setNavigationRoutesFinished(
+                match { it.setRoutesInfo is SetRoutes.Alternatives }
+            )
         }
     }
 
@@ -1514,14 +1526,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
         verifyOrder {
-            directionsSession.setRoutes(
+            directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
                     longRoutes,
                     emptyList(),
                     SetRoutes.NewRoutes(0)
                 )
             )
-            directionsSession.setRoutes(
+            directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
                     shortRoutes,
                     emptyList(),
@@ -1620,7 +1632,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coroutineRule.runBlockingTest {
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every {
-                directionsSession.registerRoutesObserver(capture(routeObserversSlot))
+                directionsSession.registerSetNavigationRoutesFinishedObserver(
+                    capture(routeObserversSlot)
+                )
             } just Runs
             createMapboxNavigation()
             mapboxNavigation.setRerouteController(rerouteController)
@@ -1679,7 +1693,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     processedRoutes,
                     nativeAlternatives
                 )
-                directionsSession.setRoutes(
+                directionsSession.setNavigationRoutesFinished(
                     DirectionsSessionRoutes(
                         processedRoutes,
                         emptyList(),
@@ -1713,7 +1727,11 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 )
             } returns NativeSetRouteError("some error")
 
-            verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+            verify {
+                directionsSession.registerSetNavigationRoutesFinishedObserver(
+                    capture(routeObserversSlot)
+                )
+            }
             routeObserversSlot.forEach {
                 it.onRoutesChanged(
                     RoutesUpdatedResult(
@@ -1755,7 +1773,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 delay(100)
                 NativeSetRouteValue(inputRoutes, validAlternatives)
             }
-            every { directionsSession.setRoutes(any()) } answers {
+            every { directionsSession.setNavigationRoutesFinished(any()) } answers {
                 every {
                     directionsSession.routes
                 } returns (firstArg() as DirectionsSessionRoutes).acceptedRoutes
@@ -1771,7 +1789,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
             coVerifyOrder {
                 tripSession.setRoutes(inputRoutes, setRoutesInfo)
-                directionsSession.setRoutes(
+                directionsSession.setNavigationRoutesFinished(
                     DirectionsSessionRoutes(acceptedRoutes, ignoredRoutes, setRoutesInfo)
                 )
                 tripSession.setRoutes(acceptedRoutes, setRoutesInfo)
@@ -1779,7 +1797,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
             val routesSlot = mutableListOf<DirectionsSessionRoutes>()
             verify(exactly = 1) {
-                directionsSession.setRoutes(capture(routesSlot))
+                directionsSession.setNavigationRoutesFinished(capture(routesSlot))
             }
             assertEquals(1, routesSlot.size)
             assertEquals(acceptedRoutes, routesSlot.first().acceptedRoutes)
@@ -1796,10 +1814,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.stopTripSession()
 
         verify(exactly = 1) {
-            directionsSession.setRoutes(match { it.acceptedRoutes == routes })
+            directionsSession.setNavigationRoutesFinished(match { it.acceptedRoutes == routes })
         }
         verify(exactly = 0) {
-            directionsSession.setRoutes(match { it.acceptedRoutes.isEmpty() })
+            directionsSession.setNavigationRoutesFinished(match { it.acceptedRoutes.isEmpty() })
         }
     }
 
@@ -1823,7 +1841,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             tripSession.setRoutes(any(), ofType(SetRoutes.Alternatives::class))
         }
         verify(exactly = 1) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -1847,7 +1865,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             tripSession.setRoutes(any(), ofType(SetRoutes.NewRoutes::class))
         }
         verify(exactly = 1) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -1871,7 +1889,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             tripSession.setRoutes(any(), any())
         }
         verify(exactly = 0) {
-            directionsSession.setRoutes(any())
+            directionsSession.setNavigationRoutesFinished(any())
         }
     }
 
@@ -1884,7 +1902,11 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
-            verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+            verify {
+                directionsSession.registerSetNavigationRoutesFinishedObserver(
+                    capture(routeObserversSlot)
+                )
+            }
 
             val alternativeRoute1 = routeWithId("id#1")
             val alternativeRoute2 = routeWithId("id#2")
@@ -1917,7 +1939,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 )
             }
             verify(exactly = 1) {
-                directionsSession.setRoutes(
+                directionsSession.setNavigationRoutesFinished(
                     DirectionsSessionRoutes(
                         acceptedRefreshRoutes,
                         ignoredRefreshRoutes,
@@ -1939,7 +1961,11 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
             val routeObserversSlot = mutableListOf<RoutesObserver>()
             every { tripSession.getState() } returns TripSessionState.STARTED
-            verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+            verify {
+                directionsSession.registerSetNavigationRoutesFinishedObserver(
+                    capture(routeObserversSlot)
+                )
+            }
 
             val primaryRoute = routeWithId("id#0")
             val alternativeRoute = routeWithId("id#1")
@@ -1966,7 +1992,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 )
             }
             verify(exactly = 0) {
-                directionsSession.setRoutes(any())
+                directionsSession.setNavigationRoutesFinished(any())
             }
         }
 
