@@ -24,7 +24,7 @@ class RouteRefresherExecutorTest {
         coEvery { refresh(any(), any()) } returns routeRefresherResult
     }
     private val timeout = 100L
-    private val sut = RouteRefresherExecutor(routeRefresher, timeout)
+    private val sut = RouteRefresherExecutor(routeRefresher, timeout, coroutineRule.coroutineScope)
     private val routes = listOf<NavigationRoute>(mockk(), mockk())
     private val startCallback = mockk<() -> Unit>(relaxed = true)
 
@@ -40,16 +40,24 @@ class RouteRefresherExecutorTest {
     }
 
     @Test
-    fun twoRequestsAreNotExecutedSimultaneously() = coroutineRule.runBlockingTest {
+    fun intermediateRequestsAreRemovedFromQueue() = coroutineRule.runBlockingTest {
         val routes2 = listOf<NavigationRoute>(mockk(), mockk(), mockk())
+        val routes3 = listOf<NavigationRoute>(mockk(), mockk(), mockk())
+        val routes4 = listOf<NavigationRoute>(mockk(), mockk(), mockk())
         val startCallback2 = mockk<() -> Unit>(relaxed = true)
+        val startCallback3 = mockk<() -> Unit>(relaxed = true)
+        val startCallback4 = mockk<() -> Unit>(relaxed = true)
         val routeRefresherResult2 = RouteRefresherResult(false, mockk())
+        val routeRefresherResult3 = RouteRefresherResult(false, mockk())
+        val routeRefresherResult4 = RouteRefresherResult(false, mockk())
 
         coEvery { routeRefresher.refresh(routes, any()) } coAnswers {
             delay(10000)
             routeRefresherResult
         }
         coEvery { routeRefresher.refresh(routes2, any()) } returns routeRefresherResult2
+        coEvery { routeRefresher.refresh(routes3, any()) } returns routeRefresherResult3
+        coEvery { routeRefresher.refresh(routes4, any()) } returns routeRefresherResult4
 
         val result1 = async {
             sut.executeRoutesRefresh(routes, startCallback)
@@ -61,9 +69,17 @@ class RouteRefresherExecutorTest {
         val result2 = async {
             sut.executeRoutesRefresh(routes2, startCallback2)
         }
-        assertEquals("Skipping request as another one is in progress.", result2.await().error)
+        val result3 = async {
+            sut.executeRoutesRefresh(routes3, startCallback3)
+        }
+        val result4 = async {
+            sut.executeRoutesRefresh(routes4, startCallback4)
+        }
 
         assertEquals(routeRefresherResult, result1.await().value)
+        assertEquals("Skipping request as a newer one is queued.", result2.await().error)
+        assertEquals("Skipping request as a newer one is queued.", result3.await().error)
+        assertEquals(routeRefresherResult4, result4.await().value)
     }
 
     @Test

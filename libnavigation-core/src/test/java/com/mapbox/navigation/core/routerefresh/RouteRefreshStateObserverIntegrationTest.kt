@@ -217,10 +217,14 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
         routeRefreshController.requestPlannedRouteRefresh(routes)
+        updateProgressWithGeometryIndex(1)
         routeRefreshController.requestImmediateRouteRefresh()
+        updateProgressWithGeometryIndex(2)
         testDispatcher.advanceTimeBy(2_000)
         routeRefreshController.requestImmediateRouteRefresh()
+        updateProgressWithGeometryIndex(3)
         routeRefreshController.requestImmediateRouteRefresh()
+        updateProgressWithGeometryIndex(4)
         routeRefreshController.requestImmediateRouteRefresh()
         testDispatcher.advanceTimeBy(2_000)
 
@@ -231,7 +235,19 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
             ),
             stateObserver.getStatesSnapshot()
         )
-        verify(exactly = 1) { router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any()) }
+        verify(exactly = 2) { router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any()) }
+        verify {
+            router.getRouteRefresh(
+                any(),
+                match<RouteRefreshRequestData> { it.routeGeometryIndex == 1 },
+                any()
+            )
+            router.getRouteRefresh(
+                any(),
+                match<RouteRefreshRequestData> { it.routeGeometryIndex == 4 },
+                any()
+            )
+        }
     }
 
     @Test
