@@ -92,7 +92,7 @@ class OnlineRouteAlternativesSwitch(
     private lateinit var mapboxNavigationScope: CoroutineScope
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        mapboxNavigationScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+        mapboxNavigationScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
         val accessToken = mapboxNavigation.navigationOptions.accessToken ?: return
         mapboxNavigationScope.launch {
             requestOnlineRoutes(
