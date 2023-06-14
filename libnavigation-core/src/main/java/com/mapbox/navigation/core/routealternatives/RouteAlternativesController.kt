@@ -87,14 +87,14 @@ internal class RouteAlternativesController constructor(
         val isStopped = observers.isEmpty()
         observers.add(routeAlternativesObserver)
         if (isStopped) {
-            nativeRouteAlternativesController.addObserver(nativeObserver)
+            nativeRouteAlternativesController.addObserver2(nativeObserver)
         }
     }
 
     fun unregister(routeAlternativesObserver: NavigationRouteAlternativesObserver) {
         observers.remove(routeAlternativesObserver)
         if (observers.isEmpty()) {
-            nativeRouteAlternativesController.removeObserver(nativeObserver)
+            nativeRouteAlternativesController.removeObserver2(nativeObserver)
         }
     }
 
@@ -150,14 +150,7 @@ internal class RouteAlternativesController constructor(
         return metadataMap[navigationRoute.id]
     }
 
-    private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
-        override fun onRouteAlternativesChanged(
-            routeAlternatives: List<RouteAlternative>,
-            removed: List<RouteAlternative>
-        ) { }
-
-        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) {}
-
+    private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserverSync {
         override fun onRouteAlternativesUpdated(
             onlinePrimaryRoute: RouteInterface?,
             routeAlternatives: MutableList<RouteAlternative>,
