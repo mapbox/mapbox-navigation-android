@@ -1,5 +1,6 @@
 package com.mapbox.navigation.testing.factories
 
+import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -91,3 +92,11 @@ fun createRouteInterfacesFromDirectionRequestResponse(
 }
 
 fun createRouteInfo() = RouteInfo(emptyList())
+
+fun createBearing(
+    angle: Double = 20.0,
+    degrees: Double = 45.0
+) = Bearing.builder()
+    .angle(angle)
+    .degrees(degrees)
+    .build()

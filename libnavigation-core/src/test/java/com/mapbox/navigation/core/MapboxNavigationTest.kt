@@ -1393,8 +1393,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation.setNavigationRoutes(routes)
 
             verifyOrder {
-                billingController.onExternalRouteSet(routes.first(), 0)
-                directionsSession.setRoutes(
+                billingController.onExternalRouteSet(routes.first())
+                directionsSession.setNavigationRoutesFinished(
                     DirectionsSessionRoutes(
                         routes,
                         emptyList(),
