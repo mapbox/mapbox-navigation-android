@@ -22,6 +22,8 @@ import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.factories.createWaypoint
 import com.mapbox.navigation.utils.internal.toPoint
+import com.mapbox.navigator.Waypoint
+import com.mapbox.navigator.WaypointType
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
@@ -188,7 +190,11 @@ internal class OnlineRouteAlternativesSwitchTest {
             Point.fromLngLat(2.2, 2.2),
             Point.fromLngLat(3.3, 3.3),
         )
-        val testRoutes = createTestRoutes(testCoordinates, RouterOrigin.Onboard)
+        val testRoutes = createTestRoutes(
+            testCoordinates,
+            RouterOrigin.Onboard,
+
+        )
         val newLocation = createLocation(
             longitudeValue = 2.5,
             latitudeValue = 2.5,
@@ -667,6 +673,18 @@ private fun createTestRoutes(
             bearingList = bearings,
             avoidManeuverRadius = avoidManeuverRadius
         ),
+        waypointsMapper = { _ ->
+            testCoordinates.mapIndexed { index, coordinate ->
+                Waypoint(
+                    "waypoint_$index",
+                    coordinate,
+                    null,
+                    null,
+                    null,
+                    WaypointType.REGULAR,
+                )
+            }
+        }
     )
 
 private fun createLocation(
