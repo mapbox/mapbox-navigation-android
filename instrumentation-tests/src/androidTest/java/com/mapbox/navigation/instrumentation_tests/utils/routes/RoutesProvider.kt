@@ -121,7 +121,8 @@ object RoutesProvider {
     }
 
     fun MockRoute.toNavigationRoutes(
-        routeOptionsBlock: RouteOptions.Builder.() -> RouteOptions.Builder = { this }
+        routeOrigin: RouterOrigin = RouterOrigin.Custom(),
+        routeOptionsBlock: RouteOptions.Builder.() -> RouteOptions.Builder = { this },
     ) : List<NavigationRoute> {
         return NavigationRoute.create(
             this.routeResponse,
@@ -130,7 +131,7 @@ object RoutesProvider {
                 .coordinatesList(this.routeWaypoints)
                 .routeOptionsBlock()
                 .build(),
-            RouterOrigin.Custom()
+            routeOrigin
         )
     }
 

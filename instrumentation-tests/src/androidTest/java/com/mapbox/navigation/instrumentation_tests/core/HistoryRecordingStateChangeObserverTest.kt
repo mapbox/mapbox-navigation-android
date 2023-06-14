@@ -4,9 +4,9 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -47,7 +47,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
-import java.net.URI
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.reflect.KClass
@@ -238,15 +237,10 @@ class HistoryRecordingStateChangeObserverTest :
             NavigationOptions.Builder(activity)
                 .accessToken(getMapboxAccessTokenFromResources(activity))
                 .routeRefreshOptions(generateRouteRefreshOptions())
-                .routingTilesOptions(
-                    RoutingTilesOptions.Builder()
-                        .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                        .build()
-                )
                 .navigatorPredictionMillis(0L)
                 .build()
         )
-        val routes = mockRoute.toNavigationRoutes {
+        val routes = mockRoute.toNavigationRoutes(RouterOrigin.Offboard) {
             baseUrl(mockWebServerRule.baseUrl)
         }
 

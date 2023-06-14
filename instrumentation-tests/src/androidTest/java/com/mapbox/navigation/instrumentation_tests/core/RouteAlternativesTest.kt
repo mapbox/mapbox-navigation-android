@@ -15,6 +15,7 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.instrumentation_tests.utils.idling.FilteredRouteAlternativesIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteAlternativesIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
@@ -79,6 +80,14 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     fun expect_initial_alternative_route_removed_after_navigating_past() {
         // Prepare with alternative routes.
         setupMockRequestHandlers(coordinates)
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(activity, R.raw.route_response_alternative_during_navigation),
+                coordinates,
+                relaxedExpectedCoordinates = true
+            )
+        )
         val routes = requestDirectionsRouteSync(coordinates)
 
         // Play the slower alternative route.
@@ -118,6 +127,49 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         assertTrue(mapboxNavigation.getRoutes().isNotEmpty())
         assertNotNull(firstAlternative.routeProgress)
         assertNotNull(firstAlternative.alternatives)
+    }
+
+    @Test
+    fun alternative_requests_use_original_route_base_url() {
+        setupMockRequestHandlers(coordinates)
+        val routes = requestDirectionsRouteSync(coordinates)
+
+        mockWebServerRule.requestHandlers.clear()
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(activity, R.raw.route_response_alternative_during_navigation),
+                coordinates,
+                relaxedExpectedCoordinates = true
+            )
+        )
+        // Play the slower alternative route.
+        mapboxNavigation.historyRecorder.startRecording()
+        mockLocationReplayerRule.playRoute(routes.first())
+        mapboxNavigation.startTripSession()
+
+        // Wait for enhanced locations to start and then set the routes.
+        val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
+        firstLocationIdlingResource.firstLocationSync()
+        mapboxNavigation.setRoutes(routes)
+        // receive first alternative update, which contains the original route
+
+        val firstAlternative =
+            FilteredRouteAlternativesIdlingResource(mapboxNavigation) { alternatives ->
+                alternatives.isNotEmpty() && alternatives.none {
+                    it.requestUuid() == "1SSd29ZxmjD7ELLqDJHRPPDP5W4wdh633IbGo41pJrL6wpJRmzNaMA=="
+                }
+            }
+        firstAlternative.register()
+        mapboxHistoryTestRule.stopRecordingOnCrash("alternatives failed") {
+            Espresso.onIdle()
+        }
+        firstAlternative.unregister()
+
+        assertEquals(
+            "DD8MJ37zcI2gU4XXhtt-Gz1vdFShCMtf7AOyEHVylhqcEyreYNiT6Q==",
+            firstAlternative.alternatives?.firstOrNull()?.requestUuid()
+        )
     }
 
     private fun setupMockRequestHandlers(coordinates: List<Point>) {
