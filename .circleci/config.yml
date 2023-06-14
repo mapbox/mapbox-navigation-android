@@ -459,7 +459,7 @@ commands:
               --device model=panther,version=33,locale=it,orientation=landscape \
               --use-orchestrator \
               --directories-to-pull=/sdcard/Download/mapbox_test \
-              --timeout 25m
+              --timeout 35m
 
   run-firebase-robo:
     parameters:

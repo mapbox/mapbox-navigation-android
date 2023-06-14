@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.BannerView
+import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
@@ -26,10 +27,11 @@ fun createDirectionsResponse(
     uuid: String? = "testUUID",
     routes: List<DirectionsRoute> = listOf(createDirectionsRoute()),
     unrecognizedProperties: Map<String, JsonElement>? = null,
-    responseWaypoints: List<DirectionsWaypoint> = listOf(createWaypoint(), createWaypoint())
+    responseWaypoints: List<DirectionsWaypoint> = listOf(createWaypoint(), createWaypoint()),
+    routeOptions: RouteOptions? = createRouteOptions()
 ): DirectionsResponse {
     val processedRoutes = routes.map {
-        it.toBuilder().requestUuid(uuid).build()
+        it.toBuilder().requestUuid(uuid).routeOptions(routeOptions).build()
     }
     return DirectionsResponse.builder()
         .uuid(uuid)
@@ -234,6 +236,8 @@ fun createRouteOptions(
     unrecognizedProperties: Map<String, JsonElement>? = null,
     enableRefresh: Boolean? = false,
     waypointsPerRoute: Boolean? = null,
+    bearingList: List<Bearing?>? = null,
+    avoidManeuverRadius: Double? = null,
 ): RouteOptions {
     return RouteOptions
         .builder()
@@ -242,6 +246,8 @@ fun createRouteOptions(
         .enableRefresh(enableRefresh)
         .waypointsPerRoute(waypointsPerRoute)
         .unrecognizedJsonProperties(unrecognizedProperties)
+        .bearingsList(bearingList)
+        .avoidManeuverRadius(avoidManeuverRadius)
         .build()
 }
 
