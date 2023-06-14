@@ -5,6 +5,8 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
+import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
@@ -28,6 +30,7 @@ class NativeRouteParserRule : TestRule {
                 every {
                     NativeRouteParserWrapper.parseDirectionsResponse(any(), any(), any())
                 } answers {
+                    val origin = this.thirdArg<RouterOrigin>()
                     val response = JSONObject(this.firstArg<String>())
                     val routesCount = response.getJSONArray("routes").length()
                     val idBase = if (response.has("uuid")) {
@@ -72,7 +75,7 @@ class NativeRouteParserRule : TestRule {
                                     every { routeId } returns "$idBase#$it"
                                     every {
                                         routerOrigin
-                                    } returns com.mapbox.navigator.RouterOrigin.CUSTOM
+                                    } returns origin.mapToNativeRouteOrigin()
                                     every { waypoints } returns parsedWaypoints
                                 }
                             )

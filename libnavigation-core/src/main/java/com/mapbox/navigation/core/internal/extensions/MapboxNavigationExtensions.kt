@@ -12,7 +12,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesSetStartedParams
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedObserver
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
@@ -146,6 +148,7 @@ fun MapboxNavigation.flowOnWaypointArrival(): Flow<RouteProgress> = callbackFlow
         override fun onWaypointArrival(routeProgress: RouteProgress) {
             trySend(routeProgress)
         }
+
         override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) = Unit
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) = Unit
     }
@@ -160,6 +163,7 @@ fun MapboxNavigation.flowOnNextRouteLegStart(): Flow<RouteLegProgress> = callbac
         override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
             trySend(routeLegProgress)
         }
+
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) = Unit
     }
     registerArrivalObserver(observer)
@@ -193,4 +197,12 @@ fun MapboxNavigation.flowRouteAlternativeObserver():
         }
         registerRouteAlternativesObserver(alternativesObserver)
         awaitClose { unregisterRouteAlternativesObserver(alternativesObserver) }
+    }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun MapboxNavigation.flowSetNavigationRoutesStarted(): Flow<RoutesSetStartedParams> =
+    callbackFlow {
+        val observer = SetNavigationRoutesStartedObserver { trySend(it) }
+        registerOnRoutesSetStartedObserver(observer)
+        awaitClose { unregisterOnRoutesSetStartedObserver(observer) }
     }

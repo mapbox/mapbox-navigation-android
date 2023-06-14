@@ -52,6 +52,8 @@ import com.mapbox.navigation.core.directions.LegacyRouterAdapter
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesSetStartedParams
+import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedObserver
 import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
@@ -511,7 +513,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.registerStateObserver(historyRecordingStateHandler)
 
         directionsSession = NavigationComponentProvider.createDirectionsSession(moduleRouter)
-        directionsSession.registerRoutesObserver(navigationSession)
+        directionsSession.registerSetNavigationRoutesFinishedObserver(navigationSession)
         if (reachabilityObserverId == null) {
             reachabilityObserverId = ReachabilityService.addReachabilityObserver(
                 connectivityHandler
@@ -1047,6 +1049,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         logD(LOG_CATEGORY) {
             "setting routes; reason: ${setRoutesInfo.mapToReason()}; IDs: ${routes.map { it.id }}"
         }
+        directionsSession.setNavigationRoutesStarted(RoutesSetStartedParams(routes))
         when (setRoutesInfo) {
             SetRoutes.CleanUp,
             is SetRoutes.NewRoutes,
@@ -1082,7 +1085,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                 processedRoutes,
                                 setRoutesInfo
                             )
-                            directionsSession.setRoutes(directionsSessionRoutes)
+                            directionsSession.setNavigationRoutesFinished(directionsSessionRoutes)
                             routesSetResult = ExpectedFactory.createValue(
                                 RoutesSetSuccess(
                                     directionsSessionRoutes.ignoredRoutes.associate {
@@ -1217,7 +1220,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         logD("onDestroy", LOG_CATEGORY)
         billingController.onDestroy()
         directionsSession.shutdown()
-        directionsSession.unregisterAllRoutesObservers()
+        directionsSession.unregisterAllSetNavigationRoutesFinishedObserver()
         tripSession.stop()
         tripSession.unregisterAllLocationObservers()
         tripSession.unregisterAllRouteProgressObservers()
@@ -1320,7 +1323,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun registerRoutesObserver(routesObserver: RoutesObserver) {
         threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
-                directionsSession.registerRoutesObserver(routesObserver)
+                directionsSession.registerSetNavigationRoutesFinishedObserver(routesObserver)
             }
         }
     }
@@ -1329,7 +1332,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Unregisters [RoutesObserver].
      */
     fun unregisterRoutesObserver(routesObserver: RoutesObserver) {
-        directionsSession.unregisterRoutesObserver(routesObserver)
+        directionsSession.unregisterSetNavigationRoutesFinishedObserver(routesObserver)
     }
 
     /**
@@ -1904,6 +1907,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     fun onEVDataUpdated(data: Map<String, String>) {
         evDynamicDataHolder.updateData(data)
+    }
+
+    internal fun registerOnRoutesSetStartedObserver(observer: SetNavigationRoutesStartedObserver) {
+        directionsSession.registerSetNavigationRoutesStartedObserver(observer)
+    }
+
+    internal fun unregisterOnRoutesSetStartedObserver(
+        observer: SetNavigationRoutesStartedObserver
+    ) {
+        directionsSession.unregisterSetNavigationRoutesStartedObserver(observer)
     }
 
     private fun createHistoryRecorderHandles(config: ConfigHandle) =
