@@ -6,10 +6,11 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.factories.createClosure
+import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createMaxSpeed
-import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.testing.factories.createRouteLeg
 import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import com.mapbox.navigation.testing.factories.createRouteOptions
@@ -227,14 +228,19 @@ class DirectionsRouteDiffProviderTest {
         waypointsPerRoute: Boolean? = null,
         waypoints: List<DirectionsWaypoint> = emptyList()
     ): NavigationRoute {
-        return createNavigationRoute(
-            createDirectionsRoute(
-                requestUuid = "testDiff",
-                legs = legs,
-                routeOptions = createRouteOptions(waypointsPerRoute = waypointsPerRoute),
-                waypoints = waypoints
+        return createNavigationRoutes(
+            options = createRouteOptions(waypointsPerRoute = waypointsPerRoute),
+            response = createDirectionsResponse(
+                uuid = "testDiff",
+                routes = listOf(
+                    createDirectionsRoute(
+                        legs = legs,
+                        waypoints = if (waypointsPerRoute == true) waypoints else null
+                    )
+                ),
+                responseWaypoints = if (waypointsPerRoute != true) waypoints else null
             )
-        )
+        ).first()
     }
 
     private fun createTestLeg(

@@ -23,7 +23,7 @@ fun createNavigationRoute(
     return createNavigationRoutes(
         response = createDirectionsResponse(
             routes = listOf(directionsRoute),
-            uuid = directionsRoute.requestUuid()
+            uuid = directionsRoute.requestUuid(),
         ),
         routesInfoMapper = { routeInfo },
         waypointsMapper = { waypoints },
