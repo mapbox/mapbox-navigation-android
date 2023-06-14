@@ -6,7 +6,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -46,7 +45,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.net.URI
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
@@ -91,11 +89,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 NavigationOptions.Builder(activity)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
                     .routeRefreshOptions(routeRefreshOptions)
-                    .routingTilesOptions(
-                        RoutingTilesOptions.Builder()
-                            .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                            .build()
-                    )
                     .navigatorPredictionMillis(0L)
                     .build()
             )

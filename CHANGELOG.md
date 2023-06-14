@@ -5,6 +5,7 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Fixed an issue where `RoutingTilesOptions#tilesBaseUri` was used as a base url for route refresh requests instead of `RouteOptions#baseUrl`.
 - Fixed an ANR caused by Copilot processing long routes. [#6984](https://github.com/mapbox/mapbox-navigation-android/pull/6984)
 
 ## Mapbox Navigation SDK 2.7.4 - 06 March, 2023

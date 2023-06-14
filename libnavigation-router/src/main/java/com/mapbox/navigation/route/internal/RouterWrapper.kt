@@ -188,6 +188,8 @@ class RouterWrapper(
             routeIndex,
             legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
+            routeOptions.baseUrl(),
+            accessToken,
             null
         )
 
