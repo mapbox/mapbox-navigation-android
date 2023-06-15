@@ -8,6 +8,26 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed an issue where `RoutingTilesOptions#tilesBaseUri` was used as a base url for route refresh requests instead of `RouteOptions#baseUrl`.
 - Fixed an ANR caused by Copilot processing long routes. [#6984](https://github.com/mapbox/mapbox-navigation-android/pull/6984)
 
+## Mapbox Navigation SDK 2.7.5 - 15 June, 2023
+### Changelog
+[Changes between v2.7.4 and v2.7.5](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.4...v2.7.5)
+
+#### Features
+
+
+#### Bug fixes and improvements
+
+- Fixed an issue where `RoutingTilesOptions#tilesBaseUri` was used as a base url for route refresh requests instead of `RouteOptions#baseUrl`.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.7.0))
+- Mapbox Navigation Native `v111.2.0`
+- Mapbox Core Common `v22.1.0`
+- Mapbox Java `v6.7.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.7.0))
+- Mapbox Android Core `v5.0.2` ([release notes](https://github.com/mapbox/mapbox-events-android/releases/tag/core-5.0.2))
+
+
 ## Mapbox Navigation SDK 2.7.4 - 06 March, 2023
 ### Changelog
 [Changes between v2.7.3 and v2.7.4](https://github.com/mapbox/mapbox-navigation-android/compare/v2.7.3...v2.7.4)
