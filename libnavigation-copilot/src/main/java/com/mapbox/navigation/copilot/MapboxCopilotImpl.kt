@@ -105,6 +105,9 @@ internal class MapboxCopilotImpl(
 
     private val shouldSendHistoryOnlyWithFeedback =
         mapboxNavigation.navigationOptions.copilotOptions.shouldSendHistoryOnlyWithFeedback
+    private val shouldRecordFreeDriveHistories =
+        mapboxNavigation.navigationOptions.copilotOptions.shouldRecordFreeDriveHistories
+
     private var hasFeedback = false
     private val userFeedbackCallback =
         UserFeedbackCallback { userFeedback ->
@@ -113,7 +116,7 @@ internal class MapboxCopilotImpl(
         }
     private val historyRecordingStateChangeObserver = object : HistoryRecordingStateChangeObserver {
         override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
-            if (state !is Idle) {
+            if (isRecordingAllowed(state)) {
                 startRecordingHistory(state)
             }
         }
@@ -293,7 +296,7 @@ internal class MapboxCopilotImpl(
     }
 
     private fun uploadHistory() {
-        if (currentHistoryRecordingSessionState is Idle) {
+        if (!isRecordingAllowed(currentHistoryRecordingSessionState)) {
             return
         }
         if (hasFeedback || !shouldSendHistoryOnlyWithFeedback) {
@@ -430,7 +433,7 @@ internal class MapboxCopilotImpl(
     }
 
     private fun pushOnFreeDriveOrActiveGuidance(eventType: String, eventJson: String) {
-        if (currentHistoryRecordingSessionState !is Idle) {
+        if (isRecordingAllowed(currentHistoryRecordingSessionState)) {
             pushHistoryJson(eventType, eventJson)
         }
     }
@@ -441,12 +444,18 @@ internal class MapboxCopilotImpl(
                 pushOnActiveGuidance()
             }
             is FreeDrive -> {
-                pushHistoryJson(eventType, eventJson)
+                if (shouldRecordFreeDriveHistories) {
+                    pushHistoryJson(eventType, eventJson)
+                }
             }
             is Idle -> {
                 // Do nothing as we're not recording
             }
         }
+    }
+
+    private fun isRecordingAllowed(state: HistoryRecordingSessionState): Boolean {
+        return state is ActiveGuidance || state is FreeDrive && shouldRecordFreeDriveHistories
     }
 
     internal companion object {
