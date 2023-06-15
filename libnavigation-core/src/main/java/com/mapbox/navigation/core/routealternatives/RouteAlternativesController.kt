@@ -87,14 +87,16 @@ internal class RouteAlternativesController constructor(
         val isStopped = observers.isEmpty()
         observers.add(routeAlternativesObserver)
         if (isStopped) {
-            nativeRouteAlternativesController.addObserver(nativeObserver)
+            nativeRouteAlternativesController.addObserver2(nativeObserver)
+            nativeRouteAlternativesController.addObserver(oldObserver)
         }
     }
 
     fun unregister(routeAlternativesObserver: NavigationRouteAlternativesObserver) {
         observers.remove(routeAlternativesObserver)
         if (observers.isEmpty()) {
-            nativeRouteAlternativesController.removeObserver(nativeObserver)
+            nativeRouteAlternativesController.removeObserver2(nativeObserver)
+            nativeRouteAlternativesController.removeObserver(oldObserver)
         }
     }
 
@@ -150,14 +152,23 @@ internal class RouteAlternativesController constructor(
         return metadataMap[navigationRoute.id]
     }
 
-    private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
+    // NN doesn't start route alternatives logic if we don't subscribe using old interface
+    // This problem is actual only for 2.13
+    private val oldObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
         override fun onRouteAlternativesChanged(
-            routeAlternatives: List<RouteAlternative>,
-            removed: List<RouteAlternative>
-        ) { }
+            routeAlternatives: MutableList<RouteAlternative>,
+            removed: MutableList<RouteAlternative>
+        ) {
+        }
 
-        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) {}
+        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) {
+        }
 
+        override fun onError(message: String) {
+        }
+    }
+
+    private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserverSync {
         override fun onRouteAlternativesUpdated(
             onlinePrimaryRoute: RouteInterface?,
             routeAlternatives: MutableList<RouteAlternative>,
