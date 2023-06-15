@@ -88,6 +88,7 @@ internal class RouteAlternativesController constructor(
         observers.add(routeAlternativesObserver)
         if (isStopped) {
             nativeRouteAlternativesController.addObserver2(nativeObserver)
+            nativeRouteAlternativesController.addObserver(oldObserver)
         }
     }
 
@@ -95,6 +96,7 @@ internal class RouteAlternativesController constructor(
         observers.remove(routeAlternativesObserver)
         if (observers.isEmpty()) {
             nativeRouteAlternativesController.removeObserver2(nativeObserver)
+            nativeRouteAlternativesController.removeObserver(oldObserver)
         }
     }
 
@@ -148,6 +150,22 @@ internal class RouteAlternativesController constructor(
 
     override fun getMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
         return metadataMap[navigationRoute.id]
+    }
+
+    // NN doesn't start route alternatives logic if we don't subscribe using old interface
+    // This problem is actual only for 2.13
+    private val oldObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
+        override fun onRouteAlternativesChanged(
+            routeAlternatives: MutableList<RouteAlternative>,
+            removed: MutableList<RouteAlternative>
+        ) {
+        }
+
+        override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) {
+        }
+
+        override fun onError(message: String) {
+        }
     }
 
     private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserverSync {
