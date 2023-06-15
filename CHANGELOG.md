@@ -6,6 +6,27 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.13.2 - 15 June, 2023
+### Changelog
+[Changes between v2.13.1 and v2.13.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.1...v2.13.2)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed redundant route alternatives request when a single primary route is set. [#7267](https://github.com/mapbox/mapbox-navigation-android/pull/7267)
+- Fixed lagging of enhanced location updates, i.e. when they're behind the real position, in tunnels. [#7267](https://github.com/mapbox/mapbox-navigation-android/pull/7267)
+- Added experimental and temporary (i.e. it will be removed in one of the next releases) `OnlineRouteAlternativesSwitch` which requests online route when the current route is offline and automatically switches if such a route is found. It's designed for the case when platform's reachability API doesn't work reliably. [#7264](https://github.com/mapbox/mapbox-navigation-android/pull/7264)
+- Changed `RouteProgress#hasUnexpectedUpcomingClosures` behavior: now it returns false if there are only "expected" closures. A closure is considered expected if it was present in the original route response. An unexpected closure is the one that appears after route refresh.  [#7240](https://github.com/mapbox/mapbox-navigation-android/pull/7240)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.13.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.13.0))
+- Mapbox Navigation Native `v132.5.1`
+- Mapbox Core Common `v23.5.0`
+- Mapbox Java `v6.11.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.11.0))
+
+
 ## Mapbox Navigation SDK 2.13.1 - 31 May, 2023
 ### Changelog
 [Changes between v2.13.0 and v2.13.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0...v2.13.1)
