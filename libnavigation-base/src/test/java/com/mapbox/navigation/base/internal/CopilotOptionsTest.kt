@@ -11,6 +11,7 @@ class CopilotOptionsTest : BuilderTest<CopilotOptions, CopilotOptions.Builder>()
 
     override fun getFilledUpBuilder() = CopilotOptions.Builder()
         .shouldSendHistoryOnlyWithFeedback(true)
+        .shouldRecordFreeDriveHistories(false)
 
     @Test
     override fun trigger() {

@@ -1,0 +1,1 @@
+- Added a Copilot option that allows to disable recording Free Drive histories.

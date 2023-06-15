@@ -49,8 +49,6 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -132,7 +130,7 @@ class MapboxCopilotImplTest {
     }
 
     @Test
-    fun `startRecording is called when HistoryRecordingStateChangeObserver#onShouldStartRecording - FreeDrive`() {
+    fun `startRecording is called when HistoryRecordingStateChangeObserver#onShouldStartRecording - FreeDrive, shouldRecordFreeDriveHistories = true`() {
         val mockedMapboxNavigation = prepareBasicMockks()
         prepareLifecycleOwnerMockk()
         val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
@@ -155,6 +153,38 @@ class MapboxCopilotImplTest {
         )
 
         verify(exactly = 1) {
+            mockedHistoryRecorder.startRecording()
+        }
+    }
+
+    @Test
+    fun `startRecording is not called when HistoryRecordingStateChangeObserver#onShouldStartRecording - FreeDrive, shouldRecordFreeDriveHistories = false`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val copilotOptions = CopilotOptions.Builder()
+            .shouldRecordFreeDriveHistories(false)
+            .build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val freeDriveHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.FreeDrive>(relaxed = true)
+
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            freeDriveHistoryRecordingSessionState
+        )
+
+        verify(exactly = 0) {
             mockedHistoryRecorder.startRecording()
         }
     }
@@ -668,8 +698,9 @@ class MapboxCopilotImplTest {
         every { registerUserFeedbackCallback(any()) } just Runs
         val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
         every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
-        val copilotOptions = mockk<CopilotOptions>()
-        every { copilotOptions.shouldSendHistoryOnlyWithFeedback } returns true
+        val copilotOptions = CopilotOptions.Builder()
+            .shouldSendHistoryOnlyWithFeedback(true)
+            .build()
         every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
         prepareUploadMockks()
         mockkObject(HistoryUploadWorker)
@@ -736,8 +767,9 @@ class MapboxCopilotImplTest {
         every { registerUserFeedbackCallback(capture(userFeedbackCallback)) } just Runs
         val fakeAccessToken = "pk.eyJ1IjoiY29waWxvdC10ZXN0LW93bmVyIiwiYSI6ImZha2UifQ.8badf00d"
         every { mockedMapboxNavigation.navigationOptions.accessToken } returns fakeAccessToken
-        val copilotOptions = mockk<CopilotOptions>()
-        every { copilotOptions.shouldSendHistoryOnlyWithFeedback } returns true
+        val copilotOptions = CopilotOptions.Builder()
+            .shouldSendHistoryOnlyWithFeedback(true)
+            .build()
         every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
         prepareUploadMockks()
         mockkObject(HistoryUploadWorker)
@@ -2095,7 +2127,7 @@ class MapboxCopilotImplTest {
     }
 
     @Test
-    fun `SearchResultsEvent is pushed when push - FreeDrive`() {
+    fun `SearchResultsEvent is pushed when push - FreeDrive, shouldRecordFreeDriveHistories = true`() {
         val mockedMapboxNavigation = prepareBasicMockks()
         prepareLifecycleOwnerMockk()
         val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
@@ -2130,6 +2162,43 @@ class MapboxCopilotImplTest {
                 SEARCH_RESULTS_EVENT_NAME,
                 expectedEventJson,
             )
+        }
+    }
+
+    @Test
+    fun `SearchResultsEvent is not pushed when push - FreeDrive, shouldRecordFreeDriveHistories = false`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val copilotOptions = CopilotOptions.Builder()
+            .shouldRecordFreeDriveHistories(false)
+            .build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
+        prepareLifecycleOwnerMockk()
+        val mockedHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+        every {
+            mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
+        } returns mockedHistoryRecorder
+        val userFeedbackCallback = slot<UserFeedbackCallback>()
+        every { registerUserFeedbackCallback(capture(userFeedbackCallback)) } just Runs
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val freeDriveHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.FreeDrive>(relaxed = true)
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            freeDriveHistoryRecordingSessionState
+        )
+        val searchResults =
+            SearchResults("mapbox", "https://mapbox.com", null, null, "?query=test1", null)
+
+        mapboxCopilot.push(SearchResultsEvent(searchResults))
+
+        verify(exactly = 0) {
+            mockedHistoryRecorder.pushHistory(SEARCH_RESULTS_EVENT_NAME, any())
         }
     }
 
@@ -2415,7 +2484,7 @@ class MapboxCopilotImplTest {
         val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
         mapboxCopilot.start()
         val idleDriveHistoryRecordingSessionState =
-            mockk<HistoryRecordingSessionState.FreeDrive>(relaxed = true)
+            mockk<HistoryRecordingSessionState.Idle>(relaxed = true)
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             idleDriveHistoryRecordingSessionState
         )
@@ -2456,12 +2525,8 @@ class MapboxCopilotImplTest {
         } just Runs
         val mockedNavigationRoute = mockk<NavigationRoute>(relaxed = true)
         val mockedNavigationRoutes = listOf(mockedNavigationRoute)
-        val testComputationDispatcher = TestCoroutineDispatcher()
-        testComputationDispatcher.pauseDispatcher()
-        val mapboxCopilot = createMapboxCopilotImplementation(
-            mockedMapboxNavigation,
-            testComputationDispatcher
-        )
+        coroutineRule.testDispatcher.pauseDispatcher()
+        val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
         mapboxCopilot.start()
         val mockedHistoryRecordingSessionState =
             mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
@@ -2475,7 +2540,7 @@ class MapboxCopilotImplTest {
         historyRecordingStateChangeObserver.captured.onShouldStopRecording(
             mockk<HistoryRecordingSessionState.FreeDrive>(relaxed = true)
         )
-        testComputationDispatcher.resumeDispatcher()
+        coroutineRule.testDispatcher.resumeDispatcher()
         historyRecordingStateChangeObserver.captured.onShouldStartRecording(
             mockedHistoryRecordingSessionState
         )
@@ -2542,6 +2607,8 @@ class MapboxCopilotImplTest {
 
     private fun prepareBasicMockks(): MapboxNavigation {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val copilotOptions = CopilotOptions.Builder().build()
+        every { mockedMapboxNavigation.navigationOptions.copilotOptions } returns copilotOptions
         val mockedContext = mockk<Application>(relaxed = true)
         every {
             mockedContext.applicationContext
@@ -2596,9 +2663,5 @@ class MapboxCopilotImplTest {
 
     private fun createMapboxCopilotImplementation(
         mapboxNavigation: MapboxNavigation,
-        computationDispatcher: CoroutineDispatcher = TestCoroutineDispatcher()
-    ) = MapboxCopilotImpl(
-        mapboxNavigation,
-        computationDispatcher
-    )
+    ) = MapboxCopilotImpl(mapboxNavigation, coroutineRule.testDispatcher)
 }
