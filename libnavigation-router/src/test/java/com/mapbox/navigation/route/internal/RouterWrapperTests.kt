@@ -402,6 +402,8 @@ class RouterWrapperTests {
                     routeOptions.profile().mapToRoutingMode(),
                     routeOptions.user()
                 ),
+                routerOptions.baseUrl(),
+                accessToken,
                 routeGeometryIndex,
                 HashMap(evData)
             )
@@ -547,6 +549,7 @@ class RouterWrapperTests {
     private fun provideDefaultRouteOptions(): RouteOptions {
         return RouteOptions.builder()
             .applyDefaultNavigationOptions()
+            .baseUrl("https://my.url.com")
             .apply {
                 coordinates(Point.fromLngLat(.0, .0), null, Point.fromLngLat(.0, .0))
             }.build()
