@@ -210,6 +210,8 @@ class RouterWrapper(
             routeIndex,
             routeRefreshRequestData.legIndex,
             RoutingProfile(routeOptions.profile().mapToRoutingMode(), routeOptions.user()),
+            routeOptions.baseUrl(),
+            accessToken,
             routeRefreshRequestData.routeGeometryIndex,
             HashMap(routeRefreshRequestData.experimentalProperties),
         )

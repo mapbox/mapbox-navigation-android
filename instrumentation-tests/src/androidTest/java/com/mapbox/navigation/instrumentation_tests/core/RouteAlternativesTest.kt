@@ -257,6 +257,44 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             }
         }
 
+    @Test
+    fun alternative_requests_use_original_route_base_url() = sdkTest {
+        setupMockRequestHandlers()
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { mapboxNavigation ->
+            val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
+
+            mockWebServerRule.requestHandlers.clear()
+            mockWebServerRule.requestHandlers.add(
+                MockDirectionsRequestHandler(
+                    "driving-traffic",
+                    readRawFileText(context, R.raw.route_response_alternative_during_navigation),
+                    startCoordinates,
+                    relaxedExpectedCoordinates = true
+                )
+            )
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.flowLocationMatcherResult().first()
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
+
+            val alternativesUpdate = mapboxNavigation.alternativesUpdates()
+                .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                .filter {
+                    it.alternatives.isNotEmpty() && it.alternatives.none {
+                        it.id.startsWith("1SSd29ZxmjD7ELLqDJHRPPDP5W4wdh633IbGo41pJrL6wpJRmzNaMA==")
+                    }
+                }
+                .first()
+
+            assertEquals(
+                "DD8MJ37zcI2gU4XXhtt-Gz1vdFShCMtf7AOyEHVylhqcEyreYNiT6Q==",
+                alternativesUpdate.alternatives.firstOrNull()?.directionsRoute?.requestUuid()
+            )
+        }
+    }
+
     private fun createExternalAlternatives(): List<NavigationRoute> {
         return NavigationRoute.create(
             readRawFileText(context, R.raw.route_response_alternative_continue),
