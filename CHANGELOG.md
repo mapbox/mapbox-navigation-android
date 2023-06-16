@@ -19,6 +19,9 @@ Mapbox welcomes participation and contributions from everyone.
 - Added experimental and temporary (i.e. it will be removed in one of the next releases) `OnlineRouteAlternativesSwitch` which requests online route when the current route is offline and automatically switches if such a route is found. It's designed for the case when platform's reachability API doesn't work reliably. [#7264](https://github.com/mapbox/mapbox-navigation-android/pull/7264)
 - Changed `RouteProgress#hasUnexpectedUpcomingClosures` behavior: now it returns false if there are only "expected" closures. A closure is considered expected if it was present in the original route response. An unexpected closure is the one that appears after route refresh.  [#7240](https://github.com/mapbox/mapbox-navigation-android/pull/7240)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.13.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.13.0))
@@ -44,6 +47,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 `MapboxNavigation#getAlternativeMetadataFor` will return null for that alternative.
 Calling `MapboxNavigation#setNavigationRoutes(listOf(currentOfflinePrimaryRoute, newOnlineAlternative))` for that case won't make any effect as the alternative will be ignored.
 Make sure that you implemented routes alternatives observers with respect to offline-online scenarios as documentation suggests.
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -84,6 +88,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Improved inactive leg independent styling: now the inactive leg will be styled differently right away, not only when the route progress updates begin. [#7078](https://github.com/mapbox/mapbox-navigation-android/pull/7078)
 - Added optional parameter `initialLegIndex` to `MapboxRouteLineAPI#setNavigationRouteLines` and `MapboxRouteLineAPI#setNavigationRoutes` to explicitly specify which leg is active, 0 by default. [#7078](https://github.com/mapbox/mapbox-navigation-android/pull/7078)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.13.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.13.0))
@@ -111,6 +118,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where `DirectionsRoute#duration` ignored charge time after refresh operation. [#7121](https://github.com/mapbox/mapbox-navigation-android/pull/7121)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -145,6 +153,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Added optional parameter `initialLegIndex` to `MapboxRouteLineAPI#setNavigationRouteLines` and `MapboxRouteLineAPI#setNavigationRoutes` to explicitly specify which leg is active, 0 by default. [#7078](https://github.com/mapbox/mapbox-navigation-android/pull/7078)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -166,6 +175,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 
 #### Bug fixes and improvements
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 ### Mapbox dependencies
@@ -236,6 +248,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Made costing algorithms using lightweight info about road graph (should improve performance). [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
 - Switched all realtime sensitive operations onto a separate thread instead of low-prioritised background thread pool. No long status delays should happen in the future. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -257,6 +272,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed Native crash signal 11 (SIGSEGV), code 1 (SEGV_MAPERR) that may happen at libmapbox-common.so at `SqlitePersistentStorage#createQuery`. [#7061](https://github.com/mapbox/mapbox-navigation-android/pull/7061)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -288,6 +304,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Known issues :warning:
 - Native crash signal 11 (SIGSEGV), code 1 (SEGV_MAPERR) may happen at libmapbox-common.so at `SqlitePersistentStorage#createQuery`.
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -313,6 +330,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed route progress vanishing point update issue introduced by feature that displays the active leg of the route line above inactive legs for multi-leg routes. [#6974](https://github.com/mapbox/mapbox-navigation-android/pull/6974)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -333,6 +351,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Features
 - Added `RouteRefreshController#pauseRouteRefreshes` and `RouteRefreshController#resumeRouteRefreshes` to pause and resume planned route refreshes correspondingly. [#6976](https://github.com/mapbox/mapbox-navigation-android/pull/6976)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.12.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.12.0-beta.1))
@@ -351,6 +372,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Bug fixes and improvements
 
 - Fixed an ANR caused by Copilot processing long routes. [#6982](https://github.com/mapbox/mapbox-navigation-android/pull/6982)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -371,6 +395,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Bug fixes and improvements
 
 - Fixed an ANR caused by Copilot processing long routes. [#6983](https://github.com/mapbox/mapbox-navigation-android/pull/6983)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -443,6 +470,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Switched all realtime sensitive operations onto a separate thread instead of low-prioritised background thread pool. No long status delays should happen in the future. [#6986](https://github.com/mapbox/mapbox-navigation-android/pull/6986)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -478,6 +506,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed a rare race condition where the alternative routes might have not been in sync with the current primary route.   [#6942](https://github.com/mapbox/mapbox-navigation-android/pull/6942)
 - Fixed an issue where all `UpcomingRoadObject`'s had the same `distanceToStart`.  [#6945](https://github.com/mapbox/mapbox-navigation-android/pull/6945)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.11.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.11.1))
@@ -496,6 +527,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Bug fixes and improvements
 - Fixed an ANR caused by Copilot processing long routes [#6978](https://github.com/mapbox/mapbox-navigation-android/pull/6978)
 - Fixed a crash caused by segfault "wstring_convert: from_bytes" error for HTTP responses. [#6985](https://github.com/mapbox/mapbox-navigation-android/pull/6985)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -518,6 +552,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Increased the distance at which the navigator discards passed alternative route in `NavigationRouteAlternativesObserver#onRouteAlternatives`. This reduces the chance of discarding alternative routes to which a driver deviated from the primary route. [#6966](https://github.com/mapbox/mapbox-navigation-android/pull/6966)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -548,6 +583,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where all `UpcomingRoadObject`'s had the same `distanceToStart`.  [#6945](https://github.com/mapbox/mapbox-navigation-android/pull/6945)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -578,6 +614,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed redundant memory usage for routing algorithm. [#6954](https://github.com/mapbox/mapbox-navigation-android/pull/6954)
 - Fixed null pointer dereference in RouteRefreshController. [#6954](https://github.com/mapbox/mapbox-navigation-android/pull/6954)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.10.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.2))
@@ -593,6 +632,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Bug fixes and improvements
 - Modified the route line implementation so that for multi-leg routes the active leg appears above inactive route legs. [#6742](https://github.com/mapbox/mapbox-navigation-android/pull/6742)
 - Fixed an issue where alternative routes refresh might have finished with response code 422. [#6935](https://github.com/mapbox/mapbox-navigation-android/pull/6935)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -622,6 +664,7 @@ Fixed "global reference table overflow" in case an application accumulates and k
 - :warning: If you're recreating the `MapboxRouteLineView` instance, for example to change the `MapboxRouteLineOptions`, make sure that your first interaction restores the state and re-applies the options by calling `MapboxRouteLineApi.getRouteDrawData` and passing the result to `MapboxRouteLineView.renderRouteDrawData`. This is a necessary change to fix an issue where `MapboxRouteLineOptions` provided in a new instance of `MapboxRouteLineView` were ignored if the style object used with `render` functions already had route line layers initialized. [#6793](https://github.com/mapbox/mapbox-navigation-android/pull/6793)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -639,6 +682,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ### Changelog
 [Changes between v2.9.6 and v2.9.7](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.6...v2.9.7)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
@@ -651,6 +697,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ## Mapbox Navigation SDK 2.8.3 - 27 January, 2023
 ### Changelog
 [Changes between v2.8.2 and v2.8.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.8.2...v2.8.3)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -687,6 +736,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Set limit of simultaneously running onboard route requests in config to 2 to prevent excessive resource consumption during intensive/repeated re-routes. [#6886](https://github.com/mapbox/mapbox-navigation-android/pull/6886)
 - Fixed potential timestamp inconsistencies that may have led to location rejection by making the timestamp shift corrector configurable and disabled by default. [#6886](https://github.com/mapbox/mapbox-navigation-android/pull/6886)
 - Fixed an issue with incorrect `UpcomingRoadObject#distanceToStart` values on multi-leg routes. [#6886](https://github.com/mapbox/mapbox-navigation-android/pull/6886)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -726,6 +778,7 @@ val shielded = roadComponent.shield != null
 - Improved `NavigationView` camera behavior to ignore keyboard insets. [#6845](https://github.com/mapbox/mapbox-navigation-android/pull/6845)
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -849,6 +902,9 @@ Previous puck can be restored by injecting `LocationPuck2D` with the `bearingIma
 
 :warning: `RouteProgress#remainingWaypoints` defines the amount of all remaining waypoints, including explicit (requested with `RouteOptions#coordinatesList`) and implicit (added on the fly, like Electric Vehicle waypoints - [see](https://docs.mapbox.com/api/navigation/directions/#electric-vehicle-routing)) ones.
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.10.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0))
@@ -893,6 +949,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Introduced `NavigationViewListener.onSpeedInfoClicked` that would be triggered when `MapboxSpeedInfoView` is clicked upon. [#6770](https://github.com/mapbox/mapbox-navigation-android/pull/6770)
 - Fixed a rare `java.lang.NullPointerException: Attempt to read from field 'SpeechAnnouncement PlayCallback.announcement' on a null object reference` crash in `PlayCallback.getAnnouncement`. [#6760](https://github.com/mapbox/mapbox-navigation-android/pull/6760)
 - Changed distance formatting: now all the imperial distances down to 0.1 miles will be represented in miles, while the smaller ones - in feet. [#6775](https://github.com/mapbox/mapbox-navigation-android/pull/6775)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -947,6 +1006,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
   ```
 
 #### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 
 #### Other changes
@@ -968,6 +1028,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 - Ensure map-matching considers HOV-only roads as auto accessible. [#6785](https://github.com/mapbox/mapbox-navigation-android/pull/6785)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
@@ -988,6 +1051,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Bug fixes and improvements
 
 - Ensure map-matching considers HOV-only roads as auto accessible. [#6791](https://github.com/mapbox/mapbox-navigation-android/pull/6791)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1045,6 +1111,9 @@ binding.navigationView.customizeViewBinders {
 - Extended `RoutesUpdatedResult` with `ignoredRoutes` property: it contains routes that were passed by the user but were ignored by the Nav SDK because they are invalid for navigation. [#6745](https://github.com/mapbox/mapbox-navigation-android/pull/6745)
 - :warning: Changed `RoutesObserver` behavior: now only valid alternative routes will be delivered in `RoutesUpdatedResult#navigationRoutes` and `RoutesUpdatedResult#routes`. [#6745](https://github.com/mapbox/mapbox-navigation-android/pull/6745)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.10.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0))
@@ -1062,6 +1131,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6717](https://github.com/mapbox/mapbox-navigation-android/pull/6717)
 - Fixed an issue where `RouteProgress#VoiceInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6717](https://github.com/mapbox/mapbox-navigation-android/pull/6717)
 - Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when setting alternative routes. [#6721](https://github.com/mapbox/mapbox-navigation-android/pull/6721)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1082,6 +1154,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6716](https://github.com/mapbox/mapbox-navigation-android/pull/6716)
 - Fixed an issue where `RouteProgress#VoiceInstructions` could've become `null` when `MapboxNavigation#updateLegIndex` was called. [#6716](https://github.com/mapbox/mapbox-navigation-android/pull/6716)
 - Fixed an issue where `RouteProgress#BannerInstructions` could've become `null` when setting alternative routes. [#6720](https://github.com/mapbox/mapbox-navigation-android/pull/6720)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1126,6 +1201,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed issues in `ReplayRouteSession`. The routes observer was never unregistered. Alternative route selection resets replay to the beginning. Drop-In Ui changing portrait and landscape modes resets replay to the beginning. [#6675](https://github.com/mapbox/mapbox-navigation-android/pull/6675)
 - Fixed an issue where first `BannerInstructions` of `RouteProgress` and `BannerInstructionsObserver` could have not been delivered after starting active guidance. [#6702](https://github.com/mapbox/mapbox-navigation-android/pull/6702)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.10.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0))
@@ -1142,6 +1220,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Bug fixes and improvements
 - Changed EH speedLimit behaviour: value is picked based on the date-time conditions using device’s system time and edge's location based timezone. [#6697](https://github.com/mapbox/mapbox-navigation-android/pull/6697)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1183,7 +1264,8 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue for `DeviceType#AUTOMOBILE` where entering a tunnel just after exiting a previous one (in a short time frame) could lead to incorrect location simulation. [#6659](https://github.com/mapbox/mapbox-navigation-android/pull/6659)
 
 #### Known issues :warning:
-This release adds copies of classes under `com.mapbox.android.core.location` and `com.mapbox.android.core.permissions` packages from `com.mapbox.mapboxsdk:mapbox-android-core` artifact directly into the binary. This means that if you explicitly define a dependency on `com.mapbox.mapboxsdk:mapbox-android-core` artifact you can run into a duplicate class error, for example:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+- This release adds copies of classes under `com.mapbox.android.core.location` and `com.mapbox.android.core.permissions` packages from `com.mapbox.mapboxsdk:mapbox-android-core` artifact directly into the binary. This means that if you explicitly define a dependency on `com.mapbox.mapboxsdk:mapbox-android-core` artifact you can run into a duplicate class error, for example:
 ```
 Execution failed for task ':{module}:checkReleaseDuplicateClasses'.
 > A failure occurred while executing com.android.build.gradle.internal.tasks.CheckDuplicatesRunnable
@@ -1235,6 +1317,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Updated `HistoryUploadWorker` attachments metadata to include the `created` field with the same value as `startedAt`. [#6660](https://github.com/mapbox/mapbox-navigation-android/pull/6660)
 - Updated `MapboxCopilotImpl` to call `startRecording` as soon as `onShouldStartRecording` is called. [#6655](https://github.com/mapbox/mapbox-navigation-android/pull/6655)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
@@ -1270,6 +1355,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed crash in `MapboxInfoPanelHeaderArrivalLayoutBinding.java` by disabling layout transitions in `InfoPanelHeaderActiveGuidanceBinder`, `InfoPanelHeaderArrivalBinder`, `InfoPanelHeaderDestinationPreviewBinder` and `InfoPanelHeaderRoutesPreviewBinder`. [#6616](https://github.com/mapbox/mapbox-navigation-android/pull/6616)
 - Fixed location permissions request when hosting `NavigationView` in a Fragment. [#6618](https://github.com/mapbox/mapbox-navigation-android/pull/6618) 
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.10.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.10.0-beta.1))
@@ -1282,6 +1370,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog
 [Changes between v2.9.0 and v2.9.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.9.0...v2.9.1)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1404,6 +1495,9 @@ binding.navigationView.customizeViewBinders {
 - Improved `MapboxNavigation#startTripSession(withForegroundService = true)` docs to indicate that it should only be called from a foreground state. [#6405](https://github.com/mapbox/mapbox-navigation-android/pull/6405)
 - Fixed an issue where registered `RouteProgressObserver`s were not invoked, while alternative routes were updated. [#6397](https://github.com/mapbox/mapbox-navigation-android/pull/6397)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
@@ -1427,6 +1521,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - :warning: Updated the `RoadObject#location` property to be lazily initialized. This change greatly decreases `RouteProgress` generation time and boosts performance when navigating routes with many `UpcomingRoadObject`s [#6573](https://github.com/mapbox/mapbox-navigation-android/pull/6573)
 #### Known issues :bangbang:
 - The first `BannerInstructions` of `RouterProgress` and `BannerInstructionsObserver` may not be delivered after starting active guidance.
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1448,6 +1543,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue with EV route refresh failing in cases where EV data updates are not provided. Now, the initial parameters from a route request will be used as a fallback. [#6534](https://github.com/mapbox/mapbox-navigation-android/pull/6534)
 - Slightly decreased the memory consumption of the online router. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
 - Improved positioning and location signal simulation in tunnels. [#6562](https://github.com/mapbox/mapbox-navigation-android/pull/6562)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1496,6 +1594,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Slightly improved performance of updates to the traveled portion of the route in MapboxRouteLineView. [#6528](https://github.com/mapbox/mapbox-navigation-android/pull/6528)
 - Fixed a problem with custom route line layer scaling not getting applied to the correct layer(s) when switching between routes. [#6544](https://github.com/mapbox/mapbox-navigation-android/pull/6544)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.9.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0))
@@ -1515,6 +1616,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where re-routes could have failed for EV routes. [#6005](https://github.com/mapbox/mapbox-navigation-android/pull/6005)
 
 :warning: `RouteProgress#remainingWaypoints` defines the amount of all remaining waypoints, including explicit (requested with `RouteOptions#coordinatesList`) and implicit (added on the fly, like Electric Vehicle waypoints - [see](https://docs.mapbox.com/api/navigation/directions/#electric-vehicle-routing)) ones.
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1563,6 +1667,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Deprecated `MapboxVoiceInstructionsPlayer` constructors that accept access token and introduced the ones without it. [#6491](https://github.com/mapbox/mapbox-navigation-android/pull/6491)
 - Introduced `NavigationViewApi.getCurrentVoiceInstructionsPlayer()` which can be used to play custom voice instructions. [#6475](https://github.com/mapbox/mapbox-navigation-android/pull/6475)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.9.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0-rc.1))
@@ -1607,6 +1714,9 @@ binding.navigationView.customizeViewBinders {
 - Updated `LocationMatcherResult#zLevel`, `LocationMatcherResult#road` to have no values during `RouteProgressState#OFF_ROUTE` state. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 - Fixed crash that occurred when user selected Disagree in Telemetry Settings dialog from the map info screen. [#6464](https://github.com/mapbox/mapbox-navigation-android/pull/6464)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.9.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0-rc.1))
@@ -1640,6 +1750,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Renamed `MapboxAudioGuidance.getInstance()` to `getRegisteredInstance`. Rename `unMute` to `unmute` for audio guidance classes. [#6445](https://github.com/mapbox/mapbox-navigation-android/pull/6445)
 - Fixed an issue with `NavigationView` that prevented camera from going into following state after starting a trip. [#6449](https://github.com/mapbox/mapbox-navigation-android/pull/6449)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.9.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.9.0-beta.2))
@@ -1664,6 +1777,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mitigated a rare issue that caused a crash in alternative routes fork offset calculation when using `MapboxRouteLineApi#setNavigationRoutes`. [#6404](https://github.com/mapbox/mapbox-navigation-android/pull/6404)
 - Improved `MapboxNavigation#startTripSession(withForegroundService = true)` docs to indicate that it should only be called from a foreground state. [#6405](https://github.com/mapbox/mapbox-navigation-android/pull/6405)
 - Fixed an issue where registered `RouteProgressObserver`s were not invoked, while alternative routes were updated. [#6397](https://github.com/mapbox/mapbox-navigation-android/pull/6397)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1762,6 +1878,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Commit to a stable API for `MapboxNavigationApp` and `MapboxNavigationObserver`. This deprecates the `MapboxNavigationProvider`. [#6143](https://github.com/mapbox/mapbox-navigation-android/pull/6143)
 - Fixed a crash when the service process is killed by the Android system. [#6125](https://github.com/mapbox/mapbox-navigation-android/pull/6125)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
@@ -1777,7 +1896,8 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Known issues
 
-:bangbang: `MapboxAudioGuidance` crashes when attached to new instances of `MapboxNavigation`. This will crash `ui-androidauto` and `ui-dropin`. There is no known work around and it will be fixed in 2.9.0-alpha.4. [#6392](https://github.com/mapbox/mapbox-navigation-android/pull/6392)
+- :bangbang: `MapboxAudioGuidance` crashes when attached to new instances of `MapboxNavigation`. This will crash `ui-androidauto` and `ui-dropin`. There is no known work around and it will be fixed in 2.9.0-alpha.4. [#6392](https://github.com/mapbox/mapbox-navigation-android/pull/6392)
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 #### Features
 - Moved `MapboxAudioGuidance` and `MapboxAudioGuidanceState` into public api. [#6336](https://github.com/mapbox/mapbox-navigation-android/pull/6336)
@@ -1825,6 +1945,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Improved stop detector for auto profile. [#6373](https://github.com/mapbox/mapbox-navigation-android/pull/6373)
 - Fixed an issue where `NavigationRoute#upcomingRoadObjects` was not refreshed. This issue did not impact the deprecated `RoadObjectsOnRouteObserver`. [#6378](https://github.com/mapbox/mapbox-navigation-android/pull/6378)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
@@ -1842,6 +1965,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Bug fixes and improvements
 - Fixed super late hwy exit detection after leaving a tunnel (auto profile only). [#6346](https://github.com/mapbox/mapbox-navigation-android/pull/6346)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.8.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0))
@@ -1858,6 +1984,8 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Features
 #### Bug fixes and improvements
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1875,6 +2003,8 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Features
 #### Bug fixes and improvements
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1902,6 +2032,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Exposed `AlternativeRouteMetadata#alternativeId` which lets user distinguish a new alternative from updated alternatives. [#6329](https://github.com/mapbox/mapbox-navigation-android/pull/6329)
 - Fixed an issue with `NavigationView` that caused maneuver view to be cut off. [#6328](https://github.com/mapbox/mapbox-navigation-android/pull/6328)
 - Introduced  `MapboxUpcomingManeuverViewAdapter#updateManeuverViewOptions()`, `MapboxUpcomingManeuverViewAdapter#updateUpcomingManeuverIconStyle()` and  `upcomingManeuverListIconStyle` attribute to allow for customizing the colors of maneuver turn icons in upcoming maneuver view list. [#6330](https://github.com/mapbox/mapbox-navigation-android/pull/6330)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -1937,6 +2070,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Added Experimental API `NavigationRoute#hasUnexpectedClosures` to check if a route has unexpected closures that might require a re-route. [#6295](https://github.com/mapbox/mapbox-navigation-android/pull/6295)
 - Improved route refresh. Now Navigation SDK recalculates `DirectionsRoute#duration`, `RouteLeg#duration`, `LegStep#duration` after route refresh based on `LegAnnotation#duration`. [#6287](https://github.com/mapbox/mapbox-navigation-android/pull/6287) 
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0-rc.1))
@@ -1967,6 +2103,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where `RouteProgress#navigationRoute` could have been delivered with an incorrect route reference, if setting routes failed as reported by `RoutesSetCallback`. [#6255](https://github.com/mapbox/mapbox-navigation-android/pull/6255)
 - Expanded debug and warning logs around `RouteProgress` generation and route setting processes, including when incorrect progress is delivered to `MapboxRouteLineApi#updateWithRouteProgress`. [#6255](https://github.com/mapbox/mapbox-navigation-android/pull/6255)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.8.0-rc.1))
@@ -1986,6 +2125,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Added `NavigationViewOptions#distanceFormatterOptions` to allow for specifying `DistanceFormatterOptions` at runtime. [#6222](https://github.com/mapbox/mapbox-navigation-android/pull/6222)
 #### Bug fixes and improvements
 - Updated `NavigationViewApi`. Introduced `startFreeDrive`, `startDestinationPreview`, `startRoutePreview`, `startActiveGuidance`, `startArrival`. Removed `fetchRoutes`, `setPreviewRoutes`, `setRoutes`, `setDestination`. Replaced `enableTripSession` and `enableReplaySession` with `routeReplayEnabled(enabled: Boolean)`. [#6174](https://github.com/mapbox/mapbox-navigation-android/pull/6174)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -2019,6 +2161,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Added `RouteLegProgress#geometryIndex` and `RouteProgress#currentRouteGeometryIndex`. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 - Improved default router to refresh a route partially instead of failing for routes over 1000 km long. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
 - :warning: Disabled route refresh for routes that are set to `MapboxNavigation` while trip session is not running. A session has to be started (`MapboxNavigation#startTripSession`) for refresh feature to start as well. [#6115](https://github.com/mapbox/mapbox-navigation-android/pull/6115)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -2127,6 +2272,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140)
 - Commit to a stable API for `MapboxNavigationApp` and `MapboxNavigationObserver`. This deprecates the `MapboxNavigationProvider`. [#6143](https://github.com/mapbox/mapbox-navigation-android/pull/6143)
 
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
+
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.7.0))
@@ -2162,6 +2310,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 #### Features
 #### Bug fixes and improvements
 - Fixed a crash when the service process is killed by the Android system. [#6125](https://github.com/mapbox/mapbox-navigation-android/pull/6125)
+
+#### Known issues :warning:
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
