@@ -12,9 +12,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -59,7 +59,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.net.URI
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
@@ -124,11 +123,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 NavigationOptions.Builder(activity)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
                     .routeRefreshOptions(routeRefreshOptions)
-                    .routingTilesOptions(
-                        RoutingTilesOptions.Builder()
-                            .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                            .build()
-                    )
                     .navigatorPredictionMillis(0L)
                     .build()
             )
@@ -461,7 +455,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.startTripSession()
             // corresponds to currentRouteGeometryIndex = 3
-            stayOnPosition(38.577344, -121.496248)
+            stayOnPosition(38.577344, -121.496248, bearing = 190f)
             mapboxNavigation.routeProgressUpdates()
                 .filter { it.currentRouteGeometryIndex == 3 }
                 .first()
@@ -507,13 +501,16 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .routes
             // alternative which was requested on the second leg of the original route,
             // so the alternative has only one leg while the original route has two
-            val alternativeRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
+            val alternativeRoute = alternativeForMultileg(activity)
+                .toNavigationRoutes(RouterOrigin.Offboard) {
+                    baseUrl(mockWebServerRule.baseUrl)
+                }.first()
 
             mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
             mapboxNavigation.startTripSession()
 
             // corresponds to currentRouteGeometryIndex = 70 for primary route and 11 for alternative route
-            stayOnPosition(38.581798, -121.476146)
+            stayOnPosition(38.581798, -121.476146, bearing = 100f)
             mapboxNavigation.routeProgressUpdates()
                 .filter {
                     it.currentRouteGeometryIndex == 70
@@ -574,7 +571,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             // In this test setup we are considering a case where user was driving along the route,
             // started the second leg and received an alternative, and selected it before the fork.
             // This means that the primary route is shorter than the alternative route (former primary route).
-            val primaryRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
+            val primaryRoute = alternativeForMultileg(activity)
+                .toNavigationRoutes(RouterOrigin.Offboard) {
+                    baseUrl(mockWebServerRule.baseUrl)
+                }.first()
 
             // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
             mockLocationUpdatesRule.pushLocationUpdate(
@@ -638,7 +638,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.startTripSession()
             // corresponds to currentRouteGeometryIndex = 5
-            stayOnPosition(38.57622, -121.496731)
+            stayOnPosition(38.57622, -121.496731, bearing = 190f)
             mapboxNavigation.routeProgressUpdates()
                 .filter { it.currentRouteGeometryIndex == 5 }
                 .first()
@@ -716,7 +716,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
             mapboxNavigation.startTripSession()
             // corresponds to currentRouteGeometryIndex = 2000, currentLeg = 1
-            stayOnPosition(39.80965, -75.281163)
+            stayOnPosition(39.80965, -75.281163, bearing = 190f)
             mapboxNavigation.routeProgressUpdates()
                 .filter {
                     it.currentRouteGeometryIndex == currentRouteGeometryIndex
@@ -806,7 +806,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         // In this test setup we are considering a case where user was driving along the route,
         // started the second leg and received an alternative, and selected it before the fork.
         // This means that the primary route is shorter than the alternative route (former primary route).
-        val primaryRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
+        val primaryRoute = alternativeForMultileg(activity)
+            .toNavigationRoutes(RouterOrigin.Offboard) {
+                baseUrl(mockWebServerRule.baseUrl)
+            }.first()
 
         // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
         mockLocationUpdatesRule.pushLocationUpdate(
@@ -866,13 +869,16 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .routes
         // alternative which was requested on the second leg of the original route,
         // so the alternative has only one leg while the original route has two
-        val alternativeRoute = alternativeForMultileg(activity).toNavigationRoutes().first()
+        val alternativeRoute = alternativeForMultileg(activity)
+            .toNavigationRoutes(RouterOrigin.Offboard) {
+                baseUrl(mockWebServerRule.baseUrl)
+            }.first()
 
         mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
         mapboxNavigation.startTripSession()
 
         // corresponds to currentRouteGeometryIndex = 70 for primary route and 11 for alternative route
-        stayOnPosition(38.581798, -121.476146)
+        stayOnPosition(38.581798, -121.476146, bearing = 100f)
         mapboxNavigation.routeProgressUpdates()
             .filter {
                 it.currentRouteGeometryIndex == 70
@@ -908,18 +914,18 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             mockLocationUpdatesRule.generateLocationUpdate {
                 latitude = twoCoordinates[0].latitude()
                 longitude = twoCoordinates[0].longitude()
-                bearing = 190f
+                bearing = 280f
             },
             times = 120
         )
     }
 
-    private fun stayOnPosition(latitude: Double, longitude: Double) {
+    private fun stayOnPosition(latitude: Double, longitude: Double, bearing: Float) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
                 this.latitude = latitude
                 this.longitude = longitude
-                bearing = 190f
+                this.bearing = bearing
             },
             times = 120
         )
