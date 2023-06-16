@@ -1,0 +1,1 @@
+- Route refresh base URL is not set via `RouteOptions#baseUrl`. Instead, `NavigationOptions#routingTilesOptions#tilesBaseUri` is used for refresh.
