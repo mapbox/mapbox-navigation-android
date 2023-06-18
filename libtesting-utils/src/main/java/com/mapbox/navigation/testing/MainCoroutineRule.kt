@@ -30,10 +30,13 @@ class MainCoroutineRule : TestRule {
         override fun evaluate() {
             Dispatchers.setMain(testDispatcher)
 
-            base.evaluate()
+            try {
+                base.evaluate()
+            } finally {
+                Dispatchers.resetMain() // Restore original main dispatcher
+                createdScopes.forEach { it.cleanupTestCoroutines() }
+            }
 
-            Dispatchers.resetMain() // Restore original main dispatcher
-            createdScopes.forEach { it.cleanupTestCoroutines() }
         }
     }
 

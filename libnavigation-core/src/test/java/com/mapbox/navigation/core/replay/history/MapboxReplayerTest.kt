@@ -13,13 +13,17 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.TimeUnit
 
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 class MapboxReplayerTest {
 
     @get:Rule
@@ -28,7 +32,7 @@ class MapboxReplayerTest {
     private val replayEventsObserver: ReplayEventsObserver = mockk(relaxed = true)
     private var deviceElapsedTimeNanos = TimeUnit.HOURS.toNanos(11)
 
-    private val mapboxReplayer = MapboxReplayer()
+    private lateinit var mapboxReplayer: MapboxReplayer
 
     @Test
     fun `should play start transit and location in order`() = coroutineRule.runBlockingTest {
@@ -569,6 +573,150 @@ class MapboxReplayerTest {
         assertEquals(3000L, timeCapture[2])
     }
 
+    @Test
+    fun isPlaying_notStarted() {
+        assertFalse(mapboxReplayer.isPlaying())
+    }
+
+    @Test
+    fun isPlaying_startedButNoEvents() = coroutineRule.runBlockingTest {
+        mapboxReplayer.play()
+
+        assertFalse(mapboxReplayer.isPlaying())
+
+        mapboxReplayer.finish()
+    }
+
+    @Test
+    fun isPlaying_startedAndHasEvents() = coroutineRule.runBlockingTest {
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
+        mapboxReplayer.play()
+        advanceTimeMillis(1000)
+
+        assertTrue(mapboxReplayer.isPlaying())
+
+        advanceTimeMillis(2000)
+        mapboxReplayer.finish()
+    }
+
+    @Test
+    fun isPlaying_startedButEventsAreAllPlayed() = coroutineRule.runBlockingTest {
+        mapboxReplayer.play()
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
+
+        advanceTimeMillis(3000)
+        assertFalse(mapboxReplayer.isPlaying())
+
+        mapboxReplayer.finish()
+    }
+
+    @Test
+    fun isPlaying_stoppedHasNoEvents() = coroutineRule.runBlockingTest {
+        mapboxReplayer.play()
+        mapboxReplayer.stop()
+
+        assertFalse(mapboxReplayer.isPlaying())
+
+        mapboxReplayer.finish()
+    }
+
+    @Test
+    fun isPlaying_stoppedHasPlayedEvents() = coroutineRule.runBlockingTest {
+        mapboxReplayer.play()
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
+        advanceTimeMillis(3000)
+        mapboxReplayer.stop()
+
+        assertFalse(mapboxReplayer.isPlaying())
+
+        mapboxReplayer.finish()
+    }
+
+    @Test
+    fun isPlaying_stoppedHasClearedEvents() = coroutineRule.runBlockingTest {
+        mapboxReplayer.play()
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
+        mapboxReplayer.clearEvents()
+
+        assertFalse(mapboxReplayer.isPlaying())
+
+        mapboxReplayer.finish()
+    }
+
+    @Test
+    fun isPlaying_finishedHasClearedEvents() = coroutineRule.runBlockingTest {
+        mapboxReplayer.play()
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
+        mapboxReplayer.finish()
+
+        assertFalse(mapboxReplayer.isPlaying())
+    }
+
+    @Test
+    fun isPlaying_stoppedHasEvents() = coroutineRule.runBlockingTest {
+        mapboxReplayer.play()
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
+        mapboxReplayer.stop()
+
+        assertFalse(mapboxReplayer.isPlaying())
+
+        mapboxReplayer.finish()
+    }
+
+    @Test
+    fun isPlaying_relaunchedHasEvents() = coroutineRule.runBlockingTest {
+        mapboxReplayer.play()
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
+        mapboxReplayer.stop()
+        mapboxReplayer.play()
+
+        assertTrue(mapboxReplayer.isPlaying())
+
+        mapboxReplayer.finish()
+    }
+
     /**
      * Helpers for moving the simulation clock
      */
@@ -577,6 +725,7 @@ class MapboxReplayerTest {
     fun setup() {
         mockkStatic(SystemClock::class)
         every { SystemClock.elapsedRealtimeNanos() } returns deviceElapsedTimeNanos
+        mapboxReplayer = MapboxReplayer()
     }
 
     @After

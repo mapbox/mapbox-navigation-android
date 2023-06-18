@@ -27,6 +27,7 @@ internal class ReplayEventSimulator(
     private var simulatorTimeOffset: Double = 0.0
     private var simulatorTimeScale: Double = 1.0
 
+    private var currentJob: Job? = null
     private var pivotIndex = 0
     private var clearingPlayedEvents = false
 
@@ -40,6 +41,8 @@ internal class ReplayEventSimulator(
                     simulateEvents(replayEventsCallback)
                 }
             }
+        }.also {
+            currentJob = it
         }
     }
 
@@ -92,6 +95,10 @@ internal class ReplayEventSimulator(
         resetSimulatorClock()
     }
 
+    fun isPlaying(): Boolean {
+        return currentJob?.isActive == true && !isDonePlayingEvents()
+    }
+
     private fun resetSimulatorClock() {
         simulatorTimeOffset = timeSeconds()
         historyTimeOffset = if (isDonePlayingEvents()) {
@@ -129,7 +136,7 @@ internal class ReplayEventSimulator(
     }
 
     private fun isDonePlayingEvents(): Boolean {
-        return pivotIndex >= replayEvents.events.size
+        return (pivotIndex >= replayEvents.events.size)
     }
 
     private fun timeSeconds(): Double {

@@ -9,7 +9,6 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -65,7 +64,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         if (currentRoute?.id != routeProgress.navigationRoute.id) {
             currentRoute = routeProgress.navigationRoute
-            onRouteChanged(routeProgress)
+            onRouteChanged(routeProgress.navigationRoute, routeProgress.currentRouteGeometryIndex)
         }
     }
 
@@ -74,6 +73,14 @@ class ReplayRouteSession : MapboxNavigationObserver {
             mapboxNavigation?.resetReplayLocation()
             currentRoute = null
             polylineDecodeStream = null
+        } else if (mapboxNavigation?.mapboxReplayer?.isPlaying() != true) {
+            // In order to get route progress updates, we need location updates.
+            // If we don't have any location updates, we don't get route progress updates
+            // and we'll never start navigating the route.
+            // If we have location updates, we'll update the route from RouteProgressObserver,
+            // because it has more information, e. g. current route geometry index.
+            currentRoute = result.navigationRoutes.first()
+            onRouteChanged(result.navigationRoutes.first(), 0)
         }
     }
 
@@ -143,8 +150,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
         this.currentRoute = null
     }
 
-    private fun onRouteChanged(routeProgress: RouteProgress) {
-        val navigationRoute = routeProgress.navigationRoute
+    private fun onRouteChanged(navigationRoute: NavigationRoute, currentIndex: Int) {
         val mapboxReplayer = mapboxNavigation?.mapboxReplayer ?: return
         mapboxReplayer.clearEvents()
         mapboxReplayer.play()
@@ -162,7 +168,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
 
         // Skip up to the current geometry index. There is some imprecision here because the
         // distance traveled is not equal to a route index.
-        polylineDecodeStream?.skip(routeProgress.currentRouteGeometryIndex)
+        polylineDecodeStream?.skip(currentIndex)
 
         pushMorePoints()
     }
