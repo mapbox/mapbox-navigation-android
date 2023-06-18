@@ -1,0 +1,1 @@
+- Fixed an issue where RouteReplaySession might not have started playing a route if it was created approximately at the same time when routes were set to `MapboxNavigation`.
