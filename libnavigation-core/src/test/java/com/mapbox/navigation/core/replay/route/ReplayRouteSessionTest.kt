@@ -320,31 +320,6 @@ class ReplayRouteSessionTest {
     }
 
     @Test
-    fun `onAttached - should skip to the current routeProgress distanceTraveled`() {
-        val progressObserver = slot<RouteProgressObserver>()
-        val routesObserver = slot<RoutesObserver>()
-        every {
-            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
-        } just runs
-        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
-        val activeRoutes = mockActiveRoutesUpdatedResult()
-        val primaryRoute = activeRoutes.navigationRoutes.first()
-
-        sut.onAttached(mapboxNavigation)
-        routesObserver.captured.onRoutesChanged(activeRoutes)
-        progressObserver.captured.onRouteProgressChanged(
-            mockk {
-                every { navigationRoute } returns primaryRoute
-                every { currentRouteGeometryIndex } returns 15
-            }
-        )
-
-        val pushedEvents = slot<List<ReplayEventBase>>()
-        verify { replayer.pushEvents(capture(pushedEvents)) }
-        verifySkipToIndex(pushedEvents.captured, primaryRoute, 15)
-    }
-
-    @Test
     fun `onAttached - should skip to short routeProgress currentRouteGeometryIndex`() {
         val progressObserver = slot<RouteProgressObserver>()
         val routesObserver = slot<RoutesObserver>()
@@ -356,7 +331,6 @@ class ReplayRouteSessionTest {
         val primaryRoute = activeRoutes.navigationRoutes.first()
 
         sut.onAttached(mapboxNavigation)
-        routesObserver.captured.onRoutesChanged(activeRoutes)
         progressObserver.captured.onRouteProgressChanged(
             mockk {
                 every { navigationRoute } returns primaryRoute
@@ -367,6 +341,36 @@ class ReplayRouteSessionTest {
         val pushedEvents = slot<List<ReplayEventBase>>()
         verify { replayer.pushEvents(capture(pushedEvents)) }
         verifySkipToIndex(pushedEvents.captured, primaryRoute, 12)
+    }
+
+    @Test
+    fun `onAttached - should start from index 0 when routes changes if not playing events`() {
+        val routesObserver = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
+        val activeRoutes = mockActiveRoutesUpdatedResult()
+        val primaryRoute = activeRoutes.navigationRoutes.first()
+        every { replayer.isPlaying() } returns false
+
+        sut.onAttached(mapboxNavigation)
+        routesObserver.captured.onRoutesChanged(activeRoutes)
+
+        val pushedEvents = slot<List<ReplayEventBase>>()
+        verify { replayer.pushEvents(capture(pushedEvents)) }
+        verifySkipToIndex(pushedEvents.captured, primaryRoute, 0)
+    }
+
+    @Test
+    fun `onAttached - should not start playing route when route appears if playing events`() {
+        val routesObserver = slot<RoutesObserver>()
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
+        val activeRoutes = mockActiveRoutesUpdatedResult()
+        every { replayer.isPlaying() } returns true
+
+        sut.onAttached(mapboxNavigation)
+
+        routesObserver.captured.onRoutesChanged(activeRoutes)
+
+        verify(exactly = 0) { replayer.pushEvents(any()) }
     }
 
     @Test
