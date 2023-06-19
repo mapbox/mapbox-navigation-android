@@ -242,6 +242,7 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @UiThread
 class MapboxNavigation @VisibleForTesting internal constructor(
     val navigationOptions: NavigationOptions,
@@ -400,6 +401,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     val experimental: com.mapbox.navigator.Experimental
         get() = navigator.experimental
 
+    /**
+     * Use this property to provide ETC gate update info.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    val etcGateAPI: EtcGateApi
+
     private var reachabilityObserverId: Long? = null
 
     private var latestLegIndex: Int? = null
@@ -468,6 +475,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
             },
         )
+        etcGateAPI = EtcGateApi(navigator.experimental)
+
         assignHistoryRecorders()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         historyRecordingStateHandler = NavigationComponentProvider
@@ -2025,6 +2034,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
                 },
             )
+            etcGateAPI.experimental = navigator.experimental
             assignHistoryRecorders()
 
             val routes = directionsSession.routes

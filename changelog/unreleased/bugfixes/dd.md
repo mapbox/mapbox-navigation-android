@@ -1,0 +1,1 @@
+- Added experimental `MapboxNavigation#etcGateApi` so that the app can provide data about passed ETC gates.
