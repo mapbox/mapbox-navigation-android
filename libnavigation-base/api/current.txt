@@ -323,14 +323,17 @@ package com.mapbox.navigation.base.options {
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CopilotOptions {
+    method public boolean getShouldRecordFreeDriveHistories();
     method public boolean getShouldSendHistoryOnlyWithFeedback();
     method public com.mapbox.navigation.base.options.CopilotOptions.Builder toBuilder();
+    property public final boolean shouldRecordFreeDriveHistories;
     property public final boolean shouldSendHistoryOnlyWithFeedback;
   }
 
   public static final class CopilotOptions.Builder {
     ctor public CopilotOptions.Builder();
     method public com.mapbox.navigation.base.options.CopilotOptions build();
+    method public com.mapbox.navigation.base.options.CopilotOptions.Builder shouldRecordFreeDriveHistories(boolean flag);
     method public com.mapbox.navigation.base.options.CopilotOptions.Builder shouldSendHistoryOnlyWithFeedback(boolean flag);
   }
 

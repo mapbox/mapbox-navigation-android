@@ -2260,6 +2260,31 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         assertEquals(5, mapboxNavigation.currentLegIndex())
     }
 
+    @Test
+    fun etcGateApi() {
+        val fallbackObserver = slot<FallbackVersionsObserver>()
+        val experimental1 = mockk<com.mapbox.navigator.Experimental>(relaxed = true)
+        every { navigator.experimental } returns experimental1
+        every { tripSession.registerFallbackVersionsObserver(capture(fallbackObserver)) } just Runs
+
+        createMapboxNavigation()
+
+        mapboxNavigation.etcGateAPI.updateEtcGateInfo(EtcGateInfo(10, 10))
+
+        verify(exactly = 1) { experimental1.updateETCGateInfo(any()) }
+        clearAllMocks(answers = false)
+
+        val experimental2 = mockk<com.mapbox.navigator.Experimental>(relaxed = true)
+        every { navigator.experimental } returns experimental2
+        // recreate navigator
+        fallbackObserver.captured.onFallbackVersionsFound(listOf("1.2.3"))
+
+        mapboxNavigation.etcGateAPI.updateEtcGateInfo(EtcGateInfo(10, 10))
+
+        verify(exactly = 0) { experimental1.updateETCGateInfo(any()) }
+        verify(exactly = 1) { experimental2.updateETCGateInfo(any()) }
+    }
+
     private fun interceptRefreshObserver(): RouteRefreshObserver {
         val observers = mutableListOf<RouteRefreshObserver>()
         verify { routeRefreshController.registerRouteRefreshObserver(capture(observers)) }

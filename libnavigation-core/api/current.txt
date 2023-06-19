@@ -10,6 +10,18 @@ package com.mapbox.navigation.core {
     method public void onDeveloperMetadataChanged(com.mapbox.navigation.core.DeveloperMetadata metadata);
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class EtcGateApi {
+    method public void updateEtcGateInfo(com.mapbox.navigation.core.EtcGateInfo info);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class EtcGateInfo {
+    ctor public EtcGateInfo(int id, long monotonicTimestampNanoseconds);
+    method public int getId();
+    method public long getMonotonicTimestampNanoseconds();
+    property public final int id;
+    property public final long monotonicTimestampNanoseconds;
+  }
+
   @UiThread public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void cancelRouteRequest(long requestId);
@@ -17,6 +29,7 @@ package com.mapbox.navigation.core {
     method public int currentLegIndex();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata? getAlternativeMetadataFor(com.mapbox.navigation.base.route.NavigationRoute navigationRoute);
     method public java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> getAlternativeMetadataFor(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes);
+    method public com.mapbox.navigation.core.EtcGateApi getEtcGateAPI();
     method public com.mapbox.navigator.Experimental getExperimental();
     method public com.mapbox.navigation.core.trip.session.eh.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.core.history.MapboxHistoryRecorder getHistoryRecorder();
@@ -105,6 +118,7 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
+    property public final com.mapbox.navigation.core.EtcGateApi etcGateAPI;
     property public final com.mapbox.navigator.Experimental experimental;
     property public final com.mapbox.navigation.core.trip.session.eh.GraphAccessor graphAccessor;
     property public final com.mapbox.navigation.core.history.MapboxHistoryRecorder historyRecorder;
@@ -858,7 +872,7 @@ package com.mapbox.navigation.core.routealternatives {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class OnlineRouteAlternativesSwitch implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
-    ctor public OnlineRouteAlternativesSwitch(int connectTimeoutMilliseconds = 10_000, int readTimeoutMilliseconds = 30_000, int minimumRetryInterval = 60_000, int avoidManeuverSeconds = DEFAULT_AVOID_MANEUVER_SECONDS_FOR_ROUTE_ALTERNATIVES);
+    ctor public OnlineRouteAlternativesSwitch(int connectTimeoutMilliseconds = 10_000, int readTimeoutMilliseconds = 30_000, int minimumRetryInterval = 60_000, int avoidManeuverSeconds = 8);
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
   }
