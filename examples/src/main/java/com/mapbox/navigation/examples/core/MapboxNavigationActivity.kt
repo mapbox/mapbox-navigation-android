@@ -286,8 +286,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
                 return request
                     .toBuilder()
-                    // This is for demonstration purposes only, when using Interceptors be sure to not
-                    // downgrade from HTTPS to HTTP.
+                    // This is for demonstration purposes only, when using Interceptors be
+                    // sure to NOT downgrade from HTTPS to HTTP.
                     .url(request.url.replace("https://api.mapbox.com", "http://$IP_ADDRESS:$PORT"))
                     .build()
             }
@@ -587,6 +587,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
         private const val PORT = 3000
 
         private val IP_REGEX = Regex("^http://${IP_ADDRESS.replace(".", "\\.")}:$PORT/directions(-refresh)?/.*$")
-        private val API_REGEX = Regex("^http(s)?://api\\.mapbox\\.com/directions(-refresh)?/.*$")
+        private val API_REGEX = Regex("^https?://api\\.mapbox\\.com/directions(-refresh)?/.*$")
     }
 }
