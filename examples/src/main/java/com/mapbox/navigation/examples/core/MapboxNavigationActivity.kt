@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.Toast
@@ -12,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.*
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -27,10 +30,7 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.*
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -73,7 +73,9 @@ import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class MapboxNavigationActivity : AppCompatActivity() {
 
@@ -273,6 +275,57 @@ class MapboxNavigationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = LayoutActivityNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        Log.d(TAG, "onCreate: Interceptor Demo")
+
+        HttpServiceFactory.getInstance().setInterceptor(object : HttpServiceInterceptorInterface {
+            override fun onRequest(request: HttpRequest): HttpRequest {
+                if (!request.url.matches(API_REGEX)) {
+                    return request
+                }
+
+                return request
+                    .toBuilder()
+                    // This is for demonstration purposes only, when using Interceptors be sure to not
+                    // downgrade from HTTPS to HTTP.
+                    .url(request.url.replace("https://api.mapbox.com", "http://$IP_ADDRESS:$PORT"))
+                    .build()
+            }
+
+            override fun onResponse(response: HttpResponse): HttpResponse {
+                if (!response.request.url.matches(IP_REGEX)) {
+                    return response
+                }
+
+                if (response.result.isError) return response
+                val res = response.result.value!!
+
+                if (res.code >= 400) {
+                    return response
+                }
+
+                val json = JSONObject(String(res.data))
+
+                val mapboxResponse = json.getJSONObject("mapbox")
+                val otherResponse = json.getJSONObject("other")
+
+                Log.d(TAG, "onResponse: $otherResponse")
+                
+                return HttpResponse(
+                    response.request,
+                    ExpectedFactory.createValue(
+                        HttpResponseData(
+                            res.headers,
+                            res.code,
+                            mapboxResponse.toString().encodeToByteArray()
+                        )
+                    )
+                )
+            }
+            
+            override fun onDownload(download: DownloadOptions): DownloadOptions { return download }
+        })
+
         mapboxMap = binding.mapView.getMapboxMap()
 
         // initialize the location puck
@@ -296,7 +349,11 @@ class MapboxNavigationActivity : AppCompatActivity() {
                         BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME
                     ).build()
                 )
-                .build()
+                .routeRefreshOptions(
+                    RouteRefreshOptions.Builder()
+                        .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+                        .build()
+                ).build()
         )
         // move the camera to current location on the first update
         mapboxNavigation.registerLocationObserver(object : LocationObserver {
@@ -525,5 +582,11 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxNavigationActivity"
+        private const val TAG = "Interceptor Demo"
+        private const val IP_ADDRESS = "192.168.1.101" // replace with your own local ip address
+        private const val PORT = 3000
+
+        private val IP_REGEX = Regex("^http://${IP_ADDRESS.replace(".", "\\.")}:$PORT/directions(-refresh)?/.*$")
+        private val API_REGEX = Regex("^http(s)?://api\\.mapbox\\.com/directions(-refresh)?/.*$")
     }
 }
