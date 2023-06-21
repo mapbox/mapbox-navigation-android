@@ -1,0 +1,16 @@
+{
+  "name": "interceptor-server",
+  "version": "1.0.0",
+  "description": "interceptor demo server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "dependencies": {
+    "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "node-fetch": "^2.6.11"
+  }
+}
