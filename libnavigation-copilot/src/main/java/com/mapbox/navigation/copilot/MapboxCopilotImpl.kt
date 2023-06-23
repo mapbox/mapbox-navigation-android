@@ -46,6 +46,7 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -76,7 +77,6 @@ internal class MapboxCopilotImpl(
                 is ActiveGuidance -> {
                     filterOutActiveGuidance(SEARCH_RESULTS_EVENT_NAME)
                     filterOutActiveGuidance(SEARCH_RESULT_USED_EVENT_NAME)
-                    pushOnActiveGuidance()
                 }
                 else -> {
                     // Do nothing
@@ -105,6 +105,12 @@ internal class MapboxCopilotImpl(
 
     private val shouldSendHistoryOnlyWithFeedback =
         mapboxNavigation.navigationOptions.copilotOptions.shouldSendHistoryOnlyWithFeedback
+    private val maxHistoryFileLengthMilliseconds =
+        mapboxNavigation.navigationOptions.copilotOptions.maxHistoryFileLengthMillis
+    private val maxHistoryFilesPerSession =
+        mapboxNavigation.navigationOptions.copilotOptions.maxHistoryFilesPerSession
+    private val maxTotalHistoryFilesSizePerSession =
+        mapboxNavigation.navigationOptions.copilotOptions.maxTotalHistoryFilesSizePerSession
     private val shouldRecordFreeDriveHistories =
         mapboxNavigation.navigationOptions.copilotOptions.shouldRecordFreeDriveHistories
 
@@ -167,6 +173,8 @@ internal class MapboxCopilotImpl(
             attachAllActivities(applicationContext as Application)
         }
     }
+    private val historyFiles = mutableMapOf<File, CopilotMetadata>()
+    private var restartRecordingHistoryJob: Job? = null
 
     /**
      * start
@@ -203,7 +211,6 @@ internal class MapboxCopilotImpl(
         when (historyEvent) {
             is InitRouteEvent -> {
                 addActiveGuidance(eventType, eventJson)
-                pushOnActiveGuidance()
             }
             is DriveEndsEvent, GoingToBackgroundEvent, GoingToForegroundEvent -> {
                 pushHistoryJson(eventType, eventJson)
@@ -217,7 +224,6 @@ internal class MapboxCopilotImpl(
             }
             is SearchResultUsedEvent -> {
                 addActiveGuidance(eventType, eventJson)
-                pushOnActiveGuidance()
             }
         }
     }
@@ -274,6 +280,12 @@ internal class MapboxCopilotImpl(
         }
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
+        restartRecordingHistoryJob = mainJobController.scope.launch {
+            while (true) {
+                delay(maxHistoryFileLengthMilliseconds)
+                restartRecordingHistory()
+            }
+        }
     }
 
     private fun currentUtcTime(
@@ -295,6 +307,23 @@ internal class MapboxCopilotImpl(
         return eventJson
     }
 
+    private fun restartRecordingHistory() {
+        endedAt = currentUtcTime()
+        val drive = buildNavigationSession()
+        copilotHistoryRecorder.stopRecording { historyFilePath ->
+            historyFilePath ?: return@stopRecording
+            historyFiles[File(historyFilePath)] = drive
+            if (historyFiles.size == maxHistoryFilesPerSession) {
+                val firstFile = historyFiles.keys.first()
+                delete(firstFile)
+                historyFiles.remove(firstFile)
+            }
+            limitTotalHistoryFilesSize(historyFiles, minFilesCount = 0)
+        }
+        copilotHistoryRecorder.startRecording()
+        startedAt = currentUtcTime()
+    }
+
     private fun uploadHistory() {
         if (!isRecordingAllowed(currentHistoryRecordingSessionState)) {
             return
@@ -302,6 +331,7 @@ internal class MapboxCopilotImpl(
         if (hasFeedback || !shouldSendHistoryOnlyWithFeedback) {
             endedAt = currentUtcTime()
             val diffTime = SystemClock.elapsedRealtime() - startSessionTime
+            pushOnActiveGuidance()
             val driveEndsType = when {
                 arrivedAtFinalDestination -> when (deviceType) {
                     DeviceType.HANDHELD -> DriveEndsType.Arrived
@@ -316,10 +346,11 @@ internal class MapboxCopilotImpl(
             }
             push(DriveEndsEvent(DriveEnds(driveEndsType.type, diffTime)))
             val drive = buildNavigationSession()
+            val historyFilesCopy = historyFiles.toMutableMap()
             stopRecording { historyFilePath ->
-                mainJobController.scope.launch {
-                    pushHistoryFile(historyFilePath, drive)
-                }
+                historyFilesCopy[File(historyFilePath)] = drive
+                limitTotalHistoryFilesSize(historyFilesCopy, minFilesCount = 1)
+                pushHistoryFiles(historyFilesCopy)
             }
         } else {
             cancelRecordingHistory()
@@ -327,6 +358,9 @@ internal class MapboxCopilotImpl(
     }
 
     private fun cancelRecordingHistory() {
+        for (historyFile in historyFiles.keys) {
+            delete(historyFile)
+        }
         stopRecording { historyFilePath ->
             delete(File(historyFilePath))
         }
@@ -360,9 +394,30 @@ internal class MapboxCopilotImpl(
         return context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
     }
 
-    private suspend fun pushHistoryFile(historyFilePath: String, drive: CopilotMetadata) {
+    private fun limitTotalHistoryFilesSize(
+        historyFiles: MutableMap<File, CopilotMetadata>,
+        minFilesCount: Int,
+    ) {
+        var total = historyFiles.keys.sumOf { HistoryAttachmentsUtils.size(it) }
+        while (total > maxTotalHistoryFilesSizePerSession && historyFiles.size > minFilesCount) {
+            val firstFile = historyFiles.keys.first()
+            total -= HistoryAttachmentsUtils.size(firstFile)
+            delete(firstFile)
+            historyFiles.remove(firstFile)
+        }
+    }
+
+    private fun pushHistoryFiles(historyFiles: Map<File, CopilotMetadata>) {
+        for ((historyFile, drive) in historyFiles) {
+            mainJobController.scope.launch {
+                pushHistoryFile(historyFile, drive)
+            }
+        }
+    }
+
+    private suspend fun pushHistoryFile(historyFile: File, drive: CopilotMetadata) {
         val metadata = buildAttachmentMetadata(drive)
-        val uploadOptions = buildUploadOptions(historyFilePath, metadata)
+        val uploadOptions = buildUploadOptions(historyFile, metadata)
         HistoryUploadWorker.uploadHistory(
             mapboxNavigation.navigationOptions.applicationContext,
             drive,
@@ -377,7 +432,7 @@ internal class MapboxCopilotImpl(
         val sessionId = generateSessionId(copilotMetadata, owner)
         return AttachmentMetadata(
             name = filename,
-            created = startedAt,
+            created = copilotMetadata.startedAt,
             fileId = "",
             format = GZ,
             type = ZIP,
@@ -386,13 +441,12 @@ internal class MapboxCopilotImpl(
     }
 
     private suspend fun buildUploadOptions(
-        filePath: String,
+        from: File,
         metadata: AttachmentMetadata,
     ): UploadOptions {
         val metadataList = arrayListOf(metadata)
 
         // we have to leave it up to end users to ensure the filename in the metadata matches the actual name of the file
-        val from = File(filePath)
         val to = copyToAndRemove(from, metadata.name)
         var url = if (HistoryAttachmentsUtils.retrieveIsDebug()) {
             STAGING_BASE_URL
@@ -411,6 +465,8 @@ internal class MapboxCopilotImpl(
     }
 
     private fun stopRecording(callback: (String) -> Unit) {
+        restartRecordingHistoryJob?.cancel()
+        restartRecordingHistoryJob = null
         initRouteSerializationJob?.cancel()
         initRouteSerializationJob = null
         copilotHistoryRecorder.stopRecording { historyFilePath ->
@@ -426,6 +482,7 @@ internal class MapboxCopilotImpl(
             activeGuidanceHistoryEvents.clear()
         }
         currentHistoryRecordingSessionState = Idle
+        historyFiles.clear()
     }
 
     private fun addActiveGuidance(eventType: String, eventJson: String) {
@@ -441,7 +498,7 @@ internal class MapboxCopilotImpl(
     private fun pushSearchResults(eventType: String, eventJson: String) {
         when (currentHistoryRecordingSessionState) {
             is ActiveGuidance -> {
-                pushOnActiveGuidance()
+                // Will be pushed at the end of the session
             }
             is FreeDrive -> {
                 if (shouldRecordFreeDriveHistories) {

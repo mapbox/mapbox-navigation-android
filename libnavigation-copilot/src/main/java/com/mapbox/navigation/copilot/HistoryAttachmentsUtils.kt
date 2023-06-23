@@ -62,6 +62,8 @@ internal object HistoryAttachmentsUtils {
 
     fun delete(file: File): Boolean = file.delete()
 
+    fun size(file: File): Long = file.length()
+
     suspend fun copyToAndRemove(from: File, filename: String): File =
         withContext(Dispatchers.IO) {
             File(from.parent, filename).also { from.renameTo(it) }
