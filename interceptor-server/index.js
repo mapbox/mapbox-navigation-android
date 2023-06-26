@@ -3,7 +3,7 @@ const process = require('process');
 const express = require('express');
 const morgan = require('morgan');
 const fetch = require('node-fetch');
-const { URL } =  require('url');
+const { URL } = require('url');
 
 const PORT = process.env.PORT || 3000;
 const userAgent = `${package.name}/v${package.version} Node/${process.version}`;
