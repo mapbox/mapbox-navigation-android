@@ -17,6 +17,7 @@ import androidx.annotation.IntDef
  * - [RoadObjectType.RAILWAY_CROSSING]
  * - [RoadObjectType.IC]
  * - [RoadObjectType.JCT]
+ * - [RoadObjectType.MERGING_AREA]
  */
 object RoadObjectType {
 
@@ -83,7 +84,7 @@ object RoadObjectType {
     /**
      * Type of the [MERGING_AREA] - corresponds to Merging Area.
      */
-    internal const val MERGING_AREA = 12
+    const val MERGING_AREA = 12
 
     /**
      * Retention policy for the RoadObjectType
@@ -101,6 +102,7 @@ object RoadObjectType {
         RAILWAY_CROSSING,
         IC,
         JCT,
+        MERGING_AREA,
     )
     annotation class Type
 }

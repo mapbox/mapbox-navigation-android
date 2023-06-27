@@ -11,7 +11,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
  * @see RoadObject
  * @see RoadObjectType.MERGING_AREA
  */
-internal class MergingArea internal constructor(
+class MergingArea internal constructor(
     id: String,
     val info: MergingAreaInfo,
     length: Double?,

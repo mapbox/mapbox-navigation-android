@@ -391,7 +391,8 @@ class RoadObjectFactoryTest {
             railwayCrossing,
             ic,
             jct,
-            notification
+            mergingAreaLeft,
+            notification,
         ).mapIndexed { distanceToStart, roadObject ->
             UpcomingRouteAlert(roadObject, distanceToStart.toDouble())
         }
@@ -413,6 +414,7 @@ class RoadObjectFactoryTest {
         assertTrue(sdkObjects[8].roadObject is RailwayCrossing)
         assertTrue(sdkObjects[9].roadObject is Interchange)
         assertTrue(sdkObjects[10].roadObject is Junction)
+        assertTrue(sdkObjects[11].roadObject is MergingArea)
         sdkObjects.dropLast(unsupportedObjectsCount).forEachIndexed { distanceToStart, obj ->
             assertEquals(distanceToStart.toDouble(), obj.distanceToStart)
         }

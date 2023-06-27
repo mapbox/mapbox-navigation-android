@@ -18,6 +18,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCros
 import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingArea
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
@@ -408,13 +409,16 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             Incident::class.java,
             TollCollection::class.java,
             Junction::class.java,
+            MergingArea::class.java,
             Junction::class.java,
             Junction::class.java,
             Tunnel::class.java,
             Junction::class.java,
+            MergingArea::class.java,
             RestStop::class.java,
             Junction::class.java,
             Tunnel::class.java,
+            MergingArea::class.java,
             Tunnel::class.java,
             Tunnel::class.java,
             Junction::class.java,
