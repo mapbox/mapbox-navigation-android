@@ -11,6 +11,7 @@ class AlertServiceOptionsTest : BuilderTest<AlertServiceOptions, AlertServiceOpt
         .collectTunnels(false)
         .collectBridges(false)
         .collectRestrictedAreas(true)
+        .collectMergingAreas(true)
 
     @Test
     override fun trigger() {

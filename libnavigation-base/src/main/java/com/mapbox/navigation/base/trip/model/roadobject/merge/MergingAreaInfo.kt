@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
  *
  * @param type Merging Area type, see [MergingAreaType] for possible values.
  */
-internal class MergingAreaInfo internal constructor(
+class MergingAreaInfo internal constructor(
     @MergingAreaType.Type val type: String,
 ) {
 

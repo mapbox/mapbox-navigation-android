@@ -7199,6 +7199,9 @@
                   ]
                 },
                 {
+                  "merging_area": {
+                    "type": "from_left"
+                  },
                   "entry": [
                     true,
                     false
@@ -8537,6 +8540,9 @@
                   ]
                 },
                 {
+                  "merging_area": {
+                    "type": "from_right"
+                  },
                   "lanes": [
                     {
                       "indications": [
@@ -9518,6 +9524,9 @@
               "voiceInstructions": [],
               "intersections": [
                 {
+                  "merging_area": {
+                    "type": "from_both_sides"
+                  },
                   "bearings": [
                     330
                   ],

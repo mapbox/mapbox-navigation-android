@@ -10,7 +10,6 @@ import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
 import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingArea
-import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaType
 import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
@@ -26,6 +25,7 @@ import com.mapbox.navigator.IncidentImpact
 import com.mapbox.navigator.IncidentInfo
 import com.mapbox.navigator.IncidentType
 import com.mapbox.navigator.MergingAreaInfo
+import com.mapbox.navigator.MergingAreaType
 import com.mapbox.navigator.RailwayCrossingInfo
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.ServiceAreaInfo
@@ -63,6 +63,9 @@ internal typealias SDKRailwayCrossingInfo =
 
 internal typealias SDKMergingAreaInfo =
     com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaInfo
+
+internal typealias SDKMergingAreaType =
+    com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaType
 
 internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
     val provider = provider.mapToRoadObjectProvider()
@@ -284,9 +287,9 @@ private fun com.mapbox.navigator.LocalizedString.toLocalizedString() =
 
 private fun MergingAreaInfo.toSdkMergingAreaInfo(): SDKMergingAreaInfo {
     val sdkType = when (mergeType) {
-        com.mapbox.navigator.MergingAreaType.FROM_LEFT -> MergingAreaType.FROM_LEFT
-        com.mapbox.navigator.MergingAreaType.FROM_RIGHT -> MergingAreaType.FROM_RIGHT
-        com.mapbox.navigator.MergingAreaType.FROM_BOTH -> MergingAreaType.FROM_BOTH_SIDES
+        MergingAreaType.FROM_LEFT -> SDKMergingAreaType.FROM_LEFT
+        MergingAreaType.FROM_RIGHT -> SDKMergingAreaType.FROM_RIGHT
+        MergingAreaType.FROM_BOTH -> SDKMergingAreaType.FROM_BOTH_SIDES
     }
     return SDKMergingAreaInfo(sdkType)
 }

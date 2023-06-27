@@ -1,0 +1,1 @@
+- Introduced `MERGING_AREA` RoadObject type. You can receive Merging Areas via `RouteProgress#upcomingRoadObjects` and via `EHorizonObserver`. Note: to enable merging area collection when using EHorizon, set `AlertServiceOptions#collectMergingAreas` to true. 

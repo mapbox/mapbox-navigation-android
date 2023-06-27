@@ -5,7 +5,7 @@ import androidx.annotation.StringDef
 /**
  * Holds available [MergingAreaInfo] types.
  */
-internal object MergingAreaType {
+object MergingAreaType {
 
     /**
      * Indicates that traffic is merged from the left.

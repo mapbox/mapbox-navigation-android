@@ -283,7 +283,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.eHorizonOptions.alertServiceOptions.collectTunnels,
             navigationOptions.eHorizonOptions.alertServiceOptions.collectBridges,
             navigationOptions.eHorizonOptions.alertServiceOptions.collectRestrictedAreas,
-            false
+            navigationOptions.eHorizonOptions.alertServiceOptions.collectMergingAreas,
         ),
     )
 

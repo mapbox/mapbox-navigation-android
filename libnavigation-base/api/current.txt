@@ -306,10 +306,12 @@ package com.mapbox.navigation.base.options {
 
   public final class AlertServiceOptions {
     method public boolean getCollectBridges();
+    method public boolean getCollectMergingAreas();
     method public boolean getCollectRestrictedAreas();
     method public boolean getCollectTunnels();
     method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder toBuilder();
     property public final boolean collectBridges;
+    property public final boolean collectMergingAreas;
     property public final boolean collectRestrictedAreas;
     property public final boolean collectTunnels;
   }
@@ -318,6 +320,7 @@ package com.mapbox.navigation.base.options {
     ctor public AlertServiceOptions.Builder();
     method public com.mapbox.navigation.base.options.AlertServiceOptions build();
     method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder collectBridges(boolean collectBridges);
+    method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder collectMergingAreas(boolean collectMergingAreas);
     method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder collectRestrictedAreas(boolean collectRestrictedAreas);
     method public com.mapbox.navigation.base.options.AlertServiceOptions.Builder collectTunnels(boolean collectTunnels);
   }
@@ -1307,6 +1310,7 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final int INCIDENT = 6; // 0x6
     field public static final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType INSTANCE;
     field public static final int JCT = 10; // 0xa
+    field public static final int MERGING_AREA = 12; // 0xc
     field public static final int RAILWAY_CROSSING = 8; // 0x8
     field public static final int RESTRICTED_AREA = 4; // 0x4
     field public static final int REST_STOP = 3; // 0x3
@@ -1314,7 +1318,7 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final int TUNNEL = 0; // 0x0
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RAILWAY_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.IC, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.JCT}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RoadObjectType.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RAILWAY_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.IC, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.JCT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.MERGING_AREA}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface RoadObjectType.Type {
   }
 
   public final class UpcomingRoadObject {
@@ -1660,6 +1664,30 @@ package com.mapbox.navigation.base.trip.model.roadobject.location {
     property public final java.util.Map<java.lang.Long,com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphEdge> edges;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> entries;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> exits;
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.merge {
+
+  public final class MergingArea extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaInfo getInfo();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaInfo info;
+  }
+
+  public final class MergingAreaInfo {
+    method public String getType();
+    property public final String type;
+  }
+
+  public final class MergingAreaType {
+    field public static final String FROM_BOTH_SIDES = "from_both_sides";
+    field public static final String FROM_LEFT = "from_left";
+    field public static final String FROM_RIGHT = "from_right";
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaType INSTANCE;
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaType.FROM_LEFT, com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaType.FROM_RIGHT, com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaType.FROM_BOTH_SIDES}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MergingAreaType.Type {
   }
 
 }
