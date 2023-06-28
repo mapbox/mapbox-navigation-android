@@ -74,7 +74,8 @@ class RouteProgressExTest {
             ),
             incidents = null,
             closures = null,
-            waypoints = null
+            waypoints = null,
+            refreshTtl = null
         )
 
         assertEquals(
@@ -145,7 +146,8 @@ class RouteProgressExTest {
             ),
             incidents = null,
             closures = null,
-            waypoints = null
+            waypoints = null,
+            refreshTtl = null,
         )
 
         // compare durations with original values from json file
@@ -198,6 +200,7 @@ class RouteProgressExTest {
             incidents = null,
             closures = null,
             waypoints = null,
+            refreshTtl = null,
         )
 
         assertEquals(
@@ -235,11 +238,12 @@ class RouteProgressExTest {
             TestData(
                 "update to null items",
                 provideNavigationRoute(addLeg = false),
-                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, null),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, null, null),
                 LegItemsResult(
                     listOf(null),
                     listOf(null),
                     listOf(null),
+                    null,
                     null,
                     0,
                 )
@@ -253,12 +257,14 @@ class RouteProgressExTest {
                     listOf(null, null),
                     null,
                     null,
+                    null,
                     null
                 ),
                 LegItemsResult(
                     listOf(null, null),
                     listOf(null, null),
                     listOf(null, null),
+                    null,
                     null,
                     0
                 )
@@ -273,14 +279,55 @@ class RouteProgressExTest {
                     null,
                     null,
                     null,
+                    null,
                 ),
                 LegItemsResult(
                     listOf(provideDefaultLegAnnotation(), null),
                     listOf(provideDefaultIncidents(), null),
                     listOf(provideDefaultClosures(), null),
                     null,
+                    null,
                     0
                 ),
+            ),
+            TestData(
+                "update refresh ttl from non-null to null",
+                provideNavigationRoute(addLeg = false, refreshTtl = 5),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, null, null),
+                LegItemsResult(
+                    listOf(null),
+                    listOf(null),
+                    listOf(null),
+                    null,
+                    null,
+                    0,
+                )
+            ),
+            TestData(
+                "update refresh ttl from null to non-null",
+                provideNavigationRoute(addLeg = false),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 5, null),
+                LegItemsResult(
+                    listOf(null),
+                    listOf(null),
+                    listOf(null),
+                    null,
+                    5,
+                    0,
+                )
+            ),
+            TestData(
+                "update refresh ttl from non-null to non-null",
+                provideNavigationRoute(addLeg = false, refreshTtl = 5),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 3, null),
+                LegItemsResult(
+                    listOf(null),
+                    listOf(null),
+                    listOf(null),
+                    null,
+                    3,
+                    0,
+                )
             ),
             run {
                 val refreshedMetadata1 = mapOf("key1" to JsonPrimitive("value1"))
@@ -307,6 +354,7 @@ class RouteProgressExTest {
                         listOf(newIncidents),
                         listOf(newClosures),
                         refreshedWaypoints,
+                        null,
                         legGeometryIndex = null,
                     ),
                     LegItemsResult(
@@ -314,6 +362,7 @@ class RouteProgressExTest {
                         listOf(newIncidents),
                         listOf(newClosures),
                         expectedWaypoints,
+                        null,
                         0,
                     )
                 )
@@ -352,12 +401,14 @@ class RouteProgressExTest {
                         listOf(newClosures, newClosures2),
                         refreshedWaypoints,
                         null,
+                        null,
                     ),
                     LegItemsResult(
                         listOf(newLegAnnotations, newLegAnnotations2),
                         listOf(newIncidents, newIncidents2),
                         listOf(newClosures, newClosures2),
                         expectedWaypoints,
+                        null,
                         0,
                     )
                 )
@@ -400,6 +451,7 @@ class RouteProgressExTest {
                         listOf(newInputIncidents, newInputIncidents2),
                         listOf(newInputClosures, newInputClosures2),
                         refreshedWaypoints,
+                        null,
                         2,
                     ),
                     LegItemsResult(
@@ -407,6 +459,7 @@ class RouteProgressExTest {
                         listOf(newOutputIncidents, newOutputIncidents2),
                         listOf(newOutputClosures, newOutputClosures2),
                         expectedWaypoints,
+                        null,
                         2,
                     )
                 )
@@ -442,12 +495,14 @@ class RouteProgressExTest {
                         listOf(newClosures, newClosures2),
                         refreshedWaypoints,
                         null,
+                        null,
                     ),
                     LegItemsResult(
                         listOf(provideDefaultLegAnnotation(), newLegAnnotations2),
                         listOf(provideDefaultIncidents(), newIncidents2),
                         listOf(provideDefaultClosures(), newClosures2),
                         expectedWaypoints,
+                        null,
                         0
                     )
                 )
@@ -487,6 +542,7 @@ class RouteProgressExTest {
                         listOf(newIncidents, newInputIncidents2),
                         listOf(newClosures, newInputClosures2),
                         refreshedWaypoints,
+                        null,
                         4,
                     ),
                     LegItemsResult(
@@ -494,6 +550,7 @@ class RouteProgressExTest {
                         listOf(provideDefaultIncidents(), newOutputIncidents2),
                         listOf(provideDefaultClosures(), newOutputClosures2),
                         expectedWaypoints,
+                        null,
                         4,
                     )
                 )
@@ -511,7 +568,8 @@ class RouteProgressExTest {
                         refreshItems.legAnnotation,
                         refreshItems.incidents,
                         refreshItems.closures,
-                        refreshItems.waypoints
+                        refreshItems.waypoints,
+                        refreshItems.refreshTtl,
                     )
                 } catch (t: Throwable) {
                     throw Throwable("unhandled exception in $description", t)
@@ -593,6 +651,7 @@ class RouteProgressExTest {
         dirWaypoints: List<DirectionsWaypoint>? = null,
         addLeg: Boolean,
         distance: Double = 10.0,
+        refreshTtl: Int? = null,
     ): NavigationRoute {
         val twoPointGeometry = PolylineUtils.encode(
             listOf(
@@ -646,6 +705,13 @@ class RouteProgressExTest {
                                     5
                                 )
                             )
+                            .apply {
+                                if (refreshTtl != null) {
+                                    unrecognizedJsonProperties(
+                                        mapOf("refresh_ttl" to JsonPrimitive(refreshTtl))
+                                    )
+                                }
+                            }
                             .build()
                     )
                 )
@@ -900,7 +966,8 @@ class RouteProgressExTest {
                 null,
                 null,
                 null,
-                refreshedWaypoints
+                refreshedWaypoints,
+                null
             )
             assertEquals(expectedWaypoints, updatedRoute.directionsResponse.waypoints())
         }
@@ -918,7 +985,8 @@ class RouteProgressExTest {
                 null,
                 null,
                 null,
-                refreshedWaypoints
+                refreshedWaypoints,
+                null
             )
             assertEquals(expectedWaypoints, updatedRoute.directionsRoute.waypoints())
         }
@@ -1071,6 +1139,7 @@ class RouteProgressExTest {
         val incidents: List<List<Incident>?>?,
         val closures: List<List<Closure>?>?,
         val waypoints: List<DirectionsWaypoint?>?,
+        val refreshTtl: Int?,
         val legGeometryIndex: Int?,
     )
 
@@ -1082,6 +1151,7 @@ class RouteProgressExTest {
         val newIncidents: List<List<Incident>?>?,
         val newClosures: List<List<Closure>?>?,
         val newWaypoints: List<DirectionsWaypoint>?,
+        val expectedRefreshTtl: Int?,
         val expectedLegGeometryIndex: Int,
     )
 }

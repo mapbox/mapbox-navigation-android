@@ -11,7 +11,7 @@ import kotlin.coroutines.resume
 private data class QueuedRequest(
     val routes: List<NavigationRoute>,
     val startCallback: () -> Unit,
-    val finishCallback: (Expected<String, RouteRefresherResult>) -> Unit,
+    val finishCallback: (Expected<String, RoutesRefresherResult>) -> Unit,
 )
 
 internal class RouteRefresherExecutor(
@@ -26,7 +26,7 @@ internal class RouteRefresherExecutor(
     suspend fun executeRoutesRefresh(
         routes: List<NavigationRoute>,
         startCallback: () -> Unit,
-    ): Expected<String, RouteRefresherResult> = suspendCancellableCoroutine { cont ->
+    ): Expected<String, RoutesRefresherResult> = suspendCancellableCoroutine { cont ->
         cont.invokeOnCancellation {
             currentRequest = null
             queuedRequest = null
@@ -39,7 +39,7 @@ internal class RouteRefresherExecutor(
     private fun executeRoutesRefresh(
         routes: List<NavigationRoute>,
         startCallback: () -> Unit,
-        finishCallback: (Expected<String, RouteRefresherResult>) -> Unit,
+        finishCallback: (Expected<String, RoutesRefresherResult>) -> Unit,
     ) {
         queuedRequest?.finishCallback?.invoke(
             ExpectedFactory.createError("Skipping request as a newer one is queued.")

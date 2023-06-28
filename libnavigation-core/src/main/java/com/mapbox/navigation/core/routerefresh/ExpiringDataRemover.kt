@@ -5,7 +5,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.RoutesRefreshData
 import java.util.Date
 
 internal class ExpiringDataRemover(
@@ -13,18 +12,25 @@ internal class ExpiringDataRemover(
 ) {
 
     fun removeExpiringDataFromRoutesProgressData(
-        routesProgressData: RoutesRefreshData,
-    ): RoutesRefreshData {
+        routesRefresherResult: RoutesRefresherResult,
+    ): RoutesRefresherResult {
         val primaryRoute = removeExpiringDataFromRoute(
-            routesProgressData.primaryRoute,
-            routesProgressData.primaryRouteProgressData.legIndex
+            routesRefresherResult.primaryRouteRefresherResult.route,
+            routesRefresherResult.primaryRouteRefresherResult.routeProgressData.legIndex
         )
-        val alternativeRoutesData = routesProgressData.alternativeRoutesProgressData.map {
-            removeExpiringDataFromRoute(it.first, it.second?.legIndex ?: 0) to it.second
+        val alternativeRoutesData = routesRefresherResult.alternativesRouteRefresherResults.map {
+            RouteRefresherResult(
+                removeExpiringDataFromRoute(it.route, it.routeProgressData?.legIndex ?: 0),
+                it.routeProgressData,
+                it.status
+            )
         }
-        return RoutesRefreshData(
-            primaryRoute,
-            routesProgressData.primaryRouteProgressData,
+        return RoutesRefresherResult(
+            RouteRefresherResult(
+                primaryRoute,
+                routesRefresherResult.primaryRouteRefresherResult.routeProgressData,
+                routesRefresherResult.primaryRouteRefresherResult.status
+            ),
             alternativeRoutesData
         )
     }

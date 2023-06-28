@@ -18,24 +18,20 @@ internal class RouteRefresherResultProcessor(
         lastRefreshTimeMillis = timeProvider.millis()
     }
 
-    override fun onRoutesRefreshed(result: RouteRefresherResult) {
+    override fun onRoutesRefreshed(result: RoutesRefresherResult) {
         val currentTime = timeProvider.millis()
-        if (result.success) {
+        if (result.anySuccess()) {
             lastRefreshTimeMillis = currentTime
             observersManager.onRoutesRefreshed(result)
         } else {
             if (currentTime >= lastRefreshTimeMillis + staleDataTimeoutMillis) {
                 lastRefreshTimeMillis = currentTime
-                val newRoutesData = expiringDataRemover.removeExpiringDataFromRoutesProgressData(
-                    result.refreshedRoutesData
+                val newRoutesResult = expiringDataRemover.removeExpiringDataFromRoutesProgressData(
+                    result
                 )
                 stateHolder.onClearedExpired()
-                if (result.refreshedRoutesData != newRoutesData) {
-                    val processedResult = RouteRefresherResult(
-                        result.success,
-                        newRoutesData
-                    )
-                    observersManager.onRoutesRefreshed(processedResult)
+                if (result != newRoutesResult) {
+                    observersManager.onRoutesRefreshed(newRoutesResult)
                 }
             }
         }

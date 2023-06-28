@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.RoutesInvalidatedObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.Job
@@ -61,7 +62,7 @@ class RouteRefreshController internal constructor(
         }
         plannedRouteRefreshController.pause()
         immediateRouteRefreshController.requestRoutesRefresh(routes) {
-            if (it.value?.success == false) {
+            if (it.value?.anySuccess() == false) {
                 plannedRouteRefreshController.resume()
             }
         }
@@ -85,12 +86,20 @@ class RouteRefreshController internal constructor(
         plannedRouteRefreshController.resume()
     }
 
+    internal fun registerRoutesInvalidatedObserver(observer: RoutesInvalidatedObserver) {
+        refreshObserversManager.registerInvalidatedObserver(observer)
+    }
+
+    internal fun unregisterRoutesInvalidatedObserver(observer: RoutesInvalidatedObserver) {
+        refreshObserversManager.unregisterInvalidatedObserver(observer)
+    }
+
     internal fun registerRouteRefreshObserver(observer: RouteRefreshObserver) {
-        refreshObserversManager.registerObserver(observer)
+        refreshObserversManager.registerRefreshObserver(observer)
     }
 
     internal fun unregisterRouteRefreshObserver(observer: RouteRefreshObserver) {
-        refreshObserversManager.unregisterObserver(observer)
+        refreshObserversManager.unregisterRefreshObserver(observer)
     }
 
     internal fun destroy() {

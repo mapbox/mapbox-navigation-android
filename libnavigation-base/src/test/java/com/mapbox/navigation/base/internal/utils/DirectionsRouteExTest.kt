@@ -14,6 +14,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -170,6 +171,38 @@ class DirectionsRouteExTest {
             ),
             nativeWaypoints.mapToSdk().map { it.metadata }
         )
+    }
+
+    @Test
+    fun refreshTtl_noUnrecognizedProperties() {
+        val route = getDirectionRouteBuilder().build()
+
+        assertNull(route.refreshTtl())
+    }
+
+    @Test
+    fun refreshTtl_noRefreshTtl() {
+        val route = getDirectionRouteBuilder().unrecognizedJsonProperties(emptyMap()).build()
+
+        assertNull(route.refreshTtl())
+    }
+
+    @Test
+    fun refreshTtl_nonIntRefreshTtl() {
+        val route = getDirectionRouteBuilder()
+            .unrecognizedJsonProperties(mapOf("refresh_ttl" to JsonPrimitive("aaa")))
+            .build()
+
+        assertNull(route.refreshTtl())
+    }
+
+    @Test
+    fun refreshTtl_hasRefreshTtl() {
+        val route = getDirectionRouteBuilder()
+            .unrecognizedJsonProperties(mapOf("refresh_ttl" to JsonPrimitive(10)))
+            .build()
+
+        assertEquals(10, route.refreshTtl())
     }
 
     private fun getDirectionRouteBuilder(): DirectionsRoute.Builder =

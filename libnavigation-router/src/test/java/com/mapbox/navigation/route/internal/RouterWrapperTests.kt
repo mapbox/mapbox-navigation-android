@@ -10,6 +10,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
+import com.mapbox.navigation.base.internal.route.RouteExpirationHandler
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
@@ -96,7 +97,7 @@ class RouterWrapperTests {
             FAILURE_CODE,
             FAILURE_TYPE,
             REQUEST_ID,
-            null
+            REFRESH_TTL
         )
     )
     private val routerResultFailureDataRef: Expected<RouterError, DataRef> = ExpectedFactory
@@ -106,7 +107,7 @@ class RouterWrapperTests {
                 FAILURE_CODE,
                 FAILURE_TYPE,
                 REQUEST_ID,
-                null
+                REFRESH_TTL
             )
         )
     private val routerResultCancelled: Expected<RouterError, DataRef> = ExpectedFactory
@@ -116,7 +117,7 @@ class RouterWrapperTests {
                 FAILURE_CODE,
                 CANCELED_TYPE,
                 REQUEST_ID,
-                null
+                REFRESH_TTL
             )
         )
     private val routerResultSuccessEmptyRoutes: Expected<RouterError, DataRef> = ExpectedFactory
@@ -139,6 +140,7 @@ class RouterWrapperTests {
 
     @Before
     fun setUp() {
+        mockkObject(RouteExpirationHandler)
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
         every { ThreadController.DefaultDispatcher } returns coroutineRule.testDispatcher
@@ -159,6 +161,7 @@ class RouterWrapperTests {
 
     @After
     fun cleanUp() {
+        unmockkObject(RouteExpirationHandler)
         unmockkObject(ThreadController)
     }
 
@@ -208,6 +211,16 @@ class RouterWrapperTests {
     }
 
     @Test
+    fun `route expiration data is not updated on failure`() {
+        routerWrapper.getRoute(routerOptions, routerCallback)
+        getRouteSlot.captured.run(routerResultFailureDataRef, nativeOriginOnline)
+
+        verify(exactly = 0) {
+            RouteExpirationHandler.updateRouteExpirationData(any(), any())
+        }
+    }
+
+    @Test
     fun `check callback called on success and contains original options`() =
         coroutineRule.runBlockingTest {
             routerWrapper.getRoute(routerOptions, routerCallback)
@@ -228,6 +241,69 @@ class RouterWrapperTests {
             ).routes()
 
             verify(exactly = 1) { routerCallback.onRoutesReady(expected, Onboard) }
+        }
+
+    @Test
+    fun `route expiration data is updated on success`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, routerCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createValue(
+                    testRouteFixtures.loadTwoLegRouteWithRefreshTtl().toDataRef()
+                ),
+                nativeOriginOnboard
+            )
+            val routeCaptor = slot<NavigationRoute>()
+
+            verify(exactly = 1) {
+                RouteExpirationHandler.updateRouteExpirationData(
+                    capture(routeCaptor),
+                    10
+                )
+            }
+            assertEquals("cjeacbr8s21bk47lggcvce7lv#0", routeCaptor.captured.id)
+        }
+
+    @Test
+    fun `route expiration data is updated on success when no refresh ttl`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, routerCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createValue(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef()
+                ),
+                nativeOriginOnboard
+            )
+
+            val routeCaptor = slot<NavigationRoute>()
+
+            verify(exactly = 1) {
+                RouteExpirationHandler.updateRouteExpirationData(capture(routeCaptor), null)
+            }
+            assertEquals("cjeacbr8s21bk47lggcvce7lv#0", routeCaptor.captured.id)
+        }
+
+    @Test
+    fun `route expiration data is updated on success for multiple routes`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, routerCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createValue(
+                    testRouteFixtures.loadTwoRoutes().toDataRef()
+                ),
+                nativeOriginOnboard
+            )
+
+            verify(exactly = 1) {
+                RouteExpirationHandler.updateRouteExpirationData(
+                    match { it.id == "cjeacbr8s21bk47lggcvce7lv#0" },
+                    10
+                )
+                RouteExpirationHandler.updateRouteExpirationData(
+                    match { it.id == "cjeacbr8s21bk47lggcvce7lv#1" },
+                    5
+                )
+            }
         }
 
     @Test
@@ -536,6 +612,7 @@ class RouterWrapperTests {
                code = $FAILURE_CODE
                type = $FAILURE_TYPE
                requestId = $REQUEST_ID
+               refreshTTL = $REFRESH_TTL
                routeRefreshRequestData = $routeRefreshRequestData
             """.trimIndent()
 
@@ -544,6 +621,145 @@ class RouterWrapperTests {
         verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
         assertEquals("Route refresh failed", errorSlot.captured.message)
         assertEquals(errorMessage, errorSlot.captured.throwable?.message)
+    }
+
+    @Test
+    fun `route refresh failure with refresh ttl updates routes expiration data`() {
+        val route = createNavigationRoute(
+            DirectionsRoute.builder()
+                .requestUuid(UUID)
+                .distance(100.0)
+                .duration(100.0)
+                .routeIndex("0")
+                .routeOptions(routerOptions)
+                .build()
+        )
+
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        refreshRouteSlot.captured.run(
+            ExpectedFactory.createError<RouterError, String>(
+                RouterError(
+                    FAILURE_MESSAGE,
+                    FAILURE_CODE,
+                    FAILURE_TYPE,
+                    REQUEST_ID,
+                    REFRESH_TTL
+                )
+            ),
+            nativeOriginOnboard,
+            hashMapOf()
+        )
+
+        verify(exactly = 1) {
+            RouteExpirationHandler.updateRouteExpirationData(
+                match { it.id == "$UUID#0" },
+                REFRESH_TTL
+            )
+        }
+    }
+
+    @Test
+    fun `route refresh failure without refresh ttl updates routes expiration data`() {
+        val route = createNavigationRoute(
+            DirectionsRoute.builder()
+                .requestUuid(UUID)
+                .distance(100.0)
+                .duration(100.0)
+                .routeIndex("0")
+                .routeOptions(routerOptions)
+                .build()
+        )
+
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        refreshRouteSlot.captured.run(
+            ExpectedFactory.createError<RouterError, String>(
+                RouterError(
+                    FAILURE_MESSAGE,
+                    FAILURE_CODE,
+                    FAILURE_TYPE,
+                    REQUEST_ID,
+                    null
+                )
+            ),
+            nativeOriginOnboard,
+            hashMapOf()
+        )
+
+        verify(exactly = 1) {
+            RouteExpirationHandler.updateRouteExpirationData(match { it.id == "$UUID#0" }, null)
+        }
+    }
+
+    @Test // TODO
+    fun `route refresh successful with refresh ttl updates route expiration data`() = runBlockingTest {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439)
+                )
+            )
+            .build()
+        val route = NavigationRoute.create(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options
+            ),
+            options,
+            com.mapbox.navigation.base.route.RouterOrigin.Custom()
+        ).first()
+
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        refreshRouteSlot.captured.run(
+            ExpectedFactory.createValue(
+                testRouteFixtures.loadRefreshForMultiLegRouteWithRefreshTtl()
+            ),
+            nativeOriginOnboard,
+            hashMapOf()
+        )
+
+        verify(exactly = 1) {
+            RouteExpirationHandler.updateRouteExpirationData(
+                match { it.id == "pmzkNPXknULJwETblENCKWMNIHAUDtN8LGwlbbeyydAACiKP_nLYog==#0" },
+                50
+            )
+        }
+    }
+
+    @Test
+    fun `route refresh successful without refresh ttl updates route expiration data`() = runBlockingTest {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439)
+                )
+            )
+            .build()
+        val route = NavigationRoute.create(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options
+            ),
+            options,
+            com.mapbox.navigation.base.route.RouterOrigin.Custom()
+        ).first()
+
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
+
+        verify(exactly = 1) {
+            RouteExpirationHandler.updateRouteExpirationData(
+                match { it.id == "pmzkNPXknULJwETblENCKWMNIHAUDtN8LGwlbbeyydAACiKP_nLYog==#0" },
+                null
+            )
+        }
     }
 
     private fun provideDefaultRouteOptions(): RouteOptions {
@@ -562,6 +778,7 @@ class RouterWrapperTests {
         private val FAILURE_TYPE = RouterErrorType.UNKNOWN
         private val CANCELED_TYPE = RouterErrorType.REQUEST_CANCELLED
         private const val REQUEST_ID = 19L
+        private const val REFRESH_TTL = 100
         private const val UUID = "cjeacbr8s21bk47lggcvce7lv"
     }
 }

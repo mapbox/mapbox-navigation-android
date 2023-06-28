@@ -4,6 +4,13 @@ import java.util.Scanner
 
 class TestRouteFixtures {
     fun loadTwoLegRoute() = loadJsonFixture("directions_response_two_leg_route.json")
+
+    fun loadTwoLegRouteWithRefreshTtl() = loadJsonFixture(
+        "directions_response_two_leg_route_with_refresh_ttl.json"
+    )
+
+    fun loadTwoRoutes() = loadJsonFixture("directions_response_two_routes.json")
+
     fun loadEmptyRoutesResponse() = loadJsonFixture("directions_response_empty_routes.json")
 
     /**
@@ -16,6 +23,9 @@ class TestRouteFixtures {
      */
     fun loadRefreshForMultiLegRoute() =
         loadJsonFixture("multi_leg_refresh_response.json")
+
+    fun loadRefreshForMultiLegRouteWithRefreshTtl() =
+        loadJsonFixture("multi_leg_refresh_response_with_refresh_ttl.json")
 
     /**
      * Refreshed [loadMultiLegRouteForRefresh] by [loadRefreshForMultiLegRoute].

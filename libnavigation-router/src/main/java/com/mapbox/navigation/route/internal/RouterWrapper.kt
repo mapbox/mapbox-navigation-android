@@ -12,10 +12,12 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.InternalRouter
+import com.mapbox.navigation.base.internal.route.RouteExpirationHandler
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
+import com.mapbox.navigation.base.internal.utils.refreshTtl
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -132,6 +134,13 @@ class RouterWrapper(
                                     val metadata =
                                         routes.firstOrNull()?.directionsResponse?.metadata()
                                     logI("Response metadata: $metadata", LOG_CATEGORY)
+
+                                    routes.forEach {
+                                        RouteExpirationHandler.updateRouteExpirationData(
+                                            it,
+                                            it.directionsRoute.refreshTtl()
+                                        )
+                                    }
                                     callback.onRoutesReady(
                                         routes,
                                         origin.mapToSdkRouteOrigin()
@@ -230,15 +239,18 @@ class RouterWrapper(
                                code = ${it.code}
                                type = ${it.type}
                                requestId = ${it.requestId}
+                               refreshTTL = ${it.refreshTtl}
                                routeRefreshRequestData = $routeRefreshRequestData
                             """.trimIndent()
 
                         logW(errorMessage, LOG_CATEGORY)
 
+                        RouteExpirationHandler.updateRouteExpirationData(route, it.refreshTtl)
                         callback.onFailure(
                             RouterFactory.buildNavigationRouterRefreshError(
                                 "Route refresh failed",
-                                Exception(errorMessage)
+                                Exception(errorMessage),
+                                refreshTtl = it.refreshTtl
                             )
                         )
                     }
@@ -276,7 +288,9 @@ class RouterWrapper(
                                             it.incidents()
                                         },
                                         closures = routeRefresh.legs()?.map { it.closures() },
-                                        waypoints = updatedWaypoints
+                                        waypoints = updatedWaypoints,
+                                        refreshTtl = routeRefresh.unrecognizedJsonProperties
+                                            ?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
                                     )
                                 }
                         }.fold(
@@ -289,6 +303,10 @@ class RouterWrapper(
                                 )
                             },
                             {
+                                RouteExpirationHandler.updateRouteExpirationData(
+                                    it,
+                                    it.directionsRoute.refreshTtl()
+                                )
                                 callback.onRefreshReady(it)
                             },
                         )

@@ -18,6 +18,8 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.RoutesInvalidatedObserver
+import com.mapbox.navigation.core.RoutesInvalidatedParams
 import com.mapbox.navigation.core.RoutesSetCallback
 import com.mapbox.navigation.core.RoutesSetError
 import com.mapbox.navigation.core.RoutesSetSuccess
@@ -28,6 +30,9 @@ import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
+import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -55,6 +60,25 @@ fun MapboxNavigation.routesUpdates(): Flow<RoutesUpdatedResult> {
         { registerRoutesObserver(it) },
         { unregisterRoutesObserver(it) },
         "RoutesUpdatedResult"
+    )
+}
+
+fun MapboxNavigation.routesInvalidatedResults(): Flow<RoutesInvalidatedParams> {
+    return loggedCallbackFlow(
+        { RoutesInvalidatedObserver(it) },
+        { registerRoutesInvalidatedObserver(it) },
+        { unregisterRoutesInvalidatedObserver(it) },
+        "RoutesInvalidatedResult"
+    )
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+fun MapboxNavigation.refreshStates(): Flow<RouteRefreshStateResult> {
+    return loggedCallbackFlow(
+        { RouteRefreshStatesObserver(it) },
+        { routeRefreshController.registerRouteRefreshStateObserver(it) },
+        { routeRefreshController.unregisterRouteRefreshStateObserver(it) },
+        "RouteRefreshState"
     )
 }
 

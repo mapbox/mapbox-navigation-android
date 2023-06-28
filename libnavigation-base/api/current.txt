@@ -752,9 +752,11 @@ package com.mapbox.navigation.base.route {
 
   public final class NavigationRouterRefreshError {
     method public String? getMessage();
+    method public Integer? getRefreshTtl();
     method public com.mapbox.navigation.base.route.RouterFailure? getRouterFailure();
     method public Throwable? getThrowable();
     property public final String? message;
+    property public final Integer? refreshTtl;
     property public final com.mapbox.navigation.base.route.RouterFailure? routerFailure;
     property public final Throwable? throwable;
   }
@@ -823,6 +825,7 @@ package com.mapbox.navigation.base.route {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RouterFactory {
+    method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null, Throwable? throwable = null, com.mapbox.navigation.base.route.RouterFailure? routerFailure = null, Integer? refreshTtl = null);
     method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null, Throwable? throwable = null, com.mapbox.navigation.base.route.RouterFailure? routerFailure = null);
     method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null, Throwable? throwable = null);
     method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null);

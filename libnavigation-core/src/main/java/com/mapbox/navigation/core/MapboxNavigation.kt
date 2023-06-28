@@ -588,8 +588,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController.registerRouteRefreshObserver {
             internalSetNavigationRoutes(
-                it.allRoutesRefreshData.map { pair -> pair.first },
-                SetRoutes.RefreshRoutes(it.primaryRouteProgressData)
+                listOf(it.primaryRouteRefresherResult.route) +
+                    it.alternativesRouteRefresherResults.map { it.route },
+                SetRoutes.RefreshRoutes(it.primaryRouteRefresherResult.routeProgressData)
             )
         }
 
@@ -1408,6 +1409,24 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun unregisterTripSessionStateObserver(tripSessionStateObserver: TripSessionStateObserver) {
         tripSession.unregisterStateObserver(tripSessionStateObserver)
+    }
+
+    /**
+     * Registers [RoutesInvalidatedObserver].
+     * Use this method to keep track of routes that become invalidated,
+     * which means they won't be refreshed anymore.
+     * It is recommended to rebuild the route
+     * when you receive a notification of it being invalidated.
+     */
+    fun registerRoutesInvalidatedObserver(observer: RoutesInvalidatedObserver) {
+        routeRefreshController.registerRoutesInvalidatedObserver(observer)
+    }
+
+    /**
+     * Unregisters [RoutesInvalidatedObserver].
+     */
+    fun unregisterRoutesInvalidatedObserver(observer: RoutesInvalidatedObserver) {
+        routeRefreshController.unregisterRoutesInvalidatedObserver(observer)
     }
 
     /**

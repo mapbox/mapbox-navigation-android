@@ -25,11 +25,14 @@ interface NavigationRouterRefreshCallback {
  * @param message message
  * @param throwable cause
  * @param routerFailure failure in case the failure happened during a request
+ * @param refreshTtl time in seconds after which the route will be invalidated
+ *  (no refreshes will be possible). Baseline is request time.
  */
 class NavigationRouterRefreshError internal constructor(
     val message: String? = null,
     val throwable: Throwable? = null,
     val routerFailure: RouterFailure? = null,
+    val refreshTtl: Int? = null,
 ) {
 
     /**
@@ -44,6 +47,7 @@ class NavigationRouterRefreshError internal constructor(
         if (message != other.message) return false
         if (throwable != other.throwable) return false
         if (routerFailure != other.routerFailure) return false
+        if (refreshTtl != other.refreshTtl) return false
 
         return true
     }
@@ -55,6 +59,7 @@ class NavigationRouterRefreshError internal constructor(
         var result = message.hashCode()
         result = 31 * result + throwable.hashCode()
         result = 31 * result + routerFailure.hashCode()
+        result = 31 * result + refreshTtl.hashCode()
         return result
     }
 
@@ -65,7 +70,8 @@ class NavigationRouterRefreshError internal constructor(
         return "NavigationRouterRefreshError(" +
             "message=$message, " +
             "throwable=$throwable, " +
-            "routerFailure=$routerFailure" +
+            "routerFailure=$routerFailure, " +
+            "refreshTtl=$refreshTtl" +
             ")"
     }
 }

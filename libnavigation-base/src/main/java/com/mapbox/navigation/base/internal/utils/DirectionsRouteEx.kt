@@ -68,6 +68,14 @@ private fun String.parseMetadata(): Map<String, JsonElement>? {
     }
 }
 
+fun DirectionsRoute.refreshTtl(): Int? {
+    return try {
+        unrecognizedJsonProperties?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
+    } catch (ex: Throwable) {
+        null
+    }
+}
+
 private fun com.mapbox.navigator.WaypointType.mapToSdk(): Waypoint.InternalType =
     when (this) {
         com.mapbox.navigator.WaypointType.REGULAR -> Waypoint.InternalType.Regular

@@ -19,6 +19,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val stateHolder: RouteRefreshStateHolder,
     private val listener: RouteRefresherListener,
+    private val attemptListener: RoutesRefreshAttemptListener,
     private val parentScope: CoroutineScope,
     private val retryStrategy: RetryRouteRefreshStrategy,
 ) {
@@ -29,11 +30,13 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         stateHolder: RouteRefreshStateHolder,
         parentScope: CoroutineScope,
         listener: RouteRefresherListener,
+        attemptListener: RoutesRefreshAttemptListener,
     ) : this(
         routeRefresherExecutor,
         routeRefreshOptions,
         stateHolder,
         listener,
+        attemptListener,
         parentScope,
         RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT)
     )
@@ -131,11 +134,12 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         routeRefresherResult.fold(
             { logW("Planned route refresh error: $it", RouteRefreshLog.LOG_CATEGORY) },
             {
-                if (it.success) {
+                attemptListener.onRoutesRefreshAttemptFinished(it)
+                if (it.anySuccess()) {
                     stateHolder.onSuccess()
                     listener.onRoutesRefreshed(it)
                 } else {
-                    if (retryStrategy.shouldRetry()) {
+                    if (it.anyRequestFailed() && retryStrategy.shouldRetry()) {
                         scheduleUpdateRetry(routes, shouldNotifyOnStart = false)
                     } else {
                         stateHolder.onFailure(null)
