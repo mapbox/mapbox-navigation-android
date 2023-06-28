@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.job
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.CoroutineContext
 
 internal object CoroutineUtils {
@@ -20,4 +21,12 @@ internal object CoroutineUtils {
     ): CoroutineScope = CoroutineScope(
         SupervisorJob(parentScope.coroutineContext.job) + parentScope.coroutineContext.minusKey(Job)
     )
+
+    suspend fun <T : Any> withTimeoutOrDefault(
+        timeMillis: Long,
+        default: T,
+        block: suspend CoroutineScope.() -> T
+    ): T {
+        return withTimeoutOrNull(timeMillis, block) ?: default
+    }
 }

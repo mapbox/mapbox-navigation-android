@@ -16,5 +16,6 @@ object RouterFactory {
         message: String? = null,
         throwable: Throwable? = null,
         routerFailure: RouterFailure? = null,
-    ) = NavigationRouterRefreshError(message, throwable, routerFailure)
+        refreshTtl: Int? = null,
+    ) = NavigationRouterRefreshError(message, throwable, routerFailure, refreshTtl)
 }

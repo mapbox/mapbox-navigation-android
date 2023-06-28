@@ -1,8 +1,10 @@
 package com.mapbox.navigation.core.routealternatives
 
+import com.mapbox.navigation.base.internal.route.RouteExpirationHandler
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
 import com.mapbox.navigation.base.internal.utils.parseRouteInterface
+import com.mapbox.navigation.base.internal.utils.refreshTtl
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -227,6 +229,9 @@ internal class RouteAlternativesController constructor(
             }
         processAlternativesMetadata(alternatives, nativeAlternatives)
         val newAlternatives = parseRouteInterfaceOrEmptyList(onlinePrimaryRoute) + alternatives
+        newAlternatives.forEach {
+            RouteExpirationHandler.updateRouteExpirationData(it, it.directionsRoute.refreshTtl())
+        }
         val origin = nativeAlternatives.find {
             // looking for the first new route,
             // assuming all new routes come from the same request

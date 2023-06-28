@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
@@ -11,23 +12,17 @@ import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIn
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
-import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
+import com.mapbox.navigation.base.route.RouterFactory
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.NavigationComponentProvider
 import com.mapbox.navigation.core.RoutesProgressDataProvider
-import com.mapbox.navigation.core.RoutesRefreshData
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils
-import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.core.replay.ReplayLocationEngine
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
-import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
-import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.every
 import io.mockk.mockk
@@ -52,23 +47,9 @@ internal open class RouteRefreshIntegrationTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val mapboxReplayer = MapboxReplayer()
-    private val threadController = ThreadController()
     val router = mockk<NavigationRouterV2>(relaxed = true)
     private val routesProgressDataProvider = RoutesProgressDataProvider()
-    private val tripSession = NavigationComponentProvider.createTripSession(
-        tripService = mockk(relaxed = true),
-        TripSessionLocationEngine(mockk()) { ReplayLocationEngine(mapboxReplayer) },
-        mockk(relaxed = true),
-        threadController
-    )
     private val directionsSession = NavigationComponentProvider.createDirectionsSession(router)
-    private val routesAlternativeController = RouteAlternativesControllerProvider.create(
-        RouteAlternativesOptions.Builder().build(),
-        mockk(relaxed = true),
-        tripSession,
-        threadController
-    )
     lateinit var routeRefreshController: RouteRefreshController
     val stateObserver = TestStateObserver()
     val refreshObserver = TestRefreshObserver()
@@ -77,9 +58,9 @@ internal open class RouteRefreshIntegrationTest {
 
     class TestRefreshObserver : RouteRefreshObserver {
 
-        val refreshes = mutableListOf<RoutesRefreshData>()
+        val refreshes = mutableListOf<RoutesRefresherResult>()
 
-        override fun onRoutesRefreshed(routeInfo: RoutesRefreshData) {
+        override fun onRoutesRefreshed(routeInfo: RoutesRefresherResult) {
             refreshes.add(routeInfo)
         }
     }
@@ -169,6 +150,7 @@ internal open class RouteRefreshIntegrationTest {
         }
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     fun setUpRouteRefresh(
         fileName: String,
         successfulAttemptNumber: Int = 0,
@@ -218,7 +200,7 @@ internal open class RouteRefreshIntegrationTest {
                 if (invocationNumber >= successfulAttemptNumber) {
                     callback.onRefreshReady(refreshedRoute)
                 } else {
-                    callback.onFailure(mockk(relaxed = true))
+                    callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
                 }
             }
             invocationNumber++

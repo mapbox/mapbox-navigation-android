@@ -12,13 +12,14 @@ internal class ImmediateRouteRefreshController(
     private val routeRefresherExecutor: RouteRefresherExecutor,
     private val stateHolder: RouteRefreshStateHolder,
     private val scope: CoroutineScope,
-    private val listener: RouteRefresherListener
+    private val listener: RouteRefresherListener,
+    private val attemptListener: RoutesRefreshAttemptListener,
 ) {
 
     @Throws(IllegalArgumentException::class)
     fun requestRoutesRefresh(
         routes: List<NavigationRoute>,
-        callback: (Expected<String, RouteRefresherResult>) -> Unit
+        callback: (Expected<String, RoutesRefresherResult>) -> Unit
     ) {
         if (routes.isEmpty()) {
             throw IllegalArgumentException("Routes to refresh should not be empty")
@@ -32,7 +33,8 @@ internal class ImmediateRouteRefreshController(
             result.fold(
                 { logW("Route refresh on-demand error: $it", RouteRefreshLog.LOG_CATEGORY) },
                 {
-                    if (it.success) {
+                    attemptListener.onRoutesRefreshAttemptFinished(it)
+                    if (it.anySuccess()) {
                         stateHolder.onSuccess()
                     } else {
                         stateHolder.onFailure(null)

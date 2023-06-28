@@ -9,6 +9,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,16 +29,18 @@ class ImmediateRouteRefreshControllerTest {
 
     private val routeRefresherExecutor = mockk<RouteRefresherExecutor>(relaxed = true)
     private val stateHolder = mockk<RouteRefreshStateHolder>(relaxed = true)
+    private val attemptListener = mockk<RoutesRefreshAttemptListener>(relaxed = true)
     private val listener = mockk<RouteRefresherListener>(relaxed = true)
     private val clientCallback =
-        mockk<(Expected<String, RouteRefresherResult>) -> Unit>(relaxed = true)
+        mockk<(Expected<String, RoutesRefresherResult>) -> Unit>(relaxed = true)
     private val routes = listOf<NavigationRoute>(mockk())
 
     private val sut = ImmediateRouteRefreshController(
         routeRefresherExecutor,
         stateHolder,
         coroutineRule.coroutineScope,
-        listener
+        listener,
+        attemptListener
     )
 
     @Test(expected = IllegalArgumentException::class)
@@ -64,16 +67,14 @@ class ImmediateRouteRefreshControllerTest {
 
     @Test
     fun routesRefreshFinishedSuccessfully() = coroutineRule.runBlockingTest {
-        val result = RouteRefresherResult(
-            true,
-            mockk()
-        )
+        val result = mockk<RoutesRefresherResult> { every { anySuccess() } returns true }
         coEvery {
             routeRefresherExecutor.executeRoutesRefresh(any(), any())
         } returns ExpectedFactory.createValue(result)
 
         sut.requestRoutesRefresh(routes, clientCallback)
 
+        verify(exactly = 1) { attemptListener.onRoutesRefreshAttemptFinished(result) }
         verify(exactly = 1) { stateHolder.onSuccess() }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
         verify(exactly = 1) { clientCallback(match { it.value == result }) }
@@ -81,16 +82,17 @@ class ImmediateRouteRefreshControllerTest {
 
     @Test
     fun routesRefreshFinishedWithFailure() = coroutineRule.runBlockingTest {
-        val result = RouteRefresherResult(
-            false,
-            mockk()
-        )
+        val result = mockk<RoutesRefresherResult> {
+            every { anySuccess() } returns false
+            every { anyRequestFailed() } returns true
+        }
         coEvery {
             routeRefresherExecutor.executeRoutesRefresh(any(), any())
         } returns ExpectedFactory.createValue(result)
 
         sut.requestRoutesRefresh(routes, clientCallback)
 
+        verify(exactly = 1) { attemptListener.onRoutesRefreshAttemptFinished(result) }
         verify(exactly = 1) { stateHolder.onFailure(null) }
         verify(exactly = 1) { clientCallback(match { it.value == result }) }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
@@ -98,7 +100,7 @@ class ImmediateRouteRefreshControllerTest {
 
     @Test
     fun routesRefreshFinishedWithError() = coroutineRule.runBlockingTest {
-        val error: Expected<String, RouteRefresherResult> =
+        val error: Expected<String, RoutesRefresherResult> =
             ExpectedFactory.createError("Some error")
         coEvery {
             routeRefresherExecutor.executeRoutesRefresh(any(), any())
@@ -107,6 +109,7 @@ class ImmediateRouteRefreshControllerTest {
         sut.requestRoutesRefresh(routes, clientCallback)
 
         verify(exactly = 0) {
+            attemptListener.onRoutesRefreshAttemptFinished(any())
             stateHolder.onFailure(any())
             stateHolder.onSuccess()
             listener.onRoutesRefreshed(any())

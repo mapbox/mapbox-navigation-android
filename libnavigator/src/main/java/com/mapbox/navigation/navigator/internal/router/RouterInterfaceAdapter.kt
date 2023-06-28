@@ -201,7 +201,7 @@ class RouterInterfaceAdapter(
                                 ROUTE_REFRESH_FAILED_DEFAULT_CODE,
                                 RouterErrorType.UNKNOWN,
                                 requestId,
-                                null,
+                                error.refreshTtl
                             )
                         ),
                         NativeRouterOrigin.CUSTOM,

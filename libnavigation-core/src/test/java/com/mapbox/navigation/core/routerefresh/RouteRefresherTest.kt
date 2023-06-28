@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.navigation.base.internal.route.RouteExpirationHandler
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.RoutesRefreshData
@@ -79,6 +80,7 @@ class RouteRefresherTest {
 
     @Before
     fun setUp() {
+        mockkObject(RouteExpirationHandler)
         mockkObject(RouteRefreshValidator)
         coEvery {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
@@ -87,6 +89,7 @@ class RouteRefresherTest {
 
     @After
     fun tearDown() {
+        unmockkObject(RouteExpirationHandler)
         unmockkObject(RouteRefreshValidator)
     }
 
@@ -120,12 +123,10 @@ class RouteRefresherTest {
             "diff#3",
             "diff#4"
         )
-        val expected = RouteRefresherResult(
-            true,
-            RoutesRefreshData(
-                newRoute1,
-                routesProgressData1,
-                listOf(newRoute2 to routesProgressData2)
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(newRoute1, routesProgressData1, RouteRefresherStatus.SUCCESS),
+            listOf(
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
             )
         )
 
@@ -181,6 +182,7 @@ class RouteRefresherTest {
                 mockk(relaxed = true) {
                     every { message } returns "error message"
                     every { throwable } returns ConcurrentModificationException()
+                    every { refreshTtl } returns null
                 }
             )
             0
@@ -193,12 +195,10 @@ class RouteRefresherTest {
             "diff#1",
             "diff#2"
         )
-        val expected = RouteRefresherResult(
-            true,
-            RoutesRefreshData(
-                route1,
-                routesProgressData1,
-                listOf(newRoute2 to routesProgressData2)
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
+            listOf(
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
             )
         )
 
@@ -218,7 +218,7 @@ class RouteRefresherTest {
     }
 
     @Test
-    fun refresh_noRoutesAreRefreshed() = coroutineRule.runBlockingTest {
+    fun refresh_allRoutesRefreshFail() = coroutineRule.runBlockingTest {
         val route1 = createNavigationRoute(
             directionsRoute = createDirectionsRoute(
                 legs = listOf(
@@ -298,6 +298,7 @@ class RouteRefresherTest {
                 mockk(relaxed = true) {
                     every { message } returns "error message 1"
                     every { throwable } returns ConcurrentModificationException()
+                    every { refreshTtl } returns null
                 }
             )
             0
@@ -307,6 +308,7 @@ class RouteRefresherTest {
                 mockk(relaxed = true) {
                     every { message } returns "error message 2"
                     every { throwable } returns IllegalStateException()
+                    every { refreshTtl } returns null
                 }
             )
             0
@@ -316,11 +318,154 @@ class RouteRefresherTest {
                 mockk(relaxed = true) {
                     every { message } returns "error message 3"
                     every { throwable } returns IndexOutOfBoundsException()
+                    every { refreshTtl } returns null
                 }
             )
             0
         }
-        val expected = RouteRefresherResult(false, routesRefreshData)
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
+            listOf(
+                RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.FAILURE),
+                RouteRefresherResult(route3, routesProgressData3, RouteRefresherStatus.FAILURE)
+            )
+        )
+
+        val actual = sut.refresh(listOf(route1, route2, route3), 10)
+
+        assertEquals(expected, actual)
+        verify(exactly = 1) {
+            logger.logE(
+                "Route refresh error: error message 1 " +
+                    "throwable=java.util.ConcurrentModificationException",
+                "RouteRefreshController"
+            )
+            logger.logE(
+                "Route refresh error: error message 2 " +
+                    "throwable=java.lang.IllegalStateException",
+                "RouteRefreshController"
+            )
+            logger.logE(
+                "Route refresh error: error message 3 " +
+                    "throwable=java.lang.IndexOutOfBoundsException",
+                "RouteRefreshController"
+            )
+        }
+    }
+
+    @Test
+    fun refresh_oneRouteInvalidatedAfterRefreshOthersFail() = coroutineRule.runBlockingTest {
+        val route1 = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                legs = listOf(
+                    createRouteLeg(
+                        annotation = LegAnnotation.builder()
+                            .congestion(listOf("moderate", "moderate"))
+                            .congestionNumeric(listOf(80, 80))
+                            .build(),
+                        incidents = listOf(
+                            createIncident(endTime = "2022-06-30T21:59:00Z"),
+                            createIncident(endTime = "2022-06-31T21:59:00Z"),
+                        )
+                    ),
+                    createRouteLeg(
+                        annotation = LegAnnotation.builder()
+                            .congestion(listOf("heavy", "heavy"))
+                            .congestionNumeric(listOf(90, 90))
+                            .build(),
+                        incidents = listOf(
+                            createIncident(endTime = "2022-06-30T20:59:00Z"),
+                            createIncident(endTime = "bad time"),
+                            createIncident(endTime = "2022-06-30T19:59:00Z"),
+                        )
+                    ),
+                )
+            )
+        )
+        val route2 = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                legs = listOf(
+                    createRouteLeg(
+                        annotation = LegAnnotation.builder()
+                            .congestion(listOf("moderate", "heavy"))
+                            .congestionNumeric(listOf(80, 90))
+                            .build(),
+                        incidents = listOf(
+                            createIncident(endTime = "2022-06-31T10:59:00Z"),
+                            createIncident(endTime = "2022-06-21T10:59:00Z"),
+                        )
+                    ),
+                    createRouteLeg(
+                        annotation = LegAnnotation.builder()
+                            .congestion(listOf("heavy", "moderate"))
+                            .congestionNumeric(listOf(90, 80))
+                            .build(),
+                        incidents = null
+                    ),
+                    createRouteLeg(
+                        annotation = null,
+                        incidents = listOf(
+                            createIncident(endTime = "2022-06-31T22:59:00Z"),
+                        )
+                    ),
+                    createRouteLeg(
+                        annotation = LegAnnotation.builder().build(),
+                        incidents = listOf(
+                            createIncident(endTime = "2022-06-31T22:50:00Z"),
+                        )
+                    ),
+                )
+            )
+        )
+        val route3 = createNavigationRoute(directionsRoute = createDirectionsRoute(legs = null))
+        val routesRefreshData = RoutesRefreshData(
+            route1,
+            routesProgressData1,
+            listOf(route2 to routesProgressData2, route3 to routesProgressData3)
+        )
+        coEvery {
+            routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2, route3))
+        } returns routesRefreshData
+        every {
+            RouteRefreshValidator.validateRoute(any())
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
+            (args[2] as NavigationRouterRefreshCallback).onFailure(
+                mockk(relaxed = true) {
+                    every { message } returns "error message 1"
+                    every { throwable } returns ConcurrentModificationException()
+                    every { refreshTtl } returns 5
+                }
+            )
+            0
+        }
+        every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
+            (args[2] as NavigationRouterRefreshCallback).onFailure(
+                mockk(relaxed = true) {
+                    every { message } returns "error message 2"
+                    every { throwable } returns IllegalStateException()
+                    every { refreshTtl } returns 0
+                }
+            )
+            0
+        }
+        every { routeRefresh.requestRouteRefresh(route3, any(), any()) } answers {
+            (args[2] as NavigationRouterRefreshCallback).onFailure(
+                mockk(relaxed = true) {
+                    every { message } returns "error message 3"
+                    every { throwable } returns IndexOutOfBoundsException()
+                    every { refreshTtl } returns null
+                }
+            )
+            0
+        }
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
+            listOf(
+                RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALIDATED),
+                RouteRefresherResult(route3, routesProgressData3, RouteRefresherStatus.FAILURE)
+            )
+        )
 
         val actual = sut.refresh(listOf(route1, route2, route3), 10)
 
@@ -354,12 +499,10 @@ class RouteRefresherTest {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
             0
         }
-        val expected = RouteRefresherResult(
-            true,
-            RoutesRefreshData(
-                route1,
-                routesProgressData1,
-                listOf(newRoute2 to routesProgressData2)
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
+            listOf(
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
             )
         )
 
@@ -388,12 +531,10 @@ class RouteRefresherTest {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
             0
         }
-        val expected = RouteRefresherResult(
-            true,
-            RoutesRefreshData(
-                route1,
-                routesProgressData1,
-                listOf(newRoute2 to routesProgressData2)
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALID),
+            listOf(
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
             )
         )
 
@@ -485,7 +626,10 @@ class RouteRefresherTest {
         coEvery {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
         } returns routesRefreshData
-        val expected = RouteRefresherResult(false, routesRefreshData)
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALID),
+            listOf(RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALID))
+        )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
         assertEquals(expected, actual)
@@ -497,6 +641,140 @@ class RouteRefresherTest {
             )
             logger.logI(
                 "route $route2Id can't be refreshed because $reason2",
+                "RouteRefreshController"
+            )
+        }
+    }
+
+    @Test
+    fun refresh_oneRouteIsInvalidated() = coroutineRule.runBlockingTest {
+        every {
+            RouteRefreshValidator.validateRoute(route1)
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        every {
+            RouteRefreshValidator.validateRoute(route2)
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        every { RouteExpirationHandler.isRouteExpired(route1) } returns true
+        every { RouteExpirationHandler.isRouteExpired(route2) } returns false
+        every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1)
+            0
+        }
+        every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
+            0
+        }
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALIDATED),
+            listOf(
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
+            )
+        )
+
+        val actual = sut.refresh(listOf(route1, route2), 10)
+        assertEquals(expected, actual)
+
+        verify {
+            logger.logI(
+                "route $route1Id will not be refreshed because it is invalidated",
+                "RouteRefreshController"
+            )
+            logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
+        }
+    }
+
+    @Test
+    fun refresh_allRoutesAreInvalidated() = coroutineRule.runBlockingTest {
+        val route1Id = "route1"
+        val route2Id = "route2"
+        val route1 = spyk(
+            createNavigationRoute(
+                directionsRoute = createDirectionsRoute(
+                    legs = listOf(
+                        createRouteLeg(
+                            annotation = LegAnnotation.builder()
+                                .congestion(listOf("moderate", "moderate"))
+                                .congestionNumeric(listOf(80, 80))
+                                .build(),
+                            incidents = listOf(
+                                createIncident(endTime = "2022-06-30T21:59:00Z"),
+                                createIncident(endTime = "2022-06-31T21:59:00Z"),
+                            )
+                        ),
+                        createRouteLeg(
+                            annotation = LegAnnotation.builder()
+                                .congestion(listOf("heavy", "heavy"))
+                                .congestionNumeric(listOf(90, 90))
+                                .build(),
+                            incidents = listOf(
+                                createIncident(endTime = "2022-06-30T20:59:00Z"),
+                                createIncident(endTime = "bad time"),
+                                createIncident(endTime = "2022-06-30T19:59:00Z"),
+                            )
+                        ),
+                    )
+                )
+            )
+        ) {
+            every { id } returns route1Id
+        }
+        val route2 = spyk(
+            createNavigationRoute(
+                directionsRoute = createDirectionsRoute(
+                    legs = listOf(
+                        createRouteLeg(
+                            annotation = LegAnnotation.builder()
+                                .congestion(listOf("moderate", "heavy"))
+                                .congestionNumeric(listOf(80, 90))
+                                .build(),
+                            incidents = listOf(
+                                createIncident(endTime = "2022-06-31T10:59:00Z"),
+                                createIncident(endTime = "2022-06-21T10:59:00Z"),
+                            )
+                        ),
+                        createRouteLeg(
+                            annotation = LegAnnotation.builder()
+                                .congestion(listOf("heavy", "moderate"))
+                                .congestionNumeric(listOf(90, 80))
+                                .build(),
+                            incidents = null
+                        ),
+                    )
+                )
+            )
+        ) { every { id } returns route2Id }
+        every {
+            RouteRefreshValidator.validateRoute(route1)
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        every {
+            RouteRefreshValidator.validateRoute(route2)
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+        every { RouteExpirationHandler.isRouteExpired(any()) } returns true
+        val routesRefreshData = RoutesRefreshData(
+            route1,
+            routesProgressData1,
+            listOf(route2 to routesProgressData2)
+        )
+        coEvery {
+            routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
+        } returns routesRefreshData
+        val expected = RoutesRefresherResult(
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALIDATED),
+            listOf(
+                RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALIDATED)
+            )
+        )
+
+        val actual = sut.refresh(listOf(route1, route2), 10)
+        assertEquals(expected, actual)
+
+        verify {
+            logger.logI(
+                "route $route1Id will not be refreshed because it is invalidated",
+                "RouteRefreshController"
+            )
+            logger.logI(
+                "route $route2Id will not be refreshed because it is invalidated",
                 "RouteRefreshController"
             )
         }

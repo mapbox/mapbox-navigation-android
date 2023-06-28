@@ -1,9 +1,14 @@
 package com.mapbox.navigation.instrumentation_tests.utils.location
 
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
     latitude: Double,
@@ -28,5 +33,25 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
         } finally {
             updateLocations.cancel()
         }
+    }
+}
+
+suspend fun BaseCoreNoCleanUpTest.stayOnPositionAndWaitForUpdate(
+    mapboxNavigation: MapboxNavigation,
+    latitude: Double,
+    longitude: Double,
+    bearing: Float,
+    frequencyHz: Int = 1,
+    block: suspend () -> Unit
+) {
+    stayOnPosition(latitude, longitude, bearing, frequencyHz) {
+        mapboxNavigation.flowLocationMatcherResult().filter {
+            abs(
+                it.enhancedLocation.latitude - latitude
+            ) < 0.0001 && abs(
+                it.enhancedLocation.longitude - longitude
+            ) < 0.0001
+        }.first()
+        block()
     }
 }

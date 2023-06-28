@@ -46,19 +46,24 @@ internal object RouteRefreshControllerProvider {
             timeProvider,
             routeRefreshOptions.intervalMillis * 3
         )
+        val routeRefreshResultAttemptProcessor = RoutesRefreshAttemptProcessor(
+            refreshObserversManager
+        )
 
         val plannedRouteRefreshController = PlannedRouteRefreshController(
             routeRefresherExecutor,
             routeRefreshOptions,
             stateHolder,
             CoroutineUtils.createScope(routeRefreshParentJob, immediateDispatcher),
-            routeRefresherResultProcessor
+            routeRefresherResultProcessor,
+            routeRefreshResultAttemptProcessor,
         )
         val immediateRouteRefreshController = ImmediateRouteRefreshController(
             routeRefresherExecutor,
             stateHolder,
             CoroutineUtils.createScope(routeRefreshParentJob, dispatcher),
-            routeRefresherResultProcessor
+            routeRefresherResultProcessor,
+            routeRefreshResultAttemptProcessor,
         )
         return RouteRefreshController(
             routeRefreshParentJob,

@@ -71,6 +71,7 @@ package com.mapbox.navigation.core {
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver routeAlternativesObserver);
     method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
+    method public void registerRoutesInvalidatedObserver(com.mapbox.navigation.core.RoutesInvalidatedObserver observer);
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
@@ -114,6 +115,7 @@ package com.mapbox.navigation.core {
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver routeAlternativesObserver);
     method public void unregisterRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
+    method public void unregisterRoutesInvalidatedObserver(com.mapbox.navigation.core.RoutesInvalidatedObserver observer);
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
@@ -156,6 +158,15 @@ package com.mapbox.navigation.core {
     method public String getVersion();
     property public final String dataset;
     property public final String version;
+  }
+
+  public fun interface RoutesInvalidatedObserver {
+    method public void onRoutesInvalidated(com.mapbox.navigation.core.RoutesInvalidatedParams params);
+  }
+
+  public final class RoutesInvalidatedParams {
+    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getInvalidatedRoutes();
+    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> invalidatedRoutes;
   }
 
   public fun interface RoutesSetCallback {

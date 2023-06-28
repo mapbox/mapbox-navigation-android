@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.internal.utils
 
 import android.os.Handler
 import android.os.HandlerThread
+import com.mapbox.navigation.core.internal.utils.CoroutineUtils.withTimeoutOrDefault
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -180,5 +181,24 @@ class CoroutineUtilsTest {
             thread1.quit()
             thread2.quit()
         }
+    }
+
+    @Test
+    fun withTimeoutOrDefault_success() = runBlocking {
+        val actual = withTimeoutOrDefault(timeMillis = 1000, default = 0) {
+            10
+        }
+
+        assertEquals(10, actual)
+    }
+
+    @Test
+    fun withTimeoutOrDefault_timeout() = runBlocking {
+        val actual = withTimeoutOrDefault(timeMillis = 5, default = 1) {
+            delay(6)
+            10
+        }
+
+        assertEquals(1, actual)
     }
 }

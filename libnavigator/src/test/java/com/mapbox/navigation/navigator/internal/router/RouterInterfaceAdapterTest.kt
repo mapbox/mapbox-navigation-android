@@ -25,6 +25,7 @@ import io.mockk.slot
 import io.mockk.unmockkStatic
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
+import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
@@ -140,6 +141,7 @@ class RouterInterfaceAdapterTest {
                 com.mapbox.navigator.RouterOrigin.ONBOARD,
                 slotNativeRouterOrigin.captured
             )
+            assertNull(refreshTtl)
         }
     }
 
@@ -242,7 +244,9 @@ class RouterInterfaceAdapterTest {
 
         val receivedRequestId = routerInterface
             .getRouteRefresh(mockRouteOptions, nativeRouterRefreshCallback)
-        routerRefreshCallback.captured.onFailure(mockk(relaxed = true))
+        routerRefreshCallback.captured.onFailure(
+            mockk(relaxed = true) { every { refreshTtl } returns 10 }
+        )
 
         assertNotNull(slotNativeRouterRefreshCallback.captured)
         assertTrue(slotNativeRouterRefreshCallback.captured.isError)
@@ -251,6 +255,7 @@ class RouterInterfaceAdapterTest {
             assertEquals(requestId, this.requestId)
             assertEquals(RouterInterfaceAdapter.ROUTE_REFRESH_FAILED_DEFAULT_CODE, this.code)
             assertEquals(RouterErrorType.UNKNOWN, this.type)
+            assertEquals(10, this.refreshTtl)
         }
         assertEquals(com.mapbox.navigator.RouterOrigin.CUSTOM, slotNativeRouterOrigin.captured)
     }

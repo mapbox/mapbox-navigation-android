@@ -49,7 +49,8 @@ fun createDirectionsRoute(
     duration: Double = 9.0,
     routeIndex: String = "0",
     requestUuid: String? = "testUUID",
-    waypoints: List<DirectionsWaypoint>? = null
+    waypoints: List<DirectionsWaypoint>? = null,
+    refreshTtl: Int? = null
 ): DirectionsRoute = DirectionsRoute.builder()
     .distance(distance)
     .duration(duration)
@@ -58,6 +59,7 @@ fun createDirectionsRoute(
     .routeIndex(routeIndex)
     .requestUuid(requestUuid)
     .waypoints(waypoints)
+    .apply { refreshTtl?.let { unrecognizedJsonProperties(mapOf("refresh_ttl" to JsonPrimitive(it))) } }
     .build()
 
 fun createRouteLeg(

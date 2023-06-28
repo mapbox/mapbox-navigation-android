@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.navigation.core.RoutesRefreshData
+import com.mapbox.navigation.core.RoutesInvalidatedObserver
+import com.mapbox.navigation.core.RoutesInvalidatedParams
 import io.mockk.clearAllMocks
 import io.mockk.mockk
 import io.mockk.verify
@@ -10,45 +11,45 @@ class RefreshObserversManagerTest {
 
     private val sut = RefreshObserversManager()
     private val observer = mockk<RouteRefreshObserver>(relaxed = true)
-    private val routesRefreshData = mockk<RoutesRefreshData>()
-    private val inputResult = RouteRefresherResult(true, routesRefreshData)
-    private val outputResult = routesRefreshData
+    private val invalidatedObserver = mockk<RoutesInvalidatedObserver>(relaxed = true)
+    private val result = RoutesRefresherResult(mockk(), listOf(mockk()))
+    private val invalidatedRoutesParams = mockk<RoutesInvalidatedParams>()
 
     @Test
     fun registerObserverThenReceiveUpdate() {
-        sut.registerObserver(observer)
+        sut.registerRefreshObserver(observer)
 
-        sut.onRoutesRefreshed(inputResult)
+        sut.onRoutesRefreshed(result)
 
-        verify(exactly = 1) { observer.onRoutesRefreshed(outputResult) }
+        verify(exactly = 1) { observer.onRoutesRefreshed(result) }
     }
 
     @Test
     fun registerUnregisteredObserver() {
-        sut.registerObserver(observer)
-        sut.unregisterObserver(observer)
-        sut.registerObserver(observer)
+        sut.registerRefreshObserver(observer)
+        sut.unregisterRefreshObserver(observer)
+        sut.registerRefreshObserver(observer)
 
-        sut.onRoutesRefreshed(inputResult)
+        sut.onRoutesRefreshed(result)
 
-        verify(exactly = 1) { observer.onRoutesRefreshed(outputResult) }
+        verify(exactly = 1) { observer.onRoutesRefreshed(result) }
     }
 
     @Test
     fun receiveUpdateThenRegisterObserver() {
-        sut.onRoutesRefreshed(inputResult)
+        sut.onRoutesRefreshed(result)
 
-        sut.registerObserver(observer)
+        sut.registerRefreshObserver(observer)
 
         verify(exactly = 0) { observer.onRoutesRefreshed(any()) }
     }
 
     @Test
     fun receiveUpdateAfterUnregisterObserver() {
-        sut.registerObserver(observer)
-        sut.unregisterObserver(observer)
+        sut.registerRefreshObserver(observer)
+        sut.unregisterRefreshObserver(observer)
 
-        sut.onRoutesRefreshed(inputResult)
+        sut.onRoutesRefreshed(result)
 
         verify(exactly = 0) { observer.onRoutesRefreshed(any()) }
     }
@@ -56,11 +57,11 @@ class RefreshObserversManagerTest {
     @Test
     fun receiveUpdateAfterUnregisterAllObservers() {
         val observer2 = mockk<RouteRefreshObserver>(relaxed = true)
-        sut.registerObserver(observer)
-        sut.registerObserver(observer2)
+        sut.registerRefreshObserver(observer)
+        sut.registerRefreshObserver(observer2)
         sut.unregisterAllObservers()
 
-        sut.onRoutesRefreshed(inputResult)
+        sut.onRoutesRefreshed(result)
 
         verify(exactly = 0) {
             observer.onRoutesRefreshed(any())
@@ -71,28 +72,28 @@ class RefreshObserversManagerTest {
     @Test
     fun receiveUpdateToNotifyMultipleObservers() {
         val observer2 = mockk<RouteRefreshObserver>(relaxed = true)
-        sut.registerObserver(observer)
-        sut.registerObserver(observer2)
+        sut.registerRefreshObserver(observer)
+        sut.registerRefreshObserver(observer2)
 
-        sut.onRoutesRefreshed(inputResult)
+        sut.onRoutesRefreshed(result)
 
         verify(exactly = 1) {
-            observer.onRoutesRefreshed(outputResult)
-            observer2.onRoutesRefreshed(outputResult)
+            observer.onRoutesRefreshed(result)
+            observer2.onRoutesRefreshed(result)
         }
     }
 
     @Test
     fun receiveUpdateWithOneRegisteredAndOneUnregisteredObserver() {
         val observer2 = mockk<RouteRefreshObserver>(relaxed = true)
-        sut.registerObserver(observer)
-        sut.registerObserver(observer2)
-        sut.unregisterObserver(observer2)
+        sut.registerRefreshObserver(observer)
+        sut.registerRefreshObserver(observer2)
+        sut.unregisterRefreshObserver(observer2)
 
-        sut.onRoutesRefreshed(inputResult)
+        sut.onRoutesRefreshed(result)
 
         verify(exactly = 1) {
-            observer.onRoutesRefreshed(outputResult)
+            observer.onRoutesRefreshed(result)
         }
         verify(exactly = 0) {
             observer2.onRoutesRefreshed(any())
@@ -101,28 +102,152 @@ class RefreshObserversManagerTest {
 
     @Test
     fun receiveMultipleUpdates() {
-        val routesProgressData2 = mockk<RoutesRefreshData>()
-        val inputResult2 = RouteRefresherResult(
-            true,
-            routesProgressData2
+        val result2 = RoutesRefresherResult(
+            mockk(),
+            listOf(mockk(), mockk())
         )
 
-        sut.registerObserver(observer)
-        sut.onRoutesRefreshed(inputResult)
+        sut.registerRefreshObserver(observer)
+        sut.onRoutesRefreshed(result)
         clearAllMocks(answers = false)
 
-        sut.onRoutesRefreshed(inputResult2)
+        sut.onRoutesRefreshed(result2)
 
-        verify { observer.onRoutesRefreshed(routesProgressData2) }
+        verify { observer.onRoutesRefreshed(result2) }
     }
 
     @Test
     fun unregisterUnknownObserver() {
-        sut.unregisterObserver(observer)
+        sut.unregisterRefreshObserver(observer)
     }
 
     @Test
     fun unregisterAllObserversWhenNoneRegistered() {
         sut.unregisterAllObservers()
+    }
+
+    @Test
+    fun registerInvalidatedObserverThenReceiveUpdate() {
+        sut.registerInvalidatedObserver(invalidatedObserver)
+
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+
+        verify(exactly = 1) { invalidatedObserver.onRoutesInvalidated(invalidatedRoutesParams) }
+    }
+
+    @Test
+    fun registerUnregisteredInvalidatedObserver() {
+        sut.registerInvalidatedObserver(invalidatedObserver)
+        sut.unregisterInvalidatedObserver(invalidatedObserver)
+        sut.registerInvalidatedObserver(invalidatedObserver)
+
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+
+        verify(exactly = 1) { invalidatedObserver.onRoutesInvalidated(invalidatedRoutesParams) }
+    }
+
+    @Test
+    fun receiveUpdateThenRegisterInvalidatedObserver() {
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+
+        sut.registerInvalidatedObserver(invalidatedObserver)
+
+        verify(exactly = 0) { invalidatedObserver.onRoutesInvalidated(invalidatedRoutesParams) }
+    }
+
+    @Test
+    fun receiveUpdateAfterUnregisterInvalidatedObserver() {
+        sut.registerInvalidatedObserver(invalidatedObserver)
+        sut.unregisterInvalidatedObserver(invalidatedObserver)
+
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+
+        verify(exactly = 0) { invalidatedObserver.onRoutesInvalidated(any()) }
+    }
+
+    @Test
+    fun receiveInvalidatedUpdateAfterUnregisterAllObservers() {
+        val observer2 = mockk<RoutesInvalidatedObserver>(relaxed = true)
+        sut.registerInvalidatedObserver(invalidatedObserver)
+        sut.registerInvalidatedObserver(observer2)
+        sut.unregisterAllObservers()
+
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+
+        verify(exactly = 0) {
+            invalidatedObserver.onRoutesInvalidated(any())
+            observer2.onRoutesInvalidated(any())
+        }
+    }
+
+    @Test
+    fun receiveUpdateToNotifyMultipleInvalidatedObservers() {
+        val observer2 = mockk<RoutesInvalidatedObserver>(relaxed = true)
+        sut.registerInvalidatedObserver(invalidatedObserver)
+        sut.registerInvalidatedObserver(observer2)
+
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+
+        verify(exactly = 1) {
+            invalidatedObserver.onRoutesInvalidated(invalidatedRoutesParams)
+            observer2.onRoutesInvalidated(invalidatedRoutesParams)
+        }
+    }
+
+    @Test
+    fun receiveUpdateWithOneRegisteredAndOneUnregisteredInvalidatedObserver() {
+        val observer2 = mockk<RoutesInvalidatedObserver>(relaxed = true)
+        sut.registerInvalidatedObserver(invalidatedObserver)
+        sut.registerInvalidatedObserver(observer2)
+        sut.unregisterInvalidatedObserver(observer2)
+
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+
+        verify(exactly = 1) {
+            invalidatedObserver.onRoutesInvalidated(invalidatedRoutesParams)
+        }
+        verify(exactly = 0) {
+            observer2.onRoutesInvalidated(any())
+        }
+    }
+
+    @Test
+    fun receiveMultipleInvalidatedUpdates() {
+        val invalidatedRoutesParams2 = mockk<RoutesInvalidatedParams>()
+
+        sut.registerInvalidatedObserver(invalidatedObserver)
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+        clearAllMocks(answers = false)
+
+        sut.onRoutesInvalidated(invalidatedRoutesParams2)
+
+        verify { invalidatedObserver.onRoutesInvalidated(invalidatedRoutesParams2) }
+    }
+
+    @Test
+    fun unregisterUnknownInvalidatedObserver() {
+        sut.unregisterInvalidatedObserver(invalidatedObserver)
+    }
+
+    @Test
+    fun refreshUpdateDoesNotAffectInvalidatedObserver() {
+        sut.registerInvalidatedObserver(invalidatedObserver)
+
+        sut.onRoutesRefreshed(result)
+
+        verify(exactly = 0) {
+            invalidatedObserver.onRoutesInvalidated(any())
+        }
+    }
+
+    @Test
+    fun invalidatedUpdateDoesNotAffectRefreshObserver() {
+        sut.registerRefreshObserver(observer)
+
+        sut.onRoutesInvalidated(invalidatedRoutesParams)
+
+        verify(exactly = 0) {
+            observer.onRoutesRefreshed(any())
+        }
     }
 }

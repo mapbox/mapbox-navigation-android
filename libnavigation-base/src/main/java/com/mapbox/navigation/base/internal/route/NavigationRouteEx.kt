@@ -4,6 +4,8 @@ package com.mapbox.navigation.base.internal.route
 
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
+import com.google.gson.JsonElement
+import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -14,6 +16,7 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.SDKRouteParser
+import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
@@ -64,6 +67,7 @@ fun NavigationRoute.refreshRoute(
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
     waypoints: List<DirectionsWaypoint?>?,
+    refreshTtl: Int?,
 ): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
         if (index < initialLegIndex) {
@@ -120,12 +124,36 @@ fun NavigationRoute.refreshRoute(
                 updateLegs = updateLegs,
                 waypoints = buildNewWaypoints(this@refreshRoute.waypoints, waypoints)
             )
+            .updateRefreshTtl(this.unrecognizedJsonProperties, refreshTtl)
             .build()
     }
     val directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder = {
         waypoints(buildNewWaypoints(directionsResponse.waypoints(), waypoints))
     }
     return update(directionsRouteBlock, directionsResponseBlock)
+}
+
+private fun DirectionsRoute.Builder.updateRefreshTtl(
+    oldUnrecognizedProperties: Map<String, JsonElement>?,
+    newRefreshTtl: Int?
+): DirectionsRoute.Builder {
+    return if (newRefreshTtl == null) {
+        if (oldUnrecognizedProperties.isNullOrEmpty()) {
+            this
+        } else {
+            unrecognizedJsonProperties(
+                oldUnrecognizedProperties.toMutableMap().also {
+                    it.remove(Constants.RouteResponse.KEY_REFRESH_TTL)
+                }
+            )
+        }
+    } else {
+        unrecognizedJsonProperties(
+            oldUnrecognizedProperties.orEmpty().toMutableMap().also {
+                it[Constants.RouteResponse.KEY_REFRESH_TTL] = JsonPrimitive(newRefreshTtl)
+            }
+        )
+    }
 }
 
 private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {

@@ -10,12 +10,13 @@ class FailByRequestMockRequestHandler(
 
     var failResponse: Boolean = false
     var failResponseCode: Int = 500
+    var errorBody: String = ""
 
     override fun handle(request: RecordedRequest): MockResponse? {
         val result = wrapped.handle(request)
         return if (result != null) {
             if (failResponse) {
-                MockResponse().setResponseCode(failResponseCode).setBody("")
+                MockResponse().setResponseCode(failResponseCode).setBody(errorBody)
             } else {
                 result
             }

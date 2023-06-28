@@ -4,6 +4,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.RoutesInvalidatedObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.every
@@ -45,7 +46,7 @@ class RouteRefreshControllerTest {
 
         sut.registerRouteRefreshObserver(observer)
 
-        verify(exactly = 1) { refreshObserversManager.registerObserver(observer) }
+        verify(exactly = 1) { refreshObserversManager.registerRefreshObserver(observer) }
     }
 
     @Test
@@ -54,7 +55,7 @@ class RouteRefreshControllerTest {
 
         sut.unregisterRouteRefreshObserver(observer)
 
-        verify(exactly = 1) { refreshObserversManager.unregisterObserver(observer) }
+        verify(exactly = 1) { refreshObserversManager.unregisterRefreshObserver(observer) }
     }
 
     @Test
@@ -73,6 +74,24 @@ class RouteRefreshControllerTest {
         sut.unregisterRouteRefreshStateObserver(observer)
 
         verify(exactly = 1) { stateHolder.unregisterRouteRefreshStateObserver(observer) }
+    }
+
+    @Test
+    fun registerRoutesInvalidatedObserver() {
+        val observer = mockk<RoutesInvalidatedObserver>()
+
+        sut.registerRoutesInvalidatedObserver(observer)
+
+        verify(exactly = 1) { refreshObserversManager.registerInvalidatedObserver(observer) }
+    }
+
+    @Test
+    fun unregisterRoutesInvalidatedObserver() {
+        val observer = mockk<RoutesInvalidatedObserver>()
+
+        sut.unregisterRoutesInvalidatedObserver(observer)
+
+        verify(exactly = 1) { refreshObserversManager.unregisterInvalidatedObserver(observer) }
     }
 
     @Test
@@ -132,7 +151,7 @@ class RouteRefreshControllerTest {
     @Test
     fun requestImmediateRouteRefreshWithNonEmptySuccess() {
         val routes = listOf<NavigationRoute>(mockk())
-        val callback = slot<(Expected<String, RouteRefresherResult>) -> Unit>()
+        val callback = slot<(Expected<String, RoutesRefresherResult>) -> Unit>()
         every { plannedRouteRefreshController.routesToRefresh } returns routes
 
         sut.requestImmediateRouteRefresh()
@@ -140,7 +159,11 @@ class RouteRefreshControllerTest {
         verify(exactly = 1) {
             immediateRouteRefreshController.requestRoutesRefresh(routes, capture(callback))
         }
-        callback.captured(ExpectedFactory.createValue(RouteRefresherResult(true, mockk())))
+        callback.captured(
+            ExpectedFactory.createValue(
+                mockk { every { anySuccess() } returns true }
+            )
+        )
         verify(exactly = 0) {
             plannedRouteRefreshController.resume()
         }
@@ -149,7 +172,7 @@ class RouteRefreshControllerTest {
     @Test
     fun requestImmediateRouteRefreshWithNonEmptyFailure() {
         val routes = listOf<NavigationRoute>(mockk())
-        val callback = slot<(Expected<String, RouteRefresherResult>) -> Unit>()
+        val callback = slot<(Expected<String, RoutesRefresherResult>) -> Unit>()
         every { plannedRouteRefreshController.routesToRefresh } returns routes
 
         sut.requestImmediateRouteRefresh()
@@ -157,7 +180,13 @@ class RouteRefreshControllerTest {
         verify(exactly = 1) {
             immediateRouteRefreshController.requestRoutesRefresh(routes, capture(callback))
         }
-        callback.captured(ExpectedFactory.createValue(RouteRefresherResult(false, mockk())))
+        callback.captured(
+            ExpectedFactory.createValue(
+                mockk {
+                    every { anySuccess() } returns false
+                }
+            )
+        )
         verify(exactly = 1) {
             plannedRouteRefreshController.resume()
         }
@@ -166,7 +195,7 @@ class RouteRefreshControllerTest {
     @Test
     fun requestImmediateRouteRefreshWithNonEmptyError() {
         val routes = listOf<NavigationRoute>(mockk())
-        val callback = slot<(Expected<String, RouteRefresherResult>) -> Unit>()
+        val callback = slot<(Expected<String, RoutesRefresherResult>) -> Unit>()
         every { plannedRouteRefreshController.routesToRefresh } returns routes
 
         sut.requestImmediateRouteRefresh()
