@@ -125,7 +125,7 @@ class CopilotOptions private constructor(
 
         /**
          * Limits total size of history files per session. If the total size of history files exceeds this value,
-         * some of the first files will not be uploaded. The last file is always uploaded. Default is [Long.MAX_VALUE]
+         * some of the first files will not be uploaded. Default is [Long.MAX_VALUE]
          */
         fun maxTotalHistoryFilesSizePerSession(bytes: Long): Builder = apply {
             check(bytes > 0) {

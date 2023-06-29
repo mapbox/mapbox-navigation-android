@@ -318,7 +318,7 @@ internal class MapboxCopilotImpl(
                 delete(firstFile)
                 historyFiles.remove(firstFile)
             }
-            limitTotalHistoryFilesSize(historyFiles, minFilesCount = 0)
+            limitTotalHistoryFilesSize(historyFiles)
         }
         copilotHistoryRecorder.startRecording()
         startedAt = currentUtcTime()
@@ -349,7 +349,7 @@ internal class MapboxCopilotImpl(
             val historyFilesCopy = historyFiles.toMutableMap()
             stopRecording { historyFilePath ->
                 historyFilesCopy[File(historyFilePath)] = drive
-                limitTotalHistoryFilesSize(historyFilesCopy, minFilesCount = 1)
+                limitTotalHistoryFilesSize(historyFilesCopy)
                 pushHistoryFiles(historyFilesCopy)
             }
         } else {
@@ -394,12 +394,9 @@ internal class MapboxCopilotImpl(
         return context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
     }
 
-    private fun limitTotalHistoryFilesSize(
-        historyFiles: MutableMap<File, CopilotMetadata>,
-        minFilesCount: Int,
-    ) {
+    private fun limitTotalHistoryFilesSize(historyFiles: MutableMap<File, CopilotMetadata>) {
         var total = historyFiles.keys.sumOf { HistoryAttachmentsUtils.size(it) }
-        while (total > maxTotalHistoryFilesSizePerSession && historyFiles.size > minFilesCount) {
+        while (total > maxTotalHistoryFilesSizePerSession) {
             val firstFile = historyFiles.keys.first()
             total -= HistoryAttachmentsUtils.size(firstFile)
             delete(firstFile)
