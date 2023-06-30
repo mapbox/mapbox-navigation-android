@@ -81,6 +81,11 @@ object RoadObjectType {
     internal const val NOTIFICATION = 11
 
     /**
+     * Type of the [MERGING_AREA] - corresponds to Merging Area.
+     */
+    internal const val MERGING_AREA = 12
+
+    /**
      * Retention policy for the RoadObjectType
      */
     @Retention(AnnotationRetention.BINARY)

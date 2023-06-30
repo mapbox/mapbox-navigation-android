@@ -277,6 +277,7 @@ internal fun RoadObjectType.mapToRoadObjectType(): Int {
         RoadObjectType.IC -> SDKRoadObjectType.IC
         RoadObjectType.JCT -> SDKRoadObjectType.JCT
         RoadObjectType.NOTIFICATION -> SDKRoadObjectType.NOTIFICATION
+        RoadObjectType.MERGING_AREA -> SDKRoadObjectType.MERGING_AREA
     }
 }
 
