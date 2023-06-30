@@ -97,7 +97,8 @@ class RouterWrapperTests {
             FAILURE_MESSAGE,
             FAILURE_CODE,
             FAILURE_TYPE,
-            REQUEST_ID
+            REQUEST_ID,
+            null
         )
     )
     private val routerResultFailureDataRef: Expected<RouterError, DataRef> = ExpectedFactory
@@ -106,7 +107,8 @@ class RouterWrapperTests {
                 FAILURE_MESSAGE,
                 FAILURE_CODE,
                 FAILURE_TYPE,
-                REQUEST_ID
+                REQUEST_ID,
+                null
             )
         )
     private val routerResultCancelled: Expected<RouterError, DataRef> = ExpectedFactory
@@ -115,7 +117,8 @@ class RouterWrapperTests {
                 CANCELLED_MESSAGE,
                 FAILURE_CODE,
                 CANCELED_TYPE,
-                REQUEST_ID
+                REQUEST_ID,
+                null
             )
         )
     private val routerResultSuccessEmptyRoutes: Expected<RouterError, DataRef> = ExpectedFactory

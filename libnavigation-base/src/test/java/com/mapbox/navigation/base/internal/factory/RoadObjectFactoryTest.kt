@@ -17,6 +17,9 @@ import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingArea
+import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaInfo
+import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaType
 import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
@@ -295,6 +298,69 @@ class RoadObjectFactoryTest {
     }
 
     @Test
+    fun `buildRoadObject - merging area from left is parsed correctly`() {
+        val nativeObject = mergingAreaLeft
+
+        val expected = MergingArea(
+            ID,
+            MergingAreaInfo(MergingAreaType.FROM_LEFT),
+            LENGTH,
+            SDKRoadObjectProvider.MAPBOX,
+            false,
+            nativeObject
+        )
+
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+
+        assertEquals(expected, roadObject)
+        assertEquals(expected.hashCode(), roadObject.hashCode())
+        assertEquals(expected.toString(), roadObject.toString())
+        assertEquals(RoadObjectType.MERGING_AREA, roadObject.objectType)
+    }
+
+    @Test
+    fun `buildRoadObject - merging area from right is parsed correctly`() {
+        val nativeObject = mergingAreaRight
+
+        val expected = MergingArea(
+            ID,
+            MergingAreaInfo(MergingAreaType.FROM_RIGHT),
+            LENGTH,
+            SDKRoadObjectProvider.MAPBOX,
+            false,
+            nativeObject
+        )
+
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+
+        assertEquals(expected, roadObject)
+        assertEquals(expected.hashCode(), roadObject.hashCode())
+        assertEquals(expected.toString(), roadObject.toString())
+        assertEquals(RoadObjectType.MERGING_AREA, roadObject.objectType)
+    }
+
+    @Test
+    fun `buildRoadObject - merging area from both is parsed correctly`() {
+        val nativeObject = mergingAreaBothSides
+
+        val expected = MergingArea(
+            ID,
+            MergingAreaInfo(MergingAreaType.FROM_BOTH_SIDES),
+            LENGTH,
+            SDKRoadObjectProvider.MAPBOX,
+            false,
+            nativeObject
+        )
+
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
+
+        assertEquals(expected, roadObject)
+        assertEquals(expected.hashCode(), roadObject.hashCode())
+        assertEquals(expected.toString(), roadObject.toString())
+        assertEquals(RoadObjectType.MERGING_AREA, roadObject.objectType)
+    }
+
+    @Test
     fun `buildRoadObject - unsupported notification`() {
         val nativeObject = notification
 
@@ -440,6 +506,33 @@ class RoadObjectFactoryTest {
         railwayCrossingInfo = com.mapbox.navigator.RailwayCrossingInfo("id#1")
     )
 
+    private val mergingAreaLeft = createRoadObject(
+        type = com.mapbox.navigator.RoadObjectType.MERGING_AREA,
+        location = matchedRoadObjectLocation(location.shape),
+        mergingAreaInfo = com.mapbox.navigator.MergingAreaInfo(
+            "id#0",
+            com.mapbox.navigator.MergingAreaType.FROM_LEFT
+        )
+    )
+
+    private val mergingAreaRight = createRoadObject(
+        type = com.mapbox.navigator.RoadObjectType.MERGING_AREA,
+        location = matchedRoadObjectLocation(location.shape),
+        mergingAreaInfo = com.mapbox.navigator.MergingAreaInfo(
+            "id#0",
+            com.mapbox.navigator.MergingAreaType.FROM_RIGHT
+        )
+    )
+
+    private val mergingAreaBothSides = createRoadObject(
+        type = com.mapbox.navigator.RoadObjectType.MERGING_AREA,
+        location = matchedRoadObjectLocation(location.shape),
+        mergingAreaInfo = com.mapbox.navigator.MergingAreaInfo(
+            "id#0",
+            com.mapbox.navigator.MergingAreaType.FROM_BOTH
+        )
+    )
+
     private val ic = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.IC,
         location = matchedRoadObjectLocation(location.shape),
@@ -533,6 +626,7 @@ class RoadObjectFactoryTest {
         railwayCrossingInfo: com.mapbox.navigator.RailwayCrossingInfo? = null,
         icInfo: com.mapbox.navigator.IcInfo? = null,
         jctInfo: com.mapbox.navigator.JctInfo? = null,
+        mergingAreaInfo: com.mapbox.navigator.MergingAreaInfo? = null,
         id: String = ID
     ): RoadObject {
         val metadata = when (type) {
@@ -552,6 +646,8 @@ class RoadObjectFactoryTest {
                 RoadObjectMetadata.valueOf(icInfo!!)
             com.mapbox.navigator.RoadObjectType.JCT ->
                 RoadObjectMetadata.valueOf(jctInfo!!)
+            com.mapbox.navigator.RoadObjectType.MERGING_AREA ->
+                RoadObjectMetadata.valueOf(mergingAreaInfo!!)
             else -> mockk()
         }
 

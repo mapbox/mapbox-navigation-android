@@ -52,6 +52,7 @@ class RouterInterfaceAdapter(
                     routerFailure?.code ?: ROUTE_REQUEST_FAILED_DEFAULT_CODE,
                     RouterErrorType.UNKNOWN,
                     requestId,
+                    null,
                 )
             }
 
@@ -84,7 +85,8 @@ class RouterInterfaceAdapter(
                                     ROUTE_REQUEST_FAILED_EMPTY_ROUTES_LIST,
                                     ROUTE_REQUEST_FAILED_DEFAULT_CODE,
                                     RouterErrorType.UNKNOWN,
-                                    requestId
+                                    requestId,
+                                    null,
                                 )
                             )
                         }
@@ -117,6 +119,7 @@ class RouterInterfaceAdapter(
                                     ROUTE_REQUEST_FAILED_DEFAULT_CODE,
                                     RouterErrorType.REQUEST_CANCELLED,
                                     requestId,
+                                    null,
                                 )
                             ),
                             routerOrigin.mapToNativeRouteOrigin()
@@ -134,7 +137,7 @@ class RouterInterfaceAdapter(
     ): Long {
         callbackDataRef.run(
             ExpectedFactory.createError(
-                RouterError("Not supported yet", 0, RouterErrorType.UNKNOWN, 0)
+                RouterError("Not supported yet", 0, RouterErrorType.UNKNOWN, 0, null)
             ),
             com.mapbox.navigator.RouterOrigin.ONBOARD
         )
@@ -158,7 +161,8 @@ class RouterInterfaceAdapter(
                         "There is no route that matches $options, nothing to refresh.",
                         ROUTE_REFRESH_FAILED_DEFAULT_CODE,
                         RouterErrorType.UNKNOWN,
-                        -1
+                        -1,
+                        null,
                     )
 
                 ),
@@ -197,6 +201,7 @@ class RouterInterfaceAdapter(
                                 ROUTE_REFRESH_FAILED_DEFAULT_CODE,
                                 RouterErrorType.UNKNOWN,
                                 requestId,
+                                null,
                             )
                         ),
                         NativeRouterOrigin.CUSTOM,

@@ -39,6 +39,7 @@ internal class EHorizonMapperMapToRoadObjectTypeTest(
                 arrayOf<Any>(RoadObjectType.IC, SDKRoadObjectType.IC),
                 arrayOf<Any>(RoadObjectType.JCT, SDKRoadObjectType.JCT),
                 arrayOf<Any>(RoadObjectType.NOTIFICATION, SDKRoadObjectType.NOTIFICATION),
+                arrayOf<Any>(RoadObjectType.MERGING_AREA, SDKRoadObjectType.MERGING_AREA),
             )
             assertEquals(RoadObjectType.values().size, result.size)
             return result

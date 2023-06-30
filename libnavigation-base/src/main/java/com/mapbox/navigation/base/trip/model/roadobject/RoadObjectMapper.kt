@@ -9,6 +9,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.custom.Custom
 import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
+import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingArea
+import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaType
 import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
 import com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
@@ -23,6 +25,7 @@ import com.mapbox.navigator.IncidentCongestion
 import com.mapbox.navigator.IncidentImpact
 import com.mapbox.navigator.IncidentInfo
 import com.mapbox.navigator.IncidentType
+import com.mapbox.navigator.MergingAreaInfo
 import com.mapbox.navigator.RailwayCrossingInfo
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.ServiceAreaInfo
@@ -57,6 +60,9 @@ internal typealias SDKTunnelInfo =
 
 internal typealias SDKRailwayCrossingInfo =
     com.mapbox.navigation.base.trip.model.roadobject.railwaycrossing.RailwayCrossingInfo
+
+internal typealias SDKMergingAreaInfo =
+    com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaInfo
 
 internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
     val provider = provider.mapToRoadObjectProvider()
@@ -152,6 +158,14 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             provider,
             isUrban,
             this
+        )
+        RoadObjectType.MERGING_AREA -> MergingArea(
+            id,
+            metadata.mergingAreaInfo.toSdkMergingAreaInfo(),
+            length,
+            provider,
+            isUrban,
+            this,
         )
     }
 }
@@ -267,3 +281,12 @@ private fun RailwayCrossingInfo.toRailwayCrossingInfo() =
 
 private fun com.mapbox.navigator.LocalizedString.toLocalizedString() =
     LocalizedString(language, value)
+
+private fun MergingAreaInfo.toSdkMergingAreaInfo(): SDKMergingAreaInfo {
+    val sdkType = when (mergeType) {
+        com.mapbox.navigator.MergingAreaType.FROM_LEFT -> MergingAreaType.FROM_LEFT
+        com.mapbox.navigator.MergingAreaType.FROM_RIGHT -> MergingAreaType.FROM_RIGHT
+        com.mapbox.navigator.MergingAreaType.FROM_BOTH -> MergingAreaType.FROM_BOTH_SIDES
+    }
+    return SDKMergingAreaInfo(sdkType)
+}
