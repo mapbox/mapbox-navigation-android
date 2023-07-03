@@ -1,12 +1,15 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import android.content.Context
 import android.graphics.Color
+import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
@@ -17,7 +20,9 @@ import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -40,12 +45,19 @@ class VanishingRouteLineRoboTest {
     @get:Rule
     val nativeRouteParserRule = NativeRouteParserRule()
 
+    private val ctx: Context = mockk()
+
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
     private lateinit var testJobControl: JobControl
 
     @Before
     fun setUp() {
+        mockkStatic(AppCompatResources::class)
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true) {
+            every { intrinsicWidth } returns 24
+            every { intrinsicHeight } returns 24
+        }
         mockkObject(InternalJobControlFactory)
         every {
             InternalJobControlFactory.createDefaultScopeJobControl()
@@ -56,6 +68,7 @@ class VanishingRouteLineRoboTest {
     @After
     fun cleanUp() {
         unmockkObject(InternalJobControlFactory)
+        unmockkStatic(AppCompatResources::class)
     }
 
     @Test
@@ -92,7 +105,9 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
-            genericMockResourceProvider,
+            MapboxRouteLineOptions.Builder(ctx)
+                .withRouteLineResources(genericResourceProvider)
+                .build(),
             -1,
             0.0,
             false
@@ -193,7 +208,9 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             restrictedSegments,
-            genericMockResourceProvider,
+            MapboxRouteLineOptions.Builder(ctx)
+                .withRouteLineResources(genericResourceProvider)
+                .build(),
             0,
             0.0,
             false
@@ -239,7 +256,9 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
-            genericMockResourceProvider,
+            MapboxRouteLineOptions.Builder(ctx)
+                .withRouteLineResources(genericResourceProvider)
+                .build(),
             -1,
             20.0,
             true
@@ -277,16 +296,16 @@ class VanishingRouteLineRoboTest {
         vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 7
         vanishingRouteLine.vanishPointOffset = 0.1322571610688955
         val segments = listOf(
-            RouteLineExpressionData(0.0, -27392, 0),
-            RouteLineExpressionData(0.07932429566550842, -45747, 0),
-            RouteLineExpressionData(0.10338667841237215, -11097861, 0),
-            RouteLineExpressionData(0.18199725933538882, -27392, 0),
-            RouteLineExpressionData(0.2256358178763112, -11097861, 0),
-            RouteLineExpressionData(0.32147751186805656, -27392, 0),
-            RouteLineExpressionData(0.3838765722116185, -11097861, 0),
-            RouteLineExpressionData(0.4891841628737826, 0, 1),
-            RouteLineExpressionData(0.5402820600662328, 0, 1),
-            RouteLineExpressionData(0.9738127865054893, 0, 1)
+            RouteLineExpressionData(0.0, "", -27392, 0),
+            RouteLineExpressionData(0.07932429566550842, "", -45747, 0),
+            RouteLineExpressionData(0.10338667841237215, "", -11097861, 0),
+            RouteLineExpressionData(0.18199725933538882, "", -27392, 0),
+            RouteLineExpressionData(0.2256358178763112, "", -11097861, 0),
+            RouteLineExpressionData(0.32147751186805656, "", -27392, 0),
+            RouteLineExpressionData(0.3838765722116185, "", -11097861, 0),
+            RouteLineExpressionData(0.4891841628737826, "", 0, 1),
+            RouteLineExpressionData(0.5402820600662328, "", 0, 1),
+            RouteLineExpressionData(0.9738127865054893, "", 0, 1)
         )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
@@ -294,7 +313,7 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
-            RouteLineResources.Builder().build(),
+            MapboxRouteLineOptions.Builder(ctx).build(),
             0,
             0.0,
             false
@@ -314,21 +333,23 @@ class VanishingRouteLineRoboTest {
         )
     }
 
-    private val genericMockResourceProvider = mockk<RouteLineResources> {
-        every { routeLineColorResources } returns mockk<RouteLineColorResources> {
-            every { routeUnknownCongestionColor } returns 1
-            every { routeLineTraveledColor } returns 0
-            every { routeDefaultColor } returns 3
-            every { routeCasingColor } returns 4
-            every { routeLowCongestionColor } returns 5
-            every { routeModerateCongestionColor } returns 6
-            every { routeSevereCongestionColor } returns 7
-            every { routeHeavyCongestionColor } returns 8
-            every { alternativeRouteUnknownCongestionColor } returns 9
-            every { routeLineTraveledCasingColor } returns 10
-            every { inActiveRouteLegsColor } returns 11
-            every { restrictedRoadColor } returns 12
-        }
-        every { trafficBackfillRoadClasses } returns listOf()
-    }
+    private val genericResourceProvider = RouteLineResources.Builder()
+        .routeLineColorResources(
+            RouteLineColorResources.Builder()
+                .routeUnknownCongestionColor(1)
+                .routeLineTraveledColor(0)
+                .routeDefaultColor(3)
+                .routeCasingColor(4)
+                .routeLowCongestionColor(5)
+                .routeModerateCongestionColor(6)
+                .routeSevereCongestionColor(7)
+                .routeHeavyCongestionColor(8)
+                .alternativeRouteUnknownCongestionColor(9)
+                .routeLineTraveledCasingColor(10)
+                .inActiveRouteLegsColor(11)
+                .restrictedRoadColor(12)
+                .inactiveRouteLegRestrictedRoadColor(13)
+                .build()
+        )
+        .build()
 }

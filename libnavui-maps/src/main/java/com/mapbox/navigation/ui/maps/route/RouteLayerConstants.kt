@@ -129,6 +129,21 @@ object RouteLayerConstants {
     internal val ROUTE_SEVERE_TRAFFIC_COLOR = Color.parseColor("#8f2447")
 
     @ColorInt
+    internal val ROUTE_LEG_INACTIVE_UNKNOWN_TRAFFIC_COLOR = Color.TRANSPARENT
+
+    @ColorInt
+    internal val ROUTE_LEG_INACTIVE_LOW_TRAFFIC_COLOR = Color.TRANSPARENT
+
+    @ColorInt
+    internal val ROUTE_LEG_INACTIVE_MODERATE_TRAFFIC_COLOR = Color.TRANSPARENT
+
+    @ColorInt
+    internal val ROUTE_LEG_INACTIVE_HEAVY_TRAFFIC_COLOR = Color.TRANSPARENT
+
+    @ColorInt
+    internal val ROUTE_LEG_INACTIVE_SEVERE_TRAFFIC_COLOR = Color.TRANSPARENT
+
+    @ColorInt
     internal val ROUTE_CASING_COLOR = Color.parseColor("#2F7AC6")
 
     @ColorInt
@@ -156,6 +171,9 @@ object RouteLayerConstants {
     internal val RESTRICTED_ROAD_COLOR = Color.parseColor("#000000")
 
     @ColorInt
+    internal val ROUTE_LEG_INACTIVE_RESTRICTED_ROAD_COLOR = Color.TRANSPARENT
+
+    @ColorInt
     internal val ALTERNATE_RESTRICTED_ROAD_COLOR = Color.parseColor("#333333")
 
     @DrawableRes
@@ -172,6 +190,9 @@ object RouteLayerConstants {
 
     @ColorInt
     internal val ROUTE_CLOSURE_COLOR = Color.parseColor("#000000")
+
+    @ColorInt
+    internal val ROUTE_LEG_INACTIVE_CLOSURE_COLOR = Color.TRANSPARENT
 
     @ColorInt
     internal val ALTERNATIVE_ROUTE_CLOSURE_COLOR = Color.parseColor("#333333")

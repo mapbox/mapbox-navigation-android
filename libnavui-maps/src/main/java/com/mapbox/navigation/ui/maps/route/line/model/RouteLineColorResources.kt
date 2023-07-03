@@ -7,44 +7,6 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 /**
  * Contains colors an other values used to determine the appearance of the route line.
  *
- * @param lowCongestionRange the range for low congestion traffic.
- * @param moderateCongestionRange the range for low congestion traffic.
- * @param heavyCongestionRange the range for low congestion traffic.
- * @param severeCongestionRange the range for low congestion traffic.
- * @param routeDefaultColor the default color of the route line
- * @param routeLowCongestionColor the color used for representing low traffic congestion
- * @param routeModerateCongestionColor the color used for representing moderate traffic congestion
- * @param routeHeavyCongestionColor the color used for representing heavy traffic congestion
- * @param routeSevereCongestionColor the color used for representing severe traffic congestion
- * @param routeUnknownCongestionColor the color used for representing unknown traffic congestion
- * @param routeClosureColor the color used for the route closure line
- * @param restrictedRoadColor the color for the restricted road indicator(s)
- * @param alternativeRouteDefaultColor the default color used for alternative route lines
- * @param alternativeRouteLowCongestionColor the color used for representing low traffic congestion on
- * alternative routes
- * @param alternativeRouteModerateCongestionColor the color used for representing moderate traffic congestion
- * on alternative routes
- * @param alternativeRouteHeavyCongestionColor the color used for representing heavy traffic congestion on
- * alternative routes
- * @param alternativeRouteSevereCongestionColor the color used for representing severe traffic congestion
- * on alternative routes
- * @param alternativeRouteUnknownCongestionColor the color used for representing unknown traffic
- * congestion on alternative routes
- * @param alternativeRouteRestrictedRoadColor the color for the restricted road indicator(s) for
- * alternative routes.
- * @param alternativeRouteClosureColor the color used for the alternative route closure line(s)
- * @param routeLineTraveledColor the color of the section of route line behind the puck
- * representing the section of the route traveled
- * @param routeLineTraveledCasingColor the color of the casing section of route line behind the
- * puck representing the section of the route traveled. By default the casing line is beneath
- * the route line and gives the appearance of a border
- * @param routeCasingColor the color used for the route casing line which is positioned below
- * the route line giving the line the appearance of a boarder
- * @param alternativeRouteCasingColor the color used for the alternative route casing line(s) which
- * is positioned below the route line giving the line the appearance of a boarder
- * @param inActiveRouteLegsColor the color used for route legs that aren't currently
- * being navigated.
- *
  * The congestion range is to be used if when making a route request you use
  * `DirectionCriteria.ANNOTATION_CONGESTION_NUMERIC` annotation. The congestion values obtained
  * with this annotation in the route response would be in the range 0..100, 0 being the minimum and
@@ -76,6 +38,51 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
  * route line color. In this case consider also changing the unknown/low traffic color to match the
  * default route line color or setting the traffic congestion color(s) to something like
  * Color.Transparent if it fits your use case.
+ *
+ * @param lowCongestionRange the range for low congestion traffic.
+ * @param moderateCongestionRange the range for low congestion traffic.
+ * @param heavyCongestionRange the range for low congestion traffic.
+ * @param severeCongestionRange the range for low congestion traffic.
+ * @param routeDefaultColor the default color of the route line
+ * @param routeLowCongestionColor the color used for representing low traffic congestion
+ * @param routeModerateCongestionColor the color used for representing moderate traffic congestion
+ * @param routeHeavyCongestionColor the color used for representing heavy traffic congestion
+ * @param routeSevereCongestionColor the color used for representing severe traffic congestion
+ * @param routeUnknownCongestionColor the color used for representing unknown traffic congestion
+ * @param routeClosureColor the color used for the route closure line
+ * @param inactiveRouteLegLowCongestionColor the color used for representing low traffic congestion on inactive legs of the route
+ * @param inactiveRouteLegModerateCongestionColor the color used for representing moderate traffic congestion on inactive legs of the route
+ * @param inactiveRouteLegHeavyCongestionColor the color used for representing heavy traffic congestion on inactive legs of the route
+ * @param inactiveRouteLegSevereCongestionColor the color used for representing severe traffic congestion on inactive legs of the route
+ * @param inactiveRouteLegUnknownCongestionColor the color used for representing unknown traffic congestion on inactive legs of the route
+ * @param inactiveRouteLegClosureColor the color used for the route closure line on inactive legs of the route
+ * @param restrictedRoadColor the color for the restricted road indicator(s)
+ * @param inactiveRouteLegRestrictedRoadColor the color for the restricted road indicator(s) on inactive legs of the route
+ * @param alternativeRouteDefaultColor the default color used for alternative route lines
+ * @param alternativeRouteLowCongestionColor the color used for representing low traffic congestion on
+ * alternative routes
+ * @param alternativeRouteModerateCongestionColor the color used for representing moderate traffic congestion
+ * on alternative routes
+ * @param alternativeRouteHeavyCongestionColor the color used for representing heavy traffic congestion on
+ * alternative routes
+ * @param alternativeRouteSevereCongestionColor the color used for representing severe traffic congestion
+ * on alternative routes
+ * @param alternativeRouteUnknownCongestionColor the color used for representing unknown traffic
+ * congestion on alternative routes
+ * @param alternativeRouteRestrictedRoadColor the color for the restricted road indicator(s) for
+ * alternative routes.
+ * @param alternativeRouteClosureColor the color used for the alternative route closure line(s)
+ * @param routeLineTraveledColor the color of the section of route line behind the puck
+ * representing the section of the route traveled
+ * @param routeLineTraveledCasingColor the color of the casing section of route line behind the
+ * puck representing the section of the route traveled. By default the casing line is beneath
+ * the route line and gives the appearance of a border
+ * @param routeCasingColor the color used for the route casing line which is positioned below
+ * the route line giving the line the appearance of a boarder
+ * @param alternativeRouteCasingColor the color used for the alternative route casing line(s) which
+ * is positioned below the route line giving the line the appearance of a boarder
+ * @param inActiveRouteLegsColor the color used for route legs that aren't currently
+ * being navigated.
  */
 class RouteLineColorResources private constructor(
     val lowCongestionRange: IntRange,
@@ -88,6 +95,11 @@ class RouteLineColorResources private constructor(
     @ColorInt val routeHeavyCongestionColor: Int,
     @ColorInt val routeSevereCongestionColor: Int,
     @ColorInt val routeUnknownCongestionColor: Int,
+    @ColorInt val inactiveRouteLegLowCongestionColor: Int,
+    @ColorInt val inactiveRouteLegModerateCongestionColor: Int,
+    @ColorInt val inactiveRouteLegHeavyCongestionColor: Int,
+    @ColorInt val inactiveRouteLegSevereCongestionColor: Int,
+    @ColorInt val inactiveRouteLegUnknownCongestionColor: Int,
     @ColorInt val alternativeRouteDefaultColor: Int,
     @ColorInt val alternativeRouteLowCongestionColor: Int,
     @ColorInt val alternativeRouteModerateCongestionColor: Int,
@@ -96,6 +108,8 @@ class RouteLineColorResources private constructor(
     @ColorInt val alternativeRouteUnknownCongestionColor: Int,
     @ColorInt val restrictedRoadColor: Int,
     @ColorInt val routeClosureColor: Int,
+    @ColorInt val inactiveRouteLegRestrictedRoadColor: Int,
+    @ColorInt val inactiveRouteLegClosureColor: Int,
     @ColorInt val alternativeRouteRestrictedRoadColor: Int,
     @ColorInt val alternativeRouteClosureColor: Int,
     @ColorInt val routeLineTraveledColor: Int,
@@ -120,8 +134,15 @@ class RouteLineColorResources private constructor(
             .routeHeavyCongestionColor(routeHeavyCongestionColor)
             .routeSevereCongestionColor(routeSevereCongestionColor)
             .routeUnknownCongestionColor(routeUnknownCongestionColor)
+            .inactiveRouteLegLowCongestionColor(inactiveRouteLegLowCongestionColor)
+            .inactiveRouteLegModerateCongestionColor(inactiveRouteLegModerateCongestionColor)
+            .inactiveRouteLegHeavyCongestionColor(inactiveRouteLegHeavyCongestionColor)
+            .inactiveRouteLegSevereCongestionColor(inactiveRouteLegSevereCongestionColor)
+            .inactiveRouteLegUnknownCongestionColor(inactiveRouteLegUnknownCongestionColor)
             .routeClosureColor(routeClosureColor)
             .restrictedRoadColor(restrictedRoadColor)
+            .inactiveRouteLegClosureColor(inactiveRouteLegClosureColor)
+            .inactiveRouteLegRestrictedRoadColor(inactiveRouteLegRestrictedRoadColor)
             .alternativeRouteDefaultColor(alternativeRouteDefaultColor)
             .alternativeRouteLowCongestionColor(alternativeRouteLowCongestionColor)
             .alternativeRouteModerateCongestionColor(alternativeRouteModerateCongestionColor)
@@ -152,8 +173,15 @@ class RouteLineColorResources private constructor(
             "routeHeavyCongestionColor=$routeHeavyCongestionColor, " +
             "routeSevereCongestionColor=$routeSevereCongestionColor, " +
             "routeUnknownCongestionColor=$routeUnknownCongestionColor, " +
+            "inactiveRouteLegLowCongestionColor=$inactiveRouteLegLowCongestionColor, " +
+            "inactiveRouteLegModerateCongestionColor=$inactiveRouteLegModerateCongestionColor, " +
+            "inactiveRouteLegHeavyCongestionColor=$inactiveRouteLegHeavyCongestionColor, " +
+            "inactiveRouteLegSevereCongestionColor=$inactiveRouteLegSevereCongestionColor, " +
+            "inactiveRouteLegUnknownCongestionColor=$inactiveRouteLegUnknownCongestionColor, " +
             "routeClosureColor=$routeClosureColor, " +
+            "inactiveRouteLegClosureColor=$inactiveRouteLegClosureColor, " +
             "restrictedRoadColor=$restrictedRoadColor, " +
+            "inactiveRouteLegRestrictedRoadColor=$inactiveRouteLegRestrictedRoadColor, " +
             "alternativeRouteDefaultColor=$alternativeRouteDefaultColor, " +
             "alternativeRouteLowCongestionColor=$alternativeRouteLowCongestionColor, " +
             "alternativeRouteModerateCongestionColor=$alternativeRouteModerateCongestionColor, " +
@@ -185,7 +213,14 @@ class RouteLineColorResources private constructor(
         result = 31 * result + routeSevereCongestionColor
         result = 31 * result + routeUnknownCongestionColor
         result = 31 * result + routeClosureColor
+        result = 31 * result + inactiveRouteLegLowCongestionColor
+        result = 31 * result + inactiveRouteLegModerateCongestionColor
+        result = 31 * result + inactiveRouteLegHeavyCongestionColor
+        result = 31 * result + inactiveRouteLegSevereCongestionColor
+        result = 31 * result + inactiveRouteLegUnknownCongestionColor
+        result = 31 * result + inactiveRouteLegClosureColor
         result = 31 * result + restrictedRoadColor
+        result = 31 * result + inactiveRouteLegRestrictedRoadColor
         result = 31 * result + alternativeRouteDefaultColor
         result = 31 * result + alternativeRouteLowCongestionColor
         result = 31 * result + alternativeRouteModerateCongestionColor
@@ -222,7 +257,30 @@ class RouteLineColorResources private constructor(
         if (routeSevereCongestionColor != other.routeSevereCongestionColor) return false
         if (routeUnknownCongestionColor != other.routeUnknownCongestionColor) return false
         if (routeClosureColor != other.routeClosureColor) return false
+        if (inactiveRouteLegLowCongestionColor != other.inactiveRouteLegLowCongestionColor) {
+            return false
+        }
+        if (inactiveRouteLegModerateCongestionColor
+            != other.inactiveRouteLegModerateCongestionColor
+        ) {
+            return false
+        }
+        if (inactiveRouteLegHeavyCongestionColor != other.inactiveRouteLegHeavyCongestionColor) {
+            return false
+        }
+        if (inactiveRouteLegSevereCongestionColor != other.inactiveRouteLegSevereCongestionColor) {
+            return false
+        }
+        if (inactiveRouteLegUnknownCongestionColor
+            != other.inactiveRouteLegUnknownCongestionColor
+        ) {
+            return false
+        }
+        if (inactiveRouteLegClosureColor != other.inactiveRouteLegClosureColor) return false
         if (restrictedRoadColor != other.restrictedRoadColor) return false
+        if (inactiveRouteLegRestrictedRoadColor != other.inactiveRouteLegRestrictedRoadColor) {
+            return false
+        }
         if (alternativeRouteDefaultColor != other.alternativeRouteDefaultColor) return false
         if (alternativeRouteLowCongestionColor != other.alternativeRouteLowCongestionColor) {
             return false
@@ -275,6 +333,20 @@ class RouteLineColorResources private constructor(
             RouteLayerConstants.ROUTE_UNKNOWN_TRAFFIC_COLOR
         private var restrictedRoadColor: Int = RouteLayerConstants.RESTRICTED_ROAD_COLOR
         private var routeClosureColor: Int = RouteLayerConstants.ROUTE_CLOSURE_COLOR
+        private var inactiveRouteLegLowCongestionColor: Int =
+            RouteLayerConstants.ROUTE_LEG_INACTIVE_LOW_TRAFFIC_COLOR
+        private var inactiveRouteLegModerateCongestionColor: Int =
+            RouteLayerConstants.ROUTE_LEG_INACTIVE_MODERATE_TRAFFIC_COLOR
+        private var inactiveRouteLegHeavyCongestionColor: Int =
+            RouteLayerConstants.ROUTE_LEG_INACTIVE_HEAVY_TRAFFIC_COLOR
+        private var inactiveRouteLegSevereCongestionColor: Int =
+            RouteLayerConstants.ROUTE_LEG_INACTIVE_SEVERE_TRAFFIC_COLOR
+        private var inactiveRouteLegUnknownCongestionColor: Int =
+            RouteLayerConstants.ROUTE_LEG_INACTIVE_UNKNOWN_TRAFFIC_COLOR
+        private var inactiveRouteLegRestrictedRoadColor: Int =
+            RouteLayerConstants.ROUTE_LEG_INACTIVE_RESTRICTED_ROAD_COLOR
+        private var inactiveRouteLegClosureColor: Int =
+            RouteLayerConstants.ROUTE_LEG_INACTIVE_CLOSURE_COLOR
         private var alternativeRouteDefaultColor: Int =
             RouteLayerConstants.ALTERNATE_ROUTE_DEFAULT_COLOR
         private var alternativeRouteLowCongestionColor: Int =
@@ -457,6 +529,90 @@ class RouteLineColorResources private constructor(
             apply { this.routeClosureColor = color }
 
         /**
+         * The color used for representing low traffic congestion on inactive legs of the route.
+         *
+         * Defaults to transparent. Also see [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently].
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inactiveRouteLegLowCongestionColor(@ColorInt color: Int): Builder =
+            apply { this.inactiveRouteLegLowCongestionColor = color }
+
+        /**
+         * The color used for representing moderate traffic congestion on inactive legs of the route.
+         *
+         * Defaults to transparent. Also see [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently].
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inactiveRouteLegModerateCongestionColor(@ColorInt color: Int): Builder =
+            apply { this.inactiveRouteLegModerateCongestionColor = color }
+
+        /**
+         * The color used for representing heavy traffic congestion on inactive legs of the route.
+         *
+         * Defaults to transparent. Also see [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently].
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inactiveRouteLegHeavyCongestionColor(@ColorInt color: Int): Builder =
+            apply { this.inactiveRouteLegHeavyCongestionColor = color }
+
+        /**
+         * The color used for representing severe traffic congestion on inactive legs of the route.
+         *
+         * Defaults to transparent. Also see [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently].
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inactiveRouteLegSevereCongestionColor(@ColorInt color: Int): Builder =
+            apply { this.inactiveRouteLegSevereCongestionColor = color }
+
+        /**
+         * The color used for representing unknown traffic congestion on inactive legs of the route.
+         *
+         * Defaults to transparent. Also see [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently].
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inactiveRouteLegUnknownCongestionColor(@ColorInt color: Int): Builder =
+            apply { this.inactiveRouteLegUnknownCongestionColor = color }
+
+        /**
+         * The color used for the restricted road representation on inactive legs of the route.
+         *
+         * Defaults to transparent. Also see [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently].
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inactiveRouteLegRestrictedRoadColor(@ColorInt color: Int): Builder =
+            apply { this.inactiveRouteLegRestrictedRoadColor = color }
+
+        /**
+         * The color used for road closure sections of a route on inactive legs of the route.
+         *
+         * Defaults to transparent. Also see [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently].
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inactiveRouteLegClosureColor(@ColorInt color: Int): Builder =
+            apply { this.inactiveRouteLegClosureColor = color }
+
+        /**
          * The default color used for alternative route lines.
          *
          * @param color the color to be used
@@ -604,31 +760,38 @@ class RouteLineColorResources private constructor(
             }
 
             return RouteLineColorResources(
-                lowCongestionRange,
-                moderateCongestionRange,
-                heavyCongestionRange,
-                severeCongestionRange,
-                routeDefaultColor,
-                routeLowCongestionColor,
-                routeModerateCongestionColor,
-                routeHeavyCongestionColor,
-                routeSevereCongestionColor,
-                routeUnknownCongestionColor,
-                alternativeRouteDefaultColor,
-                alternativeRouteLowCongestionColor,
-                alternativeRouteModerateCongestionColor,
-                alternativeRouteHeavyCongestionColor,
-                alternativeRouteSevereCongestionColor,
-                alternativeRouteUnknownCongestionColor,
-                restrictedRoadColor,
-                routeClosureColor,
-                alternativeRouteRestrictedRoadColor,
-                alternativeRouteClosureColor,
-                routeLineTraveledColor,
-                routeLineTraveledCasingColor,
-                routeCasingColor,
-                alternativeRouteCasingColor,
-                inActiveRouteLegsColor
+                lowCongestionRange = lowCongestionRange,
+                moderateCongestionRange = moderateCongestionRange,
+                heavyCongestionRange = heavyCongestionRange,
+                severeCongestionRange = severeCongestionRange,
+                routeDefaultColor = routeDefaultColor,
+                routeLowCongestionColor = routeLowCongestionColor,
+                routeModerateCongestionColor = routeModerateCongestionColor,
+                routeHeavyCongestionColor = routeHeavyCongestionColor,
+                routeSevereCongestionColor = routeSevereCongestionColor,
+                routeUnknownCongestionColor = routeUnknownCongestionColor,
+                inactiveRouteLegLowCongestionColor = inactiveRouteLegLowCongestionColor,
+                inactiveRouteLegModerateCongestionColor = inactiveRouteLegModerateCongestionColor,
+                inactiveRouteLegHeavyCongestionColor = inactiveRouteLegHeavyCongestionColor,
+                inactiveRouteLegSevereCongestionColor = inactiveRouteLegSevereCongestionColor,
+                inactiveRouteLegUnknownCongestionColor = inactiveRouteLegUnknownCongestionColor,
+                alternativeRouteDefaultColor = alternativeRouteDefaultColor,
+                alternativeRouteLowCongestionColor = alternativeRouteLowCongestionColor,
+                alternativeRouteModerateCongestionColor = alternativeRouteModerateCongestionColor,
+                alternativeRouteHeavyCongestionColor = alternativeRouteHeavyCongestionColor,
+                alternativeRouteSevereCongestionColor = alternativeRouteSevereCongestionColor,
+                alternativeRouteUnknownCongestionColor = alternativeRouteUnknownCongestionColor,
+                restrictedRoadColor = restrictedRoadColor,
+                routeClosureColor = routeClosureColor,
+                inactiveRouteLegRestrictedRoadColor = inactiveRouteLegRestrictedRoadColor,
+                inactiveRouteLegClosureColor = inactiveRouteLegClosureColor,
+                alternativeRouteRestrictedRoadColor = alternativeRouteRestrictedRoadColor,
+                alternativeRouteClosureColor = alternativeRouteClosureColor,
+                routeLineTraveledColor = routeLineTraveledColor,
+                routeLineTraveledCasingColor = routeLineTraveledCasingColor,
+                routeCasingColor = routeCasingColor,
+                alternativeRouteCasingColor = alternativeRouteCasingColor,
+                inActiveRouteLegsColor = inActiveRouteLegsColor,
             )
         }
 
