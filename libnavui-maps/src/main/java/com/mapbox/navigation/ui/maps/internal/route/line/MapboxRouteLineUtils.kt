@@ -15,6 +15,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
@@ -40,6 +41,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ExpressionOffsetData
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
+import com.mapbox.navigation.ui.maps.route.line.model.InactiveRouteColors
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
@@ -166,7 +168,7 @@ internal object MapboxRouteLineUtils {
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
-                RouteLineExpressionData(distanceOffset, lineColor, 0)
+                RouteLineExpressionData(distanceOffset, congestionValue = "", lineColor, 0)
             }
         ).forEach {
             // If the color hasn't changed there's no reason to add it to the expression. A smaller
@@ -208,7 +210,7 @@ internal object MapboxRouteLineUtils {
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
-                RouteLineExpressionData(distanceOffset, lineColor, 0)
+                RouteLineExpressionData(distanceOffset, congestionValue = "", lineColor, 0)
             }
         )
         filteredItems.forEachIndexed { index, expressionData ->
@@ -296,7 +298,7 @@ internal object MapboxRouteLineUtils {
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
-                RouteLineExpressionData(distanceOffset, defaultColor, 0)
+                RouteLineExpressionData(distanceOffset, congestionValue = "", defaultColor, 0)
             }
         ).forEach {
             val colorToUse = if (activeLegIndex >= 0 && it.legIndex != activeLegIndex) {
@@ -482,6 +484,45 @@ internal object MapboxRouteLineUtils {
     }
 
     /**
+     * Returns the color that is used to represent traffic congestion on inactive legs of the primary route.
+     */
+    @ColorInt
+    fun getCongestionColorForInactiveRouteLegs(
+        congestionValue: String,
+        colors: InactiveRouteColors,
+    ): Int = when (congestionValue) {
+        RouteLayerConstants.LOW_CONGESTION_VALUE -> {
+            colors.inactiveRouteLegLowCongestionColor
+        }
+
+        RouteLayerConstants.MODERATE_CONGESTION_VALUE -> {
+            colors.inactiveRouteLegModerateCongestionColor
+        }
+
+        RouteLayerConstants.HEAVY_CONGESTION_VALUE -> {
+            colors.inactiveRouteLegHeavyCongestionColor
+        }
+
+        RouteLayerConstants.SEVERE_CONGESTION_VALUE -> {
+            colors.inactiveRouteLegSevereCongestionColor
+        }
+
+        RouteLayerConstants.UNKNOWN_CONGESTION_VALUE -> {
+            colors.inactiveRouteLegUnknownCongestionColor
+        }
+
+        RouteLayerConstants.CLOSURE_CONGESTION_VALUE -> {
+            colors.inactiveRouteLegClosureColor
+        }
+
+        RouteLayerConstants.RESTRICTED_CONGESTION_VALUE -> {
+            colors.inactiveRouteLegRestrictedRoadColor
+        }
+
+        else -> colors.inactiveRouteLegUnknownCongestionColor
+    }
+
+    /**
      * Calculates line segments based on the legs in the route line and color representation
      * of the traffic congestion. The items returned can be used to create a style expression
      * which can be used to style the route line. The styled route line will be colored
@@ -523,6 +564,7 @@ internal object MapboxRouteLineUtils {
             true -> listOf(
                 RouteLineExpressionData(
                     0.0,
+                    "",
                     getRouteColorForCongestion(
                         "",
                         isPrimaryRoute,
@@ -829,6 +871,7 @@ internal object MapboxRouteLineUtils {
                 expressionDataToReturn.add(
                     RouteLineExpressionData(
                         annotationExpData.offset,
+                        congestionValue = trafficIdentifier,
                         trafficColor,
                         annotationExpData.legIndex
                     )
@@ -837,6 +880,7 @@ internal object MapboxRouteLineUtils {
                 expressionDataToReturn.add(
                     RouteLineExpressionData(
                         annotationExpData.offset,
+                        congestionValue = trafficIdentifier,
                         trafficColor,
                         annotationExpData.legIndex
                     )
@@ -1690,33 +1734,34 @@ internal object MapboxRouteLineUtils {
         routeData: List<ExtractedRouteRestrictionData>,
         vanishingPointOffset: Double,
         activeLegIndex: Int,
-        routeLineColorResources: RouteLineColorResources
+        routeLineOptions: MapboxRouteLineOptions,
     ) = RouteLineExpressionProvider {
+        val (restrictedSectionColor, restrictedSectionInactiveColor) =
+            routeLineOptions.resourceProvider.routeLineColorResources.run {
+                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                    Pair(restrictedRoadColor, inactiveRouteLegRestrictedRoadColor)
+                } else {
+                    Pair(restrictedRoadColor, restrictedRoadColor)
+                }
+            }
         getRestrictedLineExpression(
             vanishingPointOffset,
             activeLegIndex,
-            routeLineColorResources.restrictedRoadColor,
+            restrictedSectionColor = restrictedSectionColor,
+            restrictedSectionInactiveColor = restrictedSectionInactiveColor,
             routeData
         )
     }
 
-    internal fun getDisabledRestrictedLineExpressionProducer(
-        vanishingPointOffset: Double,
-        activeLegIndex: Int,
-        restrictedSectionColor: Int,
-    ) = RouteLineExpressionProvider {
-        getRestrictedLineExpression(
-            vanishingPointOffset,
-            activeLegIndex,
-            restrictedSectionColor,
-            listOf()
-        )
+    internal fun getDisabledRestrictedLineExpressionProducer() = RouteLineExpressionProvider {
+        color(Color.TRANSPARENT)
     }
 
     internal fun getRestrictedLineExpression(
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         restrictedSectionColor: Int,
+        restrictedSectionInactiveColor: Int,
         routeLineExpressionData: List<ExtractedRouteRestrictionData>
     ): Expression {
         var lastColor = Int.MAX_VALUE
@@ -1732,7 +1777,11 @@ internal object MapboxRouteLineUtils {
             }
         ).forEach {
             val colorToUse = if (activeLegIndex >= 0 && it.legIndex != activeLegIndex) {
-                Color.TRANSPARENT
+                if (it.isInRestrictedSection) {
+                    restrictedSectionInactiveColor
+                } else {
+                    Color.TRANSPARENT
+                }
             } else if (it.isInRestrictedSection) {
                 restrictedSectionColor
             } else {
@@ -1750,16 +1799,6 @@ internal object MapboxRouteLineUtils {
             }
         }
         return expressionBuilder.build()
-    }
-
-    internal fun routeHasRestrictions(route: DirectionsRoute): Boolean {
-        return route.legs()?.asSequence()?.flatMap { routeLeg ->
-            routeLeg.steps()?.asSequence() ?: sequenceOf()
-        }?.flatMap { legStep ->
-            legStep.intersections()?.asSequence() ?: sequenceOf()
-        }?.any { stepIntersection ->
-            stepIntersection.classes()?.contains("restricted") ?: false
-        } ?: false
     }
 
     internal fun trimRouteDataCacheToSize(size: Int) {
