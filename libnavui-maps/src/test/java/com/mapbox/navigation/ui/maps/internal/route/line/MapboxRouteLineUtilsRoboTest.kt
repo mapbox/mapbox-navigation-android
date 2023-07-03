@@ -22,6 +22,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
@@ -894,13 +895,24 @@ class MapboxRouteLineUtilsRoboTest {
             0.0,
             false,
             listOf(
-                RouteLineExpressionData(0.0, routeLineColorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    offset = 0.0,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
+                    segmentColor = routeLineColorResources.routeLowCongestionColor,
+                    legIndex = 0
+                ),
                 RouteLineExpressionData(
                     offset = 0.9425498931842539,
+                    congestionValue = RouteLayerConstants.MODERATE_CONGESTION_VALUE,
                     segmentColor = routeLineColorResources.routeModerateCongestionColor,
                     legIndex = 0
                 ),
-                RouteLineExpressionData(1.0, routeLineColorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    offset = 1.0,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
+                    segmentColor = routeLineColorResources.routeLowCongestionColor,
+                    legIndex = 0
+                ),
             )
         )
 
@@ -936,55 +948,70 @@ class MapboxRouteLineUtilsRoboTest {
             stopGap = 0.0,
             useSoftGradient = false,
             segments = listOf(
-                RouteLineExpressionData(0.0, routeLineColorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    0.0,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
+                    routeLineColorResources.routeLowCongestionColor,
+                    0
+                ),
                 RouteLineExpressionData(
                     0.10373821458415478,
+                    congestionValue = RouteLayerConstants.MODERATE_CONGESTION_VALUE,
                     routeLineColorResources.routeModerateCongestionColor,
                     0
                 ),
                 RouteLineExpressionData(
                     0.1240124365711821,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
                     routeLineColorResources.routeLowCongestionColor,
                     0
                 ),
                 RouteLineExpressionData(
                     0.2718982903427929,
+                    congestionValue = RouteLayerConstants.MODERATE_CONGESTION_VALUE,
                     routeLineColorResources.routeModerateCongestionColor,
                     0
                 ),
                 RouteLineExpressionData(
                     0.32264099467350016,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
                     routeLineColorResources.routeLowCongestionColor,
                     0
                 ),
 
                 RouteLineExpressionData(
                     0.4897719974699625,
+                    congestionValue = RouteLayerConstants.MODERATE_CONGESTION_VALUE,
                     routeLineColorResources.routeModerateCongestionColor,
                     1
                 ),
                 RouteLineExpressionData(
                     0.5421388243827154,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
                     routeLineColorResources.routeLowCongestionColor,
                     1
                 ),
                 RouteLineExpressionData(
                     0.5710651139490561,
+                    congestionValue = RouteLayerConstants.MODERATE_CONGESTION_VALUE,
                     routeLineColorResources.routeModerateCongestionColor,
                     1
                 ),
                 RouteLineExpressionData(
                     0.5916095976376619,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
                     routeLineColorResources.routeLowCongestionColor,
                     1
                 ),
                 RouteLineExpressionData(
                     0.88674421638117,
+                    congestionValue = RouteLayerConstants.MODERATE_CONGESTION_VALUE,
                     routeLineColorResources.routeModerateCongestionColor,
                     1
                 ),
                 RouteLineExpressionData(
                     0.9423002251348892,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
                     routeLineColorResources.routeLowCongestionColor,
                     1
                 ),
@@ -1023,18 +1050,30 @@ class MapboxRouteLineUtilsRoboTest {
             stopGap = 0.0,
             useSoftGradient = false,
             segments = listOf(
-                RouteLineExpressionData(0.0, colorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    0.0,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
+                    colorResources.routeLowCongestionColor,
+                    0
+                ),
                 RouteLineExpressionData(
                     offset = 0.5688813850361385,
+                    congestionValue = RouteLayerConstants.UNKNOWN_CONGESTION_VALUE,
                     segmentColor = colorResources.routeUnknownCongestionColor,
                     legIndex = 0
                 ),
                 RouteLineExpressionData(
                     offset = 0.5688813850361385,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
                     segmentColor = colorResources.routeLowCongestionColor,
                     legIndex = 0
                 ),
-                RouteLineExpressionData(1.0, colorResources.routeUnknownCongestionColor, 0),
+                RouteLineExpressionData(
+                    1.0,
+                    congestionValue = RouteLayerConstants.UNKNOWN_CONGESTION_VALUE,
+                    colorResources.routeUnknownCongestionColor,
+                    0
+                ),
             )
         )
 
@@ -1059,14 +1098,21 @@ class MapboxRouteLineUtilsRoboTest {
             0.24906600249,
             true,
             listOf(
-                RouteLineExpressionData(0.0, routeLineColorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    0.0,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
+                    routeLineColorResources.routeLowCongestionColor,
+                    0
+                ),
                 RouteLineExpressionData(
                     0.9425498931842539,
+                    congestionValue = RouteLayerConstants.MODERATE_CONGESTION_VALUE,
                     routeLineColorResources.routeModerateCongestionColor,
                     0
                 ),
                 RouteLineExpressionData(
                     1.0,
+                    congestionValue = RouteLayerConstants.LOW_CONGESTION_VALUE,
                     routeLineColorResources.routeLowCongestionColor,
                     0
                 ),
