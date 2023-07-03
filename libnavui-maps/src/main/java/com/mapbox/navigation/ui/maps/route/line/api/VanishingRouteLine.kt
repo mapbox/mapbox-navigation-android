@@ -7,9 +7,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
@@ -149,7 +149,7 @@ internal class VanishingRouteLine {
         granularDistances: RouteLineGranularDistances,
         routeLineExpressionData: List<RouteLineExpressionData>,
         restrictedLineExpressionData: List<ExtractedRouteRestrictionData>?,
-        routeResourceProvider: RouteLineResources,
+        options: MapboxRouteLineOptions,
         activeLegIndex: Int,
         softGradientTransition: Double,
         useSoftGradient: Boolean,
@@ -162,8 +162,8 @@ internal class VanishingRouteLine {
                 val trafficLineExpressionProvider = {
                     MapboxRouteLineUtils.getTrafficLineExpression(
                         offset,
-                        routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                        routeResourceProvider
+                        options.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+                        options.resourceProvider
                             .routeLineColorResources
                             .routeUnknownCongestionColor,
                         softGradientTransition,
@@ -175,9 +175,9 @@ internal class VanishingRouteLine {
                     MapboxRouteLineUtils.getRouteLineExpression(
                         offset,
                         routeLineExpressionData,
-                        routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                        routeResourceProvider.routeLineColorResources.routeDefaultColor,
-                        routeResourceProvider.routeLineColorResources.inActiveRouteLegsColor,
+                        options.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+                        options.resourceProvider.routeLineColorResources.routeDefaultColor,
+                        options.resourceProvider.routeLineColorResources.inActiveRouteLegsColor,
                         activeLegIndex
                     )
                 }
@@ -185,8 +185,10 @@ internal class VanishingRouteLine {
                     MapboxRouteLineUtils.getRouteLineExpression(
                         offset,
                         routeLineExpressionData,
-                        routeResourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
-                        routeResourceProvider.routeLineColorResources.routeCasingColor,
+                        options.resourceProvider
+                            .routeLineColorResources
+                            .routeLineTraveledCasingColor,
+                        options.resourceProvider.routeLineColorResources.routeCasingColor,
                         Color.TRANSPARENT,
                         activeLegIndex
                     )
@@ -194,11 +196,23 @@ internal class VanishingRouteLine {
                 val restrictedRoadExpressionProvider =
                     ifNonNull(restrictedLineExpressionData) { expressionData ->
                         {
+                            val (restrictedSectionColor, restrictedSectionInactiveColor) =
+                                options.resourceProvider.routeLineColorResources.run {
+                                    if (options.styleInactiveRouteLegsIndependently) {
+                                        Pair(
+                                            restrictedRoadColor,
+                                            inactiveRouteLegRestrictedRoadColor
+                                        )
+                                    } else {
+                                        Pair(restrictedRoadColor, restrictedRoadColor)
+                                    }
+                                }
                             MapboxRouteLineUtils.getRestrictedLineExpression(
                                 offset,
                                 activeLegIndex,
-                                routeResourceProvider.routeLineColorResources.restrictedRoadColor,
-                                expressionData
+                                restrictedSectionColor = restrictedSectionColor,
+                                restrictedSectionInactiveColor = restrictedSectionInactiveColor,
+                                expressionData,
                             )
                         }
                     }

@@ -29,6 +29,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.extractRouteRestrictionData
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getCongestionColorForInactiveRouteLegs
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getMatchingColors
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.granularDistancesProvider
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
@@ -37,6 +38,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.la
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
+import com.mapbox.navigation.ui.maps.route.line.model.InactiveRouteColors
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
@@ -238,7 +240,7 @@ class MapboxRouteLineApi(
 
     private val alternativelyStyleSegmentsNotInLegCache: LruCache<
         CacheResultUtils.CacheResultKey3<
-            Int, List<RouteLineExpressionData>, Int,
+            Int, List<RouteLineExpressionData>, InactiveRouteColors,
             List<RouteLineExpressionData>,
             >,
         List<RouteLineExpressionData>> by lazy { LruCache(4) }
@@ -569,10 +571,7 @@ class MapboxRouteLineApi(
                         alternativelyStyleSegmentsNotInLeg(
                             activeLegIndex,
                             routeLineExpressionData,
-                            routeLineOptions
-                                .resourceProvider
-                                .routeLineColorResources
-                                .inActiveRouteLegsColor
+                            InactiveRouteColors(routeLineOptions)
                         )
 
                     routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
@@ -580,7 +579,7 @@ class MapboxRouteLineApi(
                         granularDistances,
                         workingRouteLineExpressionData,
                         restrictedExpressionData,
-                        routeLineOptions.resourceProvider,
+                        routeLineOptions,
                         activeLegIndex,
                         stopGap,
                         routeLineOptions.displaySoftGradientForTraffic,
@@ -604,6 +603,7 @@ class MapboxRouteLineApi(
                     )
                 )
             }
+
             else -> {
                 val alternativesProvider = {
                     throw UnsupportedOperationException(
@@ -703,10 +703,7 @@ class MapboxRouteLineApi(
                 alternativelyStyleSegmentsNotInLeg(
                     activeLegIndex,
                     routeLineExpressionData,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .inActiveRouteLegsColor
+                    InactiveRouteColors(routeLineOptions),
                 )
             } else {
                 routeLineExpressionData
@@ -749,10 +746,14 @@ class MapboxRouteLineApi(
                         MapboxRouteLineUtils.getRestrictedLineExpression(
                             offset,
                             -1,
-                            routeLineOptions
+                            restrictedSectionColor = routeLineOptions
                                 .resourceProvider
                                 .routeLineColorResources
                                 .restrictedRoadColor,
+                            restrictedSectionInactiveColor = routeLineOptions
+                                .resourceProvider
+                                .routeLineColorResources
+                                .inactiveRouteLegRestrictedRoadColor,
                             restrictedExpressionData
                         )
                     }
@@ -851,6 +852,7 @@ class MapboxRouteLineApi(
                                     currentPrimaryRoute,
                                     routeProgress
                                 )
+
                                 false -> null
                             }
                         val legChange = (currentLegIndex ?: 0) > activeLegIndex
@@ -873,6 +875,7 @@ class MapboxRouteLineApi(
                                         routeLineMaskingLayerDynamicData,
                                         consumer
                                     )
+
                                     else -> {
                                         ifNonNull(
                                             routeProgress.currentLegProgress
@@ -883,10 +886,7 @@ class MapboxRouteLineApi(
                                                         alternativelyStyleSegmentsNotInLeg(
                                                             routeLegProgress.legIndex,
                                                             routeLineExpressionData,
-                                                            routeLineOptions
-                                                                .resourceProvider
-                                                                .routeLineColorResources
-                                                                .inActiveRouteLegsColor
+                                                            InactiveRouteColors(routeLineOptions),
                                                         )
                                                     }
                                                 }
@@ -899,6 +899,7 @@ class MapboxRouteLineApi(
                                     }
                                 }
                             }
+
                             else -> provideRouteLegUpdate(
                                 routeLineMaskingLayerDynamicData,
                                 consumer
@@ -954,7 +955,7 @@ class MapboxRouteLineApi(
         val alteredSegments = alternativelyStyleSegmentsNotInLeg(
             legIndex,
             segments,
-            Color.TRANSPARENT
+            InactiveRouteColors(Color.TRANSPARENT),
         )
         val trafficExp = MapboxRouteLineUtils.getTrafficLineExpression(
             0.0,
@@ -1002,7 +1003,7 @@ class MapboxRouteLineApi(
         )
         val restrictedExpProvider = getRestrictedLineExpressionProducerForLegIndex(
             legIndex,
-            routeLineOptions.resourceProvider.routeLineColorResources,
+            routeLineOptions,
             restrictedExpressionData
         )
 
@@ -1070,6 +1071,7 @@ class MapboxRouteLineApi(
                     )
                 consumer.accept(expected)
             }
+
             else -> {
                 showRouteWithLegIndexHighlighted(
                     routeProgress.currentLegProgress!!.legIndex,
@@ -1116,10 +1118,7 @@ class MapboxRouteLineApi(
                         val updatedRouteData = alternativelyStyleSegmentsNotInLeg(
                             legIndexToHighlight,
                             routeLineExpressionData,
-                            routeLineOptions
-                                .resourceProvider
-                                .routeLineColorResources
-                                .inActiveRouteLegsColor
+                            InactiveRouteColors(routeLineOptions),
                         )
                         val routeLineExpressionProvider = {
                             MapboxRouteLineUtils.getRouteLineExpression(
@@ -1175,9 +1174,7 @@ class MapboxRouteLineApi(
                                             restrictedExpressionData,
                                             0.0,
                                             legIndexToHighlight,
-                                            routeLineOptions
-                                                .resourceProvider
-                                                .routeLineColorResources
+                                            routeLineOptions,
                                         )
                                     }
                                 }
@@ -1525,10 +1522,7 @@ class MapboxRouteLineApi(
                             alternativelyStyleSegmentsNotInLeg(
                                 legIndex,
                                 this,
-                                routeLineOptions
-                                    .resourceProvider
-                                    .routeLineColorResources
-                                    .inActiveRouteLegsColor
+                                InactiveRouteColors(routeLineOptions),
                             )
                         } else {
                             this
@@ -1616,7 +1610,7 @@ class MapboxRouteLineApi(
             primaryRoute?.route?.run {
                 getRestrictedLineExpressionProducerForLegIndex(
                     legIndex,
-                    routeLineOptions.resourceProvider.routeLineColorResources,
+                    routeLineOptions,
                     restrictedExpressionData
                 )
             }?.generateExpression()
@@ -1677,6 +1671,7 @@ class MapboxRouteLineApi(
                 true -> {
                     routeLineExpressionData = deferred.await()
                 }
+
                 false -> {
                     jobControl.scope.launch(Dispatchers.Main) {
                         routeLineExpressionData = deferred.await()
@@ -1922,14 +1917,18 @@ class MapboxRouteLineApi(
     internal val alternativelyStyleSegmentsNotInLeg: (
         Int,
         List<RouteLineExpressionData>,
-        Int
+        InactiveRouteColors
     ) -> List<RouteLineExpressionData> =
-        { activeLegIndex: Int, segments: List<RouteLineExpressionData>, substitutionColor: Int ->
+        { activeLegIndex: Int, segments: List<RouteLineExpressionData>,
+            colors: InactiveRouteColors ->
             segments.parallelMap(
                 {
                     if (it.legIndex != activeLegIndex) {
                         it.copyWithNewSegmentColor(
-                            newSegmentColor = substitutionColor
+                            newSegmentColor = getCongestionColorForInactiveRouteLegs(
+                                congestionValue = it.congestionValue,
+                                colors
+                            )
                         )
                     } else {
                         it
@@ -1940,23 +1939,19 @@ class MapboxRouteLineApi(
         }.cacheResult(alternativelyStyleSegmentsNotInLegCache)
 
     private fun getRestrictedLineExpressionProducerForLegIndex(
-        legIndex: Int,
-        colorResources: RouteLineColorResources,
+        activeLegIndex: Int,
+        options: MapboxRouteLineOptions,
         restrictedRouteExpressionData: List<ExtractedRouteRestrictionData>
     ): RouteLineExpressionProvider {
         return if (routeLineOptions.displayRestrictedRoadSections) {
             MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
                 restrictedRouteExpressionData,
                 vanishingPointOffset = 0.0,
-                activeLegIndex = legIndex,
-                colorResources
+                activeLegIndex = activeLegIndex,
+                options,
             )
         } else {
-            MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer(
-                0.0,
-                legIndex,
-                colorResources.restrictedRoadColor
-            )
+            MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer()
         }
     }
 }

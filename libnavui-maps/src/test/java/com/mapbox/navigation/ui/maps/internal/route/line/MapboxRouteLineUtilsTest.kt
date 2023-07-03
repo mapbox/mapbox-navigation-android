@@ -75,6 +75,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
@@ -130,9 +131,9 @@ class MapboxRouteLineUtilsTest {
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
 
         val expressionDatas = listOf(
-            RouteLineExpressionData(0.0, -11097861, 0),
-            RouteLineExpressionData(0.015670907645820537, -11097861, 0),
-            RouteLineExpressionData(0.11898525632162987, -11097861, 0)
+            RouteLineExpressionData(0.0, "", -11097861, 0),
+            RouteLineExpressionData(0.015670907645820537, "", -11097861, 0),
+            RouteLineExpressionData(0.11898525632162987, "", -11097861, 0)
         )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
@@ -156,13 +157,13 @@ class MapboxRouteLineUtilsTest {
             "[rgba, 0.0, 255.0, 0.0, 1.0], 0.7964017663976524, " +
             "[rgba, 0.0, 0.0, 255.0, 1.0]]"
         val expressionDatas = listOf(
-            RouteLineExpressionData(0.7868200761181402, -11097861, 0),
-            RouteLineExpressionData(0.7930120224665551, -11097861, 0),
+            RouteLineExpressionData(0.7868200761181402, "", -11097861, 0),
+            RouteLineExpressionData(0.7930120224665551, "", -11097861, 0),
             // this should not be used
-            RouteLineExpressionData(0.7932530928525063, Color.RED, 0),
+            RouteLineExpressionData(0.7932530928525063, "", Color.RED, 0),
             // this should be used
-            RouteLineExpressionData(0.7932530928525063, Color.GREEN, 0),
-            RouteLineExpressionData(0.7964017663976524, Color.BLUE, 0)
+            RouteLineExpressionData(0.7932530928525063, "", Color.GREEN, 0),
+            RouteLineExpressionData(0.7964017663976524, "", Color.BLUE, 0)
         )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
@@ -178,18 +179,18 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun getFilteredRouteLineExpressionDataDuplicateOffsetsRemoved() {
         val expressionDatas = listOf(
-            RouteLineExpressionData(0.7868200761181402, -11097861, 0),
-            RouteLineExpressionData(0.7930120224665551, -11097861, 0),
-            RouteLineExpressionData(0.7932530928525063, -11097861, 0),
-            RouteLineExpressionData(0.7932530928525063, -11097861, 0),
-            RouteLineExpressionData(0.7964017663976524, -11097861, 0)
+            RouteLineExpressionData(0.7868200761181402, "", -11097861, 0),
+            RouteLineExpressionData(0.7930120224665551, "", -11097861, 0),
+            RouteLineExpressionData(0.7932530928525063, "", -11097861, 0),
+            RouteLineExpressionData(0.7932530928525063, "", -11097861, 0),
+            RouteLineExpressionData(0.7964017663976524, "", -11097861, 0)
         )
 
         val result = MapboxRouteLineUtils.getFilteredRouteLineExpressionData(
             0.0,
             expressionDatas,
             defaultObjectCreator = {
-                RouteLineExpressionData(0.0, -11097861, 0)
+                RouteLineExpressionData(0.0, "", -11097861, 0)
             }
         )
 
@@ -240,6 +241,7 @@ class MapboxRouteLineUtilsTest {
             0.2,
             0,
             Color.CYAN,
+            Color.GRAY,
             expData
         )
 
@@ -250,6 +252,14 @@ class MapboxRouteLineUtilsTest {
     fun getRestrictedLineExpressionProducer() {
         val colorResources = RouteLineColorResources.Builder()
             .restrictedRoadColor(Color.CYAN)
+            .inactiveRouteLegRestrictedRoadColor(Color.GRAY)
+            .build()
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(colorResources)
+                    .build()
+            )
             .build()
         val expectedExpressionContents = listOf(
             StringChecker("step"),
@@ -276,7 +286,7 @@ class MapboxRouteLineUtilsTest {
             expData,
             0.2,
             0,
-            colorResources
+            options
         ).generateExpression()
 
         checkExpression(expectedExpressionContents, expression)
@@ -284,14 +294,10 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getDisabledRestrictedLineExpressionProducer() {
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.0, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedExpression = "[rgba, 0.0, 0.0, 0.0, 0.0]"
 
-        val expression = MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer(
-            0.0,
-            0,
-            1
-        ).generateExpression()
+        val expression = MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer()
+            .generateExpression()
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -309,6 +315,7 @@ class MapboxRouteLineUtilsTest {
         val expression = MapboxRouteLineUtils.getRestrictedLineExpression(
             0.2,
             0,
+            -1,
             -1,
             expData
         )
@@ -2217,6 +2224,7 @@ class MapboxRouteLineUtilsTest {
             0.0,
             0,
             Color.CYAN,
+            Color.GRAY,
             expressionData
         )
 
@@ -2307,6 +2315,7 @@ class MapboxRouteLineUtilsTest {
             vanishingPointOffset = 0.0,
             activeLegIndex = -1,
             Color.CYAN,
+            Color.GRAY,
             expressionData
         )
 
