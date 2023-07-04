@@ -1,0 +1,1 @@
+- Fixes an issue where trail layer that indicates the traveled portion of the route was visible below inactive legs.
