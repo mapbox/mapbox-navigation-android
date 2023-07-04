@@ -1736,7 +1736,7 @@ class MapboxRouteLineApi(
                 MapboxRouteLineUtils.getRouteLineExpression(
                     vanishingPointOffset,
                     colorResources.routeLineTraveledColor,
-                    colorResources.routeLineTraveledColor
+                    Color.TRANSPARENT,
                 )
             }
 
@@ -1745,7 +1745,7 @@ class MapboxRouteLineApi(
                 MapboxRouteLineUtils.getRouteLineExpression(
                     vanishingPointOffset,
                     colorResources.routeLineTraveledCasingColor,
-                    colorResources.routeLineTraveledCasingColor
+                    Color.TRANSPARENT,
                 )
             }
 
