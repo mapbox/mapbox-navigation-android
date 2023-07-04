@@ -32,6 +32,7 @@ import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewpo
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeBearing
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
 import java.util.concurrent.CopyOnWriteArraySet
@@ -270,6 +271,10 @@ class MapboxNavigationViewportDataSource(
      * to control the camera in scenarios like free drive where the maneuver points are not available.
      */
     var followingPadding: EdgeInsets = EMPTY_EDGE_INSETS
+        set(value) {
+            field = value
+            logI("followingPadding: $value")
+        }
     private var appliedFollowingPadding = followingPadding
 
     /**
@@ -279,6 +284,10 @@ class MapboxNavigationViewportDataSource(
      * or its remainder if [onRouteProgressChanged] is also available, and the [additionalPointsToFrameForOverview].
      */
     var overviewPadding: EdgeInsets = EMPTY_EDGE_INSETS
+        set(value) {
+            field = value
+            logI("overviewPadding: $value")
+        }
 
     private var additionalPointsToFrameForFollowing: List<Point> = emptyList()
     private var additionalPointsToFrameForOverview: List<Point> = emptyList()
@@ -333,6 +342,10 @@ class MapboxNavigationViewportDataSource(
      * @see [getViewportData]
      */
     fun evaluate() {
+        logI("evaluate; options: $options")
+        logI("evaluate; followingPadding: $followingPadding")
+        logI("evaluate; overviewPadding: $overviewPadding")
+
         updateFollowingData()
         updateOverviewData()
 
@@ -412,6 +425,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun onRouteChanged(route: NavigationRoute) {
+        logI("onRouteChanged; route: ${route.id}", LOG_CATEGORY)
         if (!route.directionsRoute.isSameRoute(navigationRoute?.directionsRoute)) {
             clearRouteData()
             this.navigationRoute = route
@@ -476,6 +490,9 @@ class MapboxNavigationViewportDataSource(
             clearProgressData()
             return
         }
+
+        val stepProgress = routeProgress.currentLegProgress?.currentStepProgress
+        logI("onRouteProgressChanged; route: ${routeProgress.navigationRoute.id}, stepIndex=${stepProgress?.stepIndex}, distanceRemaining=${stepProgress?.distanceRemaining}", LOG_CATEGORY)
 
         ifNonNull(
             routeProgress.currentLegProgress,
@@ -558,6 +575,7 @@ class MapboxNavigationViewportDataSource(
      * Provide additional points that should be fitted into the following frame update.
      */
     fun additionalPointsToFrameForFollowing(points: List<Point>) {
+        logI("additionalPointsToFrameForFollowing: $points", LOG_CATEGORY)
         additionalPointsToFrameForFollowing = ArrayList(points)
     }
 
@@ -577,6 +595,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingCenterPropertyOverride(value: Point?) {
+        logI("followingCenterPropertyOverride: $value", LOG_CATEGORY)
         followingCenterProperty.override = value
     }
 
@@ -589,6 +608,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingZoomPropertyOverride(value: Double?) {
+        logI("followingZoomPropertyOverride: $value", LOG_CATEGORY)
         followingZoomProperty.override = value
     }
 
@@ -601,6 +621,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingBearingPropertyOverride(value: Double?) {
+        logI("followingBearingPropertyOverride: $value", LOG_CATEGORY)
         followingBearingProperty.override = value
     }
 
@@ -613,6 +634,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingPitchPropertyOverride(value: Double?) {
+        logI("followingPitchPropertyOverride: $value", LOG_CATEGORY)
         followingPitchProperty.override = value
     }
 
@@ -699,6 +721,11 @@ class MapboxNavigationViewportDataSource(
         // needs to be added here to be taken into account for bearing smoothing
         pointsForFollowing.addAll(additionalPointsToFrameForFollowing)
 
+        logI(
+            "updateFollowingData; location: $localTargetLocation",
+            LOG_CATEGORY
+        )
+
         if (pointsForFollowing.isEmpty()) {
             options.followingFrameOptions.run {
                 val cameraState = mapboxMap.cameraState
@@ -734,6 +761,10 @@ class MapboxNavigationViewportDataSource(
                 options.followingFrameOptions.maximizeViewableGeometryWhenPitchZero &&
                 followingPitchProperty.get() == ZERO_PITCH
             ) {
+                logI(
+                    "updateFollowingData; generating for maximal viewable area in pitch 0",
+                    LOG_CATEGORY
+                )
                 mapboxMap.cameraForCoordinates(
                     pointsForFollowing,
                     followingPadding,
@@ -758,17 +789,37 @@ class MapboxNavigationViewportDataSource(
                     .pitch(followingPitchProperty.get())
                     .zoom(cameraState.zoom)
                     .build()
+                logI(
+                    "updateFollowingData; fallbackCameraOptions: $fallbackCameraOptions",
+                    LOG_CATEGORY
+                )
+                logI(
+                    "updateFollowingData; map size: $mapSize, screenBox=$screenBox, resultingPadding=$padding",
+                    LOG_CATEGORY
+                )
                 if (pointsForFollowing.size > 1) {
+                    logI(
+                        "updateFollowingData; generating for multiple points",
+                        LOG_CATEGORY
+                    )
                     mapboxMap.cameraForCoordinates(
                         pointsForFollowing,
                         fallbackCameraOptions,
                         screenBox
                     )
                 } else {
+                    logI(
+                        "updateFollowingData; generating for one point",
+                        LOG_CATEGORY
+                    )
                     fallbackCameraOptions
                 }
             }
 
+        logI(
+            "updateFollowingData; generated cameraFrame: $cameraFrame",
+            LOG_CATEGORY
+        )
         followingCenterProperty.fallback = cameraFrame.center!!
         options.followingFrameOptions.run {
             followingZoomProperty.fallback = max(min(cameraFrame.zoom!!, maxZoom), minZoom)

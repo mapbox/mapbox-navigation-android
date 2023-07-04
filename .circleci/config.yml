@@ -38,6 +38,7 @@ workflows:
               only:
                 - main
                 - release-v.*
+                - NAVAND-1166-dd-logs
       - release:
           filters:
             tags:

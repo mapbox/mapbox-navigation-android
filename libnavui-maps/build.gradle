@@ -43,6 +43,11 @@ dependencies {
     implementation project(":libnavui-resources")
 
     api dependenciesList.mapboxMapSdk
+    api("com.mapbox.maps:android-core") {
+        version {
+            strictly '10.7.0-a34a63fde5-SNAPSHOT'
+        }
+    }
     api dependenciesList.mapboxSdkTurf
 
     implementation dependenciesList.androidXAppCompat
@@ -63,7 +68,7 @@ dokkaHtmlPartial {
     moduleName.set("UI Maps")
     dokkaSourceSets {
         configureEach {
-            reportUndocumented.set(true)
+            reportUndocumented.set(false)
             perPackageOption {
                 matchingRegex.set("com.mapbox.navigation.ui.maps.internal.*")
                 suppress.set(true)
