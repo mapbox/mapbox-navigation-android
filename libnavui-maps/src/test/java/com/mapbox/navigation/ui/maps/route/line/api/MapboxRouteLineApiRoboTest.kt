@@ -1327,6 +1327,98 @@ class MapboxRouteLineApiRoboTest {
         }
 
     @Test
+    fun `setVanishingOffset with restrictions across legs when inactiveLegStyling and leg 0`() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .displayRestrictedRoadSections(true)
+                .withRouteLineResources(
+                    RouteLineResources.Builder()
+                        .routeLineColorResources(
+                            RouteLineColorResources.Builder()
+                                .restrictedRoadColor(Color.RED)
+                                .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
+                                .build()
+                        )
+                        .build()
+                )
+                .styleInactiveRouteLegsIndependently(true)
+                .build()
+            val api = MapboxRouteLineApi(options)
+            val expectedRestrictedExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.39564579),
+                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.4897719974699625),
+                StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
+                DoubleChecker(0.5540039481345271),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            )
+            val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
+                .toTestNavigationRoute(RouterOrigin.Offboard)
+
+            api.setNavigationRoutes(listOf(route), activeLegIndex = 0)
+            val result = api.setVanishingOffset(0.0).value!!
+                .primaryRouteLineDynamicData
+                .restrictedSectionExpressionProvider!!
+                .generateExpression()
+
+            checkExpression(
+                expectedRestrictedExpressionContents,
+                result
+            )
+        }
+
+    @Test
+    fun `setVanishingOffset with restrictions across legs when inactiveLegStyling and leg 1`() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .displayRestrictedRoadSections(true)
+                .withRouteLineResources(
+                    RouteLineResources.Builder()
+                        .routeLineColorResources(
+                            RouteLineColorResources.Builder()
+                                .restrictedRoadColor(Color.RED)
+                                .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
+                                .build()
+                        )
+                        .build()
+                )
+                .styleInactiveRouteLegsIndependently(true)
+                .build()
+            val api = MapboxRouteLineApi(options)
+            val expectedRestrictedExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.39564579),
+                StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
+                DoubleChecker(0.4897719974699625),
+                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.5540039481345271),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            )
+            val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
+                .toTestNavigationRoute(RouterOrigin.Offboard)
+
+            api.setNavigationRoutes(listOf(route), activeLegIndex = 1)
+            val result = api.setVanishingOffset(0.0).value!!
+                .primaryRouteLineDynamicData
+                .restrictedSectionExpressionProvider!!
+                .generateExpression()
+
+            checkExpression(
+                expectedRestrictedExpressionContents,
+                result
+            )
+        }
+
+    @Test
     fun setRoutesTrafficExpressionsWithAlternativeRoutes() = coroutineRule.runBlockingTest {
         val expectedPrimaryTrafficLineExpressionContents = listOf(
             StringChecker("step"),
