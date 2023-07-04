@@ -743,17 +743,19 @@ class MapboxRouteLineApi(
                 true -> null
                 false -> {
                     {
+                        val (restrictedSectionColor, restrictedSectionInactiveColor) =
+                            routeLineOptions.resourceProvider.routeLineColorResources.run {
+                                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                                    Pair(restrictedRoadColor, inactiveRouteLegRestrictedRoadColor)
+                                } else {
+                                    Pair(restrictedRoadColor, restrictedRoadColor)
+                                }
+                            }
                         MapboxRouteLineUtils.getRestrictedLineExpression(
                             offset,
-                            -1,
-                            restrictedSectionColor = routeLineOptions
-                                .resourceProvider
-                                .routeLineColorResources
-                                .restrictedRoadColor,
-                            restrictedSectionInactiveColor = routeLineOptions
-                                .resourceProvider
-                                .routeLineColorResources
-                                .inactiveRouteLegRestrictedRoadColor,
+                            activeLegIndex,
+                            restrictedSectionColor = restrictedSectionColor,
+                            restrictedSectionInactiveColor = restrictedSectionInactiveColor,
                             restrictedExpressionData
                         )
                     }
@@ -1440,7 +1442,7 @@ class MapboxRouteLineApi(
         routes.addAll(distinctNewRoutes)
         primaryRoute = distinctNewRoutes.firstOrNull()
         MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
-        this.activeLegIndex = INVALID_ACTIVE_LEG_INDEX
+        this.activeLegIndex = activeLegIndex
 
         preWarmRouteCaches(
             distinctNewRoutes,
