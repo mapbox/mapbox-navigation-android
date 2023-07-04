@@ -1,0 +1,1 @@
+- Route request timeout errors are now considered failures as opposed to cancellations (`NavigationRouterCallback#onFailure` will be invoked instead of `NavigationRouterCallback#onCanceled`).
