@@ -1847,7 +1847,7 @@ class MapboxRouteLineApi(
             }
 
         val maskingLayerData = if ((primaryRoute?.route?.directionsRoute?.legs()?.size ?: 0) > 1) {
-            getRouteLineDynamicDataForMaskingLayers(routeLineExpressionData, 0)
+            getRouteLineDynamicDataForMaskingLayers(routeLineExpressionData, legIndex)
         } else {
             val exp = MapboxRouteLineUtils.getRouteLineExpression(
                 1.0,
