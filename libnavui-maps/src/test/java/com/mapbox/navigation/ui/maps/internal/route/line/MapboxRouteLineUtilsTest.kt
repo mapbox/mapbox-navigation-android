@@ -249,18 +249,7 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun getRestrictedLineExpressionProducer() {
-        val colorResources = RouteLineColorResources.Builder()
-            .restrictedRoadColor(Color.CYAN)
-            .inactiveRouteLegRestrictedRoadColor(Color.GRAY)
-            .build()
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withRouteLineResources(
-                RouteLineResources.Builder()
-                    .routeLineColorResources(colorResources)
-                    .build()
-            )
-            .build()
+    fun getRestrictedLineExpressionProducerRestrictionsEnabled() {
         val expectedExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
@@ -286,18 +275,32 @@ class MapboxRouteLineUtilsTest {
             expData,
             0.2,
             0,
-            options
+            activeColor = Color.CYAN,
+            inactiveColor = Color.GRAY,
+            displayRestrictedEnabled = true
         ).generateExpression()
 
         checkExpression(expectedExpressionContents, expression)
     }
 
     @Test
-    fun getDisabledRestrictedLineExpressionProducer() {
+    fun getRestrictedLineExpressionProducerRestrictionsDisabled() {
         val expectedExpression = "[rgba, 0.0, 0.0, 0.0, 0.0]"
 
-        val expression = MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer()
-            .generateExpression()
+        val route = loadNavigationRoute("route-with-restrictions.json")
+        val expData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
+
+        val expression = MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
+            expData,
+            0.2,
+            0,
+            activeColor = Color.CYAN,
+            inactiveColor = Color.GRAY,
+            displayRestrictedEnabled = false
+        ).generateExpression()
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -2320,6 +2323,123 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun `getRestrictedLineExpression with restriction across two legs, active index = 0`() {
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.3956457979751531, " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.4897719974699625, " +
+            "[rgba, 136.0, 136.0, 136.0, 1.0], 0.5540039481345271, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
+        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
+
+        val result = MapboxRouteLineUtils.getRestrictedLineExpression(
+            vanishingPointOffset = 0.0,
+            activeLegIndex = 0,
+            Color.CYAN,
+            Color.GRAY,
+            expressionData
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun `getRestrictedLineExpression with restriction across two legs, active index = 1`() {
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.3956457979751531, " +
+            "[rgba, 136.0, 136.0, 136.0, 1.0], 0.4897719974699625, " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5540039481345271, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
+        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
+
+        val result = MapboxRouteLineUtils.getRestrictedLineExpression(
+            vanishingPointOffset = 0.0,
+            activeLegIndex = 1,
+            Color.CYAN,
+            Color.GRAY,
+            expressionData
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun `getNonMaskingRestrictedLineExpression with restriction across two legs, enabled`() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(
+                        RouteLineColorResources.Builder()
+                            .restrictedRoadColor(Color.CYAN)
+                            .inactiveRouteLegRestrictedRoadColor(Color.GRAY)
+                            .build()
+                    )
+                    .build()
+            )
+            .styleInactiveRouteLegsIndependently(true)
+            .displayRestrictedRoadSections(true)
+            .build()
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.3956457979751531, " +
+            "[rgba, 136.0, 136.0, 136.0, 1.0], 0.4897719974699625, " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5540039481345271, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
+        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
+
+        val result = MapboxRouteLineUtils.getNonMaskingRestrictedLineExpressionProducer(
+            expressionData,
+            vanishingPointOffset = 0.0,
+            activeLegIndex = 1,
+            options
+        )
+
+        assertEquals(expectedExpression, result.generateExpression().toString())
+    }
+
+    @Test
+    fun `getNonMaskingRestrictedLineExpression with restriction across two legs, disabled`() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(
+                        RouteLineColorResources.Builder()
+                            .restrictedRoadColor(Color.CYAN)
+                            .inactiveRouteLegRestrictedRoadColor(Color.GRAY)
+                            .build()
+                    )
+                    .build()
+            )
+            .styleInactiveRouteLegsIndependently(false)
+            .displayRestrictedRoadSections(true)
+            .build()
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.3956457979751531, " +
+            "[rgba, 0.0, 255.0, 255.0, 1.0], 0.5540039481345271, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
+        val expressionData = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
+
+        val result = MapboxRouteLineUtils.getNonMaskingRestrictedLineExpressionProducer(
+            expressionData,
+            vanishingPointOffset = 0.0,
+            activeLegIndex = 1,
+            options
+        )
+
+        assertEquals(expectedExpression, result.generateExpression().toString())
     }
 
     @Test
