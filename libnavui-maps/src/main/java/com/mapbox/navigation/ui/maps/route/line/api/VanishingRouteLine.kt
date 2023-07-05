@@ -195,26 +195,12 @@ internal class VanishingRouteLine {
                 }
                 val restrictedRoadExpressionProvider =
                     ifNonNull(restrictedLineExpressionData) { expressionData ->
-                        {
-                            val (restrictedSectionColor, restrictedSectionInactiveColor) =
-                                options.resourceProvider.routeLineColorResources.run {
-                                    if (options.styleInactiveRouteLegsIndependently) {
-                                        Pair(
-                                            restrictedRoadColor,
-                                            inactiveRouteLegRestrictedRoadColor
-                                        )
-                                    } else {
-                                        Pair(restrictedRoadColor, restrictedRoadColor)
-                                    }
-                                }
-                            MapboxRouteLineUtils.getRestrictedLineExpression(
-                                offset,
-                                activeLegIndex,
-                                restrictedSectionColor = restrictedSectionColor,
-                                restrictedSectionInactiveColor = restrictedSectionInactiveColor,
-                                expressionData,
-                            )
-                        }
+                        MapboxRouteLineUtils.getNonMaskingRestrictedLineExpressionProducer(
+                            expressionData,
+                            offset,
+                            activeLegIndex,
+                            options
+                        )
                     }
 
                 VanishingRouteLineExpressions(

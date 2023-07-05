@@ -210,6 +210,7 @@ class VanishingRouteLineRoboTest {
             restrictedSegments,
             MapboxRouteLineOptions.Builder(ctx)
                 .withRouteLineResources(genericResourceProvider)
+                .displayRestrictedRoadSections(true)
                 .build(),
             0,
             0.0,
@@ -219,6 +220,51 @@ class VanishingRouteLineRoboTest {
         checkExpression(
             expectedRestrictedExpressionContents,
             result!!.restrictedRoadExpression!!.generateExpression()
+        )
+    }
+
+    @Test
+    fun getTraveledRouteLineExpressions_withRestrictedLineExpressionData_disabled() {
+        val colorResources = RouteLineColorResources.Builder()
+            .restrictedRoadColor(Color.CYAN)
+            .build()
+
+        val route = loadNavigationRoute("route-with-restrictions.json")
+        val lineString = LineString.fromPolyline(
+            route.directionsRoute.geometry() ?: "",
+            Constants.PRECISION_6
+        )
+        val vanishingRouteLine = VanishingRouteLine()
+        vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 1
+        val segments: List<RouteLineExpressionData> =
+            MapboxRouteLineUtils.calculateRouteLineSegments(
+                route,
+                listOf(),
+                true,
+                colorResources
+            )
+        val restrictedSegments = MapboxRouteLineUtils.extractRouteRestrictionData(
+            route,
+            MapboxRouteLineUtils.granularDistancesProvider
+        )
+
+        val result = vanishingRouteLine.getTraveledRouteLineExpressions(
+            lineString.coordinates()[0],
+            granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
+            segments,
+            restrictedSegments,
+            MapboxRouteLineOptions.Builder(ctx)
+                .withRouteLineResources(genericResourceProvider)
+                .displayRestrictedRoadSections(false)
+                .build(),
+            0,
+            0.0,
+            false
+        )
+
+        assertEquals(
+            "[rgba, 0.0, 0.0, 0.0, 0.0]",
+            result!!.restrictedRoadExpression!!.generateExpression().toString()
         )
     }
 

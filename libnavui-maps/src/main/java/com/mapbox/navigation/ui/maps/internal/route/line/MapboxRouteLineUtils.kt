@@ -1730,31 +1730,47 @@ internal object MapboxRouteLineUtils {
         }
     }
 
+    internal fun getNonMaskingRestrictedLineExpressionProducer(
+        routeData: List<ExtractedRouteRestrictionData>,
+        vanishingPointOffset: Double,
+        activeLegIndex: Int,
+        options: MapboxRouteLineOptions
+    ): RouteLineExpressionProvider {
+        val colorResources = options.resourceProvider.routeLineColorResources
+        val inactiveColor = if (options.styleInactiveRouteLegsIndependently) {
+            colorResources.inactiveRouteLegRestrictedRoadColor
+        } else {
+            colorResources.restrictedRoadColor
+        }
+        return getRestrictedLineExpressionProducer(
+            routeData,
+            vanishingPointOffset,
+            activeLegIndex,
+            options.displayRestrictedRoadSections,
+            activeColor = colorResources.restrictedRoadColor,
+            inactiveColor = inactiveColor,
+        )
+    }
+
     internal fun getRestrictedLineExpressionProducer(
         routeData: List<ExtractedRouteRestrictionData>,
         vanishingPointOffset: Double,
         activeLegIndex: Int,
-        routeLineOptions: MapboxRouteLineOptions,
+        displayRestrictedEnabled: Boolean,
+        activeColor: Int,
+        inactiveColor: Int,
     ) = RouteLineExpressionProvider {
-        val (restrictedSectionColor, restrictedSectionInactiveColor) =
-            routeLineOptions.resourceProvider.routeLineColorResources.run {
-                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
-                    Pair(restrictedRoadColor, inactiveRouteLegRestrictedRoadColor)
-                } else {
-                    Pair(restrictedRoadColor, restrictedRoadColor)
-                }
-            }
-        getRestrictedLineExpression(
-            vanishingPointOffset,
-            activeLegIndex,
-            restrictedSectionColor = restrictedSectionColor,
-            restrictedSectionInactiveColor = restrictedSectionInactiveColor,
-            routeData
-        )
-    }
-
-    internal fun getDisabledRestrictedLineExpressionProducer() = RouteLineExpressionProvider {
-        color(Color.TRANSPARENT)
+        if (displayRestrictedEnabled) {
+            getRestrictedLineExpression(
+                vanishingPointOffset,
+                activeLegIndex,
+                restrictedSectionColor = activeColor,
+                restrictedSectionInactiveColor = inactiveColor,
+                routeData
+            )
+        } else {
+            color(Color.TRANSPARENT)
+        }
     }
 
     internal fun getRestrictedLineExpression(
