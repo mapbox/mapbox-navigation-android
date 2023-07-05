@@ -31,6 +31,8 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.extractRouteRestrictionData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getCongestionColorForInactiveRouteLegs
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getMatchingColors
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getNonMaskingRestrictedLineExpressionProducer
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRestrictedLineExpressionProducer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.granularDistancesProvider
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
@@ -1003,10 +1005,14 @@ class MapboxRouteLineApi(
             Color.TRANSPARENT,
             legIndex
         )
-        val restrictedExpProvider = getRestrictedLineExpressionProducerForLegIndex(
+        val restrictedExpProvider = getRestrictedLineExpressionProducer(
+            restrictedExpressionData,
+            0.0,
             legIndex,
-            routeLineOptions,
-            restrictedExpressionData
+            routeLineOptions.displayRestrictedRoadSections,
+            activeColor = routeLineOptions.resourceProvider.routeLineColorResources
+                .restrictedRoadColor,
+            inactiveColor = Color.TRANSPARENT,
         )
 
         return RouteLineDynamicData(
@@ -1172,7 +1178,7 @@ class MapboxRouteLineApi(
                                 true -> null
                                 false -> {
                                     {
-                                        MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
+                                        getNonMaskingRestrictedLineExpressionProducer(
                                             restrictedExpressionData,
                                             0.0,
                                             legIndexToHighlight,
@@ -1610,10 +1616,11 @@ class MapboxRouteLineApi(
         // If false produce a gradient for the restricted line layer that is completely transparent.
         val primaryRouteRestrictedSectionsExpressionDef = jobControl.scope.async {
             primaryRoute?.route?.run {
-                getRestrictedLineExpressionProducerForLegIndex(
+                getNonMaskingRestrictedLineExpressionProducer(
+                    restrictedExpressionData,
+                    0.0,
                     legIndex,
                     routeLineOptions,
-                    restrictedExpressionData
                 )
             }?.generateExpression()
         }
@@ -1939,21 +1946,4 @@ class MapboxRouteLineApi(
                 jobControl.scope
             )
         }.cacheResult(alternativelyStyleSegmentsNotInLegCache)
-
-    private fun getRestrictedLineExpressionProducerForLegIndex(
-        activeLegIndex: Int,
-        options: MapboxRouteLineOptions,
-        restrictedRouteExpressionData: List<ExtractedRouteRestrictionData>
-    ): RouteLineExpressionProvider {
-        return if (routeLineOptions.displayRestrictedRoadSections) {
-            MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
-                restrictedRouteExpressionData,
-                vanishingPointOffset = 0.0,
-                activeLegIndex = activeLegIndex,
-                options,
-            )
-        } else {
-            MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer()
-        }
-    }
 }
