@@ -4,9 +4,11 @@ package com.mapbox.navigation.ui.voice.options
  * MapboxSpeechApiOptions.
  *
  * @param baseUri base URL
+ * @param gender voice gender
  */
 class MapboxSpeechApiOptions private constructor(
-    val baseUri: String
+    val baseUri: String,
+    @VoiceGender.Type val gender: String?
 ) {
 
     /**
@@ -14,6 +16,7 @@ class MapboxSpeechApiOptions private constructor(
      */
     fun toBuilder(): Builder = Builder().apply {
         baseUri(baseUri)
+        gender(gender)
     }
 
     /**
@@ -26,6 +29,7 @@ class MapboxSpeechApiOptions private constructor(
         other as MapboxSpeechApiOptions
 
         if (baseUri != other.baseUri) return false
+        if (gender != other.gender) return false
 
         return true
     }
@@ -34,7 +38,9 @@ class MapboxSpeechApiOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        return baseUri.hashCode()
+        var result = baseUri.hashCode()
+        result = 31 * result + (gender?.hashCode() ?: 0)
+        return result
     }
 
     /**
@@ -42,7 +48,8 @@ class MapboxSpeechApiOptions private constructor(
      */
     override fun toString(): String {
         return "MapboxSpeechApiOptions(" +
-            "baseUri=$baseUri" +
+            "baseUri=$baseUri, " +
+            "gender=$gender" +
             ")"
     }
 
@@ -52,6 +59,7 @@ class MapboxSpeechApiOptions private constructor(
     class Builder {
 
         private var baseUri: String = "https://api.mapbox.com"
+        private var gender: String? = null
 
         /**
          * Specifies the base URL
@@ -61,11 +69,20 @@ class MapboxSpeechApiOptions private constructor(
             apply { this.baseUri = baseUri }
 
         /**
+         * Specifies gender of the voice.
+         * Optional parameter. Might not work with all the languages.
+         * Defaults to [VoiceGender.FEMALE].
+         */
+        fun gender(@VoiceGender.Type gender: String?): Builder =
+            apply { this.gender = gender }
+
+        /**
          * Build the [VoiceInstructionsPlayerOptions]
          */
         fun build(): MapboxSpeechApiOptions {
             return MapboxSpeechApiOptions(
-                baseUri = baseUri
+                baseUri = baseUri,
+                gender = gender,
             )
         }
     }
