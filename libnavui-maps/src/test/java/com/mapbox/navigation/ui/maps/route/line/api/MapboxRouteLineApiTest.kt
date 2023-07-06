@@ -1334,14 +1334,14 @@ class MapboxRouteLineApiTest {
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
         )
         val expectedTrailCasingExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 255.0, 0.0, 255.0, 1.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            StringChecker("[rgba, 255.0, 0.0, 255.0, 1.0]"),
         )
         val expectedMaskingTrafficExpressionContents = listOf(
             StringChecker("step"),
