@@ -6,6 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.14.1 - 06 July, 2023
+### Changelog
+[Changes between v2.14.0 and v2.14.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.14.0...v2.14.1)
+
+#### Features
+- Added new options to `RouteLineColorResources` to style congestion, restrictions, and closures colors on inactive legs when `MapboxRouteLineOptions#styleInactiveRouteLegsIndependently` is enabled. The values default to transparent. [#7322](https://github.com/mapbox/mapbox-navigation-android/pull/7322)
+
+#### Bug fixes and improvements
+- Route request timeout errors are now considered failures as opposed to cancellations (`NavigationRouterCallback#onFailure` will be invoked instead of `NavigationRouterCallback#onCanceled`). [#7324](https://github.com/mapbox/mapbox-navigation-android/pull/7324)
+- Fixed an issue where road closures where not displayed for inactive legs of the route. [#7322](https://github.com/mapbox/mapbox-navigation-android/pull/7322)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.14.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.14.1))
+- Mapbox Navigation Native `v137.1.2`
+- Mapbox Core Common `v23.6.0`
+- Mapbox Java `v6.12.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.12.0))
+
+
 ## Mapbox Navigation SDK 2.14.0 - 23 June, 2023
 ### Changelog
 [Changes between v2.13.0 and v2.14.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.13.0...v2.14.0)
