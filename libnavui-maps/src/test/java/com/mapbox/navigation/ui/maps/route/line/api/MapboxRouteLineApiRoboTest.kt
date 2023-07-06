@@ -369,14 +369,14 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
@@ -573,14 +573,14 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
@@ -973,14 +973,14 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
@@ -1179,14 +1179,14 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
             )
 
             val expectedMaskingTrafficExpressionContents = listOf(
@@ -1482,6 +1482,7 @@ class MapboxRouteLineApiRoboTest {
                     .baseExpressionProvider.generateExpression()
                 val casingExpression = result.primaryRouteLineDynamicData
                     .casingExpressionProvider.generateExpression()
+
 
                 checkExpression(expectedMaskingTrafficExpressionContents, trafficMaskingExpression)
                 checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
