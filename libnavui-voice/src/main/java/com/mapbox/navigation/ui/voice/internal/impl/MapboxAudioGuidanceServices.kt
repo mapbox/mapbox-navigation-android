@@ -8,6 +8,7 @@ import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructions
+import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 
 class MapboxAudioGuidanceServices {
 
@@ -17,8 +18,9 @@ class MapboxAudioGuidanceServices {
     fun mapboxAudioGuidanceVoice(
         mapboxNavigation: MapboxNavigation,
         language: String,
+        options: MapboxSpeechApiOptions,
     ): MapboxAudioGuidanceVoice {
-        val mapboxSpeechApi = mapboxSpeechApi(mapboxNavigation, language)
+        val mapboxSpeechApi = mapboxSpeechApi(mapboxNavigation, language, options)
         val mapboxVoiceInstructionsPlayer =
             getOrUpdateMapboxVoiceInstructionsPlayer(mapboxNavigation, language)
         return MapboxAudioGuidanceVoice(
@@ -29,11 +31,12 @@ class MapboxAudioGuidanceServices {
 
     fun mapboxSpeechApi(
         mapboxNavigation: MapboxNavigation,
-        language: String
+        language: String,
+        options: MapboxSpeechApiOptions
     ): MapboxSpeechApi {
         val applicationContext = mapboxNavigation.navigationOptions.applicationContext
         val accessToken = mapboxNavigation.navigationOptions.accessToken!!
-        return MapboxSpeechApi(applicationContext, accessToken, language)
+        return MapboxSpeechApi(applicationContext, accessToken, language, options)
     }
 
     fun getOrUpdateMapboxVoiceInstructionsPlayer(

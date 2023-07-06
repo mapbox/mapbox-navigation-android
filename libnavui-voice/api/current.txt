@@ -30,6 +30,7 @@ package com.mapbox.navigation.ui.voice.api {
   }
 
   public final class MapboxAudioGuidance implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create(com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create();
     method public com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer? getCurrentVoiceInstructionsPlayer();
     method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getRegisteredInstance();
@@ -39,10 +40,12 @@ package com.mapbox.navigation.ui.voice.api {
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState> stateFlow();
     method public void toggle();
     method public void unmute();
+    method public void updateSpeechApiOptions(com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options);
     field public static final com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance.Companion Companion;
   }
 
   public static final class MapboxAudioGuidance.Companion {
+    method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create(com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create();
     method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getRegisteredInstance();
   }
