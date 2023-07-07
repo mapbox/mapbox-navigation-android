@@ -6,6 +6,42 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.15.0-beta.1 - 07 July, 2023
+### Changelog
+[Changes between v2.14.1 and v2.15.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.14.1...v2.15.0-beta.1)
+
+#### Features
+- Added new options to `RouteLineColorResources` to style congestion, restrictions, and closures colors on inactive legs when `MapboxRouteLineOptions#styleInactiveRouteLegsIndependently` is enabled. The values default to transparent. [#7322](https://github.com/mapbox/mapbox-navigation-android/pull/7322)
+
+#### Bug fixes and improvements
+- Fixed an issue where `RoutingTilesOptions#tilesBaseUri` was used as a base url for route refresh requests instead of `RouteOptions#baseUrl`. [#7294](https://github.com/mapbox/mapbox-navigation-android/pull/7294)
+- Improved Copilot to send a proper type with events of type `DriveEndsEvent`. [#7236](https://github.com/mapbox/mapbox-navigation-android/pull/7236)
+- Added a Copilot option that allows to disable recording Free Drive histories. [#7276](https://github.com/mapbox/mapbox-navigation-android/pull/7276)
+- Added experimental `metadata` property to `LegWaypoint` class. This property exposes the corresponding `DirectionsWaypoint#metadata`. [#7259](https://github.com/mapbox/mapbox-navigation-android/pull/7259)
+- Added Copilot option that allows to split history files by duration. [#7232](https://github.com/mapbox/mapbox-navigation-android/pull/7232)
+- Added Copilot options that allow to limit the number and total size of history files to be sent per session. [#7232](https://github.com/mapbox/mapbox-navigation-android/pull/7232)
+- Route request timeout errors are now considered failures as opposed to cancellations (`NavigationRouterCallback#onFailure` will be invoked instead of `NavigationRouterCallback#onCanceled`). [#7319](https://github.com/mapbox/mapbox-navigation-android/pull/7319)
+- Fixed an issue where location might have been snapped to an incorrect road when previously location updates had been inactive. [#7319](https://github.com/mapbox/mapbox-navigation-android/pull/7319)
+- Fixed an issue where in case of poor location signal it might have been snapped to a road, which is above/below the correct one.  [#7319](https://github.com/mapbox/mapbox-navigation-android/pull/7319)
+- Added experimental `MapboxNavigation#etcGateApi` so that the app can provide data about passed ETC gates. [#7295](https://github.com/mapbox/mapbox-navigation-android/pull/7295)
+- Fixed an issue where road closures where not displayed for inactive legs of the route. [#7322](https://github.com/mapbox/mapbox-navigation-android/pull/7322)
+- Added experimental and temporary (i.e. it will be removed in one of the next releases) `OnlineRouteAlternativesSwitch` which requests online route when the current route is offline and automatically switches if such a route is found. It's designed for the case when platform's reachability API doesn't work reliably. [#7245](https://github.com/mapbox/mapbox-navigation-android/pull/7245)
+- Fixed an issue where RouteReplaySession might not have started playing a route if it was created approximately at the same time when routes were set to `MapboxNavigation`. [#7293](https://github.com/mapbox/mapbox-navigation-android/pull/7293)
+
+#### Known issues :warning:
+- In case an app provides custom `Router` implementation to Nav SDK, the Nav SDK doesn't trigger `NavigationRouteAlternativesObserver` with online alternatives when current route is offline.
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.15.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.15.0-beta.1))
+- Mapbox Navigation Native `v143.0.0`
+- Mapbox Core Common `v23.7.0-beta.1`
+- Mapbox Java `v6.12.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.12.0))
+
+
 ## Mapbox Navigation SDK 2.14.1 - 06 July, 2023
 ### Changelog
 [Changes between v2.14.0 and v2.14.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.14.0...v2.14.1)
