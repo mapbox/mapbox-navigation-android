@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -67,7 +66,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @Ignore("NN-843")
     fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
     ) {
@@ -178,6 +176,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 navigation.registerRouteAlternativesObserver(
                     SimpleAlternativesObserverFromDocumentation(navigation)
                 )
+
                 navigation.startTripSession()
                 stayOnPosition(
                     evBerlinTestRoute.origin.latitude(),

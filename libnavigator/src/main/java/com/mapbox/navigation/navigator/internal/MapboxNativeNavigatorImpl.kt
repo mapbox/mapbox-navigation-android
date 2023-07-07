@@ -66,7 +66,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override var roadObjectsStore: RoadObjectsStore? = null
     override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
-    override lateinit var router: RouterInterface
     override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
@@ -83,7 +82,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
         accessToken: String,
-        router: RouterInterface,
+        router: RouterInterface?,
     ): MapboxNativeNavigator {
         navigator?.shutdown()
 
@@ -99,7 +98,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
         experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
-        this.router = nativeComponents.router
         routeAlternativesController = nativeComponents.routeAlternativesController
         this.accessToken = accessToken
         return this

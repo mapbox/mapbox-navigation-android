@@ -1,0 +1,1 @@
+- In case an app provides custom `Router` implementation to Nav SDK, the Nav SDK doesn't trigger `NavigationRouteAlternativesObserver` with online alternatives when current route is offline.

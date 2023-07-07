@@ -52,7 +52,7 @@ object NavigatorLoader {
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
-        router: RouterInterface,
+        router: RouterInterface?,
     ): NativeComponents {
         val cache = CacheFactory.build(tilesConfig, config, historyRecorderComposite)
         val navigator = Navigator(
@@ -69,7 +69,6 @@ object NavigatorLoader {
             graphAccessor,
             cache,
             roadObjectMatcher,
-            router,
             navigator.routeAlternativesController,
         )
     }
@@ -149,7 +148,6 @@ object NavigatorLoader {
         val graphAccessor: GraphAccessor,
         val cache: CacheHandle,
         val roadObjectMatcher: RoadObjectMatcher,
-        val router: RouterInterface,
         val routeAlternativesController: RouteAlternativesControllerInterface,
     )
 }

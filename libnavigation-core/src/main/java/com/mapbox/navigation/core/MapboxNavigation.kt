@@ -471,7 +471,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ),
             navigationOptions.accessToken ?: "",
             if (moduleRouter.isInternalImplementation()) {
-                nativeRouter
+                // We pass null to let NN know that default router is used and it can rely
+                // on implementation details in some cases like offline-online switch.
+                // Meanwhile platform SDK uses its own instance of native router for
+                // route requests
+                null
             } else {
                 RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
             },

@@ -17,7 +17,6 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin.Offboard
 import com.mapbox.navigation.base.route.RouterOrigin.Onboard
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.TestRouteFixtures
@@ -74,7 +73,6 @@ class RouterWrapperTests {
     var coroutineRule = MainCoroutineRule()
 
     private lateinit var routerWrapper: RouterWrapper
-    private val mapboxNativeNavigator: MapboxNativeNavigator = mockk(relaxed = true)
     private val router: RouterInterface = mockk(relaxed = true)
     private val accessToken = "pk.123"
     private val route: DirectionsRoute = mockk(relaxed = true)
@@ -145,7 +143,6 @@ class RouterWrapperTests {
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
         every { ThreadController.DefaultDispatcher } returns coroutineRule.testDispatcher
 
-        every { mapboxNativeNavigator.router } returns router
         every { router.getRoute(any(), any(), capture(getRouteSlot)) } returns 0L
         every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns 0L
 
@@ -155,7 +152,7 @@ class RouterWrapperTests {
 
         routerWrapper = RouterWrapper(
             accessToken,
-            mapboxNativeNavigator.router,
+            router,
             ThreadController(),
         )
     }
