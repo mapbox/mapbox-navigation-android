@@ -67,14 +67,14 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @Ignore("NN-843")
     fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
     ) {
         val originalTestRoute = setupBerlinEvRoute()
         withMapboxNavigationAndOfflineTilesForRegion(
             OfflineRegions.Berlin,
-            historyRecorderRule = mapboxHistoryTestRule
+            historyRecorderRule = mapboxHistoryTestRule,
+            customConfig = "{\"navigation\": { \"alternativeRoutes\": { \"tryOnlineIntervalSeconds\": 5 }}}"
         ) { navigation ->
             navigation.registerRouteAlternativesObserver(
                 AdvancedAlternativesObserverFromDocumentation(navigation)
@@ -277,7 +277,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     private fun setupBerlinEvRoute(): MockedEvRoutes {
         val originalTestRoute = EvRoutesProvider.getBerlinEvRoute(
             context,
-            mockWebServerRule.baseUrl
+            null
         )
         mockWebServerRule.requestHandlers.add(originalTestRoute.mockWebServerHandler)
         return originalTestRoute

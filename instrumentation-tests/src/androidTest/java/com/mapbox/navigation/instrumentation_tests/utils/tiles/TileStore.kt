@@ -46,12 +46,14 @@ suspend fun loadRegion(navigation: MapboxNavigation, region: OfflineRegion) {
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForRegion(
     region: OfflineRegion,
     historyRecorderRule: MapboxHistoryTestRule? = null,
+    customConfig: String = "",
     block: (MapboxNavigation) -> Unit
 ) {
     withMapboxNavigation(
         useRealTiles = true, // TODO: use mocked tiles instead of real NAVAND-1351
         tileStore = createTileStore(),
-        historyRecorderRule = historyRecorderRule
+        historyRecorderRule = historyRecorderRule,
+        customConfig = customConfig,
     ) { navigation ->
         loadRegion(navigation, region)
         block(navigation)

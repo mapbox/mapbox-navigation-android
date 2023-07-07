@@ -6,6 +6,7 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
 import com.mapbox.common.TileStoreOptions
+import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -17,6 +18,7 @@ import java.net.URI
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     useRealTiles: Boolean = false,
     tileStore: TileStore? = null,
+    customConfig: String = "",
     historyRecorderRule: MapboxHistoryTestRule? = null, // TODO: copy features to new infra
     block: (navigation: MapboxNavigation) -> Unit
 ) {
@@ -38,6 +40,9 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
                     .build()
                 routingTilesOptions(routingTilesOptions)
             }
+            .deviceProfile(
+                DeviceProfile.Builder().customConfig(customConfig).build()
+            )
             .build()
     )
     historyRecorderRule?.historyRecorder = navigation.historyRecorder
