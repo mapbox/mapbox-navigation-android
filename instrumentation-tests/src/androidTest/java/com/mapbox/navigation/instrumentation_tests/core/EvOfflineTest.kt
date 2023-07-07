@@ -156,7 +156,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOfflineWithSimpleObserver() =
         sdkTest(
-            timeout = 160000
+            timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
         ) {
             val evBerlinTestRoute = EvRoutesProvider.getBerlinEvRoute(
                 context,
