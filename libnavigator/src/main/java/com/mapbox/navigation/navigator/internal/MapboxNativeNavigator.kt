@@ -42,7 +42,7 @@ interface MapboxNativeNavigator {
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
         accessToken: String,
-        router: RouterInterface,
+        router: RouterInterface?,
     ): MapboxNativeNavigator
 
     /**
@@ -192,6 +192,4 @@ interface MapboxNativeNavigator {
     val roadObjectMatcher: RoadObjectMatcher?
 
     val experimental: Experimental
-
-    val router: RouterInterface
 }

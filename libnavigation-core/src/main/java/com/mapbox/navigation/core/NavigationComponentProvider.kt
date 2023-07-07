@@ -42,7 +42,7 @@ internal object NavigationComponentProvider {
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
         accessToken: String,
-        router: RouterInterface,
+        router: RouterInterface?,
     ): MapboxNativeNavigator = MapboxNativeNavigatorImpl.create(
         config,
         historyRecorderComposite,
