@@ -3,7 +3,6 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.common.ReachabilityFactory
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -35,7 +34,6 @@ import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -68,9 +66,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-//    @Ignore("NN-843")
     fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(
-        timeout = 160000
+        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
     ) {
         val originalTestRoute = setupBerlinEvRoute()
         withMapboxNavigationAndOfflineTilesForRegion(
@@ -179,9 +176,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 navigation.registerRouteAlternativesObserver(
                     SimpleAlternativesObserverFromDocumentation(navigation)
                 )
-                ReachabilityFactory.reachability(null).addListener {
-                    println("[TestNetwork3] listener triggered with status: $it")
-                }
 
                 navigation.startTripSession()
                 stayOnPosition(
