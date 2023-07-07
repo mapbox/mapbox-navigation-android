@@ -59,7 +59,7 @@ object NavigatorLoader {
             config,
             cache,
             historyRecorderComposite,
-            router,
+            null,
         )
         val graphAccessor = GraphAccessor(cache)
         val roadObjectMatcher = RoadObjectMatcher(cache)
