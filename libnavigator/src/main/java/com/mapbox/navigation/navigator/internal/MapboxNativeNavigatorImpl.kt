@@ -111,7 +111,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
         accessToken: String,
-        router: RouterInterface
+        router: RouterInterface?
     ) {
         val storeNavSessionState = navigator!!.storeNavigationSession()
         create(config, historyRecorderComposite, tilesConfig, accessToken, router)

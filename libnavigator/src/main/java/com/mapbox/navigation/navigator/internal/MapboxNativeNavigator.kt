@@ -53,7 +53,7 @@ interface MapboxNativeNavigator {
         historyRecorderComposite: HistoryRecorderHandle?,
         tilesConfig: TilesConfig,
         accessToken: String,
-        router: RouterInterface,
+        router: RouterInterface?,
     )
 
     suspend fun resetRideSession()
