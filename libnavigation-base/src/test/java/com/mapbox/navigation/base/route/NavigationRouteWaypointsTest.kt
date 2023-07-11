@@ -163,7 +163,8 @@ class NavigationRouteWaypointsTest(
                 )
                 .waypointsPerRoute(waypointsPerRoute)
                 .build(),
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            null
         )
         assertEquals(expectedWaypoints, route.waypoints)
     }

@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteInterface
@@ -67,6 +68,7 @@ fun NavigationRoute.refreshRoute(
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
     waypoints: List<DirectionsWaypoint?>?,
+    responseTime: Long,
     refreshTtl: Int?,
 ): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
@@ -130,7 +132,12 @@ fun NavigationRoute.refreshRoute(
     val directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder = {
         waypoints(buildNewWaypoints(directionsResponse.waypoints(), waypoints))
     }
-    return update(directionsRouteBlock, directionsResponseBlock)
+    val newExpirationTime = refreshTtl?.plus(responseTime)
+    return update(
+        directionsRouteBlock,
+        directionsResponseBlock,
+        newExpirationTime ?: expirationTime
+    )
 }
 
 private fun DirectionsRoute.Builder.updateRefreshTtl(
@@ -167,6 +174,7 @@ private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {
 fun NavigationRoute.update(
     directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute,
     directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder,
+    newExpirationTime: Long? = this.expirationTime,
 ): NavigationRoute {
     val refreshedRoute = directionsRoute.directionsRouteBlock()
     val refreshedRoutes = directionsResponse.routes().toMutableList()
@@ -175,7 +183,16 @@ fun NavigationRoute.update(
         .routes(refreshedRoutes)
         .directionsResponseBlock()
         .build()
-    return copy(directionsResponse = refreshedResponse)
+    return copy(directionsResponse = refreshedResponse, expirationTime = newExpirationTime)
+}
+
+fun NavigationRoute.updateExpirationTime(newExpirationTime: Long?): NavigationRoute {
+    this.expirationTime = newExpirationTime
+    return this
+}
+
+fun NavigationRoute.isExpired(): Boolean {
+    return this.expirationTime?.let { Time.SystemClockImpl.seconds() >= it } ?: false
 }
 
 /**
@@ -207,14 +224,21 @@ fun createNavigationRoutes(
     routeOptions: RouteOptions,
     routeParser: SDKRouteParser,
     routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
+    responseTime: Long?
 ): List<NavigationRoute> =
-    NavigationRoute.create(directionsResponse, routeOptions, routeParser, routerOrigin)
+    NavigationRoute.create(
+        directionsResponse,
+        routeOptions,
+        routeParser,
+        routerOrigin,
+        responseTime
+    )
 
 /**
  * Internal API to create a new [NavigationRoute] from a native peer.
  */
-fun RouteInterface.toNavigationRoute(): NavigationRoute {
-    return this.toNavigationRoute()
+fun RouteInterface.toNavigationRoute(responseTime: Long): NavigationRoute {
+    return this.toNavigationRoute(responseTime)
 }
 
 private fun List<LegStep>.updateSteps(

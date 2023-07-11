@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
-import com.mapbox.navigation.base.internal.route.RouteExpirationHandler
+import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.RoutesRefreshData
@@ -20,8 +20,10 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.spyk
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
@@ -80,17 +82,19 @@ class RouteRefresherTest {
 
     @Before
     fun setUp() {
-        mockkObject(RouteExpirationHandler)
+        mockkStatic(NavigationRoute::isExpired)
         mockkObject(RouteRefreshValidator)
         coEvery {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
         } returns routesRefreshData
+        every { route1.isExpired() } returns false
+        every { route2.isExpired() } returns false
     }
 
     @After
     fun tearDown() {
-        unmockkObject(RouteExpirationHandler)
         unmockkObject(RouteRefreshValidator)
+        unmockkStatic(NavigationRoute::isExpired)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -654,8 +658,8 @@ class RouteRefresherTest {
         every {
             RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { RouteExpirationHandler.isRouteExpired(route1) } returns true
-        every { RouteExpirationHandler.isRouteExpired(route2) } returns false
+        every { route1.isExpired() } returns true
+        every { route2.isExpired() } returns false
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1)
             0
@@ -749,7 +753,8 @@ class RouteRefresherTest {
         every {
             RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { RouteExpirationHandler.isRouteExpired(any()) } returns true
+        every { route1.isExpired() } returns true
+        every { route2.isExpired() } returns true
         val routesRefreshData = RoutesRefreshData(
             route1,
             routesProgressData1,
