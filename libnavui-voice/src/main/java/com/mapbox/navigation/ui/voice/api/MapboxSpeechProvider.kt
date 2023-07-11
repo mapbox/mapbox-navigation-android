@@ -86,6 +86,11 @@ internal class MapboxSpeechProvider(
             .appendQueryParameter("textType", textType)
             .appendQueryParameter("language", language)
             .appendQueryParameter("access_token", accessToken)
+            .apply {
+                options.gender?.let {
+                    appendQueryParameter("gender", it)
+                }
+            }
         // omitting "outputFormat" -> will default to MP3
 
         val resourceUrl = URL(uri.build().toString()) // throws MalformedURLException

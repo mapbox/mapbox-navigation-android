@@ -30,6 +30,7 @@ package com.mapbox.navigation.ui.voice.api {
   }
 
   public final class MapboxAudioGuidance implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create(com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create();
     method public com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer? getCurrentVoiceInstructionsPlayer();
     method public static com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getRegisteredInstance();
@@ -39,10 +40,12 @@ package com.mapbox.navigation.ui.voice.api {
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState> stateFlow();
     method public void toggle();
     method public void unmute();
+    method public void updateSpeechApiOptions(com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options);
     field public static final com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance.Companion Companion;
   }
 
   public static final class MapboxAudioGuidance.Companion {
+    method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create(com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance create();
     method public com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance getRegisteredInstance();
   }
@@ -164,14 +167,26 @@ package com.mapbox.navigation.ui.voice.options {
 
   public final class MapboxSpeechApiOptions {
     method public String getBaseUri();
+    method public String? getGender();
     method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions.Builder toBuilder();
     property public final String baseUri;
+    property public final String? gender;
   }
 
   public static final class MapboxSpeechApiOptions.Builder {
     ctor public MapboxSpeechApiOptions.Builder();
     method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions.Builder baseUri(String baseUri);
     method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions build();
+    method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions.Builder gender(@com.mapbox.navigation.ui.voice.options.VoiceGender.Type String? gender);
+  }
+
+  public final class VoiceGender {
+    field public static final String FEMALE = "female";
+    field public static final com.mapbox.navigation.ui.voice.options.VoiceGender INSTANCE;
+    field public static final String MALE = "male";
+  }
+
+  @StringDef({com.mapbox.navigation.ui.voice.options.VoiceGender.MALE, com.mapbox.navigation.ui.voice.options.VoiceGender.FEMALE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface VoiceGender.Type {
   }
 
   public final class VoiceInstructionsPlayerOptions {

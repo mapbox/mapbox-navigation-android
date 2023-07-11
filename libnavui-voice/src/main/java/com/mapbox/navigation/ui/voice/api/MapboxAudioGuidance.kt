@@ -11,6 +11,7 @@ import com.mapbox.navigation.ui.utils.internal.datastore.NavigationDataStoreOwne
 import com.mapbox.navigation.ui.utils.internal.datastore.booleanDataStoreKey
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
 import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceServices
+import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +39,7 @@ class MapboxAudioGuidance
 internal constructor(
     private val audioGuidanceServices: MapboxAudioGuidanceServices,
     dispatcher: CoroutineDispatcher,
+    options: MapboxSpeechApiOptions
 ) : MapboxNavigationObserver {
 
     private var dataStoreOwner: NavigationDataStoreOwner? = null
@@ -49,6 +51,7 @@ internal constructor(
     private val internalStateFlow = MutableStateFlow(MapboxAudioGuidanceState())
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private val mapboxVoiceInstructions = audioGuidanceServices.mapboxVoiceInstructions()
+    private val optionsFlow = MutableStateFlow(options)
 
     private var job: Job? = null
 
@@ -124,6 +127,17 @@ internal constructor(
     }
 
     /**
+     * Updates [MapboxSpeechApiOptions] that was provided during [MapboxAudioGuidance] creation.
+     *
+     * @param options New [MapboxSpeechApiOptions]
+     *
+     * @see [create]
+     */
+    fun updateSpeechApiOptions(options: MapboxSpeechApiOptions) {
+        optionsFlow.value = options
+    }
+
+    /**
      * Top level flow that will switch based on the language and muted state.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -177,11 +191,16 @@ internal constructor(
         return combine(
             mapboxVoiceInstructions.voiceLanguage(),
             configOwner!!.language(),
-        ) { voiceLanguage, deviceLanguage -> voiceLanguage ?: deviceLanguage }
+            optionsFlow,
+        ) { voiceLanguage, deviceLanguage, options -> (voiceLanguage ?: deviceLanguage) to options }
             .distinctUntilChanged()
-            .map { language ->
+            .map { (language, options) ->
                 trigger?.onDetached(this)
-                audioGuidanceServices.mapboxAudioGuidanceVoice(this, language).also {
+                audioGuidanceServices.mapboxAudioGuidanceVoice(
+                    this,
+                    language,
+                    options,
+                ).also {
                     trigger = VoiceInstructionsPrefetcher(it.mapboxSpeechApi).also { trigger ->
                         trigger.onAttached(this)
                     }
@@ -206,11 +225,17 @@ internal constructor(
 
         /**
          * Construct an instance without registering to [MapboxNavigationApp].
+         *
+         * @param options Optional [MapboxSpeechApiOptions]
          */
         @JvmStatic
-        fun create() = MapboxAudioGuidance(
+        @JvmOverloads
+        fun create(
+            options: MapboxSpeechApiOptions = MapboxSpeechApiOptions.Builder().build(),
+        ) = MapboxAudioGuidance(
             MapboxAudioGuidanceServices(),
-            Dispatchers.Main.immediate
+            Dispatchers.Main.immediate,
+            options
         )
 
         /**

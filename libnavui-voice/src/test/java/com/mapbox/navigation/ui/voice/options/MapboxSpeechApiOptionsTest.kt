@@ -11,7 +11,9 @@ class MapboxSpeechApiOptionsTest :
         MapboxSpeechApiOptions::class
 
     override fun getFilledUpBuilder(): MapboxSpeechApiOptions.Builder =
-        MapboxSpeechApiOptions.Builder().baseUri("https://api-routing-tiles-staging.tilestream.net")
+        MapboxSpeechApiOptions.Builder()
+            .baseUri("https://api-routing-tiles-staging.tilestream.net")
+            .gender(VoiceGender.MALE)
 
     @Test
     override fun trigger() {

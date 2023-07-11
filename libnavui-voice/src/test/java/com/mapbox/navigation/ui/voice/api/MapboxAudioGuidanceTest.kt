@@ -9,6 +9,8 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.voice.TestMapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.TestMapboxAudioGuidanceServices.Companion.SPEECH_ANNOUNCEMENT_DELAY_MS
 import com.mapbox.navigation.ui.voice.internal.MapboxVoiceInstructionsState
+import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
+import com.mapbox.navigation.ui.voice.options.VoiceGender
 import io.mockk.clearMocks
 import io.mockk.coVerify
 import io.mockk.every
@@ -38,6 +40,7 @@ class MapboxAudioGuidanceTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
+    private val options = MapboxSpeechApiOptions.Builder().build()
     private val testMapboxAudioGuidanceServices = TestMapboxAudioGuidanceServices()
     private val mapboxNavigation: MapboxNavigation = mockk(relaxUnitFun = true) {
         every { navigationOptions } returns mockk {
@@ -48,6 +51,7 @@ class MapboxAudioGuidanceTest {
     private val carAppAudioGuidance = MapboxAudioGuidance(
         testMapboxAudioGuidanceServices.mapboxAudioGuidanceServices,
         coroutineRule.testDispatcher,
+        options,
     )
 
     @Suppress("PrivatePropertyName")
@@ -293,8 +297,8 @@ class MapboxAudioGuidanceTest {
             verifySequence {
                 mapboxAudioGuidanceServices.dataStoreOwner(any())
                 mapboxAudioGuidanceServices.configOwner(any())
-                mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), "en")
-                mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), voiceLanguage)
+                mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), "en", options)
+                mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), voiceLanguage, options)
             }
             carAppAudioGuidance.onDetached(mapboxNavigation)
         }
@@ -343,6 +347,34 @@ class MapboxAudioGuidanceTest {
         }
 
         carAppAudioGuidance.onDetached(mapboxNavigation)
+    }
+
+    @Test
+    fun `creates new MapboxAudioGuidanceVoice on options update`() = coroutineRule.runBlockingTest {
+        val mapboxAudioGuidanceServices =
+            testMapboxAudioGuidanceServices.mapboxAudioGuidanceServices
+
+        carAppAudioGuidance.onAttached(mapboxNavigation)
+
+        val newOptions = MapboxSpeechApiOptions.Builder()
+            .baseUri("https://test.com")
+            .gender(VoiceGender.MALE)
+            .build()
+
+        carAppAudioGuidance.updateSpeechApiOptions(newOptions)
+
+        delay(SPEECH_ANNOUNCEMENT_DELAY_MS)
+
+        excludeRecords {
+            mapboxAudioGuidanceServices.mapboxVoiceInstructions()
+            mapboxAudioGuidanceServices.dataStoreOwner(any())
+            mapboxAudioGuidanceServices.configOwner(any())
+        }
+
+        verifySequence {
+            mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), any(), eq(options))
+            mapboxAudioGuidanceServices.mapboxAudioGuidanceVoice(any(), any(), eq(newOptions))
+        }
     }
 
     @Test

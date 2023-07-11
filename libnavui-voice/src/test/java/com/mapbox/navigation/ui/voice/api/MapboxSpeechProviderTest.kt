@@ -16,6 +16,7 @@ import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
+import com.mapbox.navigation.ui.voice.options.VoiceGender
 import com.mapbox.navigation.ui.voice.testutils.Fixtures
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
@@ -53,6 +54,7 @@ internal class MapboxSpeechProviderTest {
     private val language = "en"
     private val apiOptions = MapboxSpeechApiOptions.Builder()
         .baseUri("https://example.com")
+        .gender(VoiceGender.FEMALE)
         .build()
     private val sku = "SKU"
 
@@ -117,6 +119,7 @@ internal class MapboxSpeechProviderTest {
                 "textType" to "ssml",
                 "language" to language,
                 "access_token" to accessToken,
+                "gender" to apiOptions.gender,
                 "sku" to sku
             ),
             loadRequestUri.getQueryParams()

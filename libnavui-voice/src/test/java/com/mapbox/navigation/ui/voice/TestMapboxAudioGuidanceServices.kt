@@ -78,7 +78,7 @@ class TestMapboxAudioGuidanceServices(
 
     val mapboxAudioGuidanceServices = mockk<MapboxAudioGuidanceServices> {
         every { mapboxVoiceInstructions() } returns mapboxVoiceInstructions
-        every { mapboxAudioGuidanceVoice(any(), any()) } returns mapboxAudioGuidanceVoice
+        every { mapboxAudioGuidanceVoice(any(), any(), any()) } returns mapboxAudioGuidanceVoice
         every { configOwner(any()) } returns carAppConfigOwner
         every { dataStoreOwner(any()) } returns dataStoreOwner
     }
