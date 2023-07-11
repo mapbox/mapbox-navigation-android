@@ -10,14 +10,17 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
-import com.mapbox.navigation.base.internal.route.RouteExpirationHandler
+import com.mapbox.navigation.base.internal.SDKRouteParser
+import com.mapbox.navigation.base.internal.route.createNavigationRoutes
+import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
-import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin.Offboard
 import com.mapbox.navigation.base.route.RouterOrigin.Onboard
+import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.TestRouteFixtures
@@ -29,6 +32,7 @@ import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigator.GetRouteOptions
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
@@ -50,7 +54,9 @@ import kotlinx.coroutines.test.runBlockingTest
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -77,7 +83,7 @@ class RouterWrapperTests {
     private val router: RouterInterface = mockk(relaxed = true)
     private val accessToken = "pk.123"
     private val route: DirectionsRoute = mockk(relaxed = true)
-    private val routerCallback: RouterCallback = mockk(relaxed = true)
+    private val navigationRouterCallback: NavigationRouterCallback = mockk(relaxed = true)
     private val routerRefreshCallback: NavigationRouterRefreshCallback = mockk(relaxed = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val routeUrl = routerOptions.toUrl(accessToken).toString()
@@ -137,13 +143,16 @@ class RouterWrapperTests {
     private val getRouteSlot = slot<com.mapbox.navigator.RouterDataRefCallback>()
     private val refreshRouteSlot = slot<RouterRefreshCallback>()
     private val routeSlot = slot<NavigationRoute>()
+    private val responseTime = 12345L
 
     @Before
     fun setUp() {
-        mockkObject(RouteExpirationHandler)
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
         every { ThreadController.DefaultDispatcher } returns coroutineRule.testDispatcher
+
+        mockkObject(Time.SystemClockImpl)
+        every { Time.SystemClockImpl.seconds() } returns responseTime
 
         every { router.getRoute(any(), any(), capture(getRouteSlot)) } returns 0L
         every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns 0L
@@ -161,8 +170,8 @@ class RouterWrapperTests {
 
     @After
     fun cleanUp() {
-        unmockkObject(RouteExpirationHandler)
         unmockkObject(ThreadController)
+        unmockkObject(Time.SystemClockImpl)
     }
 
     @Test
@@ -172,7 +181,7 @@ class RouterWrapperTests {
 
     @Test
     fun `get route is called with expected url and options`() {
-        routerWrapper.getRoute(routerOptions, routerCallback)
+        routerWrapper.getRoute(routerOptions, navigationRouterCallback)
         val requestOptions = GetRouteOptions(null)
 
         verify {
@@ -186,7 +195,7 @@ class RouterWrapperTests {
 
     @Test
     fun `check callback called on failure with redacted token`() {
-        routerWrapper.getRoute(routerOptions, routerCallback)
+        routerWrapper.getRoute(routerOptions, navigationRouterCallback)
         getRouteSlot.captured.run(routerResultFailureDataRef, nativeOriginOnline)
 
         val expected = listOf(
@@ -207,23 +216,13 @@ class RouterWrapperTests {
                 any<com.mapbox.navigator.RouterDataRefCallback>()
             )
         }
-        verify { routerCallback.onFailure(expected, routerOptions) }
-    }
-
-    @Test
-    fun `route expiration data is not updated on failure`() {
-        routerWrapper.getRoute(routerOptions, routerCallback)
-        getRouteSlot.captured.run(routerResultFailureDataRef, nativeOriginOnline)
-
-        verify(exactly = 0) {
-            RouteExpirationHandler.updateRouteExpirationData(any(), any())
-        }
+        verify { navigationRouterCallback.onFailure(expected, routerOptions) }
     }
 
     @Test
     fun `check callback called on success and contains original options`() =
         coroutineRule.runBlockingTest {
-            routerWrapper.getRoute(routerOptions, routerCallback)
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
             getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnboard)
 
             verify {
@@ -240,34 +239,40 @@ class RouterWrapperTests {
                 UUID
             ).routes()
 
-            verify(exactly = 1) { routerCallback.onRoutesReady(expected, Onboard) }
+            verify(exactly = 1) {
+                navigationRouterCallback.onRoutesReady(
+                    match { it.toDirectionsRoutes() == expected },
+                    Onboard
+                )
+            }
         }
 
     @Test
     fun `route expiration data is updated on success`() =
         coroutineRule.runBlockingTest {
-            routerWrapper.getRoute(routerOptions, routerCallback)
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
             getRouteSlot.captured.run(
                 ExpectedFactory.createValue(
                     testRouteFixtures.loadTwoLegRouteWithRefreshTtl().toDataRef()
                 ),
                 nativeOriginOnboard
             )
-            val routeCaptor = slot<NavigationRoute>()
-
-            verify(exactly = 1) {
-                RouteExpirationHandler.updateRouteExpirationData(
-                    capture(routeCaptor),
-                    10
-                )
+            val routesCaptor = slot<List<NavigationRoute>>()
+            verify {
+                navigationRouterCallback.onRoutesReady(capture(routesCaptor), any())
             }
-            assertEquals("cjeacbr8s21bk47lggcvce7lv#0", routeCaptor.captured.id)
+
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 9
+            assertFalse(routesCaptor.captured[0].isExpired())
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 11
+            assertTrue(routesCaptor.captured[0].isExpired())
+            assertEquals("cjeacbr8s21bk47lggcvce7lv#0", routesCaptor.captured[0].id)
         }
 
     @Test
     fun `route expiration data is updated on success when no refresh ttl`() =
         coroutineRule.runBlockingTest {
-            routerWrapper.getRoute(routerOptions, routerCallback)
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
             getRouteSlot.captured.run(
                 ExpectedFactory.createValue(
                     testRouteFixtures.loadTwoLegRoute().toDataRef()
@@ -275,18 +280,20 @@ class RouterWrapperTests {
                 nativeOriginOnboard
             )
 
-            val routeCaptor = slot<NavigationRoute>()
-
-            verify(exactly = 1) {
-                RouteExpirationHandler.updateRouteExpirationData(capture(routeCaptor), null)
+            val routesCaptor = slot<List<NavigationRoute>>()
+            verify {
+                navigationRouterCallback.onRoutesReady(capture(routesCaptor), any())
             }
-            assertEquals("cjeacbr8s21bk47lggcvce7lv#0", routeCaptor.captured.id)
+
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 10000
+            assertFalse(routesCaptor.captured[0].isExpired())
+            assertEquals("cjeacbr8s21bk47lggcvce7lv#0", routesCaptor.captured[0].id)
         }
 
     @Test
     fun `route expiration data is updated on success for multiple routes`() =
         coroutineRule.runBlockingTest {
-            routerWrapper.getRoute(routerOptions, routerCallback)
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
             getRouteSlot.captured.run(
                 ExpectedFactory.createValue(
                     testRouteFixtures.loadTwoRoutes().toDataRef()
@@ -294,22 +301,29 @@ class RouterWrapperTests {
                 nativeOriginOnboard
             )
 
-            verify(exactly = 1) {
-                RouteExpirationHandler.updateRouteExpirationData(
-                    match { it.id == "cjeacbr8s21bk47lggcvce7lv#0" },
-                    10
-                )
-                RouteExpirationHandler.updateRouteExpirationData(
-                    match { it.id == "cjeacbr8s21bk47lggcvce7lv#1" },
-                    5
-                )
+            val routesCaptor = slot<List<NavigationRoute>>()
+            verify {
+                navigationRouterCallback.onRoutesReady(capture(routesCaptor), any())
             }
+
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 4
+            assertFalse(routesCaptor.captured[1].isExpired())
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 6
+            assertTrue(routesCaptor.captured[1].isExpired())
+
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 9
+            assertFalse(routesCaptor.captured[0].isExpired())
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 11
+            assertTrue(routesCaptor.captured[0].isExpired())
+
+            assertEquals("cjeacbr8s21bk47lggcvce7lv#0", routesCaptor.captured[0].id)
+            assertEquals("cjeacbr8s21bk47lggcvce7lv#1", routesCaptor.captured[1].id)
         }
 
     @Test
     fun `check on failure is called on success response with no routes`() =
         coroutineRule.runBlockingTest {
-            routerWrapper.getRoute(routerOptions, routerCallback)
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
             getRouteSlot.captured.run(routerResultSuccessEmptyRoutes, nativeOriginOnboard)
 
             verify {
@@ -331,7 +345,9 @@ class RouterWrapperTests {
             )
 
             val failures = slot<List<RouterFailure>>()
-            verify(exactly = 1) { routerCallback.onFailure(capture(failures), routerOptions) }
+            verify(exactly = 1) {
+                navigationRouterCallback.onFailure(capture(failures), routerOptions)
+            }
             val failure: RouterFailure = failures.captured[0]
             assertEquals(expected.message, failure.message)
             assertEquals(expected.code, failure.code)
@@ -343,7 +359,7 @@ class RouterWrapperTests {
     @Test
     fun `check on failure is called on erroneous success response`() =
         coroutineRule.runBlockingTest {
-            routerWrapper.getRoute(routerOptions, routerCallback)
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
             getRouteSlot.captured.run(routerResultSuccessErroneousValue, nativeOriginOnboard)
 
             verify {
@@ -365,7 +381,9 @@ class RouterWrapperTests {
             )
 
             val failures = slot<List<RouterFailure>>()
-            verify(exactly = 1) { routerCallback.onFailure(capture(failures), routerOptions) }
+            verify(exactly = 1) {
+                navigationRouterCallback.onFailure(capture(failures), routerOptions)
+            }
             val failure: RouterFailure = failures.captured[0]
             assertEquals(expected.message, failure.message)
             assertEquals(expected.code, failure.code)
@@ -380,10 +398,10 @@ class RouterWrapperTests {
             getRouteSlot.captured.run(routerResultCancelled, nativeOriginOnboard)
         }
 
-        routerWrapper.getRoute(routerOptions, routerCallback)
+        routerWrapper.getRoute(routerOptions, navigationRouterCallback)
         routerWrapper.cancelRouteRequest(REQUEST_ID)
 
-        verify { routerCallback.onCanceled(routerOptions, Onboard) }
+        verify { navigationRouterCallback.onCanceled(routerOptions, Onboard) }
     }
 
     @Test
@@ -392,10 +410,10 @@ class RouterWrapperTests {
             getRouteSlot.captured.run(routerResultCancelled, nativeOriginOnline)
         }
 
-        routerWrapper.getRoute(routerOptions, routerCallback)
+        routerWrapper.getRoute(routerOptions, navigationRouterCallback)
         routerWrapper.cancelAll()
 
-        verify { routerCallback.onCanceled(routerOptions, Offboard) }
+        verify { navigationRouterCallback.onCanceled(routerOptions, Offboard) }
     }
 
     @Test
@@ -650,16 +668,14 @@ class RouterWrapperTests {
             hashMapOf()
         )
 
-        verify(exactly = 1) {
-            RouteExpirationHandler.updateRouteExpirationData(
-                match { it.id == "$UUID#0" },
-                REFRESH_TTL
-            )
-        }
+        every { Time.SystemClockImpl.seconds() } returns responseTime + REFRESH_TTL - 1
+        assertFalse(route.isExpired())
+        every { Time.SystemClockImpl.seconds() } returns responseTime + REFRESH_TTL + 1
+        assertTrue(route.isExpired())
     }
 
     @Test
-    fun `route refresh failure without refresh ttl updates routes expiration data`() {
+    fun `route refresh failure without refresh ttl does not update routes expiration data`() {
         val route = createNavigationRoute(
             DirectionsRoute.builder()
                 .requestUuid(UUID)
@@ -685,9 +701,8 @@ class RouterWrapperTests {
             hashMapOf()
         )
 
-        verify(exactly = 1) {
-            RouteExpirationHandler.updateRouteExpirationData(match { it.id == "$UUID#0" }, null)
-        }
+        every { Time.SystemClockImpl.seconds() } returns responseTime + 10000
+        assertFalse(route.isExpired())
     }
 
     @Test // TODO
@@ -721,16 +736,17 @@ class RouterWrapperTests {
             hashMapOf()
         )
 
-        verify(exactly = 1) {
-            RouteExpirationHandler.updateRouteExpirationData(
-                match { it.id == "pmzkNPXknULJwETblENCKWMNIHAUDtN8LGwlbbeyydAACiKP_nLYog==#0" },
-                50
-            )
-        }
+        val routeCaptor = slot<NavigationRoute>()
+        verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor)) }
+
+        every { Time.SystemClockImpl.seconds() } returns responseTime + 49
+        assertFalse(routeCaptor.captured.isExpired())
+        every { Time.SystemClockImpl.seconds() } returns responseTime + 51
+        assertTrue(routeCaptor.captured.isExpired())
     }
 
     @Test
-    fun `route refresh successful without refresh ttl updates route expiration data`() = runBlockingTest {
+    fun `route refresh successful without refresh ttl does not update route expiration data`() = runBlockingTest {
         val options = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .coordinatesList(
@@ -742,24 +758,25 @@ class RouterWrapperTests {
                 )
             )
             .build()
-        val route = NavigationRoute.create(
+        val route = createNavigationRoutes(
             DirectionsResponse.fromJson(
                 testRouteFixtures.loadMultiLegRouteForRefresh(),
                 options
             ),
             options,
-            com.mapbox.navigation.base.route.RouterOrigin.Custom()
+            SDKRouteParser.default,
+            com.mapbox.navigation.base.route.RouterOrigin.Custom(),
+            100L
         ).first()
 
         routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
 
-        verify(exactly = 1) {
-            RouteExpirationHandler.updateRouteExpirationData(
-                match { it.id == "pmzkNPXknULJwETblENCKWMNIHAUDtN8LGwlbbeyydAACiKP_nLYog==#0" },
-                null
-            )
-        }
+        val routeCaptor = slot<NavigationRoute>()
+        verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor)) }
+
+        every { Time.SystemClockImpl.seconds() } returns responseTime + 10000
+        assertFalse(routeCaptor.captured.isExpired())
     }
 
     private fun provideDefaultRouteOptions(): RouteOptions {

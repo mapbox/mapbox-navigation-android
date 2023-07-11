@@ -12,8 +12,8 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.InternalRouter
-import com.mapbox.navigation.base.internal.route.RouteExpirationHandler
 import com.mapbox.navigation.base.internal.route.refreshRoute
+import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
@@ -35,6 +35,7 @@ import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.parseDirectionsRouteRefresh
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
@@ -111,11 +112,13 @@ class RouterWrapper(
                                     "from router.getRoute for $urlWithoutToken",
                                 LOG_CATEGORY
                             )
+                            val responseTime = Time.SystemClockImpl.seconds()
                             parseDirectionsResponse(
                                 ThreadController.DefaultDispatcher,
                                 it,
                                 routeUrl,
                                 origin.mapToSdkRouteOrigin(),
+                                responseTime
                             ).fold(
                                 { throwable ->
                                     callback.onFailure(
@@ -135,12 +138,6 @@ class RouterWrapper(
                                         routes.firstOrNull()?.directionsResponse?.metadata()
                                     logI("Response metadata: $metadata", LOG_CATEGORY)
 
-                                    routes.forEach {
-                                        RouteExpirationHandler.updateRouteExpirationData(
-                                            it,
-                                            it.directionsRoute.refreshTtl()
-                                        )
-                                    }
                                     callback.onRoutesReady(
                                         routes,
                                         origin.mapToSdkRouteOrigin()
@@ -229,6 +226,7 @@ class RouterWrapper(
             refreshOptions,
         ) { result, _, _ ->
             logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
+            val responseTime = Time.SystemClockImpl.seconds()
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -245,7 +243,7 @@ class RouterWrapper(
 
                         logW(errorMessage, LOG_CATEGORY)
 
-                        RouteExpirationHandler.updateRouteExpirationData(route, it.refreshTtl)
+                        it.refreshTtl?.let { route.updateExpirationTime(it + responseTime) }
                         callback.onFailure(
                             RouterFactory.buildNavigationRouterRefreshError(
                                 "Route refresh failed",
@@ -289,6 +287,7 @@ class RouterWrapper(
                                         },
                                         closures = routeRefresh.legs()?.map { it.closures() },
                                         waypoints = updatedWaypoints,
+                                        responseTime = responseTime,
                                         refreshTtl = routeRefresh.unrecognizedJsonProperties
                                             ?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
                                     )
@@ -303,10 +302,6 @@ class RouterWrapper(
                                 )
                             },
                             {
-                                RouteExpirationHandler.updateRouteExpirationData(
-                                    it,
-                                    it.directionsRoute.refreshTtl()
-                                )
                                 callback.onRefreshReady(it)
                             },
                         )

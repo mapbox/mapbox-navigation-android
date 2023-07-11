@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
 import com.mapbox.navigation.base.internal.route.toTestNavigationRoutes
+import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -328,7 +329,8 @@ class NavigationRouteTest {
             val serialisedFromDataRef = NavigationRoute.createAsync(
                 responseDataRef,
                 requestUrl,
-                RouterOrigin.Offboard
+                RouterOrigin.Offboard,
+                null
             )
 
             assertEquals(serialisedFromModel, serialisedFromString)
@@ -349,7 +351,8 @@ class NavigationRouteTest {
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            null
         )
 
         assertEquals(
@@ -372,7 +375,8 @@ class NavigationRouteTest {
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            null
         )
 
         val newRouteJson = FileUtils.loadJsonFixture("route_closure_second_silent_waypoint.json")
@@ -385,5 +389,27 @@ class NavigationRouteTest {
         )
 
         assertEquals(original.unavoidableClosures, copied.unavoidableClosures)
+    }
+
+    @Test
+    fun updateExpirationTime() {
+        val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
+        val route = NavigationRoute(
+            DirectionsResponse.builder()
+                .routes(listOf(DirectionsRoute.fromJson(routeJson)))
+                .uuid("uuid")
+                .code("Ok")
+                .build(),
+            0,
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .coordinates("0.0,0.0;1.1,1.1")
+                .build(),
+            mockk(relaxed = true),
+            null
+        )
+
+        route.updateExpirationTime(45)
+        assertEquals(45L, route.expirationTime)
     }
 }

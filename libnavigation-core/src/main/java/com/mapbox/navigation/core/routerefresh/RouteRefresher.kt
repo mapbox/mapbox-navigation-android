@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import android.util.Log
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
-import com.mapbox.navigation.base.internal.route.RouteExpirationHandler
+import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
@@ -141,7 +141,7 @@ internal class RouteRefresher(
             )
             return RouteRefresherResult(route, routeProgressData, RouteRefresherStatus.INVALID)
         }
-        if (RouteExpirationHandler.isRouteExpired(route)) {
+        if (route.isExpired()) {
             logI(
                 "route ${route.id} will not be refreshed because it is invalidated",
                 RouteRefreshLog.LOG_CATEGORY

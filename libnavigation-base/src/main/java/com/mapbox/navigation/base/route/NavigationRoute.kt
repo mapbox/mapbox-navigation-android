@@ -22,8 +22,10 @@ import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
+import com.mapbox.navigation.base.internal.utils.refreshTtl
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
@@ -49,6 +51,7 @@ class NavigationRoute internal constructor(
     val routeOptions: RouteOptions,
     internal val nativeRoute: RouteInterface,
     internal val unavoidableClosures: List<List<Closure>>,
+    internal var expirationTime: Long?,
 ) {
 
     internal constructor(
@@ -56,6 +59,7 @@ class NavigationRoute internal constructor(
         routeIndex: Int,
         routeOptions: RouteOptions,
         nativeRoute: RouteInterface,
+        expirationTime: Long?,
     ) : this(
         directionsResponse,
         routeIndex,
@@ -63,7 +67,8 @@ class NavigationRoute internal constructor(
         nativeRoute,
         directionsResponse.routes().getOrNull(routeIndex)?.legs()
             ?.map { leg -> leg.closures().orEmpty() }
-            .orEmpty()
+            .orEmpty(),
+        expirationTime,
     )
 
     companion object {
@@ -116,6 +121,7 @@ class NavigationRoute internal constructor(
                 routeOptions,
                 routeOptionsUrlString = routeOptions.toUrl("").toString(),
                 routerOrigin,
+                null,
             )
         }
 
@@ -165,6 +171,7 @@ class NavigationRoute internal constructor(
                 routeOptions = RouteOptions.fromUrl(URL(routeRequestUrl)),
                 routeOptionsUrlString = routeRequestUrl,
                 routerOrigin = routerOrigin,
+                responseTime = null,
             )
         }
 
@@ -180,6 +187,7 @@ class NavigationRoute internal constructor(
             directionsResponseJson: DataRef,
             routeRequestUrl: String,
             routerOrigin: RouterOrigin,
+            responseTime: Long?,
             routeParser: SDKRouteParser = SDKRouteParser.default
         ): List<NavigationRoute> {
             logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
@@ -215,7 +223,8 @@ class NavigationRoute internal constructor(
                 create(
                     deferredNativeParsing.await(),
                     deferredResponseParsing.await(),
-                    deferredRouteOptionsParsing.await()
+                    deferredRouteOptionsParsing.await(),
+                    responseTime,
                 ).also {
                     logD(
                         "NavigationRoute.createAsync finished " +
@@ -231,6 +240,7 @@ class NavigationRoute internal constructor(
             routeOptions: RouteOptions,
             routeParser: SDKRouteParser,
             routerOrigin: RouterOrigin,
+            responseTime: Long?
         ): List<NavigationRoute> {
             return create(
                 directionsResponse,
@@ -238,6 +248,7 @@ class NavigationRoute internal constructor(
                 routeOptions,
                 routeOptionsUrlString = routeOptions.toUrl("").toString(),
                 routerOrigin,
+                responseTime,
                 routeParser,
             )
         }
@@ -248,6 +259,7 @@ class NavigationRoute internal constructor(
             routeOptions: RouteOptions,
             routeOptionsUrlString: String,
             routerOrigin: RouterOrigin,
+            responseTime: Long?,
             routeParser: SDKRouteParser = SDKRouteParser.default
         ): List<NavigationRoute> {
             return routeParser.parseDirectionsResponse(
@@ -255,7 +267,7 @@ class NavigationRoute internal constructor(
                 routeOptionsUrlString,
                 routerOrigin
             ).run {
-                create(this, directionsResponse, routeOptions)
+                create(this, directionsResponse, routeOptions, responseTime)
             }
         }
 
@@ -263,6 +275,7 @@ class NavigationRoute internal constructor(
             expected: Expected<String, List<RouteInterface>>,
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
+            responseTime: Long?,
         ): List<NavigationRoute> {
             return expected.fold({ error ->
                 logE("NavigationRoute", "Failed to parse a route. Reason: $error")
@@ -274,7 +287,13 @@ class NavigationRoute internal constructor(
                     directionsResponse,
                     index,
                     routeOptions,
-                    routeInterface
+                    routeInterface,
+                    ifNonNull(
+                        directionsResponse.routes().getOrNull(index)?.refreshTtl(),
+                        responseTime
+                    ) { refreshTtl, responseTime ->
+                        refreshTtl + responseTime
+                    }
                 )
             }.cache()
         }
@@ -380,12 +399,14 @@ class NavigationRoute internal constructor(
         routeIndex: Int = this.routeIndex,
         routeOptions: RouteOptions = this.routeOptions,
         nativeRoute: RouteInterface = this.nativeRoute,
+        expirationTime: Long? = this.expirationTime,
     ): NavigationRoute = NavigationRoute(
         directionsResponse,
         routeIndex,
         routeOptions,
         nativeRoute,
-        this.unavoidableClosures
+        this.unavoidableClosures,
+        expirationTime,
     ).cache()
 }
 
@@ -557,15 +578,18 @@ internal fun DirectionsRoute.toNavigationRoute(
         .waypoints(waypoints)
         .uuid(requestUuid())
         .build()
-    return NavigationRoute.create(response, options, sdkRouteParser, routerOrigin)[routeIndex]
+    return NavigationRoute.create(response, options, sdkRouteParser, routerOrigin, null)[routeIndex]
 }
 
-internal fun RouteInterface.toNavigationRoute(): NavigationRoute {
+internal fun RouteInterface.toNavigationRoute(responseTime: Long): NavigationRoute {
+    val response = responseJsonRef.toDirectionsResponse()
+    val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
     return NavigationRoute(
-        directionsResponse = responseJsonRef.toDirectionsResponse(),
+        directionsResponse = response,
         routeOptions = RouteOptions.fromUrl(URL(requestUri)),
         routeIndex = routeIndex,
-        nativeRoute = this
+        nativeRoute = this,
+        expirationTime = refreshTtl?.plus(responseTime)
     ).cache()
 }
 

@@ -75,7 +75,8 @@ class RouteProgressExTest {
             incidents = null,
             closures = null,
             waypoints = null,
-            refreshTtl = null
+            refreshTtl = null,
+            responseTime = 0,
         )
 
         assertEquals(
@@ -134,7 +135,7 @@ class RouteProgressExTest {
                             ?.build()
                     )
                     .build()
-            }) { this }
+            }, { this }, null)
 
         val refreshedRoute = sourceRoute.refreshRoute(
             initialLegIndex = 0,
@@ -148,6 +149,7 @@ class RouteProgressExTest {
             closures = null,
             waypoints = null,
             refreshTtl = null,
+            responseTime = 0,
         )
 
         // compare durations with original values from json file
@@ -201,6 +203,7 @@ class RouteProgressExTest {
             closures = null,
             waypoints = null,
             refreshTtl = null,
+            responseTime = 0,
         )
 
         assertEquals(
@@ -238,7 +241,7 @@ class RouteProgressExTest {
             TestData(
                 "update to null items",
                 provideNavigationRoute(addLeg = false),
-                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, null, null),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 0, null, null),
                 LegItemsResult(
                     listOf(null),
                     listOf(null),
@@ -257,6 +260,7 @@ class RouteProgressExTest {
                     listOf(null, null),
                     null,
                     null,
+                    0,
                     null,
                     null
                 ),
@@ -278,6 +282,7 @@ class RouteProgressExTest {
                     listOf(null, null),
                     null,
                     null,
+                    0,
                     null,
                     null,
                 ),
@@ -291,22 +296,9 @@ class RouteProgressExTest {
                 ),
             ),
             TestData(
-                "update refresh ttl from non-null to null",
-                provideNavigationRoute(addLeg = false, refreshTtl = 5),
-                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, null, null),
-                LegItemsResult(
-                    listOf(null),
-                    listOf(null),
-                    listOf(null),
-                    null,
-                    null,
-                    0,
-                )
-            ),
-            TestData(
-                "update refresh ttl from null to non-null",
-                provideNavigationRoute(addLeg = false),
-                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 5, null),
+                "update expiration time from non-null with null refresh ttl",
+                provideNavigationRoute(addLeg = false, expirationTime = 5),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 0, null, null),
                 LegItemsResult(
                     listOf(null),
                     listOf(null),
@@ -317,15 +309,41 @@ class RouteProgressExTest {
                 )
             ),
             TestData(
-                "update refresh ttl from non-null to non-null",
-                provideNavigationRoute(addLeg = false, refreshTtl = 5),
-                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 3, null),
+                "update expiration time from null with null refresh ttl",
+                provideNavigationRoute(addLeg = false),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 0, null, null),
                 LegItemsResult(
                     listOf(null),
                     listOf(null),
                     listOf(null),
                     null,
-                    3,
+                    null,
+                    0,
+                )
+            ),
+            TestData(
+                "update expiration time from null to non-null",
+                provideNavigationRoute(addLeg = false),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 5, 10, null),
+                LegItemsResult(
+                    listOf(null),
+                    listOf(null),
+                    listOf(null),
+                    null,
+                    15,
+                    0,
+                )
+            ),
+            TestData(
+                "update expiration time from non-null with non-null refresh ttl",
+                provideNavigationRoute(addLeg = false, expirationTime = 5),
+                RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 3, 9, null),
+                LegItemsResult(
+                    listOf(null),
+                    listOf(null),
+                    listOf(null),
+                    null,
+                    12,
                     0,
                 )
             ),
@@ -354,6 +372,7 @@ class RouteProgressExTest {
                         listOf(newIncidents),
                         listOf(newClosures),
                         refreshedWaypoints,
+                        0,
                         null,
                         legGeometryIndex = null,
                     ),
@@ -400,6 +419,7 @@ class RouteProgressExTest {
                         listOf(newIncidents, newIncidents2),
                         listOf(newClosures, newClosures2),
                         refreshedWaypoints,
+                        0,
                         null,
                         null,
                     ),
@@ -451,6 +471,7 @@ class RouteProgressExTest {
                         listOf(newInputIncidents, newInputIncidents2),
                         listOf(newInputClosures, newInputClosures2),
                         refreshedWaypoints,
+                        0,
                         null,
                         2,
                     ),
@@ -494,6 +515,7 @@ class RouteProgressExTest {
                         listOf(newIncidents, newIncidents2),
                         listOf(newClosures, newClosures2),
                         refreshedWaypoints,
+                        0,
                         null,
                         null,
                     ),
@@ -542,6 +564,7 @@ class RouteProgressExTest {
                         listOf(newIncidents, newInputIncidents2),
                         listOf(newClosures, newInputClosures2),
                         refreshedWaypoints,
+                        0,
                         null,
                         4,
                     ),
@@ -569,6 +592,7 @@ class RouteProgressExTest {
                         refreshItems.incidents,
                         refreshItems.closures,
                         refreshItems.waypoints,
+                        refreshItems.responseTime,
                         refreshItems.refreshTtl,
                     )
                 } catch (t: Throwable) {
@@ -651,7 +675,7 @@ class RouteProgressExTest {
         dirWaypoints: List<DirectionsWaypoint>? = null,
         addLeg: Boolean,
         distance: Double = 10.0,
-        refreshTtl: Int? = null,
+        expirationTime: Long? = null,
     ): NavigationRoute {
         val twoPointGeometry = PolylineUtils.encode(
             listOf(
@@ -705,13 +729,6 @@ class RouteProgressExTest {
                                     5
                                 )
                             )
-                            .apply {
-                                if (refreshTtl != null) {
-                                    unrecognizedJsonProperties(
-                                        mapOf("refresh_ttl" to JsonPrimitive(refreshTtl))
-                                    )
-                                }
-                            }
                             .build()
                     )
                 )
@@ -728,7 +745,8 @@ class RouteProgressExTest {
                 every { routeId } returns ""
                 every { routerOrigin } returns RouterOrigin.ONLINE
                 every { waypoints } returns emptyList()
-            }
+            },
+            expirationTime = expirationTime
         )
     }
 
@@ -967,6 +985,7 @@ class RouteProgressExTest {
                 null,
                 null,
                 refreshedWaypoints,
+                0,
                 null
             )
             assertEquals(expectedWaypoints, updatedRoute.directionsResponse.waypoints())
@@ -986,6 +1005,7 @@ class RouteProgressExTest {
                 null,
                 null,
                 refreshedWaypoints,
+                0,
                 null
             )
             assertEquals(expectedWaypoints, updatedRoute.directionsRoute.waypoints())
@@ -1072,7 +1092,8 @@ class RouteProgressExTest {
                     every { routeId } returns ""
                     every { routerOrigin } returns RouterOrigin.ONLINE
                     every { waypoints } returns emptyList()
-                }
+                },
+                expirationTime = null
             )
         }
 
@@ -1139,6 +1160,7 @@ class RouteProgressExTest {
         val incidents: List<List<Incident>?>?,
         val closures: List<List<Closure>?>?,
         val waypoints: List<DirectionsWaypoint?>?,
+        val responseTime: Long,
         val refreshTtl: Int?,
         val legGeometryIndex: Int?,
     )
@@ -1151,7 +1173,7 @@ class RouteProgressExTest {
         val newIncidents: List<List<Incident>?>?,
         val newClosures: List<List<Closure>?>?,
         val newWaypoints: List<DirectionsWaypoint>?,
-        val expectedRefreshTtl: Int?,
+        val expectedExpirationTime: Long?,
         val expectedLegGeometryIndex: Int,
     )
 }
@@ -1169,5 +1191,6 @@ private fun createNavigationRouteFromResource(
         )
     ),
     TestSDKRouteParser(),
-    com.mapbox.navigation.base.route.RouterOrigin.Offboard
+    com.mapbox.navigation.base.route.RouterOrigin.Offboard,
+    null
 ).first()
