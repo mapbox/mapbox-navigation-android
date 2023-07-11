@@ -2,6 +2,11 @@ package com.mapbox.navigation.instrumentation_tests.utils
 
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mapbox.common.DownloadOptions
+import com.mapbox.common.HttpRequest
+import com.mapbox.common.HttpResponse
+import com.mapbox.common.HttpServiceFactory
+import com.mapbox.common.HttpServiceInterceptorInterface
 import com.mapbox.common.NetworkStatus
 import com.mapbox.common.ReachabilityFactory
 import com.mapbox.common.ReachabilityInterface
@@ -14,10 +19,34 @@ import kotlin.coroutines.resume
 private const val LOG_TAG = "TestNetwork"
 
 suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
-    withoutWifiAndMobileData {
-        mockWebServerRule.withoutWebServer {
-            block()
+    val interseptor = object : HttpServiceInterceptorInterface {
+        override fun onRequest(request: HttpRequest): HttpRequest {
+            Log.d(LOG_TAG, "on request ${request.url}")
+            return request
         }
+
+        override fun onDownload(download: DownloadOptions): DownloadOptions {
+            Log.d(LOG_TAG, "on request ${download.request.url}")
+            return download
+        }
+
+        override fun onResponse(response: HttpResponse): HttpResponse {
+            Log.d(LOG_TAG, "on response code: ${response.result.value?.code} ${response.request.url}, error ${response.result.error?.message}")
+            return response
+        }
+
+    }
+    Log.d(LOG_TAG, "registering interceptor")
+    HttpServiceFactory.getInstance().setInterceptor(interseptor)
+    try {
+        withoutWifiAndMobileData {
+            mockWebServerRule.withoutWebServer {
+                block()
+            }
+        }
+    } finally {
+        Log.d(LOG_TAG, "unregistering interceptor")
+        HttpServiceFactory.getInstance().setInterceptor(null)
     }
 }
 
@@ -69,7 +98,7 @@ private suspend fun ReachabilityInterface.waitForNetworkStatus(
             } else {
                 "Keep on waiting for updates."
             }
-            Log.d("Network", "Current network status $currentStatus. $messageForStatus")
+            Log.d(LOG_TAG, "Current network status $currentStatus. $messageForStatus")
             if (satisfiesCondition) {
                 if (continuation.isActive) {
                     continuation.resume(Unit)
