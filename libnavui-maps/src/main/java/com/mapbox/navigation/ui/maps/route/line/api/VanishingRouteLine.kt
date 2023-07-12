@@ -116,9 +116,12 @@ internal class VanishingRouteLine {
 
     internal fun getTraveledRouteLineExpressions(
         point: Point,
-        granularDistances: RouteLineGranularDistances
+        granularDistances: RouteLineGranularDistances,
+        options: MapboxRouteLineOptions,
     ): VanishingRouteLineExpressions? {
-        return ifNonNull(upcomingRouteGeometrySegmentIndex) { index ->
+        return ifNonNull(
+            upcomingRouteGeometrySegmentIndex
+        ) { index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
                 vanishPointOffset = offset
                 val trimmedOffsetExpression = literal(listOf(0.0, offset))
@@ -134,11 +137,28 @@ internal class VanishingRouteLine {
                 val restrictedRoadExpressionProvider = RouteLineTrimExpressionProvider {
                     trimmedOffsetExpression
                 }
+                val colorResources = options.resourceProvider.routeLineColorResources
+                val routeLineTrailExpressionProvider = {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        offset,
+                        colorResources.routeLineTraveledColor,
+                        Color.TRANSPARENT
+                    )
+                }
+                val routeLineTrailCasingExpressionProvider = {
+                    MapboxRouteLineUtils.getRouteLineExpression(
+                        offset,
+                        colorResources.routeLineTraveledCasingColor,
+                        Color.TRANSPARENT
+                    )
+                }
                 VanishingRouteLineExpressions(
                     trafficLineExpressionProvider,
                     routeLineExpressionProvider,
                     routeLineCasingExpressionProvider,
-                    restrictedRoadExpressionProvider
+                    restrictedRoadExpressionProvider,
+                    routeLineTrailExpressionProvider,
+                    routeLineTrailCasingExpressionProvider
                 )
             }
         }
