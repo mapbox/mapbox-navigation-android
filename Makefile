@@ -172,7 +172,7 @@ upload-to-sdk-registry:
 
 .PHONY: publish-to-sdk-registry
 publish-to-sdk-registry:
-	if [ -z "$(GITHUB_TOKEN)" ]; then \
+	@if [ -z "$(GITHUB_TOKEN)" ]; then \
 		echo "GITHUB_TOKEN env variable has to be set"; \
 	else \
 		python3 -m pip install git-pull-request; \
@@ -185,7 +185,7 @@ upload-to-sdk-registry-androidauto:
 
 .PHONY: publish-to-sdk-registry-androidauto
 publish-to-sdk-registry-androidauto:
-	if [ -z "$(GITHUB_TOKEN)" ]; then \
+	@if [ -z "$(GITHUB_TOKEN)" ]; then \
 		echo "GITHUB_TOKEN env variable has to be set"; \
 	else \
 		python3 -m pip install git-pull-request; \
