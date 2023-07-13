@@ -1,0 +1,2 @@
+- The app is now considered as the one in active navigation only when an active route is set to `MapboxNavigation`. Previously it was always considered active.
+- When Android Auto host tells the app to stop active navigation because another app starts navigating, now SDK will enter FreeDrive mode instead of stopping trip session completely.

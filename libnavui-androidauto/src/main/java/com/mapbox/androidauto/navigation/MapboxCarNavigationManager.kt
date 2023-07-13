@@ -7,14 +7,15 @@ import androidx.car.app.navigation.model.Trip
 import com.mapbox.androidauto.internal.logAndroidAuto
 import com.mapbox.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.androidauto.navigation.maneuver.CarManeuverMapper
+import com.mapbox.androidauto.screenmanager.MapboxScreen
+import com.mapbox.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.androidauto.telemetry.MapboxCarTelemetry
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,11 +43,19 @@ class MapboxCarNavigationManager internal constructor(
         onUpdateTrip(trip)
     }
 
-    private val tripSessionStateObserver = TripSessionStateObserver { tripSessionState ->
-        logAndroidAuto("$LOG_CATEGORY tripSessionStateObserver state: $tripSessionState")
-        when (tripSessionState) {
-            TripSessionState.STARTED -> navigationManager.navigationStarted()
-            TripSessionState.STOPPED -> navigationManager.navigationEnded()
+    private var inActiveNavigation = false
+
+    private val routesObserver = RoutesObserver {
+        if (it.navigationRoutes.isEmpty()) {
+            if (inActiveNavigation) {
+                logAndroidAuto("$LOG_CATEGORY stop active navigation")
+                inActiveNavigation = false
+                navigationManager.navigationEnded()
+            }
+        } else if (!inActiveNavigation) {
+            logAndroidAuto("$LOG_CATEGORY start active navigation")
+            inActiveNavigation = true
+            navigationManager.navigationStarted()
         }
     }
 
@@ -54,7 +63,8 @@ class MapboxCarNavigationManager internal constructor(
         override fun onStopNavigation() {
             logAndroidAuto("$LOG_CATEGORY onStopNavigation")
             super.onStopNavigation()
-            mapboxNavigation?.stopTripSession()
+            mapboxNavigation?.setNavigationRoutes(emptyList())
+            MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
         }
 
         override fun onAutoDriveEnabled() {
@@ -79,7 +89,7 @@ class MapboxCarNavigationManager internal constructor(
         )
         maneuverApi = MapboxManeuverApi(distanceFormatter)
         navigationManager.setNavigationManagerCallback(navigationManagerCallback)
-        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
     }
 
@@ -88,7 +98,7 @@ class MapboxCarNavigationManager internal constructor(
         this.mapboxNavigation = null
         carTelemetry.onDetached(mapboxNavigation)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
 
         // Tell android auto navigation stopped. Navigation can continue with mapbox navigation
         // on another device.
@@ -97,7 +107,7 @@ class MapboxCarNavigationManager internal constructor(
     }
 
     private fun onUpdateTrip(trip: Trip) {
-        if (mapboxNavigation?.getTripSessionState() == TripSessionState.STARTED) {
+        if (inActiveNavigation) {
             // There is no way to know if NavigationManager isNavigating and it will crash if false
             // https://issuetracker.google.com/u/0/issues/260968395
             try { navigationManager.updateTrip(trip) } catch (e: IllegalStateException) {
