@@ -67,7 +67,8 @@ You should become familiar with [Google's documentation for building a navigatio
         <service
             android:name=".car.MainCarAppService"
             android:exported="true"
-            tools:ignore="ExportedService">
+            tools:ignore="ExportedService"
+            android:foregroundServiceType="location">
 
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
