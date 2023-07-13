@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
@@ -73,6 +74,8 @@ class MapboxTripNotificationTest {
         mockkStatic(DateFormat::class)
         mockkStatic(PendingIntent::class)
         mockkStatic(TimeFormatter::class)
+        mockkStatic(Bitmap::class)
+        every { Bitmap.createBitmap(any(), any(), any()) } returns mockk()
         mockedContext = createContext()
         every { mockedContext.applicationContext } returns mockedContext
         every { navigationOptions.applicationContext } returns mockedContext
@@ -154,6 +157,13 @@ class MapboxTripNotificationTest {
         } returns (mockPendingIntentForBroadcast)
         every {
             mockedContext.registerReceiver(
+                any(),
+                any()
+            )
+        } returns (mockedBroadcastReceiverIntent)
+        every {
+            mockedContext.registerReceiver(
+                any(),
                 any(),
                 any()
             )
