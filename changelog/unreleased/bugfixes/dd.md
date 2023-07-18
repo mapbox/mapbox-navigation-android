@@ -1,0 +1,3 @@
+- Fixed snapping to a tunnel after driving out of underground parking.
+- Fixed ADASIS assertion failures on KML files.
+- Fixed MapMatching isuue where it might have picked the wrong tunnel.
