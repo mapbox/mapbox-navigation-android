@@ -295,6 +295,43 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Test
+    fun alternative_request_keeps_eta_model_parameter() = sdkTest {
+        setupMockRequestHandlers()
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { mapboxNavigation ->
+            val routes = mapboxNavigation.requestNavigationRoutes(
+                startCoordinates,
+                unrecognized = mapOf("eta_model" to "enhanced")
+            )
+            mockWebServerRule.requestHandlers.clear()
+            val alternativesHandler = MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_alternative_during_navigation),
+                startCoordinates,
+                relaxedExpectedCoordinates = true
+            )
+            mockWebServerRule.requestHandlers.add(alternativesHandler)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.flowLocationMatcherResult().first()
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
+
+            mapboxNavigation.alternativesUpdates()
+                .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
+                .filter {
+                    it.alternatives.isNotEmpty() && it.alternatives.none {
+                        it.id.startsWith("1SSd29ZxmjD7ELLqDJHRPPDP5W4wdh633IbGo41pJrL6wpJRmzNaMA==")
+                    }
+                }
+                .first()
+
+            val alternativesRequest = alternativesHandler.handledRequests.last()
+            assertEquals("enhanced", alternativesRequest.requestUrl?.queryParameter("eta_model"))
+        }
+    }
+
     private fun createExternalAlternatives(): List<NavigationRoute> {
         return NavigationRoute.create(
             readRawFileText(context, R.raw.route_response_alternative_continue),
@@ -328,12 +365,14 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
     }
 
     private suspend fun MapboxNavigation.requestNavigationRoutes(
-        coordinates: List<Point>
+        coordinates: List<Point>,
+        unrecognized: Map<String, String>? = null
     ): List<NavigationRoute> {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .alternatives(true)
             .coordinatesList(coordinates)
+            .unrecognizedProperties(unrecognized)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
             .build()
         return requestRoutes(routeOptions)

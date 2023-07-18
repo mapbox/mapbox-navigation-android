@@ -22,6 +22,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -35,6 +36,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefr
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
@@ -67,6 +69,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
@@ -851,6 +854,53 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
             }
         }.first()
         assertEquals(routes[1], rerouteResult.navigationRoutes.first())
+    }
+
+    @Test
+    fun reroute_keeps_eta_model_parameter() = sdkTest {
+        val mapboxNavigation = createMapboxNavigation()
+        val coordinates = listOf(
+            Point.fromLngLat(139.828785, 36.503349),
+            Point.fromLngLat(139.051904, 35.982396)
+        )
+        val offRouteLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            this.latitude = coordinates[0].latitude() + 0.002
+            this.longitude = coordinates[0].longitude()
+        }
+        val handler = MockDirectionsRequestHandler(
+            DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            readRawFileText(context, R.raw.route_response_enhanced_model),
+            coordinates,
+            relaxedExpectedCoordinates = true
+        )
+        mockWebServerRule.requestHandlers.add(handler)
+
+        mapboxNavigation.startTripSession()
+        stayOnPosition(coordinates[0].latitude(), coordinates[0].longitude(), 0f) {
+            mapboxNavigation.flowLocationMatcherResult().filter {
+                abs(it.enhancedLocation.latitude - coordinates[0].latitude()) < 0.001 &&
+                    abs(it.enhancedLocation.longitude - coordinates[0].longitude()) < 0.001
+            }.first()
+            val routes = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(activity)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(coordinates)
+                    .unrecognizedProperties(mapOf("eta_model" to "enhanced"))
+                    .build()
+            ).getSuccessfulResultOrThrowException().routes
+
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        }
+        stayOnPosition(offRouteLocation.latitude, offRouteLocation.longitude, 0f) {
+            mapboxNavigation.routesUpdates()
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
+                .first()
+
+            val rerouteRequest = handler.handledRequests.last()
+            assertEquals("enhanced", rerouteRequest.requestUrl?.queryParameter("eta_model"))
+        }
     }
 
     private fun createMapboxNavigation(customRefreshInterval: Long? = null): MapboxNavigation {
