@@ -29,6 +29,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
@@ -61,6 +62,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             withoutInternet {
                 val routes = navigation.requestRoutes(testRoute.routeOptions)
                 assertTrue(routes is RouteRequestResult.Failure)
+                delay(10_000) // Otherwise mock web server can't start on the same port
             }
         }
     }
@@ -223,7 +225,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
 
     @Test
-    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest(
+    fun deviateFromOnlinePrimaryRouteWithoutInternetAndGetBackOnline() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
     ) {
         val originalTestRoute = setupBerlinEvRoute()
@@ -233,6 +235,9 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             OfflineRegions.Berlin,
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
+            navigation.registerRouteAlternativesObserver(
+                AdvancedAlternativesObserverFromDocumentation(navigation)
+            )
             navigation.startTripSession()
             val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
                 .getSuccessfulResultOrThrowException()
@@ -242,7 +247,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 listOf(3, 3),
                 requestResult.routes.map { it.waypoints?.size }
             )
-            navigation.setNavigationRoutesAsync(requestResult.routes)
+            val initialOnlineRoutes = requestResult.routes
+            navigation.setNavigationRoutesAsync(initialOnlineRoutes)
 
             withoutInternet {
                 stayOnPosition(
@@ -255,12 +261,65 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                         .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
                     assertEquals(RouterOrigin.Onboard, newRoutes.navigationRoutes.first().origin)
                     assertEquals(
-                        "onboard router doesn't add waypoints",
-                        newRoutes.navigationRoutes.map { 2 },
-                        newRoutes.navigationRoutes.map { it.waypoints?.size }
+                        "Fallback to offline navigation doesn't change a trip plan",
+                        initialOnlineRoutes.first().waypoints?.map { it.location() }?.drop(1),
+                        newRoutes.navigationRoutes.first().waypoints?.map { it.location() }?.drop(1)
                     )
+                    // TODO: uncomment when NN-854 is done
+//                    assertEquals(
+//                        "Fallback to offline navigation doesn't change a trip plan",
+//                        initialOnlineRoutes.first().getChargingStationIds(),
+//                        newRoutes.navigationRoutes.first().getChargingStationIds()
+//                    )
+//                    assertEquals(
+//                        "Fallback to offline navigation doesn't change charging stations power",
+//                        initialOnlineRoutes.first().getChargingStationPowerKW(),
+//                        newRoutes.navigationRoutes.first().getChargingStationPowerKW()
+//                    )
+//                    assertEquals(
+//                        "Fallback to offline navigation doesn't change charging station current type",
+//                        initialOnlineRoutes.first().getChargingStationPowerCurrentType(),
+//                        newRoutes.navigationRoutes.first().getChargingStationPowerCurrentType()
+//                    )
+                    // TODO: implement in the context of NAVAND-1429
+//                    assertEquals(
+//                        "Fallback to offline navigation doesn't change charging station type",
+//                        initialOnlineRoutes.first().getChargingStationType(),
+//                        newRoutes.navigationRoutes.first().getChargingStationType()
+//                    )
                 }
             }
+
+            val onlineRoutesUpdate = navigation.routesUpdates()
+                .first { it.navigationRoutes.first().origin == RouterOrigin.Offboard }
+            val onlineRoute = onlineRoutesUpdate.navigationRoutes.first()
+            assertEquals(
+                "Switch back to an online route doesn't change a trip plan",
+                initialOnlineRoutes.first().waypoints?.map { it.location() }?.drop(1),
+                onlineRoute.waypoints?.map { it.location() }?.drop(1)
+            )
+            // TODO: uncomment when NN-854 is done
+//            assertEquals(
+//                "Switch back to an online route doesn't change a trip plan",
+//                initialOnlineRoutes.first().getChargingStationIds(),
+//                onlineRoute.getChargingStationIds()
+//            )
+//            assertEquals(
+//                "Switch back to an online route doesn't change charging stations power",
+//                initialOnlineRoutes.first().getChargingStationPowerKW(),
+//                onlineRoute.getChargingStationPowerKW()
+//            )
+//            assertEquals(
+//                "Switch back to an online route doesn't change charging station current type",
+//                initialOnlineRoutes.first().getChargingStationPowerCurrentType(),
+//                onlineRoute.getChargingStationPowerCurrentType()
+//            )
+            // TODO: implement in the context of NAVAND-1429
+//            assertEquals(
+//                "Switch back to an online route doesn't change charging station type",
+//                initialOnlineRoutes.first().getChargingStationTypes(),
+//                onlineRoute.getChargingStationTypes()
+//            )
         }
     }
 
@@ -276,7 +335,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     private fun setupBerlinEvRoute(): MockedEvRoutes {
         val originalTestRoute = EvRoutesProvider.getBerlinEvRoute(
             context,
-            mockWebServerRule.baseUrl
+            // TODO: uncomment and setup EV route per url NN-854 is done
+            //mockWebServerRule.baseUrl
         )
         mockWebServerRule.requestHandlers.add(originalTestRoute.mockWebServerHandler)
         return originalTestRoute

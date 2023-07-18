@@ -6,10 +6,13 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.indexOfNextRequestedCoordinate
+import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.testing.factories.createNativeWaypoint
+import com.mapbox.navigation.testing.factories.createWaypoint
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -89,7 +92,9 @@ class RouteOptionsUpdaterParameterizedTest(
             every { routeProgress.currentLegProgress } returns currentLegProgress
             every { indexOfNextRequestedCoordinate(any(), any()) } returns nextCoordinateIndex
             every { routeProgress.remainingWaypoints } returns 0
-            every { routeProgress.navigationRoute.internalWaypoints() } returns listOf(mockk())
+            every { routeProgress.navigationRoute.internalWaypoints() } returns routeOptions.coordinatesList().map {
+                mockk<Waypoint>(relaxed = true)
+            }
 
             val updatedRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)

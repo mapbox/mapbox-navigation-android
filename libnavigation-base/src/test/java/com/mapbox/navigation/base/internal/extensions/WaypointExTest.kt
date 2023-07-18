@@ -276,7 +276,7 @@ class WaypointExTest {
                         Waypoint.InternalType.Regular
                     ),
                     2,
-                    2,
+                    3,
                 ),
                 arrayOf(
                     "Next index: 3 for 5 relevant waypoints and remaining waypoint 2",

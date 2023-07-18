@@ -2,82 +2,84 @@ package com.mapbox.navigation.instrumentation_tests.utils
 
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import com.mapbox.common.NetworkStatus
 import com.mapbox.common.ReachabilityFactory
-import com.mapbox.common.ReachabilityInterface
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
-import kotlinx.coroutines.suspendCancellableCoroutine
+import com.mapbox.navigation.testing.ui.utils.executeShellCommandBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import org.junit.Assume.assumeFalse
-import kotlin.coroutines.resume
+import org.junit.Assume.assumeTrue
 
 private const val LOG_TAG = "TestNetwork"
 
 suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
-    withoutWifiAndMobileData {
-        mockWebServerRule.withoutWebServer {
+    mockWebServerRule.withoutWebServer {
+        withoutWifiAndMobileData {
             block()
         }
     }
 }
 
 suspend fun withoutWifiAndMobileData(block: suspend () -> Unit) {
-    val reachability = ReachabilityFactory.reachability(null)
     Log.d(LOG_TAG, "Got request to turn internet off, checking if it was present")
-    reachability.waitForNetworkStatus { it != NetworkStatus.NOT_REACHABLE }
+    assumeNetworkIsReachable()
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     val uiAutomation = instrumentation.uiAutomation
     Log.d(LOG_TAG, "turning off wifi and mobile data")
     uiAutomation.executeShellCommand("svc wifi disable")
     uiAutomation.executeShellCommand("svc data disable")
     try {
-        assumeNetworkIsNotReachable(reachability)
+        assumeNetworkIsNotReachable()
         block()
     } finally {
         Log.d(LOG_TAG, "turning on wifi and mobile data")
         uiAutomation.executeShellCommand("svc wifi enable")
         uiAutomation.executeShellCommand("svc data enable")
     }
-    Log.d(LOG_TAG, "Waiting for network to become reachable")
-    reachability.waitForNetworkStatus { it != NetworkStatus.NOT_REACHABLE }
+    assumeNetworkIsReachable()
 }
 
-private suspend fun assumeNetworkIsNotReachable(reachability: ReachabilityInterface) {
-    val networkIsReachable = withTimeoutOrNull(3000) {
-        reachability.waitForNetworkStatus { it == NetworkStatus.NOT_REACHABLE }
-        false
-    } ?: true
-    assumeFalse(
+private suspend fun assumeNetworkIsNotReachable() {
+    val result = waitForHostReachability(expectedReachability = false)
+    assumeTrue(
         "network should not be reachable if it's turned off on device",
-        networkIsReachable
+        result == WaitResult.SUCCESS
     )
 }
 
-private suspend fun ReachabilityInterface.waitForNetworkStatus(
-    condition: (NetworkStatus) -> Boolean
-) {
-    val currentStatus = currentNetworkStatus()
-    if (condition(currentNetworkStatus())) {
-        Log.d(LOG_TAG, "Network status $currentStatus is ok")
-        return
-    }
-    suspendCancellableCoroutine<Unit> { continuation ->
-        val id = this.addListener { currentStatus ->
-            val satisfiesCondition = condition(currentStatus)
-            val messageForStatus = if (satisfiesCondition) {
-                "Ok."
-            } else {
-                "Keep on waiting for updates."
-            }
-            Log.d("Network", "Current network status $currentStatus. $messageForStatus")
-            if (satisfiesCondition) {
-                if (continuation.isActive) {
-                    continuation.resume(Unit)
+private suspend fun assumeNetworkIsReachable() {
+    val result = waitForHostReachability(expectedReachability = true)
+    assumeTrue(
+        "host should be reachable when network is turned on",
+        result == WaitResult.SUCCESS
+    )
+}
+
+private enum class WaitResult { SUCCESS, TIMEOUT }
+
+private suspend fun waitForHostReachability(expectedReachability: Boolean): WaitResult =
+    withTimeoutOrNull(10_000) {
+        withContext(Dispatchers.IO) {
+            while (true) {
+                val actualReachability = checkReachability()
+                Log.d(LOG_TAG, "is host reachable: $actualReachability, waiting for $expectedReachability")
+                if (actualReachability == expectedReachability) {
+                    break
+                } else {
+                    delay(500)
                 }
             }
+            WaitResult.SUCCESS
         }
-        continuation.invokeOnCancellation {
-            this.removeListener(id)
-        }
-    }
+    } ?: WaitResult.TIMEOUT
+
+private fun checkReachability(): Boolean {
+    val command = "ping -W 1 -c 1 8.8.8.8"
+    val result = InstrumentationRegistry.getInstrumentation()
+        .uiAutomation
+        .executeShellCommandBlocking(command)
+        .let { String(it) }
+    Log.d(LOG_TAG, "result of ping execution: $result")
+    return result.isNotEmpty() && (!result.contains("100% packet loss"))
 }

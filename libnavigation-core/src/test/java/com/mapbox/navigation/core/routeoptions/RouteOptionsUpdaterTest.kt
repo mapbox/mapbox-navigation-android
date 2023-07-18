@@ -140,18 +140,6 @@ class RouteOptionsUpdaterTest {
             )
 
         private fun Any?.isNullToString(): String = if (this == null) "Null" else "NonNull"
-
-        private fun mockWaypoint(
-            location: Point,
-            @Waypoint.Type type: Int,
-            name: String,
-            target: Point?,
-        ): Waypoint = mockk {
-            every { this@mockk.location } returns location
-            every { this@mockk.type } returns type
-            every { this@mockk.name } returns name
-            every { this@mockk.target } returns target
-        }
     }
 
     @Before
@@ -825,6 +813,7 @@ class RouteOptionsUpdaterTest {
                     1,
                     provideApproachesList(
                         null,
+                        DirectionsCriteria.APPROACH_CURB,
                         DirectionsCriteria.APPROACH_UNRESTRICTED,
                         DirectionsCriteria.APPROACH_CURB,
                     ),
@@ -844,7 +833,7 @@ class RouteOptionsUpdaterTest {
         fun testCases() {
             mockkStatic(::indexOfNextRequestedCoordinate) {
                 val mockRemainingWaypoints = -1
-                val mockWaypoints = listOf(mockk<Waypoint>())
+                val mockWaypoints = listOf(mockk<Waypoint>(relaxed = true))
                 val routeProgress: RouteProgress = mockk(relaxed = true) {
                     every { remainingWaypoints } returns mockRemainingWaypoints
                     every { navigationRoute.internalWaypoints() } returns mockWaypoints
@@ -951,6 +940,7 @@ class RouteOptionsUpdaterTest {
                         "waypoints.charging_station_id" to JsonPrimitive(";;3"),
                         "waypoints.charging_station_power" to JsonPrimitive(";;3000"),
                         "waypoints.charging_station_current_type" to JsonPrimitive(";;dc"),
+                        "ev_add_charging_stops" to JsonPrimitive(false)
                     ),
                 ),
                 arrayOf(
@@ -974,6 +964,7 @@ class RouteOptionsUpdaterTest {
                         "waypoints.charging_station_id" to JsonPrimitive(";;2;3"),
                         "waypoints.charging_station_power" to JsonPrimitive(";;2000;3000"),
                         "waypoints.charging_station_current_type" to JsonPrimitive(";;ac;dc"),
+                        "ev_add_charging_stops" to JsonPrimitive(false),
                     ),
                 ),
                 arrayOf(
@@ -997,6 +988,7 @@ class RouteOptionsUpdaterTest {
                         "waypoints.charging_station_id" to JsonPrimitive(";3"),
                         "waypoints.charging_station_power" to JsonPrimitive(";3000"),
                         "waypoints.charging_station_current_type" to JsonPrimitive(";dc"),
+                        "ev_add_charging_stops" to JsonPrimitive(false),
                     ),
                 ),
             )
@@ -1011,7 +1003,7 @@ class RouteOptionsUpdaterTest {
         fun unrecognizedJsonProperties() {
             mockkStatic(::indexOfNextRequestedCoordinate) {
                 val mockRemainingWaypoints = -1
-                val mockWaypoints = listOf(mockk<Waypoint>())
+                val mockWaypoints = listOf(mockk<Waypoint>(relaxed = true))
                 val routeProgress: RouteProgress = mockk(relaxed = true) {
                     every { remainingWaypoints } returns mockRemainingWaypoints
                     every { navigationRoute.internalWaypoints() } returns mockWaypoints
