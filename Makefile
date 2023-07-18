@@ -164,7 +164,7 @@ publish-local:
 
 .PHONY: upload-to-sdk-registry-snapshot
 upload-to-sdk-registry-snapshot:
-	./gradlew mapboxSDKRegistryUpload -Psnapshot=true;
+	./gradlew libnavui-androidauto:mapboxSDKRegistryUpload -Psnapshot=true;
 
 .PHONY: upload-to-sdk-registry
 upload-to-sdk-registry:
