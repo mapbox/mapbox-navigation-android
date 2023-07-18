@@ -15,6 +15,9 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequ
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRoutes
+import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationIds
+import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationPowerCurrentTypes
+import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationPowersKW
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
@@ -265,22 +268,21 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                         initialOnlineRoutes.first().waypoints?.map { it.location() }?.drop(1),
                         newRoutes.navigationRoutes.first().waypoints?.map { it.location() }?.drop(1)
                     )
-                    // TODO: uncomment when NN-854 is done
-//                    assertEquals(
-//                        "Fallback to offline navigation doesn't change a trip plan",
-//                        initialOnlineRoutes.first().getChargingStationIds(),
-//                        newRoutes.navigationRoutes.first().getChargingStationIds()
-//                    )
-//                    assertEquals(
-//                        "Fallback to offline navigation doesn't change charging stations power",
-//                        initialOnlineRoutes.first().getChargingStationPowerKW(),
-//                        newRoutes.navigationRoutes.first().getChargingStationPowerKW()
-//                    )
-//                    assertEquals(
-//                        "Fallback to offline navigation doesn't change charging station current type",
-//                        initialOnlineRoutes.first().getChargingStationPowerCurrentType(),
-//                        newRoutes.navigationRoutes.first().getChargingStationPowerCurrentType()
-//                    )
+                    assertEquals(
+                        "Fallback to offline navigation doesn't change a trip plan",
+                        initialOnlineRoutes.first().getChargingStationIds(),
+                        newRoutes.navigationRoutes.first().getChargingStationIds()
+                    )
+                    assertEquals(
+                        "Fallback to offline navigation doesn't change charging stations power",
+                        initialOnlineRoutes.first().getChargingStationPowersKW(),
+                        newRoutes.navigationRoutes.first().getChargingStationPowersKW()
+                    )
+                    assertEquals(
+                        "Fallback to offline navigation doesn't change charging station current type",
+                        initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
+                        newRoutes.navigationRoutes.first().getChargingStationPowerCurrentTypes()
+                    )
                     // TODO: implement in the context of NAVAND-1429
 //                    assertEquals(
 //                        "Fallback to offline navigation doesn't change charging station type",
@@ -298,22 +300,21 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 initialOnlineRoutes.first().waypoints?.map { it.location() }?.drop(1),
                 onlineRoute.waypoints?.map { it.location() }?.drop(1)
             )
-            // TODO: uncomment when NN-854 is done
-//            assertEquals(
-//                "Switch back to an online route doesn't change a trip plan",
-//                initialOnlineRoutes.first().getChargingStationIds(),
-//                onlineRoute.getChargingStationIds()
-//            )
-//            assertEquals(
-//                "Switch back to an online route doesn't change charging stations power",
-//                initialOnlineRoutes.first().getChargingStationPowerKW(),
-//                onlineRoute.getChargingStationPowerKW()
-//            )
-//            assertEquals(
-//                "Switch back to an online route doesn't change charging station current type",
-//                initialOnlineRoutes.first().getChargingStationPowerCurrentType(),
-//                onlineRoute.getChargingStationPowerCurrentType()
-//            )
+            assertEquals(
+                "Switch back to an online route doesn't change a trip plan",
+                initialOnlineRoutes.first().getChargingStationIds(),
+                onlineRoute.getChargingStationIds()
+            )
+            assertEquals(
+                "Switch back to an online route doesn't change charging stations power",
+                initialOnlineRoutes.first().getChargingStationPowersKW(),
+                onlineRoute.getChargingStationPowersKW()
+            )
+            assertEquals(
+                "Switch back to an online route doesn't change charging station current type",
+                initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
+                onlineRoute.getChargingStationPowerCurrentTypes()
+            )
             // TODO: implement in the context of NAVAND-1429
 //            assertEquals(
 //                "Switch back to an online route doesn't change charging station type",

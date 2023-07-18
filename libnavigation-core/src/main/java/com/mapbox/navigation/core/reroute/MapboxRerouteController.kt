@@ -142,7 +142,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                 rerouteOptions,
                 tripSession.locationMatcherResult?.enhancedLocation?.speed
             )
-
+        val currentRouteProgress = tripSession.getRouteProgress()
         routeOptionsUpdater.update(
             routeOptions,
             tripSession.getRouteProgress(),
@@ -154,7 +154,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                         val modifiedRerouteOption = compositeRerouteOptionsAdapter.onRouteOptions(
                             routeOptionsResult.routeOptions
                         )
-                        request(callback, modifiedRerouteOption)
+                        request(callback, modifiedRerouteOption, currentRouteProgress!!.navigationRoute)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         state = RerouteState.Failed(
@@ -196,14 +196,19 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
     private fun request(
         callback: InternalRerouteController.RoutesCallback,
-        routeOptions: RouteOptions
+        routeOptions: RouteOptions,
+        originalRoute: NavigationRoute
     ) {
         rerouteJob = mainJobController.scope.launch {
             when (val result = requestAsync(routeOptions)) {
                 is RouteRequestResult.Success -> {
+                    val routesWithEvStations = preserveChargingStationsFromOldRoutes(
+                        originalRoute,
+                        result.routes
+                    )
                     state = RerouteState.RouteFetched(result.routerOrigin)
                     state = RerouteState.Idle
-                    callback.onNewRoutes(RerouteResult(result.routes, 0, result.routerOrigin))
+                    callback.onNewRoutes(RerouteResult(routesWithEvStations, 0, result.routerOrigin))
                 }
                 is RouteRequestResult.Failure -> {
                     state = RerouteState.Failed(
