@@ -362,7 +362,7 @@ class WaypointExTest {
             assertEquals(
                 testDescription,
                 expectedIndex,
-                indexOfNextRequestedCoordinate(waypoints, remainingWaypoints)
+                indexOfNextWaypoint(waypoints, remainingWaypoints)
             )
         }
     }

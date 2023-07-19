@@ -37,7 +37,7 @@ fun Waypoint.isServerAddedWaypoint(): Boolean =
 /**
  * Return the index of **next requested** coordinate. See [RouteOptions.coordinatesList]
  */
-fun indexOfNextRequestedCoordinate(
+fun indexOfNextWaypoint(
     waypoints: List<Waypoint>,
     remainingWaypoints: Int,
 ): Int? {

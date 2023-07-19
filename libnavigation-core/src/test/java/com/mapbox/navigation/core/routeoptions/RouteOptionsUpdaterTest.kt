@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.extensions.indexOfNextRequestedCoordinate
+import com.mapbox.navigation.base.internal.extensions.indexOfNextWaypoint
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.WaypointFactory
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
@@ -311,19 +311,19 @@ class RouteOptionsUpdaterTest {
 
     @Test
     fun index_of_next_coordinate_is_null() {
-        mockkStatic(::indexOfNextRequestedCoordinate) {
+        mockkStatic(::indexOfNextWaypoint) {
             val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
             val routeProgress: RouteProgress = mockk(relaxed = true) {
                 every { remainingWaypoints } returns 0
                 // list size 1
                 every { navigationRoute.routeOptions.coordinatesList() } returns listOf(mockk())
             }
-            every { indexOfNextRequestedCoordinate(any(), any()) } returns null
+            every { indexOfNextWaypoint(any(), any()) } returns null
 
             val newRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
 
-            verify(exactly = 1) { indexOfNextRequestedCoordinate(any(), any()) }
+            verify(exactly = 1) { indexOfNextWaypoint(any(), any()) }
             assertTrue(newRouteOptions is RouteOptionsUpdater.RouteOptionsResult.Error)
         }
     }
@@ -485,20 +485,20 @@ class RouteOptionsUpdaterTest {
         fun setup() {
             MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
             mockLocation()
-            mockkStatic(::indexOfNextRequestedCoordinate)
+            mockkStatic(::indexOfNextWaypoint)
 
             routeRefreshAdapter = RouteOptionsUpdater()
         }
 
         @After
         fun cleanup() {
-            unmockkStatic(::indexOfNextRequestedCoordinate)
+            unmockkStatic(::indexOfNextWaypoint)
         }
 
         @Test
         fun bearingOptions() {
             val routeProgress: RouteProgress = mockk(relaxed = true) {
-                every { indexOfNextRequestedCoordinate(any(), any()) } returns indexNextCoordinate
+                every { indexOfNextWaypoint(any(), any()) } returns indexNextCoordinate
             }
 
             val newRouteOptions =
@@ -831,7 +831,7 @@ class RouteOptionsUpdaterTest {
 
         @Test
         fun testCases() {
-            mockkStatic(::indexOfNextRequestedCoordinate) {
+            mockkStatic(::indexOfNextWaypoint) {
                 val mockRemainingWaypoints = -1
                 val mockWaypoints = listOf(mockk<Waypoint>(relaxed = true))
                 val routeProgress: RouteProgress = mockk(relaxed = true) {
@@ -839,7 +839,7 @@ class RouteOptionsUpdaterTest {
                     every { navigationRoute.internalWaypoints() } returns mockWaypoints
                 }
                 every {
-                    indexOfNextRequestedCoordinate(mockWaypoints, mockRemainingWaypoints)
+                    indexOfNextWaypoint(mockWaypoints, mockRemainingWaypoints)
                 } returns idxOfNextRequestedCoordinate
 
                 val updatedRouteOptions = routeOptionsUpdater.update(
@@ -1001,7 +1001,7 @@ class RouteOptionsUpdaterTest {
 
         @Test
         fun unrecognizedJsonProperties() {
-            mockkStatic(::indexOfNextRequestedCoordinate) {
+            mockkStatic(::indexOfNextWaypoint) {
                 val mockRemainingWaypoints = -1
                 val mockWaypoints = listOf(mockk<Waypoint>(relaxed = true))
                 val routeProgress: RouteProgress = mockk(relaxed = true) {
@@ -1009,7 +1009,7 @@ class RouteOptionsUpdaterTest {
                     every { navigationRoute.internalWaypoints() } returns mockWaypoints
                 }
                 every {
-                    indexOfNextRequestedCoordinate(mockWaypoints, mockRemainingWaypoints)
+                    indexOfNextWaypoint(mockWaypoints, mockRemainingWaypoints)
                 } returns idxOfNextRequestedCoordinate
 
                 val updatedRouteOptions = routeOptionsUpdater.update(

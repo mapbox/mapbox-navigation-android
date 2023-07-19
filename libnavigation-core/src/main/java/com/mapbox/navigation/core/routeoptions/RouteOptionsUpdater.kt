@@ -6,7 +6,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.extensions.indexOfNextRequestedCoordinate
+import com.mapbox.navigation.base.internal.extensions.indexOfNextWaypoint
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -74,7 +74,7 @@ class RouteOptionsUpdater {
             }
         }
 
-        val (nextCoordinateIndex, remainingCoordinates) = indexOfNextRequestedCoordinate(
+        val (nextCoordinateIndex, remainingCoordinates) = indexOfNextWaypoint(
             routeProgress.navigationRoute.internalWaypoints(),
             routeProgress.remainingWaypoints,
         ).let {
