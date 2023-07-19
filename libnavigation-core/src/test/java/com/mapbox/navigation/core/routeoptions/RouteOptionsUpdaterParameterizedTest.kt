@@ -11,8 +11,6 @@ import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
-import com.mapbox.navigation.testing.factories.createNativeWaypoint
-import com.mapbox.navigation.testing.factories.createWaypoint
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk

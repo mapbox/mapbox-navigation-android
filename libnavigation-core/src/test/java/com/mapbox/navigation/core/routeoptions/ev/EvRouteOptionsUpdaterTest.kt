@@ -70,6 +70,11 @@ class EvRouteOptionsUpdaterTest {
             originalRouteOptions.radiusesList()?.drop(1),
             updatedUrl.radiusesList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
         )
+        assertEquals(
+            "charging stations doesn't have radiuses",
+            listOf(null, null, null),
+            updatedUrl.radiusesList()?.takeExceptIndexes(waypointsIndexes)
+        )
         assertEquals(6, updatedUrl.waypointNamesList()?.size)
         assertEquals(
             "original waypoints names shouldn't change",
@@ -206,7 +211,7 @@ class EvRouteOptionsUpdaterTest {
         )
         assertEquals(
             listOf(
-                Double.POSITIVE_INFINITY,
+                null,
                 originalRouteOptions.radiusesList()?.last(),
             ),
             updatedRouteOptions.radiusesList()
@@ -304,7 +309,7 @@ class EvRouteOptionsUpdaterTest {
         )
         assertEquals(
             listOf(
-                Double.POSITIVE_INFINITY,
+                null,
                 originalRouteOptions.radiusesList()?.last(),
             ),
             updatedRouteOptions.radiusesList()

@@ -120,7 +120,7 @@ class RouteOptionsUpdater {
                         val radiusesList = routeOptions.radiusesList()
                             ?.updateWithValueForIndexes(
                                 serverAddedChargingStationWithIndex,
-                                Double.POSITIVE_INFINITY
+                                null
                             )
                         if (radiusesList.isNullOrEmpty()) {
                             return@radiusesList emptyList<Double?>()
