@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.reroute.restoreChargingStationsMetadata
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -181,8 +182,14 @@ internal class RouteAlternativesController constructor(
                             return@processRouteAlternatives
                         }
 
+                    val updatedAlternatives = restoreChargingStationsMetadata(
+                        routeProgress.navigationRoute,
+                        alternatives,
+                        ThreadController.DefaultDispatcher
+                    )
+
                     observers.forEach {
-                        it.onRouteAlternatives(routeProgress, alternatives, origin)
+                        it.onRouteAlternatives(routeProgress, updatedAlternatives, origin)
                     }
                 }
         }
@@ -210,7 +217,9 @@ internal class RouteAlternativesController constructor(
         val alternatives: List<NavigationRoute> =
             nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
                 val expected = withContext(ThreadController.DefaultDispatcher) {
-                    parseNativeDirectionsAlternative(routeAlternative)
+                    parseNativeDirectionsAlternative(routeAlternative).onValue {
+
+                    }
                 }
                 if (expected.isValue) {
                     expected.value

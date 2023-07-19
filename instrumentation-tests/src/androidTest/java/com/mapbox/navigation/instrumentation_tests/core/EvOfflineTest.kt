@@ -320,12 +320,11 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
                     onlineRoute.getChargingStationPowerCurrentTypes()
                 )
-                // TODO: implement in the context of NAVAND-1429
-//            assertEquals(
-//                "Switch back to an online route doesn't change charging station type",
-//                initialOnlineRoutes.first().getChargingStationTypes(),
-//                onlineRoute.getChargingStationTypes()
-//            )
+                assertEquals(
+                    "Switch back to an online route doesn't change charging station type",
+                    initialOnlineRoutes.first().getChargingStationTypes(),
+                    onlineRoute.getChargingStationTypes()
+                )
             }
         }
     }
