@@ -309,8 +309,6 @@ class RouteOptionsUpdater {
                     waypointsCount
                 )
             }
-        }
-        if (originalUnrecognizedJsonProperties.isEVRoute()) {
             newUnrecognizedJsonProperties["ev_add_charging_stops"] = JsonPrimitive(false)
         }
         return newUnrecognizedJsonProperties
