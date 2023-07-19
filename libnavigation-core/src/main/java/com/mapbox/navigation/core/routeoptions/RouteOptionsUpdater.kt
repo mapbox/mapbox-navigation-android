@@ -310,7 +310,7 @@ class RouteOptionsUpdater {
                 )
             }
         }
-        if (originalUnrecognizedJsonProperties["engine"]?.asString == "electric") {
+        if (originalUnrecognizedJsonProperties.isEVRoute()) {
             newUnrecognizedJsonProperties["ev_add_charging_stops"] = JsonPrimitive(false)
         }
         return newUnrecognizedJsonProperties
