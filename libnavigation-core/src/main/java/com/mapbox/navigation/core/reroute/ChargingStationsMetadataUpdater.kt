@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.reroute
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -12,7 +13,8 @@ import kotlinx.coroutines.withContext
 
 // It's a temporary platform side workaround, the final solution will be on NN side.
 // See https://mapbox.atlassian.net/browse/NN-854
-internal suspend fun restoreChargingStationsMetadataFromUrl(
+internal suspend fun restoreChargingStationsMetadata(
+    originalRoute: NavigationRoute,
     newRoutes: List<NavigationRoute>,
     workerDispatcher: CoroutineDispatcher = Dispatchers.Default
 ): List<NavigationRoute> = withContext(workerDispatcher) {
@@ -21,9 +23,56 @@ internal suspend fun restoreChargingStationsMetadataFromUrl(
     if (!rerouteRouteOptions.isEVRoute()) {
         return@withContext newRoutes
     }
-    if (newPrimaryRoute.origin == RouterOrigin.Offboard) {
-        return@withContext newRoutes
+    val updatedResponseWithoutCorrectTypes = if (newPrimaryRoute.origin == RouterOrigin.Onboard) {
+        updateChargingStationsMetadataBasedOnRequestUrl(rerouteRouteOptions, newPrimaryRoute)
+    } else {
+        newPrimaryRoute.directionsResponse
     }
+    val updatedResponse = updateChargingStationsTypes(
+        updatedResponseWithoutCorrectTypes,
+        originalRoute.getServerProvidedChargingStationsIds()
+    )
+    // TODO: optimise java memory usage creating a copy of a response NAVAND-1437
+    NavigationRoute.create(updatedResponse, rerouteRouteOptions, newPrimaryRoute.origin)
+}
+
+fun updateChargingStationsTypes(
+    response: DirectionsResponse,
+    serverProvidedStationsIds: Set<String>
+): DirectionsResponse {
+    val updatedRoutes = response.routes().map { route ->
+        val updatedWaypoints =
+            (route.waypoints() ?: emptyList()).mapIndexed { waypointIndex, waypoint ->
+                val waypointUnrecognizedProperties = waypoint.unrecognizedJsonProperties
+                val waypointMetadata = waypointUnrecognizedProperties?.get("metadata")
+                    ?.asJsonObject
+                val stationId = waypointMetadata
+                    ?.get("station_id")
+                    ?.asString
+                if (stationId != null && serverProvidedStationsIds.contains(stationId)) {
+                    val updatedMetadata = waypointMetadata.deepCopy()
+                    updatedMetadata.remove("type")
+                    updatedMetadata.add("type", JsonPrimitive("charging-station"))
+                    val updatedUnrecognizedProperties = waypointUnrecognizedProperties
+                        .toMutableMap()
+                    updatedUnrecognizedProperties["metadata"] = updatedMetadata
+                    waypoint.toBuilder()
+                        .unrecognizedJsonProperties(updatedUnrecognizedProperties)
+                        .build()
+                } else {
+                    waypoint
+                }
+            }
+        route.toBuilder().waypoints(updatedWaypoints).build()
+    }
+    val updatedResponse = response.toBuilder().routes(updatedRoutes).build()
+    return updatedResponse
+}
+
+private fun updateChargingStationsMetadataBasedOnRequestUrl(
+    rerouteRouteOptions: RouteOptions,
+    newPrimaryRoute: NavigationRoute
+): DirectionsResponse {
     val chargingStationsPowers = rerouteRouteOptions
         .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_power")
     val chargingStationsIds = rerouteRouteOptions
@@ -63,8 +112,7 @@ internal suspend fun restoreChargingStationsMetadataFromUrl(
         route.toBuilder().waypoints(updatedWaypoints).build()
     }
     val updatedResponse = response.toBuilder().routes(updatedRoutes).build()
-    // TODO: optimise java memory usage creating a copy of a response NAVAND-1437
-    NavigationRoute.create(updatedResponse, rerouteRouteOptions, RouterOrigin.Onboard)
+    return updatedResponse
 }
 
 private fun RouteOptions.getUnrecognisedSemicolonSeparatedParameter(name: String) =
@@ -72,3 +120,13 @@ private fun RouteOptions.getUnrecognisedSemicolonSeparatedParameter(name: String
         ?.get(name)
         ?.asString
         ?.split(";")
+
+private fun NavigationRoute.getServerProvidedChargingStationsIds(): Set<String> =
+    this.waypoints?.mapNotNull {
+        val metadata = it.unrecognizedJsonProperties?.get("metadata")?.asJsonObject
+        if (metadata?.get("type")?.asString == "charging-station") {
+            metadata.get("station_id")?.asString
+        } else {
+            null
+        }
+    }?.toSet() ?: emptySet()

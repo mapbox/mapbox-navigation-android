@@ -18,6 +18,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationIds
 import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationPowerCurrentTypes
 import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationPowersKW
+import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationTypes
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
@@ -283,12 +284,11 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                         initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
                         newRoutes.navigationRoutes.first().getChargingStationPowerCurrentTypes()
                     )
-                    // TODO: implement in the context of NAVAND-1429
-//                    assertEquals(
-//                        "Fallback to offline navigation doesn't change charging station type",
-//                        initialOnlineRoutes.first().getChargingStationType(),
-//                        newRoutes.navigationRoutes.first().getChargingStationType()
-//                    )
+                    assertEquals(
+                        "Fallback to offline navigation doesn't change charging station type",
+                        initialOnlineRoutes.first().getChargingStationTypes(),
+                        newRoutes.navigationRoutes.first().getChargingStationTypes()
+                    )
                 }
             }
             stayOnPosition(

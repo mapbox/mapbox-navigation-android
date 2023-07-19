@@ -23,7 +23,7 @@ class ChargingStationsMetadataUpdaterTest {
     @Test
     fun `offline EV route with user provided charging stations`() = runBlocking {
         val offlineRoutes = createTestBerlinOfflineEvRouteAfterReroute()
-        val result = restoreChargingStationsMetadataFromUrl(offlineRoutes)
+        val result = restoreChargingStationsMetadata(offlineRoutes)
         result.forEachIndexed { index, navigationRoute ->
             assertEquals(
                 "route #$index doesn't have charging stations ids",
@@ -55,7 +55,7 @@ class ChargingStationsMetadataUpdaterTest {
                     .build().toUrl("").toString()
             }
         }
-        val result = restoreChargingStationsMetadataFromUrl(offlineRoutes)
+        val result = restoreChargingStationsMetadata(offlineRoutes)
         result.forEachIndexed { index, navigationRoute ->
             assertEquals(
                 listOf(null, null, null),
@@ -83,7 +83,7 @@ class ChargingStationsMetadataUpdaterTest {
                     .build().toUrl("").toString()
             }
         }
-        val result = restoreChargingStationsMetadataFromUrl(offlineRoutes)
+        val result = restoreChargingStationsMetadata(offlineRoutes)
         result.forEachIndexed { index, navigationRoute ->
             assertEquals(
                 "route #$index doesn't have charging stations ids",
