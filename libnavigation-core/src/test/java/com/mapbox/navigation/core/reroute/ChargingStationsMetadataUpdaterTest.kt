@@ -22,7 +22,7 @@ class ChargingStationsMetadataUpdaterTest {
     val nativeRoute = NativeRouteParserRule()
 
     @Test
-    fun `offline EV route with user provided charging stations`() = runBlocking {
+    fun `offline EV route with server provided charging stations`() = runBlocking {
         val onlineRoute = createTestBerlinOnlineEvRouteAfterReroute().first()
         val offlineRoutes = createTestBerlinOfflineEvRouteAfterReroute()
         val result = restoreChargingStationsMetadata(onlineRoute, offlineRoutes)
@@ -50,7 +50,7 @@ class ChargingStationsMetadataUpdaterTest {
     }
 
     @Test
-    fun `offline EV route has only required user provided charging stations parameters`() = runBlocking {
+    fun `offline EV route has only required charging stations parameters`() = runBlocking {
         val onlineRoute = createTestBerlinOnlineEvRouteAfterReroute().first()
         val offlineRoutes = createTestBerlinOfflineEvRouteAfterReroute {
             RouteOptions.fromUrl(URL(it)).let {
@@ -84,7 +84,7 @@ class ChargingStationsMetadataUpdaterTest {
     }
 
     @Test
-    fun `offline EV route doesn't have required user provided charging stations parameters`() = runBlocking {
+    fun `offline EV route doesn't have required charging stations parameters`() = runBlocking {
         val onlineRoute = createTestBerlinOnlineEvRouteAfterReroute().first()
         val offlineRoutes = createTestBerlinOfflineEvRouteAfterReroute {
             RouteOptions.fromUrl(URL(it)).let {
