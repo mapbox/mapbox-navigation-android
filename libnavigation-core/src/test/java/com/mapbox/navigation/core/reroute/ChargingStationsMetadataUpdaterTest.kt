@@ -72,6 +72,36 @@ class ChargingStationsMetadataUpdaterTest {
         }
     }
 
+    @Test
+    fun `offline EV route doesn't have required user provided charging stations parameters`() = runBlocking {
+        val offlineRoutes = createTestOfflineRoutes {
+            RouteOptions.fromUrl(URL(it)).let {
+                it.toBuilder()
+                    .unrecognizedJsonProperties(it.unrecognizedJsonProperties?.apply {
+                        remove("waypoints.charging_station_power")
+                    })
+                    .build().toUrl("").toString()
+            }
+        }
+        val result = restoreChargingStationsMetadataFromUrl(offlineRoutes)
+        result.forEachIndexed { index, navigationRoute ->
+            assertEquals(
+                "route #$index doesn't have charging stations ids",
+                listOf(null, "ocm-54453", null),
+                navigationRoute.getChargingStationIds()
+            )
+            assertEquals(
+                listOf(null, null, null),
+                navigationRoute.getChargingStationPowersKW()
+            )
+            assertEquals(
+                "route #$index doesn't have charging stations current type",
+                listOf(null, "dc", null),
+                navigationRoute.getChargingStationPowerCurrentTypes()
+            )
+        }
+    }
+
     private fun createTestOfflineRoutes(
         urlUpdate: (String) -> String = { it }
     ): List<NavigationRoute> {

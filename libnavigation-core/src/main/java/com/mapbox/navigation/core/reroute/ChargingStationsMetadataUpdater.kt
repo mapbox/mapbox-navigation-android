@@ -26,43 +26,44 @@ internal suspend fun restoreChargingStationsMetadataFromUrl(
     }
     val chargingStationsPowers = rerouteRouteOptions
         .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_power")
-        ?: return@withContext newRoutes
     val chargingStationsIds = rerouteRouteOptions
         .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_id")
     val chargingStationsCurrentTypes = rerouteRouteOptions
         .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_current_type")
     val response = newPrimaryRoute.directionsResponse
     val updatedRoutes = response.routes().map { route ->
-        val updatedWaypoints = (route.waypoints() ?: emptyList()).mapIndexed { waypointIndex, waypoint ->
-            val chargingStationId = chargingStationsIds?.get(waypointIndex)
-            val chargingStationsPower = chargingStationsPowers[waypointIndex]
-                .toIntOrNull()
-                ?.let { it / 1000 }
-            val chargingStationsCurrentType = chargingStationsCurrentTypes?.get(waypointIndex)
-            if (chargingStationsPower != null) {
+        val updatedWaypoints =
+            (route.waypoints() ?: emptyList()).mapIndexed { waypointIndex, waypoint ->
+                val chargingStationId = chargingStationsIds?.get(waypointIndex)
+                val chargingStationsPower = chargingStationsPowers?.get(waypointIndex)
+                    ?.toIntOrNull()
+                    ?.let { it / 1000 }
+                val chargingStationsCurrentType = chargingStationsCurrentTypes?.get(waypointIndex)
                 waypoint.toBuilder()
                     .unrecognizedJsonProperties(
                         mapOf(
                             "metadata" to JsonObject().apply {
-                                add("power_kw", JsonPrimitive(chargingStationsPower))
+                                if (chargingStationsPower != null) {
+                                    add("power_kw", JsonPrimitive(chargingStationsPower))
+                                }
                                 if (!chargingStationId.isNullOrEmpty()) {
                                     add("station_id", JsonPrimitive(chargingStationId))
                                 }
                                 if (!chargingStationsCurrentType.isNullOrEmpty()) {
-                                    add("current_type", JsonPrimitive(chargingStationsCurrentType))
+                                    add(
+                                        "current_type",
+                                        JsonPrimitive(chargingStationsCurrentType)
+                                    )
                                 }
                             }
                         )
                     )
                     .build()
-            } else {
-                waypoint
             }
-        }
         route.toBuilder().waypoints(updatedWaypoints).build()
     }
     val updatedResponse = response.toBuilder().routes(updatedRoutes).build()
-    // TODO: optimise java memory usage crating a copy of a response NAVAND-1437
+    // TODO: optimise java memory usage creating a copy of a response NAVAND-1437
     NavigationRoute.create(updatedResponse, rerouteRouteOptions, RouterOrigin.Onboard)
 }
 
