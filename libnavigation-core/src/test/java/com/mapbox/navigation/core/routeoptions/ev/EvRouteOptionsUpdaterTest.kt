@@ -42,88 +42,87 @@ class EvRouteOptionsUpdaterTest {
             )
         )
 
-        val updatedUrl = (result as RouteOptionsUpdater.RouteOptionsResult.Success).routeOptions
+        val updatedRouteOptions = (result as RouteOptionsUpdater.RouteOptionsResult.Success).routeOptions
 
         val waypointsIndexesWithoutOrigin = listOf(3, 5)
         val waypointsIndexes = listOf(0, 3, 5)
-        assertEquals(6, updatedUrl.coordinatesList().size)
-        // TODO: check coordinates of charging waypoints
+        assertEquals(6, updatedRouteOptions.coordinatesList().size)
         assertEquals(
             "user added waypoints shouldn't change",
             originalRouteOptions.coordinatesList().drop(1),
-            updatedUrl.coordinatesList().takeByIndexes(waypointsIndexesWithoutOrigin)
+            updatedRouteOptions.coordinatesList().takeByIndexes(waypointsIndexesWithoutOrigin)
         )
         assertEquals(
             "charging station location is incorrect",
             navigationRoute.waypoints?.takeExceptIndexes(waypointsIndexes)?.map { it.location() },
-            updatedUrl.coordinatesList().takeExceptIndexes(waypointsIndexes)
+            updatedRouteOptions.coordinatesList().takeExceptIndexes(waypointsIndexes)
         )
-        assertEquals(6, updatedUrl.bearingsList()?.size)
+        assertEquals(6, updatedRouteOptions.bearingsList()?.size)
         assertEquals(
             "original bearings shouldn't change",
             originalRouteOptions.bearingsList()?.drop(1),
-            updatedUrl.bearingsList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
+            updatedRouteOptions.bearingsList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
         )
-        assertEquals(6, updatedUrl.radiusesList()?.size)
+        assertEquals(6, updatedRouteOptions.radiusesList()?.size)
         assertEquals(
             "original radiuses shouldn't change",
             originalRouteOptions.radiusesList()?.drop(1),
-            updatedUrl.radiusesList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
+            updatedRouteOptions.radiusesList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
         )
         assertEquals(
             "charging stations doesn't have radiuses",
             listOf(null, null, null),
-            updatedUrl.radiusesList()?.takeExceptIndexes(waypointsIndexes)
+            updatedRouteOptions.radiusesList()?.takeExceptIndexes(waypointsIndexes)
         )
-        assertEquals(6, updatedUrl.waypointNamesList()?.size)
+        assertEquals(6, updatedRouteOptions.waypointNamesList()?.size)
         assertEquals(
             "original waypoints names shouldn't change",
             originalRouteOptions.waypointNamesList()?.drop(1),
-            updatedUrl.waypointNamesList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
+            updatedRouteOptions.waypointNamesList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
         )
         assertEquals(
             listOf(null, null, null),
-            updatedUrl.waypointNamesList()
+            updatedRouteOptions.waypointNamesList()
                 ?.takeExceptIndexes(waypointsIndexesWithoutOrigin)
                 ?.drop(1)
         )
-        assertEquals(6, updatedUrl.waypointTargetsList()?.size)
+        assertEquals(6, updatedRouteOptions.waypointTargetsList()?.size)
         assertEquals(
             "original waypoints target list shouldn't change",
             originalRouteOptions.waypointTargetsList()?.drop(1),
-            updatedUrl.waypointTargetsList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
+            updatedRouteOptions.waypointTargetsList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
         )
         assertEquals(
             listOf(null, null, null),
-            updatedUrl.waypointTargetsList()
+            updatedRouteOptions.waypointTargetsList()
                 ?.takeExceptIndexes(waypointsIndexesWithoutOrigin)
                 ?.drop(1)
         )
-        assertEquals(6, updatedUrl.approachesList()?.size)
+        assertEquals(6, updatedRouteOptions.approachesList()?.size)
         assertEquals(
             "original waypoints approaches shouldn't change",
             originalRouteOptions.approachesList()?.drop(1),
-            updatedUrl.approachesList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
+            updatedRouteOptions.approachesList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
         )
         assertEquals(
             listOf(null, null, null),
-            updatedUrl.approachesList()
+            updatedRouteOptions.approachesList()
                 ?.takeExceptIndexes(waypointsIndexesWithoutOrigin)
                 ?.drop(1)
         )
-        assertEquals(6, updatedUrl.layersList()?.size)
+        assertEquals(6, updatedRouteOptions.layersList()?.size)
         assertEquals(
             "original waypoints layers shouldn't change",
             originalRouteOptions.layersList()?.drop(1),
-            updatedUrl.layersList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
+            updatedRouteOptions.layersList()?.takeByIndexes(waypointsIndexesWithoutOrigin)
         )
         assertEquals(
             listOf(null, null, null),
-            updatedUrl.layersList()
+            updatedRouteOptions.layersList()
                 ?.takeExceptIndexes(waypointsIndexesWithoutOrigin)
                 ?.drop(1)
         )
-        val chargingStationsIdsRaw = updatedUrl.getUnrecognizedProperty("waypoints.charging_station_id")
+        val chargingStationsIdsRaw = updatedRouteOptions.getUnrecognizedProperty("waypoints.charging_station_id")
             ?.asString
         val chargingStationsIds = chargingStationsIdsRaw?.split(";")
         assertEquals(6, chargingStationsIds?.size)
@@ -136,7 +135,7 @@ class EvRouteOptionsUpdaterTest {
             listOf("ocm-176564", "ocm-195363", "ocm-134236"),
             chargingStationsIds?.takeExceptIndexes(waypointsIndexes)
         )
-        val chargingStationsPowerRaw = updatedUrl
+        val chargingStationsPowerRaw = updatedRouteOptions
             .getUnrecognizedProperty("waypoints.charging_station_power")
             ?.asString
         val chargingStationsPower = chargingStationsPowerRaw?.split(";")
@@ -150,7 +149,7 @@ class EvRouteOptionsUpdaterTest {
             listOf("150000", "300000", "350000"),
             chargingStationsPower?.takeExceptIndexes(waypointsIndexes)
         )
-        val chargingStationsCurrentTypeRaw = updatedUrl
+        val chargingStationsCurrentTypeRaw = updatedRouteOptions
             .getUnrecognizedProperty("waypoints.charging_station_current_type")
             ?.asString
         val chargingStationsCurrentType = chargingStationsCurrentTypeRaw?.split(";")
@@ -167,7 +166,15 @@ class EvRouteOptionsUpdaterTest {
         assertEquals(
             "Directions API shouldn't add new charging stations",
             false,
-            updatedUrl.getUnrecognizedProperty("ev_add_charging_stops")?.asBoolean
+            updatedRouteOptions.getUnrecognizedProperty("ev_add_charging_stops")?.asBoolean
+        )
+        assertEquals(
+            listOf(true, null, null, null, null, null),
+            updatedRouteOptions.snappingIncludeStaticClosuresList()
+        )
+        assertEquals(
+            listOf(true, null, null, null, null, null),
+            updatedRouteOptions.snappingIncludeClosuresList()
         )
     }
 
@@ -269,6 +276,14 @@ class EvRouteOptionsUpdaterTest {
             listOf("", "dc", ""),
             chargingStationsCurrentType
         )
+        assertEquals(
+            listOf(true, null, null),
+            updatedRouteOptions.snappingIncludeStaticClosuresList()
+        )
+        assertEquals(
+            listOf(true, null, null),
+            updatedRouteOptions.snappingIncludeClosuresList()
+        )
     }
 
     @Test
@@ -366,12 +381,12 @@ class EvRouteOptionsUpdaterTest {
             )
         )
 
-        val updatedUrl = (result as RouteOptionsUpdater.RouteOptionsResult.Success).routeOptions
+        val updatedRouteOptions = (result as RouteOptionsUpdater.RouteOptionsResult.Success).routeOptions
 
         val waypointsIndexes = listOf(0, 4)
         val waypointsCount = 5
-        assertEquals(waypointsCount, updatedUrl.coordinatesList().size)
-        val chargingStationsIdsRaw = updatedUrl.getUnrecognizedProperty("waypoints.charging_station_id")
+        assertEquals(waypointsCount, updatedRouteOptions.coordinatesList().size)
+        val chargingStationsIdsRaw = updatedRouteOptions.getUnrecognizedProperty("waypoints.charging_station_id")
             ?.asString
         val chargingStationsIds = chargingStationsIdsRaw?.split(";")
         assertEquals(waypointsCount, chargingStationsIds?.size)
@@ -384,7 +399,7 @@ class EvRouteOptionsUpdaterTest {
             listOf("opis-af2ce792-5f6e-11ed-9c8d-ac1f6be1d08e", "id_1", "opis-9e070a3a-5f6b-11ed-9c8d-ac1f6be1d08e"),
             chargingStationsIds?.takeExceptIndexes(waypointsIndexes)
         )
-        val chargingStationsPowerRaw = updatedUrl
+        val chargingStationsPowerRaw = updatedRouteOptions
             .getUnrecognizedProperty("waypoints.charging_station_power")
             ?.asString
         val chargingStationsPower = chargingStationsPowerRaw?.split(";")
@@ -398,7 +413,7 @@ class EvRouteOptionsUpdaterTest {
             listOf("350000", "100000", "50000"),
             chargingStationsPower?.takeExceptIndexes(waypointsIndexes)
         )
-        val chargingStationsCurrentTypeRaw = updatedUrl
+        val chargingStationsCurrentTypeRaw = updatedRouteOptions
             .getUnrecognizedProperty("waypoints.charging_station_current_type")
             ?.asString
         val chargingStationsCurrentType = chargingStationsCurrentTypeRaw?.split(";")
@@ -411,6 +426,14 @@ class EvRouteOptionsUpdaterTest {
         assertEquals(
             listOf("dc", "dc", "dc"),
             chargingStationsCurrentType?.takeExceptIndexes(waypointsIndexes)
+        )
+        assertEquals(
+            listOf(true, null, null, null, null),
+            updatedRouteOptions.snappingIncludeStaticClosuresList()
+        )
+        assertEquals(
+            listOf(true, null, null, null, null),
+            updatedRouteOptions.snappingIncludeClosuresList()
         )
     }
 
@@ -452,7 +475,7 @@ class EvRouteOptionsUpdaterTest {
     }
 
     private fun createTestEvRouteWithUserProvidedChargingStations(): NavigationRoute {
-        val url = "https://api.mapbox.com/directions/v5/mapbox/driving/-122.42302878903037,37.780226502149986;-122.73225023858345,38.458230137668835;-123.2092146120633,39.147413952094894?overview=false&alternatives=true&waypoints_per_route=true&engine=electric&ev_initial_charge=600&ev_max_charge=50000&ev_connector_types=ccs_combo_type1,ccs_combo_type2&energy_consumption_curve=0,300;20,160;80,140;120,180&ev_charging_curve=0,100000;40000,70000;60000,30000;80000,10000&ev_min_charge_at_charging_station=1&access_token=***&waypoints.charging_station_power=;100000;&waypoints.charging_station_current_type=;dc;&waypoints.charging_station_id=;id_1;"
+        val url = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/-122.42302878903037,37.780226502149986;-122.73225023858345,38.458230137668835;-123.2092146120633,39.147413952094894?overview=false&alternatives=true&waypoints_per_route=true&engine=electric&ev_initial_charge=600&ev_max_charge=50000&ev_connector_types=ccs_combo_type1,ccs_combo_type2&energy_consumption_curve=0,300;20,160;80,140;120,180&ev_charging_curve=0,100000;40000,70000;60000,30000;80000,10000&ev_min_charge_at_charging_station=1&access_token=***&waypoints.charging_station_power=;100000;&waypoints.charging_station_current_type=;dc;&waypoints.charging_station_id=;id_1;"
         val navigationRoute = NavigationRoute.create(
             resourceAsString("testRouteWithUserProvidedChargingStation.json"),
             url,
