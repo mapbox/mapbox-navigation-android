@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -22,8 +23,9 @@ class ChargingStationsMetadataUpdaterTest {
 
     @Test
     fun `offline EV route with user provided charging stations`() = runBlocking {
+        val onlineRoute = createTestBerlinOnlineEvRouteAfterReroute().first()
         val offlineRoutes = createTestBerlinOfflineEvRouteAfterReroute()
-        val result = restoreChargingStationsMetadata(offlineRoutes)
+        val result = restoreChargingStationsMetadata(onlineRoute, offlineRoutes)
         result.forEachIndexed { index, navigationRoute ->
             assertEquals(
                 "route #$index doesn't have charging stations ids",
@@ -40,11 +42,16 @@ class ChargingStationsMetadataUpdaterTest {
                 listOf(null, "dc", null),
                 navigationRoute.getChargingStationPowerCurrentTypes()
             )
+            assertEquals(
+                listOf(null, "charging-station", null),
+                navigationRoute.getChargingStationTypes()
+            )
         }
     }
 
     @Test
     fun `offline EV route has only required user provided charging stations parameters`() = runBlocking {
+        val onlineRoute = createTestBerlinOnlineEvRouteAfterReroute().first()
         val offlineRoutes = createTestBerlinOfflineEvRouteAfterReroute {
             RouteOptions.fromUrl(URL(it)).let {
                 it.toBuilder()
@@ -55,7 +62,7 @@ class ChargingStationsMetadataUpdaterTest {
                     .build().toUrl("").toString()
             }
         }
-        val result = restoreChargingStationsMetadata(offlineRoutes)
+        val result = restoreChargingStationsMetadata(onlineRoute, offlineRoutes)
         result.forEachIndexed { index, navigationRoute ->
             assertEquals(
                 listOf(null, null, null),
@@ -69,11 +76,16 @@ class ChargingStationsMetadataUpdaterTest {
                 listOf(null, "50", null),
                 navigationRoute.getChargingStationPowersKW()
             )
+            assertEquals(
+                listOf(null, null, null),
+                navigationRoute.getChargingStationTypes()
+            )
         }
     }
 
     @Test
     fun `offline EV route doesn't have required user provided charging stations parameters`() = runBlocking {
+        val onlineRoute = createTestBerlinOnlineEvRouteAfterReroute().first()
         val offlineRoutes = createTestBerlinOfflineEvRouteAfterReroute {
             RouteOptions.fromUrl(URL(it)).let {
                 it.toBuilder()
@@ -83,7 +95,7 @@ class ChargingStationsMetadataUpdaterTest {
                     .build().toUrl("").toString()
             }
         }
-        val result = restoreChargingStationsMetadata(offlineRoutes)
+        val result = restoreChargingStationsMetadata(onlineRoute, offlineRoutes)
         result.forEachIndexed { index, navigationRoute ->
             assertEquals(
                 "route #$index doesn't have charging stations ids",
@@ -99,6 +111,10 @@ class ChargingStationsMetadataUpdaterTest {
                 listOf(null, "dc", null),
                 navigationRoute.getChargingStationPowerCurrentTypes()
             )
+            assertEquals(
+                listOf(null, "charging-station", null),
+                navigationRoute.getChargingStationTypes()
+            )
         }
     }
 
@@ -113,6 +129,33 @@ class ChargingStationsMetadataUpdaterTest {
             RouterOrigin.Onboard
         )
     }
+
+    private fun createTestBerlinOnlineEvRouteAfterReroute(): List<NavigationRoute> {
+        return NavigationRoute.create(
+            resourceAsString("berlinOnlineEvRoute.json"),
+            berlinEvRouteOptions().toUrl("").toString(),
+            RouterOrigin.Onboard
+        )
+    }
+
+    private fun berlinEvRouteOptions(): RouteOptions = RouteOptions.builder()
+        .applyDefaultNavigationOptions()
+        .coordinates("13.361378213031003,52.49813341962201;13.393450988895268,52.50913924804004")
+        .annotations("state_of_charge")
+        .alternatives(true)
+        .waypointsPerRoute(true)
+        .unrecognizedProperties(
+            mapOf(
+                "engine" to "electric",
+                "ev_initial_charge" to "1000",
+                "ev_max_charge" to "50000",
+                "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
+                "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
+                "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
+                "ev_min_charge_at_charging_station" to "1"
+            )
+        )
+        .build()
 
     private fun resourceAsString(
         name: String,
