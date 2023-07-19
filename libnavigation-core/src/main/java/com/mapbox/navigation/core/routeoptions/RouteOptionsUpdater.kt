@@ -147,10 +147,13 @@ class RouteOptionsUpdater {
                     if (routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC) {
                         snappingIncludeClosuresList(
                             routeOptions.snappingIncludeClosuresList()
+                                ?.toMutableList()
+                                ?.updateWithValueForIndexes(serverAddedChargingStationWithIndex, null)
                                 .withFirstTrue(remainingCoordinates)
                         )
                         snappingIncludeStaticClosuresList(
                             routeOptions.snappingIncludeStaticClosuresList()
+                                ?.updateWithValueForIndexes(serverAddedChargingStationWithIndex, null)
                                 .withFirstTrue(remainingCoordinates)
                         )
                     }
@@ -223,7 +226,7 @@ class RouteOptionsUpdater {
     }
 
     private fun allCoordinatesAreWaypoints(routeOptions: RouteOptions) =
-        routeOptions.waypointIndicesList() == (0..routeOptions.coordinatesList().count()).toList()
+        routeOptions.waypointIndicesList() == (0 until routeOptions.coordinatesList().count()).toList()
 
     private fun <T> List<T>.updateWithValueForIndexes(
         serverAddedChargingStationWithIndex: List<Pair<Int, Waypoint>>,
@@ -384,7 +387,7 @@ class RouteOptionsUpdater {
         return updatedStartWaypointIndicesIndex
     }
 
-    private fun List<Boolean>?.withFirstTrue(
+    private fun List<Boolean?>?.withFirstTrue(
         remainingCoordinates: Int,
     ): List<Boolean?> {
         return mutableListOf<Boolean?>().also { newList ->

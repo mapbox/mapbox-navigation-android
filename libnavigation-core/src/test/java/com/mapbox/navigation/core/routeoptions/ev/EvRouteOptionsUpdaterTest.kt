@@ -169,12 +169,28 @@ class EvRouteOptionsUpdaterTest {
             updatedRouteOptions.getUnrecognizedProperty("ev_add_charging_stops")?.asBoolean
         )
         assertEquals(
-            listOf(true, null, null, null, null, null),
+            "snapping include static closures shouldn't change",
+            originalRouteOptions.snappingIncludeStaticClosuresList()?.drop(1),
             updatedRouteOptions.snappingIncludeStaticClosuresList()
+                ?.takeByIndexes(waypointsIndexesWithoutOrigin)
         )
         assertEquals(
-            listOf(true, null, null, null, null, null),
+            "charging stations aren't snapped to static closures",
+            listOf(null, null, null),
+            updatedRouteOptions.snappingIncludeStaticClosuresList()
+                ?.takeExceptIndexes(waypointsIndexes)
+        )
+        assertEquals(
+            "snapping include closures shouldn't change for original waypoits",
+            originalRouteOptions.snappingIncludeClosuresList()?.drop(1),
             updatedRouteOptions.snappingIncludeClosuresList()
+                ?.takeByIndexes(waypointsIndexesWithoutOrigin)
+        )
+        assertEquals(
+            "charging stations aren't snapped to closures",
+            listOf(null, null, null),
+            updatedRouteOptions.snappingIncludeClosuresList()
+                ?.takeExceptIndexes(waypointsIndexes)
         )
     }
 
@@ -277,11 +293,11 @@ class EvRouteOptionsUpdaterTest {
             chargingStationsCurrentType
         )
         assertEquals(
-            listOf(true, null, null),
+            listOf(true, null, false),
             updatedRouteOptions.snappingIncludeStaticClosuresList()
         )
         assertEquals(
-            listOf(true, null, null),
+            listOf(true, null, true),
             updatedRouteOptions.snappingIncludeClosuresList()
         )
     }
@@ -458,7 +474,7 @@ class EvRouteOptionsUpdaterTest {
     }
 
     private fun createTestEvRoute(): NavigationRoute {
-        val rawUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/11.587428364032348,48.20148957377813;11.81872714026062,50.67773738599428;13.378818297105255,52.627628120089355?access_token=***=polyline6&alternatives=false&overview=full&steps=true&continue_straight=true&annotations=state_of_charge&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true&waypoints_per_route=true&engine=electric&ev_initial_charge=30000&ev_max_charge=50000&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180&ev_charging_curve=0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000&ev_min_charge_at_charging_station=7000&bearings=1,45;65,45;&radiuses=5;50;unlimited&waypoint_names=origin;test;destination&waypoint_targets=;;13.379077134850064,52.62734923825474&approaches=;curb;&layers=0;0;0&waypoints=0;1;2;3"
+        val rawUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/11.587428364032348,48.20148957377813;11.81872714026062,50.67773738599428;13.378818297105255,52.627628120089355?geometries=polyline6&alternatives=false&overview=full&steps=true&continue_straight=true&annotations=state_of_charge&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true&waypoints_per_route=true&engine=electric&ev_initial_charge=30000&ev_max_charge=50000&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180&ev_charging_curve=0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000&ev_min_charge_at_charging_station=7000&bearings=1,45;65,45;&radiuses=5;50;unlimited&waypoint_names=origin;test;destination&waypoint_targets=;;13.379077134850064,52.62734923825474&approaches=;curb;&layers=0;0;0&snapping_include_static_closures=false;true;false&snapping_include_closures=true;false;true&waypoints=0;1;2"
         val url = RouteOptions.fromUrl(URL(rawUrl)).let {
             // normalizes accuracy of doubles
             it.toBuilder()
