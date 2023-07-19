@@ -2,7 +2,6 @@ package com.mapbox.navigation.instrumentation_tests.utils
 
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import com.mapbox.common.ReachabilityFactory
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.executeShellCommandBlocking
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +13,8 @@ import org.junit.Assume.assumeTrue
 private const val LOG_TAG = "TestNetwork"
 
 suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
-    mockWebServerRule.withoutWebServer {
-        withoutWifiAndMobileData {
+    withoutWifiAndMobileData {
+        mockWebServerRule.withoutWebServer {
             block()
         }
     }
@@ -63,7 +62,10 @@ private suspend fun waitForHostReachability(expectedReachability: Boolean): Wait
         withContext(Dispatchers.IO) {
             while (true) {
                 val actualReachability = checkReachability()
-                Log.d(LOG_TAG, "is host reachable: $actualReachability, waiting for $expectedReachability")
+                Log.d(
+                    LOG_TAG,
+                    "is host reachable: $actualReachability, waiting for $expectedReachability"
+                )
                 if (actualReachability == expectedReachability) {
                     break
                 } else {
