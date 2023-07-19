@@ -291,36 +291,42 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 //                    )
                 }
             }
-
-            val onlineRoutesUpdate = navigation.routesUpdates()
-                .first { it.navigationRoutes.first().origin == RouterOrigin.Offboard }
-            val onlineRoute = onlineRoutesUpdate.navigationRoutes.first()
-            assertEquals(
-                "Switch back to an online route doesn't change a trip plan",
-                initialOnlineRoutes.first().waypoints?.map { it.location() }?.drop(1),
-                onlineRoute.waypoints?.map { it.location() }?.drop(1)
-            )
-            assertEquals(
-                "Switch back to an online route doesn't change a trip plan",
-                initialOnlineRoutes.first().getChargingStationIds(),
-                onlineRoute.getChargingStationIds()
-            )
-            assertEquals(
-                "Switch back to an online route doesn't change charging stations power",
-                initialOnlineRoutes.first().getChargingStationPowersKW(),
-                onlineRoute.getChargingStationPowersKW()
-            )
-            assertEquals(
-                "Switch back to an online route doesn't change charging station current type",
-                initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
-                onlineRoute.getChargingStationPowerCurrentTypes()
-            )
-            // TODO: implement in the context of NAVAND-1429
+            stayOnPosition(
+                // off route position
+                latitude = testRouteAfterReroute.origin.latitude(),
+                longitude = testRouteAfterReroute.origin.longitude(),
+                bearing = 280.0f
+            ) {
+                val onlineRoutesUpdate = navigation.routesUpdates()
+                    .first { it.navigationRoutes.first().origin == RouterOrigin.Offboard }
+                val onlineRoute = onlineRoutesUpdate.navigationRoutes.first()
+                assertEquals(
+                    "Switch back to an online route doesn't change a trip plan",
+                    initialOnlineRoutes.first().waypoints?.map { it.location() }?.drop(1),
+                    onlineRoute.waypoints?.map { it.location() }?.drop(1)
+                )
+                assertEquals(
+                    "Switch back to an online route doesn't change a trip plan",
+                    initialOnlineRoutes.first().getChargingStationIds(),
+                    onlineRoute.getChargingStationIds()
+                )
+                assertEquals(
+                    "Switch back to an online route doesn't change charging stations power",
+                    initialOnlineRoutes.first().getChargingStationPowersKW(),
+                    onlineRoute.getChargingStationPowersKW()
+                )
+                assertEquals(
+                    "Switch back to an online route doesn't change charging station current type",
+                    initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
+                    onlineRoute.getChargingStationPowerCurrentTypes()
+                )
+                // TODO: implement in the context of NAVAND-1429
 //            assertEquals(
 //                "Switch back to an online route doesn't change charging station type",
 //                initialOnlineRoutes.first().getChargingStationTypes(),
 //                onlineRoute.getChargingStationTypes()
 //            )
+            }
         }
     }
 
@@ -336,8 +342,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     private fun setupBerlinEvRoute(): MockedEvRoutes {
         val originalTestRoute = EvRoutesProvider.getBerlinEvRoute(
             context,
-            // TODO: uncomment and setup EV route per url NN-854 is done
-            //mockWebServerRule.baseUrl
+            mockWebServerRule.baseUrl
         )
         mockWebServerRule.requestHandlers.add(originalTestRoute.mockWebServerHandler)
         return originalTestRoute
