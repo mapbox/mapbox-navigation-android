@@ -374,7 +374,6 @@ class RouteOptionsUpdater {
         waypointIndicesList: List<Int>?,
         nextCoordinateIndex: Int
     ): Int {
-        // How did it work with waypoints names but without waypoint indexes?
         if (waypointIndicesList == null) {
             return nextCoordinateIndex - 1
         }
