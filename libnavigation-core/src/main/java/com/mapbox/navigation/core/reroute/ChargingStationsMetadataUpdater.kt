@@ -24,31 +24,33 @@ internal suspend fun restoreChargingStationsMetadataFromUrl(
     if (newPrimaryRoute.origin == RouterOrigin.Offboard) {
         return@withContext newRoutes
     }
-    val chargingStationsIds = rerouteRouteOptions
-        .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_id")
-        ?: return@withContext newRoutes
     val chargingStationsPowers = rerouteRouteOptions
         .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_power")
         ?: return@withContext newRoutes
+    val chargingStationsIds = rerouteRouteOptions
+        .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_id")
     val chargingStationsCurrentTypes = rerouteRouteOptions
         .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_current_type")
-        ?: return@withContext newRoutes
     val response = newPrimaryRoute.directionsResponse
     val updatedRoutes = response.routes().map { route ->
         val updatedWaypoints = (route.waypoints() ?: emptyList()).mapIndexed { waypointIndex, waypoint ->
-            val chargingStationId = chargingStationsIds[waypointIndex]
+            val chargingStationId = chargingStationsIds?.get(waypointIndex)
             val chargingStationsPower = chargingStationsPowers[waypointIndex]
                 .toIntOrNull()
                 ?.let { it / 1000 }
-            val chargingStationsCurrentType = chargingStationsCurrentTypes[waypointIndex]
-            if (chargingStationId != "" && chargingStationsPower != null && chargingStationsCurrentType != "") {
+            val chargingStationsCurrentType = chargingStationsCurrentTypes?.get(waypointIndex)
+            if (chargingStationsPower != null) {
                 waypoint.toBuilder()
                     .unrecognizedJsonProperties(
                         mapOf(
                             "metadata" to JsonObject().apply {
-                                add("station_id", JsonPrimitive(chargingStationId))
                                 add("power_kw", JsonPrimitive(chargingStationsPower))
-                                add("current_type", JsonPrimitive(chargingStationsCurrentType))
+                                if (!chargingStationId.isNullOrEmpty()) {
+                                    add("station_id", JsonPrimitive(chargingStationId))
+                                }
+                                if (!chargingStationsCurrentType.isNullOrEmpty()) {
+                                    add("current_type", JsonPrimitive(chargingStationsCurrentType))
+                                }
                             }
                         )
                     )
