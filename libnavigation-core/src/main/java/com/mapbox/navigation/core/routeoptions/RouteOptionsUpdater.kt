@@ -62,9 +62,17 @@ class RouteOptionsUpdater {
             }
         }
 
+        val currentNavigationRoute = routeProgress.navigationRoute
         val serverAddedChargingStationWithIndex =
-            routeProgress.navigationRoute.internalWaypoints().mapIndexedNotNull { index, waypoint ->
-                if (waypoint.type == Waypoint.EV_CHARGING_SERVER) {
+            currentNavigationRoute.internalWaypoints().mapIndexedNotNull { index, waypoint ->
+                val wasAlreadyRequestedAsUserProvided = currentNavigationRoute.waypoints
+                    ?.getOrNull(index)
+                    ?.unrecognizedJsonProperties
+                    ?.get("metadata")
+                    ?.asJsonObject
+                    ?.get("was_requested_as_user_provided")
+                    ?.asBoolean == true
+                if (waypoint.type == Waypoint.EV_CHARGING_SERVER && !wasAlreadyRequestedAsUserProvided) {
                     Pair(index, waypoint)
                 } else null
             }
