@@ -6,26 +6,32 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.routeoptions.isEVRoute
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+// It's a temporary platform side workaround, the final solution will be on NN side.
+// See https://mapbox.atlassian.net/browse/NN-854
 internal suspend fun preserveChargingStationsFromOldRoutes(
-    originalRoute: NavigationRoute,
-    newRoutes: List<NavigationRoute>
-): List<NavigationRoute> = withContext(Dispatchers.Default) {
-    if (!originalRoute.routeOptions.isEVRoute()) {
-        return@withContext newRoutes
-    }
-    if (newRoutes.first().origin == RouterOrigin.Offboard) {
-        return@withContext newRoutes
-    }
+    newRoutes: List<NavigationRoute>,
+    workerDispatcher: CoroutineDispatcher = Dispatchers.Default
+): List<NavigationRoute> = withContext(workerDispatcher) {
     val newPrimaryRoute = newRoutes.first()
     val rerouteRouteOptions = newPrimaryRoute.routeOptions
-    val chargingStationsIds = rerouteRouteOptions.getUnrecognisedParameter("waypoints.charging_station_id")
+    if (!rerouteRouteOptions.isEVRoute()) {
+        return@withContext newRoutes
+    }
+    if (newPrimaryRoute.origin == RouterOrigin.Offboard) {
+        return@withContext newRoutes
+    }
+    val chargingStationsIds = rerouteRouteOptions
+        .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_id")
         ?: return@withContext newRoutes
-    val chargingStationsPowers = rerouteRouteOptions.getUnrecognisedParameter("waypoints.charging_station_power")
+    val chargingStationsPowers = rerouteRouteOptions
+        .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_power")
         ?: return@withContext newRoutes
-    val chargingStationsCurrentTypes = rerouteRouteOptions.getUnrecognisedParameter("waypoints.charging_station_current_type")
+    val chargingStationsCurrentTypes = rerouteRouteOptions
+        .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_current_type")
         ?: return@withContext newRoutes
     val response = newPrimaryRoute.directionsResponse
     val updatedRoutes = response.routes().map { route ->
@@ -54,10 +60,11 @@ internal suspend fun preserveChargingStationsFromOldRoutes(
         route.toBuilder().waypoints(updatedWaypoints).build()
     }
     val updatedResponse = response.toBuilder().routes(updatedRoutes).build()
+    // TODO: optimise java memory usage crating a copy of a response NAVAND-1437
     NavigationRoute.create(updatedResponse, rerouteRouteOptions, RouterOrigin.Onboard)
 }
 
-private fun RouteOptions.getUnrecognisedParameter(name: String) =
+private fun RouteOptions.getUnrecognisedSemicolonSeparatedParameter(name: String) =
     unrecognizedJsonProperties
         ?.get(name)
         ?.asString

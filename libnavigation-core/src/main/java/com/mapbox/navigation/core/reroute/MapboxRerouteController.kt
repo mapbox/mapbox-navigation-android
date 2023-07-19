@@ -23,6 +23,8 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -39,6 +41,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
     private val compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter,
+    private val workerDispatcher: CoroutineDispatcher,
 ) : InternalRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
@@ -60,7 +63,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         routeOptionsUpdater,
         rerouteOptions,
         threadController,
-        MapboxRerouteOptionsAdapter(evDynamicDataHolder)
+        MapboxRerouteOptionsAdapter(evDynamicDataHolder),
+        Dispatchers.Default
     )
 
     override var state: RerouteState = RerouteState.Idle
@@ -142,7 +146,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                 rerouteOptions,
                 tripSession.locationMatcherResult?.enhancedLocation?.speed
             )
-        val currentRouteProgress = tripSession.getRouteProgress()
         routeOptionsUpdater.update(
             routeOptions,
             tripSession.getRouteProgress(),
@@ -154,7 +157,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                         val modifiedRerouteOption = compositeRerouteOptionsAdapter.onRouteOptions(
                             routeOptionsResult.routeOptions
                         )
-                        request(callback, modifiedRerouteOption, currentRouteProgress!!.navigationRoute)
+                        request(callback, modifiedRerouteOption)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         state = RerouteState.Failed(
@@ -196,15 +199,14 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
     private fun request(
         callback: InternalRerouteController.RoutesCallback,
-        routeOptions: RouteOptions,
-        originalRoute: NavigationRoute
+        routeOptions: RouteOptions
     ) {
         rerouteJob = mainJobController.scope.launch {
             when (val result = requestAsync(routeOptions)) {
                 is RouteRequestResult.Success -> {
                     val routesWithEvStations = preserveChargingStationsFromOldRoutes(
-                        originalRoute,
-                        result.routes
+                        result.routes,
+                        workerDispatcher
                     )
                     state = RerouteState.RouteFetched(result.routerOrigin)
                     state = RerouteState.Idle

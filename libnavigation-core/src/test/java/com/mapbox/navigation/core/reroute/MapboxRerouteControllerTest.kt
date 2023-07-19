@@ -34,6 +34,7 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import io.mockk.verifySequence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -106,7 +107,8 @@ class MapboxRerouteControllerTest {
                 routeOptionsUpdater,
                 rerouteOptions,
                 threadController,
-                compositeRerouteOptionsAdapter
+                compositeRerouteOptionsAdapter,
+                TestCoroutineDispatcher()
             )
         )
     }
@@ -163,7 +165,7 @@ class MapboxRerouteControllerTest {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
         val routes = listOf(
-            mockk<NavigationRoute> {
+            mockk<NavigationRoute>(relaxed = true) {
                 every {
                     directionsRoute
                 } returns MapboxJavaObjectsFactory.directionsRoute(routeOptions = null)
