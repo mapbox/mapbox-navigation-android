@@ -15,7 +15,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
-import com.mapbox.navigation.core.reroute.MapboxRerouteController.Companion.applyRerouteOptions
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
@@ -204,7 +203,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         rerouteJob = mainJobController.scope.launch {
             when (val result = requestAsync(routeOptions)) {
                 is RouteRequestResult.Success -> {
-                    val routesWithEvStations = preserveChargingStationsFromOldRoutes(
+                    val routesWithEvStations = restoreChargingStationsMetadataFromUrl(
                         result.routes,
                         workerDispatcher
                     )

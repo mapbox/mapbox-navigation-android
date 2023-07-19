@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 
 // It's a temporary platform side workaround, the final solution will be on NN side.
 // See https://mapbox.atlassian.net/browse/NN-854
-internal suspend fun preserveChargingStationsFromOldRoutes(
+internal suspend fun restoreChargingStationsMetadataFromUrl(
     newRoutes: List<NavigationRoute>,
     workerDispatcher: CoroutineDispatcher = Dispatchers.Default
 ): List<NavigationRoute> = withContext(workerDispatcher) {
