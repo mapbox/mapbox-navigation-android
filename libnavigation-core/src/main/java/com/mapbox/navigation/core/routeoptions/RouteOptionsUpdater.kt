@@ -140,7 +140,7 @@ class RouteOptionsUpdater {
                         }
                         mutableListOf<String?>() +
                             null +
-                            approachesList.takeLast(remainingCoordinates) //TODO: double check why we did -1
+                            approachesList.takeLast(remainingCoordinates)
                     }
                 )
                 .apply {
