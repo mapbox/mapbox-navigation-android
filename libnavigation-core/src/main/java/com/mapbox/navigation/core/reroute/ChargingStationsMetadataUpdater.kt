@@ -112,6 +112,7 @@ private fun updateMetadataBasedOnRequestUrl(
             if (waypoint.getWaypointMetadata() == null && updatedMetadata.jsonMetadata.size() == 0) {
                 waypoint
             } else {
+                updatedMetadata.setUserProvidedType()
                 waypoint.toBuilder()
                     .unrecognizedJsonProperties(
                         mapOf(

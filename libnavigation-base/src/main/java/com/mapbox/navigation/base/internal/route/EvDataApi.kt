@@ -53,6 +53,10 @@ value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonO
         jsonMetadata.add("current_type", JsonPrimitive(currentType))
     }
 
+    fun setUserProvidedType() {
+        jsonMetadata.add("type", JsonPrimitive("user-provided-charging-station"))
+    }
+
     companion object {
         fun createEmpty()  = ChargingStationMetadata(JsonObject())
     }
