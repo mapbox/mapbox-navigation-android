@@ -4,11 +4,14 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.indexOfNextWaypoint
-import com.mapbox.navigation.base.internal.route.Waypoint
-import com.mapbox.navigation.base.internal.route.getWaypointMetadata
+import com.mapbox.navigation.base.internal.route.getChargingStationCurrentType
+import com.mapbox.navigation.base.internal.route.getChargingStationId
+import com.mapbox.navigation.base.internal.route.getChargingStationPowerKw
+import com.mapbox.navigation.base.internal.route.getWaypointMetadataOrEmpty
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -66,18 +69,15 @@ class RouteOptionsUpdater {
 
         val currentNavigationRoute = routeProgress.navigationRoute
         val serverAddedChargingStationWithIndex =
-            currentNavigationRoute.internalWaypoints().mapIndexedNotNull { index, waypoint ->
-                val wasAlreadyRequestedAsUserProvided = currentNavigationRoute.waypoints
-                    ?.getOrNull(index)
-                    ?.getWaypointMetadata()
-                    ?.wasRequestedAsUserProvided()
-                if (waypoint.type == Waypoint.EV_CHARGING_SERVER && wasAlreadyRequestedAsUserProvided != true) {
+            currentNavigationRoute.waypoints?.mapIndexedNotNull { index, waypoint ->
+                val metadata = waypoint.getWaypointMetadataOrEmpty()
+                if (metadata.isServerProvided() && !metadata.wasRequestedAsUserProvided()) {
                     Pair(index, waypoint)
                 } else null
-            }
+            } ?: emptyList()
         val coordinatesList = routeOptions.coordinatesList().toMutableList().apply {
             serverAddedChargingStationWithIndex.forEach { (indexOfWaypoint, waypoint) ->
-                this.add(indexOfWaypoint, waypoint.location)
+                this.add(indexOfWaypoint, waypoint.location())
             }
         }
 
@@ -155,12 +155,18 @@ class RouteOptionsUpdater {
                         snappingIncludeClosuresList(
                             routeOptions.snappingIncludeClosuresList()
                                 ?.toMutableList()
-                                ?.updateWithValueForIndexes(serverAddedChargingStationWithIndex, null)
+                                ?.updateWithValueForIndexes(
+                                    serverAddedChargingStationWithIndex,
+                                    null
+                                )
                                 .withFirstTrue(remainingCoordinates)
                         )
                         snappingIncludeStaticClosuresList(
                             routeOptions.snappingIncludeStaticClosuresList()
-                                ?.updateWithValueForIndexes(serverAddedChargingStationWithIndex, null)
+                                ?.updateWithValueForIndexes(
+                                    serverAddedChargingStationWithIndex,
+                                    null
+                                )
                                 .withFirstTrue(remainingCoordinates)
                         )
                     }
@@ -233,10 +239,11 @@ class RouteOptionsUpdater {
     }
 
     private fun allCoordinatesAreWaypoints(routeOptions: RouteOptions) =
-        routeOptions.waypointIndicesList() == (0 until routeOptions.coordinatesList().count()).toList()
+        routeOptions.waypointIndicesList() == (0 until routeOptions.coordinatesList()
+            .count()).toList()
 
     private fun <T> List<T>.updateWithValueForIndexes(
-        serverAddedChargingStationWithIndex: List<Pair<Int, Waypoint>>,
+        serverAddedChargingStationWithIndex: List<Pair<Int, DirectionsWaypoint>>,
         value: T
     ): List<T> {
         val result = this.toMutableList()
@@ -291,7 +298,7 @@ class RouteOptionsUpdater {
     private fun getUpdatedUnrecognizedJsonProperties(
         originalUnrecognizedJsonProperties: Map<String, JsonElement>?,
         nextCoordinateIndex: Int,
-        serverAddedChargingStationWithIndex: List<Pair<Int, Waypoint>>,
+        serverAddedChargingStationWithIndex: List<Pair<Int, DirectionsWaypoint>>,
         waypointsCount: Int
     ): Map<String, JsonElement>? {
         if (originalUnrecognizedJsonProperties == null) {
@@ -304,12 +311,27 @@ class RouteOptionsUpdater {
         if (originalUnrecognizedJsonProperties.isEVRoute()) {
             listOf(
                 "waypoints.charging_station_id" to serverAddedChargingStationWithIndex
-                    .map { (index, waypoint) -> Pair(index, waypoint.metadata?.get("station_id")?.asString ?: "") },
+                    .map { (index, waypoint) ->
+                        Pair(
+                            index,
+                            waypoint.getChargingStationId() ?: ""
+                        )
+                    },
                 "waypoints.charging_station_power" to serverAddedChargingStationWithIndex
-                    .map { (index, waypoint) -> Pair(index, waypoint.metadata?.get("power_kw")?.asInt?.let { (it * 1000).toString() } ?: "") },
+                    .map { (index, waypoint) ->
+                        Pair(
+                            index,
+                            waypoint.getChargingStationPowerKw()?.let { (it * 1000).toString() }
+                                ?: "")
+                    },
                 "waypoints.charging_station_current_type" to serverAddedChargingStationWithIndex
-                    .map { (index, waypoint) -> Pair(index, waypoint.metadata?.get("current_type")?.asString ?: "") },
-            ).forEach {(param, serverAddedValues) ->
+                    .map { (index, waypoint) ->
+                        Pair(
+                            index,
+                            waypoint.getChargingStationCurrentType() ?: ""
+                        )
+                    },
+            ).forEach { (param, serverAddedValues) ->
                 updateCoordinateRelatedListProperty(
                     newUnrecognizedJsonProperties,
                     originalUnrecognizedJsonProperties,

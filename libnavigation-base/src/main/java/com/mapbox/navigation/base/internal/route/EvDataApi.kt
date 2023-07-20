@@ -8,8 +8,11 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 fun DirectionsWaypoint.getChargingStationId(): String? =
     getWaypointMetadata()?.getStationId()
 
-fun DirectionsWaypoint.getChargingStationType(): String? =
-    getWaypointMetadata()?.getType()
+fun DirectionsWaypoint.getChargingStationCurrentType(): String? =
+    getWaypointMetadata()?.getCurrentType()
+
+fun DirectionsWaypoint.getChargingStationPowerKw(): Int? =
+    getWaypointMetadata()?.getPowerKw()
 
 fun DirectionsWaypoint.getWaypointMetadata(): ChargingStationMetadata? {
     val waypointUnrecognizedProperties = this.unrecognizedJsonProperties
@@ -25,6 +28,8 @@ fun DirectionsWaypoint.getWaypointMetadataOrEmpty() = getWaypointMetadata()
 value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonObject) {
     fun getType(): String? = jsonMetadata.get("type")?.asString
     fun getStationId(): String? = jsonMetadata.get("station_id")?.asString
+    fun getPowerKw(): Int? = jsonMetadata.get("power_kw")?.asInt
+    fun getCurrentType(): String? = jsonMetadata.get("current_type")?.asString
     fun isServerProvided(): Boolean = getType() == "charging-station"
     fun wasRequestedAsUserProvided(): Boolean
         = jsonMetadata.get("was_requested_as_user_provided")?.asBoolean == true
