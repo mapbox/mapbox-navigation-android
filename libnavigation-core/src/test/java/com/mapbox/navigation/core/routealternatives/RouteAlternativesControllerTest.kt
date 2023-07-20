@@ -732,6 +732,18 @@ class RouteAlternativesControllerTest {
             assertNull(metadata)
         }
 
+    @Test
+    fun `should set ev data on update`() {
+        val testEvData = hashMapOf("test-ev-option" to "test")
+
+        val routeAlternativesController = createRouteAlternativesController()
+        routeAlternativesController.onEVDataUpdated(testEvData)
+
+        verify(exactly = 1) {
+            controllerInterface.onEvDataUpdated(testEvData)
+        }
+    }
+
     private val nativeInfoFork = com.mapbox.navigator.AlternativeRouteInfo(
         100.0, // distance
         200.0, // duration
