@@ -76,7 +76,7 @@ class RouteProgressExTest {
             closures = null,
             waypoints = null,
             refreshTtl = null,
-            responseTime = 0,
+            responseTimeElapsedSeconds = 0,
         )
 
         assertEquals(
@@ -149,7 +149,7 @@ class RouteProgressExTest {
             closures = null,
             waypoints = null,
             refreshTtl = null,
-            responseTime = 0,
+            responseTimeElapsedSeconds = 0,
         )
 
         // compare durations with original values from json file
@@ -203,7 +203,7 @@ class RouteProgressExTest {
             closures = null,
             waypoints = null,
             refreshTtl = null,
-            responseTime = 0,
+            responseTimeElapsedSeconds = 0,
         )
 
         assertEquals(
@@ -746,7 +746,7 @@ class RouteProgressExTest {
                 every { routerOrigin } returns RouterOrigin.ONLINE
                 every { waypoints } returns emptyList()
             },
-            expirationTime = expirationTime
+            expirationTimeElapsedSeconds = expirationTime
         )
     }
 
@@ -1093,7 +1093,7 @@ class RouteProgressExTest {
                     every { routerOrigin } returns RouterOrigin.ONLINE
                     every { waypoints } returns emptyList()
                 },
-                expirationTime = null
+                expirationTimeElapsedSeconds = null
             )
         }
 

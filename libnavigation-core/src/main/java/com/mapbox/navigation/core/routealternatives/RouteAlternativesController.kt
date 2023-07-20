@@ -208,11 +208,11 @@ internal class RouteAlternativesController constructor(
         nativeAlternatives: List<RouteAlternative>,
         block: suspend (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) = mainJobControl.scope.launch {
-        val responseTime = Time.SystemClockImpl.seconds()
+        val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
         val alternatives: List<NavigationRoute> =
             nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
                 val expected = withContext(ThreadController.DefaultDispatcher) {
-                    parseNativeDirectionsAlternative(routeAlternative, responseTime)
+                    parseNativeDirectionsAlternative(routeAlternative, responseTimeElapsedSeconds)
                 }
                 if (expected.isValue) {
                     expected.value
@@ -230,7 +230,7 @@ internal class RouteAlternativesController constructor(
         processAlternativesMetadata(alternatives, nativeAlternatives)
         val newAlternatives = parseRouteInterfaceOrEmptyList(
             onlinePrimaryRoute,
-            responseTime
+            responseTimeElapsedSeconds
         ) + alternatives
         val origin = nativeAlternatives.find {
             // looking for the first new route,
@@ -291,7 +291,7 @@ private fun com.mapbox.navigator.AlternativeRouteInfo.mapToPlatform(): Alternati
 
 private fun parseRouteInterfaceOrEmptyList(
     onlinePrimaryRoute: RouteInterface?,
-    responseTime: Long
+    responseTimeElapsedSeconds: Long
 ) = onlinePrimaryRoute?.let {
-    parseRouteInterface(it, responseTime)
+    parseRouteInterface(it, responseTimeElapsedSeconds)
 }?.value?.let { listOf(it) } ?: emptyList()

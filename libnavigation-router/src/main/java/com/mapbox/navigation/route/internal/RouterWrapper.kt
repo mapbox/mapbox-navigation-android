@@ -17,7 +17,6 @@ import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
-import com.mapbox.navigation.base.internal.utils.refreshTtl
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -112,13 +111,13 @@ class RouterWrapper(
                                     "from router.getRoute for $urlWithoutToken",
                                 LOG_CATEGORY
                             )
-                            val responseTime = Time.SystemClockImpl.seconds()
+                            val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
                             parseDirectionsResponse(
                                 ThreadController.DefaultDispatcher,
                                 it,
                                 routeUrl,
                                 origin.mapToSdkRouteOrigin(),
-                                responseTime
+                                responseTimeElapsedSeconds
                             ).fold(
                                 { throwable ->
                                     callback.onFailure(
@@ -226,7 +225,7 @@ class RouterWrapper(
             refreshOptions,
         ) { result, _, _ ->
             logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
-            val responseTime = Time.SystemClockImpl.seconds()
+            val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
             result.fold(
                 {
                     mainJobControl.scope.launch {
@@ -243,7 +242,9 @@ class RouterWrapper(
 
                         logW(errorMessage, LOG_CATEGORY)
 
-                        it.refreshTtl?.let { route.updateExpirationTime(it + responseTime) }
+                        it.refreshTtl?.let {
+                            route.updateExpirationTime(it + responseTimeElapsedSeconds)
+                        }
                         callback.onFailure(
                             RouterFactory.buildNavigationRouterRefreshError(
                                 "Route refresh failed",
@@ -287,7 +288,7 @@ class RouterWrapper(
                                         },
                                         closures = routeRefresh.legs()?.map { it.closures() },
                                         waypoints = updatedWaypoints,
-                                        responseTime = responseTime,
+                                        responseTimeElapsedSeconds = responseTimeElapsedSeconds,
                                         refreshTtl = routeRefresh.unrecognizedJsonProperties
                                             ?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
                                     )
