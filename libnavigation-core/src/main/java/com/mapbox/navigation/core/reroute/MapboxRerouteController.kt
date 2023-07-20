@@ -145,9 +145,10 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                 rerouteOptions,
                 tripSession.locationMatcherResult?.enhancedLocation?.speed
             )
+        val routeProgress = tripSession.getRouteProgress()
         routeOptionsUpdater.update(
             routeOptions,
-            tripSession.getRouteProgress(),
+            routeProgress,
             tripSession.locationMatcherResult,
         )
             .let { routeOptionsResult ->
@@ -156,8 +157,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                         val modifiedRerouteOption = compositeRerouteOptionsAdapter.onRouteOptions(
                             routeOptionsResult.routeOptions
                         )
-                        //TODO: can it be null?
-                        request(callback, modifiedRerouteOption, tripSession.getRouteProgress()!!.navigationRoute)
+                        // route progress can't be null at this point
+                        request(callback, modifiedRerouteOption, routeProgress!!.navigationRoute)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         state = RerouteState.Failed(
