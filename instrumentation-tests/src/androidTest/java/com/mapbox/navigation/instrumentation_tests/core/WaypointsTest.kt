@@ -225,7 +225,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     @Test
     fun leg_destination_ev_route() = sdkTest {
         val coordinates = listOf(
-            Point.fromLngLat( 11.063842, 48.39023),
+            Point.fromLngLat(11.063842, 48.39023),
             Point.fromLngLat(10.340713, 49.164725)
         )
         addResponseHandler(R.raw.ev_route_response_for_refresh_with_2_waypoints, coordinates)
