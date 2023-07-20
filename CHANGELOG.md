@@ -6,6 +6,58 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.15.0-rc.1 - 20 July, 2023
+### Changelog
+[Changes between v2.15.0-beta.1 and v2.15.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.0-beta.1...v2.15.0-rc.1)
+
+#### Features
+- Introduced `RoutesInvalidatedObserver` to be notified about routes invalidation. When this observer is fired, the routes passed as an argument will not be refreshed anymore, because they expired. It is recommended to rebuild a route in this case. Example usage: [#7318](https://github.com/mapbox/mapbox-navigation-android/pull/7318)
+```
+mapboxNavigation.registerRoutesInvalidatedObserver { routes ->
+    val invalidatedIds = routes.map { it.id }
+    val currentRoutes = mapboxNavigation.getNavigationRoutes()
+    val primaryRoute = currentRoutes.firstOrNull()
+    if (routes.any { it.id == primaryRoute?.id }) {
+        // primary route is outdated - trigger reroute
+        mapboxNavigation.getRerouteController()?.reroute(object : NavigationRerouteController.RoutesCallback {
+            override fun onNewRoutes(
+                routes: List<NavigationRoute>,
+                routerOrigin: RouterOrigin
+            ) {
+                mapboxNavigation.setNavigationRoutes(routes)
+            }
+        })
+    } else {
+        // remove outdated alternatives
+        mapboxNavigation.setNavigationRoutes(currentRoutes.filterNot { it.id in invalidatedIds })
+    }
+}
+```
+- Introduced `MERGING_AREA` RoadObject type. You can receive Merging Areas via `RouteProgress#upcomingRoadObjects` and via `EHorizonObserver`. Note: to enable merging area collection when using EHorizon, set `AlertServiceOptions#collectMergingAreas` to true.  [#7358](https://github.com/mapbox/mapbox-navigation-android/pull/7358)
+- Added new option to control gender of voice `MapboxSpeechApiOptions.gender`. [#7337](https://github.com/mapbox/mapbox-navigation-android/pull/7337)
+
+#### Bug fixes and improvements
+- Now updated via `MapboxNavigation#onEvDataUpdated` parameters are added to continuous alternatives requests. [#7380](https://github.com/mapbox/mapbox-navigation-android/pull/7380)
+- Fixed snapping to a tunnel after driving out of underground parking. [#7372](https://github.com/mapbox/mapbox-navigation-android/pull/7372)
+- Fixed ADASIS assertion failures on KML files. [#7372](https://github.com/mapbox/mapbox-navigation-android/pull/7372)
+- Fixed MapMatching isuue where it might have picked the wrong tunnel. [#7372](https://github.com/mapbox/mapbox-navigation-android/pull/7372)
+- Fixes an issue where trail layer that indicates the traveled portion of the route was visible below inactive legs. [#7363](https://github.com/mapbox/mapbox-navigation-android/pull/7363)
+- Nav SDK now preserves charging stations after reroute. [#7369](https://github.com/mapbox/mapbox-navigation-android/pull/7369)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.15.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.15.0-rc.1))
+- Mapbox Navigation Native `v145.0.0`
+- Mapbox Core Common `v23.7.0-rc.1`
+- Mapbox Java `v6.13.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0-beta.1))
+
+
 ## Mapbox Navigation SDK 2.15.0-beta.1 - 07 July, 2023
 ### Changelog
 [Changes between v2.14.1 and v2.15.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.14.1...v2.15.0-beta.1)
