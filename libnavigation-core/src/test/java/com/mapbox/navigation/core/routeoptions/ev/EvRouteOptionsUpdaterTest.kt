@@ -42,7 +42,8 @@ class EvRouteOptionsUpdaterTest {
             )
         )
 
-        val updatedRouteOptions = (result as RouteOptionsUpdater.RouteOptionsResult.Success).routeOptions
+        val updatedRouteOptions = (result as RouteOptionsUpdater.RouteOptionsResult.Success)
+            .routeOptions
 
         val waypointsIndexesWithoutOrigin = listOf(3, 5)
         val waypointsIndexes = listOf(0, 3, 5)
@@ -122,7 +123,8 @@ class EvRouteOptionsUpdaterTest {
                 ?.takeExceptIndexes(waypointsIndexesWithoutOrigin)
                 ?.drop(1)
         )
-        val chargingStationsIdsRaw = updatedRouteOptions.getUnrecognizedProperty("waypoints.charging_station_id")
+        val chargingStationsIdsRaw = updatedRouteOptions
+            .getUnrecognizedProperty("waypoints.charging_station_id")
             ?.asString
         val chargingStationsIds = chargingStationsIdsRaw?.split(";")
         assertEquals(6, chargingStationsIds?.size)
@@ -213,7 +215,8 @@ class EvRouteOptionsUpdaterTest {
             )
         )
 
-        val updatedRouteOptions = (result as RouteOptionsUpdater.RouteOptionsResult.Success).routeOptions
+        val updatedRouteOptions = (result as RouteOptionsUpdater.RouteOptionsResult.Success)
+            .routeOptions
 
         assertEquals(
             listOf(
@@ -370,7 +373,8 @@ class EvRouteOptionsUpdaterTest {
             ),
             updatedRouteOptions.layersList()
         )
-        val chargingStationsIdsRaw = updatedRouteOptions.getUnrecognizedProperty("waypoints.charging_station_id")
+        val chargingStationsIdsRaw = updatedRouteOptions
+            .getUnrecognizedProperty("waypoints.charging_station_id")
         assertNull(chargingStationsIdsRaw)
         val chargingStationsPowerRaw = updatedRouteOptions
             .getUnrecognizedProperty("waypoints.charging_station_power")
@@ -397,12 +401,15 @@ class EvRouteOptionsUpdaterTest {
             )
         )
 
-        val updatedRouteOptions = (result as RouteOptionsUpdater.RouteOptionsResult.Success).routeOptions
+        val updatedRouteOptions = (result as RouteOptionsUpdater.RouteOptionsResult.Success)
+            .routeOptions
 
         val waypointsIndexes = listOf(0, 4)
         val waypointsCount = 5
         assertEquals(waypointsCount, updatedRouteOptions.coordinatesList().size)
-        val chargingStationsIdsRaw = updatedRouteOptions.getUnrecognizedProperty("waypoints.charging_station_id")
+        val chargingStationsIdsRaw = updatedRouteOptions.getUnrecognizedProperty(
+            "waypoints.charging_station_id"
+        )
             ?.asString
         val chargingStationsIds = chargingStationsIdsRaw?.split(";")
         assertEquals(waypointsCount, chargingStationsIds?.size)
@@ -412,7 +419,11 @@ class EvRouteOptionsUpdaterTest {
             chargingStationsIds?.takeByIndexes(waypointsIndexes)
         )
         assertEquals(
-            listOf("opis-af2ce792-5f6e-11ed-9c8d-ac1f6be1d08e", "id_1", "opis-9e070a3a-5f6b-11ed-9c8d-ac1f6be1d08e"),
+            listOf(
+                "opis-af2ce792-5f6e-11ed-9c8d-ac1f6be1d08e",
+                "id_1",
+                "opis-9e070a3a-5f6b-11ed-9c8d-ac1f6be1d08e"
+            ),
             chargingStationsIds?.takeExceptIndexes(waypointsIndexes)
         )
         val chargingStationsPowerRaw = updatedRouteOptions
@@ -474,7 +485,21 @@ class EvRouteOptionsUpdaterTest {
     }
 
     private fun createTestEvRoute(): NavigationRoute {
-        val rawUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/11.587428364032348,48.20148957377813;11.81872714026062,50.67773738599428;13.378818297105255,52.627628120089355?geometries=polyline6&alternatives=false&overview=full&steps=true&continue_straight=true&annotations=state_of_charge&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true&waypoints_per_route=true&engine=electric&ev_initial_charge=30000&ev_max_charge=50000&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180&ev_charging_curve=0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000&ev_min_charge_at_charging_station=7000&bearings=1,45;65,45;&radiuses=5;50;unlimited&waypoint_names=origin;test;destination&waypoint_targets=;;13.379077134850064,52.62734923825474&approaches=;curb;&layers=0;0;0&snapping_include_static_closures=false;true;false&snapping_include_closures=true;false;true&waypoints=0;1;2"
+        val rawUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+            "11.587428364032348,48.20148957377813;11.81872714026062,50.67773738599428" +
+            ";13.378818297105255,52.627628120089355?geometries=polyline6" +
+            "&alternatives=false&overview=full&steps=true&continue_straight=true" +
+            "&annotations=state_of_charge&roundabout_exits=true&voice_instructions=true" +
+            "&banner_instructions=true&enable_refresh=true&waypoints_per_route=true" +
+            "&engine=electric&ev_initial_charge=30000&ev_max_charge=50000" +
+            "&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2" +
+            "&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180" +
+            "&ev_charging_curve=0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000" +
+            "&ev_min_charge_at_charging_station=7000&bearings=1,45;65,45;" +
+            "&radiuses=5;50;unlimited&waypoint_names=origin;test;destination" +
+            "&waypoint_targets=;;13.379077134850064,52.62734923825474&approaches=;curb;" +
+            "&layers=0;0;0&snapping_include_static_closures=false;true;false" +
+            "&snapping_include_closures=true;false;true&waypoints=0;1;2"
         val url = RouteOptions.fromUrl(URL(rawUrl)).let {
             // normalizes accuracy of doubles
             it.toBuilder()
@@ -491,7 +516,16 @@ class EvRouteOptionsUpdaterTest {
     }
 
     private fun createTestEvRouteWithUserProvidedChargingStations(): NavigationRoute {
-        val url = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/-122.42302878903037,37.780226502149986;-122.73225023858345,38.458230137668835;-123.2092146120633,39.147413952094894?overview=false&alternatives=true&waypoints_per_route=true&engine=electric&ev_initial_charge=600&ev_max_charge=50000&ev_connector_types=ccs_combo_type1,ccs_combo_type2&energy_consumption_curve=0,300;20,160;80,140;120,180&ev_charging_curve=0,100000;40000,70000;60000,30000;80000,10000&ev_min_charge_at_charging_station=1&access_token=***&waypoints.charging_station_power=;100000;&waypoints.charging_station_current_type=;dc;&waypoints.charging_station_id=;id_1;"
+        val url = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+            "-122.42302878903037,37.780226502149986;-122.73225023858345,38.458230137668835" +
+            ";-123.2092146120633,39.147413952094894?overview=false&alternatives=true" +
+            "&waypoints_per_route=true&engine=electric&ev_initial_charge=600&ev_max_charge=50000" +
+            "&ev_connector_types=ccs_combo_type1,ccs_combo_type2" +
+            "&energy_consumption_curve=0,300;20,160;80,140;120,180" +
+            "&ev_charging_curve=0,100000;40000,70000;60000,30000;80000,10000" +
+            "&ev_min_charge_at_charging_station=1&access_token=***" +
+            "&waypoints.charging_station_power=;100000;" +
+            "&waypoints.charging_station_current_type=;dc;&waypoints.charging_station_id=;id_1;"
         val navigationRoute = NavigationRoute.create(
             resourceAsString("testRouteWithUserProvidedChargingStation.json"),
             url,

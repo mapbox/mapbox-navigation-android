@@ -73,7 +73,9 @@ class RouteOptionsUpdater {
                 val metadata = waypoint.getWaypointMetadataOrEmpty()
                 if (metadata.isServerProvided() && !metadata.wasRequestedAsUserProvided()) {
                     Pair(index, waypoint)
-                } else null
+                } else {
+                    null
+                }
             } ?: emptyList()
         val coordinatesList = routeOptions.coordinatesList().toMutableList().apply {
             serverAddedChargingStationWithIndex.forEach { (indexOfWaypoint, waypoint) ->
@@ -239,8 +241,8 @@ class RouteOptionsUpdater {
     }
 
     private fun allCoordinatesAreWaypoints(routeOptions: RouteOptions) =
-        routeOptions.waypointIndicesList() == (0 until routeOptions.coordinatesList()
-            .count()).toList()
+        routeOptions.waypointIndicesList() ==
+            (0 until routeOptions.coordinatesList().count()).toList()
 
     private fun <T> List<T>.updateWithValueForIndexes(
         serverAddedChargingStationWithIndex: List<Pair<Int, DirectionsWaypoint>>,
@@ -322,7 +324,8 @@ class RouteOptionsUpdater {
                         Pair(
                             index,
                             waypoint.getChargingStationPowerKw()?.let { (it * 1000).toString() }
-                                ?: "")
+                                ?: ""
+                        )
                     },
                 "waypoints.charging_station_current_type" to serverAddedChargingStationWithIndex
                     .map { (index, waypoint) ->

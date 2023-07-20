@@ -90,9 +90,10 @@ class RouteOptionsUpdaterParameterizedTest(
             every { routeProgress.currentLegProgress } returns currentLegProgress
             every { indexOfNextWaypoint(any(), any()) } returns nextCoordinateIndex
             every { routeProgress.remainingWaypoints } returns 0
-            every { routeProgress.navigationRoute.internalWaypoints() } returns routeOptions.coordinatesList().map {
-                mockk<Waypoint>(relaxed = true)
-            }
+            every { routeProgress.navigationRoute.internalWaypoints() } returns routeOptions
+                .coordinatesList().map {
+                    mockk<Waypoint>(relaxed = true)
+                }
 
             val updatedRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)

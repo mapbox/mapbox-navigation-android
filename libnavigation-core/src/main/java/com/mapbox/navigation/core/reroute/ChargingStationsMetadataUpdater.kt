@@ -3,11 +3,10 @@ package com.mapbox.navigation.core.reroute
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.route.Waypoint
-import com.mapbox.navigation.base.internal.route.getWaypointMetadata
 import com.mapbox.navigation.base.internal.route.getChargingStationsCurrentType
 import com.mapbox.navigation.base.internal.route.getChargingStationsId
 import com.mapbox.navigation.base.internal.route.getChargingStationsPower
+import com.mapbox.navigation.base.internal.route.getWaypointMetadata
 import com.mapbox.navigation.base.internal.route.getWaypointMetadataOrEmpty
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -109,7 +108,9 @@ private fun updateMetadataBasedOnRequestUrl(
             if (!chargingStationsCurrentType.isNullOrEmpty()) {
                 updatedMetadata.setCurrentType(chargingStationsCurrentType)
             }
-            if (waypoint.getWaypointMetadata() == null && updatedMetadata.jsonMetadata.size() == 0) {
+            if (waypoint.getWaypointMetadata() == null &&
+                updatedMetadata.jsonMetadata.size() == 0
+            ) {
                 waypoint
             } else {
                 updatedMetadata.setUserProvidedType()

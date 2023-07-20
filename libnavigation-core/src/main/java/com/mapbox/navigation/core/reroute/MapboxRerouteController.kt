@@ -213,7 +213,9 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                     )
                     state = RerouteState.RouteFetched(result.routerOrigin)
                     state = RerouteState.Idle
-                    callback.onNewRoutes(RerouteResult(routesWithEvStations, 0, result.routerOrigin))
+                    callback.onNewRoutes(
+                        RerouteResult(routesWithEvStations, 0, result.routerOrigin)
+                    )
                 }
                 is RouteRequestResult.Failure -> {
                     state = RerouteState.Failed(
