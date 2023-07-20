@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.route.getWaypointMetadata
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -45,6 +46,10 @@ class ChargingStationsMetadataUpdaterTest {
             assertEquals(
                 listOf(null, "charging-station", null),
                 navigationRoute.getChargingStationTypes()
+            )
+            assertEquals(
+                listOf(true, false, true),
+                navigationRoute.waypoints?.map { it.getWaypointMetadata() == null }
             )
         }
     }

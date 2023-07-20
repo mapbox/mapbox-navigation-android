@@ -95,13 +95,17 @@ private fun updateChargingStationsMetadataBasedOnRequestUrl(
                 if (!chargingStationsCurrentType.isNullOrEmpty()) {
                     updatedMetadata.setCurrentType(chargingStationsCurrentType)
                 }
-                waypoint.toBuilder()
-                    .unrecognizedJsonProperties(
-                        mapOf(
-                            "metadata" to updatedMetadata.jsonMetadata
+                if (waypoint.getWaypointMetadata() == null && updatedMetadata.jsonMetadata.size() == 0) {
+                    waypoint
+                } else {
+                    waypoint.toBuilder()
+                        .unrecognizedJsonProperties(
+                            mapOf(
+                                "metadata" to updatedMetadata.jsonMetadata
+                            )
                         )
-                    )
-                    .build()
+                        .build()
+                }
             }
         route.toBuilder().waypoints(updatedWaypoints).build()
     }
