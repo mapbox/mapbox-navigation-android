@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.indexOfNextWaypoint
 import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.internal.route.getWaypointMetadata
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -67,12 +68,9 @@ class RouteOptionsUpdater {
             currentNavigationRoute.internalWaypoints().mapIndexedNotNull { index, waypoint ->
                 val wasAlreadyRequestedAsUserProvided = currentNavigationRoute.waypoints
                     ?.getOrNull(index)
-                    ?.unrecognizedJsonProperties
-                    ?.get("metadata")
-                    ?.asJsonObject
-                    ?.get("was_requested_as_user_provided")
-                    ?.asBoolean == true
-                if (waypoint.type == Waypoint.EV_CHARGING_SERVER && !wasAlreadyRequestedAsUserProvided) {
+                    ?.getWaypointMetadata()
+                    ?.wasRequestedAsUserProvided()
+                if (waypoint.type == Waypoint.EV_CHARGING_SERVER && wasAlreadyRequestedAsUserProvided != true) {
                     Pair(index, waypoint)
                 } else null
             }

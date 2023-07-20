@@ -26,6 +26,8 @@ value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonO
     fun getType(): String? = jsonMetadata.get("type")?.asString
     fun getStationId(): String? = jsonMetadata.get("station_id")?.asString
     fun isServerProvided(): Boolean = getType() == "charging-station"
+    fun wasRequestedAsUserProvided(): Boolean
+        = jsonMetadata.get("was_requested_as_user_provided")?.asBoolean == true
 
     fun deepCopy() = ChargingStationMetadata(jsonMetadata.deepCopy())
 
