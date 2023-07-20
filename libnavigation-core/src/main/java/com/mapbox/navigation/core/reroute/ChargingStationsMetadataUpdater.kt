@@ -5,6 +5,9 @@ import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.route.getChargingStationWaypointMetadata
+import com.mapbox.navigation.base.internal.route.getChargingStationsCurrentType
+import com.mapbox.navigation.base.internal.route.getChargingStationsId
+import com.mapbox.navigation.base.internal.route.getChargingStationsPower
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.routeoptions.isEVRoute
@@ -76,19 +79,15 @@ private fun updateChargingStationsMetadataBasedOnRequestUrl(
     rerouteRouteOptions: RouteOptions,
     newPrimaryRoute: NavigationRoute
 ): DirectionsResponse {
-    val chargingStationsPowers = rerouteRouteOptions
-        .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_power")
-    val chargingStationsIds = rerouteRouteOptions
-        .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_id")
-    val chargingStationsCurrentTypes = rerouteRouteOptions
-        .getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_current_type")
+    val chargingStationsPowers = rerouteRouteOptions.getChargingStationsPower()
+    val chargingStationsIds = rerouteRouteOptions.getChargingStationsId()
+    val chargingStationsCurrentTypes = rerouteRouteOptions.getChargingStationsCurrentType()
     val response = newPrimaryRoute.directionsResponse
     val updatedRoutes = response.routes().map { route ->
         val updatedWaypoints =
             (route.waypoints() ?: emptyList()).mapIndexed { waypointIndex, waypoint ->
                 val chargingStationId = chargingStationsIds?.get(waypointIndex)
                 val chargingStationsPower = chargingStationsPowers?.get(waypointIndex)
-                    ?.toIntOrNull()
                     ?.let { it / 1000 }
                 val chargingStationsCurrentType = chargingStationsCurrentTypes?.get(waypointIndex)
                 waypoint.toBuilder()
@@ -117,12 +116,6 @@ private fun updateChargingStationsMetadataBasedOnRequestUrl(
     val updatedResponse = response.toBuilder().routes(updatedRoutes).build()
     return updatedResponse
 }
-
-private fun RouteOptions.getUnrecognisedSemicolonSeparatedParameter(name: String) =
-    unrecognizedJsonProperties
-        ?.get(name)
-        ?.asString
-        ?.split(";")
 
 private fun NavigationRoute.getServerProvidedChargingStationsIds(): Set<String> =
     this.waypoints?.mapNotNull {

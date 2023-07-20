@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.internal.route
 
 import com.google.gson.JsonObject
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
+import com.mapbox.api.directions.v5.models.RouteOptions
 
 fun DirectionsWaypoint.getChargingStationId(): String? =
     getChargingStationWaypointMetadata()?.getStationId()
@@ -24,3 +25,20 @@ value class ChargingStationMetadata internal constructor(val metadata: JsonObjec
 
     fun copy() = ChargingStationMetadata(metadata.deepCopy())
 }
+
+fun RouteOptions.getChargingStationsPower(): List<Int?>? =
+    getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_power")?.map {
+        it.toIntOrNull()
+    }
+
+fun RouteOptions.getChargingStationsId(): List<String>? =
+    getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_id")
+
+fun RouteOptions.getChargingStationsCurrentType(): List<String>? =
+    getUnrecognisedSemicolonSeparatedParameter("waypoints.charging_station_current_type")
+
+private fun RouteOptions.getUnrecognisedSemicolonSeparatedParameter(name: String) =
+    unrecognizedJsonProperties
+        ?.get(name)
+        ?.asString
+        ?.split(";")
