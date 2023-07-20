@@ -18,7 +18,7 @@ internal suspend fun restoreChargingStationsMetadata(
     newRoutes: List<NavigationRoute>,
     workerDispatcher: CoroutineDispatcher = Dispatchers.Default
 ): List<NavigationRoute> = withContext(workerDispatcher) {
-    val newPrimaryRoute = newRoutes.first()
+    val newPrimaryRoute = newRoutes.firstOrNull() ?: return@withContext newRoutes
     val rerouteRouteOptions = newPrimaryRoute.routeOptions
     if (!rerouteRouteOptions.isEVRoute()) {
         return@withContext newRoutes

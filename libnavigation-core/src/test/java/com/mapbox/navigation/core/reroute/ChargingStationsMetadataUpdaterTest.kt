@@ -118,6 +118,13 @@ class ChargingStationsMetadataUpdaterTest {
         }
     }
 
+    @Test
+    fun `empty new routes`() = runBlocking {
+        val onlineRoute = createTestBerlinOnlineEvRouteAfterReroute().first()
+        val result = restoreChargingStationsMetadata(onlineRoute, emptyList())
+        assertEquals(emptyList<NavigationRoute>(), result)
+    }
+
     private fun createTestBerlinOfflineEvRouteAfterReroute(
         urlUpdate: (String) -> String = { it }
     ): List<NavigationRoute> {
