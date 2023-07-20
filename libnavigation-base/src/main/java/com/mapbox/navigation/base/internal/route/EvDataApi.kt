@@ -31,8 +31,8 @@ value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonO
     fun getPowerKw(): Int? = jsonMetadata.get("power_kw")?.asInt
     fun getCurrentType(): String? = jsonMetadata.get("current_type")?.asString
     fun isServerProvided(): Boolean = getType() == "charging-station"
-    fun wasRequestedAsUserProvided(): Boolean
-        = jsonMetadata.get("was_requested_as_user_provided")?.asBoolean == true
+    fun wasRequestedAsUserProvided(): Boolean =
+        jsonMetadata.get("was_requested_as_user_provided")?.asBoolean == true
 
     fun deepCopy() = ChargingStationMetadata(jsonMetadata.deepCopy())
 
@@ -58,7 +58,7 @@ value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonO
     }
 
     companion object {
-        fun createEmpty()  = ChargingStationMetadata(JsonObject())
+        fun createEmpty() = ChargingStationMetadata(JsonObject())
     }
 }
 
