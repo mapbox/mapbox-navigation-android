@@ -44,7 +44,6 @@ class RouteOptionsUpdater {
         routeProgress: RouteProgress?,
         locationMatcherResult: LocationMatcherResult?,
     ): RouteOptionsResult {
-        var routeOptions = routeOptions
         if (routeOptions == null || routeProgress == null || locationMatcherResult == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
                 "routeProgress and locationMatcherResult cannot be null"
@@ -52,15 +51,17 @@ class RouteOptionsUpdater {
             return RouteOptionsResult.Error(Throwable(msg))
         }
 
-        if (routeOptions.isEVRoute() && routeOptions.waypointIndices() != null) {
+        val routeOptions = if (routeOptions.isEVRoute() && routeOptions.waypointIndices() != null) {
             if (!allCoordinatesAreWaypoints(routeOptions)) {
                 return RouteOptionsResult.Error(
                     Throwable("Silent waypoints aren't supported in EV routing")
                 )
             } else {
                 // getting rid of waypoints indices to simplify the rest of the logic
-                routeOptions = routeOptions.toBuilder().waypointIndicesList(null).build()
+                routeOptions.toBuilder().waypointIndicesList(null).build()
             }
+        } else {
+            routeOptions
         }
 
         val currentNavigationRoute = routeProgress.navigationRoute

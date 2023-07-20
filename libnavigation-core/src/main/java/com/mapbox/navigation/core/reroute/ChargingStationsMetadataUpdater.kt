@@ -47,7 +47,7 @@ fun updateChargingStationsTypes(
 ): DirectionsResponse {
     val updatedRoutes = response.routes().map { route ->
         val updatedWaypoints =
-            (route.waypoints() ?: emptyList()).mapIndexed { waypointIndex, waypoint ->
+            (route.waypoints() ?: emptyList()).map { waypoint ->
                 val waypointUnrecognizedProperties = waypoint.unrecognizedJsonProperties
                 val waypointMetadata = waypoint.getWaypointMetadata()
                 val stationId = waypointMetadata?.getStationId()
