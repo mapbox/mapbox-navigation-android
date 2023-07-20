@@ -1950,6 +1950,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     fun onEVDataUpdated(data: Map<String, String>) {
         evDynamicDataHolder.updateData(data)
+        routeAlternativesController.onEVDataUpdated(
+            HashMap(evDynamicDataHolder.currentData(emptyMap()))
+        )
     }
 
     internal fun registerOnRoutesSetStartedObserver(observer: SetNavigationRoutesStartedObserver) {

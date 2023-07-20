@@ -2190,6 +2190,21 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
     }
 
+    @Test
+    fun sendsAccumulatedDataToRouteAlternativesControllerWhenEvDataUpdated() {
+        val newData = mapOf("option-1" to "option-1")
+        val oldData = mapOf("option-2" to "option-2")
+
+        createMapboxNavigation()
+        every { evDynamicDataHolder.currentData(any()) } returns oldData + newData
+
+        mapboxNavigation.onEVDataUpdated(newData)
+
+        verify(exactly = 1) {
+            routeAlternativesController.onEVDataUpdated(oldData + newData)
+        }
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun moveRoutesFromPreviewToNavigatorNoPreviewedRoutes() {
         createMapboxNavigation()

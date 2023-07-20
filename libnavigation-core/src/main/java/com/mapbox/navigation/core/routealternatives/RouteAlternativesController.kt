@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 
 internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
-    navigator: MapboxNativeNavigator,
+    private val navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
     private val threadController: ThreadController
 ) : AlternativeMetadataProvider {
@@ -145,6 +145,10 @@ internal class RouteAlternativesController constructor(
         observers.clear()
         legacyObserversMap.clear()
         observerProcessingJob?.cancel()
+    }
+
+    fun onEVDataUpdated(data: Map<String, String>) {
+        navigator.routeAlternativesController.onEvDataUpdated(HashMap(data))
     }
 
     override fun getMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
