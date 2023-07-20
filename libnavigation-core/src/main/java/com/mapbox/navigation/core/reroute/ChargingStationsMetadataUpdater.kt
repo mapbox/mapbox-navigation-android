@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.getChargingStationWaypointMetadata
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.routeoptions.isEVRoute
@@ -125,9 +126,9 @@ private fun RouteOptions.getUnrecognisedSemicolonSeparatedParameter(name: String
 
 private fun NavigationRoute.getServerProvidedChargingStationsIds(): Set<String> =
     this.waypoints?.mapNotNull {
-        val metadata = it.unrecognizedJsonProperties?.get("metadata")?.asJsonObject
-        if (metadata?.get("type")?.asString == "charging-station") {
-            metadata.get("station_id")?.asString
+        val metadata = it.getChargingStationWaypointMetadata()
+        if (metadata?.isServerProvided() == true) {
+            metadata.getStationId()
         } else {
             null
         }
