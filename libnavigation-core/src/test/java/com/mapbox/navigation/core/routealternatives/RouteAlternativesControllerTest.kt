@@ -291,7 +291,7 @@ class RouteAlternativesControllerTest {
 
     @Test
     fun `should set RouteOptions to alternative routes`() = coroutineRule.runBlockingTest {
-        val mockRouteOptions = mockk<RouteOptions>()
+        val mockRouteOptions = mockk<RouteOptions>(relaxed = true)
         mockkStatic(RouteOptions::fromUrl)
         every { RouteOptions.fromUrl(eq(genericURL)) } returns mockRouteOptions
         val routeAlternativesController = createRouteAlternativesController()
