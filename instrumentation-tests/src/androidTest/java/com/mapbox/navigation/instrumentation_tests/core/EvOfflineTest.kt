@@ -66,7 +66,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             withoutInternet {
                 val routes = navigation.requestRoutes(testRoute.routeOptions)
                 assertTrue(routes is RouteRequestResult.Failure)
-                delay(10_000) // Otherwise mock web server can't start on the same port
             }
         }
     }
