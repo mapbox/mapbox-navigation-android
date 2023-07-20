@@ -15,7 +15,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
-import com.mapbox.navigation.core.reroute.MapboxRerouteController.Companion.applyRerouteOptions
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
@@ -23,6 +22,8 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -39,6 +40,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
     private val compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter,
+    private val workerDispatcher: CoroutineDispatcher,
 ) : InternalRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
@@ -60,7 +62,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         routeOptionsUpdater,
         rerouteOptions,
         threadController,
-        MapboxRerouteOptionsAdapter(evDynamicDataHolder)
+        MapboxRerouteOptionsAdapter(evDynamicDataHolder),
+        Dispatchers.Default
     )
 
     override var state: RerouteState = RerouteState.Idle
@@ -142,10 +145,10 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                 rerouteOptions,
                 tripSession.locationMatcherResult?.enhancedLocation?.speed
             )
-
+        val routeProgress = tripSession.getRouteProgress()
         routeOptionsUpdater.update(
             routeOptions,
-            tripSession.getRouteProgress(),
+            routeProgress,
             tripSession.locationMatcherResult,
         )
             .let { routeOptionsResult ->
@@ -154,7 +157,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                         val modifiedRerouteOption = compositeRerouteOptionsAdapter.onRouteOptions(
                             routeOptionsResult.routeOptions
                         )
-                        request(callback, modifiedRerouteOption)
+                        // route progress can't be null at this point
+                        request(callback, modifiedRerouteOption, routeProgress!!.navigationRoute)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         state = RerouteState.Failed(
@@ -196,14 +200,22 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
     private fun request(
         callback: InternalRerouteController.RoutesCallback,
-        routeOptions: RouteOptions
+        routeOptions: RouteOptions,
+        currentRoute: NavigationRoute
     ) {
         rerouteJob = mainJobController.scope.launch {
             when (val result = requestAsync(routeOptions)) {
                 is RouteRequestResult.Success -> {
+                    val routesWithEvStations = restoreChargingStationsMetadata(
+                        currentRoute,
+                        result.routes,
+                        workerDispatcher,
+                    )
                     state = RerouteState.RouteFetched(result.routerOrigin)
                     state = RerouteState.Idle
-                    callback.onNewRoutes(RerouteResult(result.routes, 0, result.routerOrigin))
+                    callback.onNewRoutes(
+                        RerouteResult(routesWithEvStations, 0, result.routerOrigin)
+                    )
                 }
                 is RouteRequestResult.Failure -> {
                     state = RerouteState.Failed(
