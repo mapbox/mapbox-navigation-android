@@ -18,20 +18,37 @@ fun DirectionsWaypoint.getWaypointMetadata(): ChargingStationMetadata? {
     return waypointMetadata?.let { ChargingStationMetadata(it) }
 }
 
+fun DirectionsWaypoint.getWaypointMetadataOrEmpty() = getWaypointMetadata()
+    ?: ChargingStationMetadata.createEmpty()
+
 @JvmInline
 value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonObject) {
     fun getType(): String? = jsonMetadata.get("type")?.asString
     fun getStationId(): String? = jsonMetadata.get("station_id")?.asString
     fun isServerProvided(): Boolean = getType() == "charging-station"
 
-    fun setServerAddedType() {
-        jsonMetadata.remove("type")
-        jsonMetadata.remove("was_requested_as_user_provided")
+    fun deepCopy() = ChargingStationMetadata(jsonMetadata.deepCopy())
+
+    fun setServerAddedTypeToUserProvided() {
         jsonMetadata.add("type", JsonPrimitive("charging-station"))
         jsonMetadata.add("was_requested_as_user_provided", JsonPrimitive(true))
     }
 
-    fun deepCopy() = ChargingStationMetadata(jsonMetadata.deepCopy())
+    fun setPowerKw(chargingStationsPowerKw: Int) {
+        jsonMetadata.add("power_kw", JsonPrimitive(chargingStationsPowerKw))
+    }
+
+    fun setStationId(chargingStationId: String) {
+        jsonMetadata.add("station_id", JsonPrimitive(chargingStationId))
+    }
+
+    fun setCurrentType(currentType: String) {
+        jsonMetadata.add("current_type", JsonPrimitive(currentType))
+    }
+
+    companion object {
+        fun createEmpty()  = ChargingStationMetadata(JsonObject())
+    }
 }
 
 fun RouteOptions.getChargingStationsPower(): List<Int?>? =

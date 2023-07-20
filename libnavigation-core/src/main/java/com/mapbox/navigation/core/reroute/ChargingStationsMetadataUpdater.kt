@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.internal.route.getWaypointMetadata
 import com.mapbox.navigation.base.internal.route.getChargingStationsCurrentType
 import com.mapbox.navigation.base.internal.route.getChargingStationsId
 import com.mapbox.navigation.base.internal.route.getChargingStationsPower
+import com.mapbox.navigation.base.internal.route.getWaypointMetadataOrEmpty
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.routeoptions.isEVRoute
@@ -52,7 +53,7 @@ fun updateChargingStationsTypes(
                 val stationId = waypointMetadata?.getStationId()
                 if (stationId != null && serverProvidedStationsIds.contains(stationId)) {
                     val updatedMetadata = waypointMetadata.deepCopy()
-                    updatedMetadata.setServerAddedType()
+                    updatedMetadata.setServerAddedTypeToUserProvided()
                     val updatedUnrecognizedProperties = waypointUnrecognizedProperties
                         ?.toMutableMap() ?: mutableMapOf()
                     updatedUnrecognizedProperties["metadata"] = updatedMetadata.jsonMetadata
@@ -84,23 +85,20 @@ private fun updateChargingStationsMetadataBasedOnRequestUrl(
                 val chargingStationsPower = chargingStationsPowers?.get(waypointIndex)
                     ?.let { it / 1000 }
                 val chargingStationsCurrentType = chargingStationsCurrentTypes?.get(waypointIndex)
+                val updatedMetadata = waypoint.getWaypointMetadataOrEmpty().deepCopy()
+                if (chargingStationsPower != null) {
+                    updatedMetadata.setPowerKw(chargingStationsPower)
+                }
+                if (!chargingStationId.isNullOrEmpty()) {
+                    updatedMetadata.setStationId(chargingStationId)
+                }
+                if (!chargingStationsCurrentType.isNullOrEmpty()) {
+                    updatedMetadata.setCurrentType(chargingStationsCurrentType)
+                }
                 waypoint.toBuilder()
                     .unrecognizedJsonProperties(
                         mapOf(
-                            "metadata" to JsonObject().apply {
-                                if (chargingStationsPower != null) {
-                                    add("power_kw", JsonPrimitive(chargingStationsPower))
-                                }
-                                if (!chargingStationId.isNullOrEmpty()) {
-                                    add("station_id", JsonPrimitive(chargingStationId))
-                                }
-                                if (!chargingStationsCurrentType.isNullOrEmpty()) {
-                                    add(
-                                        "current_type",
-                                        JsonPrimitive(chargingStationsCurrentType)
-                                    )
-                                }
-                            }
+                            "metadata" to updatedMetadata.jsonMetadata
                         )
                     )
                     .build()
