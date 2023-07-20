@@ -33,7 +33,6 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
@@ -279,7 +278,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                         newRoutes.navigationRoutes.first().getChargingStationPowersKW()
                     )
                     assertEquals(
-                        "Fallback to offline navigation doesn't change charging station current type",
+                        "Fallback to offline navigation doesn't " +
+                            "change charging station current type",
                         initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
                         newRoutes.navigationRoutes.first().getChargingStationPowerCurrentTypes()
                     )

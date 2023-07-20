@@ -9,7 +9,6 @@ import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTe
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationIds
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
-import com.mapbox.navigation.instrumentation_tests.utils.withoutInternet
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
@@ -25,7 +24,6 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URL
-
 
 class EvAlternativesTest : BaseCoreNoCleanUpTest() {
 
@@ -44,9 +42,34 @@ class EvAlternativesTest : BaseCoreNoCleanUpTest() {
     fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
     ) {
-        val testRouteOptions = RouteOptions.fromUrl(URL("https://api.mapbox.com/directions/v5/mapbox/driving-traffic/11.587428364032348,48.20148957377813;11.81872714026062,50.67773738599428;13.378818297105255,52.627628120089355?access_token=***&geometries=polyline6&alternatives=true&overview=full&steps=true&continue_straight=true&annotations=state_of_charge&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true&waypoints_per_route=true&engine=electric&ev_initial_charge=30000&ev_max_charge=50000&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180&ev_charging_curve=0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000&ev_min_charge_at_charging_station=7000&bearings=1,45;65,45;&radiuses=5;50;unlimited&waypoint_names=origin;test;destination&waypoint_targets=;;13.379077134850064,52.62734923825474&approaches=;curb;&layers=0;0;0&snapping_include_static_closures=true;false;true&snapping_include_closures=true;false;true&waypoints=0;1;2"))
+        val testRouteOptions =
+            RouteOptions.fromUrl(
+                URL(
+                    "https://api.mapbox.com/directions/v5/mapbox/" +
+                        "driving-traffic/11.587428364032348,48.20148957377813" +
+                        ";11.81872714026062,50.67773738599428" +
+                        ";13.378818297105255,52.627628120089355" +
+                        "?access_token=***&geometries=polyline6" +
+                        "&alternatives=true&overview=full" +
+                        "&steps=true&continue_straight=true&annotations=state_of_charge" +
+                        "&roundabout_exits=true&voice_instructions=true" +
+                        "&banner_instructions=true" +
+                        "&enable_refresh=true&waypoints_per_route=true&engine=electric" +
+                        "&ev_initial_charge=30000&ev_max_charge=50000" +
+                        "&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2" +
+                        "&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180" +
+                        "&ev_charging_curve=" +
+                        "0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000" +
+                        "&ev_min_charge_at_charging_station=7000&bearings=1,45;65,45;" +
+                        "&radiuses=5;50;unlimited&waypoint_names=origin;test;destination" +
+                        "&waypoint_targets=;;13.379077134850064,52.62734923825474" +
+                        "&approaches=;curb;" +
+                        "&layers=0;0;0&snapping_include_static_closures=true;false;true" +
+                        "&snapping_include_closures=true;false;true&waypoints=0;1;2"
+                )
+            )
         val origin = testRouteOptions.coordinatesList().first()
-        withMapboxNavigation (
+        withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
             navigation.registerRouteAlternativesObserver(
@@ -64,7 +87,9 @@ class EvAlternativesTest : BaseCoreNoCleanUpTest() {
                 navigation.startTripSession()
                 navigation.setNavigationRoutesAsync(requestResult.routes)
             }
-            val forkPoint = navigation.getAlternativeMetadataFor(requestResult.routes[1])!!.forkIntersectionOfPrimaryRoute.geometryIndexInRoute
+            val forkPoint =
+                navigation.getAlternativeMetadataFor(requestResult.routes[1])!!
+                    .forkIntersectionOfPrimaryRoute.geometryIndexInRoute
             val points = requestResult.routes.first().directionsRoute.completeGeometryToPoints()
             val locationAfterAlternativeForkPoint = points[forkPoint + 10]
 
@@ -75,12 +100,15 @@ class EvAlternativesTest : BaseCoreNoCleanUpTest() {
             ) {
                 val onlineRoutes = navigation.routesUpdates().filter {
                     it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE &&
-                        it.navigationRoutes.first().origin == RouterOrigin.Offboard && it.navigationRoutes.size > 1
+                        it.navigationRoutes.first().origin ==
+                        RouterOrigin.Offboard && it.navigationRoutes.size > 1
                 }.drop(1).first()
                 val routeProgress = navigation.routeProgressUpdates().first()
                 assertEquals(
-                    onlineRoutes.navigationRoutes[1].getChargingStationIds().takeLast(routeProgress.remainingWaypoints),
-                    requestResult.routes.first().getChargingStationIds().takeLast(routeProgress.remainingWaypoints)
+                    onlineRoutes.navigationRoutes[1].getChargingStationIds()
+                        .takeLast(routeProgress.remainingWaypoints),
+                    requestResult.routes.first().getChargingStationIds()
+                        .takeLast(routeProgress.remainingWaypoints)
                 )
             }
         }
