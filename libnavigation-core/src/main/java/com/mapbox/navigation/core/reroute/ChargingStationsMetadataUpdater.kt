@@ -1,10 +1,9 @@
 package com.mapbox.navigation.core.reroute
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.getWaypointMetadata
 import com.mapbox.navigation.base.internal.route.getChargingStationsCurrentType
 import com.mapbox.navigation.base.internal.route.getChargingStationsId
@@ -36,64 +35,58 @@ internal suspend fun restoreChargingStationsMetadata(
     }
     val updatedResponse = updateChargingStationsTypes(
         updatedResponseWithoutCorrectTypes,
+        rerouteRouteOptions,
         originalRoute.getServerProvidedChargingStationsIds()
     )
     // TODO: optimise java memory usage creating a copy of a response NAVAND-1437
     NavigationRoute.create(updatedResponse, rerouteRouteOptions, newPrimaryRoute.origin)
 }
 
-fun updateChargingStationsTypes(
+private fun updateChargingStationsTypes(
     response: DirectionsResponse,
+    routeOptions: RouteOptions,
     serverProvidedStationsIds: Set<String>
 ): DirectionsResponse {
-    val updatedRoutes = response.routes().map { route ->
-        val updatedWaypoints =
-            (route.waypoints() ?: emptyList()).map { waypoint ->
-                val waypointUnrecognizedProperties = waypoint.unrecognizedJsonProperties
-                val waypointMetadata = waypoint.getWaypointMetadata()
-                val stationId = waypointMetadata?.getStationId()
-                if (stationId != null && serverProvidedStationsIds.contains(stationId)) {
-                    val updatedMetadata = waypointMetadata.deepCopy()
-                    updatedMetadata.setServerAddedTypeToUserProvided()
-                    val updatedUnrecognizedProperties = waypointUnrecognizedProperties
-                        ?.toMutableMap() ?: mutableMapOf()
-                    updatedUnrecognizedProperties["metadata"] = updatedMetadata.jsonMetadata
-                    waypoint.toBuilder()
-                        .unrecognizedJsonProperties(updatedUnrecognizedProperties)
-                        .build()
-                } else {
-                    waypoint
-                }
-            }
-        route.toBuilder().waypoints(updatedWaypoints).build()
+    return response.updateWaypoints(routeOptions) {
+        updateChargingStationTypes(it, serverProvidedStationsIds)
     }
-    val updatedResponse = response.toBuilder().routes(updatedRoutes).build()
-    return updatedResponse
+}
+
+private fun updateChargingStationTypes(
+    waypoints: List<DirectionsWaypoint>,
+    serverProvidedStationsIds: Set<String>
+): List<DirectionsWaypoint> {
+    val updatedWaypoints =
+        waypoints.map { waypoint ->
+            val waypointUnrecognizedProperties = waypoint.unrecognizedJsonProperties
+            val waypointMetadata = waypoint.getWaypointMetadata()
+            val stationId = waypointMetadata?.getStationId()
+            if (stationId != null && serverProvidedStationsIds.contains(stationId)) {
+                val updatedMetadata = waypointMetadata.deepCopy()
+                updatedMetadata.setServerAddedTypeToUserProvided()
+                val updatedUnrecognizedProperties = waypointUnrecognizedProperties
+                    ?.toMutableMap() ?: mutableMapOf()
+                updatedUnrecognizedProperties["metadata"] = updatedMetadata.jsonMetadata
+                waypoint.toBuilder()
+                    .unrecognizedJsonProperties(updatedUnrecognizedProperties)
+                    .build()
+            } else {
+                waypoint
+            }
+        }
+    return updatedWaypoints
 }
 
 private fun updateChargingStationsMetadataBasedOnRequestUrl(
     rerouteRouteOptions: RouteOptions,
     newPrimaryRoute: NavigationRoute
 ): DirectionsResponse {
-
-    val response = newPrimaryRoute.directionsResponse
-    val updatedResponse = response.toBuilder()
-    if (rerouteRouteOptions.waypointsPerRoute() == true) {
-        val updatedRoutes = response.routes().map { route ->
-            val waypoints = route.waypoints() ?: emptyList()
-            val updatedWaypoints = updateWaypoints(rerouteRouteOptions, waypoints)
-            route.toBuilder().waypoints(updatedWaypoints).build()
-        }
-        updatedResponse.routes(updatedRoutes)
-    } else {
-        val waypoints = response.waypoints() ?: emptyList()
-        val updatedWaypoints = updateWaypoints(rerouteRouteOptions, waypoints)
-        updatedResponse.waypoints(updatedWaypoints)
+    return newPrimaryRoute.directionsResponse.updateWaypoints(rerouteRouteOptions) {
+        updateMetadataBasedOnRequestUrl(rerouteRouteOptions, it)
     }
-    return updatedResponse.build()
 }
 
-private fun updateWaypoints(
+private fun updateMetadataBasedOnRequestUrl(
     rerouteRouteOptions: RouteOptions,
     waypoints: List<DirectionsWaypoint>
 ): List<DirectionsWaypoint> {
@@ -140,3 +133,23 @@ private fun NavigationRoute.getServerProvidedChargingStationsIds(): Set<String> 
             null
         }
     }?.toSet() ?: emptySet()
+
+private fun DirectionsResponse.updateWaypoints(
+    routeOptions: RouteOptions,
+    updateBlock: (List<DirectionsWaypoint>) -> List<DirectionsWaypoint>
+): DirectionsResponse {
+    val updatedResponse = toBuilder()
+    if (routeOptions.waypointsPerRoute() == true) {
+        val updatedRoutes = routes().map { route ->
+            val waypoints = route.waypoints() ?: emptyList()
+            val updatedWaypoints = updateBlock(waypoints)
+            route.toBuilder().waypoints(updatedWaypoints).build()
+        }
+        updatedResponse.routes(updatedRoutes)
+    } else {
+        val waypoints = waypoints() ?: emptyList()
+        val updatedWaypoints = updateBlock(waypoints)
+        updatedResponse.waypoints(updatedWaypoints)
+    }
+    return updatedResponse.build()
+}

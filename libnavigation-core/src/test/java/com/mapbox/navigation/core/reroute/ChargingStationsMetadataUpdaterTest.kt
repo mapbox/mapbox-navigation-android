@@ -106,6 +106,10 @@ class ChargingStationsMetadataUpdaterTest {
                 listOf(null, "50", null),
                 navigationRoute.getChargingStationPowersKW()
             )
+            assertEquals(
+                listOf(null, "charging-station", null),
+                navigationRoute.getChargingStationTypes()
+            )
         }
     }
 
