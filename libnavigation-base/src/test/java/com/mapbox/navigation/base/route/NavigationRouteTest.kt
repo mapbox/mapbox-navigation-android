@@ -410,6 +410,6 @@ class NavigationRouteTest {
         )
 
         route.updateExpirationTime(45)
-        assertEquals(45L, route.expirationTime)
+        assertEquals(45L, route.expirationTimeElapsedSeconds)
     }
 }

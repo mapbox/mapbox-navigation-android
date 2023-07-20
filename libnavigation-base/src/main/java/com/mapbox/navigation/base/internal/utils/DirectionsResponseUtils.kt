@@ -18,7 +18,7 @@ suspend fun parseDirectionsResponse(
     responseJson: DataRef,
     requestUrl: String,
     routerOrigin: RouterOrigin,
-    responseTime: Long
+    responseTimeElapsedSeconds: Long
 ): Expected<Throwable, List<NavigationRoute>> =
     withContext(dispatcher) {
         return@withContext try {
@@ -26,7 +26,7 @@ suspend fun parseDirectionsResponse(
                 directionsResponseJson = responseJson,
                 routeRequestUrl = requestUrl,
                 routerOrigin,
-                responseTime
+                responseTimeElapsedSeconds
             )
             if (routes.isEmpty()) {
                 ExpectedFactory.createError(
@@ -46,17 +46,17 @@ suspend fun parseDirectionsResponse(
 
 fun parseNativeDirectionsAlternative(
     routeAlternative: RouteAlternative,
-    responseTime: Long
+    responseTimeElapsedSeconds: Long
 ): Expected<Throwable, NavigationRoute> {
-    return parseRouteInterface(routeAlternative.route, responseTime)
+    return parseRouteInterface(routeAlternative.route, responseTimeElapsedSeconds)
 }
 
 fun parseRouteInterface(
     route: RouteInterface,
-    responseTime: Long
+    responseTimeElapsedSeconds: Long
 ): Expected<Throwable, NavigationRoute> {
     return try {
-        val navigationRoute = route.toNavigationRoute(responseTime)
+        val navigationRoute = route.toNavigationRoute(responseTimeElapsedSeconds)
         ExpectedFactory.createValue(navigationRoute)
     } catch (ex: Exception) {
         when (ex) {

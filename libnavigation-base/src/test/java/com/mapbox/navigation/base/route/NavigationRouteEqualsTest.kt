@@ -204,7 +204,7 @@ class NavigationRouteEqualsTest(
                 every { routeInfo } returns RouteInfo(listOf(mockk(relaxed = true)))
                 every { waypoints } returns emptyList()
             },
-            expirationTime = expirationTime1
+            expirationTimeElapsedSeconds = expirationTime1
         )
         route2 = NavigationRoute(
             directionsResponse2,
@@ -219,7 +219,7 @@ class NavigationRouteEqualsTest(
                 } returns RouteInfo(listOf(mockk(relaxed = true), mockk(relaxed = true)))
                 every { waypoints } returns emptyList()
             },
-            expirationTime = expirationTime2
+            expirationTimeElapsedSeconds = expirationTime2
         )
     }
 

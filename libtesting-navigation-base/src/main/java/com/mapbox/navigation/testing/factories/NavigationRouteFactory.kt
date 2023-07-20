@@ -44,7 +44,7 @@ fun createNavigationRoutes(
     response: DirectionsResponse = createDirectionsResponse(),
     options: RouteOptions = response.routes().first().routeOptions()!!,
     routerOrigin: RouterOrigin = RouterOrigin.Offboard,
-    responseTime: Long? = null,
+    responseTimeElapsedSeconds: Long? = null,
     routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
     waypointsMapper: (List<DirectionsWaypoint>, RouteOptions?) -> List<Waypoint> = ::mapToNativeWaypoints
 ): List<NavigationRoute> {
@@ -57,7 +57,7 @@ fun createNavigationRoutes(
         options,
         parser,
         routerOrigin,
-        responseTime
+        responseTimeElapsedSeconds
     )
 }
 
