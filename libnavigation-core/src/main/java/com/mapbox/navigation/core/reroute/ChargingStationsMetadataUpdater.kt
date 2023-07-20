@@ -4,7 +4,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.route.getChargingStationWaypointMetadata
+import com.mapbox.navigation.base.internal.route.getWaypointMetadata
 import com.mapbox.navigation.base.internal.route.getChargingStationsCurrentType
 import com.mapbox.navigation.base.internal.route.getChargingStationsId
 import com.mapbox.navigation.base.internal.route.getChargingStationsPower
@@ -48,20 +48,14 @@ fun updateChargingStationsTypes(
         val updatedWaypoints =
             (route.waypoints() ?: emptyList()).mapIndexed { waypointIndex, waypoint ->
                 val waypointUnrecognizedProperties = waypoint.unrecognizedJsonProperties
-                val waypointMetadata = waypointUnrecognizedProperties?.get("metadata")
-                    ?.asJsonObject
-                val stationId = waypointMetadata
-                    ?.get("station_id")
-                    ?.asString
+                val waypointMetadata = waypoint.getWaypointMetadata()
+                val stationId = waypointMetadata?.getStationId()
                 if (stationId != null && serverProvidedStationsIds.contains(stationId)) {
                     val updatedMetadata = waypointMetadata.deepCopy()
-                    updatedMetadata.remove("type")
-                    updatedMetadata.remove("was_requested_as_user_provided")
-                    updatedMetadata.add("type", JsonPrimitive("charging-station"))
-                    updatedMetadata.add("was_requested_as_user_provided", JsonPrimitive(true))
+                    updatedMetadata.setServerAddedType()
                     val updatedUnrecognizedProperties = waypointUnrecognizedProperties
-                        .toMutableMap()
-                    updatedUnrecognizedProperties["metadata"] = updatedMetadata
+                        ?.toMutableMap() ?: mutableMapOf()
+                    updatedUnrecognizedProperties["metadata"] = updatedMetadata.jsonMetadata
                     waypoint.toBuilder()
                         .unrecognizedJsonProperties(updatedUnrecognizedProperties)
                         .build()
@@ -119,7 +113,7 @@ private fun updateChargingStationsMetadataBasedOnRequestUrl(
 
 private fun NavigationRoute.getServerProvidedChargingStationsIds(): Set<String> =
     this.waypoints?.mapNotNull {
-        val metadata = it.getChargingStationWaypointMetadata()
+        val metadata = it.getWaypointMetadata()
         if (metadata?.isServerProvided() == true) {
             metadata.getStationId()
         } else {

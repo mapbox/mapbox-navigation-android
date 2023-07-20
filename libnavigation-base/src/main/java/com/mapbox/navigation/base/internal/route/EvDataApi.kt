@@ -1,16 +1,17 @@
 package com.mapbox.navigation.base.internal.route
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 
 fun DirectionsWaypoint.getChargingStationId(): String? =
-    getChargingStationWaypointMetadata()?.getStationId()
+    getWaypointMetadata()?.getStationId()
 
 fun DirectionsWaypoint.getChargingStationType(): String? =
-    getChargingStationWaypointMetadata()?.getType()
+    getWaypointMetadata()?.getType()
 
-fun DirectionsWaypoint.getChargingStationWaypointMetadata(): ChargingStationMetadata? {
+fun DirectionsWaypoint.getWaypointMetadata(): ChargingStationMetadata? {
     val waypointUnrecognizedProperties = this.unrecognizedJsonProperties
     val waypointMetadata = waypointUnrecognizedProperties?.get("metadata")
         ?.asJsonObject
@@ -18,12 +19,19 @@ fun DirectionsWaypoint.getChargingStationWaypointMetadata(): ChargingStationMeta
 }
 
 @JvmInline
-value class ChargingStationMetadata internal constructor(val metadata: JsonObject) {
-    fun getType(): String? = metadata.get("type")?.asString
-    fun getStationId(): String? = metadata.get("station_id")?.asString
+value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonObject) {
+    fun getType(): String? = jsonMetadata.get("type")?.asString
+    fun getStationId(): String? = jsonMetadata.get("station_id")?.asString
     fun isServerProvided(): Boolean = getType() == "charging-station"
 
-    fun copy() = ChargingStationMetadata(metadata.deepCopy())
+    fun setServerAddedType() {
+        jsonMetadata.remove("type")
+        jsonMetadata.remove("was_requested_as_user_provided")
+        jsonMetadata.add("type", JsonPrimitive("charging-station"))
+        jsonMetadata.add("was_requested_as_user_provided", JsonPrimitive(true))
+    }
+
+    fun deepCopy() = ChargingStationMetadata(jsonMetadata.deepCopy())
 }
 
 fun RouteOptions.getChargingStationsPower(): List<Int?>? =
