@@ -13,6 +13,8 @@ import org.junit.Assume.assumeTrue
 private const val LOG_TAG = "TestNetwork"
 
 suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
+    // Without network doesn't work stable on old devices
+    assumeTrue(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
     withoutWifiAndMobileData {
         mockWebServerRule.withoutWebServer {
             block()
