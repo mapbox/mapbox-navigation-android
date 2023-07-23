@@ -81,6 +81,8 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
  * the route line giving the line the appearance of a boarder
  * @param alternativeRouteCasingColor the color used for the alternative route casing line(s) which
  * is positioned below the route line giving the line the appearance of a boarder
+ * @param inactiveRouteLegCasingColor the color used for casing of route legs hat aren't currently
+ * being navigated.
  * @param inActiveRouteLegsColor the color used for route legs that aren't currently
  * being navigated.
  */
@@ -116,6 +118,7 @@ class RouteLineColorResources private constructor(
     @ColorInt val routeLineTraveledCasingColor: Int,
     @ColorInt val routeCasingColor: Int,
     @ColorInt val alternativeRouteCasingColor: Int,
+    @ColorInt val inactiveRouteLegCasingColor: Int,
     @ColorInt val inActiveRouteLegsColor: Int
 ) {
 
@@ -155,6 +158,7 @@ class RouteLineColorResources private constructor(
             .routeLineTraveledCasingColor(routeLineTraveledCasingColor)
             .routeCasingColor(routeCasingColor)
             .alternativeRouteCasingColor(alternativeRouteCasingColor)
+            .inactiveRouteLegCasingColor(inactiveRouteLegCasingColor)
             .inActiveRouteLegsColor(inActiveRouteLegsColor)
     }
 
@@ -194,6 +198,7 @@ class RouteLineColorResources private constructor(
             "routeLineTraveledCasingColor=$routeLineTraveledCasingColor, " +
             "routeCasingColor=$routeCasingColor, " +
             "alternativeRouteCasingColor=$alternativeRouteCasingColor, " +
+            "inactiveRouteLegCasingColor=$inactiveRouteLegCasingColor, " +
             "inActiveRouteLegsColor=$inActiveRouteLegsColor" +
             ")"
     }
@@ -233,6 +238,7 @@ class RouteLineColorResources private constructor(
         result = 31 * result + routeLineTraveledCasingColor
         result = 31 * result + routeCasingColor
         result = 31 * result + alternativeRouteCasingColor
+        result = 31 * result + inactiveRouteLegCasingColor
         result = 31 * result + inActiveRouteLegsColor
         return result
     }
@@ -310,6 +316,7 @@ class RouteLineColorResources private constructor(
         if (routeCasingColor != other.routeCasingColor) return false
         if (inActiveRouteLegsColor != other.inActiveRouteLegsColor) return false
         if (alternativeRouteCasingColor != other.alternativeRouteCasingColor) return false
+        if (inactiveRouteLegCasingColor != other.inactiveRouteLegCasingColor) return false
 
         return true
     }
@@ -369,6 +376,8 @@ class RouteLineColorResources private constructor(
         private var routeCasingColor: Int = RouteLayerConstants.ROUTE_CASING_COLOR
         private var alternativeRouteCasingColor: Int =
             RouteLayerConstants.ALTERNATE_ROUTE_CASING_COLOR
+        private var inactiveRouteLegCasingColor: Int =
+            RouteLayerConstants.INACTIVE_ROUTE_LEG_CASING_COLOR
         private var inActiveRouteLegsColor: Int =
             RouteLayerConstants.IN_ACTIVE_ROUTE_LEG_COLOR
 
@@ -738,6 +747,16 @@ class RouteLineColorResources private constructor(
             apply { this.alternativeRouteCasingColor = color }
 
         /**
+         * The color used for casing of route legs that aren't currently being navigated.
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inactiveRouteLegCasingColor(@ColorInt color: Int): Builder =
+            apply { this.inactiveRouteLegCasingColor = color }
+
+        /**
          * The color used for route legs that aren't currently being navigated.
          *
          * @param color the color to be used
@@ -791,6 +810,7 @@ class RouteLineColorResources private constructor(
                 routeLineTraveledCasingColor = routeLineTraveledCasingColor,
                 routeCasingColor = routeCasingColor,
                 alternativeRouteCasingColor = alternativeRouteCasingColor,
+                inactiveRouteLegCasingColor = inactiveRouteLegCasingColor,
                 inActiveRouteLegsColor = inActiveRouteLegsColor,
             )
         }

@@ -1,0 +1,1 @@
+- Added `RouteLineColorResources#inactiveRouteLegCasingColor` to specify the color used for inactive legs casing.

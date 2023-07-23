@@ -46,6 +46,7 @@ class RouteLineColorResourcesTest :
             .routeCasingColor(9)
             .alternativeRouteCasingColor(16)
             .inActiveRouteLegsColor(21)
+            .inactiveRouteLegCasingColor(22)
     }
 
     @Test

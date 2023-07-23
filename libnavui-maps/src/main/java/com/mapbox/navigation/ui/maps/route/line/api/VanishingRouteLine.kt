@@ -179,13 +179,12 @@ internal class VanishingRouteLine {
         ) { index ->
             ifNonNull(getOffset(point, granularDistances, index)) { offset ->
                 vanishPointOffset = offset
+                val colorResources = options.resourceProvider.routeLineColorResources
                 val trafficLineExpressionProvider = {
                     MapboxRouteLineUtils.getTrafficLineExpression(
                         offset,
-                        options.resourceProvider.routeLineColorResources.routeLineTraveledColor,
-                        options.resourceProvider
-                            .routeLineColorResources
-                            .routeUnknownCongestionColor,
+                        colorResources.routeLineTraveledColor,
+                        colorResources.routeUnknownCongestionColor,
                         softGradientTransition,
                         useSoftGradient,
                         routeLineExpressionData
@@ -195,9 +194,9 @@ internal class VanishingRouteLine {
                     MapboxRouteLineUtils.getRouteLineExpression(
                         offset,
                         routeLineExpressionData,
-                        options.resourceProvider.routeLineColorResources.routeLineTraveledColor,
-                        options.resourceProvider.routeLineColorResources.routeDefaultColor,
-                        options.resourceProvider.routeLineColorResources.inActiveRouteLegsColor,
+                        colorResources.routeLineTraveledColor,
+                        colorResources.routeDefaultColor,
+                        colorResources.inActiveRouteLegsColor,
                         activeLegIndex
                     )
                 }
@@ -205,11 +204,9 @@ internal class VanishingRouteLine {
                     MapboxRouteLineUtils.getRouteLineExpression(
                         offset,
                         routeLineExpressionData,
-                        options.resourceProvider
-                            .routeLineColorResources
-                            .routeLineTraveledCasingColor,
-                        options.resourceProvider.routeLineColorResources.routeCasingColor,
-                        Color.TRANSPARENT,
+                        colorResources.routeLineTraveledCasingColor,
+                        colorResources.routeCasingColor,
+                        colorResources.inactiveRouteLegCasingColor,
                         activeLegIndex
                     )
                 }
