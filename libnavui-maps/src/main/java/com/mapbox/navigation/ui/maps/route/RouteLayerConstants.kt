@@ -198,6 +198,9 @@ object RouteLayerConstants {
     internal val ALTERNATIVE_ROUTE_CLOSURE_COLOR = Color.parseColor("#333333")
 
     @ColorInt
+    internal val INACTIVE_ROUTE_LEG_CASING_COLOR = Color.TRANSPARENT
+
+    @ColorInt
     internal val IN_ACTIVE_ROUTE_LEG_COLOR = Color.TRANSPARENT
 
     @DrawableRes

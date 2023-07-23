@@ -455,11 +455,11 @@ class VanishingRouteLineRoboTest {
             " 0.32147751186805656, [rgba, 255.0, 149.0, 0.0, 1.0], 0.3838765722116185, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4891841628737826, [rgba, 0.0, 0.0, 0.0, 0.0]]"
         val expectedRouteLineExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.13240839439705454, [rgba, 86.0, 168.0, 251.0, 1.0], 0.4891841628737826, " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0]]"
-        val expectedCasingExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
-            " 0.13240839439705454, [rgba, 47.0, 122.0, 198.0, 1.0], 0.4891841628737826," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0]]"
+            "0.13240839439705454, [rgba, 0.0, 0.0, 3.0, 0.0], 0.4891841628737826, " +
+            "[rgba, 0.0, 0.0, 11.0, 0.0]]"
+        val expectedCasingExp = "[step, [line-progress], [rgba, 0.0, 0.0, 10.0, 0.0]," +
+            " 0.13240839439705454, [rgba, 0.0, 0.0, 4.0, 0.0], 0.4891841628737826," +
+            " [rgba, 0.0, 0.0, 14.0, 0.0]]"
         val route = loadNavigationRoute("multileg-route-two-legs.json")
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.upcomingRouteGeometrySegmentIndex = 7
@@ -482,7 +482,9 @@ class VanishingRouteLineRoboTest {
             granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!,
             segments,
             null,
-            MapboxRouteLineOptions.Builder(ctx).build(),
+            MapboxRouteLineOptions.Builder(ctx)
+                .withRouteLineResources(genericResourceProvider)
+                .build(),
             0,
             0.0,
             false
@@ -518,6 +520,7 @@ class VanishingRouteLineRoboTest {
                 .inActiveRouteLegsColor(11)
                 .restrictedRoadColor(12)
                 .inactiveRouteLegRestrictedRoadColor(13)
+                .inactiveRouteLegCasingColor(14)
                 .build()
         )
         .build()

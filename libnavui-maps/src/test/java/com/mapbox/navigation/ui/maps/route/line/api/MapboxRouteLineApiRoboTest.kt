@@ -166,7 +166,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
@@ -256,6 +256,7 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
                 .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
             val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
             val options = MapboxRouteLineOptions.Builder(ctx)
@@ -362,7 +363,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
@@ -452,6 +453,7 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
                 .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
             val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
             val options = MapboxRouteLineOptions.Builder(ctx)
@@ -564,7 +566,7 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
@@ -656,6 +658,7 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
                 .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
             val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
             val options = MapboxRouteLineOptions.Builder(ctx)
@@ -761,7 +764,7 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
@@ -853,6 +856,7 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
                 .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
             val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
             val options = MapboxRouteLineOptions.Builder(ctx)
@@ -966,7 +970,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
@@ -1056,6 +1060,7 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
                 .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
             val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
             val options = MapboxRouteLineOptions.Builder(ctx)
@@ -1170,7 +1175,7 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
@@ -1263,6 +1268,7 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
                 .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
             val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
             val options = MapboxRouteLineOptions.Builder(ctx)
@@ -1368,7 +1374,7 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
@@ -1446,6 +1452,7 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
                 .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
             val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
             val options = MapboxRouteLineOptions.Builder(ctx)
@@ -1627,6 +1634,7 @@ class MapboxRouteLineApiRoboTest {
             .routeLineTraveledColor(Color.RED)
             .routeLineTraveledCasingColor(Color.MAGENTA)
             .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegCasingColor(Color.BLACK)
             .build()
         val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
         val options = MapboxRouteLineOptions.Builder(ctx)
@@ -3173,6 +3181,7 @@ class MapboxRouteLineApiRoboTest {
     fun alternativelyStyleSegmentsNotInLeg() = coroutineRule.runBlockingTest {
         val colorOptions = RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegCasingColor(Color.BLACK)
             .build()
         val resources = RouteLineResources.Builder().routeLineColorResources(colorOptions).build()
         val options = MapboxRouteLineOptions.Builder(ctx).withRouteLineResources(resources).build()

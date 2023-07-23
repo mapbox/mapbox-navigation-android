@@ -83,6 +83,7 @@ class ActiveLegAboveInactiveLegsActivity : AppCompatActivity() {
 
         RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegCasingColor(Color.RED)
             .routeLineTraveledColor(traveledColor)
             .routeLineTraveledCasingColor(traveledCasingColor)
             .build()

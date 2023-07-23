@@ -737,14 +737,32 @@ class MapboxRouteLineApi(
                     routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
                 )
             }
-            val routeLineCasingExpressionProvider = {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    offset,
-                    routeLineOptions
-                        .resourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
-                    routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
-                )
-            }
+            val routeLineCasingExpressionProvider =
+                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                    {
+                        MapboxRouteLineUtils.getRouteLineExpression(
+                            offset,
+                            workingExpressionData,
+                            routeLineOptions.resourceProvider
+                                .routeLineColorResources.routeLineTraveledCasingColor,
+                            routeLineOptions.resourceProvider
+                                .routeLineColorResources.routeCasingColor,
+                            routeLineOptions.resourceProvider
+                                .routeLineColorResources.inactiveRouteLegCasingColor,
+                            activeLegIndex
+                        )
+                    }
+                } else {
+                    {
+                        MapboxRouteLineUtils.getRouteLineExpression(
+                            offset,
+                            routeLineOptions.resourceProvider
+                                .routeLineColorResources.routeLineTraveledCasingColor,
+                            routeLineOptions.resourceProvider
+                                .routeLineColorResources.routeCasingColor
+                        )
+                    }
+                }
 
             val restrictedLineExpressionProvider = when (restrictedExpressionData.isEmpty()) {
                 true -> null
@@ -1158,7 +1176,8 @@ class MapboxRouteLineApi(
                                     .routeLineColorResources.routeCasingColor,
                                 routeLineOptions.resourceProvider
                                     .routeLineColorResources.routeCasingColor,
-                                Color.TRANSPARENT,
+                                routeLineOptions.resourceProvider
+                                    .routeLineColorResources.inactiveRouteLegCasingColor,
                                 legIndexToHighlight
                             )
                         }
@@ -1733,7 +1752,7 @@ class MapboxRouteLineApi(
                         routeLineExpressionData,
                         colorResources.routeLineTraveledCasingColor,
                         colorResources.routeCasingColor,
-                        Color.TRANSPARENT,
+                        colorResources.inactiveRouteLegCasingColor,
                         legIndex
                     )
                 } else {
