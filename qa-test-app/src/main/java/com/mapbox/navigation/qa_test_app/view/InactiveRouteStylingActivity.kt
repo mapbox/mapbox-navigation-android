@@ -62,6 +62,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     private val routeLineColorResources by lazy {
         RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegCasingColor(Color.GRAY)
             .restrictedRoadColor(Color.MAGENTA)
             .routeLineTraveledCasingColor(Color.RED)
             .routeCasingColor(Color.GREEN)
