@@ -78,6 +78,7 @@ class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
     private val routeLineColorResources by lazy {
         RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegCasingColor(Color.BLACK)
             .restrictedRoadColor(Color.MAGENTA)
             .build()
     }
