@@ -38,6 +38,10 @@ value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonO
         jsonMetadata.add("power_kw", JsonPrimitive(chargingStationsPowerKw))
     }
 
+    fun setServerAddedTypeToUserProvided() {
+        jsonMetadata.add("type", JsonPrimitive("charging-station"))
+    }
+
     fun setStationId(chargingStationId: String) {
         jsonMetadata.add("station_id", JsonPrimitive(chargingStationId))
     }

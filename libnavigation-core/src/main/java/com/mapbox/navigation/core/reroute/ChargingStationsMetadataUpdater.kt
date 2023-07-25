@@ -64,6 +64,7 @@ private fun updateChargingStationTypes(
                 val updatedMetadata = waypointMetadata.deepCopy()
                 val updatedUnrecognizedProperties = waypointUnrecognizedProperties
                     ?.toMutableMap() ?: mutableMapOf()
+                updatedMetadata.setServerAddedTypeToUserProvided()
                 updatedUnrecognizedProperties["metadata"] = updatedMetadata.jsonMetadata
                 waypoint.toBuilder()
                     .unrecognizedJsonProperties(updatedUnrecognizedProperties)
