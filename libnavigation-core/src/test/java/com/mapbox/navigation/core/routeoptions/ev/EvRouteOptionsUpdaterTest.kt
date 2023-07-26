@@ -680,7 +680,7 @@ class EvRouteOptionsUpdaterTest {
             rerouteRouteOptions.toUrl("***").toString()
         )
         val navigationRoute = NavigationRoute.create(
-            resourceAsString("evRouteRepeatedUserAndServerChargingStationsAfterReroute.json"),
+            resourceAsString("evRouteRepeatedUserAndServerChargingStationsAfterRerouteFromOrigin.json"),
             expectedUrl,
             RouterOrigin.Offboard
         ).first()
