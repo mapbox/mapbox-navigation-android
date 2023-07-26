@@ -59,7 +59,7 @@ private fun updateChargingStationTypes(
             val waypointMetadata = waypoint.getWaypointMetadata()
             val stationId = waypointMetadata?.getStationId()
             if (stationId != null &&
-                serverProvidedStationsInfo[stationId]?.indexes?.contains(index) == true
+                serverProvidedStationsInfo[stationId]?.indexes?.contains(waypoints.count() - index) == true
             ) {
                 val updatedMetadata = waypointMetadata.deepCopy()
                 updatedMetadata.setServerAddedTypeToUserProvided()
@@ -129,18 +129,19 @@ private fun updateMetadataBasedOnRequestUrl(
 }
 
 private class ServerAddedChargingStationInfo(
-    val indexes: MutableSet<Int> = mutableSetOf()
+    val indexes: MutableSet<Int> = mutableSetOf(),
 )
 
 private fun NavigationRoute.getServerProvidedChargingStationsInfo(): Map<String, ServerAddedChargingStationInfo> {
     val result = mutableMapOf<String, ServerAddedChargingStationInfo>()
-    this.waypoints?.forEachIndexed { index, waypoint ->
+    val waypoints = this.waypoints
+    waypoints?.forEachIndexed { index, waypoint ->
         val metadata = waypoint.getWaypointMetadata() ?: return@forEachIndexed
         val stationId = metadata.getStationId()
         if (metadata.isServerProvided() && stationId != null) {
             val stationInfo = result[stationId] ?: ServerAddedChargingStationInfo()
             result[stationId] = stationInfo.apply {
-                indexes.add(index)
+                indexes.add(waypoints.count() - index)
             }
         }
     }

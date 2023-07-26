@@ -521,7 +521,7 @@ class EvRouteOptionsUpdaterTest {
     }
 
     @Test
-    fun `reroute in case of duplicated charging station`() = runBlocking {
+    fun `reroute from origin in case of duplicated charging station`() = runBlocking {
         val originalRoute = createRouteWithRepeatedUserAndServerProvidedChargingStations()
         val originalRouteOptions = originalRoute.routeOptions
         val locationMatcherResult = mockLocationMatcher(
@@ -548,6 +548,37 @@ class EvRouteOptionsUpdaterTest {
         assertEquals(
             originalRoute.getChargingStationTypes(),
             primaryRouteAfterReroute.getChargingStationTypes()
+        )
+    }
+
+    @Test
+    fun `reroute after second waypoint in case of duplicated charging station`() = runBlocking {
+        val originalRoute = createRouteWithRepeatedUserAndServerProvidedChargingStations()
+        val originalRouteOptions = originalRoute.routeOptions
+        val locationMatcherResult = mockLocationMatcher(
+            point = originalRoute.waypoints!![2].location()
+        )
+
+        val routeOptionsForFirstReroute = createUpdater().update(
+            originalRouteOptions,
+            createRouteProgress(originalRoute, remainingWaypointsValue = 3),
+            locationMatcherResult
+        ) as RouteOptionsUpdater.RouteOptionsResult.Success
+        val routeAfterRerouteFromServer = createRouteWithRepeatedUserAndServerProvidedChargingStationsAfterRerouteFromSecondWaypoint(
+            routeOptionsForFirstReroute.routeOptions
+        )
+        val primaryRouteAfterReroute = restoreChargingStationsMetadata(
+            originalRoute,
+            listOf(routeAfterRerouteFromServer)
+        ).first()
+
+        assertEquals(
+            originalRoute.getChargingStationIds().drop(3),
+            primaryRouteAfterReroute.getChargingStationIds().drop(1)
+        )
+        assertEquals(
+            originalRoute.getChargingStationTypes().drop(3),
+            primaryRouteAfterReroute.getChargingStationTypes().drop(1)
         )
     }
 
@@ -681,6 +712,26 @@ class EvRouteOptionsUpdaterTest {
         )
         val navigationRoute = NavigationRoute.create(
             resourceAsString("evRouteRepeatedUserAndServerChargingStationsAfterRerouteFromOrigin.json"),
+            expectedUrl,
+            RouterOrigin.Offboard
+        ).first()
+        return navigationRoute
+    }
+
+    private fun createRouteWithRepeatedUserAndServerProvidedChargingStationsAfterRerouteFromSecondWaypoint(
+        rerouteRouteOptions: RouteOptions
+    ): NavigationRoute {
+        val expectedUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/12.552784,62.543831;12.679051,62.433569;12.679051,62.433569;12.9605557,62.1484323?access_token=***&geometries=polyline6&alternatives=false&overview=full&steps=true&bearings=3.3%2C90%3B%3B%3B&layers=0%3B%3B%3B&continue_straight=true&annotations=state_of_charge&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true&snapping_include_closures=true%3B%3B%3B&snapping_include_static_closures=true%3B%3B%3B&waypoints_per_route=true&waypoints.charging_station_power=%3B150000%3B150000%3B&ev_max_charge=50000&ev_charging_curve=0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000&engine=electric&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180&ev_min_charge_at_charging_station=7000&waypoints.charging_station_id=%3Bocm-216129%3Bocm-216129%3B&waypoints.charging_station_current_type=%3Bdc%3Bdc%3B&ev_add_charging_stops=false&ev_initial_charge=10000&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2"
+        val expectedRouteOptions = RouteOptions.fromUrl(URL(expectedUrl))
+        assertEquals(
+            "Saved route after reroute isn't actual for the given route options. " +
+                "Regenerate route using following url: " +
+                "${rerouteRouteOptions.toUrl("\$MAPBOX_ACCESS_TOKEN")}",
+            expectedRouteOptions.toUrl("***").toString(),
+            rerouteRouteOptions.toUrl("***").toString()
+        )
+        val navigationRoute = NavigationRoute.create(
+            resourceAsString("evRouteRepeatedUserAndServerChargingStationsAfterRerouteAfterSecondWaypoint.json"),
             expectedUrl,
             RouterOrigin.Offboard
         ).first()
