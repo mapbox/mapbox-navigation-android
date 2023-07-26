@@ -1,6 +1,9 @@
 package com.mapbox.navigation.base.internal.extensions
 
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.internal.route.doNotAddChargingStationsFlag
+import com.mapbox.navigation.testing.factories.createRouteOptions
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.Assert.assertEquals
@@ -13,6 +16,7 @@ class WaypointExTest {
 
     @RunWith(Parameterized::class)
     class FilterTest internal constructor(
+        private val routeOptions: RouteOptions,
         private val waypoints: List<Waypoint>,
         private val requestedWaypointsExpected: List<Waypoint.InternalType>,
         private val legsWaypointsExpected: List<Waypoint.InternalType>
@@ -22,6 +26,7 @@ class WaypointExTest {
             @Parameterized.Parameters
             fun data() = listOf(
                 arrayOf(
+                    provideTestRouteOptions(),
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Silent,
@@ -35,6 +40,7 @@ class WaypointExTest {
                     listOf(Waypoint.InternalType.Regular, Waypoint.InternalType.Regular),
                 ),
                 arrayOf(
+                    provideTestRouteOptions(),
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Silent,
@@ -58,6 +64,32 @@ class WaypointExTest {
                     ),
                 ),
                 arrayOf(
+                    provideTestRouteOptions(serverAddsChargingStations = false),
+                    provideWaypoints(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.Regular
+                    ),
+                    listOf(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Silent,
+                        Waypoint.InternalType.Regular
+                    ),
+                    listOf(
+                        Waypoint.InternalType.Regular,
+                        Waypoint.InternalType.EvChargingServer,
+                        Waypoint.InternalType.EvChargingUser,
+                        Waypoint.InternalType.Regular
+                    ),
+                ),
+                arrayOf(
+                    provideTestRouteOptions(),
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.EvChargingServer,
@@ -84,6 +116,7 @@ class WaypointExTest {
                     ),
                 ),
                 arrayOf(
+                    provideTestRouteOptions(),
                     provideWaypoints(
                         Waypoint.InternalType.Regular,
                         Waypoint.InternalType.Silent,
@@ -134,7 +167,7 @@ class WaypointExTest {
         fun testCases() {
             checkWaypoints(
                 requestedWaypointsExpected,
-                waypoints.filter { it.isRequestedWaypoint() },
+                waypoints.filter { it.isRequestedWaypoint(routeOptions) },
                 waypoints
             )
             checkWaypoints(
@@ -397,3 +430,14 @@ private fun provideWaypoints(vararg waypointType: Waypoint.InternalType): List<W
     waypointType.map { mapToType ->
         mockk { every { internalType } returns mapToType }
     }
+
+private fun provideTestRouteOptions(
+    serverAddsChargingStations: Boolean = true,
+): RouteOptions {
+    val unrecognizedProperties = if (serverAddsChargingStations) {
+        null
+    } else {
+        mapOf(doNotAddChargingStationsFlag())
+    }
+    return createRouteOptions(unrecognizedProperties = unrecognizedProperties)
+}

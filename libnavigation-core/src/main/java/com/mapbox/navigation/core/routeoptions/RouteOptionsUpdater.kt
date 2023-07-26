@@ -8,10 +8,12 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.indexOfNextWaypoint
+import com.mapbox.navigation.base.internal.route.doNotAddChargingStationsFlag
 import com.mapbox.navigation.base.internal.route.getChargingStationCurrentType
 import com.mapbox.navigation.base.internal.route.getChargingStationId
 import com.mapbox.navigation.base.internal.route.getChargingStationPowerKw
 import com.mapbox.navigation.base.internal.route.getWaypointMetadataOrEmpty
+import com.mapbox.navigation.base.internal.route.serverAddsChargingStations
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -68,15 +70,18 @@ class RouteOptionsUpdater {
         }
 
         val currentNavigationRoute = routeProgress.navigationRoute
-        val serverAddedChargingStationWithIndex =
+        val serverAddedChargingStationWithIndex = if (routeOptions.serverAddsChargingStations()) {
             currentNavigationRoute.waypoints?.mapIndexedNotNull { index, waypoint ->
                 val metadata = waypoint.getWaypointMetadataOrEmpty()
-                if (metadata.isServerProvided() && !metadata.wasRequestedAsUserProvided()) {
+                if (metadata.isServerProvided()) {
                     Pair(index, waypoint)
                 } else {
                     null
                 }
             } ?: emptyList()
+        } else {
+            emptyList()
+        }
         val coordinatesList = routeOptions.coordinatesList().toMutableList().apply {
             serverAddedChargingStationWithIndex.forEach { (indexOfWaypoint, waypoint) ->
                 this.add(indexOfWaypoint, waypoint.location())
@@ -344,7 +349,8 @@ class RouteOptionsUpdater {
                     waypointsCount
                 )
             }
-            newUnrecognizedJsonProperties["ev_add_charging_stops"] = JsonPrimitive(false)
+            val (doNotAddStationsFlagName, doNotAddStationsValue) = doNotAddChargingStationsFlag()
+            newUnrecognizedJsonProperties[doNotAddStationsFlagName] = doNotAddStationsValue
         }
         return newUnrecognizedJsonProperties
     }
