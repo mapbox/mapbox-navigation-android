@@ -1,0 +1,1 @@
+- Fixed an issue where in rare cases `BannerInstructionsObserver` might not have been invoked for an instruction when the route was being refreshed. 
