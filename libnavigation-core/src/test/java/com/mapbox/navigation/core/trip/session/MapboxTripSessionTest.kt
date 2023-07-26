@@ -723,6 +723,10 @@ class MapboxTripSessionTest {
                 SetRoutes.RefreshRoutes(RouteProgressData(0, 0, null))
             )
 
+            coVerifyOrder {
+                navigator.refreshRoute(refreshedRoutes[1])
+                navigator.refreshRoute(refreshedRoutes[0])
+            }
             refreshedRoutes.forEach {
                 coVerify(exactly = 1) { navigator.refreshRoute(it) }
             }
@@ -849,10 +853,10 @@ class MapboxTripSessionTest {
             )
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[0])
-            } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
+            } returns ExpectedFactory.createValue(mockAlternativesMetadata2)
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[1])
-            } returns ExpectedFactory.createValue(mockAlternativesMetadata2)
+            } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
 
             refreshedRoutes.forEachIndexed { i, route ->
                 every { route.refreshNativePeer() } returns refreshedRoutes[i]
@@ -1534,7 +1538,7 @@ class MapboxTripSessionTest {
         }
 
     @Test
-    fun `routeProgress updates ignored while primary route is being refreshed`() =
+    fun `routeProgress updates are not ignored while primary route is being refreshed`() =
         coroutineRule.runBlockingTest {
             val primary = mockNavigationRoute()
             val alternative = mockNavigationRoute()
@@ -1554,12 +1558,6 @@ class MapboxTripSessionTest {
                 launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
                 runCurrent()
                 advanceTimeBy(delayTimeMillis = 50)
-                navigatorObserverImplSlot.captured.onStatus(
-                    navigationStatusOrigin,
-                    navigationStatus
-                )
-                verify(exactly = 0) { observer.onRouteProgressChanged(any()) }
-                advanceTimeBy(delayTimeMillis = 100)
                 navigatorObserverImplSlot.captured.onStatus(
                     navigationStatusOrigin,
                     navigationStatus
