@@ -58,7 +58,9 @@ private fun updateChargingStationTypes(
             val waypointUnrecognizedProperties = waypoint.unrecognizedJsonProperties
             val waypointMetadata = waypoint.getWaypointMetadata()
             val stationId = waypointMetadata?.getStationId()
-            if (stationId != null && serverProvidedStationsInfo.contains(stationId) && serverProvidedStationsInfo[stationId]?.indexes?.contains(index) == true) {
+            if (stationId != null &&
+                serverProvidedStationsInfo[stationId]?.indexes?.contains(index) == true
+            ) {
                 val updatedMetadata = waypointMetadata.deepCopy()
                 updatedMetadata.setServerAddedTypeToUserProvided()
                 val updatedUnrecognizedProperties = waypointUnrecognizedProperties
