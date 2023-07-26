@@ -5,6 +5,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.reroute.getChargingStationIds
+import com.mapbox.navigation.core.reroute.getChargingStationTypes
 import com.mapbox.navigation.core.reroute.restoreChargingStationsMetadata
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -12,7 +14,6 @@ import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.IOUtils
 import org.junit.Assert.assertEquals
@@ -502,14 +503,9 @@ class EvRouteOptionsUpdaterTest {
         val routeAfterReroute = createTestEvOnlineRouteAfterRerouteOnOrigin(
             routeOptionsForFirstReroute.routeOptions
         )
-        val newRouteFromServer = restoreChargingStationsMetadata(
-            routeAfterReroute,
-            listOf(routeAfterReroute)
-        )
         val newPrimaryRoute = restoreChargingStationsMetadata(
             originalRoute,
-            newRouteFromServer,
-            Dispatchers.Unconfined
+            listOf(routeAfterReroute)
         ).first()
 
         val routeOptionsForSecondReroute = createUpdater().update(
@@ -521,6 +517,37 @@ class EvRouteOptionsUpdaterTest {
         assertEquals(
             routeOptionsForFirstReroute.routeOptions.toUrl("***").toString(),
             routeOptionsForSecondReroute.routeOptions.toUrl("***").toString()
+        )
+    }
+
+    @Test
+    fun `reroute in case of duplicated charging station`() = runBlocking {
+        val originalRoute = createRouteWithRepeatedUserAndServerProvidedChargingStations()
+        val originalRouteOptions = originalRoute.routeOptions
+        val locationMatcherResult = mockLocationMatcher(
+            point = originalRouteOptions.coordinatesList().first()
+        )
+
+        val routeOptionsForFirstReroute = createUpdater().update(
+            originalRouteOptions,
+            createRouteProgress(originalRoute, remainingWaypointsValue = 5),
+            locationMatcherResult
+        ) as RouteOptionsUpdater.RouteOptionsResult.Success
+        val routeAfterRerouteFromServer = createRouteWithRepeatedUserAndServerProvidedChargingStationsAfterRerouteOnOrigin(
+            routeOptionsForFirstReroute.routeOptions
+        )
+        val primaryRouteAfterReroute = restoreChargingStationsMetadata(
+            originalRoute,
+            listOf(routeAfterRerouteFromServer)
+        ).first()
+
+        assertEquals(
+            originalRoute.getChargingStationIds(),
+            primaryRouteAfterReroute.getChargingStationIds()
+        )
+        assertEquals(
+            originalRoute.getChargingStationTypes(),
+            primaryRouteAfterReroute.getChargingStationTypes()
         )
     }
 
@@ -612,6 +639,50 @@ class EvRouteOptionsUpdaterTest {
             resourceAsString("testRouteAfterRerouteFromOrigin.json"),
             expectedUrl,
             RouterOrigin.Onboard
+        ).first()
+        return navigationRoute
+    }
+
+
+    private fun createRouteWithRepeatedUserAndServerProvidedChargingStations(): NavigationRoute {
+        val url = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+            "12.757992395990613,62.37862024993083;12.553151736970278,62.543837724908144" +
+            ";12.679051,62.433569;12.960555680729072,62.14843226194216" +
+            "?access_token=***&geometries=polyline6&alternatives=false&overview=full" +
+            "&steps=true&continue_straight=true&annotations=state_of_charge" +
+            "&roundabout_exits=true&voice_instructions=true&banner_instructions=true" +
+            "&enable_refresh=true&waypoints_per_route=true&engine=electric" +
+            "&ev_initial_charge=10000&ev_max_charge=50000" +
+            "&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2" +
+            "&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180" +
+            "&ev_charging_curve=0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000" +
+            "&ev_min_charge_at_charging_station=7000" +
+            "&waypoints.charging_station_power=;;150000;" +
+            "&waypoints.charging_station_current_type=;;dc;" +
+            "&waypoints.charging_station_id=;;ocm-216129;"
+        return NavigationRoute.create(
+            resourceAsString("evRouteRepeatedUserAndServerChargingStations.json"),
+            url,
+            RouterOrigin.Offboard
+        ).first()
+    }
+
+    private fun createRouteWithRepeatedUserAndServerProvidedChargingStationsAfterRerouteOnOrigin(
+        rerouteRouteOptions: RouteOptions
+    ): NavigationRoute {
+        val expectedUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/12.7579924,62.3786202;12.679051,62.433569;12.5531517,62.5438377;12.679051,62.433569;12.679051,62.433569;12.9605557,62.1484323?access_token=***&geometries=polyline6&alternatives=false&overview=full&steps=true&bearings=3.3%2C90%3B%3B%3B%3B%3B&layers=0%3B%3B%3B%3B%3B&continue_straight=true&annotations=state_of_charge&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true&snapping_include_closures=true%3B%3B%3B%3B%3B&snapping_include_static_closures=true%3B%3B%3B%3B%3B&waypoints_per_route=true&waypoints.charging_station_power=%3B150000%3B%3B150000%3B150000%3B&ev_max_charge=50000&ev_charging_curve=0%2C100000%3B40000%2C70000%3B60000%2C30000%3B80000%2C10000&engine=electric&energy_consumption_curve=0%2C300%3B20%2C160%3B80%2C140%3B120%2C180&ev_min_charge_at_charging_station=7000&waypoints.charging_station_id=%3Bocm-216129%3B%3Bocm-216129%3Bocm-216129%3B&waypoints.charging_station_current_type=%3Bdc%3B%3Bdc%3Bdc%3B&ev_add_charging_stops=false&ev_initial_charge=10000&ev_connector_types=ccs_combo_type1%2Cccs_combo_type2"
+        val expectedRouteOptions = RouteOptions.fromUrl(URL(expectedUrl))
+        assertEquals(
+            "Saved route after reroute isn't actual for the given route options. " +
+                "Regenerate route using following url: " +
+                "${rerouteRouteOptions.toUrl("\$MAPBOX_ACCESS_TOKEN")}",
+            expectedRouteOptions.toUrl("***").toString(),
+            rerouteRouteOptions.toUrl("***").toString()
+        )
+        val navigationRoute = NavigationRoute.create(
+            resourceAsString("evRouteRepeatedUserAndServerChargingStationsAfterReroute.json"),
+            expectedUrl,
+            RouterOrigin.Offboard
         ).first()
         return navigationRoute
     }
