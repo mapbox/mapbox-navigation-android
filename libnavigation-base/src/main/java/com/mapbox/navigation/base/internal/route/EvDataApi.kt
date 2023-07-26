@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.internal.route
 
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
@@ -31,18 +32,14 @@ value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonO
     fun getPowerKw(): Int? = jsonMetadata.get("power_kw")?.asInt
     fun getCurrentType(): String? = jsonMetadata.get("current_type")?.asString
     fun isServerProvided(): Boolean = getType() == "charging-station"
-    fun wasRequestedAsUserProvided(): Boolean =
-        jsonMetadata.get("was_requested_as_user_provided")?.asBoolean == true
-
     fun deepCopy() = ChargingStationMetadata(jsonMetadata.deepCopy())
-
-    fun setServerAddedTypeToUserProvided() {
-        jsonMetadata.add("type", JsonPrimitive("charging-station"))
-        jsonMetadata.add("was_requested_as_user_provided", JsonPrimitive(true))
-    }
 
     fun setPowerKw(chargingStationsPowerKw: Int) {
         jsonMetadata.add("power_kw", JsonPrimitive(chargingStationsPowerKw))
+    }
+
+    fun setServerAddedTypeToUserProvided() {
+        jsonMetadata.add("type", JsonPrimitive("charging-station"))
     }
 
     fun setStationId(chargingStationId: String) {
@@ -60,6 +57,15 @@ value class ChargingStationMetadata internal constructor(val jsonMetadata: JsonO
     companion object {
         fun createEmpty() = ChargingStationMetadata(JsonObject())
     }
+}
+
+private const val ADD_CHARGING_STOP_FLAG = "ev_add_charging_stops"
+
+fun RouteOptions.serverAddsChargingStations() =
+    unrecognizedJsonProperties?.get(ADD_CHARGING_STOP_FLAG)?.asBoolean != false
+
+fun doNotAddChargingStationsFlag(): Pair<String, JsonElement> {
+    return ADD_CHARGING_STOP_FLAG to JsonPrimitive(false)
 }
 
 fun RouteOptions.getChargingStationsPower(): List<Int?>? =
