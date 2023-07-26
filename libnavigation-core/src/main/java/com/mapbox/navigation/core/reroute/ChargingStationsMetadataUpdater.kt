@@ -15,8 +15,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-// It's a temporary platform side workaround, the final solution will be on NN side.
-// See https://mapbox.atlassian.net/browse/NN-854
 internal suspend fun restoreChargingStationsMetadata(
     originalRoute: NavigationRoute,
     newRoutes: List<NavigationRoute>,
@@ -35,7 +33,7 @@ internal suspend fun restoreChargingStationsMetadata(
     val updatedResponse = updateChargingStationsTypes(
         updatedResponseWithoutCorrectTypes,
         rerouteRouteOptions,
-        originalRoute.getServerProvidedChargingStationsIds()
+        originalRoute.getServerProvidedChargingStationsInfo()
     )
     // TODO: optimise java memory usage creating a copy of a response NAVAND-1437
     NavigationRoute.create(updatedResponse, rerouteRouteOptions, newPrimaryRoute.origin)
@@ -44,23 +42,23 @@ internal suspend fun restoreChargingStationsMetadata(
 private fun updateChargingStationsTypes(
     response: DirectionsResponse,
     routeOptions: RouteOptions,
-    serverProvidedStationsIds: Set<String>
+    serverProvidedStationsInfo: Map<String, ServerAddedChargingStationInfo>
 ): DirectionsResponse {
     return response.updateWaypoints(routeOptions) {
-        updateChargingStationTypes(it, serverProvidedStationsIds)
+        updateChargingStationTypes(it, serverProvidedStationsInfo)
     }
 }
 
 private fun updateChargingStationTypes(
     waypoints: List<DirectionsWaypoint>,
-    serverProvidedStationsIds: Set<String>
+    serverProvidedStationsInfo: Map<String, ServerAddedChargingStationInfo>
 ): List<DirectionsWaypoint> {
     val updatedWaypoints =
-        waypoints.map { waypoint ->
+        waypoints.mapIndexed { index, waypoint ->
             val waypointUnrecognizedProperties = waypoint.unrecognizedJsonProperties
             val waypointMetadata = waypoint.getWaypointMetadata()
             val stationId = waypointMetadata?.getStationId()
-            if (stationId != null && serverProvidedStationsIds.contains(stationId)) {
+            if (stationId != null && serverProvidedStationsInfo.contains(stationId) && serverProvidedStationsInfo[stationId]?.indexes?.contains(index) == true) {
                 val updatedMetadata = waypointMetadata.deepCopy()
                 updatedMetadata.setServerAddedTypeToUserProvided()
                 val updatedUnrecognizedProperties = waypointUnrecognizedProperties
@@ -76,6 +74,8 @@ private fun updateChargingStationTypes(
     return updatedWaypoints
 }
 
+// It's a temporary platform side workaround, the final solution will be on NN side.
+// See https://mapbox.atlassian.net/browse/NN-854
 private fun updateChargingStationsMetadataBasedOnRequestUrl(
     rerouteRouteOptions: RouteOptions,
     newPrimaryRoute: NavigationRoute
@@ -126,15 +126,26 @@ private fun updateMetadataBasedOnRequestUrl(
     return updatedWaypoints
 }
 
-private fun NavigationRoute.getServerProvidedChargingStationsIds(): Set<String> =
-    this.waypoints?.mapNotNull {
-        val metadata = it.getWaypointMetadata()
-        if (metadata?.isServerProvided() == true) {
-            metadata.getStationId()
-        } else {
-            null
+data class ServerAddedChargingStationInfo(
+    val indexes: MutableList<Int>
+)
+
+private fun NavigationRoute.getServerProvidedChargingStationsInfo(): Map<String, ServerAddedChargingStationInfo> {
+    val result = mutableMapOf<String, ServerAddedChargingStationInfo>()
+    this.waypoints?.forEachIndexed { index, waypoint ->
+        val metadata = waypoint.getWaypointMetadata() ?: return@forEachIndexed
+        val stationId = metadata.getStationId()
+        if (metadata.isServerProvided() && stationId != null) {
+            metadata.getStationId()!! to index
+            if (result.containsKey(stationId)) {
+                result[stationId]?.indexes?.add(index)
+            } else {
+                result[stationId] = ServerAddedChargingStationInfo(mutableListOf(index))
+            }
         }
-    }?.toSet() ?: emptySet()
+    }
+    return result
+}
 
 private fun DirectionsResponse.updateWaypoints(
     routeOptions: RouteOptions,
