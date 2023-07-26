@@ -126,8 +126,8 @@ private fun updateMetadataBasedOnRequestUrl(
     return updatedWaypoints
 }
 
-data class ServerAddedChargingStationInfo(
-    val indexes: MutableList<Int>
+private class ServerAddedChargingStationInfo(
+    val indexes: MutableSet<Int> = mutableSetOf()
 )
 
 private fun NavigationRoute.getServerProvidedChargingStationsInfo(): Map<String, ServerAddedChargingStationInfo> {
@@ -136,11 +136,9 @@ private fun NavigationRoute.getServerProvidedChargingStationsInfo(): Map<String,
         val metadata = waypoint.getWaypointMetadata() ?: return@forEachIndexed
         val stationId = metadata.getStationId()
         if (metadata.isServerProvided() && stationId != null) {
-            metadata.getStationId()!! to index
-            if (result.containsKey(stationId)) {
-                result[stationId]?.indexes?.add(index)
-            } else {
-                result[stationId] = ServerAddedChargingStationInfo(mutableListOf(index))
+            val stationInfo = result[stationId] ?: ServerAddedChargingStationInfo()
+            result[stationId] = stationInfo.apply {
+                indexes.add(index)
             }
         }
     }
