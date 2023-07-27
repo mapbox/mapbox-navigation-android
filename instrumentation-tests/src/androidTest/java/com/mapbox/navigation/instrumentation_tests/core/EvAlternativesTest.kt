@@ -39,7 +39,7 @@ class EvAlternativesTest : BaseCoreNoCleanUpTest() {
 
     @Test
     @Ignore("used for semi manual testing")
-    fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(
+    fun passForkPointToReceiveEvAlternatives() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
     ) {
         val testRouteOptions =

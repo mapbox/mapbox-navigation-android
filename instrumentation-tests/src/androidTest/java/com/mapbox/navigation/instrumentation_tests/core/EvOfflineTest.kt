@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -65,6 +66,51 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             withoutInternet {
                 val routes = navigation.requestRoutes(testRoute.routeOptions)
                 assertTrue(routes is RouteRequestResult.Failure)
+            }
+        }
+    }
+
+    @Test
+    fun offlineEvRouteWithUserProvidedWaypoints() = sdkTest {
+        val testRouteRouteOptions = EvRoutesProvider.getBerlinEvRoute(context).routeOptions.let {
+            val existingUnrecognizedProperties: Map<String, String> = it.unrecognizedJsonProperties
+                ?.map { it.key to it.value!!.asString }?.toMap() ?: emptyMap()
+            it.toBuilder()
+                .coordinatesList(
+                    it.coordinatesList().toMutableList().apply {
+                        add(1, Point.fromLngLat(13.377746,52.51224))
+                    }
+                ).unrecognizedProperties(
+                    existingUnrecognizedProperties + mapOf(
+                        "waypoints.charging_station_power" to ";50000;",
+                        "waypoints.charging_station_current_type" to ";dc;",
+                        "waypoints.charging_station_id" to ";ocm-54453;"
+                    )
+                )
+                .build()
+        }
+        withMapboxNavigationAndOfflineTilesForRegion(
+            OfflineRegions.Berlin,
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { navigation ->
+            withoutInternet {
+                val requestResult = navigation.requestRoutes(testRouteRouteOptions)
+                    .getSuccessfulResultOrThrowException()
+                assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
+                val primaryRoute = requestResult.routes.first()
+                assertEquals(3, primaryRoute.waypoints?.size)
+//                assertEquals(
+//                    listOf(null, "50", null),
+//                    primaryRoute.getChargingStationPowersKW(),
+//                )
+                assertEquals(
+                    listOf(null, "dc", null),
+                    primaryRoute.getChargingStationPowerCurrentTypes()
+                )
+                assertEquals(
+                    listOf(null, "user-provided-charging-station", null),
+                    primaryRoute.getChargingStationTypes()
+                )
             }
         }
     }
