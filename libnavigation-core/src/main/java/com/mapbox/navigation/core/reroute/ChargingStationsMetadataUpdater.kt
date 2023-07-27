@@ -15,8 +15,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-// It's a temporary platform side workaround, the final solution will be on NN side.
-// See https://mapbox.atlassian.net/browse/NN-854
 internal suspend fun restoreChargingStationsMetadata(
     originalRoute: NavigationRoute,
     newRoutes: List<NavigationRoute>,
@@ -27,13 +25,8 @@ internal suspend fun restoreChargingStationsMetadata(
     if (!rerouteRouteOptions.isEVRoute()) {
         return@withContext newRoutes
     }
-    val updatedResponseWithoutCorrectTypes = if (newPrimaryRoute.origin == RouterOrigin.Onboard) {
-        updateChargingStationsMetadataBasedOnRequestUrl(rerouteRouteOptions, newPrimaryRoute)
-    } else {
-        newPrimaryRoute.directionsResponse
-    }
     val updatedResponse = updateChargingStationsTypes(
-        updatedResponseWithoutCorrectTypes,
+        newPrimaryRoute.directionsResponse,
         rerouteRouteOptions,
         originalRoute.getServerProvidedChargingStationsIds()
     )
@@ -71,56 +64,6 @@ private fun updateChargingStationTypes(
                     .build()
             } else {
                 waypoint
-            }
-        }
-    return updatedWaypoints
-}
-
-private fun updateChargingStationsMetadataBasedOnRequestUrl(
-    rerouteRouteOptions: RouteOptions,
-    newPrimaryRoute: NavigationRoute
-): DirectionsResponse {
-    return newPrimaryRoute.directionsResponse.updateWaypoints(rerouteRouteOptions) {
-        updateMetadataBasedOnRequestUrl(rerouteRouteOptions, it)
-    }
-}
-
-private fun updateMetadataBasedOnRequestUrl(
-    rerouteRouteOptions: RouteOptions,
-    waypoints: List<DirectionsWaypoint>
-): List<DirectionsWaypoint> {
-    val chargingStationsPowers = rerouteRouteOptions.getChargingStationsPower()
-    val chargingStationsIds = rerouteRouteOptions.getChargingStationsId()
-    val chargingStationsCurrentTypes = rerouteRouteOptions.getChargingStationsCurrentType()
-    val updatedWaypoints =
-        (waypoints).mapIndexed { waypointIndex, waypoint ->
-            val chargingStationId = chargingStationsIds?.get(waypointIndex)
-            val chargingStationsPower = chargingStationsPowers?.get(waypointIndex)
-                ?.let { it / 1000 }
-            val chargingStationsCurrentType = chargingStationsCurrentTypes?.get(waypointIndex)
-            val updatedMetadata = waypoint.getWaypointMetadataOrEmpty().deepCopy()
-            if (chargingStationsPower != null) {
-                updatedMetadata.setPowerKw(chargingStationsPower)
-            }
-            if (!chargingStationId.isNullOrEmpty()) {
-                updatedMetadata.setStationId(chargingStationId)
-            }
-            if (!chargingStationsCurrentType.isNullOrEmpty()) {
-                updatedMetadata.setCurrentType(chargingStationsCurrentType)
-            }
-            if (waypoint.getWaypointMetadata() == null &&
-                updatedMetadata.jsonMetadata.size() == 0
-            ) {
-                waypoint
-            } else {
-                updatedMetadata.setUserProvidedType()
-                waypoint.toBuilder()
-                    .unrecognizedJsonProperties(
-                        mapOf(
-                            "metadata" to updatedMetadata.jsonMetadata
-                        )
-                    )
-                    .build()
             }
         }
     return updatedWaypoints
