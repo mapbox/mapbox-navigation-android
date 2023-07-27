@@ -36,13 +36,25 @@ fun Waypoint.isServerAddedWaypoint(): Boolean =
 
 /**
  * Return the index of **next requested** coordinate. See [RouteOptions.coordinatesList]
+ *
+ * For instance, EV waypoints are not requested explicitly, so they are not taken into account.
  */
-fun indexOfNextWaypoint(
+fun indexOfNextRequestedCoordinate(
     waypoints: List<Waypoint>,
     remainingWaypoints: Int,
 ): Int? {
-    if (remainingWaypoints > waypoints.size || remainingWaypoints == 0) {
+    if (remainingWaypoints > waypoints.size) {
         return null
     }
-    return waypoints.size - remainingWaypoints
+    val nextWaypointIndex = waypoints.size - remainingWaypoints
+    var requestedIndex = 0
+    waypoints.forEachIndexed { index, waypoint ->
+        if (waypoint.isRequestedWaypoint()) {
+            if (index >= nextWaypointIndex) {
+                return requestedIndex
+            }
+            requestedIndex++
+        }
+    }
+    return null
 }

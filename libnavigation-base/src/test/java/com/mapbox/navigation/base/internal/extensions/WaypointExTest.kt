@@ -276,7 +276,7 @@ class WaypointExTest {
                         Waypoint.InternalType.Regular
                     ),
                     2,
-                    3,
+                    2,
                 ),
                 arrayOf(
                     "Next index: 3 for 5 relevant waypoints and remaining waypoint 2",
@@ -362,7 +362,7 @@ class WaypointExTest {
             assertEquals(
                 testDescription,
                 expectedIndex,
-                indexOfNextWaypoint(waypoints, remainingWaypoints)
+                indexOfNextRequestedCoordinate(waypoints, remainingWaypoints)
             )
         }
     }
