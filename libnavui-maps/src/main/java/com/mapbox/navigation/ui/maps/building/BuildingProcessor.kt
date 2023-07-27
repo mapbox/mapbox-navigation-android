@@ -66,7 +66,6 @@ internal object BuildingProcessor {
     }
 
     private fun getBuildingLocation(legWaypointIndex: Int, progress: RouteProgress): Point? {
-        val routeOptions = progress.navigationRoute.routeOptions
         val waypoints = progress.navigationRoute.internalWaypoints()
         val legWaypoints = waypoints.filter { it.isLegWaypoint() }
         val waypoint = legWaypoints.getOrNull(legWaypointIndex)
@@ -74,11 +73,11 @@ internal object BuildingProcessor {
         if (waypoint.target != null) {
             return waypoint.target
         }
-        if (!waypoint.isRequestedWaypoint(routeOptions)) {
+        if (!waypoint.isRequestedWaypoint()) {
             return waypoint.location
         }
         val nonRequestedWaypointsCount = legWaypoints.take(legWaypointIndex + 1)
-            .count { !it.isRequestedWaypoint(routeOptions) }
+            .count { !it.isRequestedWaypoint() }
         return progress.navigationRoute.routeOptions.coordinatesList()
             .getOrNull(legWaypointIndex - nonRequestedWaypointsCount)
     }
