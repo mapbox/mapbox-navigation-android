@@ -15,10 +15,6 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequ
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRoutes
-import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationIds
-import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationPowerCurrentTypes
-import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationPowersKW
-import com.mapbox.navigation.instrumentation_tests.utils.routes.getChargingStationTypes
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
@@ -227,7 +223,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
 
     @Test
-    fun deviateFromOnlinePrimaryRouteWithoutInternetAndGetBackOnline() = sdkTest(
+    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
     ) {
         val originalTestRoute = setupBerlinEvRoute()
@@ -237,9 +233,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             OfflineRegions.Berlin,
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
-            navigation.registerRouteAlternativesObserver(
-                AdvancedAlternativesObserverFromDocumentation(navigation)
-            )
             navigation.startTripSession()
             val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
                 .getSuccessfulResultOrThrowException()
@@ -249,8 +242,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 listOf(3, 3),
                 requestResult.routes.map { it.waypoints?.size }
             )
-            val initialOnlineRoutes = requestResult.routes
-            navigation.setNavigationRoutesAsync(initialOnlineRoutes)
+            navigation.setNavigationRoutesAsync(requestResult.routes)
 
             withoutInternet {
                 stayOnPosition(
@@ -263,67 +255,11 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                         .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
                     assertEquals(RouterOrigin.Onboard, newRoutes.navigationRoutes.first().origin)
                     assertEquals(
-                        "Fallback to offline navigation doesn't change a trip plan",
-                        initialOnlineRoutes.first().waypoints?.map { it.location() }?.drop(1),
-                        newRoutes.navigationRoutes.first().waypoints?.map { it.location() }?.drop(1)
-                    )
-                    assertEquals(
-                        "Fallback to offline navigation doesn't change a trip plan",
-                        initialOnlineRoutes.first().getChargingStationIds(),
-                        newRoutes.navigationRoutes.first().getChargingStationIds()
-                    )
-                    assertEquals(
-                        "Fallback to offline navigation doesn't change charging stations power",
-                        initialOnlineRoutes.first().getChargingStationPowersKW(),
-                        newRoutes.navigationRoutes.first().getChargingStationPowersKW()
-                    )
-                    assertEquals(
-                        "Fallback to offline navigation doesn't " +
-                            "change charging station current type",
-                        initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
-                        newRoutes.navigationRoutes.first().getChargingStationPowerCurrentTypes()
-                    )
-                    assertEquals(
-                        "Fallback to offline navigation doesn't change charging station type",
-                        initialOnlineRoutes.first().getChargingStationTypes(),
-                        newRoutes.navigationRoutes.first().getChargingStationTypes()
+                        "onboard router doesn't add waypoints",
+                        newRoutes.navigationRoutes.map { 2 },
+                        newRoutes.navigationRoutes.map { it.waypoints?.size }
                     )
                 }
-            }
-            stayOnPosition(
-                // off route position
-                latitude = testRouteAfterReroute.origin.latitude(),
-                longitude = testRouteAfterReroute.origin.longitude(),
-                bearing = 280.0f
-            ) {
-                val onlineRoutesUpdate = navigation.routesUpdates()
-                    .first { it.navigationRoutes.first().origin == RouterOrigin.Offboard }
-                val onlineRoute = onlineRoutesUpdate.navigationRoutes.first()
-                assertEquals(
-                    "Switch back to an online route doesn't change a trip plan",
-                    initialOnlineRoutes.first().waypoints?.map { it.location() }?.drop(1),
-                    onlineRoute.waypoints?.map { it.location() }?.drop(1)
-                )
-                assertEquals(
-                    "Switch back to an online route doesn't change a trip plan",
-                    initialOnlineRoutes.first().getChargingStationIds(),
-                    onlineRoute.getChargingStationIds()
-                )
-                assertEquals(
-                    "Switch back to an online route doesn't change charging stations power",
-                    initialOnlineRoutes.first().getChargingStationPowersKW(),
-                    onlineRoute.getChargingStationPowersKW()
-                )
-                assertEquals(
-                    "Switch back to an online route doesn't change charging station current type",
-                    initialOnlineRoutes.first().getChargingStationPowerCurrentTypes(),
-                    onlineRoute.getChargingStationPowerCurrentTypes()
-                )
-                assertEquals(
-                    "Switch back to an online route doesn't change charging station type",
-                    initialOnlineRoutes.first().getChargingStationTypes(),
-                    onlineRoute.getChargingStationTypes()
-                )
             }
         }
     }
