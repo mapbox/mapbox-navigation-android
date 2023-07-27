@@ -760,6 +760,9 @@ package com.mapbox.navigation.core.replay.route {
 
 package com.mapbox.navigation.core.reroute {
 
+  public final class ChargingStationsMetadataUpdaterKt {
+  }
+
   public final class MapboxRerouteControllerKt {
   }
 

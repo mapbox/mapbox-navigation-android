@@ -91,6 +91,7 @@ fun createNavigationStatus(
         upcomingRouteAlertUpdates,
         nextWaypointIndex,
         layer,
+        false,
     )
 }
 

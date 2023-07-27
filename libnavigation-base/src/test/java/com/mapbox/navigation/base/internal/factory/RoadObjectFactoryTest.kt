@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongest
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
 import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType
+import com.mapbox.navigation.base.trip.model.roadobject.incident.TrafficCodeInfo
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
 import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingArea
 import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingAreaInfo
@@ -250,6 +251,10 @@ class RoadObjectFactoryTest {
                 INCIDENT_SUB_TYPE,
                 INCIDENT_SUB_TYPE_DESCRIPTION,
                 INCIDENT_ALERT_CODES,
+                mapOf(
+                    "jartic_regulation_code" to TrafficCodeInfo(600),
+                    "jartic_cause_code" to TrafficCodeInfo(400),
+                ),
                 USA_CODE_2,
                 USA_CODE_3,
                 listOf(INCIDENT_LANES_BLOCKED),
@@ -489,6 +494,10 @@ class RoadObjectFactoryTest {
             INCIDENT_SUB_TYPE,
             INCIDENT_SUB_TYPE_DESCRIPTION,
             INCIDENT_ALERT_CODES,
+            hashMapOf(
+                "jartic_regulation_code" to 600,
+                "jartic_cause_code" to 400,
+            ),
             INCIDENT_LONG_DESCRIPTION,
             INCIDENT_LANES_CLEAR_DESC,
             INCIDENT_NUM_LANES_BLOCKED,

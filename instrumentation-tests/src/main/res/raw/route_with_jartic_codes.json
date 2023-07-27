@@ -1,0 +1,228 @@
+{
+  "routes": [
+    {
+      "weight_typical": 11.135,
+      "duration_typical": 11.421,
+      "weight_name": "auto",
+      "weight": 11.271,
+      "duration": 11.56,
+      "distance": 263.003,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "JPN",
+              "iso_3166_1": "JP"
+            }
+          ],
+          "incidents": [
+            {
+              "id": "8197267209395880",
+              "type": "construction",
+              "creation_time": "2023-07-27T15:45:00Z",
+              "start_time": "2023-07-27T15:45:00Z",
+              "end_time": "2023-07-27T16:00:00Z",
+              "iso_3166_1_alpha2": "JP",
+              "iso_3166_1_alpha3": "JPN",
+              "description": "1st driving lane restriction",
+              "sub_type": "construction",
+              "sub_type_description": "Construction",
+              "alertc_codes": [
+                449,
+                31
+              ],
+              "traffic_codes": {
+                "jartic_cause_code": 449,
+                "jartic_regulation_code": 31
+              },
+              "lanes_blocked": [],
+              "length": 1784,
+              "south": 34.837169,
+              "west": 137.513519,
+              "north": 34.845829,
+              "east": 137.528656,
+              "congestion": {
+                "value": 101
+              },
+              "geometry_index_start": 0,
+              "geometry_index_end": 2,
+              "affected_road_names": [
+                "Tomei Expwy"
+              ],
+              "affected_road_names_by_language": [
+                {
+                  "language": "ja",
+                  "names": [
+                    "E1/東名高速道路"
+                  ]
+                },
+                {
+                  "language": "en",
+                  "names": [
+                    "Tomei Expwy"
+                  ]
+                }
+              ]
+            }
+          ],
+          "weight_typical": 11.135,
+          "duration_typical": 11.421,
+          "weight": 11.271,
+          "duration": 11.56,
+          "steps": [
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive southeast on <say-as interpret-as=\"address\">Tomei Expwy</say-as>. Then You will arrive at your destination.</prosody></amazon:effect></speak>",
+                  "announcement": "Drive southeast on Tomei Expwy. Then You will arrive at your destination.",
+                  "distanceAlongGeometry": 263.003
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">You have arrived at your destination.</prosody></amazon:effect></speak>",
+                  "announcement": "You have arrived at your destination.",
+                  "distanceAlongGeometry": 118.056
+                }
+              ],
+              "intersections": [
+                {
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    120
+                  ],
+                  "duration": 8.98,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 8.756,
+                  "geometry_index": 0,
+                  "location": [
+                    137.52814,
+                    34.837394
+                  ]
+                },
+                {
+                  "bearings": [
+                    119,
+                    294
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 1,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 5,
+                  "location": [
+                    137.530165,
+                    34.836621
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive southeast on Tomei Expwy.",
+                "bearing_after": 120,
+                "bearing_before": 0,
+                "location": [
+                  137.52814,
+                  34.837394
+                ]
+              },
+              "name": "Tomei Expwy",
+              "weight_typical": 11.135,
+              "duration_typical": 11.421,
+              "duration": 11.56,
+              "distance": 263.003,
+              "driving_side": "left",
+              "weight": 11.271,
+              "mode": "driving",
+              "geometry": "cxhmaAws`ieGxFoOfE{N|HiXrJk`@tKob@vNib@"
+            },
+            {
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    299
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 6,
+                  "location": [
+                    137.53073,
+                    34.836369
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "You have arrived at your destination.",
+                "bearing_after": 0,
+                "bearing_before": 119,
+                "location": [
+                  137.53073,
+                  34.836369
+                ]
+              },
+              "name": "Tomei Expwy",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "left",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "axfmaAsueieG??"
+            }
+          ],
+          "distance": 263.003,
+          "summary": "Tomei Expwy"
+        }
+      ],
+      "geometry": "cxhmaAws`ieGxFoOfE{N|HiXrJk`@tKob@vNib@",
+      "voiceLocale": "en-US"
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 2.687,
+      "name": "E1",
+      "location": [
+        137.52814,
+        34.837394
+      ]
+    },
+    {
+      "distance": 0.327,
+      "name": "E1",
+      "location": [
+        137.53073,
+        34.836369
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "route_with_jartic_codes"
+}
