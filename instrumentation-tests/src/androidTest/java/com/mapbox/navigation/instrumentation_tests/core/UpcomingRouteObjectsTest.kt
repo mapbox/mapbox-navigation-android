@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import org.junit.Assert.assertEquals
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
@@ -150,6 +151,38 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             .filter { it.roadObject.objectType == RoadObjectType.JCT }
         assertEquals(1, upcomingJunctions.size)
         assertEquals("Ariake JCT", (upcomingJunctions[0].roadObject as Junction).name[0].value)
+    }
+
+    @Test
+    @Ignore("NN does not support AG yet")
+    fun incidentTrafficCodesTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
+        mapboxNavigation.startTripSession()
+        val origin = Point.fromLngLat(137.52814, 34.837394)
+        stayOnPosition(origin)
+        setUpRoutes(
+            R.raw.route_with_jartic_codes,
+            "137.5281542766699,34.83741480073306;137.53072840419628,34.83636637489471"
+        )
+
+        val upcomingIncidents = mapboxNavigation.routeProgressUpdates()
+            .first {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.navigationRoute.id.startsWith("route_with_jartic_codes")
+            }
+            .upcomingRoadObjects
+            .filter { it.roadObject.objectType == RoadObjectType.INCIDENT }
+        assertEquals(1, upcomingIncidents.size)
+        val incident = upcomingIncidents[0].roadObject as Incident
+        println("[ddlog] ${incident.info.trafficCodes}")
+        assertEquals(
+            31,
+            incident.info.trafficCodes["jartic_regulation_code"]
+        )
+        assertEquals(
+            449,
+            incident.info.trafficCodes["jartic_cause_code"]
+        )
     }
 
     @Test

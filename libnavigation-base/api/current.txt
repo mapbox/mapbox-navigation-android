@@ -1508,6 +1508,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
     method public java.util.Date? getStartTime();
     method public String? getSubType();
     method public String? getSubTypeDescription();
+    method public java.util.Map<java.lang.String,com.mapbox.navigation.base.trip.model.roadobject.incident.TrafficCodeInfo> getTrafficCodes();
     method public int getType();
     method public boolean isClosed();
     property public final java.util.List<java.lang.String>? affectedRoadNames;
@@ -1528,6 +1529,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
     property public final java.util.Date? startTime;
     property public final String? subType;
     property public final String? subTypeDescription;
+    property public final java.util.Map<java.lang.String,com.mapbox.navigation.base.trip.model.roadobject.incident.TrafficCodeInfo> trafficCodes;
     property public final int type;
   }
 
@@ -1549,6 +1551,11 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
   }
 
   @IntDef({com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ACCIDENT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.CONGESTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.CONSTRUCTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.DISABLED_VEHICLE, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.LANE_RESTRICTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.MASS_TRANSIT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.MISCELLANEOUS, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.OTHER_NEWS, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.PLANNED_EVENT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ROAD_CLOSURE, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ROAD_HAZARD, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.WEATHER}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface IncidentType.Type {
+  }
+
+  public final class TrafficCodeInfo {
+    method public int getValue();
+    property public final int value;
   }
 
 }

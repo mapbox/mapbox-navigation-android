@@ -1,0 +1,1 @@
+- Added `IncidentInfo#trafficCodes` property.
