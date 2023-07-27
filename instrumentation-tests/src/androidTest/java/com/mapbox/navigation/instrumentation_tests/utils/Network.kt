@@ -13,8 +13,6 @@ import org.junit.Assume.assumeTrue
 private const val LOG_TAG = "TestNetwork"
 
 suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
-    // Doesn't work stable on old devices
-    assumeTrue(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
     withoutWifiAndMobileData {
         mockWebServerRule.withoutWebServer {
             block()
@@ -60,7 +58,7 @@ private suspend fun assumeNetworkIsReachable() {
 private enum class WaitResult { SUCCESS, TIMEOUT }
 
 private suspend fun waitForHostReachability(expectedReachability: Boolean): WaitResult =
-    withTimeoutOrNull(20_000) {
+    withTimeoutOrNull(10_000) {
         withContext(Dispatchers.IO) {
             while (true) {
                 val actualReachability = checkReachability()
