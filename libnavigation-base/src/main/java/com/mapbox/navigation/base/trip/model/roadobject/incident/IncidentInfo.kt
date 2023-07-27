@@ -21,6 +21,8 @@ import java.util.Date
  * @param subType sub-type of the incident.
  * @param subTypeDescription sub-type-specific description.
  * @param alertcCodes alertC codes.
+ * @param trafficCodes map of traffic code names to their values.
+ *  For example, the map may contain info about jartic_regulation_code and jartic_cause_code.
  * @param countryCodeAlpha2 ISO 3166-1, 2 letter country code.
  * @param countryCodeAlpha3 ISO 3166-1, 3 letter country code.
  * @param lanesBlocked lanes which are blocked. Might be: LEFT, LEFT CENTER, LEFT TURN LANE, CENTER,
@@ -47,6 +49,7 @@ class IncidentInfo internal constructor(
     val subType: String?,
     val subTypeDescription: String?,
     val alertcCodes: List<Int>?,
+    val trafficCodes: Map<String, TrafficCodeInfo>,
     val countryCodeAlpha2: String?,
     val countryCodeAlpha3: String?,
     val lanesBlocked: List<String>,
@@ -77,6 +80,7 @@ class IncidentInfo internal constructor(
         if (subType != other.subType) return false
         if (subTypeDescription != other.subTypeDescription) return false
         if (alertcCodes != other.alertcCodes) return false
+        if (trafficCodes != other.trafficCodes) return false
         if (countryCodeAlpha2 != other.countryCodeAlpha2) return false
         if (countryCodeAlpha3 != other.countryCodeAlpha3) return false
         if (lanesBlocked != other.lanesBlocked) return false
@@ -104,6 +108,7 @@ class IncidentInfo internal constructor(
         result = 31 * result + subType.hashCode()
         result = 31 * result + subTypeDescription.hashCode()
         result = 31 * result + alertcCodes.hashCode()
+        result = 31 * result + trafficCodes.hashCode()
         result = 31 * result + countryCodeAlpha2.hashCode()
         result = 31 * result + countryCodeAlpha3.hashCode()
         result = 31 * result + lanesBlocked.hashCode()
@@ -131,6 +136,7 @@ class IncidentInfo internal constructor(
             "subType=$subType, " +
             "subTypeDescription=$subTypeDescription, " +
             "alertcCodes=$alertcCodes, " +
+            "trafficCodes=$trafficCodes, " +
             "countryCodeAlpha2=$countryCodeAlpha2, " +
             "countryCodeAlpha3=$countryCodeAlpha3, " +
             "lanesBlocked=$lanesBlocked, " +
