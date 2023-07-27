@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.bridge.Bridge
 import com.mapbox.navigation.base.trip.model.roadobject.custom.Custom
 import com.mapbox.navigation.base.trip.model.roadobject.ic.Interchange
 import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
+import com.mapbox.navigation.base.trip.model.roadobject.incident.TrafficCodeInfo
 import com.mapbox.navigation.base.trip.model.roadobject.jct.Junction
 import com.mapbox.navigation.base.trip.model.roadobject.merge.MergingArea
 import com.mapbox.navigation.base.trip.model.roadobject.notification.Notification
@@ -240,6 +241,7 @@ private fun IncidentInfo.toIncidentInfo() =
         subType,
         subTypeDescription,
         alertcCodes,
+        trafficCodes.entries.associate { it.key to TrafficCodeInfo(it.value) },
         iso_3166_1_alpha2,
         iso_3166_1_alpha3,
         lanesBlocked,
