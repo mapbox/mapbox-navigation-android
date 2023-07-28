@@ -50,7 +50,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import org.junit.Assert.assertEquals
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
@@ -154,7 +153,6 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @Ignore("NN does not support AG yet")
     fun incidentTrafficCodesTest() = sdkTest {
         mapboxNavigation = createMapboxNavigation()
         mapboxNavigation.startTripSession()
@@ -174,7 +172,6 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             .filter { it.roadObject.objectType == RoadObjectType.INCIDENT }
         assertEquals(1, upcomingIncidents.size)
         val incident = upcomingIncidents[0].roadObject as Incident
-        println("[ddlog] ${incident.info.trafficCodes}")
         assertEquals(
             31,
             incident.info.trafficCodes["jartic_regulation_code"]
