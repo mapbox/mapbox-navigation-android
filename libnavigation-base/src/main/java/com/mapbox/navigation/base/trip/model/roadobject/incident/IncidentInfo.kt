@@ -49,7 +49,7 @@ class IncidentInfo internal constructor(
     val subType: String?,
     val subTypeDescription: String?,
     val alertcCodes: List<Int>?,
-    val trafficCodes: Map<String, TrafficCodeInfo>,
+    val trafficCodes: Map<String, Int>,
     val countryCodeAlpha2: String?,
     val countryCodeAlpha3: String?,
     val lanesBlocked: List<String>,
