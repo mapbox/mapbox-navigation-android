@@ -489,6 +489,7 @@ class RoadObjectFactoryTest {
             INCIDENT_SUB_TYPE,
             INCIDENT_SUB_TYPE_DESCRIPTION,
             INCIDENT_ALERT_CODES,
+            HashMap(),
             INCIDENT_LONG_DESCRIPTION,
             INCIDENT_LANES_CLEAR_DESC,
             INCIDENT_NUM_LANES_BLOCKED,
