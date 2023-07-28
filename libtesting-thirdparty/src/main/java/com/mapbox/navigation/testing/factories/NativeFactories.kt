@@ -59,7 +59,8 @@ fun createNavigationStatus(
     upcomingRouteAlertUpdates: List<UpcomingRouteAlertUpdate> = emptyList(),
     nextWaypointIndex: Int = 0,
     layer: Int = 0,
-    alternativeRouteIndices: List<RouteIndices> = emptyList()
+    alternativeRouteIndices: List<RouteIndices> = emptyList(),
+    isSyntheticLocation: Boolean = false
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
@@ -91,6 +92,7 @@ fun createNavigationStatus(
         upcomingRouteAlertUpdates,
         nextWaypointIndex,
         layer,
+        isSyntheticLocation
     )
 }
 
