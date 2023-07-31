@@ -724,6 +724,8 @@ class MapboxRouteLineApi(
                         .resourceProvider
                         .routeLineColorResources
                         .routeUnknownCongestionColor,
+                    routeLineOptions.softGradientTransition,
+                    routeLineOptions.displaySoftGradientForTraffic,
                     workingExpressionData
                 )
             }
@@ -959,6 +961,7 @@ class MapboxRouteLineApi(
 
     internal fun getRouteLineDynamicDataForMaskingLayers(
         segments: List<RouteLineExpressionData>,
+        distance: Double,
         legIndex: Int
     ): RouteLineDynamicData {
         val alteredSegments = alternativelyStyleSegmentsNotInLeg(
@@ -973,6 +976,8 @@ class MapboxRouteLineApi(
                 .resourceProvider
                 .routeLineColorResources
                 .routeUnknownCongestionColor,
+            routeLineOptions.softGradientTransition / distance,
+            routeLineOptions.displaySoftGradientForTraffic,
             alteredSegments
         )
         val mainExp = MapboxRouteLineUtils.getRouteLineExpression(
@@ -1051,7 +1056,7 @@ class MapboxRouteLineApi(
             val numLegs = navRoute.directionsRoute.legs()?.size ?: 0
             val legIndex = currentLegProgress.legIndex
             if (numLegs > 1 && legIndex < numLegs) {
-                getRouteLineDynamicDataForMaskingLayers(routeLineExpressionData, legIndex)
+                getRouteLineDynamicDataForMaskingLayers(routeLineExpressionData, navRoute.directionsRoute.distance(), legIndex)
             } else {
                 null
             }
@@ -1126,7 +1131,8 @@ class MapboxRouteLineApi(
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
-                val expected = ifNonNull(primaryRoute?.directionsRoute?.legs()) { routeLegs ->
+                val directionsRoute = primaryRoute?.directionsRoute
+                val expected = ifNonNull(directionsRoute, directionsRoute?.legs()) { directionsRoute, routeLegs ->
                     if (legIndexToHighlight in 0..routeLegs.lastIndex) {
                         val updatedRouteData = alternativelyStyleSegmentsNotInLeg(
                             legIndexToHighlight,
@@ -1174,6 +1180,8 @@ class MapboxRouteLineApi(
                                     .resourceProvider
                                     .routeLineColorResources
                                     .routeUnknownCongestionColor,
+                                routeLineOptions.softGradientTransition / directionsRoute.distance(),
+                                routeLineOptions.displaySoftGradientForTraffic,
                                 updatedRouteData
                             )
                         }
@@ -1858,8 +1866,9 @@ class MapboxRouteLineApi(
                 RouteLineExpressionProvider { exp }
             }
 
-        val maskingLayerData = if ((primaryRoute?.route?.directionsRoute?.legs()?.size ?: 0) > 1) {
-            getRouteLineDynamicDataForMaskingLayers(routeLineExpressionData, legIndex)
+        val route = primaryRoute?.route?.directionsRoute
+        val maskingLayerData = if (route != null && (route.legs()?.size ?: 0) > 1) {
+            getRouteLineDynamicDataForMaskingLayers(routeLineExpressionData, route.distance(), legIndex)
         } else {
             val exp = MapboxRouteLineUtils.getRouteLineExpression(
                 1.0,

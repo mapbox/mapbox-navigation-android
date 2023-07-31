@@ -1720,6 +1720,158 @@ class MapboxRouteLineApiRoboTest {
     }
 
     @Test
+    fun setRoutes_displaySoftGradientForTraffic() = coroutineRule.runBlockingTest {
+        val colors = RouteLineColorResources.Builder()
+            .routeLowCongestionColor(Color.GRAY)
+            .routeUnknownCongestionColor(Color.LTGRAY)
+            .routeDefaultColor(Color.BLUE)
+            .routeLineTraveledColor(Color.RED)
+            .routeLineTraveledCasingColor(Color.MAGENTA)
+            .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegUnknownCongestionColor(Color.CYAN)
+            .inactiveRouteLegLowCongestionColor(Color.rgb(22, 99, 66))
+            .inactiveRouteLegModerateCongestionColor(Color.rgb(33, 99, 66))
+            .inactiveRouteLegHeavyCongestionColor(Color.rgb(44, 99, 66))
+            .inactiveRouteLegSevereCongestionColor(Color.rgb(55, 99, 66))
+            .build()
+        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(resources)
+            .displaySoftGradientForTraffic(true)
+            .softGradientTransition(30)
+            .styleInactiveRouteLegsIndependently(true)
+            .withVanishingRouteLineEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(options)
+
+        val expectedTrafficExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.46930494817835106),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48220037017458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48220037018458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5147467093417488),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+        )
+        val expectedTrailExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
+        val expectedMaskingTrafficExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.46930494817835106),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48220037017458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48220037018458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5147467093417488),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
+        val expectedMaskingTrailExpressionContents = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
+
+        val result = api.setNavigationRoutes(listOf(multiLegRouteWithOverlap.navigationRoute))
+
+        checkExpression(
+            expectedTrafficExpressionContents,
+            result.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
+                .generateExpression()
+        )
+        checkExpression(
+            expectedMaskingTrafficExpressionContents,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
+                .generateExpression()
+        )
+        checkExpression(
+            expectedTrailExpressionContents,
+            result.value!!.primaryRouteLineData.dynamicData.trailExpressionProvider!!
+                .generateExpression()
+        )
+        checkExpression(
+            expectedMaskingTrailExpressionContents,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider!!
+                .generateExpression()
+        )
+    }
+
+    @Test
     fun setRoutesWithCallback() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
@@ -1974,6 +2126,138 @@ class MapboxRouteLineApiRoboTest {
                     .generateExpression()
             )
         }
+
+    @Test
+    fun updateWithRouteProgress_displaySoftGradientForTraffic() = coroutineRule.runBlockingTest {
+        val colors = RouteLineColorResources.Builder()
+            .routeLowCongestionColor(Color.GRAY)
+            .routeUnknownCongestionColor(Color.LTGRAY)
+            .routeDefaultColor(Color.BLUE)
+            .routeLineTraveledColor(Color.RED)
+            .routeLineTraveledCasingColor(Color.MAGENTA)
+            .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegUnknownCongestionColor(Color.CYAN)
+            .inactiveRouteLegLowCongestionColor(Color.rgb(22, 99, 66))
+            .inactiveRouteLegModerateCongestionColor(Color.rgb(33, 99, 66))
+            .inactiveRouteLegHeavyCongestionColor(Color.rgb(44, 99, 66))
+            .inactiveRouteLegSevereCongestionColor(Color.rgb(55, 99, 66))
+            .build()
+        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(resources)
+            .displaySoftGradientForTraffic(true)
+            .softGradientTransition(30)
+            .styleInactiveRouteLegsIndependently(true)
+            .withVanishingRouteLineEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(options)
+        api.setNavigationRoutes(listOf(multiLegRouteWithOverlap.navigationRoute), -1)
+        val routeProgress = mockRouteProgress(multiLegRouteWithOverlap.navigationRoute)
+        every { routeProgress.currentRouteGeometryIndex } returns 15
+
+        val expectedTrafficExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.46930494817835106),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48220037017458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48220037018458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5147467093417488),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+        )
+        val expectedMaskingTrafficExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.46930494817835106),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48220037017458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48220037018458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5147467093417488),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+        )
+
+        var callbackCalled = false
+        api.updateWithRouteProgress(routeProgress) { result ->
+            checkExpression(
+                expectedTrafficExpressionContents,
+                result.value!!.primaryRouteLineDynamicData.trafficExpressionProvider!!
+                    .generateExpression()
+            )
+            checkExpression(
+                expectedMaskingTrafficExpressionContents,
+                result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
+                    .generateExpression()
+            )
+            callbackCalled = true
+        }
+        assertTrue(callbackCalled)
+    }
 
     @Test
     fun `updateWithRouteProgress with restrictions across legs when inactiveLegStyling and leg 0`() =
@@ -2534,6 +2818,111 @@ class MapboxRouteLineApiRoboTest {
     }
 
     @Test
+    fun updateTraveledRouteLine_displaySoftGradientForTraffic() = coroutineRule.runBlockingTest {
+        val colors = RouteLineColorResources.Builder()
+            .routeLowCongestionColor(Color.GRAY)
+            .routeUnknownCongestionColor(Color.LTGRAY)
+            .routeDefaultColor(Color.BLUE)
+            .routeLineTraveledColor(Color.RED)
+            .routeLineTraveledCasingColor(Color.MAGENTA)
+            .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegUnknownCongestionColor(Color.CYAN)
+            .inactiveRouteLegLowCongestionColor(Color.rgb(22, 99, 66))
+            .inactiveRouteLegModerateCongestionColor(Color.rgb(33, 99, 66))
+            .inactiveRouteLegHeavyCongestionColor(Color.rgb(44, 99, 66))
+            .inactiveRouteLegSevereCongestionColor(Color.rgb(55, 99, 66))
+            .build()
+        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(resources)
+            .displaySoftGradientForTraffic(true)
+            .softGradientTransition(30)
+            .styleInactiveRouteLegsIndependently(true)
+            .withVanishingRouteLineEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(options)
+        val route = multiLegRouteWithOverlap.navigationRoute
+        val lineString = LineString.fromPolyline(
+            route.directionsRoute.geometry() ?: "",
+            Constants.PRECISION_6
+        )
+        api.setNavigationRoutes(listOf(route))
+        val routeProgress = mockRouteProgress(route)
+        every { routeProgress.currentRouteGeometryIndex } returns 15
+        api.updateUpcomingRoutePointIndex(routeProgress)
+        api.updateVanishingPointState(routeProgress.currentState)
+        val result = api.updateTraveledRouteLine(lineString.coordinates()[16])
+
+        val expectedTrafficExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+            DoubleChecker(0.3775848671450963),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+            DoubleChecker(0.3775848671450963),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.46930494817835106),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48220037017458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48220037018458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5147467093417488),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+        )
+        val expectedMaskingTrafficExpressionContents = listOf(
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.3775848671550963),
+            )
+        )
+
+        checkExpression(
+            expectedTrafficExpressionContents,
+            result.value!!.primaryRouteLineDynamicData.trafficExpressionProvider!!
+                .generateExpression()
+        )
+        checkExpression(
+            expectedMaskingTrafficExpressionContents,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
+                .generateExpression()
+        )
+        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider)
+        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionProvider)
+    }
+
+    @Test
     fun updateTraveledRouteLine_pointUpdateIntervalRespected() =
         coroutineRule.runBlockingTest {
             val options = MapboxRouteLineOptions.Builder(ctx)
@@ -2940,6 +3329,104 @@ class MapboxRouteLineApiRoboTest {
                 .casingExpressionProvider.generateExpression()
         )
     }
+
+    @Test
+    fun setVanishingOffset_displaySoftGradientForTraffic() = coroutineRule.runBlockingTest {
+        val colors = RouteLineColorResources.Builder()
+            .routeLowCongestionColor(Color.GRAY)
+            .routeUnknownCongestionColor(Color.LTGRAY)
+            .routeDefaultColor(Color.BLUE)
+            .routeLineTraveledColor(Color.RED)
+            .routeLineTraveledCasingColor(Color.MAGENTA)
+            .inActiveRouteLegsColor(Color.YELLOW)
+            .inactiveRouteLegUnknownCongestionColor(Color.CYAN)
+            .inactiveRouteLegLowCongestionColor(Color.rgb(22, 99, 66))
+            .inactiveRouteLegModerateCongestionColor(Color.rgb(33, 99, 66))
+            .inactiveRouteLegHeavyCongestionColor(Color.rgb(44, 99, 66))
+            .inactiveRouteLegSevereCongestionColor(Color.rgb(55, 99, 66))
+            .build()
+        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(resources)
+            .displaySoftGradientForTraffic(true)
+            .softGradientTransition(30)
+            .styleInactiveRouteLegsIndependently(true)
+            .withVanishingRouteLineEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(options)
+        val route = multiLegRouteWithOverlap.navigationRoute
+        api.setNavigationRoutes(listOf(route))
+        val result = api.setVanishingOffset(.4)
+
+        val expectedTrafficExpressionContents = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.4),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.4),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.4),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48220037017458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48220037018458817),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.48481010101499833),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49040955817278464),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.49222381941898674),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.503940915637458),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.5055971863970301),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5131917124217056),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.5147467093417488),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+        )
+        val expectedMaskingTrafficExpressionContents = listOf(
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.4),
+            )
+        )
+
+        checkExpression(
+            expectedTrafficExpressionContents,
+            result.value!!.primaryRouteLineDynamicData.trafficExpressionProvider!!
+                .generateExpression()
+        )
+        checkExpression(
+            expectedMaskingTrafficExpressionContents,
+            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
+                .generateExpression()
+        )
+        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider)
+        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionProvider)
+    }
+
 
     @Test
     fun setVanishingOffset_withRestrictionsEnabledPrimaryRouteNull() {
