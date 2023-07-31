@@ -274,8 +274,14 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                     relaxedExpectedCoordinates = true
                 )
             )
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.flowLocationMatcherResult().first()
+            stayOnPosition(
+                startCoordinates.first().latitude(),
+                startCoordinates.first().longitude(),
+                30f
+            ) {
+                mapboxNavigation.startTripSession()
+                mapboxNavigation.flowLocationMatcherResult().first()
+            }
             mapboxNavigation.setNavigationRoutesAsync(routes)
             mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
 
