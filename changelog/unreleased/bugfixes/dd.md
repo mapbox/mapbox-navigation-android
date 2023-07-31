@@ -1,0 +1,1 @@
+- Fixed an issue where soft gradient was not applied for active legs.
