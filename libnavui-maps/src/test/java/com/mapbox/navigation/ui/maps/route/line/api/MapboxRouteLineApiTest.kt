@@ -1549,6 +1549,7 @@ class MapboxRouteLineApiTest {
 
         val result = MapboxRouteLineApi(options).getRouteLineDynamicDataForMaskingLayers(
             segments,
+            multilegRouteWithOverlap.navigationRoute.directionsRoute.distance(),
             1
         )
 
