@@ -1967,8 +1967,8 @@ internal object MapboxRouteLineUtils {
                 RouteLineTrimExpressionProvider { trimmedOffsetExpression },
                 restrictedSectionExpressionProvider =
                 RouteLineTrimExpressionProvider { trimmedOffsetExpression },
-                trailExpressionProvider = { trimmedOffsetExpression },
-                trailCasingExpressionProvider = { trimmedOffsetExpression },
+                trailExpressionProvider = null,
+                trailCasingExpressionProvider = null,
             )
         } else {
             null
