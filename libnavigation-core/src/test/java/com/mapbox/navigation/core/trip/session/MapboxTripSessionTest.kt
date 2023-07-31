@@ -35,6 +35,7 @@ import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoint
 import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.factories.createNavigationStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FixLocation
@@ -877,6 +878,96 @@ class MapboxTripSessionTest {
                 assertTrue(route === refreshedRoutes[i])
             }
             assertEquals(tripSession.primaryRoute, refreshedRoutes.first())
+        }
+
+    @Test
+    fun `refresh route updates primary route only when all routes are refreshed`() =
+        coroutineRule.runBlockingTest {
+            every {
+                getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any())
+            } answers {
+                callOriginal()
+            }
+            val progressObserver = mockk<RouteProgressObserver>(relaxed = true)
+            val routeProgresses = mutableListOf<RouteProgress>()
+            every { progressObserver.onRouteProgressChanged(capture(routeProgresses)) } just Runs
+            val mockAlternativesMetadata1 = listOf<RouteAlternative>(mockk())
+            val mockAlternativesMetadata2 = listOf<RouteAlternative>(mockk(), mockk())
+            val originalRoute1 = mockk<NavigationRoute>(relaxed = true) {
+                every { id } returns "id0"
+            }
+            val originalRoute2 = mockk<NavigationRoute>(relaxed = true) {
+                every { id } returns "id0"
+            }
+            val refreshedRoute1 = mockk<NavigationRoute>(relaxed = true) {
+                every { id } returns "id0"
+            }
+            tripSession.start(true)
+            val navigatorObserverSlot = slot<NavigatorObserver>()
+            verify { navigator.addNavigatorObserver(capture(navigatorObserverSlot)) }
+            val navigatorObserver = navigatorObserverSlot.captured
+            tripSession.registerRouteProgressObserver(progressObserver)
+            tripSession.setRoutes(
+                listOf(originalRoute1, originalRoute2),
+                SetRoutes.NewRoutes(0)
+            )
+
+            val refreshedRoutes = listOf(
+                refreshedRoute1,
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id1"
+                },
+            )
+            coEvery {
+                navigator.refreshRoute(refreshedRoutes[0])
+            } coAnswers {
+                delay(300)
+                ExpectedFactory.createValue(mockAlternativesMetadata2)
+            }
+            coEvery {
+                navigator.refreshRoute(refreshedRoutes[1])
+            } coAnswers {
+                delay(500)
+                ExpectedFactory.createValue(mockAlternativesMetadata1)
+            }
+
+            refreshedRoutes.forEachIndexed { i, route ->
+                every { route.refreshNativePeer() } returns refreshedRoutes[i]
+            }
+
+            tripSession.start(true)
+            coroutineRule.testDispatcher.pauseDispatcher()
+            val job = coroutineRule.coroutineScope.launch {
+                tripSession.setRoutes(
+                    refreshedRoutes,
+                    SetRoutes.RefreshRoutes(routeProgressData),
+                )
+            }
+
+            navigatorObserver.onStatus(
+                NavigationStatusOrigin.UNCONDITIONAL,
+                createNavigationStatus()
+            )
+            assertTrue(routeProgresses.last().navigationRoute === originalRoute1)
+
+            coroutineRule.testDispatcher.advanceTimeBy(501)
+
+            navigatorObserver.onStatus(
+                NavigationStatusOrigin.UNCONDITIONAL,
+                createNavigationStatus()
+            )
+            assertTrue(routeProgresses.last().navigationRoute === originalRoute1)
+
+            coroutineRule.testDispatcher.advanceTimeBy(301)
+            assertTrue(job.isCompleted)
+
+            navigatorObserver.onStatus(
+                NavigationStatusOrigin.UNCONDITIONAL,
+                createNavigationStatus()
+            )
+            assertTrue(routeProgresses.last().navigationRoute === refreshedRoute1)
+
+            coroutineRule.testDispatcher.resumeDispatcher()
         }
 
     @Test
