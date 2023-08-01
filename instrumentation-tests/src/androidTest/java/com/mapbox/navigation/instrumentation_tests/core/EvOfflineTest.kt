@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -159,18 +160,34 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         sdkTest(
             timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
         ) {
+            val originBearing = 290.0f
+            val chargingStationId = "ocm-54453"
+            val chargingStationCurrentType = "dc"
+            val chargingStationPower = 50_000
+            val chargingStationPowerKw = chargingStationPower / 1000
+            val chargingStationLocation = Point.fromLngLat(13.361342, 52.498064)
             val routeOptions = EvRoutesProvider.berlinEvRouteOptions(
                 null,
                 mapOf(
-                    "waypoints.charging_station_power" to ";50000;",
-                    "waypoints.charging_station_current_type" to ";dc;",
-                    "waypoints.charging_station_id" to ";ocm-54453;"
+                    "waypoints.charging_station_power" to ";$chargingStationPower;",
+                    "waypoints.charging_station_current_type" to ";$chargingStationCurrentType;",
+                    "waypoints.charging_station_id" to ";$chargingStationId;"
                 )
             ).let {
                 it.toBuilder()
                     .coordinatesList(it.coordinatesList().toMutableList().apply {
-                        add(1, Point.fromLngLat(13.361342,52.498064))
+                        add(1, chargingStationLocation)
                     })
+                    .bearingsList(
+                        listOf(
+                            null,
+                            Bearing.builder()
+                                .degrees(45.0)
+                                .angle(originBearing.toDouble())
+                                .build(),
+                            null
+                        )
+                    )
                     .build()
             }
             val origin = routeOptions.coordinatesList().first()
@@ -185,7 +202,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 stayOnPosition(
                     origin.latitude(),
                     origin.longitude(),
-                    290.0f,
+                    originBearing,
                 ) {
                     withoutInternet {
                         val requestResult = navigation.requestRoutes(routeOptions)
@@ -198,15 +215,15 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                             offlinePrimaryRoute.getChargingStationsType()
                         )
                         assertEquals(
-                            listOf(null, "50", null),
+                            listOf(null, "$chargingStationPowerKw", null),
                             offlinePrimaryRoute.getChargingStationsPowerKw()
                         )
                         assertEquals(
-                            listOf(null, "ocm-54453", null),
+                            listOf(null, chargingStationId, null),
                             offlinePrimaryRoute.getChargingStationsId()
                         )
                         assertEquals(
-                            listOf(null, "dc", null),
+                            listOf(null, chargingStationCurrentType, null),
                             offlinePrimaryRoute.getChargingStationsCurrentType()
                         )
                     }
@@ -221,15 +238,15 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                         onlinePrimaryRoute.getChargingStationsType()
                     )
                     assertEquals(
-                        listOf(null, "50", null),
+                        listOf(null, "$chargingStationPowerKw", null),
                         onlinePrimaryRoute.getChargingStationsPowerKw()
                     )
                     assertEquals(
-                        listOf(null, "ocm-54453", null),
+                        listOf(null, chargingStationId, null),
                         onlinePrimaryRoute.getChargingStationsId()
                     )
                     assertEquals(
-                        listOf(null, "dc", null),
+                        listOf(null, chargingStationCurrentType, null),
                         onlinePrimaryRoute.getChargingStationsCurrentType()
                     )
                 }
