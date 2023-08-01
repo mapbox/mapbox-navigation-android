@@ -159,7 +159,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         sdkTest(
             timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
         ) {
-            val testRoute = EvRoutesProvider.getBerlinEvRouteWithUserProvidedChargingStation(context)
+            val testRoute = setupBerlinEvRouteWithCustomProvidedChargingStation()
             withMapboxNavigationAndOfflineTilesForRegion(
                 OfflineRegions.Berlin,
                 historyRecorderRule = mapboxHistoryTestRule
@@ -191,28 +191,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 }
             }
         }
-
-    private fun verifyUserProvidedChargingStationMetadata(
-        offlinePrimaryRoute: NavigationRoute,
-        testRoute: MockedEvRouteWithSingleUserProvidedChargingStation
-    ) {
-        assertEquals(
-            listOf(null, "user-provided-charging-station", null),
-            offlinePrimaryRoute.getChargingStationsType()
-        )
-        assertEquals(
-            listOf(null, "${testRoute.chargingStationPowerKw}", null),
-            offlinePrimaryRoute.getChargingStationsPowerKw()
-        )
-        assertEquals(
-            listOf(null, testRoute.chargingStationId, null),
-            offlinePrimaryRoute.getChargingStationsId()
-        )
-        assertEquals(
-            listOf(null, testRoute.currentType, null),
-            offlinePrimaryRoute.getChargingStationsCurrentType()
-        )
-    }
 
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOfflineWithSimpleObserver() =
@@ -360,6 +338,16 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         )
         mockWebServerRule.requestHandlers.add(evRouteRequestHandler)
     }
+
+    private fun setupBerlinEvRouteWithCustomProvidedChargingStation(): MockedEvRouteWithSingleUserProvidedChargingStation {
+        val testRoute = EvRoutesProvider.getBerlinEvRouteWithUserProvidedChargingStation(
+            context,
+            null
+            //mockWebServerRule.baseUrl
+        )
+        mockWebServerRule.requestHandlers.add(testRoute.mockWebServerHandler)
+        return testRoute
+    }
 }
 
 /**
@@ -442,4 +430,26 @@ private fun NavigationRoute.getWaypointMetadata(name: String): List<String?> {
     return waypoints?.map {
         it.unrecognizedJsonProperties?.get("metadata")?.asJsonObject?.get(name)?.asString
     } ?: emptyList()
+}
+
+private fun verifyUserProvidedChargingStationMetadata(
+    offlinePrimaryRoute: NavigationRoute,
+    testRoute: MockedEvRouteWithSingleUserProvidedChargingStation
+) {
+    assertEquals(
+        listOf(null, "user-provided-charging-station", null),
+        offlinePrimaryRoute.getChargingStationsType()
+    )
+    assertEquals(
+        listOf(null, "${testRoute.chargingStationPowerKw}", null),
+        offlinePrimaryRoute.getChargingStationsPowerKw()
+    )
+    assertEquals(
+        listOf(null, testRoute.chargingStationId, null),
+        offlinePrimaryRoute.getChargingStationsId()
+    )
+    assertEquals(
+        listOf(null, testRoute.currentType, null),
+        offlinePrimaryRoute.getChargingStationsCurrentType()
+    )
 }

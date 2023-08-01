@@ -67,7 +67,8 @@ object EvRoutesProvider {
     }
 
     fun getBerlinEvRouteWithUserProvidedChargingStation(
-        context: Context
+        context: Context,
+        baseUrl: String?
     ): MockedEvRouteWithSingleUserProvidedChargingStation {
         val originBearing = Bearing.builder()
             .degrees(45.0)
@@ -110,6 +111,11 @@ object EvRoutesProvider {
                     "waypoints.charging_station_id" to ";$chargingStationId;"
                 )
             )
+            .apply {
+                if (baseUrl != null) {
+                    baseUrl(baseUrl)
+                }
+            }
             .build()
         val origin = routeOptions.coordinatesList().first()
         return MockedEvRouteWithSingleUserProvidedChargingStation(
