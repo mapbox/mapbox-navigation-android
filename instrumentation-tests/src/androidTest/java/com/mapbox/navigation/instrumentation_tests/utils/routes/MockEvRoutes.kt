@@ -125,7 +125,10 @@ object EvRoutesProvider {
             routeOptions,
             MockDirectionsRequestHandler(
                 profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-                jsonResponse = readRawFileText(context, R.raw.ev_routes_berlin_user_provided_charging_station),
+                jsonResponse = readRawFileText(
+                    context,
+                    R.raw.ev_routes_berlin_user_provided_charging_station
+                ),
                 expectedCoordinates = routeOptions.coordinatesList(),
                 routeOptionsFilter = {
                     it.unrecognizedJsonProperties

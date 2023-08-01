@@ -155,7 +155,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun startNavigationOfflineWithUserProvidedChargingStationsThenSwitchToOnlineRouteWhenInternetAppears() =
+    fun startOfflineWithUserProvidedChargingStationsThenSwitchToOnlineRouteWhenInternetAppears() =
         sdkTest(
             timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
         ) {
@@ -339,11 +339,13 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         mockWebServerRule.requestHandlers.add(evRouteRequestHandler)
     }
 
-    private fun setupBerlinEvRouteWithCustomProvidedChargingStation(): MockedEvRouteWithSingleUserProvidedChargingStation {
+    private fun setupBerlinEvRouteWithCustomProvidedChargingStation():
+        MockedEvRouteWithSingleUserProvidedChargingStation {
         val testRoute = EvRoutesProvider.getBerlinEvRouteWithUserProvidedChargingStation(
             context,
-            //null,
-            mockWebServerRule.baseUrl
+            // Use real server for a while
+            null,
+            // mockWebServerRule.baseUrl
         )
         mockWebServerRule.requestHandlers.add(testRoute.mockWebServerHandler)
         return testRoute
