@@ -3,10 +3,6 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.Bearing
-import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -18,6 +14,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTe
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRouteWithSingleUserProvidedChargingStation
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
@@ -162,50 +159,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         sdkTest(
             timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
         ) {
-            val originBearing = 290.0f
-            val chargingStationId = "ocm-54453"
-            val chargingStationCurrentType = "dc"
-            val chargingStationPower = 50_000
-            val chargingStationPowerKw = chargingStationPower / 1000
-            val chargingStationLocation = Point.fromLngLat(13.361342, 52.498064)
-            val routeOptions = RouteOptions.builder()
-                .applyDefaultNavigationOptions()
-                .coordinatesList(
-                    listOf(
-                        Point.fromLngLat(13.361378213031003, 52.49813341962201),
-                        chargingStationLocation,
-                        Point.fromLngLat(13.393450988895268, 52.50913924804004)
-                    )
-                )
-                .bearingsList(
-                    listOf(
-                        null,
-                        Bearing.builder()
-                            .degrees(45.0)
-                            .angle(originBearing.toDouble())
-                            .build(),
-                        null
-                    )
-                )
-                .annotations("state_of_charge")
-                .alternatives(true)
-                .waypointsPerRoute(true)
-                .unrecognizedProperties(
-                    mapOf(
-                        "engine" to "electric",
-                        "ev_initial_charge" to "1000",
-                        "ev_max_charge" to "50000",
-                        "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
-                        "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
-                        "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
-                        "ev_min_charge_at_charging_station" to "1",
-                        "waypoints.charging_station_power" to ";$chargingStationPower;",
-                        "waypoints.charging_station_current_type" to ";$chargingStationCurrentType;",
-                        "waypoints.charging_station_id" to ";$chargingStationId;"
-                    )
-                )
-                .build()
-            val origin = routeOptions.coordinatesList().first()
+            val testRoute = EvRoutesProvider.getBerlinEvRouteWithUserProvidedChargingStation(context)
             withMapboxNavigationAndOfflineTilesForRegion(
                 OfflineRegions.Berlin,
                 historyRecorderRule = mapboxHistoryTestRule
@@ -215,32 +169,17 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 )
                 navigation.startTripSession()
                 stayOnPosition(
-                    origin.latitude(),
-                    origin.longitude(),
-                    originBearing,
+                    testRoute.origin.latitude(),
+                    testRoute.origin.longitude(),
+                    testRoute.originBearing,
                 ) {
                     withoutInternet {
-                        val requestResult = navigation.requestRoutes(routeOptions)
+                        val requestResult = navigation.requestRoutes(testRoute.routeOptions)
                             .getSuccessfulResultOrThrowException()
                         assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
                         navigation.setNavigationRoutesAsync(requestResult.routes)
                         val offlinePrimaryRoute = requestResult.routes.first()
-                        assertEquals(
-                            listOf(null, "user-provided-charging-station", null),
-                            offlinePrimaryRoute.getChargingStationsType()
-                        )
-                        assertEquals(
-                            listOf(null, "$chargingStationPowerKw", null),
-                            offlinePrimaryRoute.getChargingStationsPowerKw()
-                        )
-                        assertEquals(
-                            listOf(null, chargingStationId, null),
-                            offlinePrimaryRoute.getChargingStationsId()
-                        )
-                        assertEquals(
-                            listOf(null, chargingStationCurrentType, null),
-                            offlinePrimaryRoute.getChargingStationsCurrentType()
-                        )
+                        verifyUserProvidedChargingStationMetadata(offlinePrimaryRoute, testRoute)
                     }
                     val onlineRoutes = navigation.routesUpdates().first {
                         it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW &&
@@ -248,25 +187,32 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     }
                     val onlinePrimaryRoute = onlineRoutes.navigationRoutes.first()
 
-                    assertEquals(
-                        listOf(null, "user-provided-charging-station", null),
-                        onlinePrimaryRoute.getChargingStationsType()
-                    )
-                    assertEquals(
-                        listOf(null, "$chargingStationPowerKw", null),
-                        onlinePrimaryRoute.getChargingStationsPowerKw()
-                    )
-                    assertEquals(
-                        listOf(null, chargingStationId, null),
-                        onlinePrimaryRoute.getChargingStationsId()
-                    )
-                    assertEquals(
-                        listOf(null, chargingStationCurrentType, null),
-                        onlinePrimaryRoute.getChargingStationsCurrentType()
-                    )
+                    verifyUserProvidedChargingStationMetadata(onlinePrimaryRoute, testRoute)
                 }
             }
         }
+
+    private fun verifyUserProvidedChargingStationMetadata(
+        offlinePrimaryRoute: NavigationRoute,
+        testRoute: MockedEvRouteWithSingleUserProvidedChargingStation
+    ) {
+        assertEquals(
+            listOf(null, "user-provided-charging-station", null),
+            offlinePrimaryRoute.getChargingStationsType()
+        )
+        assertEquals(
+            listOf(null, "${testRoute.chargingStationPowerKw}", null),
+            offlinePrimaryRoute.getChargingStationsPowerKw()
+        )
+        assertEquals(
+            listOf(null, testRoute.chargingStationId, null),
+            offlinePrimaryRoute.getChargingStationsId()
+        )
+        assertEquals(
+            listOf(null, testRoute.currentType, null),
+            offlinePrimaryRoute.getChargingStationsCurrentType()
+        )
+    }
 
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOfflineWithSimpleObserver() =
