@@ -4,7 +4,9 @@ import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -166,30 +168,43 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             val chargingStationPower = 50_000
             val chargingStationPowerKw = chargingStationPower / 1000
             val chargingStationLocation = Point.fromLngLat(13.361342, 52.498064)
-            val routeOptions = EvRoutesProvider.berlinEvRouteOptions(
-                null,
-                mapOf(
-                    "waypoints.charging_station_power" to ";$chargingStationPower;",
-                    "waypoints.charging_station_current_type" to ";$chargingStationCurrentType;",
-                    "waypoints.charging_station_id" to ";$chargingStationId;"
-                )
-            ).let {
-                it.toBuilder()
-                    .coordinatesList(it.coordinatesList().toMutableList().apply {
-                        add(1, chargingStationLocation)
-                    })
-                    .bearingsList(
-                        listOf(
-                            null,
-                            Bearing.builder()
-                                .degrees(45.0)
-                                .angle(originBearing.toDouble())
-                                .build(),
-                            null
-                        )
+            val routeOptions = RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .coordinatesList(
+                    listOf(
+                        Point.fromLngLat(13.361378213031003, 52.49813341962201),
+                        chargingStationLocation,
+                        Point.fromLngLat(13.393450988895268, 52.50913924804004)
                     )
-                    .build()
-            }
+                )
+                .bearingsList(
+                    listOf(
+                        null,
+                        Bearing.builder()
+                            .degrees(45.0)
+                            .angle(originBearing.toDouble())
+                            .build(),
+                        null
+                    )
+                )
+                .annotations("state_of_charge")
+                .alternatives(true)
+                .waypointsPerRoute(true)
+                .unrecognizedProperties(
+                    mapOf(
+                        "engine" to "electric",
+                        "ev_initial_charge" to "1000",
+                        "ev_max_charge" to "50000",
+                        "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
+                        "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
+                        "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
+                        "ev_min_charge_at_charging_station" to "1",
+                        "waypoints.charging_station_power" to ";$chargingStationPower;",
+                        "waypoints.charging_station_current_type" to ";$chargingStationCurrentType;",
+                        "waypoints.charging_station_id" to ";$chargingStationId;"
+                    )
+                )
+                .build()
             val origin = routeOptions.coordinatesList().first()
             withMapboxNavigationAndOfflineTilesForRegion(
                 OfflineRegions.Berlin,
