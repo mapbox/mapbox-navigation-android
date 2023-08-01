@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.utils.routes
 
 import android.content.Context
+import com.google.gson.JsonElement
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -78,6 +79,11 @@ object EvRoutesProvider {
         val chargingStationCurrentType = "dc"
         val chargingStationPower = 50_000
         val chargingStationLocation = Point.fromLngLat(13.361342, 52.498064)
+        val userProvidedChargingStationRequestParams = mapOf(
+            "waypoints.charging_station_power" to ";$chargingStationPower;",
+            "waypoints.charging_station_current_type" to ";$chargingStationCurrentType;",
+            "waypoints.charging_station_id" to ";$chargingStationId;"
+        )
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .coordinatesList(
@@ -106,10 +112,7 @@ object EvRoutesProvider {
                     "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
                     "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
                     "ev_min_charge_at_charging_station" to "1",
-                    "waypoints.charging_station_power" to ";$chargingStationPower;",
-                    "waypoints.charging_station_current_type" to ";$chargingStationCurrentType;",
-                    "waypoints.charging_station_id" to ";$chargingStationId;"
-                )
+                ) + userProvidedChargingStationRequestParams
             )
             .apply {
                 if (baseUrl != null) {
@@ -120,11 +123,15 @@ object EvRoutesProvider {
         val origin = routeOptions.coordinatesList().first()
         return MockedEvRouteWithSingleUserProvidedChargingStation(
             routeOptions,
-            //TODO: replace
             MockDirectionsRequestHandler(
                 profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-                jsonResponse = "",
+                jsonResponse = readRawFileText(context, R.raw.ev_routes_berlin_user_provided_charging_station),
                 expectedCoordinates = routeOptions.coordinatesList(),
+                routeOptionsFilter = {
+                    it.unrecognizedJsonProperties
+                        .orEmpty()
+                        .containsParameters(userProvidedChargingStationRequestParams)
+                }
             ),
             chargingStationId,
             chargingStationPower,
@@ -159,4 +166,10 @@ object EvRoutesProvider {
             }
         }
         .build()
+}
+
+private fun Map<String, JsonElement>.containsParameters(params: Map<String, String>): Boolean {
+    return params.all {
+        this[it.key]?.asString == it.value
+    }
 }
