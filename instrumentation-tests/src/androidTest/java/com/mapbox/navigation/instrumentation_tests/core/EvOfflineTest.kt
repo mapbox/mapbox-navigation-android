@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -152,6 +153,88 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             }
         }
     }
+
+    @Test
+    fun startNavigationOfflineWithUserProvidedChargingStationsThenSwitchToOnlineRouteWhenInternetAppears() =
+        sdkTest(
+            timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
+        ) {
+            val routeOptions = EvRoutesProvider.berlinEvRouteOptions(
+                null,
+                mapOf(
+                    "waypoints.charging_station_power" to ";50000;",
+                    "waypoints.charging_station_current_type" to ";dc;",
+                    "waypoints.charging_station_id" to ";ocm-54453;"
+                )
+            ).let {
+                it.toBuilder()
+                    .coordinatesList(it.coordinatesList().toMutableList().apply {
+                        add(1, Point.fromLngLat(13.361342,52.498064))
+                    })
+                    .build()
+            }
+            val origin = routeOptions.coordinatesList().first()
+            withMapboxNavigationAndOfflineTilesForRegion(
+                OfflineRegions.Berlin,
+                historyRecorderRule = mapboxHistoryTestRule
+            ) { navigation ->
+                navigation.registerRouteAlternativesObserver(
+                    AdvancedAlternativesObserverFromDocumentation(navigation)
+                )
+                navigation.startTripSession()
+                stayOnPosition(
+                    origin.latitude(),
+                    origin.longitude(),
+                    290.0f,
+                ) {
+                    withoutInternet {
+                        val requestResult = navigation.requestRoutes(routeOptions)
+                            .getSuccessfulResultOrThrowException()
+                        assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
+                        navigation.setNavigationRoutesAsync(requestResult.routes)
+                        val offlinePrimaryRoute = requestResult.routes.first()
+                        assertEquals(
+                            listOf(null, "user-provided-charging-station", null),
+                            offlinePrimaryRoute.getChargingStationsType()
+                        )
+                        assertEquals(
+                            listOf(null, "50", null),
+                            offlinePrimaryRoute.getChargingStationsPowerKw()
+                        )
+                        assertEquals(
+                            listOf(null, "ocm-54453", null),
+                            offlinePrimaryRoute.getChargingStationsId()
+                        )
+                        assertEquals(
+                            listOf(null, "dc", null),
+                            offlinePrimaryRoute.getChargingStationsCurrentType()
+                        )
+                    }
+                    val onlineRoutes = navigation.routesUpdates().first {
+                        it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW &&
+                            it.navigationRoutes.first().origin == RouterOrigin.Offboard
+                    }
+                    val onlinePrimaryRoute = onlineRoutes.navigationRoutes.first()
+
+                    assertEquals(
+                        listOf(null, "user-provided-charging-station", null),
+                        onlinePrimaryRoute.getChargingStationsType()
+                    )
+                    assertEquals(
+                        listOf(null, "50", null),
+                        onlinePrimaryRoute.getChargingStationsPowerKw()
+                    )
+                    assertEquals(
+                        listOf(null, "ocm-54453", null),
+                        onlinePrimaryRoute.getChargingStationsId()
+                    )
+                    assertEquals(
+                        listOf(null, "dc", null),
+                        onlinePrimaryRoute.getChargingStationsCurrentType()
+                    )
+                }
+            }
+        }
 
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOfflineWithSimpleObserver() =
@@ -370,4 +453,15 @@ class SimpleAlternativesObserverFromDocumentation(
     override fun onRouteAlternativesError(error: RouteAlternativesError) {
         Log.e("SimpleAlternativesObserverFromDocumentation", "error: $error", error.throwable)
     }
+}
+
+private fun NavigationRoute.getChargingStationsType() = getWaypointMetadata("type")
+private fun NavigationRoute.getChargingStationsPowerKw() = getWaypointMetadata("power_kw")
+private fun NavigationRoute.getChargingStationsCurrentType() = getWaypointMetadata("current_type")
+private fun NavigationRoute.getChargingStationsId() = getWaypointMetadata("station_id")
+
+private fun NavigationRoute.getWaypointMetadata(name: String): List<String?> {
+    return waypoints?.map {
+        it.unrecognizedJsonProperties?.get("metadata")?.asJsonObject?.get(name)?.asString
+    } ?: emptyList()
 }

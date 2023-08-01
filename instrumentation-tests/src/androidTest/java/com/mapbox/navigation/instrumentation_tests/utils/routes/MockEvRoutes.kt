@@ -53,7 +53,10 @@ object EvRoutesProvider {
         return MockedEvRoutes(newRouteOptions, newRouteOnlineRouteRequestHandler)
     }
 
-    private fun berlinEvRouteOptions(baseUrl: String?): RouteOptions = RouteOptions.builder()
+    fun berlinEvRouteOptions(
+        baseUrl: String?,
+        additionalUnrecognizedProperties: Map<String, String> = emptyMap()
+    ): RouteOptions = RouteOptions.builder()
         .applyDefaultNavigationOptions()
         .coordinates("13.361378213031003,52.49813341962201;13.393450988895268,52.50913924804004")
         .annotations("state_of_charge")
@@ -68,7 +71,7 @@ object EvRoutesProvider {
                 "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
                 "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
                 "ev_min_charge_at_charging_station" to "1"
-            )
+            ) + additionalUnrecognizedProperties
         )
         .apply {
             if (baseUrl != null) {
