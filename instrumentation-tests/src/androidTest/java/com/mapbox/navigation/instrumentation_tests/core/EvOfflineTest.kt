@@ -434,23 +434,23 @@ private fun NavigationRoute.getWaypointMetadata(name: String): List<String?> {
 }
 
 private fun verifyUserProvidedChargingStationMetadata(
-    offlinePrimaryRoute: NavigationRoute,
+    route: NavigationRoute,
     testRoute: MockedEvRouteWithSingleUserProvidedChargingStation
 ) {
     assertEquals(
         listOf(null, "user-provided-charging-station", null),
-        offlinePrimaryRoute.getChargingStationsType()
+        route.getChargingStationsType()
     )
     assertEquals(
         listOf(null, "${testRoute.chargingStationPowerKw}", null),
-        offlinePrimaryRoute.getChargingStationsPowerKw()
+        route.getChargingStationsPowerKw()
     )
     assertEquals(
         listOf(null, testRoute.chargingStationId, null),
-        offlinePrimaryRoute.getChargingStationsId()
+        route.getChargingStationsId()
     )
     assertEquals(
         listOf(null, testRoute.currentType, null),
-        offlinePrimaryRoute.getChargingStationsCurrentType()
+        route.getChargingStationsCurrentType()
     )
 }
