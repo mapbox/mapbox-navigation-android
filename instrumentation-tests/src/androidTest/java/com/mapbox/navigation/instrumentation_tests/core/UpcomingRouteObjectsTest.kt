@@ -30,6 +30,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.assertions.compareIdWithIncidentId
 import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
@@ -195,13 +196,13 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         val upcomingIncidentForOneLeg = mapboxNavigation.routeProgressUpdates()
             .first { it.currentState == RouteProgressState.TRACKING }
             .upcomingRoadObjects
-            .first { it.roadObject.id == incidentId }
+            .first { it.roadObject.compareIdWithIncidentId(incidentId) }
 
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(twoLegsRoute)
         val upcomingIncidentForTwoLegsRoute = mapboxNavigation.routeProgressUpdates()
             .first { it.currentState == RouteProgressState.TRACKING }
             .upcomingRoadObjects
-            .first { it.roadObject.id == incidentId }
+            .first { it.roadObject.compareIdWithIncidentId(incidentId) }
 
         assertEquals(
             upcomingIncidentForOneLeg.distanceToStart!!,

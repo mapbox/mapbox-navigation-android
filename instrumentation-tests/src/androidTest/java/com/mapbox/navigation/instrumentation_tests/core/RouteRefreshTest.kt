@@ -24,6 +24,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
+import com.mapbox.navigation.instrumentation_tests.utils.assertions.compareIdWithIncidentId
 import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
@@ -161,8 +162,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             val roadObjectsFromObserver = mapboxNavigation.roadObjectsOnRoute()
                 .filter { upcomingRoadObjects ->
                     upcomingRoadObjects.size == 2 &&
-                        upcomingRoadObjects.map { it.roadObject.id }
-                            .containsAll(listOf("11589180127444257", "14158569638505033"))
+                        listOf("11589180127444257", "14158569638505033").all { incidentId ->
+                            upcomingRoadObjects.any {
+                                it.roadObject.compareIdWithIncidentId(incidentId)
+                            }
+                        }
                 }
                 .first()
 
