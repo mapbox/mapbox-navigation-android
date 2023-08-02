@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.utils.http
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.testing.ui.http.BaseMockRequestHandler
@@ -7,6 +8,8 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+
+private const val TAG = "MockDirectionsRequestHandler"
 
 /**
  * Mocks a directions response.
@@ -22,6 +25,7 @@ data class MockDirectionsRequestHandler constructor(
     val expectedCoordinates: List<Point>?,
     val relaxedExpectedCoordinates: Boolean = false,
     val coordinatesAccuracyInMeters: Double = 30.0,
+    val routeOptionsFilter: (RouteOptions) -> Boolean = { true }
 ) : BaseMockRequestHandler() {
 
     constructor(
@@ -30,12 +34,14 @@ data class MockDirectionsRequestHandler constructor(
         expectedCoordinates: List<Point>?,
         relaxedExpectedCoordinates: Boolean = false,
         coordinatesAccuracyInMeters: Double = 30.0,
+        routeOptionsFilter: (RouteOptions) -> Boolean = { true }
     ) : this(
         profile,
         { jsonResponse },
         expectedCoordinates,
         relaxedExpectedCoordinates,
         coordinatesAccuracyInMeters,
+        routeOptionsFilter
     )
 
     var jsonResponseModifier: ((String) -> String) = { it }
@@ -50,7 +56,7 @@ data class MockDirectionsRequestHandler constructor(
         }
         if (routeOptions != null) {
             if (relaxedExpectedCoordinates) {
-                return createMockResponse()
+                return provideMockResponse()
             }
             require(expectedCoordinates != null) {
                 "specify expected coordinates if they are not relaxed"
@@ -61,14 +67,25 @@ data class MockDirectionsRequestHandler constructor(
                 coordinatesAccuracyInMeters
             )
             if (coordinatesMatchExpectedAccordingToAccuracy) {
-                return createMockResponse()
+                if (routeOptionsFilter(routeOptions)) {
+                    return provideMockResponse()
+                } else {
+                    Log.w(TAG, "mock response is filtered out by route options filters")
+                }
+            } else {
+                Log.w(
+                    TAG,
+                    "mock response isn't provided because locations doesn't match expected"
+                )
             }
         }
         return null
     }
 
-    private fun createMockResponse() =
-        MockResponse().setBody(jsonResponseModifier(lazyJsonResponse()))
+    private fun provideMockResponse(): MockResponse {
+        Log.d(TAG, "mock response is provided")
+        return MockResponse().setBody(jsonResponseModifier(lazyJsonResponse()))
+    }
 
     private fun coordinatesWithinRadius(
         expected: List<Point>,
