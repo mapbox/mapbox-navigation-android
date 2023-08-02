@@ -75,10 +75,10 @@ object EvRoutesProvider {
             .degrees(45.0)
             .angle(290.0)
             .build()
-        val chargingStationId = "ocm-54453"
+        val chargingStationId = "ocm-54453-test"
         val chargingStationCurrentType = "dc"
         val chargingStationPower = 50_000
-        val chargingStationLocation = Point.fromLngLat(13.361342, 52.498064)
+        val chargingStationLocation = Point.fromLngLat(13.366152, 52.503602)
         val userProvidedChargingStationRequestParams = mapOf(
             "waypoints.charging_station_power" to ";$chargingStationPower;",
             "waypoints.charging_station_current_type" to ";$chargingStationCurrentType;",
