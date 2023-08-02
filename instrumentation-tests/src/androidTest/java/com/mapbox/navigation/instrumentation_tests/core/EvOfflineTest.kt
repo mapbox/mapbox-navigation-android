@@ -344,8 +344,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         val testRoute = EvRoutesProvider.getBerlinEvRouteWithUserProvidedChargingStation(
             context,
             // Use real server for a while
-            null,
-            // mockWebServerRule.baseUrl
+            //null,
+             mockWebServerRule.baseUrl
         )
         mockWebServerRule.requestHandlers.add(testRoute.mockWebServerHandler)
         return testRoute
