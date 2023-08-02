@@ -51,6 +51,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
@@ -535,6 +536,60 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             }.drop(3)
 
         checkRoadObjects(expectedObjectsAfterFirstRefresh, updateAfterRefresh.upcomingRoadObjects)
+    }
+
+    @Test
+    fun duplicateIncidentIdsTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
+        val origin = Point.fromLngLat(139.696561, 35.655992)
+        val positionAlongTheRoute = Point.fromLngLat(139.69483, 35.655424)
+        stayOnPosition(origin)
+        mapboxNavigation.startTripSession()
+        setUpRoutes(
+            R.raw.route_with_duplicate_incidents,
+            "139.696561,35.655992;139.87476,35.017036;139.581421,35.543326"
+        )
+
+        val upcomingIncidentsOnStart = mapboxNavigation.routeProgressUpdates()
+            .first {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.currentRouteGeometryIndex == 0
+            }
+            .upcomingRoadObjects
+            .filter { it.roadObject.objectType == RoadObjectType.INCIDENT }
+
+        val incident1 = upcomingIncidentsOnStart.first()
+        val incident2 = upcomingIncidentsOnStart.last()
+        assertTrue(incident1.roadObject.id.startsWith("5372267336278653"))
+        assertTrue(incident2.roadObject.id.startsWith("5372267336278653"))
+
+        assertTrue(incident2.distanceToStart!! > incident1.distanceToStart!!)
+
+        val distanceDiff = 167.55607
+        stayOnPosition(positionAlongTheRoute)
+        val upcomingRoadObjectsAlongTheRoute = mapboxNavigation.routeProgressUpdates()
+            .first {
+                it.currentState == RouteProgressState.TRACKING &&
+                    it.currentRouteGeometryIndex > 0
+            }
+            .upcomingRoadObjects
+            .filter { it.roadObject.objectType == RoadObjectType.INCIDENT }
+        val updatedIncident1 = upcomingRoadObjectsAlongTheRoute.first()
+        val updatedIncident2 = upcomingRoadObjectsAlongTheRoute.last()
+
+        assertEquals(updatedIncident1.roadObject.id, incident1.roadObject.id)
+        assertEquals(updatedIncident2.roadObject.id, incident2.roadObject.id)
+
+        assertEquals(
+            updatedIncident1.distanceToStart!!,
+            incident1.distanceToStart!! - distanceDiff,
+            tolerance
+        )
+        assertEquals(
+            updatedIncident2.distanceToStart!!,
+            incident2.distanceToStart!! - distanceDiff,
+            tolerance
+        )
     }
 
     private fun stayOnPosition(position: Point, bearing: Float = 0f) {
