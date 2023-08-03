@@ -14,6 +14,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTe
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRouteWithSingleUserProvidedChargingStation
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
@@ -152,6 +153,44 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             }
         }
     }
+
+    @Test
+    fun startOfflineWithUserProvidedChargingStationsThenSwitchToOnlineRouteWhenInternetAppears() =
+        sdkTest(
+            timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
+        ) {
+            val testRoute = setupBerlinEvRouteWithCustomProvidedChargingStation()
+            withMapboxNavigationAndOfflineTilesForRegion(
+                OfflineRegions.Berlin,
+                historyRecorderRule = mapboxHistoryTestRule
+            ) { navigation ->
+                navigation.registerRouteAlternativesObserver(
+                    AdvancedAlternativesObserverFromDocumentation(navigation)
+                )
+                navigation.startTripSession()
+                stayOnPosition(
+                    testRoute.origin.latitude(),
+                    testRoute.origin.longitude(),
+                    testRoute.originBearing,
+                ) {
+                    withoutInternet {
+                        val requestResult = navigation.requestRoutes(testRoute.routeOptions)
+                            .getSuccessfulResultOrThrowException()
+                        assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
+                        navigation.setNavigationRoutesAsync(requestResult.routes)
+                        val offlinePrimaryRoute = requestResult.routes.first()
+                        verifyUserProvidedChargingStationMetadata(offlinePrimaryRoute, testRoute)
+                    }
+                    val onlineRoutes = navigation.routesUpdates().first {
+                        it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW &&
+                            it.navigationRoutes.first().origin == RouterOrigin.Offboard
+                    }
+                    val onlinePrimaryRoute = onlineRoutes.navigationRoutes.first()
+
+                    verifyUserProvidedChargingStationMetadata(onlinePrimaryRoute, testRoute)
+                }
+            }
+        }
 
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOfflineWithSimpleObserver() =
@@ -299,6 +338,17 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         )
         mockWebServerRule.requestHandlers.add(evRouteRequestHandler)
     }
+
+    private fun setupBerlinEvRouteWithCustomProvidedChargingStation():
+        MockedEvRouteWithSingleUserProvidedChargingStation {
+        val testRoute = EvRoutesProvider.getBerlinEvRouteWithUserProvidedChargingStation(
+            context,
+            // Pass null to use a real server
+            mockWebServerRule.baseUrl
+        )
+        mockWebServerRule.requestHandlers.add(testRoute.mockWebServerHandler)
+        return testRoute
+    }
 }
 
 /**
@@ -370,4 +420,37 @@ class SimpleAlternativesObserverFromDocumentation(
     override fun onRouteAlternativesError(error: RouteAlternativesError) {
         Log.e("SimpleAlternativesObserverFromDocumentation", "error: $error", error.throwable)
     }
+}
+
+private fun NavigationRoute.getChargingStationsType() = getWaypointMetadata("type")
+private fun NavigationRoute.getChargingStationsPowerKw() = getWaypointMetadata("power_kw")
+private fun NavigationRoute.getChargingStationsCurrentType() = getWaypointMetadata("current_type")
+private fun NavigationRoute.getChargingStationsId() = getWaypointMetadata("station_id")
+
+private fun NavigationRoute.getWaypointMetadata(name: String): List<String?> {
+    return waypoints?.map {
+        it.unrecognizedJsonProperties?.get("metadata")?.asJsonObject?.get(name)?.asString
+    } ?: emptyList()
+}
+
+private fun verifyUserProvidedChargingStationMetadata(
+    route: NavigationRoute,
+    testRoute: MockedEvRouteWithSingleUserProvidedChargingStation
+) {
+    assertEquals(
+        listOf(null, "user-provided-charging-station", null),
+        route.getChargingStationsType()
+    )
+    assertEquals(
+        listOf(null, "${testRoute.chargingStationPowerKw}", null),
+        route.getChargingStationsPowerKw()
+    )
+    assertEquals(
+        listOf(null, testRoute.chargingStationId, null),
+        route.getChargingStationsId()
+    )
+    assertEquals(
+        listOf(null, testRoute.currentType, null),
+        route.getChargingStationsCurrentType()
+    )
 }
