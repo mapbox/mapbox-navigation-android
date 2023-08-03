@@ -35,7 +35,7 @@ abstract class RoadObject internal constructor(
     val length: Double?,
     val provider: String,
     val isUrban: Boolean?,
-    internal val nativeRoadObject: com.mapbox.navigator.RoadObject,
+    val nativeRoadObject: com.mapbox.navigator.RoadObject,
 ) {
     /**
      * Location of the road object.

@@ -1,0 +1,3406 @@
+{
+  "routes": [
+    {
+      "country_crossed": false,
+      "weight_typical": 1087.672,
+      "duration_typical": 941.326,
+      "weight_name": "auto",
+      "weight": 1216.915,
+      "duration": 1052.199,
+      "distance": 10166.08,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "JPN",
+              "iso_3166_1": "JP"
+            }
+          ],
+          "incidents": [],
+          "weight_typical": 1087.672,
+          "duration_typical": 941.326,
+          "weight": 1216.915,
+          "duration": 1052.199,
+          "steps": [
+            {
+              "bannerInstructions": [
+                {
+                  "view": {
+                    "components": [
+                      {
+                        "imageURL": "https://api-guidance-views-staging.tilestream.net/guidance-views/v1/727833600/jct/CA069301?arrow_ids=CA06930E",
+                        "subType": "jct",
+                        "type": "guidance-view",
+                        "text": ""
+                      }
+                    ],
+                    "type": "fork",
+                    "modifier": "right",
+                    "text": ""
+                  },
+                  "sub": {
+                    "components": [
+                      {
+                        "active": false,
+                        "directions": [
+                          "slight left"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active": false,
+                        "directions": [
+                          "slight left"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active_direction": "straight",
+                        "active": true,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active_direction": "straight",
+                        "active": true,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active_direction": "straight",
+                        "active": true,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      }
+                    ],
+                    "text": ""
+                  },
+                  "secondary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "空港中央"
+                      },
+                      {
+                        "type": "text",
+                        "text": "/"
+                      },
+                      {
+                        "type": "text",
+                        "text": "横浜"
+                      }
+                    ],
+                    "type": "fork",
+                    "modifier": "right",
+                    "text": "空港中央 / 横浜"
+                  },
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Ariake JCT"
+                      }
+                    ],
+                    "type": "fork",
+                    "modifier": "right",
+                    "text": "Ariake JCT"
+                  },
+                  "distanceAlongGeometry": 220.274
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive southwest on <say-as interpret-as=\"address\">Expwy Wangan Line</say-as>. Then Keep right at <say-as interpret-as=\"address\">Ariake JCT</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Drive southwest on Expwy Wangan Line. Then Keep right at Ariake JCT.",
+                  "distanceAlongGeometry": 220.274
+                }
+              ],
+              "intersections": [
+                {
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    236
+                  ],
+                  "duration": 5.085,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 5.085,
+                  "geometry_index": 0,
+                  "location": [
+                    139.790845,
+                    35.634688
+                  ]
+                },
+                {
+                  "bearings": [
+                    56,
+                    237
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 1,
+                  "location": [
+                    139.789811,
+                    35.634114
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive southwest on Expwy Wangan Line.",
+                "bearing_after": 236,
+                "bearing_before": 0,
+                "location": [
+                  139.790845,
+                  35.634688
+                ]
+              },
+              "name": "Expwy Wangan Line",
+              "weight_typical": 9.9,
+              "duration_typical": 9.9,
+              "duration": 9.9,
+              "distance": 220.274,
+              "driving_side": "left",
+              "weight": 9.9,
+              "mode": "driving",
+              "geometry": "__~}bAy~csiGzb@r_A~_@v|@"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for 2 miles.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for 2 miles.",
+                  "distanceAlongGeometry": 3621.062
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Take the <say-as interpret-as=\"address\">Oi</say-as> exit on the left.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Take the Oi exit on the left.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Take the <say-as interpret-as=\"address\">Oi</say-as> exit on the left.</prosody></amazon:effect></speak>",
+                  "announcement": "Take the Oi exit on the left.",
+                  "distanceAlongGeometry": 132.222
+                }
+              ],
+              "intersections": [
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "slight left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "slight left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "location": [
+                    139.788823,
+                    35.633586
+                  ],
+                  "geometry_index": 2,
+                  "admin_index": 0,
+                  "weight": 1.853,
+                  "is_urban": false,
+                  "duration": 1.872,
+                  "bearings": [
+                    57,
+                    228,
+                    236
+                  ],
+                  "out": 2,
+                  "in": 0,
+                  "turn_duration": 0.019,
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    56,
+                    236
+                  ],
+                  "duration": 22.83,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 22.83,
+                  "geometry_index": 3,
+                  "location": [
+                    139.788505,
+                    35.63341
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    56,
+                    236
+                  ],
+                  "duration": 9.511,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 9.511,
+                  "geometry_index": 5,
+                  "location": [
+                    139.783914,
+                    35.630901
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    56,
+                    236
+                  ],
+                  "duration": 8.222,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 8.222,
+                  "geometry_index": 6,
+                  "location": [
+                    139.781948,
+                    35.629836
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    56,
+                    236
+                  ],
+                  "duration": 9.244,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 9.013,
+                  "geometry_index": 7,
+                  "location": [
+                    139.780256,
+                    35.62891
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "location": [
+                    139.778347,
+                    35.627873
+                  ],
+                  "geometry_index": 9,
+                  "admin_index": 0,
+                  "weight": 12.96,
+                  "is_urban": false,
+                  "turn_weight": 1,
+                  "duration": 12.286,
+                  "bearings": [
+                    57,
+                    63,
+                    237
+                  ],
+                  "out": 2,
+                  "in": 0,
+                  "turn_duration": 0.019,
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    56,
+                    236
+                  ],
+                  "duration": 4.4,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 4.4,
+                  "geometry_index": 11,
+                  "location": [
+                    139.775801,
+                    35.626512
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    56,
+                    237
+                  ],
+                  "duration": 1.156,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.156,
+                  "geometry_index": 12,
+                  "location": [
+                    139.774892,
+                    35.626022
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    57,
+                    236
+                  ],
+                  "duration": 25.929,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 25.929,
+                  "geometry_index": 13,
+                  "location": [
+                    139.774652,
+                    35.625893
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "location": [
+                    139.76995,
+                    35.622503
+                  ],
+                  "geometry_index": 20,
+                  "admin_index": 0,
+                  "weight": 5.659,
+                  "is_urban": false,
+                  "turn_weight": 0.75,
+                  "duration": 4.928,
+                  "bearings": [
+                    47,
+                    52,
+                    226
+                  ],
+                  "out": 2,
+                  "in": 0,
+                  "turn_duration": 0.019,
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "bearings": [
+                    48,
+                    226
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 24,
+                  "location": [
+                    139.758599,
+                    35.613763
+                  ]
+                }
+              ],
+              "junction_name": "Ariake JCT",
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Oi"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "mapbox_shield": {
+                          "text_color": "white",
+                          "name": "jp-national-route",
+                          "display_ref": "357",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "type": "icon",
+                        "text": "National Road No.357 Line"
+                      }
+                    ],
+                    "type": "off ramp",
+                    "modifier": "left",
+                    "text": "Oi / National Road No.357 Line"
+                  },
+                  "distanceAlongGeometry": 3647.728
+                },
+                {
+                  "view": {
+                    "components": [
+                      {
+                        "imageURL": "https://api-guidance-views-staging.tilestream.net/guidance-views/v1/727833600/jct/CB293101?arrow_ids=CB29310A",
+                        "subType": "jct",
+                        "type": "guidance-view",
+                        "text": ""
+                      }
+                    ],
+                    "type": "off ramp",
+                    "modifier": "left",
+                    "text": ""
+                  },
+                  "sub": {
+                    "components": [
+                      {
+                        "active_direction": "slight left",
+                        "active": true,
+                        "directions": [
+                          "slight left"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active": false,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active": false,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active": false,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      }
+                    ],
+                    "text": ""
+                  },
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Oi"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "mapbox_shield": {
+                          "text_color": "white",
+                          "name": "jp-national-route",
+                          "display_ref": "357",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "type": "icon",
+                        "text": "National Road No.357 Line"
+                      }
+                    ],
+                    "type": "off ramp",
+                    "modifier": "left",
+                    "text": "Oi / National Road No.357 Line"
+                  },
+                  "distanceAlongGeometry": 402.336
+                }
+              ],
+              "destinations": "空港中央, 横浜",
+              "maneuver": {
+                "type": "fork",
+                "instruction": "Keep right at Ariake JCT toward 空港中央/横浜.",
+                "modifier": "slight right",
+                "bearing_after": 236,
+                "bearing_before": 237,
+                "location": [
+                  139.788823,
+                  35.633586
+                ]
+              },
+              "name": "Expwy Wangan Line",
+              "weight_typical": 179.719,
+              "duration_typical": 176.698,
+              "guidance_views": [
+                {
+                  "overlay_ids": [
+                    "CA06930E"
+                  ],
+                  "base_id": "CA069301",
+                  "type": "jct",
+                  "data_id": "727833600"
+                }
+              ],
+              "duration": 179.463,
+              "distance": 3647.728,
+              "driving_side": "left",
+              "weight": 182.783,
+              "mode": "driving",
+              "geometry": "cz{}bAm``siG~IzRbEfJtuCtrGpaAzyBzx@vhBrh@`kAdVfj@jj@tpAth@llAr]xw@`G~MjGnNtA~C`Rx\\xZdh@|`AhvAp`AttAlUj\\ta@vk@jnDhiF|iIhfLfD`Fln@j{@"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for a half mile.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for a half mile.",
+                  "distanceAlongGeometry": 771.784
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Keep right at the fork.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Keep right at the fork.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Keep right at the fork.</prosody></amazon:effect></speak>",
+                  "announcement": "Keep right at the fork.",
+                  "distanceAlongGeometry": 83.333
+                }
+              ],
+              "intersections": [
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "slight left"
+                      ],
+                      "valid_indication": "slight left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "location": [
+                    139.757633,
+                    35.613004
+                  ],
+                  "geometry_index": 25,
+                  "admin_index": 0,
+                  "weight": 3.703,
+                  "is_urban": false,
+                  "mapbox_streets_v8": {
+                    "class": "trunk_link"
+                  },
+                  "duration": 3.539,
+                  "bearings": [
+                    46,
+                    217,
+                    227
+                  ],
+                  "out": 1,
+                  "in": 0,
+                  "turn_duration": 0.013,
+                  "classes": [
+                    "toll"
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    37,
+                    217
+                  ],
+                  "duration": 8.522,
+                  "mapbox_streets_v8": {
+                    "class": "trunk_link"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 8.949,
+                  "geometry_index": 26,
+                  "location": [
+                    139.75731,
+                    35.612659
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    33,
+                    210
+                  ],
+                  "duration": 6.686,
+                  "mapbox_streets_v8": {
+                    "class": "trunk_link"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 7.02,
+                  "geometry_index": 28,
+                  "location": [
+                    139.756576,
+                    35.61181
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "toll"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    21,
+                    197
+                  ],
+                  "duration": 10.8,
+                  "mapbox_streets_v8": {
+                    "class": "trunk_link"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 11.34,
+                  "geometry_index": 31,
+                  "location": [
+                    139.756147,
+                    35.61107
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    3,
+                    8,
+                    184
+                  ],
+                  "duration": 30.619,
+                  "turn_weight": 11,
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 43.13,
+                  "geometry_index": 37,
+                  "location": [
+                    139.755849,
+                    35.609773
+                  ]
+                },
+                {
+                  "bearings": [
+                    1,
+                    180,
+                    270
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "turn_weight": 0.75,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 41,
+                  "location": [
+                    139.755781,
+                    35.607024
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Keep right at the fork"
+                      }
+                    ],
+                    "type": "fork",
+                    "modifier": "right",
+                    "text": "Keep right at the fork"
+                  },
+                  "distanceAlongGeometry": 785.117
+                }
+              ],
+              "destinations": "Oi",
+              "maneuver": {
+                "type": "off ramp",
+                "instruction": "Take the Oi exit on the left.",
+                "modifier": "slight left",
+                "bearing_after": 217,
+                "bearing_before": 226,
+                "location": [
+                  139.757633,
+                  35.613004
+                ]
+              },
+              "name": "Wangan Road",
+              "weight_typical": 83.869,
+              "duration_typical": 70.724,
+              "guidance_views": [
+                {
+                  "overlay_ids": [
+                    "CB29310A"
+                  ],
+                  "base_id": "CB293101",
+                  "type": "jct",
+                  "data_id": "727833600"
+                }
+              ],
+              "duration": 70.724,
+              "distance": 785.117,
+              "driving_side": "left",
+              "weight": 83.869,
+              "mode": "driving",
+              "ref": "National Road No.357 Line",
+              "geometry": "wss|bAaccqiGpTdShXxVvZ`UvKdHhP|HdOtFtCfAfSjE`NhCjPnB|Il@vKVxHTpQbAjT?`yBl@zi@?"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "sub": {
+                    "components": [
+                      {
+                        "active_direction": "straight",
+                        "active": true,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active_direction": "straight",
+                        "active": true,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      }
+                    ],
+                    "text": ""
+                  },
+                  "primary": {
+                    "components": [
+                      {
+                        "mapbox_shield": {
+                          "text_color": "white",
+                          "name": "jp-national-route",
+                          "display_ref": "357",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "type": "icon",
+                        "text": "National Road No.357 Line"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "slight right",
+                    "text": "National Road No.357 Line"
+                  },
+                  "distanceAlongGeometry": 178.406
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 600 feet, Bear right onto <say-as interpret-as=\"address\">National Road No.357 Line</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "In 600 feet, Bear right onto National Road No.357 Line.",
+                  "distanceAlongGeometry": 169.406
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Bear right onto <say-as interpret-as=\"address\">National Road No.357 Line</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Bear right onto National Road No.357 Line.",
+                  "distanceAlongGeometry": 62
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    0,
+                    177,
+                    189
+                  ],
+                  "duration": 8.436,
+                  "turn_weight": 5,
+                  "turn_duration": 0.036,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 13.82,
+                  "geometry_index": 42,
+                  "location": [
+                    139.755781,
+                    35.606338
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    13,
+                    256
+                  ],
+                  "duration": 6.155,
+                  "turn_weight": 5.25,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 11.713,
+                  "geometry_index": 46,
+                  "location": [
+                    139.755691,
+                    35.605783
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    92,
+                    275
+                  ],
+                  "duration": 2.787,
+                  "turn_weight": 1.05,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 3.976,
+                  "geometry_index": 49,
+                  "location": [
+                    139.755122,
+                    35.605746
+                  ]
+                },
+                {
+                  "bearings": [
+                    0,
+                    95,
+                    179,
+                    273
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "turn_weight": 7.7,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight",
+                        "right"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 3,
+                  "geometry_index": 50,
+                  "location": [
+                    139.754861,
+                    35.605764
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "fork",
+                "instruction": "Keep right at the fork.",
+                "modifier": "slight right",
+                "bearing_after": 189,
+                "bearing_before": 180,
+                "location": [
+                  139.755781,
+                  35.606338
+                ]
+              },
+              "name": "",
+              "weight_typical": 41.843,
+              "duration_typical": 23.798,
+              "duration": 23.798,
+              "distance": 178.406,
+              "driving_side": "left",
+              "weight": 41.843,
+              "mode": "driving",
+              "geometry": "csf|bAio_qiGtGbA~TTfATv@bAv@dAd@fCSb\\c@hOe@fY"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Keep left at the fork"
+                      }
+                    ],
+                    "type": "fork",
+                    "modifier": "left",
+                    "text": "Keep left at the fork"
+                  },
+                  "distanceAlongGeometry": 1278.35
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for 1 mile.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for 1 mile.",
+                  "distanceAlongGeometry": 1261.683
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Keep left at the fork.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Keep left at the fork.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Keep left at the fork.</prosody></amazon:effect></speak>",
+                  "announcement": "Keep left at the fork.",
+                  "distanceAlongGeometry": 60
+                }
+              ],
+              "intersections": [
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "location": [
+                    139.754441,
+                    35.605783
+                  ],
+                  "geometry_index": 51,
+                  "admin_index": 0,
+                  "weight": 34.872,
+                  "is_urban": false,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "turn_duration": 0.09,
+                  "turn_weight": 10.775,
+                  "duration": 23.04,
+                  "bearings": [
+                    93,
+                    137,
+                    294
+                  ],
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.752895,
+                    35.606347
+                  ],
+                  "geometry_index": 52,
+                  "admin_index": 0,
+                  "weight": 31.304,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.022,
+                  "turn_weight": 7,
+                  "duration": 24.63,
+                  "bearings": [
+                    20,
+                    114,
+                    200,
+                    297
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    5,
+                    170,
+                    185
+                  ],
+                  "duration": 19.029,
+                  "turn_weight": 1,
+                  "turn_duration": 0.021,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 21.434,
+                  "geometry_index": 67,
+                  "location": [
+                    139.75235,
+                    35.607579
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    3,
+                    13,
+                    185
+                  ],
+                  "duration": 55.807,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 59.985,
+                  "geometry_index": 68,
+                  "location": [
+                    139.752486,
+                    35.608764
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    1,
+                    181
+                  ],
+                  "duration": 33.369,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 35.872,
+                  "geometry_index": 71,
+                  "location": [
+                    139.752759,
+                    35.612374
+                  ]
+                },
+                {
+                  "bearings": [
+                    5,
+                    179,
+                    185
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "turn_weight": 1,
+                  "turn_duration": 0.021,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 74,
+                  "location": [
+                    139.752872,
+                    35.614532
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Bear right onto National Road No.357 Line.",
+                "modifier": "slight right",
+                "bearing_after": 294,
+                "bearing_before": 273,
+                "location": [
+                  139.754441,
+                  35.605783
+                ]
+              },
+              "name": "",
+              "weight_typical": 133.821,
+              "duration_typical": 108.638,
+              "duration": 182.619,
+              "distance": 1278.35,
+              "driving_side": "left",
+              "weight": 213.194,
+              "mode": "driving",
+              "ref": "National Road No.357 Line",
+              "geometry": "mpe|bAq{|piGgb@r_B}AfHw@xAu@bA}ApBiAbAiAbAaCbA_CbAgHpBuGzAyDj@}EV{A?gHTeKm@aiAoGsh@yAsvCoLk_@WefAk@ad@{AsYyAstAqG_UoB"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "mapbox_shield": {
+                          "text_color": "white",
+                          "name": "jp-metropolitan-road",
+                          "display_ref": "480",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "type": "icon",
+                        "text": "Todou No.480 Line"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "Todou No.480 Line"
+                  },
+                  "distanceAlongGeometry": 608.878
+                },
+                {
+                  "sub": {
+                    "components": [
+                      {
+                        "active_direction": "left",
+                        "active": true,
+                        "directions": [
+                          "left"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active_direction": "left",
+                        "active": true,
+                        "directions": [
+                          "left"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active": false,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active": false,
+                        "directions": [
+                          "right"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      }
+                    ],
+                    "text": ""
+                  },
+                  "primary": {
+                    "components": [
+                      {
+                        "mapbox_shield": {
+                          "text_color": "white",
+                          "name": "jp-metropolitan-road",
+                          "display_ref": "480",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "type": "icon",
+                        "text": "Todou No.480 Line"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "Todou No.480 Line"
+                  },
+                  "distanceAlongGeometry": 402.336
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for a half mile.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for a half mile.",
+                  "distanceAlongGeometry": 596.878
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Turn left onto <say-as interpret-as=\"address\">Todou No.480 Line</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Turn left onto Todou No.480 Line.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn left onto <say-as interpret-as=\"address\">Todou No.480 Line</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn left onto Todou No.480 Line.",
+                  "distanceAlongGeometry": 68
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    9,
+                    25,
+                    187
+                  ],
+                  "duration": 6.75,
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 7.235,
+                  "geometry_index": 76,
+                  "location": [
+                    139.753065,
+                    35.616254
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    7,
+                    190
+                  ],
+                  "duration": 7.2,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 7.74,
+                  "geometry_index": 78,
+                  "location": [
+                    139.753145,
+                    35.616633
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    28,
+                    186
+                  ],
+                  "duration": 2.348,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 2.524,
+                  "geometry_index": 80,
+                  "location": [
+                    139.753202,
+                    35.617041
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "slight left"
+                      ],
+                      "valid_indication": "slight left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "slight left"
+                      ],
+                      "valid_indication": "slight left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.753281,
+                    35.617161
+                  ],
+                  "geometry_index": 81,
+                  "admin_index": 0,
+                  "weight": 9.135,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.042,
+                  "turn_weight": 0.75,
+                  "duration": 9.842,
+                  "bearings": [
+                    2,
+                    90,
+                    152,
+                    208
+                  ],
+                  "out": 0,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    3,
+                    182
+                  ],
+                  "duration": 20.933,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 22.503,
+                  "geometry_index": 82,
+                  "location": [
+                    139.753304,
+                    35.617624
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    5,
+                    183
+                  ],
+                  "duration": 13.93,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 14.975,
+                  "geometry_index": 83,
+                  "location": [
+                    139.753395,
+                    35.619031
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    4,
+                    185
+                  ],
+                  "duration": 12.678,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 13.629,
+                  "geometry_index": 84,
+                  "location": [
+                    139.753486,
+                    35.619827
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    3,
+                    184
+                  ],
+                  "duration": 17.217,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 18.509,
+                  "geometry_index": 85,
+                  "location": [
+                    139.753542,
+                    35.620549
+                  ]
+                },
+                {
+                  "bearings": [
+                    11,
+                    183
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 86,
+                  "location": [
+                    139.753611,
+                    35.62154
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "fork",
+                "instruction": "Keep left at the fork.",
+                "modifier": "slight left",
+                "bearing_after": 9,
+                "bearing_before": 7,
+                "location": [
+                  139.753065,
+                  35.616254
+                ]
+              },
+              "name": "",
+              "weight_typical": 108.988,
+              "duration_typical": 102.748,
+              "duration": 93.56,
+              "distance": 608.878,
+              "driving_side": "left",
+              "weight": 99.111,
+              "mode": "driving",
+              "ref": "Todou No.316 Line",
+              "geometry": "{~y|bAqezpiGiPqBkEm@cRyAkEWoF}C}[m@}vAuDwp@uDcl@oB}|@iCgHcA"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "view": {
+                    "components": [
+                      {
+                        "imageURL": "https://api-guidance-views-staging.tilestream.net/guidance-views/v1/727833600/cityreal/13c00091_o30d?arrow_ids=13c00091_o33a",
+                        "subType": "cityreal",
+                        "type": "guidance-view",
+                        "text": ""
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "slight right",
+                    "text": ""
+                  },
+                  "sub": {
+                    "components": [
+                      {
+                        "active": false,
+                        "directions": [
+                          "left",
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active": false,
+                        "directions": [
+                          "straight"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active_direction": "right",
+                        "active": true,
+                        "directions": [
+                          "right"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      },
+                      {
+                        "active_direction": "right",
+                        "active": true,
+                        "directions": [
+                          "right"
+                        ],
+                        "type": "lane",
+                        "text": ""
+                      }
+                    ],
+                    "text": ""
+                  },
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "天王洲アイル"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "mapbox_shield": {
+                          "text_color": "white",
+                          "name": "jp-metropolitan-road",
+                          "display_ref": "316",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "type": "icon",
+                        "text": "Todou No.316 Line"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "slight right",
+                    "text": "天王洲アイル / Todou No.316 Line"
+                  },
+                  "distanceAlongGeometry": 246.257
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 800 feet, Bear right at <phoneme alphabet=\"jeita\" ph=\"ﾃﾝﾉｰｽﾞｱｲﾙ\">天王洲アイル</phoneme>.</prosody></amazon:effect></speak>",
+                  "announcement": "In 800 feet, Bear right at 天王洲アイル.",
+                  "distanceAlongGeometry": 232.924
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Bear right at <phoneme alphabet=\"jeita\" ph=\"ﾃﾝﾉｰｽﾞｱｲﾙ\">天王洲アイル</phoneme>.</prosody></amazon:effect></speak>",
+                  "announcement": "Bear right at 天王洲アイル.",
+                  "distanceAlongGeometry": 62.222
+                }
+              ],
+              "intersections": [
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid_indication": "left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid_indication": "left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "secondary"
+                  },
+                  "location": [
+                    139.753645,
+                    35.621688
+                  ],
+                  "geometry_index": 87,
+                  "admin_index": 0,
+                  "weight": 14.74,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 4.765,
+                  "turn_weight": 7,
+                  "duration": 11.965,
+                  "bearings": [
+                    17,
+                    20,
+                    94,
+                    191,
+                    274
+                  ],
+                  "out": 4,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    94,
+                    273
+                  ],
+                  "duration": 12.982,
+                  "turn_weight": 0.5,
+                  "mapbox_streets_v8": {
+                    "class": "secondary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 14.455,
+                  "geometry_index": 88,
+                  "location": [
+                    139.753099,
+                    35.621716
+                  ]
+                },
+                {
+                  "bearings": [
+                    93,
+                    274
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "turn_weight": 0.5,
+                  "mapbox_streets_v8": {
+                    "class": "secondary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 89,
+                  "location": [
+                    139.751781,
+                    35.621781
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto Todou No.480 Line.",
+                "modifier": "left",
+                "bearing_after": 274,
+                "bearing_before": 11,
+                "location": [
+                  139.753645,
+                  35.621688
+                ]
+              },
+              "name": "",
+              "weight_typical": 49.561,
+              "duration_typical": 43.427,
+              "duration": 43.427,
+              "distance": 246.257,
+              "driving_side": "left",
+              "weight": 49.561,
+              "mode": "driving",
+              "ref": "Todou No.480 Line",
+              "geometry": "ord}bAyi{piGw@ba@aCjqA{Aft@"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "汐彩橋"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "mapbox_shield": {
+                          "text_color": "white",
+                          "name": "jp-urban-expressway",
+                          "display_ref": "1",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "type": "icon",
+                        "text": "1"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "slight right",
+                    "text": "汐彩橋 / 1"
+                  },
+                  "distanceAlongGeometry": 2142.68
+                },
+                {
+                  "view": {
+                    "components": [
+                      {
+                        "imageURL": "https://api-guidance-views-staging.tilestream.net/guidance-views/v1/727833600/entrance/13i00027_o10d?arrow_ids=13i00027_o11a",
+                        "subType": "entrance",
+                        "type": "guidance-view",
+                        "text": ""
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "slight right",
+                    "text": ""
+                  },
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "汐彩橋"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "mapbox_shield": {
+                          "text_color": "white",
+                          "name": "jp-urban-expressway",
+                          "display_ref": "1",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "type": "icon",
+                        "text": "1"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "slight right",
+                    "text": "汐彩橋 / 1"
+                  },
+                  "distanceAlongGeometry": 402.336
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for 1.5 miles.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for 1.5 miles.",
+                  "distanceAlongGeometry": 2114.126
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Take the ramp on the right.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Take the ramp on the right.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Take the ramp on the right.</prosody></amazon:effect></speak>",
+                  "announcement": "Take the ramp on the right.",
+                  "distanceAlongGeometry": 71.111
+                }
+              ],
+              "intersections": [
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left",
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid_indication": "right",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid_indication": "right",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.750929,
+                    35.621827
+                  ],
+                  "geometry_index": 90,
+                  "admin_index": 0,
+                  "weight": 12.622,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 3.086,
+                  "turn_weight": 10.5,
+                  "duration": 5.06,
+                  "bearings": [
+                    55,
+                    94,
+                    189,
+                    265,
+                    330,
+                    334
+                  ],
+                  "out": 4,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.750838,
+                    35.621956
+                  ],
+                  "geometry_index": 91,
+                  "admin_index": 0,
+                  "weight": 29.059,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.022,
+                  "turn_weight": 3.2,
+                  "duration": 26.077,
+                  "bearings": [
+                    4,
+                    94,
+                    148,
+                    150,
+                    255,
+                    333
+                  ],
+                  "out": 5,
+                  "in": 3,
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    152,
+                    332,
+                    358
+                  ],
+                  "duration": 5.418,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "slight right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.018,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 5.805,
+                  "geometry_index": 93,
+                  "location": [
+                    139.750088,
+                    35.623123
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    152,
+                    337
+                  ],
+                  "duration": 2.618,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 2.815,
+                  "geometry_index": 94,
+                  "location": [
+                    139.749917,
+                    35.623382
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    32,
+                    157,
+                    343
+                  ],
+                  "duration": 30.939,
+                  "turn_weight": 1,
+                  "turn_duration": 0.028,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 34.229,
+                  "geometry_index": 96,
+                  "location": [
+                    139.749849,
+                    35.623512
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    4,
+                    94,
+                    184
+                  ],
+                  "duration": 21.484,
+                  "turn_weight": 1,
+                  "turn_duration": 0.018,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 24.613,
+                  "geometry_index": 103,
+                  "location": [
+                    139.749815,
+                    35.625734
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.74994,
+                    35.627178
+                  ],
+                  "geometry_index": 104,
+                  "admin_index": 0,
+                  "weight": 26.73,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.018,
+                  "turn_weight": 0.5,
+                  "duration": 26.418,
+                  "bearings": [
+                    4,
+                    94,
+                    184
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.750076,
+                    35.628817
+                  ],
+                  "geometry_index": 106,
+                  "admin_index": 0,
+                  "weight": 11.73,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.022,
+                  "turn_weight": 1,
+                  "duration": 12.004,
+                  "bearings": [
+                    6,
+                    94,
+                    183,
+                    273
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    4,
+                    186
+                  ],
+                  "duration": 10.309,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 11.082,
+                  "geometry_index": 107,
+                  "location": [
+                    139.750145,
+                    35.629363
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    3,
+                    90,
+                    184
+                  ],
+                  "duration": 16.535,
+                  "turn_weight": 0.5,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 18.267,
+                  "geometry_index": 108,
+                  "location": [
+                    139.75019,
+                    35.629928
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    5,
+                    37,
+                    183
+                  ],
+                  "duration": 10.495,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight",
+                        "slight right"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "turn_duration": 0.022,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 11.258,
+                  "geometry_index": 109,
+                  "location": [
+                    139.750258,
+                    35.630835
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left",
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.750303,
+                    35.631409
+                  ],
+                  "geometry_index": 111,
+                  "admin_index": 0,
+                  "weight": 22.067,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.021,
+                  "turn_weight": 2,
+                  "duration": 20.687,
+                  "bearings": [
+                    4,
+                    37,
+                    93,
+                    181,
+                    275
+                  ],
+                  "out": 0,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    4,
+                    184,
+                    275
+                  ],
+                  "duration": 19.264,
+                  "turn_duration": 0.018,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 20.69,
+                  "geometry_index": 112,
+                  "location": [
+                    139.750417,
+                    35.632659
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left",
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.750553,
+                    35.633899
+                  ],
+                  "geometry_index": 115,
+                  "admin_index": 0,
+                  "weight": 15.932,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.036,
+                  "turn_weight": 2,
+                  "duration": 14.996,
+                  "bearings": [
+                    18,
+                    51,
+                    104,
+                    189,
+                    296
+                  ],
+                  "out": 0,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    24,
+                    111,
+                    203
+                  ],
+                  "duration": 3.379,
+                  "turn_weight": 1,
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 4.612,
+                  "geometry_index": 118,
+                  "location": [
+                    139.750962,
+                    35.634807
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    21,
+                    204
+                  ],
+                  "duration": 12.91,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 13.879,
+                  "geometry_index": 120,
+                  "location": [
+                    139.751087,
+                    35.635038
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    21,
+                    201
+                  ],
+                  "duration": 3.067,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 3.297,
+                  "geometry_index": 121,
+                  "location": [
+                    139.751508,
+                    35.635909
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.751599,
+                    35.636103
+                  ],
+                  "geometry_index": 122,
+                  "admin_index": 0,
+                  "weight": 34.711,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.021,
+                  "turn_weight": 0.5,
+                  "duration": 33.845,
+                  "bearings": [
+                    23,
+                    113,
+                    201
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left",
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    139.752542,
+                    35.637936
+                  ],
+                  "geometry_index": 123,
+                  "admin_index": 0,
+                  "weight": 21.951,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.018,
+                  "turn_weight": 1,
+                  "duration": 21.507,
+                  "bearings": [
+                    22,
+                    113,
+                    115,
+                    203,
+                    291
+                  ],
+                  "out": 0,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "bearings": [
+                    23,
+                    190,
+                    202
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "turn_weight": 1,
+                  "turn_duration": 0.021,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 124,
+                  "location": [
+                    139.753201,
+                    35.639242
+                  ]
+                }
+              ],
+              "junction_name": "天王洲アイル",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Bear right at 天王洲アイル.",
+                "modifier": "slight right",
+                "bearing_after": 333,
+                "bearing_before": 274,
+                "location": [
+                  139.750929,
+                  35.621827
+                ]
+              },
+              "name": "Kaigan St.",
+              "weight_typical": 338.813,
+              "duration_typical": 308.798,
+              "guidance_views": [
+                {
+                  "overlay_ids": [
+                    "13c00091_o33a"
+                  ],
+                  "base_id": "13c00091_o30d",
+                  "type": "cityreal",
+                  "data_id": "727833600"
+                }
+              ],
+              "duration": 322.832,
+              "distance": 2142.68,
+              "driving_side": "left",
+              "weight": 354.083,
+              "mode": "driving",
+              "ref": "Todou No.316 Line",
+              "geometry": "e{d}bAa`vpiGaGtDuCzAgcA~j@eOtIoB`AsCdAkExAoFbAuGzAgHTuGTySUqlAkEgyAyFccBoGiA?ca@iCib@yAuw@gCeZyAuG?cmAcFcl@qB{Lm@oQoBoMuDsNuDsYeM{Am@qJkEmu@iYcKuDqqB}y@spAeh@_YmLiWyKeOoG"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for a half mile.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for a half mile.",
+                  "distanceAlongGeometry": 1045.058
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, You will arrive at your destination.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, You will arrive at your destination.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">You have arrived at your destination.</prosody></amazon:effect></speak>",
+                  "announcement": "You have arrived at your destination.",
+                  "distanceAlongGeometry": 55.556
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary_link"
+                  },
+                  "location": [
+                    139.753757,
+                    35.640306
+                  ],
+                  "geometry_index": 127,
+                  "admin_index": 0,
+                  "weight": 41.688,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "classes": [
+                    "toll"
+                  ],
+                  "turn_duration": 2.026,
+                  "turn_weight": 17.5,
+                  "duration": 24.526,
+                  "bearings": [
+                    23,
+                    28,
+                    113,
+                    114,
+                    203,
+                    289
+                  ],
+                  "out": 1,
+                  "in": 4,
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "payment_methods": [
+                        "etc"
+                      ],
+                      "valid_indication": "straight",
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "payment_methods": [
+                        "general",
+                        "etc"
+                      ],
+                      "valid_indication": "straight",
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary_link"
+                  },
+                  "location": [
+                    139.754405,
+                    35.641297
+                  ],
+                  "geometry_index": 133,
+                  "admin_index": 0,
+                  "weight": 46.27,
+                  "is_urban": true,
+                  "turn_weight": 15,
+                  "duration": 29.088,
+                  "bearings": [
+                    25,
+                    207
+                  ],
+                  "out": 0,
+                  "in": 1,
+                  "classes": [
+                    "toll"
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "location": [
+                    139.755223,
+                    35.642982
+                  ],
+                  "geometry_index": 140,
+                  "admin_index": 0,
+                  "weight": 52.504,
+                  "is_urban": true,
+                  "turn_weight": 16,
+                  "duration": 33.981,
+                  "bearings": [
+                    22,
+                    198,
+                    206
+                  ],
+                  "out": 0,
+                  "in": 1,
+                  "turn_duration": 0.024,
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "bearings": [
+                    22,
+                    202
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "classes": [
+                    "toll",
+                    "motorway"
+                  ],
+                  "in": 1,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 145,
+                  "location": [
+                    139.756662,
+                    35.645889
+                  ]
+                }
+              ],
+              "junction_name": "汐彩橋",
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "You will arrive at your destination"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "straight",
+                    "text": "You will arrive at your destination"
+                  },
+                  "distanceAlongGeometry": 1058.391
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "You have arrived at your destination"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "straight",
+                    "text": "You have arrived at your destination"
+                  },
+                  "distanceAlongGeometry": 55.556
+                }
+              ],
+              "destinations": "1: 首都高速１号羽田線",
+              "maneuver": {
+                "type": "on ramp",
+                "instruction": "Take the ramp on the right.",
+                "modifier": "slight right",
+                "bearing_after": 28,
+                "bearing_before": 23,
+                "location": [
+                  139.753757,
+                  35.640306
+                ]
+              },
+              "name": "Expwy No.1 Line Haneda Line",
+              "weight_typical": 141.159,
+              "duration_typical": 96.596,
+              "guidance_views": [
+                {
+                  "overlay_ids": [
+                    "13i00027_o11a"
+                  ],
+                  "base_id": "13i00027_o10d",
+                  "type": "entrance",
+                  "data_id": "727833600"
+                }
+              ],
+              "duration": 125.877,
+              "distance": 1058.391,
+              "driving_side": "left",
+              "weight": 182.571,
+              "mode": "driving",
+              "geometry": "c~h~bAyp{piGkPkJqJcFuGkE_JcFkEgC}EgCgSkJuR}HoQgHkPyFaGoBmI_D_JgCgi@qSyi@aUcl@iTwa@uPwOiGu]cNwe@}Rao@cWi[oLmt@kY"
+            },
+            {
+              "bannerInstructions": [],
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    202
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 150,
+                  "location": [
+                    139.758247,
+                    35.649077
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "You have arrived at your destination.",
+                "bearing_after": 0,
+                "bearing_before": 22,
+                "location": [
+                  139.758247,
+                  35.649077
+                ]
+              },
+              "name": "Expwy No.1 Line Haneda Line",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "left",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "ibz~bAmidqiG??"
+            }
+          ],
+          "distance": 10166.08,
+          "summary": "Expwy Wangan Line, Kaigan St."
+        }
+      ],
+      "geometry": "__~}bAy~csiGzb@r_A~_@v|@~IzRbEfJtuCtrGpaAzyBzx@vhBrh@`kAdVfj@jj@tpAth@llAr]xw@`G~MjGnNtA~C`Rx\\xZdh@|`AhvAp`AttAlUj\\ta@vk@jnDhiF|iIhfLfD`Fln@j{@pTdShXxVvZ`UvKdHhP|HdOtFtCfAfSjE`NhCjPnB|Il@vKVxHTpQbAjT?`yBl@zi@?tGbA~TTfATv@bAv@dAd@fCSb\\c@hOe@fYgb@r_B}AfHw@xAu@bA}ApBiAbAiAbAaCbA_CbAgHpBuGzAyDj@}EV{A?gHTeKm@aiAoGsh@yAsvCoLk_@WefAk@ad@{AsYyAstAqG_UoBiPqBkEm@cRyAkEWoF}C}[m@}vAuDwp@uDcl@oB}|@iCgHcAw@ba@aCjqA{Aft@aGtDuCzAgcA~j@eOtIoB`AsCdAkExAoFbAuGzAgHTuGTySUqlAkEgyAyFccBoGiA?ca@iCib@yAuw@gCeZyAuG?cmAcFcl@qB{Lm@oQoBoMuDsNuDsYeM{Am@qJkEmu@iYcKuDqqB}y@spAeh@_YmLiWyKeOoGkPkJqJcFuGkE_JcFkEgC}EgCgSkJuR}HoQgHkPyFaGoBmI_D_JgCgi@qSyi@aUcl@iTwa@uPwOiGu]cNwe@}Rao@cWi[oLmt@kY",
+      "voiceLocale": "en-US"
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 1.404,
+      "name": "B",
+      "location": [
+        139.790845,
+        35.634688
+      ]
+    },
+    {
+      "distance": 0.489,
+      "name": "1",
+      "location": [
+        139.758247,
+        35.649077
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "route_with_road_objects"
+}
