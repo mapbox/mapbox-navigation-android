@@ -1504,6 +1504,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
     method public java.util.List<java.lang.String> getLanesBlocked();
     method public String? getLanesClearDesc();
     method public String? getLongDescription();
+    method public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getMultilingualAffectedRoadNames();
     method public Long? getNumLanesBlocked();
     method public java.util.Date? getStartTime();
     method public String? getSubType();
@@ -1525,6 +1526,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
     property public final java.util.List<java.lang.String> lanesBlocked;
     property public final String? lanesClearDesc;
     property public final String? longDescription;
+    property public final java.util.Map<java.lang.String,java.util.List<java.lang.String>> multilingualAffectedRoadNames;
     property public final Long? numLanesBlocked;
     property public final java.util.Date? startTime;
     property public final String? subType;

@@ -537,6 +537,34 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         checkRoadObjects(expectedObjectsAfterFirstRefresh, updateAfterRefresh.upcomingRoadObjects)
     }
 
+    @Test
+    fun affectedRoadNamesTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
+        val origin = Point.fromLngLat(140.025878, 35.660315)
+        stayOnPosition(origin)
+        mapboxNavigation.startTripSession()
+        setUpRoutes(
+            R.raw.route_with_multilingual_affected_road_names,
+            "140.025878,35.660315;140.1611265965725,35.6873837089764"
+        )
+
+        val incident = mapboxNavigation.getNavigationRoutes().first().upcomingRoadObjects
+            .filter { it.roadObject.objectType == RoadObjectType.INCIDENT }
+            .first()
+
+        assertEquals(
+            listOf("Higashikanto Expwy(Koya To Itako)"),
+            (incident.roadObject as Incident).info.affectedRoadNames
+        )
+        assertEquals(
+            mapOf(
+                "en" to listOf("Higashikanto Expwy(Koya To Itako)"),
+                "ja" to listOf("E51/東関東自動車道（高谷～潮来）"),
+            ),
+            (incident.roadObject as Incident).info.multilingualAffectedRoadNames
+        )
+    }
+
     private fun stayOnPosition(position: Point, bearing: Float = 0f) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
