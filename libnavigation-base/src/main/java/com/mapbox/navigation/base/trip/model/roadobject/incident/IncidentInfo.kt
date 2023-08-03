@@ -34,7 +34,10 @@ import java.util.Date
  *  - only shoulder gets by
  *  - two left lanes get by
  * @param numLanesBlocked number of lanes blocked.
- * @param affectedRoadNames affected road names.
+ * @param affectedRoadNames affected road names in primary language.
+ * @param multilingualAffectedRoadNames affected road names in different languages.
+ *  May contain affected road names from [affectedRoadNames] property in case language is known for them.
+ *  Key is a ISO 639-1, 2 letter language code, value - the list of affected road names.
  */
 class IncidentInfo internal constructor(
     val id: String,
@@ -57,6 +60,7 @@ class IncidentInfo internal constructor(
     val lanesClearDesc: String?,
     val numLanesBlocked: Long?,
     val affectedRoadNames: List<String>?,
+    val multilingualAffectedRoadNames: Map<String, List<String>>,
 ) {
 
     /**
@@ -88,6 +92,7 @@ class IncidentInfo internal constructor(
         if (lanesClearDesc != other.lanesClearDesc) return false
         if (numLanesBlocked != other.numLanesBlocked) return false
         if (affectedRoadNames != other.affectedRoadNames) return false
+        if (multilingualAffectedRoadNames != other.multilingualAffectedRoadNames) return false
 
         return true
     }
@@ -116,6 +121,7 @@ class IncidentInfo internal constructor(
         result = 31 * result + lanesClearDesc.hashCode()
         result = 31 * result + numLanesBlocked.hashCode()
         result = 31 * result + affectedRoadNames.hashCode()
+        result = 31 * result + multilingualAffectedRoadNames.hashCode()
         return result
     }
 
@@ -143,7 +149,8 @@ class IncidentInfo internal constructor(
             "longDescription=$longDescription, " +
             "lanesClearDesc=$lanesClearDesc, " +
             "numLanesBlocked=$numLanesBlocked, " +
-            "affectedRoadNames=$affectedRoadNames" +
+            "affectedRoadNames=$affectedRoadNames, " +
+            "multilingualAffectedRoadNames=$multilingualAffectedRoadNames" +
             ")"
     }
 }

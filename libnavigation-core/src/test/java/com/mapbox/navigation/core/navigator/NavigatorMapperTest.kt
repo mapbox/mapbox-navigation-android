@@ -30,6 +30,7 @@ import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.UpcomingRouteAlert
+import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import io.mockk.every
 import io.mockk.mockk
@@ -553,9 +554,9 @@ class NavigatorMapperTest {
     fun `parsing multiple tunnel entrances returns multiple alerts`() {
         val firstEntrance = tunnel.toUpcomingRouteAlert(100.0)
         val secondEntrance = tunnel.toUpcomingRouteAlert(200.0)
-        every { navigationStatus.upcomingRouteAlerts } returns listOf(
-            firstEntrance,
-            secondEntrance
+        every { navigationStatus.upcomingRouteAlertUpdates } returns listOf(
+            UpcomingRouteAlertUpdate(tunnel.id, 100.0),
+            UpcomingRouteAlertUpdate(tunnel.id, 200.0),
         )
 
         val routeProgress = getRouteProgressFrom(
@@ -774,7 +775,6 @@ class NavigatorMapperTest {
         every { bannerInstruction } returns nativeBannerInstructions
         every { voiceInstruction } returns nativeVoiceInstructions
         every { inTunnel } returns true
-        every { upcomingRouteAlerts } returns emptyList()
         every { roads } returns listOf(roadName)
         every { locatedAlternativeRouteId } returns "alternative_id"
         every { geometryIndex } returns routeGeometryIndex

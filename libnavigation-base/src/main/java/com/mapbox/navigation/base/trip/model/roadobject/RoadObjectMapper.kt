@@ -248,6 +248,7 @@ private fun IncidentInfo.toIncidentInfo() =
         lanesClearDesc,
         numLanesBlocked,
         affectedRoadNames,
+        multiLingualAffectedRoadNames,
     )
 
 private fun IncidentType.toIncidentType(): Int =
