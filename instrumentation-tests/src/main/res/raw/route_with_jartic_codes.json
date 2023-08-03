@@ -49,20 +49,6 @@
               "geometry_index_end": 2,
               "affected_road_names": [
                 "Tomei Expwy"
-              ],
-              "affected_road_names_by_language": [
-                {
-                  "language": "ja",
-                  "names": [
-                    "E1/東名高速道路"
-                  ]
-                },
-                {
-                  "language": "en",
-                  "names": [
-                    "Tomei Expwy"
-                  ]
-                }
               ]
             }
           ],

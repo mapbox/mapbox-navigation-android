@@ -88,7 +88,6 @@ fun createNavigationStatus(
         offRoadProba,
         offRoadStateProvider,
         activeGuidanceInfo,
-        upcomingRouteAlerts,
         upcomingRouteAlertUpdates,
         nextWaypointIndex,
         layer,
