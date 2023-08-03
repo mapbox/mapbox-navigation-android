@@ -261,6 +261,16 @@ class RoadObjectFactoryTest {
                 INCIDENT_LANES_CLEAR_DESC,
                 INCIDENT_NUM_LANES_BLOCKED,
                 listOf(INCIDENT_AFFECTED_ROAD_NAME),
+                mapOf(
+                    "en" to listOf(
+                        INCIDENT_AFFECTED_ROAD_NAME_EN1,
+                        INCIDENT_AFFECTED_ROAD_NAME_EN2
+                    ),
+                    "ja" to listOf(
+                        INCIDENT_AFFECTED_ROAD_NAME_JA1,
+                        INCIDENT_AFFECTED_ROAD_NAME_JA2
+                    ),
+                )
             ),
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
@@ -501,7 +511,10 @@ class RoadObjectFactoryTest {
             INCIDENT_LANES_CLEAR_DESC,
             INCIDENT_NUM_LANES_BLOCKED,
             listOf(INCIDENT_AFFECTED_ROAD_NAME),
-            hashMapOf()
+            hashMapOf(
+                "en" to listOf(INCIDENT_AFFECTED_ROAD_NAME_EN1, INCIDENT_AFFECTED_ROAD_NAME_EN2),
+                "ja" to listOf(INCIDENT_AFFECTED_ROAD_NAME_JA1, INCIDENT_AFFECTED_ROAD_NAME_JA2),
+            )
         )
     )
 
@@ -682,6 +695,10 @@ class RoadObjectFactoryTest {
         private const val INCIDENT_OPEN_LR = "incident_open_lr"
         private const val INCIDENT_LANES_BLOCKED = "incident_lanes_blocked"
         private const val INCIDENT_AFFECTED_ROAD_NAME = "affected_road_name"
+        private const val INCIDENT_AFFECTED_ROAD_NAME_JA1 = "最初に影響を受けた道路名"
+        private const val INCIDENT_AFFECTED_ROAD_NAME_JA2 = "2番目に影響を受けたリヤド名"
+        private const val INCIDENT_AFFECTED_ROAD_NAME_EN1 = "affected_road_name_en1"
+        private const val INCIDENT_AFFECTED_ROAD_NAME_EN2 = "affected_road_name_en2"
         private const val INCIDENT_DESCRIPTION = "incident_description"
         private const val INCIDENT_LONG_DESCRIPTION = "incident_long_description"
         private const val INCIDENT_SUB_TYPE = "incident_sub_type"
