@@ -501,6 +501,7 @@ class RoadObjectFactoryTest {
             INCIDENT_LANES_CLEAR_DESC,
             INCIDENT_NUM_LANES_BLOCKED,
             listOf(INCIDENT_AFFECTED_ROAD_NAME),
+            hashMapOf()
         )
     )
 

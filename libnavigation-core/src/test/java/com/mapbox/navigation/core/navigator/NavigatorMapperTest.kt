@@ -553,10 +553,6 @@ class NavigatorMapperTest {
     fun `parsing multiple tunnel entrances returns multiple alerts`() {
         val firstEntrance = tunnel.toUpcomingRouteAlert(100.0)
         val secondEntrance = tunnel.toUpcomingRouteAlert(200.0)
-        every { navigationStatus.upcomingRouteAlerts } returns listOf(
-            firstEntrance,
-            secondEntrance
-        )
 
         val routeProgress = getRouteProgressFrom(
             mockk(relaxed = true),
@@ -774,7 +770,6 @@ class NavigatorMapperTest {
         every { bannerInstruction } returns nativeBannerInstructions
         every { voiceInstruction } returns nativeVoiceInstructions
         every { inTunnel } returns true
-        every { upcomingRouteAlerts } returns emptyList()
         every { roads } returns listOf(roadName)
         every { locatedAlternativeRouteId } returns "alternative_id"
         every { geometryIndex } returns routeGeometryIndex
