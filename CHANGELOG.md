@@ -6,6 +6,81 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.15.0 - 04 August, 2023
+### Changelog
+[Changes between v2.14.0 and v2.15.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.14.0...v2.15.0)
+
+#### Features
+- Added `IncidentInfo#trafficCodes` property. [#7407](https://github.com/mapbox/mapbox-navigation-android/pull/7407)
+- Introduced `RoutesInvalidatedObserver` to be notified about routes invalidation. When this observer is fired, the routes passed as an argument will not be refreshed anymore, because they expired. It is recommended to rebuild a route in this case. Example usage: [#7318](https://github.com/mapbox/mapbox-navigation-android/pull/7318)
+```
+mapboxNavigation.registerRoutesInvalidatedObserver { routes ->
+    val invalidatedIds = routes.map { it.id }
+    val currentRoutes = mapboxNavigation.getNavigationRoutes()
+    val primaryRoute = currentRoutes.firstOrNull()
+    if (routes.any { it.id == primaryRoute?.id }) {
+        // primary route is outdated - trigger reroute
+        mapboxNavigation.getRerouteController()?.reroute(object : NavigationRerouteController.RoutesCallback {
+            override fun onNewRoutes(
+                routes: List<NavigationRoute>,
+                routerOrigin: RouterOrigin
+            ) {
+                mapboxNavigation.setNavigationRoutes(routes)
+            }
+        })
+    } else {
+        // remove outdated alternatives
+        mapboxNavigation.setNavigationRoutes(currentRoutes.filterNot { it.id in invalidatedIds })
+    }
+}
+```
+- Introduced `MERGING_AREA` RoadObject type. You can receive Merging Areas via `RouteProgress#upcomingRoadObjects` and via `EHorizonObserver`. Note: to enable merging area collection when using EHorizon, set `AlertServiceOptions#collectMergingAreas` to true.  [#7358](https://github.com/mapbox/mapbox-navigation-android/pull/7358)
+- Added new option to control gender of voice `MapboxSpeechApiOptions.gender`. [#7337](https://github.com/mapbox/mapbox-navigation-android/pull/7337)
+- Added new options to `RouteLineColorResources` to style congestion, restrictions, and closures colors on inactive legs when `MapboxRouteLineOptions#styleInactiveRouteLegsIndependently` is enabled. The values default to transparent. [#7322](https://github.com/mapbox/mapbox-navigation-android/pull/7322)
+
+#### Bug fixes and improvements
+- Added `RouteLineColorResources#inactiveRouteLegCasingColor` to specify the color used for inactive legs casing. [#7392](https://github.com/mapbox/mapbox-navigation-android/pull/7392)
+- Fixed an issue where in rare cases `BannerInstructionsObserver` might not have been invoked for an instruction when the route was being refreshed.  [#7414](https://github.com/mapbox/mapbox-navigation-android/pull/7414)
+- Reverted sticky charging stations feature for rerouting. [#7403](https://github.com/mapbox/mapbox-navigation-android/pull/7403)
+- Map matching now uses emergency roads. [#7404](https://github.com/mapbox/mapbox-navigation-android/pull/7404)
+- Improved algorithm that chooses fork during dead-reckoning. [#7404](https://github.com/mapbox/mapbox-navigation-android/pull/7404)
+- Dead-reckoning is allowed even in short tunnels and bridges. [#7404](https://github.com/mapbox/mapbox-navigation-android/pull/7404)
+- Improved arrival detection in case of off-road. [#7429](https://github.com/mapbox/mapbox-navigation-android/pull/7429)
+- Fixed an issue where RouteProgress might have contained the same incident twice. [#7429](https://github.com/mapbox/mapbox-navigation-android/pull/7429)
+- Fixed an issue where the app might have crashed due to JNI reference table overflow. [#7429](https://github.com/mapbox/mapbox-navigation-android/pull/7429)
+- Fixed an issue with broken map-matching after significant teleports. [#7429](https://github.com/mapbox/mapbox-navigation-android/pull/7429)
+- Fixed an issue where map-matching might have jumped on parallel roads. [#7429](https://github.com/mapbox/mapbox-navigation-android/pull/7429)
+- Started using fallback to onboard routing in case of 5xx Directions Response codes. [#7429](https://github.com/mapbox/mapbox-navigation-android/pull/7429)
+- Added `IncidentInfo#multilingualAffectedRoadNames`. [#7428](https://github.com/mapbox/mapbox-navigation-android/pull/7428)
+- Fixed an issue where soft gradient was not applied for active legs. [#7410](https://github.com/mapbox/mapbox-navigation-android/pull/7410)
+- Now updated via `MapboxNavigation#onEvDataUpdated` parameters are added to continuous alternatives requests. [#7380](https://github.com/mapbox/mapbox-navigation-android/pull/7380)
+- Fixed snapping to a tunnel after driving out of underground parking. [#7372](https://github.com/mapbox/mapbox-navigation-android/pull/7372)
+- Fixed ADASIS assertion failures on KML files. [#7372](https://github.com/mapbox/mapbox-navigation-android/pull/7372)
+- Fixed MapMatching isuue where it might have picked the wrong tunnel. [#7372](https://github.com/mapbox/mapbox-navigation-android/pull/7372)
+- Fixes an issue where trail layer that indicates the traveled portion of the route was visible below inactive legs. [#7363](https://github.com/mapbox/mapbox-navigation-android/pull/7363)
+- Nav SDK now preserves charging stations after reroute. [#7369](https://github.com/mapbox/mapbox-navigation-android/pull/7369)
+- Fixed an issue where `RoutingTilesOptions#tilesBaseUri` was used as a base url for route refresh requests instead of `RouteOptions#baseUrl`. [#7294](https://github.com/mapbox/mapbox-navigation-android/pull/7294)
+- Improved Copilot to send a proper type with events of type `DriveEndsEvent`. [#7236](https://github.com/mapbox/mapbox-navigation-android/pull/7236)
+- Added a Copilot option that allows to disable recording Free Drive histories. [#7276](https://github.com/mapbox/mapbox-navigation-android/pull/7276)
+- Added experimental `metadata` property to `LegWaypoint` class. This property exposes the corresponding `DirectionsWaypoint#metadata`. [#7259](https://github.com/mapbox/mapbox-navigation-android/pull/7259)
+- Added Copilot option that allows to split history files by duration. [#7232](https://github.com/mapbox/mapbox-navigation-android/pull/7232)
+- Added Copilot options that allow to limit the number and total size of history files to be sent per session. [#7232](https://github.com/mapbox/mapbox-navigation-android/pull/7232)
+- Route request timeout errors are now considered failures as opposed to cancellations (`NavigationRouterCallback#onFailure` will be invoked instead of `NavigationRouterCallback#onCanceled`). [#7319](https://github.com/mapbox/mapbox-navigation-android/pull/7319)
+- Fixed an issue where location might have been snapped to an incorrect road when previously location updates had been inactive. [#7319](https://github.com/mapbox/mapbox-navigation-android/pull/7319)
+- Fixed an issue where in case of poor location signal it might have been snapped to a road, which is above/below the correct one.  [#7319](https://github.com/mapbox/mapbox-navigation-android/pull/7319)
+- Added experimental `MapboxNavigation#etcGateApi` so that the app can provide data about passed ETC gates. [#7295](https://github.com/mapbox/mapbox-navigation-android/pull/7295)
+- Fixed an issue where road closures where not displayed for inactive legs of the route. [#7322](https://github.com/mapbox/mapbox-navigation-android/pull/7322)
+- Added experimental and temporary (i.e. it will be removed in one of the next releases) `OnlineRouteAlternativesSwitch` which requests online route when the current route is offline and automatically switches if such a route is found. It's designed for the case when platform's reachability API doesn't work reliably. [#7245](https://github.com/mapbox/mapbox-navigation-android/pull/7245)
+- Fixed an issue where RouteReplaySession might not have started playing a route if it was created approximately at the same time when routes were set to `MapboxNavigation`. [#7293](https://github.com/mapbox/mapbox-navigation-android/pull/7293)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.15.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.15.0))
+- Mapbox Navigation Native `v148.0.0`
+- Mapbox Core Common `v23.7.0`
+- Mapbox Java `v6.13.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0))
+
+
 ## Mapbox Navigation SDK 2.15.0-rc.1 - 20 July, 2023
 ### Changelog
 [Changes between v2.15.0-beta.1 and v2.15.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.0-beta.1...v2.15.0-rc.1)
