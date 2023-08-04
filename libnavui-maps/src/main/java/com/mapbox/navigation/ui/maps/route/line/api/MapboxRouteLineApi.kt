@@ -64,6 +64,7 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
 import kotlinx.coroutines.Deferred
@@ -74,6 +75,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -268,10 +270,14 @@ class MapboxRouteLineApi(
      */
     fun setRoadClasses(roadClasses: List<String>) {
         jobControl.scope.launch(Dispatchers.Main) {
+            val uuid = UUID.randomUUID().toString()
+            logI("Mutex before lock setRoadClasses ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
             mutex.withLock {
+                logI("Mutex after lock setRoadClasses ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 trafficBackfillRoadClasses.clear()
                 trafficBackfillRoadClasses.addAll(roadClasses)
             }
+            logI("Mutex after unlock setRoadClasses ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
         }
     }
 
@@ -491,7 +497,10 @@ class MapboxRouteLineApi(
     ) {
         jobControl.job.cancelChildren()
         jobControl.scope.launch(Dispatchers.Main) {
+            val uuid = UUID.randomUUID().toString()
+            logI("Mutex before lock setNavigationRouteLines ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
             mutex.withLock {
+                logI("Mutex after lock setNavigationRouteLines ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
                 val routeData = setNewRouteData(
@@ -500,8 +509,10 @@ class MapboxRouteLineApi(
                     alternativeRoutesMetadata,
                     activeLegIndex
                 )
+                logI("Mutex before consumer invocation setNavigationRouteLines ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 consumer.accept(routeData)
             }
+            logI("Mutex after unlock setNavigationRouteLines ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
         }
     }
 
@@ -515,12 +526,17 @@ class MapboxRouteLineApi(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
+            val uuid = UUID.randomUUID().toString()
+            logI("Mutex before lock getRouteDrawData ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
             mutex.withLock {
+                logI("Mutex after lock getRouteDrawData ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
                 val result = buildDrawRoutesState(featureDataProvider, activeLegIndex)
+                logI("Mutex before consumer invocation getRouteDrawData ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 consumer.accept(result)
             }
+            logI("Mutex after unlock getRouteDrawData ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
         }
     }
 
@@ -666,7 +682,10 @@ class MapboxRouteLineApi(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineClearValue>>
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
+            val uuid = UUID.randomUUID().toString()
+            logI("Mutex before lock clearRouteLine ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
             mutex.withLock {
+                logI("after before lock clearRouteLine ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 lastLocationPoint = null
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
@@ -675,6 +694,7 @@ class MapboxRouteLineApi(
                 routeLineExpressionData = emptyList()
                 resetCaches()
 
+                logI("Mutex before consumer invocation clearRouteLine ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 consumer.accept(
                     ExpectedFactory.createValue(
                         RouteLineClearValue(
@@ -688,6 +708,7 @@ class MapboxRouteLineApi(
                     )
                 )
             }
+            logI("Mutex before unlock clearRouteLine ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
         }
     }
 
@@ -850,6 +871,7 @@ class MapboxRouteLineApi(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
+        val uuid = UUID.randomUUID().toString()
         routeProgressUpdatesQueue.addJob(
             CoalescingBlockingQueue.Item(
                 {
@@ -857,6 +879,7 @@ class MapboxRouteLineApi(
                     if (currentPrimaryRoute == null) {
                         val msg =
                             "You're calling #updateWithRouteProgress without any routes being set."
+                        logI("Mutex before consumer invocation updateWithRouteProgress1 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", "MapboxRouteLineApi")
                         consumer.accept(
                             ExpectedFactory.createError(RouteLineError(msg, throwable = null))
                         )
@@ -866,6 +889,7 @@ class MapboxRouteLineApi(
                             "${currentPrimaryRoute.id}) and navigated route " +
                             "(#updateWithRouteProgress, ID: ${routeProgress.navigationRoute.id}) " +
                             "are not the same. Aborting the update."
+                        logI("Mutex before consumer invocation updateWithRouteProgress2 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", "MapboxRouteLineApi")
                         consumer.accept(
                             ExpectedFactory.createError(RouteLineError(msg, throwable = null))
                         )
@@ -911,13 +935,17 @@ class MapboxRouteLineApi(
                                         ) { routeLegProgress ->
                                             if (legChange && activeLegIndex >= 0) {
                                                 jobControl.scope.launch(Dispatchers.Main) {
+                                                    val uuid = UUID.randomUUID().toString()
+                                                    logI("Mutex before lock alternativelyStyleSegmentsNotInLeg ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                                                     mutex.withLock {
+                                                        logI("Mutex after lock alternativelyStyleSegmentsNotInLeg ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                                                         alternativelyStyleSegmentsNotInLeg(
                                                             routeLegProgress.legIndex,
                                                             routeLineExpressionData,
                                                             InactiveRouteColors(routeLineOptions),
                                                         )
                                                     }
+                                                    logI("Mutex after unlock alternativelyStyleSegmentsNotInLeg ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                                                 }
                                             }
                                         }
@@ -938,6 +966,7 @@ class MapboxRouteLineApi(
                 },
                 {
                     val msg = "Skipping #updateWithRouteProgress because a newer one is available."
+                    logI("Mutex before callback invocation updateWithRouteProgress5 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                     consumer.accept(
                         ExpectedFactory.createError(RouteLineError(msg, throwable = null))
                     )
@@ -967,6 +996,7 @@ class MapboxRouteLineApi(
                     ).also {
                         it.ignorePrimaryRouteLineData = true
                     }
+                    logI("Mutex before consumer invocation updateWithRouteProgress4", "MapboxRouteLineApi")
                     consumer.accept(
                         ExpectedFactory.createValue<RouteLineError, RouteLineUpdateValue>(
                             updateValue
@@ -1098,7 +1128,7 @@ class MapboxRouteLineApi(
     private fun highlightActiveLeg(
         routeProgress: RouteProgress,
         maskingLayerData: RouteLineDynamicData?,
-        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>,
     ) {
         when (routeProgress.currentLegProgress) {
             null -> {
@@ -1109,6 +1139,7 @@ class MapboxRouteLineApi(
                             null
                         )
                     )
+                logI("Mutex before consumer invocation updateWithRouteProgress3", "MapboxRouteLineApi")
                 consumer.accept(expected)
             }
 
@@ -1152,7 +1183,10 @@ class MapboxRouteLineApi(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
         jobControl.scope.launch(Dispatchers.Main) {
+            val uuid = UUID.randomUUID().toString()
+            logI("Mutex before lock showRouteWithLegIndexHighlighted ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
             mutex.withLock {
+                logI("Mutex after lock showRouteWithLegIndexHighlighted ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 val directionsRoute = primaryRoute?.directionsRoute
                 val expected = ifNonNull(
                     directionsRoute,
@@ -1270,8 +1304,10 @@ class MapboxRouteLineApi(
                 } ?: ExpectedFactory.createError<RouteLineError, RouteLineUpdateValue>(
                     RouteLineError("", null)
                 )
+                logI("Mutex before consumer invocation showRouteWithLegIndexHighlighted ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 consumer.accept(expected)
             }
+            logI("Mutex after unlock showRouteWithLegIndexHighlighted ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
         }
     }
 
@@ -1305,11 +1341,17 @@ class MapboxRouteLineApi(
                 )
             } else {
                 val featuresDataCopy: List<RouteFeatureData>
+                val uuid = UUID.randomUUID().toString()
+                logI("Mutex before lock findClosestRoute1 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 mutex.withLock {
+                    logI("Mutex after lock findClosestRoute1 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                     featuresDataCopy = routeFeatureData.toList()
                 }
+                logI("Mutex after unlock findClosestRoute1 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 val state = findClosestRoute(target, mapboxMap, padding, featuresDataCopy)
+                logI("Mutex before lock findClosestRoute2 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                 mutex.withLock {
+                    logI("Mutex after lock findClosestRoute2 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
                     if (
                         featuresDataCopy.map { it.route.id } == routeFeatureData.map { it.route.id }
                     ) {
@@ -1322,6 +1364,7 @@ class MapboxRouteLineApi(
                         )
                     }
                 }
+                logI("Mutex after unlock findClosestRoute2 ($uuid) [${this@MapboxRouteLineApi.hashCode()}]", LOG_CATEGORY)
             }
         }
     }
@@ -1487,7 +1530,9 @@ class MapboxRouteLineApi(
         routes.clear()
         routes.addAll(distinctNewRoutes)
         primaryRoute = distinctNewRoutes.firstOrNull()
+        // dd synchronized start main thread E, G
         MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
+        // dd synchronized end main thread E, G
         this.activeLegIndex = activeLegIndex
 
         preWarmRouteCaches(
@@ -1496,9 +1541,11 @@ class MapboxRouteLineApi(
             alternativeRouteMetadataAvailable = distinctAlternativeRouteMetadata.isNotEmpty()
         )
 
+        // dd synchronized (multiple) main thread start G
         alternativesDeviationOffset = distinctAlternativeRouteMetadata.associate {
             it.navigationRoute.id to MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(it)
         }
+        // dd synchronized (multiple) main thread end G
 
         return buildDrawRoutesState(featureDataProvider, activeLegIndex)
     }
@@ -1511,17 +1558,23 @@ class MapboxRouteLineApi(
         if (routes.isEmpty()) return
         withContext(jobControl.scope.coroutineContext) {
             if (vanishingRouteLineEnabled) {
+                // dd synchronized start default thread G
                 granularDistancesProvider(routes.first())
+                // dd synchronized end default thread G
             }
             if (alternativeRouteMetadataAvailable) {
                 routes.drop(1).forEach {
+                    // dd synchronized start default thread G
                     granularDistancesProvider(it)
+                    // dd synchronized start default thread G
                 }
             }
         }
 
         restrictedExpressionData = if (routeLineOptions.displayRestrictedRoadSections) {
+            // dd synchronized main thread start G, G
             extractRouteRestrictionData(routes.first(), granularDistancesProvider)
+            // dd synchronized main thread end G, G
         } else {
             listOf()
         }
@@ -1559,13 +1612,16 @@ class MapboxRouteLineApi(
         val vanishingPointOffset = routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
         val primaryRouteTrafficLineExpressionDef = jobControl.scope.async {
             primaryRoute?.route?.run {
+                // dd nested (!) synchronized default thread start E -> G
                 val workingRouteLineExpressionData =
                     MapboxRouteLineUtils.calculateRouteLineSegments(
                         this,
                         trafficBackfillRoadClasses,
                         isPrimaryRoute = true,
                         routeLineOptions.resourceProvider.routeLineColorResources,
-                    ).run {
+                    )
+                        // dd nested (!) synchronized default thread end E -> G
+                        .run {
                         if (routeLineOptions.styleInactiveRouteLegsIndependently) {
                             alternativelyStyleSegmentsNotInLeg(
                                 legIndex,
@@ -1613,6 +1669,7 @@ class MapboxRouteLineApi(
 
         val alternateRoute1TrafficExpressionDef = jobControl.scope.async {
             alternativeRoute1?.route?.run {
+                // dd nested (!) synchronized default thread start E -> G
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this,
                     routeLineOptions.resourceProvider.routeLineColorResources,
@@ -1627,11 +1684,13 @@ class MapboxRouteLineApi(
                     routeLineOptions.displaySoftGradientForTraffic,
                     routeLineOptions.softGradientTransition
                 )
+                // dd nested (!) synchronized default thread end E -> G
             }?.generateExpression()
         }
 
         val alternateRoute2TrafficExpressionDef = jobControl.scope.async {
             if (partitionedRoutes.second.size > 1) {
+                // dd nested (!) synchronized default thread start E -> G
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     alternativeRoute2!!.route,
                     routeLineOptions.resourceProvider.routeLineColorResources,
@@ -1646,6 +1705,7 @@ class MapboxRouteLineApi(
                     routeLineOptions.displaySoftGradientForTraffic,
                     routeLineOptions.softGradientTransition
                 ).generateExpression()
+                // dd nested (!) synchronized default thread end E -> G
             } else {
                 null
             }
@@ -1700,12 +1760,14 @@ class MapboxRouteLineApi(
         ) {
             jobControl.scope.async {
                 partitionedRoutes.first.firstOrNull()?.route?.run {
+                    // dd nested (!) synchronized default thread start E -> G
                     MapboxRouteLineUtils.calculateRouteLineSegments(
                         this,
                         trafficBackfillRoadClasses,
                         isPrimaryRoute = true,
                         routeLineOptions.resourceProvider.routeLineColorResources
                     )
+                    // dd nested (!) synchronized default thread end E -> G
                 } ?: listOf()
             }
         } else {

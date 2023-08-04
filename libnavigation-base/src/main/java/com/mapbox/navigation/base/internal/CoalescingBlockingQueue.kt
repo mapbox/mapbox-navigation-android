@@ -1,9 +1,11 @@
 package com.mapbox.navigation.base.internal
 
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.UUID
 
 /**
  * A queue that executes added jobs (see [addJob]) in the order they are added,
@@ -35,11 +37,15 @@ class CoalescingBlockingQueue(
 
     private fun startExecuting() {
         scope.launch {
+            val uuid = UUID.randomUUID().toString()
+            logI("Mutex before lock startExecuting ($uuid)", "MapboxRouteLineApi")
             mutex.withLock {
+                logI("Mutex after lock startExecuting ($uuid)", "MapboxRouteLineApi")
                 val currentItemCopy = currentItem
                 currentItem = null
                 currentItemCopy?.block?.invoke()
             }
+            logI("Mutex before unlock startExecuting ($uuid)", "MapboxRouteLineApi")
         }
     }
 }
