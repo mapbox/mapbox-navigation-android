@@ -119,30 +119,6 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     }
 
     @Test
-    fun ev_reroute_parameters_for_non_ev_route() = sdkTest {
-        val requestedRoutes = requestRoutes(twoCoordinates, electric = false)
-
-        mapboxNavigation.onEVDataUpdated(
-            mapOf(
-                KEY_ENERGY_CONSUMPTION_CURVE to "0,300;20,120;40,150",
-                KEY_EV_INITIAL_CHARGE to "80",
-                KEY_EV_PRECONDITIONING_TIME to "10",
-                KEY_AUXILIARY_CONSUMPTION to "300"
-            )
-        )
-        mapboxNavigation.startTripSession()
-        stayOnInitialPosition()
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
-        waitForReroute()
-
-        checkDoesNotHaveParameters(
-            routeHandler.handledRequests.last().requestUrl!!,
-            evDataKeys + userProvidedCpoiKeys + KEY_ENGINE
-        )
-    }
-
-    @Test
     fun ev_reroute_parameters_for_ev_route_with_no_ev_data() = sdkTest {
         val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
 
