@@ -1,0 +1,1 @@
+- Fixed an issue with broken map-matching after significant teleports.
