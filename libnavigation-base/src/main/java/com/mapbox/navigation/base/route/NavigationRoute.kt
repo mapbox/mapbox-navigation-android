@@ -32,7 +32,6 @@ import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import okhttp3.internal.and
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.URL
@@ -714,7 +713,7 @@ private class ByteBufferBackedInputStream(
         return if (!buffer.hasRemaining()) {
             -1
         } else {
-            buffer.get() and 0xFF
+            buffer.get().toInt()
         }
     }
 
