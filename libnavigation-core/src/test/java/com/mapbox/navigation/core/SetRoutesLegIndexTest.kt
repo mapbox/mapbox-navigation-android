@@ -23,6 +23,7 @@ internal class SetRoutesLegIndexTest(
             arrayOf(SetRoutes.RefreshRoutes(RouteProgressData(1, 2, 3)), 1),
             arrayOf(SetRoutes.Reroute(5), 5),
             arrayOf(SetRoutes.Alternatives(6), 6),
+            arrayOf(SetRoutes.Reorder(7), 7),
         ).also {
             assertEquals(SetRoutes::class.sealedSubclasses.size, it.size)
         }

@@ -926,8 +926,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         // Telemetry uses this field to determine what type of event should be triggered.
         val setRoutesInfo = when {
             routes.isEmpty() -> SetRoutes.CleanUp
-            routes.first() == directionsSession.routes.firstOrNull() ->
+            routes.first() == directionsSession.routes.firstOrNull() -> {
                 SetRoutes.Alternatives(initialLegIndex)
+            }
+            directionsSession.routes.map { it.id }.contains(routes.first().id) -> {
+                SetRoutes.Reorder(initialLegIndex)
+            }
             else -> SetRoutes.NewRoutes(initialLegIndex)
         }
         internalSetNavigationRoutes(
@@ -1078,7 +1082,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         when (setRoutesInfo) {
             SetRoutes.CleanUp,
             is SetRoutes.NewRoutes,
-            is SetRoutes.Reroute -> {
+            is SetRoutes.Reroute,
+            is SetRoutes.Reorder -> {
                 rerouteController?.interrupt()
             }
             is SetRoutes.RefreshRoutes,

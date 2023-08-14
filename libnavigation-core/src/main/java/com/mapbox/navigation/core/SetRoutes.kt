@@ -38,6 +38,11 @@ internal sealed class SetRoutes {
     ) : SetRoutes()
 
     /**
+     * Triggered when primary route changed and previous primary became alternative.
+     */
+    internal data class Reorder(val legIndex: Int) : SetRoutes()
+
+    /**
      * Triggered when the **routes do not change but are refreshed**.
      *
      * Currently this can only be trigger internally by a response to [RouteRefreshController.refresh].

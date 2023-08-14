@@ -14,7 +14,7 @@ object RoutesExtra {
     const val ROUTES_UPDATE_REASON_CLEAN_UP = "ROUTES_UPDATE_REASON_CLEAN_UP"
 
     /**
-     * Routes update reason is *•new routes**.
+     * Routes update reason is **new routes**.
      * @see [RoutesObserver]
      */
     const val ROUTES_UPDATE_REASON_NEW = "ROUTES_UPDATE_REASON_NEW"
