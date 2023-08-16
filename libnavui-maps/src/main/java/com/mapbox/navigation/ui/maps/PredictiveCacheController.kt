@@ -243,7 +243,9 @@ class PredictiveCacheController constructor(
      */
     fun removeMapControllers(map: MapboxMap) {
         mapListeners[map]?.let {
-            map.removeOnStyleLoadedListener(it)
+            if (map.isValid()) {
+                map.removeOnStyleLoadedListener(it)
+            }
             mapListeners.remove(map)
         }
         PredictiveCache.removeAllMapControllersFromTileVariants(map)
