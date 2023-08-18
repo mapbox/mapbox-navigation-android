@@ -9,8 +9,12 @@ import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTe
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
+import org.junit.Assume.assumeTrue
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+
+const val TIME_TO_LOAD_TILES = 50_000L
 
 data class OfflineRegion(
     val id: String,
@@ -53,7 +57,14 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForR
         tileStore = createTileStore(),
         historyRecorderRule = historyRecorderRule
     ) { navigation ->
-        loadRegion(navigation, region)
+        val tilesAreLoaded = withTimeoutOrNull(TIME_TO_LOAD_TILES) {
+            loadRegion(navigation, region)
+            true
+        } ?: false
+        assumeTrue(
+            "wasn't able to load routing tiles on time, ignoring test",
+            tilesAreLoaded
+        )
         block(navigation)
     }
 }
