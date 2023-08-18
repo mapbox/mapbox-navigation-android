@@ -249,6 +249,7 @@ private fun IncidentInfo.toIncidentInfo() =
         numLanesBlocked,
         affectedRoadNames,
         multiLingualAffectedRoadNames,
+        length,
     )
 
 private fun IncidentType.toIncidentType(): Int =

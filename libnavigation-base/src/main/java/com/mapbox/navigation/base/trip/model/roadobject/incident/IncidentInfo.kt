@@ -38,6 +38,7 @@ import java.util.Date
  * @param multilingualAffectedRoadNames affected road names in different languages.
  *  May contain affected road names from [affectedRoadNames] property in case language is known for them.
  *  Key is a ISO 639-1, 2 letter language code, value - the list of affected road names.
+ *  @param length length of the incident in meters.
  */
 class IncidentInfo internal constructor(
     val id: String,
@@ -61,6 +62,7 @@ class IncidentInfo internal constructor(
     val numLanesBlocked: Long?,
     val affectedRoadNames: List<String>?,
     val multilingualAffectedRoadNames: Map<String, List<String>>,
+    val length: Int?,
 ) {
 
     /**
@@ -93,6 +95,7 @@ class IncidentInfo internal constructor(
         if (numLanesBlocked != other.numLanesBlocked) return false
         if (affectedRoadNames != other.affectedRoadNames) return false
         if (multilingualAffectedRoadNames != other.multilingualAffectedRoadNames) return false
+        if (length != other.length) return false
 
         return true
     }
@@ -122,6 +125,7 @@ class IncidentInfo internal constructor(
         result = 31 * result + numLanesBlocked.hashCode()
         result = 31 * result + affectedRoadNames.hashCode()
         result = 31 * result + multilingualAffectedRoadNames.hashCode()
+        result = 31 * result + length.hashCode()
         return result
     }
 
@@ -150,7 +154,8 @@ class IncidentInfo internal constructor(
             "lanesClearDesc=$lanesClearDesc, " +
             "numLanesBlocked=$numLanesBlocked, " +
             "affectedRoadNames=$affectedRoadNames, " +
-            "multilingualAffectedRoadNames=$multilingualAffectedRoadNames" +
+            "multilingualAffectedRoadNames=$multilingualAffectedRoadNames, " +
+            "length=$length" +
             ")"
     }
 }
