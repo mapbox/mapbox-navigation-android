@@ -270,7 +270,8 @@ class RoadObjectFactoryTest {
                         INCIDENT_AFFECTED_ROAD_NAME_JA1,
                         INCIDENT_AFFECTED_ROAD_NAME_JA2
                     ),
-                )
+                ),
+                INCIDENT_LENGTH
             ),
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
@@ -493,6 +494,7 @@ class RoadObjectFactoryTest {
             INCIDENT_CREATION_TIME,
             INCIDENT_START_TIME,
             INCIDENT_END_TIME,
+            INCIDENT_LENGTH,
             USA_CODE_2,
             USA_CODE_3,
             listOf(INCIDENT_LANES_BLOCKED),
@@ -710,6 +712,7 @@ class RoadObjectFactoryTest {
         private val INCIDENT_CREATION_TIME = Date(40)
         private val INCIDENT_START_TIME = Date(60)
         private val INCIDENT_END_TIME = Date(80)
+        private const val INCIDENT_LENGTH = 12345
         private const val USA_CODE_2 = "US"
         private const val USA_CODE_3 = "USA"
         private const val CANADA_CODE_2 = "CA"

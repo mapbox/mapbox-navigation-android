@@ -185,6 +185,29 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
+    fun incidentLengthTest() = sdkTest {
+        mapboxNavigation = createMapboxNavigation()
+        mapboxNavigation.startTripSession()
+        val origin = Point.fromLngLat(137.52814, 34.837394)
+        stayOnPosition(origin)
+        setUpRoutes(
+            R.raw.route_with_length,
+            "137.5281542766699,34.83741480073306;137.53072840419628,34.83636637489471"
+        )
+
+        val upcomingIncidents = mapboxNavigation.routeProgressUpdates()
+            .first { it.navigationRoute.id.startsWith("route_with_length") }
+            .upcomingRoadObjects
+            .filter { it.roadObject.objectType == RoadObjectType.INCIDENT }
+        assertEquals(1, upcomingIncidents.size)
+        val incident = upcomingIncidents[0].roadObject as Incident
+        assertEquals(
+            1784,
+            incident.info.length
+        )
+    }
+
+    @Test
     fun distanceToIncidentDoesNotChangeAfterAddingNewWaypointOnTheRouteGeometry() = sdkTest {
         mapboxNavigation = createMapboxNavigation()
         val (oneLegRoute, twoLegsRoute, incidentId) =
