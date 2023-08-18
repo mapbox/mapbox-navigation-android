@@ -222,7 +222,7 @@ class MapboxRerouteControllerTest {
                     every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
                 },
             )
-            val expectedRoutes = mockRoutes.drop(1)
+            val expectedRoutes = listOf(mockRoutes[1], mockRoutes[0])
             every { directionsSession.routes } returns mockRoutes
             every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
                 every { routeAlternativeId } returns routeId2
@@ -287,7 +287,7 @@ class MapboxRerouteControllerTest {
                     every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
                 },
             )
-            val expectedRoutes = mockRoutes.drop(1)
+            val expectedRoutes = listOf(mockRoutes[1], mockRoutes[0])
             every { directionsSession.routes } returns mockRoutes
             every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
                 every { routeAlternativeId } returns routeId2
@@ -348,7 +348,7 @@ class MapboxRerouteControllerTest {
                     every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
                 },
             )
-            val expectedRoutes = mockRoutes.drop(1)
+            val expectedRoutes = listOf(mockRoutes[1], mockRoutes[0])
             every { directionsSession.routes } returns mockRoutes
             every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
                 every { routeAlternativeId } returns routeId2
