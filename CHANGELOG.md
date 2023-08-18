@@ -6,6 +6,44 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.16.0-beta.1 - 18 August, 2023
+### Changelog
+[Changes between v2.15.1 and v2.16.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.1...v2.16.0-beta.1)
+
+#### Features
+- Added `IncidentInfo#length` property. [#7467](https://github.com/mapbox/mapbox-navigation-android/pull/7467)
+- Added `IncidentInfo#trafficCodes` property. [#7408](https://github.com/mapbox/mapbox-navigation-android/pull/7408)
+
+#### Bug fixes and improvements
+- Added `RouteLineColorResources#inactiveRouteLegCasingColor` to specify the color used for inactive legs casing. [#7393](https://github.com/mapbox/mapbox-navigation-android/pull/7393)
+- Added `IncidentInfo#multilingualAffectedRoadNames`. [#7430](https://github.com/mapbox/mapbox-navigation-android/pull/7430)
+- Map matching now uses emergency roads. [#7404](https://github.com/mapbox/mapbox-navigation-android/pull/7404)
+- Improved algorithm that chooses fork during dead-reckoning. [#7404](https://github.com/mapbox/mapbox-navigation-android/pull/7404)
+- Dead-reckoning is allowed even in short tunnels and bridges. [#7404](https://github.com/mapbox/mapbox-navigation-android/pull/7404)
+- Improved arrival detection in case of off-road. [#7431](https://github.com/mapbox/mapbox-navigation-android/pull/7431)
+- Fixed an issue where RouteProgress might have contained the same incident twice. [#7431](https://github.com/mapbox/mapbox-navigation-android/pull/7431)
+- Fixed an issue where the app might have crashed due to JNI reference table overflow. [#7431](https://github.com/mapbox/mapbox-navigation-android/pull/7431)
+- Fixed an issue with broken map-matching after significant teleports. [#7431](https://github.com/mapbox/mapbox-navigation-android/pull/7431)
+- Fixed an issue where map-matching might have jumped on parallel roads. [#7431](https://github.com/mapbox/mapbox-navigation-android/pull/7431)
+- Started using fallback to onboard routing in case of 5xx Directions Response codes. [#7431](https://github.com/mapbox/mapbox-navigation-android/pull/7431)
+- Fixed an issue where soft gradient was not applied for active legs. [#7416](https://github.com/mapbox/mapbox-navigation-android/pull/7416)
+- Fixed an issue where in rare cases `BannerInstructionsObserver` might not have been invoked for an instruction when the route was being refreshed.  [#7399](https://github.com/mapbox/mapbox-navigation-android/pull/7399)
+- Reverted sticky charging stations feature for rerouting. [#7401](https://github.com/mapbox/mapbox-navigation-android/pull/7401)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.0-beta.1))
+- Mapbox Navigation Native `v155.0.0`
+- Mapbox Core Common `v23.8.0-beta.1`
+- Mapbox Java `v6.13.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0))
+
+
 ## Mapbox Navigation SDK 2.14.2 - 08 August, 2023
 ### Changelog
 [Changes between v2.14.1 and v2.14.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.14.1...v2.14.2)
