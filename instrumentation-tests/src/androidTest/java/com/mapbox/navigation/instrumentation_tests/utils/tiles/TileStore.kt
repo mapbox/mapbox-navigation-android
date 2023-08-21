@@ -14,7 +14,7 @@ import org.junit.Assume.assumeTrue
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-const val TIME_TO_LOAD_TILES = 50_000L
+const val TIME_TO_LOAD_TILES = 70_000L
 
 data class OfflineRegion(
     val id: String,

@@ -10,6 +10,7 @@ import org.junit.Assume.assumeTrue
 import java.net.InetAddress
 
 private const val LOG_TAG = "TestNetwork"
+private const val MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION = 5000L
 
 suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
     withoutWifiAndMobileData {
@@ -20,9 +21,7 @@ suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
 }
 
 suspend fun withoutWifiAndMobileData(block: suspend () -> Unit) {
-    val pingAddress = withContext(Dispatchers.IO) {
-        InetAddress.getByName("api.mapbox.com")
-    }
+    val pingAddress = getPingAddress()
     Log.d(LOG_TAG, "Got request to turn internet off, checking if it was present")
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     val uiAutomation = instrumentation.uiAutomation
@@ -41,12 +40,42 @@ suspend fun withoutWifiAndMobileData(block: suspend () -> Unit) {
     pingAddress.waitForNetworkStatus(isNetworkReachabilityExpected = true)
 }
 
-private suspend fun InetAddress.waitForNetworkStatus(isNetworkReachabilityExpected: Boolean) {
-    val actualReachability = withTimeoutOrNull(5000) {
-        do {
-            val isReachable = withContext(Dispatchers.IO) {
-                isReachable(1000)
+private suspend fun getPingAddress(): InetAddress = withContext(Dispatchers.IO) {
+    val host = "api.mapbox.com"
+    val result = withTimeoutOrNull<InetAddress?>(MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION) {
+        var address: InetAddress? = null
+        while (true) {
+            try {
+                address = InetAddress.getByName("api.mapbox.com")
+                break
+            } catch (t: Throwable) {
+                Log.e(LOG_TAG, "error resolving address for $host", t)
             }
+        }
+        address
+    }
+    assumeTrue(
+        "wasn't able to get address of $host" +
+            " in $MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION ms" +
+            ", check your internet connection.",
+        result != null
+    )
+    Log.d(LOG_TAG, "Successfully resolved address for $host")
+    result!!
+}
+
+private suspend fun InetAddress.waitForNetworkStatus(isNetworkReachabilityExpected: Boolean) {
+    val actualReachability = withTimeoutOrNull(MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION) {
+        do {
+            Log.d(LOG_TAG, "checking reachability")
+            val isReachable = withContext(Dispatchers.IO) {
+                isReachable(300)
+            }
+            Log.d(
+                LOG_TAG,
+                "is reachable: $isReachable, " +
+                    "is network reachability expected $isNetworkReachabilityExpected "
+            )
         } while (isReachable != isNetworkReachabilityExpected)
         isNetworkReachabilityExpected
     } ?: !isNetworkReachabilityExpected
