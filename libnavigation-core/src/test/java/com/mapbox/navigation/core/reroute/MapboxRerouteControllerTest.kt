@@ -222,7 +222,7 @@ class MapboxRerouteControllerTest {
                     every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
                 },
             )
-            val expectedRoutes = mockRoutes.drop(1)
+            val expectedRoutes = listOf(mockRoutes[1], mockRoutes[0])
             every { directionsSession.routes } returns mockRoutes
             every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
                 every { routeAlternativeId } returns routeId2
@@ -287,7 +287,7 @@ class MapboxRerouteControllerTest {
                     every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
                 },
             )
-            val expectedRoutes = mockRoutes.drop(1)
+            val expectedRoutes = listOf(mockRoutes[1], mockRoutes[0])
             every { directionsSession.routes } returns mockRoutes
             every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
                 every { routeAlternativeId } returns routeId2
@@ -333,6 +333,7 @@ class MapboxRerouteControllerTest {
         ) {
             val routeId1 = "id_1"
             val routeId2 = "id_2"
+            val routeId3 = "id_3"
             val mockRoutes = listOf<NavigationRoute>(
                 mockk {
                     every { id } returns routeId1
@@ -347,11 +348,15 @@ class MapboxRerouteControllerTest {
                     every { id } returns routeId2
                     every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
                 },
+                mockk {
+                    every { id } returns routeId3
+                    every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                },
             )
-            val expectedRoutes = mockRoutes.drop(1)
+            val expectedRoutes = listOf(mockRoutes[2], mockRoutes[0], mockRoutes[1])
             every { directionsSession.routes } returns mockRoutes
             every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
-                every { routeAlternativeId } returns routeId2
+                every { routeAlternativeId } returns routeId3
                 every { currentRouteGeometryIndex } returns 40
                 every { currentLegProgress } returns mockk(relaxed = true) {
                     every { legIndex } returns 2

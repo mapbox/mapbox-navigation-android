@@ -39,6 +39,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
+import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -432,26 +433,38 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
     @Test
     fun reroute_to_alternative_route() = sdkTest {
-        val mapboxNavigation = createMapboxNavigation()
-        val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
-        val origin = routes.first().routeOptions.coordinatesList().first()
-        mockLocationUpdatesRule.pushLocationUpdate {
-            latitude = origin.latitude()
-            longitude = origin.longitude()
-        }
-        mapboxNavigation.startTripSession()
-        mapboxNavigation.setNavigationRoutes(routes)
-        mapboxNavigation.routesUpdates().first { it.navigationRoutes == routes }
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { mapboxNavigation ->
+            val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes(
+                routerOrigin = RouterOrigin.Offboard
+            )
+            val origin = routes.first().routeOptions.coordinatesList().first()
+            mockLocationUpdatesRule.pushLocationUpdate {
+                latitude = origin.latitude()
+                longitude = origin.longitude()
+            }
+            mapboxNavigation.registerRouteAlternativesObserver(
+                AdvancedAlternativesObserverFromDocumentation(mapboxNavigation)
+            )
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutes(routes)
+            mapboxNavigation.routesUpdates().first { it.navigationRoutes == routes }
 
-        mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
-        val routesUpdate = mapboxNavigation.routesUpdates().first {
-            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
-        }
+            mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
+            val rerouteUpdate = mapboxNavigation.routesUpdates().first {
+                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            }
+            assertEquals(
+                listOf(routes[1], routes[0]),
+                rerouteUpdate.navigationRoutes
+            )
 
-        assertEquals(
-            listOf(routes[1]),
-            routesUpdate.navigationRoutes
-        )
+            val removePassedAlternativeUpdate = mapboxNavigation.routesUpdates().first {
+                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE &&
+                    !it.navigationRoutes.contains(routes[0])
+            }
+        }
     }
 
     @Test
@@ -474,16 +487,20 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                         )
                     )
                 }
+
                 override fun reroute(routesCallback: RerouteController.RoutesCallback) {
                 }
+
                 override val state: RerouteState = RerouteState.Idle
                 override fun interrupt() {
                 }
+
                 override fun registerRerouteStateObserver(
                     rerouteStateObserver: RerouteController.RerouteStateObserver
                 ): Boolean {
                     return false
                 }
+
                 override fun unregisterRerouteStateObserver(
                     rerouteStateObserver: RerouteController.RerouteStateObserver
                 ): Boolean {

@@ -117,13 +117,9 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             if (relevantAlternative != null) {
                 val alternativeLegIndex = tripSession.getRouteProgress()
                     ?.internalAlternativeRouteIndices()?.get(routeAlternativeId)?.legIndex ?: 0
-                val newList = mutableListOf(relevantAlternative).apply {
-                    addAll(
-                        routes.toMutableList().apply {
-                            removeFirst()
-                            remove(relevantAlternative)
-                        }
-                    )
+                val newList = routes.toMutableList().apply {
+                    remove(relevantAlternative)
+                    add(0, relevantAlternative)
                 }
 
                 logD("Reroute switch to alternative", LOG_CATEGORY)
