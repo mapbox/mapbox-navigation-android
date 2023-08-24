@@ -67,6 +67,27 @@ object EvRoutesProvider {
         return MockedEvRoutes(newRouteOptions, newRouteOnlineRouteRequestHandler)
     }
 
+    /***
+     * Has the same destination as [getBerlinEvRoute], but different origin,
+     * It's expected to be used as the first continuous alternative after passing fork point
+     */
+    fun getContinuousAlternativeBerlinEvRoute(
+        context: Context,
+        baseUrl: String? = null
+    ): MockedEvRoutes {
+        val routeOptions = berlinEvRouteOptions(baseUrl, origin = "13.3597435982,52.4989946786")
+        val jsonResponse = readRawFileText(context, R.raw.ev_routes_berlin_continuous_alternative)
+        val evRouteRequestHandler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            jsonResponse = jsonResponse,
+            expectedCoordinates = routeOptions.coordinatesList(),
+        )
+        return MockedEvRoutes(
+            routeOptions,
+            evRouteRequestHandler
+        )
+    }
+
     fun getBerlinEvRouteWithUserProvidedChargingStation(
         context: Context,
         baseUrl: String?
@@ -145,10 +166,11 @@ object EvRoutesProvider {
     }
 
     private fun berlinEvRouteOptions(
-        baseUrl: String?
+        baseUrl: String?,
+        origin: String = "13.361378213031003,52.49813341962201"
     ): RouteOptions = RouteOptions.builder()
         .applyDefaultNavigationOptions()
-        .coordinates("13.361378213031003,52.49813341962201;13.393450988895268,52.50913924804004")
+        .coordinates("$origin;13.393450988895268,52.50913924804004")
         .annotations("state_of_charge")
         .alternatives(true)
         .waypointsPerRoute(true)
