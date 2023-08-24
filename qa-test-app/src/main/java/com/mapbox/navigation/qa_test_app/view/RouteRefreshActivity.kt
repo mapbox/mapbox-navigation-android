@@ -20,6 +20,8 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.extension.observable.model.SourceDataType
 import com.mapbox.maps.extension.observable.subscribeSourceDataLoaded
+import com.mapbox.maps.extension.style.sources.getSource
+import com.mapbox.maps.extension.style.utils.unwrapToTyped
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnSourceDataLoadedListener
@@ -354,6 +356,7 @@ class RouteRefreshActivity : AppCompatActivity() {
         val routeArrowOptions = RouteArrowOptions.Builder(this).build()
         routeArrowView = MapboxRouteArrowView(routeArrowOptions)
         val styleURL = "mapbox://styles/mapbox/traffic-day-v2"
+        val sourceId = "mapbox://mapbox.mapbox-traffic-v1"
         // load map style
         mapboxMap.loadStyleUri(styleURL) { style ->
             routeLineView.initializeLayers(style)
@@ -363,9 +366,10 @@ class RouteRefreshActivity : AppCompatActivity() {
                 true
             }
             val listener = OnSourceDataLoadedListener { eventData ->
-                if (!mapboxNavigation.getNavigationRoutes().isEmpty() && eventData.id == "mapbox://mapbox.mapbox-traffic-v2-beta" && eventData.type == SourceDataType.TILE) {
-                    val cameraZoom = mapboxMap.cameraState.zoom.toLong()
-                    if (cameraZoom == eventData.tileID!!.zoom) {
+                if (!mapboxNavigation.getNavigationRoutes().isEmpty() && eventData.id == sourceId && eventData.type == SourceDataType.TILE) {
+                    val maxSourceZoom = style.getStyleSourceProperty(sourceId, "maxzoom").value.unwrapToTyped<Long>();
+                    val targetZoom = min(mapboxMap.cameraState.zoom.toLong(), maxSourceZoom)
+                    if (targetZoom == eventData.tileID!!.zoom) {
                         val currentTime = System.currentTimeMillis()
                         val updatePeriodMs = 17000 // FIXME: to be fetched from eventData.
                         if (currentTime - lastRouteTrafficUpdateTime >= updatePeriodMs) {
