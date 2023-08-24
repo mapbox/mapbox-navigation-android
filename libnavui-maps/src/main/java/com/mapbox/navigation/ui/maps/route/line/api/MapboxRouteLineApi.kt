@@ -1558,15 +1558,15 @@ class MapboxRouteLineApi(
         if (routes.isEmpty()) return
         withContext(jobControl.scope.coroutineContext) {
             if (vanishingRouteLineEnabled) {
-                // dd synchronized start default thread G
+                // dd synchronized start default thread G -> S
                 granularDistancesProvider(routes.first())
-                // dd synchronized end default thread G
+                // dd synchronized end default thread G -> S
             }
             if (alternativeRouteMetadataAvailable) {
                 routes.drop(1).forEach {
-                    // dd synchronized start default thread G
+                    // dd synchronized start default thread G -> S
                     granularDistancesProvider(it)
-                    // dd synchronized start default thread G
+                    // dd synchronized start default thread G -> S
                 }
             }
         }
