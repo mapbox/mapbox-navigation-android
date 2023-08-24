@@ -24,6 +24,7 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnSourceDataLoadedListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -145,6 +146,13 @@ class RouteRefreshActivity : AppCompatActivity() {
     private lateinit var routeLineView: MapboxRouteLineView
     private lateinit var routeArrowView: MapboxRouteArrowView
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
+    private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        val result = routeLineAPI.updateTraveledRouteLine(point)
+        binding.mapView.getMapboxMap().getStyle()?.apply {
+            routeLineView.renderRouteLineUpdate(this, result)
+        }
+    }
+
 
     private var lastRouteTrafficUpdateTime: Long = 0
 
@@ -178,6 +186,9 @@ class RouteRefreshActivity : AppCompatActivity() {
             val style = mapboxMap.getStyle()
             if (style != null) {
                 routeArrowView.renderManeuverUpdate(style, maneuverArrowResult)
+                routeLineAPI.updateWithRouteProgress(routeProgress) {
+                    routeLineView.renderRouteLineUpdate(style, it)
+                }
             }
         }
 
@@ -430,6 +441,7 @@ class RouteRefreshActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
+        binding.mapView.location.addOnIndicatorPositionChangedListener(onPositionChangedListener)
 
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.playbackSpeed(1.5)
@@ -442,6 +454,7 @@ class RouteRefreshActivity : AppCompatActivity() {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
+        binding.mapView.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
     }
 
     override fun onDestroy() {
