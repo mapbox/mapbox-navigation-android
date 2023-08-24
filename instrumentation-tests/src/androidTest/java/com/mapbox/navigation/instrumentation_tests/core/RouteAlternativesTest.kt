@@ -101,7 +101,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
-    @Ignore("NN-754")
     @Test
     fun alternatives_are_updated_after_passing_fork_point() = sdkTest {
         setupMockRequestHandlers()
