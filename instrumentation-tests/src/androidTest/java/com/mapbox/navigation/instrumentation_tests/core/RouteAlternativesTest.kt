@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
+import com.mapbox.navigation.core.internal.extensions.flowOnFinalDestinationArrival
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.instrumentation_tests.R
@@ -298,6 +299,55 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 "DD8MJ37zcI2gU4XXhtt-Gz1vdFShCMtf7AOyEHVylhqcEyreYNiT6Q==",
                 alternativesUpdate.alternatives.firstOrNull()?.directionsRoute?.requestUuid()
             )
+        }
+    }
+
+    @Test // NN-1023
+    fun disableContinuousAlternatives() = sdkTest {
+        setupMockRequestHandlers()
+        withMapboxNavigation(
+            customConfig = """{"navigation":{"alternativeRoutes":{"maxAlternatives":0}}}""",
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { mapboxNavigation ->
+            val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
+
+            mockWebServerRule.requestHandlers.clear()
+            mockWebServerRule.requestHandlers.add(
+                MockDirectionsRequestHandler(
+                    "driving-traffic",
+                    readRawFileText(context, R.raw.route_response_alternative_during_navigation),
+                    startCoordinates,
+                    relaxedExpectedCoordinates = true
+                )
+            )
+            stayOnPosition(
+                startCoordinates.first().latitude(),
+                startCoordinates.first().longitude(),
+                30f
+            ) {
+                mapboxNavigation.startTripSession()
+                mapboxNavigation.flowLocationMatcherResult().first()
+            }
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            var alternativeUpdates = 0
+            mapboxNavigation.registerRouteAlternativesObserver(
+                object : NavigationRouteAlternativesObserver {
+                    override fun onRouteAlternatives(
+                        routeProgress: RouteProgress,
+                        alternatives: List<NavigationRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        alternativeUpdates++
+                    }
+
+                    override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                    }
+                }
+            )
+            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
+
+            mapboxNavigation.flowOnFinalDestinationArrival().first()
+            assertEquals(0, alternativeUpdates)
         }
     }
 
