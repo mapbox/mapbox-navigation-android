@@ -6,6 +6,7 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
@@ -17,10 +18,14 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
+import com.mapbox.maps.extension.observable.model.SourceDataType
+import com.mapbox.maps.extension.observable.subscribeSourceDataLoaded
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.delegates.listeners.OnSourceDataLoadedListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -64,6 +69,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import kotlin.math.min
 
 /**
  * Use for testing alternative routes refresh.
@@ -75,6 +82,7 @@ import kotlinx.coroutines.launch
  * 5. Wait for refresh: the traffic should reappear.
  * 6. Optionally, remove the traffic and wait for refresh again.
  */
+@ExperimentalPreviewMapboxNavigationAPI
 class RouteRefreshActivity : AppCompatActivity() {
 
     /* ----- Layout binding reference ----- */
@@ -137,6 +145,8 @@ class RouteRefreshActivity : AppCompatActivity() {
     private lateinit var routeLineView: MapboxRouteLineView
     private lateinit var routeArrowView: MapboxRouteArrowView
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
+
+    private var lastRouteTrafficUpdateTime: Long = 0
 
     /* ----- Location and route progress callbacks ----- */
     private val locationObserver = object : LocationObserver {
@@ -304,7 +314,7 @@ class RouteRefreshActivity : AppCompatActivity() {
 
         // initialize route line
         val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this)
-            .withRouteLineBelowLayerId("road-label")
+            .withVanishingRouteLineEnabled(true)
             .withRouteLineResources(
                 RouteLineResources.Builder()
                     .routeLineColorResources(
@@ -332,15 +342,30 @@ class RouteRefreshActivity : AppCompatActivity() {
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
         val routeArrowOptions = RouteArrowOptions.Builder(this).build()
         routeArrowView = MapboxRouteArrowView(routeArrowOptions)
-
+        val styleURL = "mapbox://styles/mapbox/traffic-day-v2"
         // load map style
-        mapboxMap.loadStyleUri(MAPBOX_STREETS) { style ->
+        mapboxMap.loadStyleUri(styleURL) { style ->
             routeLineView.initializeLayers(style)
             // add long click listener that search for a route to the clicked destination
             binding.mapView.gestures.addOnMapLongClickListener { point ->
                 findRoute(point)
                 true
             }
+            val listener = OnSourceDataLoadedListener { eventData ->
+                if (!mapboxNavigation.getNavigationRoutes().isEmpty() && eventData.id == "mapbox://mapbox.mapbox-traffic-v2-beta" && eventData.type == SourceDataType.TILE) {
+                    val cameraZoom = mapboxMap.cameraState.zoom.toLong()
+                    if (cameraZoom == eventData.tileID!!.zoom) {
+                        val currentTime = System.currentTimeMillis()
+                        val updatePeriodMs = 17000 // FIXME: to be fetched from eventData.
+                        if (currentTime - lastRouteTrafficUpdateTime >= updatePeriodMs) {
+                            Log.d("Traffic", "Tile that triggered update: " + eventData.tileID)
+                            lastRouteTrafficUpdateTime = currentTime;
+                            mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
+                        }
+                    }
+                }
+            }
+            mapboxMap.addOnSourceDataLoadedListener(listener)
         }
 
         // initialize view interactions
@@ -391,6 +416,7 @@ class RouteRefreshActivity : AppCompatActivity() {
                     .toNavigationRoute(it.origin)
             }
             mapboxNavigation.setNavigationRoutes(newRoutes)
+            mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         }
 
         // start the trip session to being receiving location updates in free drive

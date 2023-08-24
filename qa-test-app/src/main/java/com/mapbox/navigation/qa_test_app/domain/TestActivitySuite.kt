@@ -2,6 +2,7 @@ package com.mapbox.navigation.qa_test_app.domain
 
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.ActiveLegAboveInactiveLegsActivity
@@ -42,6 +43,7 @@ typealias LaunchActivityFun = (AppCompatActivity) -> Unit
 
 data class Destination(val name: String, val point: Point)
 
+@ExperimentalPreviewMapboxNavigationAPI
 object TestActivitySuite {
 
     private val testDestinations = listOf(

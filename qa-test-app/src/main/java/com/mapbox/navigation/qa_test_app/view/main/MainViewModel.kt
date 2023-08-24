@@ -1,6 +1,7 @@
 package com.mapbox.navigation.qa_test_app.view.main
 
 import androidx.lifecycle.ViewModel
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.qa_test_app.domain.CATEGORY_COMPONENTS
 import com.mapbox.navigation.qa_test_app.domain.CATEGORY_DROP_IN
 import com.mapbox.navigation.qa_test_app.domain.CATEGORY_NONE
@@ -27,6 +28,7 @@ class MainViewModel : ViewModel() {
         PageInfo("Component Installer", CATEGORY_COMPONENTS)
     )
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun getActivitiesList(category: String): List<TestActivityDescription> {
         return TestActivitySuite.getTestActivities(category)
     }
