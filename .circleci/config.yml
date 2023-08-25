@@ -337,7 +337,7 @@ commands:
       - run:
           name: Run Navigation Core SDK Unit Tests and generate Jacoco test report
           command: |
-            make core-unit-tests-jacoco
+            make core-unit-tests-release-jacoco
       - store-results:
           module_target: "libnavigation-router"
       - store-results:

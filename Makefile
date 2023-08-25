@@ -108,9 +108,9 @@ assemble-core-release:
 core-unit-tests:
 	$(call run-gradle-tasks,$(CORE_MODULES),test)
 
-.PHONY: core-unit-tests-jacoco
-core-unit-tests-jacoco:
-	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReport)
+.PHONY: core-unit-tests-release-jacoco
+core-unit-tests-release-jacoco:
+	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReleaseUnitTestReport)
 
 .PHONY: core-dependency-graph
 core-dependency-graph:
