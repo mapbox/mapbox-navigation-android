@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.internal
 
 import com.mapbox.navigation.utils.internal.logI
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -20,6 +21,7 @@ import java.util.UUID
 class CoalescingBlockingQueue(
     private val scope: CoroutineScope,
     private val mutex: Mutex,
+    private val hashCode: Int,
 ) {
 
     data class Item(
@@ -38,14 +40,19 @@ class CoalescingBlockingQueue(
     private fun startExecuting() {
         scope.launch {
             val uuid = UUID.randomUUID().toString()
-            logI("Mutex before lock startExecuting ($uuid)", "MapboxRouteLineApi")
+            logI("Mutex before lock startExecuting ($uuid) [$hashCode]", "MapboxRouteLineApi")
             mutex.withLock {
-                logI("Mutex after lock startExecuting ($uuid)", "MapboxRouteLineApi")
-                val currentItemCopy = currentItem
-                currentItem = null
-                currentItemCopy?.block?.invoke()
+                try {
+                    logI("Mutex after lock startExecuting ($uuid) [$hashCode]", "MapboxRouteLineApi")
+                    val currentItemCopy = currentItem
+                    currentItem = null
+                    currentItemCopy?.block?.invoke()
+                } catch (ex: CancellationException) {
+                    logI("startExecuting cancelled ($uuid) [$hashCode]", "MapboxRouteLineApi")
+                    throw ex
+                }
             }
-            logI("Mutex before unlock startExecuting ($uuid)", "MapboxRouteLineApi")
+            logI("Mutex before unlock startExecuting ($uuid) [$hashCode]", "MapboxRouteLineApi")
         }
     }
 }

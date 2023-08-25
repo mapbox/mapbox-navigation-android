@@ -62,6 +62,7 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheRouteTrafficResu
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
@@ -544,13 +545,18 @@ internal object MapboxRouteLineUtils {
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
         routeLineColorResources: RouteLineColorResources,
+        uuid: String,
+        hashCode: Int,
+        tag: String,
     ): List<RouteLineExpressionData> {
         val congestionProvider =
             getTrafficCongestionAnnotationProvider(route, routeLineColorResources)
+        logI("Before extractRouteDataWithTrafficAndRoadClassDeDuped - $tag ($uuid), [$hashCode]", "MapboxRouteLineApi")
         val annotationExpressionData = extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             congestionProvider
         )
+        logI("After extractRouteDataWithTrafficAndRoadClassDeDuped - $tag ($uuid), [$hashCode]", "MapboxRouteLineApi")
 
         return when (annotationExpressionData.isEmpty()) {
             false -> {
@@ -1685,13 +1691,19 @@ internal object MapboxRouteLineUtils {
         lineStartColor: Int,
         lineColor: Int,
         useSoftGradient: Boolean,
-        softGradientTransitionDistance: Double
+        softGradientTransitionDistance: Double,
+        uuid: String,
+        hashCode: Int,
+        tag: String,
     ) = RouteLineExpressionProvider {
         val segments: List<RouteLineExpressionData> = calculateRouteLineSegments(
             route,
             trafficBackfillRoadClasses,
             isPrimaryRoute,
-            colorResources
+            colorResources,
+            uuid,
+            hashCode,
+            tag
         )
         val stopGap = softGradientTransitionDistance / route.directionsRoute.distance()
         getTrafficLineExpression(
