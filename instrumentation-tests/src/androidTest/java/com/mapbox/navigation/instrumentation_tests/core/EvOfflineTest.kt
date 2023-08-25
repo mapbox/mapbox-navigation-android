@@ -17,10 +17,12 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRouteWithSingleUserProvidedChargingStation
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.TIME_TO_LOAD_TILES
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.withoutInternet
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.DEFAULT_TIMEOUT_FOR_SDK_TEST
 import com.mapbox.navigation.testing.ui.utils.coroutines.NavigationRouteAlternativesResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.alternativesUpdates
@@ -39,7 +41,8 @@ import org.junit.Rule
 import org.junit.Test
 
 // TODO: remove in the scope of NAVAND-1351
-const val INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE = 80_000L
+const val INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE = DEFAULT_TIMEOUT_FOR_SDK_TEST +
+    TIME_TO_LOAD_TILES
 
 class EvOfflineTest : BaseCoreNoCleanUpTest() {
 

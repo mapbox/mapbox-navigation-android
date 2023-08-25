@@ -25,7 +25,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 private const val MAX_TIME_TO_UPDATE_ROUTE = 5_000L
-private const val DEFAULT_TIMEOUT_FOR_SDK_TEST = 30_000L
+const val DEFAULT_TIMEOUT_FOR_SDK_TEST = 30_000L
 
 fun sdkTest(
     timeout: Long = DEFAULT_TIMEOUT_FOR_SDK_TEST,
