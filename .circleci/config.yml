@@ -103,11 +103,11 @@ workflows:
           requires:
             - assemble-instrumentation-test-internal
       - instrumentation-tests:
-          package: core
+          package: CoreTestSuite
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          package: ui
+          package: UiTestSuite
           requires:
             - assemble-instrumentation-test
       - androidauto-test
@@ -453,7 +453,7 @@ commands:
             gcloud firebase test android run --type instrumentation \
               --app instrumentation-tests/build/outputs/apk/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>.apk \
               --test instrumentation-tests/build/outputs/apk/androidTest/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>-androidTest.apk \
-              --test-targets "package com.mapbox.navigation.instrumentation_tests.<< parameters.package >>" \
+              --test-targets "class com.mapbox.navigation.instrumentation_tests.suites.<< parameters.package >>" \
               --device model=hammerhead,version=23,locale=fr,orientation=portrait \
               --device model=q2q,version=31,locale=de,orientation=landscape \
               --device model=panther,version=33,locale=it,orientation=landscape \
