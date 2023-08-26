@@ -1,6 +1,11 @@
 package com.mapbox.navigation.instrumentation_tests.suites
 
-import com.mapbox.navigation.instrumentation_tests.core.*
+import com.mapbox.navigation.instrumentation_tests.core.RoutesPreviewTest
+import com.mapbox.navigation.instrumentation_tests.core.SanityCoreRouteTest
+import com.mapbox.navigation.instrumentation_tests.core.SetRoutesTest
+import com.mapbox.navigation.instrumentation_tests.core.TripSessionsBillingTest
+import com.mapbox.navigation.instrumentation_tests.core.UpcomingRouteObjectsTest
+import com.mapbox.navigation.instrumentation_tests.core.WaypointsTest
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
 
