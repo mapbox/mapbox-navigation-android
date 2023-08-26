@@ -87,7 +87,7 @@ workflows:
                 - main
   default:
     jobs:
-      - prepare-and-assemble
+      - assemble
       - changelog-verification:
           filters:
             branches:
@@ -99,10 +99,10 @@ workflows:
       - ui-robo-tests
       - internal-instrumentation-tests:
           requires:
-            - prepare-and-assemble
+            - assemble-instrumentation-test-internal
       - instrumentation-tests:
           requires:
-            - prepare-and-assemble
+            - assemble-instrumentation-test
       - androidauto-test
       - mobile-metrics-dry-run:
           type: approval
@@ -603,37 +603,40 @@ commands:
 #---------- JOBS ----------
 #--------------------------
 jobs:
-  prepare-and-assemble:
+  assemble:
     executor: ndk-r22-latest-executor
     steps:
       - checkout
-      - when:
-          condition:
-            not:
-              matches:
-                pattern: "^add-changelog.*"
-                value: << pipeline.git.branch >>
-          steps:
-            - restore-gradle-cache
-            - assemble-core-debug
-            - assemble-ui-debug
-            - assemble-core-release
-            - assemble-ui-release
-            - assemble-module:
-                module_target: "instrumentation-tests"
-                variant: "Debug"
-                inject_token: true
-            - assemble-instrumentation-test:
-                module_target: "instrumentation-tests"
-            - assemble-module:
-                module_target: "app-tests-wrapper"
-                variant: "Debug"
-            - assemble-instrumentation-test:
-                module_target: "libnavigation-core"
-                inject_token: true
-            - assemble-instrumentation-test:
-                module_target: "libnavigator"
-            - write-workspace
+      - restore-gradle-cache
+      - assemble-core-debug
+      - assemble-ui-debug
+      - assemble-core-release
+      - assemble-ui-release
+
+  assemble-instrumentation-test:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-module:
+          module_target: "instrumentation-tests"
+          variant: "Debug"
+          inject_token: true
+      - assemble-instrumentation-test:
+          module_target: "instrumentation-tests"
+      - write-workspace
+
+  assemble-instrumentation-test-internal:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-instrumentation-test:
+          module_target: "libnavigation-core"
+          inject_token: true
+      - assemble-instrumentation-test:
+          module_target: "libnavigator"
+      - write-workspace
 
   unit-tests-core:
     executor: ndk-r22-latest-executor
@@ -649,7 +652,7 @@ jobs:
             - checkout
             - restore-gradle-cache
             - unit-tests-core
-            - write-test-results
+            - write-workspace
       - run: exit 0
 
   unit-tests-ui:
@@ -666,7 +669,7 @@ jobs:
             - checkout
             - restore-gradle-cache
             - unit-tests-ui
-            - write-test-results
+            - write-workspace
       - run: exit 0
 
   codecov-upload:
@@ -794,6 +797,9 @@ jobs:
           steps:
             - read-workspace
             - login-google-cloud-platform
+            - assemble-module:
+                module_target: "app-tests-wrapper"
+                variant: "Debug"
             - run-internal-firebase-instrumentation:
                 module_target: "libnavigation-core"
                 module_wrapper: "app-tests-wrapper"
