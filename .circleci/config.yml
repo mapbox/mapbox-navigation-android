@@ -646,7 +646,8 @@ jobs:
                 pattern: "^add-changelog.*"
                 value: << pipeline.git.branch >>
           steps:
-            - read-workspace
+            - checkout
+            - restore-gradle-cache
             - unit-tests-core
             - write-test-results
       - run: exit 0
@@ -662,7 +663,8 @@ jobs:
                 pattern: "^add-changelog.*"
                 value: << pipeline.git.branch >>
           steps:
-            - read-workspace
+            - checkout
+            - restore-gradle-cache
             - unit-tests-ui
             - write-test-results
       - run: exit 0
@@ -691,7 +693,8 @@ jobs:
                 pattern: "^add-changelog.*"
                 value: << pipeline.git.branch >>
           steps:
-            - read-workspace
+            - checkout
+            - restore-gradle-cache
             - unit-tests-androidauto
       - run: exit 0
 
@@ -706,7 +709,8 @@ jobs:
                 pattern: "^add-changelog.*"
                 value: << pipeline.git.branch >>
           steps:
-            - read-workspace
+            - checkout
+            - restore-gradle-cache
             - verify-codestyle
             - verify-license
             - verify-common-sdk-version
@@ -759,7 +763,8 @@ jobs:
                 pattern: "^add-changelog.*"
                 value: << pipeline.git.branch >>
           steps:
-            - read-workspace
+            - checkout
+            - restore-gradle-cache
             - download-native-libs
             - generate-google-services-json
             - assemble-module:
