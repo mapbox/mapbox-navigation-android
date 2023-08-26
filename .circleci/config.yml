@@ -665,6 +665,7 @@ jobs:
 
   assemble-instrumentation-test:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - checkout
       - restore-gradle-cache
@@ -678,6 +679,7 @@ jobs:
 
   assemble-instrumentation-test-internal:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - checkout
       - restore-gradle-cache
@@ -787,6 +789,7 @@ jobs:
 
   check-api-ui:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - read-workspace
       - check-api-ui
@@ -805,6 +808,7 @@ jobs:
 
   run-android-lint:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - read-workspace
       - run-android-lint
