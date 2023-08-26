@@ -857,7 +857,7 @@ jobs:
             - login-google-cloud-platform
             - run-firebase-instrumentation:
                 variant: "debug"
-                package: << parameters.suite >>
+                suite: << parameters.suite >>
       - run: exit 0
 
   billing-tests:
