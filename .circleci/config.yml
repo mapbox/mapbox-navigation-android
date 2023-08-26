@@ -94,7 +94,31 @@ workflows:
           filters:
             branches:
               ignore: /^(main|release-.*)/
-      - static-analysis
+      - prepare-static-analysis
+      - verify-codestyle:
+          requires:
+            - prepare-static-analysis
+      - verify-license:
+          requires:
+            - prepare-static-analysis
+      - verify-common-sdk-version:
+          requires:
+            - prepare-static-analysis
+      - check-api-core:
+          requires:
+            - prepare-static-analysis
+      - check-api-ui:
+          requires:
+            - prepare-static-analysis
+      - check-api-androidauto:
+          requires:
+            - prepare-static-analysis
+      - check-public-documentation:
+          requires:
+            - prepare-static-analysis
+      - run-android-lint:
+          requires:
+            - prepare-static-analysis
       - unit-tests-core
       - unit-tests-ui
       - unit-tests-androidauto
@@ -729,6 +753,61 @@ jobs:
             - restore-gradle-cache
             - unit-tests-androidauto
       - run: exit 0
+
+  prepare-static-analysis:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - write-workspace
+
+  verify-codestyle:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - verify-codestyle
+
+  verify-license:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - verify-license
+
+  verify-common-sdk-version:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - verify-common-sdk-version
+
+  check-api-core:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - check-api-core
+
+  check-api-ui:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - check-api-ui
+
+  check-api-androidauto:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - check-api-androidauto
+
+  check-public-documentation:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - check-public-documentation
+
+  run-android-lint:
+    executor: ndk-r22-latest-executor
+    steps:
+      - read-workspace
+      - run-android-lint
 
   static-analysis:
     executor: ndk-r22-latest-executor
