@@ -88,6 +88,8 @@ workflows:
   default:
     jobs:
       - assemble
+      - assemble-instrumentation-test
+      - assemble-instrumentation-test-internal
       - changelog-verification:
           filters:
             branches:
