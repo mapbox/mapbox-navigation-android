@@ -641,6 +641,9 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache
+      - assemble-module:
+          module_target: "app-tests-wrapper"
+          variant: "Debug"
       - assemble-instrumentation-test:
           module_target: "libnavigation-core"
           inject_token: true
@@ -807,9 +810,6 @@ jobs:
           steps:
             - read-workspace
             - login-google-cloud-platform
-            - assemble-module:
-                module_target: "app-tests-wrapper"
-                variant: "Debug"
             - run-internal-firebase-instrumentation:
                 module_target: "libnavigation-core"
                 module_wrapper: "app-tests-wrapper"
