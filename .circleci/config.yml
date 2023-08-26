@@ -92,21 +92,11 @@ workflows:
           filters:
             branches:
               ignore: /^(main|release-.*)/
-      - static-analysis:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-core:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-ui:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-androidauto:
-          requires:
-            - prepare-and-assemble
-      - ui-robo-tests:
-          requires:
-            - prepare-and-assemble
+      - static-analysis
+      - unit-tests-core
+      - unit-tests-ui
+      - unit-tests-androidauto
+      - ui-robo-tests
       - internal-instrumentation-tests:
           requires:
             - prepare-and-assemble
