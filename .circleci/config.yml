@@ -103,6 +103,11 @@ workflows:
           requires:
             - assemble-instrumentation-test-internal
       - instrumentation-tests:
+          package: core
+          requires:
+            - assemble-instrumentation-test
+      - instrumentation-tests:
+          package: ui
           requires:
             - assemble-instrumentation-test
       - androidauto-test
@@ -434,6 +439,8 @@ commands:
 
   run-firebase-instrumentation:
     parameters:
+      package:
+        type: string
       variant:
         description: debug or release
         type: string
@@ -446,6 +453,7 @@ commands:
             gcloud firebase test android run --type instrumentation \
               --app instrumentation-tests/build/outputs/apk/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>.apk \
               --test instrumentation-tests/build/outputs/apk/androidTest/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>-androidTest.apk \
+              --test-targets "package com.mapbox.navigation.instrumentation_tests.<< parameters.package >>" \
               --device model=hammerhead,version=23,locale=fr,orientation=portrait \
               --device model=q2q,version=31,locale=de,orientation=landscape \
               --device model=panther,version=33,locale=it,orientation=landscape \
@@ -654,7 +662,7 @@ jobs:
             - checkout
             - restore-gradle-cache
             - unit-tests-core
-            - write-workspace
+            - write-test-results
       - run: exit 0
 
   unit-tests-ui:
@@ -671,7 +679,7 @@ jobs:
             - checkout
             - restore-gradle-cache
             - unit-tests-ui
-            - write-workspace
+            - write-test-results
       - run: exit 0
 
   codecov-upload:
@@ -813,6 +821,9 @@ jobs:
       - run: exit 0
 
   instrumentation-tests:
+    parameters:
+      package:
+        type: string
     executor: ndk-r22-latest-executor
     environment:
       JVM_OPTS: -Xmx3200m
@@ -830,6 +841,7 @@ jobs:
             - login-google-cloud-platform
             - run-firebase-instrumentation:
                 variant: "debug"
+                package: << parameters.package >>
       - run: exit 0
 
   billing-tests:
