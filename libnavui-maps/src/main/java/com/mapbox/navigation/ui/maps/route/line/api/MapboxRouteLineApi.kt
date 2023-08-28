@@ -9,10 +9,6 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
-import com.mapbox.maps.RenderedQueryOptions
-import com.mapbox.maps.ScreenBox
-import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl
@@ -75,8 +71,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Responsible for generating route line related data which can be rendered on the map to
@@ -1340,15 +1334,6 @@ class MapboxRouteLineApi(
         padding: Float,
         featuresData: List<RouteFeatureData>,
     ): Expected<RouteNotFound, ClosestRouteValue> {
-        val mapClickPoint = mapboxMap.pixelForCoordinate(target)
-        val leftFloat = (mapClickPoint.x - padding)
-        val rightFloat = (mapClickPoint.x + padding)
-        val topFloat = (mapClickPoint.y - padding)
-        val bottomFloat = (mapClickPoint.y + padding)
-        val clickRect = ScreenBox(
-            ScreenCoordinate(leftFloat, topFloat),
-            ScreenCoordinate(rightFloat, bottomFloat)
-        )
         val routesAndFeatures = featuresData.toList()
         val features = routesAndFeatures.map { it.featureCollection }
 
@@ -1363,90 +1348,32 @@ class MapboxRouteLineApi(
             .union(layerGroup2SourceLayerIds)
             .union(layerGroup3SourceLayerIds)
             .subtract(primaryRouteLineLayers)
+            .toList()
+        val primaryRouteLineLayersList = primaryRouteLineLayers.toList()
+        val mapClickPoint = mapboxMap.pixelForCoordinate(target)
 
-        val clickPointFeatureIndex = queryMapForFeatureIndex(
-            mapboxMap,
-            mapClickPoint,
-            alternateRouteLayers.toList(),
-            features
+        val closestRouteHandler = CompositeClosestRouteHandlerProvider.createHandler(
+            listOf(
+                SinglePointClosestRouteHandler(primaryRouteLineLayersList),
+                RectClosestRouteHandler(primaryRouteLineLayersList, padding),
+                SinglePointClosestRouteHandler(alternateRouteLayers),
+                RectClosestRouteHandler(alternateRouteLayers, padding),
+            )
         )
 
-        return if (clickPointFeatureIndex >= 0) {
-            ExpectedFactory.createValue(
-                ClosestRouteValue(routesAndFeatures[clickPointFeatureIndex].route)
-            )
-        } else {
-            val clickRectFeatureIndex = queryMapForFeatureIndex(
-                mapboxMap,
-                clickRect,
-                alternateRouteLayers.toList(),
-                features
-            )
-            if (clickRectFeatureIndex >= 0) {
+        val result = closestRouteHandler.handle(mapboxMap, mapClickPoint, features)
+        return result.fold(
+            {
+                ExpectedFactory.createError(
+                    RouteNotFound("No route found in query area.", null)
+                )
+            },
+            {
                 ExpectedFactory.createValue(
-                    ClosestRouteValue(routesAndFeatures[clickRectFeatureIndex].route)
+                    ClosestRouteValue(routesAndFeatures[it].route)
                 )
-            } else {
-                val index = queryMapForFeatureIndex(
-                    mapboxMap,
-                    mapClickPoint,
-                    primaryRouteLineLayers.toList(),
-                    features
-                )
-                if (index >= 0) {
-                    ExpectedFactory.createValue(ClosestRouteValue(routesAndFeatures[index].route))
-                } else {
-                    ExpectedFactory.createError(
-                        RouteNotFound("No route found in query area.", null)
-                    )
-                }
             }
-        }
-    }
-
-    private suspend fun queryMapForFeatureIndex(
-        mapboxMap: MapboxMap,
-        mapClickPoint: ScreenCoordinate,
-        layerIds: List<String>,
-        routeFeatures: List<FeatureCollection>
-    ): Int {
-        return suspendCoroutine { continuation ->
-            mapboxMap.queryRenderedFeatures(
-                mapClickPoint,
-                RenderedQueryOptions(layerIds, null)
-            ) {
-                val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
-                continuation.resume(index)
-            }
-        }
-    }
-
-    private suspend fun queryMapForFeatureIndex(
-        mapboxMap: MapboxMap,
-        clickRect: ScreenBox,
-        layerIds: List<String>,
-        routeFeatures: List<FeatureCollection>
-    ): Int {
-        return suspendCoroutine { continuation ->
-            mapboxMap.queryRenderedFeatures(
-                clickRect,
-                RenderedQueryOptions(layerIds, null)
-            ) {
-                val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
-                continuation.resume(index)
-            }
-        }
-    }
-
-    private fun getIndexOfFirstFeature(
-        features: List<QueriedFeature>,
-        routeFeatures: List<FeatureCollection>
-    ): Int {
-        return features.distinct().run {
-            routeFeatures.indexOfFirst {
-                (it.features()?.get(0)?.id() ?: 0) == this.firstOrNull()?.feature?.id()
-            }
-        }
+        )
     }
 
     internal fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
