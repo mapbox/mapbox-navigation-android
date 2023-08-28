@@ -707,7 +707,7 @@ jobs:
             - checkout
             - restore-gradle-cache
             - unit-tests-core
-            - write-workspace
+            - write-test-results
       - run: exit 0
 
   unit-tests-ui:
@@ -724,7 +724,7 @@ jobs:
             - checkout
             - restore-gradle-cache
             - unit-tests-ui
-            - write-workspace
+            - write-test-results
       - run: exit 0
 
   codecov-upload:
@@ -737,6 +737,7 @@ jobs:
                 pattern: "^add-changelog.*"
                 value: << pipeline.git.branch >>
           steps:
+            - checkout
             - read-workspace
             - codecov-upload
       - run: exit 0
