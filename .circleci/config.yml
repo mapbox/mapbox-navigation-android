@@ -707,7 +707,7 @@ jobs:
             - checkout
             - restore-gradle-cache
             - unit-tests-core
-            - write-test-results
+            - write-workspace
       - run: exit 0
 
   unit-tests-ui:
@@ -724,7 +724,7 @@ jobs:
             - checkout
             - restore-gradle-cache
             - unit-tests-ui
-            - write-test-results
+            - write-workspace
       - run: exit 0
 
   codecov-upload:
