@@ -1,0 +1,1 @@
+- Fixed an issue where clicking on primary route resulted in switching to an alternative route.

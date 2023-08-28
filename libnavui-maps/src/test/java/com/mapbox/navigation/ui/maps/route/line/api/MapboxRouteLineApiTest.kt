@@ -12,10 +12,6 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
-import com.mapbox.maps.QueryFeaturesCallback
-import com.mapbox.maps.RenderedQueryOptions
-import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
@@ -28,7 +24,9 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setAlternativeTrafficColor
@@ -52,10 +50,10 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.MockKAnnotations
-import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
@@ -69,6 +67,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -79,6 +78,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapboxRouteLineApiTest {
@@ -603,17 +605,17 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
-    fun findClosestRoute_whenClickPoint() = runBlockingTest {
-        mockkObject(MapboxRouteLineUtils)
+    fun findClosestRoute_success() = runBlockingTest {
+        mockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
+        val compositeClosestRouteHandler = mockk<CompositeClosestRouteHandler>(relaxed = true)
+        every {
+            CompositeClosestRouteHandlerProvider.createHandler(any())
+        } returns compositeClosestRouteHandler
+        val primaryLayers = layerGroup1SourceLayerIds
+        val alternativeLayers = layerGroup2SourceLayerIds + layerGroup3SourceLayerIds
         every {
             MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
-        } returns setOf()
-        val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns "abc#0"
-        }
-        val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns "def#0"
-        }
+        } returns primaryLayers
         val route1 = loadRoute("short_route.json", uuid = "abc")
         val route2 = loadRoute("short_route.json", uuid = "def")
         val options = MapboxRouteLineOptions.Builder(ctx).build()
@@ -621,10 +623,6 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val mockExpected = mockk<Expected<String, List<QueriedFeature>>> {
-            every { value } returns listOf(feature2, feature1)
-        }
-        val querySlot = slot<QueryFeaturesCallback>()
         val screenCoordinate = mockk<ScreenCoordinate> {
             every { x } returns 100.0
             every { y } returns 100.0
@@ -632,20 +630,83 @@ class MapboxRouteLineApiTest {
         val mockkMap = mockk<MapboxMap>(relaxed = true) {
             every { isValid() } returns true
             every { pixelForCoordinate(point) } returns screenCoordinate
-            every {
-                queryRenderedFeatures(any<ScreenCoordinate>(), any(), capture(querySlot))
-            } answers { querySlot.captured.run(mockExpected) }
         }
+        coEvery {
+            compositeClosestRouteHandler.handle(mockkMap, screenCoordinate, any())
+        } returns ExpectedFactory.createValue(1)
 
         val result = api.findClosestRoute(point, mockkMap, 50f)
 
         assertEquals(route2, result.value!!.route)
-        unmockkObject(MapboxRouteLineUtils)
+        coVerify {
+            compositeClosestRouteHandler.handle(
+                mockkMap,
+                screenCoordinate,
+                match {
+                    it.first().features()!!.first().id() == "abc#0" &&
+                        it[1].features()!!.first().id() == "def#0"
+                }
+            )
+        }
+        verify {
+            CompositeClosestRouteHandlerProvider.createHandler(
+                match {
+                    val handler1 = it[0] as SinglePointClosestRouteHandler
+                    val handler2 = it[1] as RectClosestRouteHandler
+                    val handler3 = it[2] as SinglePointClosestRouteHandler
+                    val handler4 = it[3] as RectClosestRouteHandler
+                    it.size == 4 &&
+                        handler1.layerIds.toSet() == primaryLayers &&
+                        handler2.layerIds.toSet() == primaryLayers &&
+                        handler2.padding == 50f &&
+                        handler3.layerIds.toSet() == alternativeLayers &&
+                        handler4.layerIds.toSet() == alternativeLayers &&
+                        handler4.padding == 50f
+                }
+            )
+        }
+        unmockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
     }
 
     @Test
-    fun findClosestRoute_whenClickPoint_mapIsInvalid() = runBlockingTest {
-        mockkObject(MapboxRouteLineUtils)
+    fun findClosestRoute_failure() = runBlockingTest {
+        mockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
+        val compositeClosestRouteHandler = mockk<CompositeClosestRouteHandler>(relaxed = true)
+        every {
+            CompositeClosestRouteHandlerProvider.createHandler(any())
+        } returns compositeClosestRouteHandler
+        every {
+            MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
+        } returns setOf()
+        val route1 = loadRoute("short_route.json", uuid = "abc")
+        val route2 = loadRoute("short_route.json", uuid = "def")
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options).also {
+            it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
+        }
+        val point = Point.fromLngLat(139.7745686, 35.677573)
+        val screenCoordinate = mockk<ScreenCoordinate> {
+            every { x } returns 100.0
+            every { y } returns 100.0
+        }
+        val mockkMap = mockk<MapboxMap>(relaxed = true) {
+            every { isValid() } returns true
+            every { pixelForCoordinate(point) } returns screenCoordinate
+        }
+        coEvery {
+            compositeClosestRouteHandler.handle(mockkMap, screenCoordinate, any())
+        } returns ExpectedFactory.createError(Unit)
+
+        val result = api.findClosestRoute(point, mockkMap, 50f)
+
+        assertEquals("No route found in query area.", result.error!!.errorMessage)
+        unmockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
+    }
+
+    @Test
+    fun findClosestRoute_mapIsInvalid() = runBlockingTest {
+        mockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
+        every { CompositeClosestRouteHandlerProvider.createHandler(any()) } returns mockk()
         every {
             MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
         } returns setOf()
@@ -668,21 +729,23 @@ class MapboxRouteLineApiTest {
         verify(exactly = 0) {
             mockkMap.queryRenderedFeatures(any<ScreenCoordinate>(), any(), any())
         }
-        unmockkObject(MapboxRouteLineUtils)
+        unmockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
     }
 
     @Test
-    fun findClosestRoute_whenClickPoint_routeIdsChanged() = coroutineRule.runBlockingTest {
-        mockkObject(MapboxRouteLineUtils)
+    fun findClosestRoute_routeIdsChanged() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
+        var continuation: Continuation<Expected<Unit, Int>>? = null
+        every { CompositeClosestRouteHandlerProvider.createHandler(any()) } returns mockk {
+            coEvery { handle(any(), any(), any()) } coAnswers {
+                suspendCoroutine<Expected<Unit, Int>> {
+                    continuation = it
+                }
+            }
+        }
         every {
             MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
         } returns setOf()
-        val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns "abc#0"
-        }
-        val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns "def#0"
-        }
         val route1 = loadRoute("short_route.json", uuid = "abc")
         val route2 = loadRoute("short_route.json", uuid = "def")
         val route3 = loadRoute("short_route.json", uuid = "abc2")
@@ -693,7 +756,6 @@ class MapboxRouteLineApiTest {
         val point = Point.fromLngLat(139.7745686, 35.677573)
         val mockkMap = mockk<MapboxMap>(relaxed = true) {
             every { isValid() } returns true
-            every { queryRenderedFeatures(any<ScreenCoordinate>(), any(), any()) } just Runs
         }
         clearAllMocks(answers = false)
 
@@ -702,34 +764,25 @@ class MapboxRouteLineApiTest {
             actual = it
         }
 
-        val callbackSlot = slot<QueryFeaturesCallback>()
-        verify {
-            mockkMap.queryRenderedFeatures(any<ScreenCoordinate>(), any(), capture(callbackSlot))
-        }
-
         api.setRoutes(listOf(RouteLine(route3, null), RouteLine(route2, null))) {}
-
-        callbackSlot.captured.run(ExpectedFactory.createValue(listOf(feature1, feature2)))
+        continuation!!.resume(ExpectedFactory.createValue(0))
 
         assertNotNull(actual)
         assertTrue(actual!!.isError)
         assertEquals("Routes have changed", actual!!.error!!.errorMessage)
 
-        unmockkObject(MapboxRouteLineUtils)
+        unmockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
     }
 
     @Test
-    fun findClosestRoute_whenClickPoint_routeAnnotationsChanged() = runBlockingTest {
-        mockkObject(MapboxRouteLineUtils)
+    fun findClosestRoute_routeAnnotationsChanged() = runBlockingTest {
+        mockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
+        every { CompositeClosestRouteHandlerProvider.createHandler(any()) } returns mockk {
+            coEvery { handle(any(), any(), any()) } returns ExpectedFactory.createValue(0)
+        }
         every {
             MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
         } returns setOf()
-        val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns "abc#0"
-        }
-        val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns "def#0"
-        }
         val route1 = loadRoute("short_route.json", uuid = "abc")
         val route2 = loadRoute("short_route.json", uuid = "def")
         val route3 = route1.toBuilder()
@@ -752,7 +805,6 @@ class MapboxRouteLineApiTest {
         val point = Point.fromLngLat(139.7745686, 35.677573)
         val mockkMap = mockk<MapboxMap>(relaxed = true) {
             every { isValid() } returns true
-            every { queryRenderedFeatures(any<ScreenCoordinate>(), any(), any()) } just Runs
         }
         clearAllMocks(answers = false)
 
@@ -761,25 +813,23 @@ class MapboxRouteLineApiTest {
             actual = it
         }
 
-        val callbackSlot = slot<QueryFeaturesCallback>()
-        verify {
-            mockkMap.queryRenderedFeatures(any<ScreenCoordinate>(), any(), capture(callbackSlot))
-        }
-
         api.setRoutes(listOf(RouteLine(route3, null), RouteLine(route2, null))) {}
-
-        callbackSlot.captured.run(ExpectedFactory.createValue(listOf(feature1, feature2)))
 
         assertNotNull(actual)
         assertTrue(actual!!.isValue)
         assertEquals(route1, actual!!.value!!.route)
 
-        unmockkObject(MapboxRouteLineUtils)
+        unmockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
     }
 
     @Test
     fun findClosestRoute_doesNotHoldMutexWhileQuerying() = runBlockingTest {
-        mockkObject(MapboxRouteLineUtils)
+        mockkObject(MapboxRouteLineUtils, CompositeClosestRouteHandlerProvider)
+        every { CompositeClosestRouteHandlerProvider.createHandler(any()) } returns mockk {
+            coEvery { handle(any(), any(), any()) } coAnswers {
+                suspendCancellableCoroutine { }
+            }
+        }
         every {
             MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
         } returns setOf()
@@ -792,7 +842,6 @@ class MapboxRouteLineApiTest {
         val point = Point.fromLngLat(139.7745686, 35.677573)
         val mockkMap = mockk<MapboxMap>(relaxed = true) {
             every { isValid() } returns true
-            every { queryRenderedFeatures(any<ScreenCoordinate>(), any(), any()) } just Runs
         }
         clearAllMocks(answers = false)
 
@@ -804,114 +853,6 @@ class MapboxRouteLineApiTest {
         // make sure it returns
         val ignored = api.setRoutes(listOf(RouteLine(route2, null), RouteLine(route1, null)))
 
-        unmockkObject(MapboxRouteLineUtils)
-    }
-
-    @Test
-    fun findClosestRoute_whenRectPoint() = runBlockingTest {
-        mockkObject(MapboxRouteLineUtils)
-        every {
-            MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
-        } returns setOf()
-        val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns "abc#0"
-        }
-        val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns "def#0"
-        }
-        val route1 = loadRoute("short_route.json", uuid = "abc")
-        val route2 = loadRoute("short_route.json", uuid = "def")
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options).also {
-            it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
-        }
-        val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<Expected<String, List<QueriedFeature>>> {
-            every { value } returns listOf()
-        }
-        val mockExpected = mockk<Expected<String, List<QueriedFeature>>> {
-            every { value } returns listOf(feature2, feature1)
-        }
-        val querySlot = slot<QueryFeaturesCallback>()
-        val screenCoordinate = mockk<ScreenCoordinate> {
-            every { x } returns 100.0
-            every { y } returns 100.0
-        }
-        val mockkMap = mockk<MapboxMap>(relaxed = true) {
-            every { isValid() } returns true
-            every { pixelForCoordinate(point) } returns screenCoordinate
-            every {
-                queryRenderedFeatures(any<ScreenCoordinate>(), any(), capture(querySlot))
-            } answers { querySlot.captured.run(emptyExpected) }
-            every { queryRenderedFeatures(any<ScreenBox>(), any(), capture(querySlot)) } answers {
-                querySlot.captured.run(mockExpected)
-            }
-        }
-
-        val result = api.findClosestRoute(point, mockkMap, 50f)
-
-        assertEquals(route2, result.value!!.route)
-        unmockkObject(MapboxRouteLineUtils)
-    }
-
-    @Test
-    fun findClosestRoute_whenPrimaryRoute() = runBlockingTest {
-        mockkObject(MapboxRouteLineUtils)
-        every {
-            MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any<Style>(), any())
-        } returns setOf()
-        val feature1 = mockk<QueriedFeature> {
-            every { feature.id() } returns "abc#0"
-        }
-        val feature2 = mockk<QueriedFeature> {
-            every { feature.id() } returns "def#0"
-        }
-        val route1 = loadRoute("short_route.json", uuid = "abc")
-        val route2 = loadRoute("short_route.json", uuid = "def")
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options).also {
-            it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
-        }
-        val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<Expected<String, List<QueriedFeature>>> {
-            every { value } returns listOf()
-        }
-        val mockExpected = mockk<Expected<String, List<QueriedFeature>>> {
-            every { value } returns listOf(feature1, feature2)
-        }
-        val querySlot = slot<QueryFeaturesCallback>()
-        val renderedQueryOptionsSlot = slot<RenderedQueryOptions>()
-        val screenCoordinate = mockk<ScreenCoordinate> {
-            every { x } returns 100.0
-            every { y } returns 100.0
-        }
-        val mockkMap = mockk<MapboxMap>(relaxed = true) {
-            every { isValid() } returns true
-            every { pixelForCoordinate(point) } returns screenCoordinate
-            every {
-                queryRenderedFeatures(
-                    any<ScreenCoordinate>(),
-                    capture(renderedQueryOptionsSlot),
-                    capture(querySlot)
-                )
-            } answers {
-                if (
-                    renderedQueryOptionsSlot.captured.layerIds!!
-                        .contains(RouteLayerConstants.LAYER_GROUP_2_MAIN)
-                ) {
-                    querySlot.captured.run(emptyExpected)
-                } else {
-                    querySlot.captured.run(mockExpected)
-                }
-            }
-            every { queryRenderedFeatures(any<ScreenBox>(), any(), capture(querySlot)) } answers {
-                querySlot.captured.run(emptyExpected)
-            }
-        }
-
-        val result = api.findClosestRoute(point, mockkMap, 50f)
-
-        assertEquals(route1, result.value!!.route)
         unmockkObject(MapboxRouteLineUtils)
     }
 
