@@ -2,18 +2,20 @@ package com.mapbox.navigation.trip.notification.internal
 
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.graphics.Bitmap
 import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.navigation.base.formatter.DistanceFormatter
@@ -24,9 +26,13 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.trip.notification.R
 import com.mapbox.navigation.trip.notification.RemoteViewsProvider
+import com.mapbox.navigation.utils.internal.DISMISS_NOTIFICATION_ACTION
+import com.mapbox.navigation.utils.internal.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
 import io.mockk.Ordering
 import io.mockk.Runs
+import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -38,11 +44,14 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 
 internal const val STOP_SESSION = "Stop session"
@@ -52,6 +61,7 @@ internal const val MANEUVER_TYPE = "MANEUVER TYPE"
 internal const val MANEUVER_MODIFIER = "MANEUVER MODIFIER"
 internal const val NAVIGATION_IS_STARTING = "Navigation is starting…"
 
+@RunWith(RobolectricTestRunner::class)
 class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
@@ -74,8 +84,9 @@ class MapboxTripNotificationTest {
         mockkStatic(DateFormat::class)
         mockkStatic(PendingIntent::class)
         mockkStatic(TimeFormatter::class)
-        mockkStatic(Bitmap::class)
-        every { Bitmap.createBitmap(any(), any(), any()) } returns mockk()
+        mockkStatic(ContextCompat::class)
+        every { ContextCompat.getColor(any(), any()) } returns 0
+        every { ContextCompat.getDrawable(any(), any()) } returns null
         mockedContext = createContext()
         every { mockedContext.applicationContext } returns mockedContext
         every { navigationOptions.applicationContext } returns mockedContext
@@ -173,9 +184,20 @@ class MapboxTripNotificationTest {
     }
 
     @Test
-    fun whenTripStartedThenRegisterReceiverCalledOnce() {
+    fun whenTripStartedThenRegisterReceiverCalledTwice() {
         notification.onTripSessionStarted()
-        verify(exactly = 1) { mockedContext.registerReceiver(any(), any()) }
+        val receivers = mutableListOf<BroadcastReceiver>()
+        val filters = mutableListOf<IntentFilter>()
+        verify(exactly = 2) {
+            mockedContext.registerReceiver(
+                capture(receivers),
+                capture(filters)
+            )
+        }
+
+        assertNotEquals(receivers[0], receivers[1])
+        assertTrue(filters[0].hasAction(END_NAVIGATION_ACTION))
+        assertTrue(filters[1].hasAction(DISMISS_NOTIFICATION_ACTION))
     }
 
     @ExperimentalCoroutinesApi
@@ -183,15 +205,65 @@ class MapboxTripNotificationTest {
     fun whenTripStoppedThenCleanupIsDone() {
         val notificationManager =
             mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notification.onTripSessionStarted()
         notification.onTripSessionStopped()
 
-        verify(exactly = 1) { mockedContext.unregisterReceiver(any()) }
+        val receivers = mutableListOf<BroadcastReceiver>()
+        verify(exactly = 2) { mockedContext.unregisterReceiver(capture(receivers)) }
+        assertNotEquals(receivers[1], receivers[0])
         verify(exactly = 1) { notificationManager.cancel(NOTIFICATION_ID) }
         assertEquals(
             true,
             MapboxTripNotification.notificationActionButtonChannel.isClosedForReceive
         )
         assertEquals(true, MapboxTripNotification.notificationActionButtonChannel.isClosedForSend)
+    }
+
+    @Test
+    fun whenNotificationIsDismissedThenCleanupIsDone() {
+        val notificationManager =
+            mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notification.onTripSessionStarted()
+        captureDismissReceiver().onReceive(mockedContext, Intent(DISMISS_NOTIFICATION_ACTION))
+
+        val receivers = mutableListOf<BroadcastReceiver>()
+        verify(exactly = 2) { mockedContext.unregisterReceiver(capture(receivers)) }
+        assertNotEquals(receivers[1], receivers[0])
+        verify(exactly = 1) { notificationManager.cancel(NOTIFICATION_ID) }
+        assertEquals(
+            true,
+            MapboxTripNotification.notificationActionButtonChannel.isClosedForReceive
+        )
+        assertEquals(true, MapboxTripNotification.notificationActionButtonChannel.isClosedForSend)
+    }
+
+    @Test
+    fun whenTripSessionIsStoppedAfterNotificationIsDismissedThenCleanupIsNotDone() {
+        val notificationManager =
+            mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notification.onTripSessionStarted()
+        captureDismissReceiver().onReceive(mockedContext, Intent(DISMISS_NOTIFICATION_ACTION))
+        clearMocks(mockedContext, notificationManager, answers = false)
+
+        notification.onTripSessionStopped()
+
+        verify(exactly = 0) { mockedContext.unregisterReceiver(any()) }
+        verify(exactly = 0) { notificationManager.cancel(any()) }
+    }
+
+    @Test
+    fun whenNotificationIsDismissedAfterTripSessionIsStoppedThenCleanupIsNotDone() {
+        val notificationManager =
+            mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notification.onTripSessionStarted()
+        val dismissReceiver = captureDismissReceiver()
+        notification.onTripSessionStopped()
+        clearMocks(mockedContext, notificationManager, answers = false)
+
+        dismissReceiver.onReceive(mockedContext, Intent(DISMISS_NOTIFICATION_ACTION))
+
+        verify(exactly = 0) { mockedContext.unregisterReceiver(any()) }
+        verify(exactly = 0) { notificationManager.cancel(any()) }
     }
 
     @Test
@@ -209,6 +281,52 @@ class MapboxTripNotificationTest {
             builder.setCustomBigContentView(any())
             builder.setOngoing(true)
             builder.setContentIntent(any())
+            builder.setDeleteIntent(any())
+        }
+    }
+
+    @Test
+    fun whenUpdateNotificationCalledWithoutSessionStartedNothingHappens() {
+        val state = mockk<TripNotificationState.TripNotificationData>(relaxed = true)
+        mockUpdateNotificationAndroidInteractions()
+
+        notification.updateNotification(state)
+
+        verify(exactly = 0) {
+            collapsedViews.setTextViewText(any(), any())
+            expandedViews.setTextViewText(any(), any())
+        }
+    }
+
+    @Test
+    fun whenUpdateNotificationCalledWithSessionStoppedNothingHappens() {
+        val state = mockk<TripNotificationState.TripNotificationData>(relaxed = true)
+        mockUpdateNotificationAndroidInteractions()
+        notification.onTripSessionStarted()
+        notification.onTripSessionStopped()
+        clearAllMocks(answers = false)
+
+        notification.updateNotification(state)
+
+        verify(exactly = 0) {
+            collapsedViews.setTextViewText(any(), any())
+            expandedViews.setTextViewText(any(), any())
+        }
+    }
+
+    @Test
+    fun whenUpdateNotificationCalledWithNotificationDismissedNothingHappens() {
+        val state = mockk<TripNotificationState.TripNotificationData>(relaxed = true)
+        mockUpdateNotificationAndroidInteractions()
+        notification.onTripSessionStarted()
+        captureDismissReceiver().onReceive(mockedContext, Intent(DISMISS_NOTIFICATION_ACTION))
+        clearMocks(collapsedViews, expandedViews, answers = false)
+
+        notification.updateNotification(state)
+
+        verify(exactly = 0) {
+            collapsedViews.setTextViewText(any(), any())
+            expandedViews.setTextViewText(any(), any())
         }
     }
 
@@ -218,6 +336,8 @@ class MapboxTripNotificationTest {
         val primaryText = { "Primary Text" }
         val bannerText = mockBannerText(state, primaryText)
         mockUpdateNotificationAndroidInteractions()
+        notification.onTripSessionStarted()
+        clearAllMocks(answers = false)
 
         notification.updateNotification(state)
 
@@ -244,6 +364,7 @@ class MapboxTripNotificationTest {
             every { durationRemaining } returns duration
         }
         mockUpdateNotificationAndroidInteractions()
+        notification.onTripSessionStarted()
 
         notification.updateNotification(state)
 
@@ -275,6 +396,7 @@ class MapboxTripNotificationTest {
             duration,
             null
         )
+        notification.onTripSessionStarted()
 
         notification.updateNotification(state)
 
@@ -288,6 +410,7 @@ class MapboxTripNotificationTest {
         val primaryText = { "Primary Text" }
         val bannerText = mockBannerText(state, primaryText)
         mockUpdateNotificationAndroidInteractions()
+        notification.onTripSessionStarted()
 
         notification.updateNotification(state)
 
@@ -313,6 +436,7 @@ class MapboxTripNotificationTest {
         val primaryTextLambda = { primaryText }
         val bannerText = mockBannerText(state, primaryTextLambda)
         mockUpdateNotificationAndroidInteractions()
+        notification.onTripSessionStarted()
 
         notification.updateNotification(state)
         primaryText = changedPrimaryText
@@ -476,6 +600,7 @@ class MapboxTripNotificationTest {
         every { interceptorOwner.interceptor } returns mockk(relaxed = true) {
             every { intercept(capture(notificationBuilderSlot)) } answers { firstArg() }
         }
+        notification.onTripSessionStarted()
 
         val state = buildTripNotificationState(
             null,
@@ -498,6 +623,7 @@ class MapboxTripNotificationTest {
                 firstArg<NotificationCompat.Builder>().extend(mockk())
             }
         }
+        notification.onTripSessionStarted()
 
         val state = buildTripNotificationState(
             null,
@@ -553,5 +679,17 @@ class MapboxTripNotificationTest {
         every { builder.setContentIntent(any()) } returns builder
         every { NotificationBuilderProvider.create(any(), any()) } returns builder
         return builder
+    }
+
+    private fun captureDismissReceiver(): BroadcastReceiver {
+        val receivers = mutableListOf<BroadcastReceiver>()
+        val filters = mutableListOf<IntentFilter>()
+        verify {
+            mockedContext.registerReceiver(
+                capture(receivers),
+                capture(filters)
+            )
+        }
+        return receivers[filters.indexOfFirst { it.hasAction(DISMISS_NOTIFICATION_ACTION) }]
     }
 }

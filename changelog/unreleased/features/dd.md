@@ -1,1 +1,1 @@
-- Added Android 14 support.
+- Added Android 14 support. Android 14 users will be able to dismiss the notification associated with navigation. This will result only in the notification not being visible anymore. The navigation will continue and the voice instructions will still be played in background.

@@ -38,6 +38,7 @@ import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.trip.notification.MapboxTripNotificationView
 import com.mapbox.navigation.trip.notification.R
+import com.mapbox.navigation.utils.internal.DISMISS_NOTIFICATION_ACTION
 import com.mapbox.navigation.utils.internal.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.internal.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.internal.NOTIFICATION_CHANNEL
@@ -68,6 +69,12 @@ class MapboxTripNotification constructor(
         var notificationActionButtonChannel = Channel<NotificationAction>(1)
     }
 
+    private enum class State {
+        NOT_STARTED, // before session is started or after session is stopped
+        STARTED, // after session is started before notification is dismissed
+        DISMISSED // after notification is dismissed before session is stopped
+    }
+
     private val applicationContext = navigationOptions.applicationContext
     private val timeFormatType = navigationOptions.timeFormatType
 
@@ -84,11 +91,14 @@ class MapboxTripNotification constructor(
     private var currentFormattedDistance: SpannableString? = null
     private var currentFormattedTime: String? = null
     private var pendingOpenIntent: PendingIntent? = null
+    private var pendingDismissalIntent: PendingIntent? = null
     private var pendingCloseIntent: PendingIntent? = null
     private val etaFormat: String = applicationContext.getString(R.string.mapbox_eta_format)
-    private val notificationReceiver = NotificationActionReceiver()
+    private val notificationEndReceiver = NotificationEndReceiver()
+    private val notificationDismissedReceiver = NotificationDismissedReceiver()
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
+    private var state: State = State.NOT_STARTED
     private val turnIconHelper = TurnIconHelper(NotificationTurnIconResources.defaultIconSet())
 
     private var notificationView: MapboxTripNotificationView
@@ -106,6 +116,7 @@ class MapboxTripNotification constructor(
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         pendingCloseIntent = createPendingCloseIntent(applicationContext)
+        pendingDismissalIntent = createPendingDismissalIntent(applicationContext)
         notificationView = MapboxTripNotificationView(applicationContext)
 
         notificationView.buildRemoteViews(pendingCloseIntent)
@@ -144,13 +155,15 @@ class MapboxTripNotification constructor(
      * @param state with the latest progress data
      */
     override fun updateNotification(state: TripNotificationState) {
-        // RemoteView has an internal mActions, which stores every change and cannot be cleared.
-        // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
-        // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
-        notificationView.buildRemoteViews(pendingCloseIntent)
-        updateNotificationViews(state)
-        notification = getNotificationBuilder().build()
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        if (this.state == State.STARTED) {
+            // RemoteView has an internal mActions, which stores every change and cannot be cleared.
+            // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
+            // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
+            notificationView.buildRemoteViews(pendingCloseIntent)
+            updateNotificationViews(state)
+            notification = getNotificationBuilder().build()
+            notificationManager.notify(NOTIFICATION_ID, notification)
+        }
     }
 
     /**
@@ -159,10 +172,11 @@ class MapboxTripNotification constructor(
      * This callback may be used to perform any actions after the trip session is initialized.
      */
     override fun onTripSessionStarted() {
-        registerReceiver()
+        registerReceivers()
         notificationActionButtonChannel = Channel(1)
         notificationView.setVisibility(VISIBLE)
         notificationView.setEndNavigationButtonText(R.string.mapbox_stop_session)
+        state = State.STARTED
     }
 
     /**
@@ -171,38 +185,55 @@ class MapboxTripNotification constructor(
      * This callback may be used to clean up any listeners or receivers, preventing leaks.
      */
     override fun onTripSessionStopped() {
-        currentManeuverType = null
-        currentManeuverModifier = null
-        currentInstructionText = null
-        currentDistanceText = null
-        notificationView.resetView()
-        unregisterReceiver()
-        try {
-            notificationActionButtonChannel.cancel()
-        } catch (e: Exception) {
-            e.ifChannelException {
-                // Do nothing
+        cleanUp()
+        state = State.NOT_STARTED
+    }
+
+    private fun cleanUp() {
+        if (state == State.STARTED) {
+            currentManeuverType = null
+            currentManeuverModifier = null
+            currentInstructionText = null
+            currentDistanceText = null
+            notificationView.resetView()
+            unregisterReceivers()
+            try {
+                notificationActionButtonChannel.cancel()
+            } catch (e: Exception) {
+                e.ifChannelException {
+                    // Do nothing
+                }
             }
         }
     }
 
-    private fun registerReceiver() {
+    private fun registerReceivers() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             applicationContext.registerReceiver(
-                notificationReceiver,
+                notificationEndReceiver,
                 IntentFilter(END_NAVIGATION_ACTION),
+                Context.RECEIVER_NOT_EXPORTED
+            )
+            applicationContext.registerReceiver(
+                notificationDismissedReceiver,
+                IntentFilter(DISMISS_NOTIFICATION_ACTION),
                 Context.RECEIVER_NOT_EXPORTED
             )
         } else {
             applicationContext.registerReceiver(
-                notificationReceiver,
+                notificationEndReceiver,
                 IntentFilter(END_NAVIGATION_ACTION)
+            )
+            applicationContext.registerReceiver(
+                notificationDismissedReceiver,
+                IntentFilter(DISMISS_NOTIFICATION_ACTION)
             )
         }
     }
 
-    private fun unregisterReceiver() {
-        applicationContext.unregisterReceiver(notificationReceiver)
+    private fun unregisterReceivers() {
+        applicationContext.unregisterReceiver(notificationEndReceiver)
+        applicationContext.unregisterReceiver(notificationDismissedReceiver)
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
@@ -223,6 +254,9 @@ class MapboxTripNotification constructor(
 
         pendingOpenIntent?.let { pendingOpenIntent ->
             builder.setContentIntent(pendingOpenIntent)
+        }
+        pendingDismissalIntent?.let { pendingDismissalIntent ->
+            builder.setDeleteIntent(pendingDismissalIntent)
         }
 
         return interceptorOwner.interceptor?.intercept(builder) ?: builder
@@ -253,6 +287,13 @@ class MapboxTripNotification constructor(
             it.setPackage(applicationContext.packageName)
         }
         return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, flags)
+    }
+
+    private fun createPendingDismissalIntent(applicationContext: Context): PendingIntent? {
+        val intent = Intent(DISMISS_NOTIFICATION_ACTION).also {
+            it.setPackage(applicationContext.packageName)
+        }
+        return PendingIntent.getBroadcast(applicationContext, 0, intent, flags)
     }
 
     private fun createNotificationChannel() {
@@ -409,9 +450,20 @@ class MapboxTripNotification constructor(
         }
     }
 
-    private inner class NotificationActionReceiver : BroadcastReceiver() {
+    private fun onNotificationDismissed() {
+        cleanUp()
+        state = State.DISMISSED
+    }
+
+    private inner class NotificationEndReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             onEndNavigationBtnClick()
+        }
+    }
+
+    private inner class NotificationDismissedReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            onNotificationDismissed()
         }
     }
 }
