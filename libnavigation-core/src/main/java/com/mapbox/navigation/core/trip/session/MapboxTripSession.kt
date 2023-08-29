@@ -716,9 +716,7 @@ internal class MapboxTripSession(
         shouldTriggerBannerInstructionsObserver: Boolean
     ) {
         routeProgress = progress
-        if (tripService.hasServiceStarted()) {
-            tripService.updateNotification(buildTripNotificationState(progress))
-        }
+        tripService.updateNotification(buildTripNotificationState(progress))
         progress?.let { progress ->
             logD(
                 "dispatching progress update; state: ${progress.currentState}",
