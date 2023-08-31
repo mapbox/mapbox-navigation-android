@@ -6,6 +6,34 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.16.0-rc.1 - 31 August, 2023
+### Changelog
+[Changes between v2.16.0-beta.1 and v2.16.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.16.0-beta.1...v2.16.0-rc.1)
+
+#### Features
+- Added Android 14 support. Android 14 users will be able to dismiss the notification associated with navigation. This will result only in the notification not being visible anymore. The navigation will continue and the voice instructions will still be played in background. [#7367](https://github.com/mapbox/mapbox-navigation-android/pull/7367)
+
+#### Bug fixes and improvements
+- Fixed an issue where clicking on primary route resulted in switching to an alternative route. [#7486](https://github.com/mapbox/mapbox-navigation-android/pull/7486)
+- Fixed an issue when Nav SDK removed primary route due to false positive detection of deviation to an alternative route. Now previous primary route is removed via continuous alternatives mechanism which has a higher certainty threshold to remove passed alternative.  [#7470](https://github.com/mapbox/mapbox-navigation-android/pull/7470)
+- Fixed warnings produced by `MapboxMap` when predictive cache controller interacted with an invalid map. [#7466](https://github.com/mapbox/mapbox-navigation-android/pull/7466)
+- Fixed an issue when continuous alternatives were provided despite disabling alternative routes in initial route request. [#7490](https://github.com/mapbox/mapbox-navigation-android/pull/7490)
+- Fixed a crash when navigator created with `maxAlternatives=0` parameter. [#7490](https://github.com/mapbox/mapbox-navigation-android/pull/7490)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.0-rc.1))
+- Mapbox Navigation Native `v156.0.0`
+- Mapbox Core Common `v23.8.0-rc.2`
+- Mapbox Java `v6.13.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0))
+
+
 ## Mapbox Navigation SDK 2.16.0-beta.1 - 18 August, 2023
 ### Changelog
 [Changes between v2.15.1 and v2.16.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.1...v2.16.0-beta.1)
