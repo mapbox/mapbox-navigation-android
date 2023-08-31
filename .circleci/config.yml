@@ -654,7 +654,7 @@ commands:
       - run:
           name: Generate test suites
           command: |
-            python3 scripts/generate_test_suites.py
+            python3 scripts/generate_test_suites.py 5
 
 #--------------------------
 #---------- JOBS ----------
