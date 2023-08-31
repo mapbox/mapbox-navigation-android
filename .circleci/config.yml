@@ -127,23 +127,23 @@ workflows:
           requires:
             - assemble-instrumentation-test-internal
       - instrumentation-tests:
-          suite: CoreFirstPartTestSuite
+          suite: Core1PartTestSuite
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: CoreSecondPartTestSuite
+          suite: Core2PartTestSuite
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: CoreThirdPartTestSuite
+          suite: Core3PartTestSuite
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: CoreFourthPartTestSuite
+          suite: Core4PartTestSuite
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: CoreFifthPartTestSuite
+          suite: Core5PartTestSuite
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
@@ -493,7 +493,7 @@ commands:
             gcloud firebase test android run --type instrumentation \
               --app instrumentation-tests/build/outputs/apk/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>.apk \
               --test instrumentation-tests/build/outputs/apk/androidTest/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>-androidTest.apk \
-              --test-targets "class com.mapbox.navigation.instrumentation_tests.suites.<< parameters.suite >>" \
+              --test-targets "class com.mapbox.navigation.instrumentation_tests.<< parameters.suite >>" \
               --device model=hammerhead,version=23,locale=fr,orientation=portrait \
               --device model=q2q,version=31,locale=de,orientation=landscape \
               --device model=panther,version=33,locale=it,orientation=landscape \
@@ -649,6 +649,13 @@ commands:
             export GITHUB_TOKEN=$(./mbx-ci github writer private token)
             python3 scripts/snapshot/prepare-snapshot.py << pipeline.parameters.ignore_snapshot_dependencies >>
 
+  generate-test-suites:
+    steps:
+      - run:
+          name: Generate test suites
+          command: |
+            python3 scripts/generate_test_suites.py
+
 #--------------------------
 #---------- JOBS ----------
 #--------------------------
@@ -669,6 +676,7 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache
+      - generate-test-suites
       - assemble-module:
           module_target: "instrumentation-tests"
           variant: "Debug"
