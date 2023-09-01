@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
@@ -32,6 +33,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
@@ -65,6 +67,39 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             withoutInternet {
                 val routes = navigation.requestRoutes(testRoute.routeOptions)
                 assertTrue(routes is RouteRequestResult.Failure)
+            }
+        }
+    }
+
+    @Test
+    fun verifyOneRouteObserverUpdatePerRouteSet() = sdkTest {
+        // ev route with 1 server added charging station
+        val testRoute = setupBerlinEvRoute()
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { navigation ->
+            stayOnPosition(
+                latitude = testRoute.origin.latitude(),
+                longitude = testRoute.origin.longitude(),
+                bearing = 0.0f,
+                frequencyHz = 10
+            ) {
+                val receivedResults = mutableListOf<RoutesUpdatedResult>()
+                navigation.registerRouteAlternativesObserver(
+                    AdvancedAlternativesObserverFromDocumentation(navigation)
+                )
+                navigation.registerRoutesObserver {
+                    receivedResults.add(it)
+                }
+                val routes = navigation.requestRoutes(testRoute.routeOptions)
+                    .getSuccessfulResultOrThrowException()
+                navigation.setNavigationRoutesAsync(routes.routes.take(1))
+                delay(5_000)
+
+                assertEquals(
+                    listOf(RoutesExtra.ROUTES_UPDATE_REASON_NEW),
+                    receivedResults.map { it.reason }
+                )
             }
         }
     }
