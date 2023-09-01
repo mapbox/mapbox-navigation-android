@@ -108,6 +108,10 @@ assemble-core-release:
 core-unit-tests:
 	$(call run-gradle-tasks,$(CORE_MODULES),test)
 
+.PHONY: core-unit-tests-jacoco
+core-unit-tests-jacoco:
+	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReport)
+
 .PHONY: core-unit-tests-release-jacoco
 core-unit-tests-release-jacoco:
 	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReleaseUnitTestReport)
@@ -153,6 +157,10 @@ assemble-androidauto-release:
 .PHONY: ui-unit-tests
 ui-unit-tests:
 	$(call run-gradle-tasks,$(UI_MODULES),test)
+
+.PHONY: ui-unit-tests-jacoco
+ui-unit-tests-jacoco:
+	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport)
 
 .PHONY: ui-unit-tests-release-jacoco
 ui-unit-tests-release-jacoco:

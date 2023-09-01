@@ -374,7 +374,13 @@ commands:
       - run:
           name: Run Navigation Core SDK Unit Tests and generate Jacoco test report
           command: |
-            make core-unit-tests-release-jacoco
+            if [[ "$CIRCLE_BRANCH" == "main" ]]; then
+              echo "Run all core unit tests"
+              make core-unit-tests-jacoco
+            else
+              echo "Run release core unit tests"
+              make core-unit-tests-release-jacoco
+            fi
       - store-results:
           module_target: "libnavigation-router"
       - store-results:
@@ -395,7 +401,13 @@ commands:
       - run:
           name: Run Navigation UI SDK Unit Tests and generate Jacoco test report
           command: |
-            make ui-unit-tests-release-jacoco
+            if [[ "$CIRCLE_BRANCH" == "main" ]]; then
+              echo "Run all ui unit tests"
+              make ui-unit-tests-jacoco
+            else
+              echo "Run release ui unit tests"
+              make ui-unit-tests-release-jacoco
+            fi
       - store-results:
           module_target: "libnavui-maps"
       - store-results:
