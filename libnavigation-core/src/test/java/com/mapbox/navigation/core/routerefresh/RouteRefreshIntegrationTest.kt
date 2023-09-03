@@ -29,6 +29,8 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.junit.After
@@ -54,7 +56,7 @@ internal open class RouteRefreshIntegrationTest {
     val stateObserver = TestStateObserver()
     val refreshObserver = TestRefreshObserver()
     val testDispatcher = coroutineRule.testDispatcher
-    val testScope = coroutineRule.createTestScope()
+    private val routeRefreshAnswerScope = coroutineRule.createTestScope()
 
     class TestRefreshObserver : RouteRefreshObserver {
 
@@ -81,7 +83,7 @@ internal open class RouteRefreshIntegrationTest {
         mockkObject(CoroutineUtils)
         every {
             CoroutineUtils.createScope(any(), any())
-        } answers { coroutineRule.createTestScope() }
+        } answers { coroutineRule.createTestScope(firstArg<Job>()) }
 
         routesProgressDataProvider.onRouteProgressChanged(
             mockk {
@@ -97,6 +99,8 @@ internal open class RouteRefreshIntegrationTest {
 
     @After
     fun tearDown() {
+        routeRefreshAnswerScope.cancel()
+        routeRefreshController.destroy()
         unmockkObject(CoroutineUtils)
     }
 
@@ -195,7 +199,7 @@ internal open class RouteRefreshIntegrationTest {
                 },
                 { this }
             )
-            testScope.launch {
+            routeRefreshAnswerScope.launch {
                 delay(responseDelay)
                 if (invocationNumber >= successfulAttemptNumber) {
                     callback.onRefreshReady(refreshedRoute)

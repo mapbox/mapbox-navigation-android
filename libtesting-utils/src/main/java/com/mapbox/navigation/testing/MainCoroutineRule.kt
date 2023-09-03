@@ -2,6 +2,7 @@ package com.mapbox.navigation.testing
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -19,8 +20,8 @@ class MainCoroutineRule : TestRule {
     val createdScopes = mutableListOf<TestCoroutineScope>()
     val coroutineScope = createTestScope()
 
-    fun createTestScope(): TestCoroutineScope {
-        return TestCoroutineScope(testDispatcher + SupervisorJob()).also {
+    fun createTestScope(job: Job = SupervisorJob()): TestCoroutineScope {
+        return TestCoroutineScope(testDispatcher + job).also {
             createdScopes.add(it)
         }
     }

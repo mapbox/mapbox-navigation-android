@@ -62,7 +62,7 @@ class RouteRefreshController internal constructor(
         }
         plannedRouteRefreshController.pause()
         immediateRouteRefreshController.requestRoutesRefresh(routes) {
-            if (it.value?.anySuccess() == false) {
+            if (it.isValue) {
                 plannedRouteRefreshController.resume()
             }
         }
@@ -111,6 +111,7 @@ class RouteRefreshController internal constructor(
 
     internal fun requestPlannedRouteRefresh(routes: List<NavigationRoute>) {
         routeRefresherResultProcessor.reset()
+        immediateRouteRefreshController.cancel()
         plannedRouteRefreshController.startRoutesRefreshing(routes)
     }
 }

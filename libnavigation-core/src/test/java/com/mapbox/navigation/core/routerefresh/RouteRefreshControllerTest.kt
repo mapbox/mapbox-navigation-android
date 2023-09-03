@@ -114,6 +114,7 @@ class RouteRefreshControllerTest {
         verify(exactly = 1) {
             resultProcessor.reset()
             plannedRouteRefreshController.startRoutesRefreshing(routes)
+            immediateRouteRefreshController.cancel()
         }
     }
 
@@ -125,6 +126,7 @@ class RouteRefreshControllerTest {
 
         verify(exactly = 1) {
             resultProcessor.reset()
+            immediateRouteRefreshController.cancel()
             plannedRouteRefreshController.startRoutesRefreshing(routes)
         }
     }
@@ -164,7 +166,7 @@ class RouteRefreshControllerTest {
                 mockk { every { anySuccess() } returns true }
             )
         )
-        verify(exactly = 0) {
+        verify(exactly = 1) {
             plannedRouteRefreshController.resume()
         }
     }

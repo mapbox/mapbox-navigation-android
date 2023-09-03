@@ -5,18 +5,18 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils
+import com.mapbox.navigation.core.utils.Delayer
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     private val routeRefresherExecutor: RouteRefresherExecutor,
-    private val routeRefreshOptions: RouteRefreshOptions,
+    private val delayer: Delayer,
     private val stateHolder: RouteRefreshStateHolder,
     private val listener: RouteRefresherListener,
     private val attemptListener: RoutesRefreshAttemptListener,
@@ -33,7 +33,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         attemptListener: RoutesRefreshAttemptListener,
     ) : this(
         routeRefresherExecutor,
-        routeRefreshOptions,
+        Delayer(routeRefreshOptions.intervalMillis),
         stateHolder,
         listener,
         attemptListener,
@@ -48,8 +48,8 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
 
     fun startRoutesRefreshing(routes: List<NavigationRoute>) {
         recreateScope()
-        routesToRefresh = null
         if (routes.isEmpty()) {
+            routesToRefresh = null
             logI("Routes are empty, nothing to refresh", RouteRefreshLog.LOG_CATEGORY)
             stateHolder.reset()
             return
@@ -58,9 +58,13 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         if (
             routesValidationResults.any { it is RouteRefreshValidator.RouteValidationResult.Valid }
         ) {
+            val hasSameRoutes = routesToRefresh?.any { route1 ->
+                routes.any { route2 -> route1.id == route2.id }
+            } == true
             routesToRefresh = routes
-            scheduleNewUpdate(routes)
+            scheduleNewUpdate(routes, hasSameRoutes)
         } else {
+            routesToRefresh = null
             val message =
                 RouteRefreshValidator.joinValidationErrorMessages(
                     routesValidationResults.mapIndexed { index, routeValidationResult ->
@@ -93,24 +97,28 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         }
     }
 
-    private fun scheduleNewUpdate(routes: List<NavigationRoute>) {
+    private fun scheduleNewUpdate(routes: List<NavigationRoute>, shouldResume: Boolean) {
         retryStrategy.reset()
-        postAttempt {
+        postAttempt(shouldResume) {
             executePlannedRefresh(routes, shouldNotifyOnStart = true)
         }
     }
 
     private fun scheduleUpdateRetry(routes: List<NavigationRoute>, shouldNotifyOnStart: Boolean) {
-        postAttempt {
+        postAttempt(false) {
             retryStrategy.onNextAttempt()
             executePlannedRefresh(routes, shouldNotifyOnStart = shouldNotifyOnStart)
         }
     }
 
-    private fun postAttempt(attemptBlock: suspend () -> Unit) {
+    private fun postAttempt(shouldResume: Boolean, attemptBlock: suspend () -> Unit) {
         plannedRefreshScope.launch {
             try {
-                delay(routeRefreshOptions.intervalMillis)
+                if (shouldResume) {
+                    delayer.resumeDelay()
+                } else {
+                    delayer.delay()
+                }
                 attemptBlock()
             } catch (ex: CancellationException) {
                 stateHolder.onCancel()
@@ -138,13 +146,17 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                 if (it.anySuccess()) {
                     stateHolder.onSuccess()
                     listener.onRoutesRefreshed(it)
+                    val refreshedRoutes = listOf(it.primaryRouteRefresherResult.route) +
+                        it.alternativesRouteRefresherResults.map { it.route }
+                    routesToRefresh = refreshedRoutes
+                    scheduleNewUpdate(refreshedRoutes, false)
                 } else {
                     if (it.anyRequestFailed() && retryStrategy.shouldRetry()) {
                         scheduleUpdateRetry(routes, shouldNotifyOnStart = false)
                     } else {
                         stateHolder.onFailure(null)
                         listener.onRoutesRefreshed(it)
-                        scheduleNewUpdate(routes)
+                        scheduleNewUpdate(routes, false)
                     }
                 }
             }

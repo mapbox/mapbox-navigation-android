@@ -7,12 +7,14 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.junit.Rule
 import org.junit.Test
 
@@ -38,7 +40,7 @@ class ImmediateRouteRefreshControllerTest {
     private val sut = ImmediateRouteRefreshController(
         routeRefresherExecutor,
         stateHolder,
-        coroutineRule.coroutineScope,
+        coroutineRule.createTestScope(),
         listener,
         attemptListener
     )
@@ -53,6 +55,7 @@ class ImmediateRouteRefreshControllerTest {
         sut.requestRoutesRefresh(routes, clientCallback)
 
         coVerify(exactly = 1) { routeRefresherExecutor.executeRoutesRefresh(routes, any()) }
+        verify(exactly = 0) { stateHolder.onCancel() }
     }
 
     @Test
@@ -63,6 +66,7 @@ class ImmediateRouteRefreshControllerTest {
         startCallback()
 
         verify(exactly = 1) { stateHolder.onStarted() }
+        verify(exactly = 0) { stateHolder.onCancel() }
     }
 
     @Test
@@ -78,6 +82,7 @@ class ImmediateRouteRefreshControllerTest {
         verify(exactly = 1) { stateHolder.onSuccess() }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
         verify(exactly = 1) { clientCallback(match { it.value == result }) }
+        verify(exactly = 0) { stateHolder.onCancel() }
     }
 
     @Test
@@ -96,6 +101,7 @@ class ImmediateRouteRefreshControllerTest {
         verify(exactly = 1) { stateHolder.onFailure(null) }
         verify(exactly = 1) { clientCallback(match { it.value == result }) }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
+        verify(exactly = 0) { stateHolder.onCancel() }
     }
 
     @Test
@@ -112,6 +118,7 @@ class ImmediateRouteRefreshControllerTest {
             attemptListener.onRoutesRefreshAttemptFinished(any())
             stateHolder.onFailure(any())
             stateHolder.onSuccess()
+            stateHolder.onCancel()
             listener.onRoutesRefreshed(any())
         }
         verify(exactly = 1) { clientCallback.invoke(error) }
@@ -121,6 +128,60 @@ class ImmediateRouteRefreshControllerTest {
                 "RouteRefreshController"
             )
         }
+    }
+
+    @Test
+    fun routesRefreshFinishedWithCancellation() = coroutineRule.runBlockingTest {
+        coEvery {
+            routeRefresherExecutor.executeRoutesRefresh(any(), any())
+        } coAnswers {
+            suspendCancellableCoroutine {}
+        }
+
+        sut.requestRoutesRefresh(routes, clientCallback)
+
+        sut.cancel()
+
+        verify(exactly = 0) {
+            attemptListener.onRoutesRefreshAttemptFinished(any())
+            stateHolder.onFailure(any())
+            stateHolder.onSuccess()
+            listener.onRoutesRefreshed(any())
+            clientCallback.invoke(any())
+        }
+        verify(exactly = 1) {
+            stateHolder.onCancel()
+        }
+    }
+
+    @Test
+    fun runJobAfterCancel() = coroutineRule.runBlockingTest {
+        coEvery {
+            routeRefresherExecutor.executeRoutesRefresh(any(), any())
+        } coAnswers {
+            suspendCancellableCoroutine {}
+        }
+
+        sut.requestRoutesRefresh(routes, clientCallback)
+
+        sut.cancel()
+        clearAllMocks(answers = false)
+
+        coEvery {
+            routeRefresherExecutor.executeRoutesRefresh(any(), any())
+        } returns ExpectedFactory.createError("some error")
+        sut.requestRoutesRefresh(routes, clientCallback)
+
+        coVerify(exactly = 1) {
+            routeRefresherExecutor.executeRoutesRefresh(routes, any())
+        }
+    }
+
+    @Test
+    fun cancelWithNoActiveJobs() = coroutineRule.runBlockingTest {
+        sut.cancel()
+
+        verify(exactly = 0) { stateHolder.onCancel() }
     }
 
     private fun interceptStartCallback(): () -> Unit {

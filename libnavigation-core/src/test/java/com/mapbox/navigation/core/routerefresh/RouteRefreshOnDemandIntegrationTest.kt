@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -9,7 +10,7 @@ import org.junit.Test
 internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
-    fun routeRefreshOnDemandDoesNotNotifyObserverBeforeTimeout() = coroutineRule.runBlockingTest {
+    fun routeRefreshOnDemandDoesNotNotifyObserverBeforeTimeout() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 100
@@ -26,7 +27,7 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
     }
 
     @Test
-    fun routeRefreshOnDemandDoesNotNotifyObserverAfterTimeout() = coroutineRule.runBlockingTest {
+    fun routeRefreshOnDemandDoesNotNotifyObserverAfterTimeout() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json", responseDelay = 30_000)
         routeRefreshController = createRefreshController(60_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)
@@ -41,7 +42,7 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
     }
 
     @Test
-    fun successfulRefreshOnDemandWhenUpdatesArePaused() = coroutineRule.runBlockingTest {
+    fun successfulRefreshOnDemandWhenUpdatesArePaused() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(30_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)
@@ -56,17 +57,17 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
         assertEquals(2, refreshObserver.refreshes.size)
 
         testDispatcher.advanceTimeBy(30_000)
-        assertEquals(2, refreshObserver.refreshes.size)
+        assertEquals(3, refreshObserver.refreshes.size)
 
         routeRefreshController.resumeRouteRefreshes()
         testDispatcher.advanceTimeBy(10_000)
-        assertEquals(2, refreshObserver.refreshes.size)
-        testDispatcher.advanceTimeBy(20_000)
         assertEquals(3, refreshObserver.refreshes.size)
+        testDispatcher.advanceTimeBy(20_000)
+        assertEquals(4, refreshObserver.refreshes.size)
     }
 
     @Test
-    fun failedRefreshOnDemandWhenUpdatesArePaused() = coroutineRule.runBlockingTest {
+    fun failedRefreshOnDemandWhenUpdatesArePaused() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(30_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)

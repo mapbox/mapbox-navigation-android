@@ -1993,8 +1993,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         routesProgressDataProvider.onNewRoutes()
-        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-        routeRefreshController.requestPlannedRouteRefresh(result.navigationRoutes)
+        if (result.reason != RoutesExtra.ROUTES_UPDATE_REASON_REFRESH) {
+            @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+            routeRefreshController.requestPlannedRouteRefresh(result.navigationRoutes)
+        }
     }
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->

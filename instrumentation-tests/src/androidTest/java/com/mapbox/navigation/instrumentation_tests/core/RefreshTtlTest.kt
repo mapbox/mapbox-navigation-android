@@ -216,7 +216,9 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
                     route.id.startsWith("alternative_route_response_for_route_with_large_ttl")
                 }
         }.first()
-        val invalidatedResults = withTimeout(4000) {
+        // worst case: refresh request is scheduled 1900 ms after we receive an alternative,
+        // refresh_ttl (=2) is not expired, then we wait for new attempt (+3s). +1s accuracy.
+        val invalidatedResults = withTimeout(6000) {
             mapboxNavigation.routesInvalidatedResults().first()
         }
         assertEquals(

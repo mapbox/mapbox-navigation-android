@@ -4,7 +4,10 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -25,10 +28,16 @@ internal class ImmediateRouteRefreshController(
             throw IllegalArgumentException("Routes to refresh should not be empty")
         }
         scope.launch {
-            val result = routeRefresherExecutor.executeRoutesRefresh(
-                routes,
-                startCallback = { stateHolder.onStarted() }
-            )
+            val result = try {
+                routeRefresherExecutor.executeRoutesRefresh(
+                    routes,
+                    startCallback = { stateHolder.onStarted() }
+                )
+            } catch (ex: CancellationException) {
+                stateHolder.onCancel()
+                throw ex
+            }
+
             callback(result)
             result.fold(
                 { logW("Route refresh on-demand error: $it", RouteRefreshLog.LOG_CATEGORY) },
@@ -43,5 +52,9 @@ internal class ImmediateRouteRefreshController(
                 }
             )
         }
+    }
+
+    fun cancel() {
+        scope.coroutineContext.job.cancelChildren()
     }
 }
