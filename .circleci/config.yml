@@ -127,27 +127,27 @@ workflows:
           requires:
             - assemble-instrumentation-test-internal
       - instrumentation-tests:
-          suite: Core1PartTestSuite
+          suite: TestSuitePart1
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: Core2PartTestSuite
+          suite: TestSuitePart2
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: Core3PartTestSuite
+          suite: TestSuitePart3
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: Core4PartTestSuite
+          suite: TestSuitePart4
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: Core5PartTestSuite
+          suite: TestSuitePart5
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests:
-          suite: UiTestSuite
+          suite: TestSuitePart6
           requires:
             - assemble-instrumentation-test
       - androidauto-test
@@ -666,7 +666,7 @@ commands:
       - run:
           name: Generate test suites
           command: |
-            python3 scripts/generate_test_suites.py 5
+            python3 scripts/generate_test_suites.py 6
 
 #--------------------------
 #---------- JOBS ----------

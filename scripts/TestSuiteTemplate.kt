@@ -1,6 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests
 
-import com.mapbox.navigation.instrumentation_tests.core.*
+{{PASTE IMPORTS HERE}}
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
 
@@ -8,4 +8,4 @@ import org.junit.runners.Suite
 @Suite.SuiteClasses(
 {{PASTE TEST CLASSES HERE}}
 )
-class Core{{PASTE PART NUMBER HERE}}PartTestSuite
+class TestSuitePart{{PASTE PART NUMBER HERE}}
