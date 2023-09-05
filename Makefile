@@ -112,6 +112,10 @@ core-unit-tests:
 core-unit-tests-jacoco:
 	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReport)
 
+.PHONY: core-unit-tests-release-jacoco
+core-unit-tests-release-jacoco:
+	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReleaseUnitTestReport)
+
 .PHONY: core-dependency-graph
 core-dependency-graph:
 	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries)
@@ -157,6 +161,10 @@ ui-unit-tests:
 .PHONY: ui-unit-tests-jacoco
 ui-unit-tests-jacoco:
 	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport)
+
+.PHONY: ui-unit-tests-release-jacoco
+ui-unit-tests-release-jacoco:
+	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReleaseUnitTestReport)
 
 .PHONY: publish-local
 publish-local:
