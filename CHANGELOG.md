@@ -7,6 +7,7 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Fixed an issue where `RoutingTilesOptions#tilesBaseUri` was used as a base url for route refresh requests instead of `RouteOptions#baseUrl`.
 - Fixed an ANR caused by Copilot processing long routes. [#6984](https://github.com/mapbox/mapbox-navigation-android/pull/6984)
+- Improved inactive leg independent styling: now the inactive leg will be styled differently right away, not only when the route progress updates begin.
 
 ## Mapbox Navigation SDK 2.7.5 - 15 June, 2023
 ### Changelog
