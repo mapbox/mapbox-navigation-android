@@ -13,6 +13,7 @@ import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
@@ -83,6 +84,26 @@ object MapboxRouteLineApiExtensions {
      *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
+     * @param activeLegIndex the index of the currently active leg of the primary route.
+     *
+     * @return a state which contains the side effects to be applied to the map
+     */
+    suspend fun MapboxRouteLineApi.setNavigationRouteLines(
+        newRoutes: List<NavigationRouteLine>,
+        activeLegIndex: Int,
+    ): Expected<RouteLineError, RouteSetValue> {
+        return setNavigationRouteLines(
+            newRoutes = newRoutes,
+            activeLegIndex = activeLegIndex,
+            alternativeRoutesMetadata = emptyList()
+        )
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
      * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
      * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
      *
@@ -92,9 +113,30 @@ object MapboxRouteLineApiExtensions {
         newRoutes: List<NavigationRouteLine>,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): Expected<RouteLineError, RouteSetValue> {
+        return setNavigationRouteLines(newRoutes, 0, alternativeRoutesMetadata)
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param activeLegIndex the index of the currently active leg of the primary route.
+     *  This is used when [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently] is enabled.
+     * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
+     * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
+     *
+     * @return a state which contains the side effects to be applied to the map
+     */
+    suspend fun MapboxRouteLineApi.setNavigationRouteLines(
+        newRoutes: List<NavigationRouteLine>,
+        activeLegIndex: Int,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
+    ): Expected<RouteLineError, RouteSetValue> {
         return suspendCancellableCoroutine { continuation ->
             this.setNavigationRouteLines(
                 newRoutes,
+                activeLegIndex,
                 alternativeRoutesMetadata
             ) { value -> continuation.resume(value) }
 
@@ -123,6 +165,27 @@ object MapboxRouteLineApiExtensions {
      *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
+     * @param activeLegIndex the index of the currently active leg of the primary route.
+     *  This is used when [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently] is enabled.
+     *
+     * @return a state which contains the side effects to be applied to the map
+     */
+    suspend fun MapboxRouteLineApi.setNavigationRoutes(
+        newRoutes: List<NavigationRoute>,
+        activeLegIndex: Int,
+    ): Expected<RouteLineError, RouteSetValue> {
+        return setNavigationRoutes(
+            newRoutes = newRoutes,
+            activeLegIndex = activeLegIndex,
+            alternativeRoutesMetadata = emptyList()
+        )
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
      * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
      * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
      *
@@ -132,9 +195,30 @@ object MapboxRouteLineApiExtensions {
         newRoutes: List<NavigationRoute>,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>
     ): Expected<RouteLineError, RouteSetValue> {
+        return setNavigationRoutes(newRoutes, 0, alternativeRoutesMetadata)
+    }
+
+    /**
+     * Sets the routes that will be operated on.
+     *
+     * @param newRoutes one or more routes. The first route in the collection will be considered
+     * the primary route and any additional routes will be alternate routes.
+     * @param activeLegIndex the index of the currently active leg of the primary route.
+     *  This is used when [MapboxRouteLineOptions.styleInactiveRouteLegsIndependently] is enabled.
+     * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
+     * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
+     *
+     * @return a state which contains the side effects to be applied to the map
+     */
+    suspend fun MapboxRouteLineApi.setNavigationRoutes(
+        newRoutes: List<NavigationRoute>,
+        activeLegIndex: Int,
+        alternativeRoutesMetadata: List<AlternativeRouteMetadata>
+    ): Expected<RouteLineError, RouteSetValue> {
         return suspendCancellableCoroutine { continuation ->
             this.setNavigationRoutes(
                 newRoutes,
+                activeLegIndex,
                 alternativeRoutesMetadata
             ) { value -> continuation.resume(value) }
 
