@@ -208,7 +208,14 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
+        verify {
+            mockApi.setNavigationRouteLines(
+                any(),
+                0,
+                any(),
+                capture(callbackSlot)
+            )
+        }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
@@ -240,7 +247,14 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
+        verify {
+            mockApi.setNavigationRouteLines(
+                any(),
+                0,
+                any(),
+                capture(callbackSlot)
+            )
+        }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
@@ -272,7 +286,14 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
+        verify {
+            mockApi.setNavigationRouteLines(
+                any(),
+                0,
+                any(),
+                capture(callbackSlot)
+            )
+        }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }
@@ -304,7 +325,14 @@ class RouteLineComponentTest {
 
         routesObserverSlot.captured.onRoutesChanged(routesUpdateResult)
 
-        verify { mockApi.setNavigationRouteLines(any(), any(), capture(callbackSlot)) }
+        verify {
+            mockApi.setNavigationRouteLines(
+                any(),
+                0,
+                any(),
+                capture(callbackSlot)
+            )
+        }
         callbackSlot.captured.accept(expectedMockError)
         verify { mockView.renderRouteDrawData(mockStyle, expectedMockError) }
     }

@@ -51,6 +51,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import io.mockk.every
 import io.mockk.mockk
@@ -604,6 +605,206 @@ class MapboxRouteLineUtilsRoboTest {
             true,
             20.0
         ).generateExpression()
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.toString()
+        )
+    }
+
+    @Test
+    fun getTrafficLineExpression() {
+        val routeLineColorResources = RouteLineColorResources.Builder().build()
+        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0], 1.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpression(
+            0.0,
+            Color.TRANSPARENT,
+            routeLineColorResources.routeUnknownCongestionColor,
+            0.0,
+            false,
+            listOf(
+                RouteLineExpressionData(0.0, routeLineColorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    offset = 0.9425498931842539,
+                    segmentColor = routeLineColorResources.routeModerateCongestionColor,
+                    legIndex = 0
+                ),
+                RouteLineExpressionData(1.0, routeLineColorResources.routeLowCongestionColor, 0),
+            )
+        )
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.toString()
+        )
+    }
+
+    @Test
+    fun `getTrafficLineExpression when duplicate point`() {
+        val routeLineColorResources = RouteLineColorResources.Builder().build()
+        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.10373821458415478, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.1240124365711821, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.2718982903427929, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.32264099467350016, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4897719974699625, " +
+            // this is the moderate color at the start of the second leg
+            // even though it's preceded by a duplicate 'severe' point which is ignored
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5421388243827154, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.5710651139490561, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5916095976376619, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.88674421638117, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.9423002251348892, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpression(
+            vanishingPointOffset = 0.0,
+            lineStartColor = Color.TRANSPARENT,
+            lineColor = routeLineColorResources.routeUnknownCongestionColor,
+            stopGap = 0.0,
+            useSoftGradient = false,
+            segments = listOf(
+                RouteLineExpressionData(0.0, routeLineColorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    0.10373821458415478,
+                    routeLineColorResources.routeModerateCongestionColor,
+                    0
+                ),
+                RouteLineExpressionData(
+                    0.1240124365711821,
+                    routeLineColorResources.routeLowCongestionColor,
+                    0
+                ),
+                RouteLineExpressionData(
+                    0.2718982903427929,
+                    routeLineColorResources.routeModerateCongestionColor,
+                    0
+                ),
+                RouteLineExpressionData(
+                    0.32264099467350016,
+                    routeLineColorResources.routeLowCongestionColor,
+                    0
+                ),
+
+                RouteLineExpressionData(
+                    0.4897719974699625,
+                    routeLineColorResources.routeModerateCongestionColor,
+                    1
+                ),
+                RouteLineExpressionData(
+                    0.5421388243827154,
+                    routeLineColorResources.routeLowCongestionColor,
+                    1
+                ),
+                RouteLineExpressionData(
+                    0.5710651139490561,
+                    routeLineColorResources.routeModerateCongestionColor,
+                    1
+                ),
+                RouteLineExpressionData(
+                    0.5916095976376619,
+                    routeLineColorResources.routeLowCongestionColor,
+                    1
+                ),
+                RouteLineExpressionData(
+                    0.88674421638117,
+                    routeLineColorResources.routeModerateCongestionColor,
+                    1
+                ),
+                RouteLineExpressionData(
+                    0.9423002251348892,
+                    routeLineColorResources.routeLowCongestionColor,
+                    1
+                ),
+            )
+        )
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.toString()
+        )
+    }
+
+    @Test
+    fun `getTrafficLineExpression with classes override when duplicate point`() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownCongestionColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyCongestionColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateCongestionColor(33)
+            .routeSevereCongestionColor(33)
+            .build()
+        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.5688813850361385, " +
+            "[rgba, 255.0, 255.0, 255.0, 1.0], 1.0, " +
+            "[rgba, 255.0, 255.0, 247.0, 1.0]]"
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpression(
+            vanishingPointOffset = 0.0,
+            lineStartColor = Color.TRANSPARENT,
+            lineColor = colorResources.routeUnknownCongestionColor,
+            stopGap = 0.0,
+            useSoftGradient = false,
+            segments = listOf(
+                RouteLineExpressionData(0.0, colorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    offset = 0.5688813850361385,
+                    segmentColor = colorResources.routeUnknownCongestionColor,
+                    legIndex = 0
+                ),
+                RouteLineExpressionData(
+                    offset = 0.5688813850361385,
+                    segmentColor = colorResources.routeLowCongestionColor,
+                    legIndex = 0
+                ),
+                RouteLineExpressionData(1.0, colorResources.routeUnknownCongestionColor, 0),
+            )
+        )
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.toString()
+        )
+    }
+
+    @Test
+    fun getTrafficLineExpression_whenUseSoftGradient() {
+        val routeLineColorResources = RouteLineColorResources.Builder().build()
+        val expectedPrimaryTrafficLineExpression = "[interpolate, [linear], [line-progress], " +
+            "0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.6934838906942539, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpression(
+            0.0,
+            Color.TRANSPARENT,
+            routeLineColorResources.routeUnknownCongestionColor,
+            0.24906600249,
+            true,
+            listOf(
+                RouteLineExpressionData(0.0, routeLineColorResources.routeLowCongestionColor, 0),
+                RouteLineExpressionData(
+                    0.9425498931842539,
+                    routeLineColorResources.routeModerateCongestionColor,
+                    0
+                ),
+                RouteLineExpressionData(
+                    1.0,
+                    routeLineColorResources.routeLowCongestionColor,
+                    0
+                ),
+            )
+        )
 
         assertEquals(
             expectedPrimaryTrafficLineExpression,
