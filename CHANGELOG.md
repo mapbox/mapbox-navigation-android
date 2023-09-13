@@ -6,6 +6,24 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.15.2 - 13 September, 2023
+### Changelog
+[Changes between v2.15.1 and v2.15.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.1...v2.15.2)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Report Off-Route if LocationOnLeg legIndex is greater than current route leg. [#7504](https://github.com/mapbox/mapbox-navigation-android/pull/7504)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.15.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.15.0))
+- Mapbox Navigation Native `v148.0.2`
+- Mapbox Core Common `v23.7.0`
+- Mapbox Java `v6.13.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0))
+
+
 ## Mapbox Navigation SDK 2.15.1 - 07 August, 2023
 ### Changelog
 [Changes between v2.15.0 and v2.15.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.0...v2.15.1)
