@@ -4,12 +4,16 @@ import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.base.internal.NativeRouteParserWrapper
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
@@ -23,7 +27,9 @@ import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.sho
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
@@ -40,6 +46,7 @@ import kotlinx.coroutines.delay
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -157,6 +164,119 @@ class MapboxRouteLineApiRoboTest {
             expectedWaypointFeature1,
             result.value!!.waypointsSource.features()!![1].geometry().toString()
         )
+    }
+
+    @Test
+    fun `setNavigationRoutes takes into account inactiveLegStyling and legIndex`() =
+        coroutineRule.runBlockingTest {
+            val route = loadRoute("multileg_route.json").toNavigationRoute(RouterOrigin.Custom())
+            val altRoute = loadRoute("multileg_route_with_overlap.json")
+                .toNavigationRoute(RouterOrigin.Custom())
+
+            val apiWithIndependentInactiveStylingEnabled = MapboxRouteLineApi(
+                MapboxRouteLineOptions.Builder(ctx)
+                    .styleInactiveRouteLegsIndependently(true)
+                    .build()
+            )
+            val apiWithIndependentInactiveStylingDisabled = MapboxRouteLineApi(
+                MapboxRouteLineOptions.Builder(ctx)
+                    .build()
+            )
+
+            val independentStylingEnabledLegZeroResult = apiWithIndependentInactiveStylingEnabled
+                .setNavigationRoutes(listOf(route, altRoute))
+            val independentStylingEnabledLegOneResult = apiWithIndependentInactiveStylingEnabled
+                .setNavigationRoutes(listOf(route, altRoute), activeLegIndex = 1)
+            val independentStylingDisabledLegZeroResult = apiWithIndependentInactiveStylingDisabled
+                .setNavigationRoutes(listOf(route, altRoute))
+            val independentStylingDisabledLegOneResult = apiWithIndependentInactiveStylingDisabled
+                .setNavigationRoutes(listOf(route, altRoute), activeLegIndex = 1)
+
+            val differentValuesToCheck = listOf(
+                independentStylingEnabledLegZeroResult,
+                independentStylingEnabledLegOneResult,
+                independentStylingDisabledLegZeroResult,
+            )
+            val equalValuesToCheck = listOf(
+                independentStylingDisabledLegZeroResult,
+                independentStylingDisabledLegOneResult,
+            )
+            val allValuesToCheck = (differentValuesToCheck + equalValuesToCheck).toSet()
+            checkNotEquals(differentValuesToCheck) {
+                it.primaryRouteLineData.dynamicData.trafficExpressionProvider!!.generateExpression()
+            }
+            checkEquals(equalValuesToCheck) {
+                it.primaryRouteLineData.dynamicData.trafficExpressionProvider!!.generateExpression()
+            }
+            println("failing")
+            checkNotEquals(differentValuesToCheck) {
+                it.primaryRouteLineData.dynamicData.baseExpressionProvider.generateExpression()
+            }
+            checkEquals(equalValuesToCheck) {
+                it.primaryRouteLineData.dynamicData.baseExpressionProvider.generateExpression()
+            }
+            checkNotEquals(differentValuesToCheck) {
+                it.primaryRouteLineData.dynamicData.casingExpressionProvider.generateExpression()
+            }
+            checkEquals(equalValuesToCheck) {
+                it.primaryRouteLineData.dynamicData.casingExpressionProvider.generateExpression()
+            }
+            checkEquals(allValuesToCheck) {
+                it.primaryRouteLineData.dynamicData.trailExpressionProvider!!.generateExpression()
+            }
+            checkEquals(allValuesToCheck) {
+                it.primaryRouteLineData.dynamicData.trailCasingExpressionProvider!!
+                    .generateExpression()
+            }
+
+            checkEquals(allValuesToCheck) {
+                it.alternativeRouteLinesData.first().dynamicData.trafficExpressionProvider!!
+                    .generateExpression()
+            }
+            checkEquals(allValuesToCheck) {
+                it.alternativeRouteLinesData.first().dynamicData.baseExpressionProvider
+                    .generateExpression()
+            }
+            checkEquals(allValuesToCheck) {
+                it.alternativeRouteLinesData.first().dynamicData.casingExpressionProvider
+                    .generateExpression()
+            }
+            checkEquals(allValuesToCheck) {
+                it.alternativeRouteLinesData.first().dynamicData.trailExpressionProvider!!
+                    .generateExpression()
+            }
+            checkEquals(allValuesToCheck) {
+                it.alternativeRouteLinesData.first().dynamicData.trailCasingExpressionProvider!!
+                    .generateExpression()
+            }
+        }
+
+    private fun checkNotEquals(
+        values: Iterable<Expected<RouteLineError, RouteSetValue>>,
+        expressionExtractor: (RouteSetValue) -> Expression
+    ) {
+        val expressions = values.map { expressionExtractor(it.value!!) }
+        expressions.forEachIndexed { index, expression ->
+            println("$index; $expression")
+        }
+        for (i in 0 until expressions.size) {
+            for (j in i + 1 until expressions.size) {
+                assertNotEquals(expressions[i], expressions[j])
+            }
+        }
+    }
+
+    private fun checkEquals(
+        values: Iterable<Expected<RouteLineError, RouteSetValue>>,
+        expressionExtractor: (RouteSetValue) -> Expression
+    ) {
+        val expressions = values.map { expressionExtractor(it.value!!) }
+        if (expressions.isNotEmpty()) {
+            val first = expressions.first()
+            expressions.drop(1).forEach {
+                assertEquals(first, it)
+            }
+        }
     }
 
     @Test

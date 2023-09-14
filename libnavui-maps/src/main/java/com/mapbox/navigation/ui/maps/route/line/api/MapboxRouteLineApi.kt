@@ -60,6 +60,7 @@ import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
@@ -1283,6 +1284,43 @@ class MapboxRouteLineApi(
             }
         }
 
+        // The RouteLineExpressionData is only needed if the vanishing route line feature
+        // or styleInactiveRouteLegsIndependently feature are enabled.
+        val segmentsDef: Deferred<List<RouteLineExpressionData>>? = if (
+            routeLineOptions.vanishingRouteLine != null ||
+            routeLineOptions.styleInactiveRouteLegsIndependently
+        ) {
+            jobControl.scope.async {
+                partitionedRoutes.first.firstOrNull()?.route?.run {
+                    MapboxRouteLineUtils.calculateRouteLineSegments(
+                        this.directionsRoute,
+                        trafficBackfillRoadClasses,
+                        true,
+                        routeLineColorResources
+                    )
+                } ?: listOf()
+            }
+        } else {
+            null
+        }
+        // If the route has multiple legs the route line expression data is needed immediately
+        // to draw the independently styled legs correctly. If not the calculation can be deferred.
+        segmentsDef?.let { deferred ->
+            val legsCount = partitionedRoutes.first.firstOrNull()
+                ?.route?.directionsRoute?.legs()?.size ?: 0
+            when (legsCount > 1) {
+                true -> {
+                    routeLineExpressionData = deferred.await()
+                }
+
+                false -> {
+                    jobControl.scope.launch(Dispatchers.Main) {
+                        routeLineExpressionData = deferred.await()
+                    }
+                }
+            }
+        }
+
         val primaryRouteBaseExpressionDef = jobControl.scope.async {
             if (routeLineOptions.styleInactiveRouteLegsIndependently) {
                 MapboxRouteLineUtils.getRouteLineExpression(
@@ -1300,12 +1338,6 @@ class MapboxRouteLineApi(
                     routeLineColorResources.routeDefaultColor
                 )
             }
-
-            MapboxRouteLineUtils.getRouteLineExpression(
-                vanishingPointOffset,
-                routeLineColorResources.routeLineTraveledColor,
-                routeLineColorResources.routeDefaultColor
-            )
         }
 
         val primaryRouteCasingExpressionDef = jobControl.scope.async {
@@ -1325,12 +1357,6 @@ class MapboxRouteLineApi(
                     routeLineColorResources.routeCasingColor,
                 )
             }
-
-            MapboxRouteLineUtils.getRouteLineExpression(
-                vanishingPointOffset,
-                routeLineColorResources.routeLineTraveledCasingColor,
-                routeLineColorResources.routeCasingColor
-            )
         }
 
         val primaryRouteTrailExpressionDef = jobControl.scope.async {
@@ -1537,27 +1563,6 @@ class MapboxRouteLineApi(
                         } ?: false
                     }
                 routeHasRestrictions = routeHasRestrictionsDef.await()
-            }
-        }
-
-        // The RouteLineExpressionData is only needed if the vanishing route line feature
-        // or styleInactiveRouteLegsIndependently feature are enabled.
-        if (
-            routeLineOptions.vanishingRouteLine != null ||
-            routeLineOptions.styleInactiveRouteLegsIndependently
-        ) {
-            jobControl.scope.launch(Dispatchers.Main) {
-                val segmentsDef = jobControl.scope.async {
-                    partitionedRoutes.first.firstOrNull()?.route?.run {
-                        MapboxRouteLineUtils.calculateRouteLineSegments(
-                            this.directionsRoute,
-                            trafficBackfillRoadClasses,
-                            true,
-                            routeLineColorResources
-                        )
-                    } ?: listOf()
-                }
-                routeLineExpressionData = segmentsDef.await()
             }
         }
 
