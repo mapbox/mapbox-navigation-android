@@ -783,7 +783,9 @@ class MapboxRouteLineUtilsRoboTest {
         val expectedPrimaryTrafficLineExpression = "[interpolate, [linear], [line-progress], " +
             "0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
             "0.6934838906942539, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.9425498931942539, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "1.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
             0.0,
