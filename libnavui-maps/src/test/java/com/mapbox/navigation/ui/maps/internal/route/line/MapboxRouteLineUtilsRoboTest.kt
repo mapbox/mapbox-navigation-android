@@ -734,8 +734,8 @@ class MapboxRouteLineUtilsRoboTest {
     @Test
     @Ignore(
         "This cherry-picked test fails because we used to take the first duplicate offset " +
-        "instead of the last, which was fixed in " +
-        "https://github.com/mapbox/mapbox-navigation-android/pull/6440"
+            "instead of the last, which was fixed in " +
+            "https://github.com/mapbox/mapbox-navigation-android/pull/6440"
     )
     fun `getTrafficLineExpression with classes override when duplicate point`() {
         val colorResources = RouteLineColorResources.Builder()
