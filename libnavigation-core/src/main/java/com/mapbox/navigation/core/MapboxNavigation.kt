@@ -854,6 +854,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         CacheHandleWrapper.requestRoadGraphDataUpdate(navigator.cache, callback)
     }
 
+    /**
+     * Returns leg index the user is currently on. If no RouteProgress updates are available,
+     * returns the value passed as `initialLegIndex` parameter to `setNavigationRoutes`.
+     * If no routes are set, returns 0.
+     */
+    fun currentLegIndex(): Int {
+        return tripSession.getRouteProgress()?.currentLegProgress?.legIndex
+            ?: directionsSession.initialLegIndex
+    }
+
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
         legIndex: Int = 0,

@@ -10,7 +10,16 @@ Mapbox welcomes participation and contributions from everyone.
 #### Bug fixes and improvements
 - Updated `NavigationView` to render upcoming maneuvers. [#6175](https://github.com/mapbox/mapbox-navigation-android/pull/6175)
 - Updated `NavigationView` to allow drawing of the info panel behind the translucent navigation bar. [#6145](https://github.com/mapbox/mapbox-navigation-android/pull/6145)
-- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140) 
+- Fixed an issue where `NavigationView` switches from Active Guidance to Free Drive state after rotating device when replay is enabled. [#6140](https://github.com/mapbox/mapbox-navigation-android/pull/6140)
+- Improved inactive leg independent styling: now the inactive leg will be styled differently right away, not only when the route progress updates begin.
+- Added `MapboxNavigation#currentLegIndex`. Use this method to correctly pass leg index to `MapboxRouteLineAPI#setNavigationRoutes` method, this is especially important if you use independent inactive leg styling:
+```kotlin
+val routesObserver = RoutesObserver {
+    routeLineAPI.setNavigationRoutes(result.navigationRoutes, mapboxNavigation.currentLegIndex()).apply {
+        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
+    }    
+}
+```
 
 ## Mapbox Navigation SDK 2.7.0 - 17 August, 2022
 ### Changelog
