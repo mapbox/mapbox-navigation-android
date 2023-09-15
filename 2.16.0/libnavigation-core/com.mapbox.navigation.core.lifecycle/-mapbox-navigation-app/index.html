@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapboxNavigationApp</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Core::com.mapbox.navigation.core.lifecycle/MapboxNavigationApp///PointingToDeclaration//119003296">
+  <div class="breadcrumbs"><a href="../../index.html">Core</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.core.lifecycle</a><span class="delimiter">/</span><a href="index.html">MapboxNavigationApp</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Mapbox</span><wbr><span>Navigation</span><wbr><span><span>App</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Manages a default lifecycle for <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a>.</p><ol><li><p class="paragraph">Call <a href="setup.html">MapboxNavigationApp.setup</a> to specify your <a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-navigation-options/index.html">NavigationOptions</a>.</p></li><li><p class="paragraph">Register and unregister your <a href="../-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a> instances with <a href="register-observer.html">MapboxNavigationApp.registerObserver</a> and <a href="unregister-observer.html">MapboxNavigationApp.unregisterObserver</a>.</p></li><li><p class="paragraph">Attach and detach <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleOwner.html">LifecycleOwner</a>s to create instances of <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a>.</p></li></ol><h2 class=""> Examples</h2><p class="paragraph">Register and unregister individual <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleOwner.html">LifecycleOwner</a>s. Below is an example of creating a single activity that uses <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a>.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">class MyActivity : ComponentActivity() {<br>  override fun onCreate() {<br>    MapboxNavigationApp<br>      .setup(navigationOptions)<br>      .attach(this)<br>  }<br>  override fun onResume() {<br>    MapboxNavigationApp<br>      .registerObserver(locationObserver)<br>  }<br>  override fun onPause() {<br>    MapboxNavigationApp<br>      .unregisterObserver(locationObserver)<br>  }<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Alternatively, you can enable an entire application by attaching all activities. This will make a <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance available to any activity or fragment.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">class MyApplication : Application() {<br>  override fun onCreate() {<br>    MapboxNavigationApp.setup(this)<br>      .attachAllActivities()<br>      .registerObserver(locationObserver)<br>  }<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="510372629%2FFunctions%2F119003296" anchor-label="attach" id="510372629%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="attach.html"><span><span>attach</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="510372629%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="attach.html"><span class="token function">attach</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lifecycleOwner<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleOwner.html">LifecycleOwner</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Individually attach a lifecycle onto the <a href="index.html">MapboxNavigationApp</a>. If the app has been <a href="setup.html">setup</a>, then this lifecycle will cause <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> to be created.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1577395283%2FFunctions%2F119003296" anchor-label="attachAllActivities" id="-1577395283%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="attach-all-activities.html"><span>attach</span><wbr><span>All</span><wbr><span><span>Activities</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1577395283%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="attach-all-activities.html"><span class="token function">attachAllActivities</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">application<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Application.html">Application</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Detect when any Activity is in the foreground. Use <a href="attach.html">attach</a> and <a href="detach.html">detach</a> for granular control of which lifecycle is used for creating <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-677331263%2FFunctions%2F119003296" anchor-label="current" id="-677331263%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="current.html"><span><span>current</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-677331263%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="current.html"><span class="token function">current</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> has functions that do not require observation streams. This function allows you to get the current instance to call those functions.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1411774179%2FFunctions%2F119003296" anchor-label="detach" id="1411774179%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="detach.html"><span><span>detach</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1411774179%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="detach.html"><span class="token function">detach</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lifecycleOwner<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleOwner.html">LifecycleOwner</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Individually detach lifecycles from <a href="index.html">MapboxNavigationApp</a>. When all LifecycleOwners have been detached, this will cause all <a href="../-mapbox-navigation-observer/on-detached.html">MapboxNavigationObserver.onDetached</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1182073906%2FFunctions%2F119003296" anchor-label="disable" id="1182073906%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="disable.html"><span><span>disable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1182073906%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="disable.html"><span class="token function">disable</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Optional function to detach all observers and disable <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> from being created. You can re-enable <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> by calling <a href="setup.html">MapboxNavigationApp.setup</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="398167667%2FFunctions%2F119003296" anchor-label="getObserver" id="398167667%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-observer.html"><span>get</span><wbr><span><span>Observer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="398167667%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observer.html">T</a><span class="token operator"> : </span><a href="../-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a><span class="token operator">&gt; </span><a href="get-observer.html"><span class="token function">getObserver</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clazz<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observer.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="get-observer.html">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Java interoperability. Provides access to any registered observer instance. If multiple instances of the same class have been registered, the first observer will be returned.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observer.html">T</a><span class="token operator"> : </span><a href="../-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a><span class="token operator">&gt; </span><a href="get-observer.html"><span class="token function">getObserver</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">kClass<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observer.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="get-observer.html">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Provides access to any registered observer instance. If multiple instances of the same class have been registered, the first observer will be returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1875519307%2FFunctions%2F119003296" anchor-label="getObservers" id="-1875519307%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-observers.html"><span>get</span><wbr><span><span>Observers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1875519307%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observers.html">T</a><span class="token operator"> : </span><a href="../-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a><span class="token operator">&gt; </span><a href="get-observers.html"><span class="token function">getObservers</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clazz<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observers.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observers.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Java interoperability. Provides access to any registered observer instance. If no observers have been registered with this class type, an empty list is returned.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observers.html">T</a><span class="token operator"> : </span><a href="../-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a><span class="token operator">&gt; </span><a href="get-observers.html"><span class="token function">getObservers</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">kClass<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observers.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="get-observers.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Provides access to any registered observer instance. If no observers have been registered with this class type, an empty list is returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1460331015%2FFunctions%2F119003296" anchor-label="isSetup" id="1460331015%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="is-setup.html"><span>is</span><wbr><span><span>Setup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1460331015%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="is-setup.html"><span class="token function">isSetup</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Indicates whether the <a href="index.html">MapboxNavigationApp</a> has been setup.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1387866281%2FFunctions%2F119003296" anchor-label="registerObserver" id="-1387866281%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="register-observer.html"><span>register</span><wbr><span><span>Observer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1387866281%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="register-observer.html"><span class="token function">registerObserver</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigationObserver<span class="token operator">: </span><a href="../-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Register an observer to receive the <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1578807615%2FFunctions%2F119003296" anchor-label="setup" id="-1578807615%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="setup.html"><span><span>setup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578807615%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="setup.html"><span class="token function">setup</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">navigationOptions<span class="token operator">: </span><a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-navigation-options/index.html">NavigationOptions</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Call <a href="setup.html">MapboxNavigationApp.setup</a> to provide the application with <a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-navigation-options/index.html">NavigationOptions</a>.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="setup.html"><span class="token function">setup</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">navigationOptionsProvider<span class="token operator">: </span><a href="../-navigation-options-provider/index.html">NavigationOptionsProvider</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Call <a href="setup.html">MapboxNavigationApp.setup</a> to provide the application with <a href="../-navigation-options-provider/index.html">NavigationOptionsProvider</a>. New <a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-navigation-options/index.html">NavigationOptions</a> will be created for every <a href="../../com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="216281072%2FFunctions%2F119003296" anchor-label="unregisterObserver" id="216281072%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="unregister-observer.html"><span>unregister</span><wbr><span><span>Observer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="216281072%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="unregister-observer.html"><span class="token function">unregisterObserver</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigationObserver<span class="token operator">: </span><a href="../-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxNavigationApp</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Unregister the observer that was registered through <a href="register-observer.html">registerObserver</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="332320119%2FProperties%2F119003296" anchor-label="lifecycleOwner" id="332320119%2FProperties%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="lifecycle-owner.html">lifecycleOwner</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="332320119%2FProperties%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><a data-name="332320119%2FProperties%2F119003296" anchor-label="lifecycleOwner" id="332320119%2FProperties%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-static/index.html"><span class="token annotation">JvmStatic</span></a></div></div><span class="token keyword"></span><span class="token keyword">val </span><a href="lifecycle-owner.html">lifecycleOwner</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleOwner.html">LifecycleOwner</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="332320119%2FProperties%2F119003296" anchor-label="lifecycleOwner" id="332320119%2FProperties%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a><p class="paragraph">Get the lifecycle of the car and app. It is started when either the car or app is in foreground. When both the car and app have been closed, the lifecycle is stopped. The lifecycle is never destroyed.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
