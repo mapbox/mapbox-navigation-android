@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.guidance.junction.api
 
 import android.net.Uri
+import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
  * Mapbox Junction Api allows you to generate junction for select maneuvers.
  * @property accessToken String
  */
+@UiThread
 class MapboxJunctionApi(
     private val accessToken: String
 ) {
