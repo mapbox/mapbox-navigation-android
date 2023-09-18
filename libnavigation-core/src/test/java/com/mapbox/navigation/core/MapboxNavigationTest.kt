@@ -153,20 +153,26 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDispatcher() {
-        createMapboxNavigation()
-        // + 1 for navigationSession
-        // + 1 for routesCacheClearer
-        verify(exactly = 3) { directionsSession.registerSetNavigationRoutesFinishedObserver(any()) }
-    }
-
-    @Test
     fun init_registersRoutesCacheClearerAsObservers() {
         createMapboxNavigation()
         verify(exactly = 1) {
             directionsSession.registerSetNavigationRoutesFinishedObserver(routesCacheClearer)
             routesPreviewController.registerRoutesPreviewObserver(routesCacheClearer)
         }
+    }
+
+    @Test
+    fun init_registerRoutesObservers() {
+        createMapboxNavigation()
+
+        val observers = mutableListOf<RoutesObserver>()
+        coVerify(exactly = 4) {
+            directionsSession.registerSetNavigationRoutesFinishedObserver(capture(observers))
+        }
+
+        assertTrue(observers[2] === routeRefreshController)
+        observers[1].onRoutesChanged(mockk())
+        verify { routeProgressDataProvider.onNewRoutes() }
     }
 
     @Test
@@ -777,7 +783,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun internalRouteObserver_notEmpty_new() {
+    fun internalRouteObserver_notEmpty() {
         createMapboxNavigation()
         val primary: NavigationRoute = mockk {
             every { directionsRoute } returns mockk()
@@ -800,41 +806,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             it.onRoutesChanged(RoutesUpdatedResult(routes, ignoredRoutes, reason))
         }
 
-        coVerifyOrder {
-            routeProgressDataProvider.onNewRoutes()
-            routeRefreshController.requestPlannedRouteRefresh(routes)
-        }
-    }
-
-    @Test
-    fun internalRouteObserver_notEmpty_refresh() {
-        createMapboxNavigation()
-        val primary: NavigationRoute = mockk {
-            every { directionsRoute } returns mockk()
-        }
-        val secondary: NavigationRoute = mockk {
-            every { directionsRoute } returns mockk()
-        }
-        val routes = listOf(primary, secondary)
-        val ignoredRoutes = listOf<IgnoredRoute>(mockk(relaxed = true))
-        val reason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
-        val routeObserversSlot = mutableListOf<RoutesObserver>()
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        verify {
-            directionsSession.registerSetNavigationRoutesFinishedObserver(
-                capture(routeObserversSlot)
-            )
-        }
-
-        routeObserversSlot.forEach {
-            it.onRoutesChanged(RoutesUpdatedResult(routes, ignoredRoutes, reason))
-        }
-
         coVerify(exactly = 1) {
             routeProgressDataProvider.onNewRoutes()
-        }
-        coVerify(exactly = 0) {
-            routeRefreshController.requestPlannedRouteRefresh(routes)
         }
     }
 
@@ -859,7 +832,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coVerify(exactly = 1) {
             routeProgressDataProvider.onNewRoutes()
         }
-        coVerify(exactly = 1) { routeRefreshController.requestPlannedRouteRefresh(emptyList()) }
     }
 
     @Test

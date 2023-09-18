@@ -160,7 +160,7 @@ internal open class RouteRefreshIntegrationTest {
         successfulAttemptNumber: Int = 0,
         responseDelay: Long = 0
     ) {
-        val refreshedRoute = NavigationRoute.create(
+        val refreshedRoutes = NavigationRoute.create(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
             RouteOptions.builder()
                 .coordinatesList(
@@ -173,9 +173,11 @@ internal open class RouteRefreshIntegrationTest {
                 .enableRefresh(true)
                 .build(),
             RouterOrigin.Custom()
-        ).first()
+        )
         var invocationNumber = 0
         every { router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any()) } answers {
+            val routeId = firstArg<NavigationRoute>().id
+            val refreshedRoute = refreshedRoutes.first { it.id == routeId }
             val callback = thirdArg() as NavigationRouterRefreshCallback
             refreshedRoute.update(
                 {

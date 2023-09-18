@@ -1,9 +1,10 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.RoutesInvalidatedObserver
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.Job
 
@@ -18,7 +19,7 @@ class RouteRefreshController internal constructor(
     private val stateHolder: RouteRefreshStateHolder,
     private val refreshObserversManager: RefreshObserversManager,
     private val routeRefresherResultProcessor: RouteRefresherResultProcessor,
-) {
+) : RoutesObserver {
 
     /**
      * Register a [RouteRefreshStatesObserver] to be notified of Route refresh state changes.
@@ -109,9 +110,11 @@ class RouteRefreshController internal constructor(
         routeRefreshParentJob.cancel()
     }
 
-    internal fun requestPlannedRouteRefresh(routes: List<NavigationRoute>) {
-        routeRefresherResultProcessor.reset()
-        immediateRouteRefreshController.cancel()
-        plannedRouteRefreshController.startRoutesRefreshing(routes)
+    override fun onRoutesChanged(result: RoutesUpdatedResult) {
+        if (result.reason != RoutesExtra.ROUTES_UPDATE_REASON_REFRESH) {
+            routeRefresherResultProcessor.reset()
+            immediateRouteRefreshController.cancel()
+            plannedRouteRefreshController.startRoutesRefreshing(result.navigationRoutes)
+        }
     }
 }

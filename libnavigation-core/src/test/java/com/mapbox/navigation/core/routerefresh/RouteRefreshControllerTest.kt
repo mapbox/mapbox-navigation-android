@@ -5,6 +5,8 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.RoutesInvalidatedObserver
+import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.every
@@ -106,10 +108,12 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun requestPlannedRouteRefreshWithNonEmptyRoutes() {
+    fun onRoutesChangedWithNonEmptyRoutesNew() {
         val routes = listOf<NavigationRoute>(mockk())
 
-        sut.requestPlannedRouteRefresh(routes)
+        sut.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
 
         verify(exactly = 1) {
             resultProcessor.reset()
@@ -119,10 +123,27 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun requestPlannedRouteRefreshWithEmptyRoutes() {
+    fun onRoutesChangedWithNonEmptyRoutesRefresh() {
+        val routes = listOf<NavigationRoute>(mockk())
+
+        sut.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
+        )
+
+        verify(exactly = 0) {
+            resultProcessor.reset()
+            plannedRouteRefreshController.startRoutesRefreshing(any())
+            immediateRouteRefreshController.cancel()
+        }
+    }
+
+    @Test
+    fun onRoutesChangedWithEmptyRoutes() {
         val routes = emptyList<NavigationRoute>()
 
-        sut.requestPlannedRouteRefresh(routes)
+        sut.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+        )
 
         verify(exactly = 1) {
             resultProcessor.reset()

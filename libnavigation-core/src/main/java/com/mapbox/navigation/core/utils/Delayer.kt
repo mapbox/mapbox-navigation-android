@@ -6,7 +6,7 @@ import com.mapbox.navigation.utils.internal.Time
  * Executes delays and provides a possibility to "resume" last delay in case it was cancelled.
  * Non thread safe.
  */
-internal class Delayer(val interval: Long) {
+internal class Delayer(private val interval: Long, private val timeProvider: Time) {
 
     private var delayRemaining: Long = interval
 
@@ -21,11 +21,11 @@ internal class Delayer(val interval: Long) {
     }
 
     private suspend fun delayInternal(millis: Long) {
-        val startMillis = Time.SystemClockImpl.millis()
+        val startMillis = timeProvider.millis()
         try {
             kotlinx.coroutines.delay(millis)
         } finally {
-            val endMillis = Time.SystemClockImpl.millis()
+            val endMillis = timeProvider.millis()
             delayRemaining = millis - (endMillis - startMillis)
         }
     }

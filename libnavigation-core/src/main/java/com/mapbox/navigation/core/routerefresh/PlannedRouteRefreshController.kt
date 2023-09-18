@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils
 import com.mapbox.navigation.core.utils.Delayer
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CancellationException
@@ -31,9 +32,10 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         parentScope: CoroutineScope,
         listener: RouteRefresherListener,
         attemptListener: RoutesRefreshAttemptListener,
+        timeProvider: Time,
     ) : this(
         routeRefresherExecutor,
-        Delayer(routeRefreshOptions.intervalMillis),
+        Delayer(routeRefreshOptions.intervalMillis, timeProvider),
         stateHolder,
         listener,
         attemptListener,

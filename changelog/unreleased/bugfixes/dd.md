@@ -1,0 +1,1 @@
+- Fixed an issue where route refresh interval might have been too long in case of a specific alternatives update rate. 

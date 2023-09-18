@@ -3,11 +3,9 @@ package com.mapbox.navigation.core.utils
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -18,22 +16,17 @@ import org.junit.Test
 class DelayerTest {
 
     private val interval = 5000L
-    private val delayer = Delayer(interval)
+    private val timeProvider: Time = mockk()
+    private val delayer: Delayer = Delayer(interval, timeProvider)
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     @Before
     fun setUp() {
-        mockkObject(Time.SystemClockImpl)
-        every { Time.SystemClockImpl.millis() } answers {
+        every { timeProvider.millis() } answers {
             coroutineRule.testDispatcher.currentTime
         }
-    }
-
-    @After
-    fun tearDown() {
-        unmockkObject(Time.SystemClockImpl)
     }
 
     @Test

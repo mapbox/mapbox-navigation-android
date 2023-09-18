@@ -2,6 +2,8 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
+import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -16,8 +18,12 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(100000)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
-        routeRefreshController.requestPlannedRouteRefresh(emptyList())
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(emptyList(), emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+        )
 
         testDispatcher.advanceTimeBy(100000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
@@ -40,7 +46,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         )
         routeRefreshController = createRefreshController(50000)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
 
         testDispatcher.advanceTimeBy(50000)
 
@@ -66,7 +74,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
 
         testDispatcher.advanceTimeBy(100000)
 
@@ -86,7 +96,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(100000)
 
         assertEquals(
@@ -105,7 +117,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(49999)
 
         assertEquals(
@@ -134,7 +148,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(100000)
 
         assertEquals(
@@ -156,7 +172,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(120_000)
 
         assertEquals(
@@ -175,7 +193,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(100_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         routeRefreshController.requestImmediateRouteRefresh()
 
         assertEquals(
@@ -196,7 +216,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(100_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         routeRefreshController.requestImmediateRouteRefresh()
 
         assertEquals(
@@ -217,7 +239,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(200_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         updateProgressWithGeometryIndex(1)
         routeRefreshController.requestImmediateRouteRefresh()
         updateProgressWithGeometryIndex(2)
@@ -260,7 +284,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(50_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         routeRefreshController.requestImmediateRouteRefresh()
 
         testDispatcher.advanceTimeBy(50_000)
@@ -285,7 +311,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(50_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(50_000)
         routeRefreshController.requestImmediateRouteRefresh()
         testDispatcher.advanceTimeBy(50_000)
@@ -312,7 +340,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(50_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(80_000)
 
         routeRefreshController.destroy()
@@ -334,7 +364,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController = createRefreshController(30_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(40_000)
 
         routeRefreshController.pauseRouteRefreshes()

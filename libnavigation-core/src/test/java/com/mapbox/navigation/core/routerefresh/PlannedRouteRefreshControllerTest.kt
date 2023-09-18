@@ -9,6 +9,7 @@ import com.mapbox.navigation.core.utils.Delayer
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.Time
 import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -54,7 +55,7 @@ class PlannedRouteRefreshControllerTest {
     private val childScopeDispatcher = TestCoroutineDispatcher()
     private var childScope: CoroutineScope? = null
     private val parentScope = coroutineRule.createTestScope()
-    private val delayer = spyk(Delayer(interval))
+    private val delayer = spyk(Delayer(interval, Time.SystemClockImpl))
     private lateinit var sut: PlannedRouteRefreshController
 
     @Before
