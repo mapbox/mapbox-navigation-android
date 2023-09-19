@@ -1,7 +1,5 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils
@@ -529,7 +527,7 @@ class PlannedRouteRefreshControllerTest {
 
         sut.startRoutesRefreshing(routes)
         clearMocks(retryStrategy, answers = false)
-        finishRequest(ExpectedFactory.createError("Some error"))
+        finishRequest(RoutesRefresherExecutorResult.ReplacedByNewer)
 
         verify(exactly = 0) {
             attemptListener.onRoutesRefreshAttemptFinished(any())
@@ -544,7 +542,10 @@ class PlannedRouteRefreshControllerTest {
             executor.executeRoutesRefresh(any(), any())
         }
         verify(exactly = 1) {
-            logger.logW("Planned route refresh error: Some error", "RouteRefreshController")
+            logger.logW(
+                "Planned route refresh error: request is skipped as a newer one is available",
+                "RouteRefreshController"
+            )
         }
     }
 
@@ -556,10 +557,10 @@ class PlannedRouteRefreshControllerTest {
     }
 
     private suspend fun finishRequest(result: RoutesRefresherResult) {
-        finishRequest(ExpectedFactory.createValue(result))
+        finishRequest(RoutesRefresherExecutorResult.Finished(result))
     }
 
-    private suspend fun finishRequest(result: Expected<String, RoutesRefresherResult>) {
+    private suspend fun finishRequest(result: RoutesRefresherExecutorResult) {
         coEvery {
             executor.executeRoutesRefresh(any(), any())
         } returns result

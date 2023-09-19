@@ -12,6 +12,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -39,7 +40,10 @@ class RouteRefresherExecutorTest {
             startCallback.invoke()
             routeRefresher.refresh(routes, timeout)
         }
-        assertEquals(routesRefresherResult, actual.value)
+        assertEquals(
+            routesRefresherResult,
+            (actual as RoutesRefresherExecutorResult.Finished).value
+        )
     }
 
     @Test
@@ -85,10 +89,16 @@ class RouteRefresherExecutorTest {
             sut.executeRoutesRefresh(routes4, startCallback4)
         }
 
-        assertEquals(routesRefresherResult, result1.await().value)
-        assertEquals("Skipping request as a newer one is queued.", result2.await().error)
-        assertEquals("Skipping request as a newer one is queued.", result3.await().error)
-        assertEquals(routesRefresherResult4, result4.await().value)
+        assertEquals(
+            routesRefresherResult,
+            (result1.await() as RoutesRefresherExecutorResult.Finished).value
+        )
+        assertTrue(result2.await() is RoutesRefresherExecutorResult.ReplacedByNewer)
+        assertTrue(result3.await() is RoutesRefresherExecutorResult.ReplacedByNewer)
+        assertEquals(
+            routesRefresherResult4,
+            (result4.await() as RoutesRefresherExecutorResult.Finished).value
+        )
     }
 
     @Test
@@ -104,6 +114,9 @@ class RouteRefresherExecutorTest {
 
         val actual = sut.executeRoutesRefresh(routes, startCallback)
 
-        assertEquals(routesRefresherResult, actual.value)
+        assertEquals(
+            routesRefresherResult,
+            (actual as RoutesRefresherExecutorResult.Finished).value
+        )
     }
 }

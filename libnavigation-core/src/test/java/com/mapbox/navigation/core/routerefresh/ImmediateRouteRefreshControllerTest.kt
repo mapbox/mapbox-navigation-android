@@ -1,7 +1,5 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -34,7 +32,7 @@ class ImmediateRouteRefreshControllerTest {
     private val attemptListener = mockk<RoutesRefreshAttemptListener>(relaxed = true)
     private val listener = mockk<RouteRefresherListener>(relaxed = true)
     private val clientCallback =
-        mockk<(Expected<String, RoutesRefresherResult>) -> Unit>(relaxed = true)
+        mockk<(RoutesRefresherExecutorResult) -> Unit>(relaxed = true)
     private val routes = listOf<NavigationRoute>(mockk())
 
     private val sut = ImmediateRouteRefreshController(
@@ -74,14 +72,18 @@ class ImmediateRouteRefreshControllerTest {
         val result = mockk<RoutesRefresherResult> { every { anySuccess() } returns true }
         coEvery {
             routeRefresherExecutor.executeRoutesRefresh(any(), any())
-        } returns ExpectedFactory.createValue(result)
+        } returns RoutesRefresherExecutorResult.Finished(result)
 
         sut.requestRoutesRefresh(routes, clientCallback)
 
         verify(exactly = 1) { attemptListener.onRoutesRefreshAttemptFinished(result) }
         verify(exactly = 1) { stateHolder.onSuccess() }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
-        verify(exactly = 1) { clientCallback(match { it.value == result }) }
+        verify(exactly = 1) {
+            clientCallback(
+                match { (it as RoutesRefresherExecutorResult.Finished).value == result }
+            )
+        }
         verify(exactly = 0) { stateHolder.onCancel() }
     }
 
@@ -93,21 +95,22 @@ class ImmediateRouteRefreshControllerTest {
         }
         coEvery {
             routeRefresherExecutor.executeRoutesRefresh(any(), any())
-        } returns ExpectedFactory.createValue(result)
+        } returns RoutesRefresherExecutorResult.Finished(result)
 
         sut.requestRoutesRefresh(routes, clientCallback)
 
         verify(exactly = 1) { attemptListener.onRoutesRefreshAttemptFinished(result) }
         verify(exactly = 1) { stateHolder.onFailure(null) }
-        verify(exactly = 1) { clientCallback(match { it.value == result }) }
+        verify(exactly = 1) {
+            clientCallback(match { (it as RoutesRefresherExecutorResult.Finished).value == result })
+        }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
         verify(exactly = 0) { stateHolder.onCancel() }
     }
 
     @Test
     fun routesRefreshFinishedWithError() = coroutineRule.runBlockingTest {
-        val error: Expected<String, RoutesRefresherResult> =
-            ExpectedFactory.createError("Some error")
+        val error = RoutesRefresherExecutorResult.ReplacedByNewer
         coEvery {
             routeRefresherExecutor.executeRoutesRefresh(any(), any())
         } returns error
@@ -124,7 +127,7 @@ class ImmediateRouteRefreshControllerTest {
         verify(exactly = 1) { clientCallback.invoke(error) }
         verify(exactly = 1) {
             logger.logW(
-                "Route refresh on-demand error: Some error",
+                "Route refresh on-demand error: request is skipped as a newer one is available",
                 "RouteRefreshController"
             )
         }
@@ -169,7 +172,7 @@ class ImmediateRouteRefreshControllerTest {
 
         coEvery {
             routeRefresherExecutor.executeRoutesRefresh(any(), any())
-        } returns ExpectedFactory.createError("some error")
+        } returns RoutesRefresherExecutorResult.ReplacedByNewer
         sut.requestRoutesRefresh(routes, clientCallback)
 
         coVerify(exactly = 1) {

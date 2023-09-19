@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.internal.logW
@@ -22,7 +21,7 @@ internal class ImmediateRouteRefreshController(
     @Throws(IllegalArgumentException::class)
     fun requestRoutesRefresh(
         routes: List<NavigationRoute>,
-        callback: (Expected<String, RoutesRefresherResult>) -> Unit
+        callback: (RoutesRefresherExecutorResult) -> Unit
     ) {
         if (routes.isEmpty()) {
             throw IllegalArgumentException("Routes to refresh should not be empty")
@@ -39,18 +38,24 @@ internal class ImmediateRouteRefreshController(
             }
 
             callback(result)
-            result.fold(
-                { logW("Route refresh on-demand error: $it", RouteRefreshLog.LOG_CATEGORY) },
-                {
-                    attemptListener.onRoutesRefreshAttemptFinished(it)
-                    if (it.anySuccess()) {
+            when (result) {
+                is RoutesRefresherExecutorResult.ReplacedByNewer -> {
+                    logW(
+                        "Route refresh on-demand error: " +
+                            "request is skipped as a newer one is available",
+                        RouteRefreshLog.LOG_CATEGORY
+                    )
+                }
+                is RoutesRefresherExecutorResult.Finished -> {
+                    attemptListener.onRoutesRefreshAttemptFinished(result.value)
+                    if (result.value.anySuccess()) {
                         stateHolder.onSuccess()
                     } else {
                         stateHolder.onFailure(null)
                     }
-                    listener.onRoutesRefreshed(it)
+                    listener.onRoutesRefreshed(result.value)
                 }
-            )
+            }
         }
     }
 

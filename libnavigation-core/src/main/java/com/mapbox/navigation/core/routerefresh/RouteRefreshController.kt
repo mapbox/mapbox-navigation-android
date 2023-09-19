@@ -63,7 +63,7 @@ class RouteRefreshController internal constructor(
         }
         plannedRouteRefreshController.pause()
         immediateRouteRefreshController.requestRoutesRefresh(routes) {
-            if (it.isValue) {
+            if (it is RoutesRefresherExecutorResult.Finished) {
                 plannedRouteRefreshController.resume()
             }
         }

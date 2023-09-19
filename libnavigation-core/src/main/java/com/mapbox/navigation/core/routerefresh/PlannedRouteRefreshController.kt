@@ -141,28 +141,40 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                 }
             }
         )
-        routeRefresherResult.fold(
-            { logW("Planned route refresh error: $it", RouteRefreshLog.LOG_CATEGORY) },
-            {
-                attemptListener.onRoutesRefreshAttemptFinished(it)
-                if (it.anySuccess()) {
+        when (routeRefresherResult) {
+            is RoutesRefresherExecutorResult.ReplacedByNewer -> {
+                logW(
+                    "Planned route refresh error: " +
+                        "request is skipped as a newer one is available",
+                    RouteRefreshLog.LOG_CATEGORY
+                )
+            }
+            is RoutesRefresherExecutorResult.Finished -> {
+                attemptListener.onRoutesRefreshAttemptFinished(routeRefresherResult.value)
+                if (routeRefresherResult.value.anySuccess()) {
                     stateHolder.onSuccess()
-                    listener.onRoutesRefreshed(it)
-                    val refreshedRoutes = listOf(it.primaryRouteRefresherResult.route) +
-                        it.alternativesRouteRefresherResults.map { it.route }
+                    listener.onRoutesRefreshed(routeRefresherResult.value)
+                    val refreshedRoutes = listOf(
+                        routeRefresherResult.value.primaryRouteRefresherResult.route
+                    ) + routeRefresherResult.value.alternativesRouteRefresherResults.map {
+                        it.route
+                    }
                     routesToRefresh = refreshedRoutes
                     scheduleNewUpdate(refreshedRoutes, false)
                 } else {
-                    if (it.anyRequestFailed() && retryStrategy.shouldRetry()) {
+                    if (
+                        routeRefresherResult.value.anyRequestFailed() &&
+                        retryStrategy.shouldRetry()
+                    ) {
                         scheduleUpdateRetry(routes, shouldNotifyOnStart = false)
                     } else {
                         stateHolder.onFailure(null)
-                        listener.onRoutesRefreshed(it)
+                        listener.onRoutesRefreshed(routeRefresherResult.value)
                         scheduleNewUpdate(routes, false)
                     }
                 }
             }
-        )
+        }
     }
 
     private fun recreateScope() {
