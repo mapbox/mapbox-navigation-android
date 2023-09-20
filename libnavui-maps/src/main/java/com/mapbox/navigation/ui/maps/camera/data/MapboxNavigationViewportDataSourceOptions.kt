@@ -17,6 +17,13 @@ class MapboxNavigationViewportDataSourceOptions internal constructor() {
      * Options that impact generation of overview frames.
      */
     var overviewFrameOptions = OverviewFrameOptions()
+
+    override fun toString(): String {
+        return "MapboxNavigationViewportDataSourceOptions(" +
+            "followingFrameOptions=$followingFrameOptions, " +
+            "overviewFrameOptions=$overviewFrameOptions" +
+            ")"
+    }
 }
 
 /**
@@ -152,6 +159,26 @@ class FollowingFrameOptions {
     var framingStrategy: FollowingCameraFramingStrategy =
         FollowingCameraFramingStrategy.Default
 
+    override fun toString(): String {
+        return "FollowingFrameOptions(" +
+            "defaultPitch=$defaultPitch, " +
+            "minZoom=$minZoom, " +
+            "maxZoom=$maxZoom, " +
+            "focalPoint=$focalPoint, " +
+            "maximizeViewableGeometryWhenPitchZero=$maximizeViewableGeometryWhenPitchZero, " +
+            "intersectionDensityCalculation=$intersectionDensityCalculation, " +
+            "pitchNearManeuvers=$pitchNearManeuvers, " +
+            "frameGeometryAfterManeuver=$frameGeometryAfterManeuver, " +
+            "bearingSmoothing=$bearingSmoothing, " +
+            "centerUpdatesAllowed=$centerUpdatesAllowed, " +
+            "zoomUpdatesAllowed=$zoomUpdatesAllowed, " +
+            "bearingUpdatesAllowed=$bearingUpdatesAllowed, " +
+            "pitchUpdatesAllowed=$pitchUpdatesAllowed, " +
+            "paddingUpdatesAllowed=$paddingUpdatesAllowed, " +
+            "framingStrategy=$framingStrategy" +
+            ")"
+    }
+
     /**
      * Options that modify the framed route geometries based on the intersection density.
      *
@@ -188,6 +215,14 @@ class FollowingFrameOptions {
          * Defaults to `20.0` meters.
          */
         var minimumDistanceBetweenIntersections = 20.0
+
+        override fun toString(): String {
+            return "IntersectionDensityCalculation(" +
+                "enabled=$enabled, " +
+                "averageDistanceMultiplier=$averageDistanceMultiplier, " +
+                "minimumDistanceBetweenIntersections=$minimumDistanceBetweenIntersections" +
+                ")"
+        }
     }
 
     /**
@@ -227,6 +262,14 @@ class FollowingFrameOptions {
             StepManeuver.OFF_RAMP,
             StepManeuver.FORK
         )
+
+        override fun toString(): String {
+            return "PitchNearManeuvers(" +
+                "enabled=$enabled, " +
+                "triggerDistanceFromManeuver=$triggerDistanceFromManeuver, " +
+                "excludedManeuvers=$excludedManeuvers" +
+                ")"
+        }
     }
 
     /**
@@ -262,6 +305,14 @@ class FollowingFrameOptions {
          * Defaults to `100.0` meters.
          */
         var distanceToFrameAfterManeuver = 100.0
+
+        override fun toString(): String {
+            return "FrameGeometryAfterManeuver(" +
+                "enabled=$enabled, " +
+                "distanceToCoalesceCompoundManeuvers=$distanceToCoalesceCompoundManeuvers, " +
+                "distanceToFrameAfterManeuver=$distanceToFrameAfterManeuver" +
+                ")"
+        }
     }
 
     /**
@@ -284,6 +335,10 @@ class FollowingFrameOptions {
          * Defaults to `45.0` degrees.
          */
         var maxBearingAngleDiff = 45.0
+
+        override fun toString(): String {
+            return "BearingSmoothing(enabled=$enabled, maxBearingAngleDiff=$maxBearingAngleDiff)"
+        }
     }
 
     /**
@@ -371,6 +426,18 @@ class OverviewFrameOptions {
      */
     var paddingUpdatesAllowed = true
 
+    override fun toString(): String {
+        return "OverviewFrameOptions(" +
+            "maxZoom=$maxZoom, " +
+            "geometrySimplification=$geometrySimplification, " +
+            "centerUpdatesAllowed=$centerUpdatesAllowed, " +
+            "zoomUpdatesAllowed=$zoomUpdatesAllowed, " +
+            "bearingUpdatesAllowed=$bearingUpdatesAllowed, " +
+            "pitchUpdatesAllowed=$pitchUpdatesAllowed, " +
+            "paddingUpdatesAllowed=$paddingUpdatesAllowed" +
+            ")"
+    }
+
     /**
      * Options that impact the simplification of geometries framed for overview.
      *
@@ -398,5 +465,9 @@ class OverviewFrameOptions {
          * The factor has to be a positive integer.
          */
         var simplificationFactor = 25
+
+        override fun toString(): String {
+            return "GeometrySimplification(enabled=$enabled, simplificationFactor=$simplificationFactor)"
+        }
     }
 }
