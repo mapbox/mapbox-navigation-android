@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
 import android.location.Location
+import android.util.Log
 import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
@@ -269,6 +270,11 @@ class MapboxNavigationViewportDataSource(
      * to control the camera in scenarios like free drive where the maneuver points are not available.
      */
     var followingPadding: EdgeInsets = EMPTY_EDGE_INSETS
+        set(value) {
+            Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.setFollowingPadding($value)")
+            field = value
+        }
+
     private var appliedFollowingPadding = followingPadding
 
     /**
@@ -278,6 +284,10 @@ class MapboxNavigationViewportDataSource(
      * or its remainder if [onRouteProgressChanged] is also available, and the [additionalPointsToFrameForOverview].
      */
     var overviewPadding: EdgeInsets = EMPTY_EDGE_INSETS
+        set(value) {
+            Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.setOverviewPadding($value)")
+            field = value
+        }
 
     private var additionalPointsToFrameForFollowing: List<Point> = emptyList()
     private var additionalPointsToFrameForOverview: List<Point> = emptyList()
@@ -382,6 +392,8 @@ class MapboxNavigationViewportDataSource(
             cameraForFollowing = followingCameraOptions,
             cameraForOverview = overviewCameraOptions
         )
+
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.evaluate(). options: $options, resulting viewportData: $viewportData")
     }
 
     /**
@@ -522,6 +534,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun onLocationChanged(location: Location) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.onLocationChanged($location)")
         targetLocation = location
     }
 
@@ -553,6 +566,7 @@ class MapboxNavigationViewportDataSource(
      * Provide additional points that should be fitted into the following frame update.
      */
     fun additionalPointsToFrameForFollowing(points: List<Point>) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.additionalPointsToFrameForFollowing($points)")
         additionalPointsToFrameForFollowing = ArrayList(points)
     }
 
@@ -560,6 +574,7 @@ class MapboxNavigationViewportDataSource(
      * Provide additional points that should be fitted into the overview frame update.
      */
     fun additionalPointsToFrameForOverview(points: List<Point>) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.additionalPointsToFrameForOverview($points)")
         additionalPointsToFrameForOverview = ArrayList(points)
     }
 
@@ -572,6 +587,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingCenterPropertyOverride(value: Point?) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.followingCenterPropertyOverride($value)")
         followingCenterProperty.override = value
     }
 
@@ -584,6 +600,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingZoomPropertyOverride(value: Double?) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.followingZoomPropertyOverride($value)")
         followingZoomProperty.override = value
     }
 
@@ -596,6 +613,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingBearingPropertyOverride(value: Double?) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.followingBearingPropertyOverride($value)")
         followingBearingProperty.override = value
     }
 
@@ -608,6 +626,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun followingPitchPropertyOverride(value: Double?) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.followingPitchPropertyOverride($value)")
         followingPitchProperty.override = value
     }
 
@@ -621,6 +640,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun overviewCenterPropertyOverride(value: Point?) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.overviewCenterPropertyOverride($value)")
         overviewCenterProperty.override = value
     }
 
@@ -634,6 +654,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun overviewZoomPropertyOverride(value: Double?) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.overviewZoomPropertyOverride($value)")
         overviewZoomProperty.override = value
     }
 
@@ -647,6 +668,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun overviewBearingPropertyOverride(value: Double?) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.overviewBearingPropertyOverride($value)")
         overviewBearingProperty.override = value
     }
 
@@ -660,6 +682,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun overviewPitchPropertyOverride(value: Double?) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.overviewPitchPropertyOverride($value)")
         overviewPitchProperty.override = value
     }
 
@@ -667,6 +690,7 @@ class MapboxNavigationViewportDataSource(
      * Helper method that clears all user-set overrides for camera properties when in following.
      */
     fun clearFollowingOverrides() {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.clearFollowingOverrides()")
         followingCenterProperty.override = null
         followingZoomProperty.override = null
         followingBearingProperty.override = null
@@ -677,6 +701,7 @@ class MapboxNavigationViewportDataSource(
      * Helper method that clears all user-set overrides for camera properties when in overview.
      */
     fun clearOverviewOverrides() {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.clearOverviewOverrides()")
         overviewCenterProperty.override = null
         overviewZoomProperty.override = null
         overviewBearingProperty.override = null
