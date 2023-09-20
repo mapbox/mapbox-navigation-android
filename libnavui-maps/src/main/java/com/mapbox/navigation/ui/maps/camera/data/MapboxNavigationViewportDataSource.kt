@@ -393,7 +393,7 @@ class MapboxNavigationViewportDataSource(
             cameraForOverview = overviewCameraOptions
         )
 
-        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.evaluate(). options: $options, resulting viewportData: $viewportData")
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.evaluate(). resulting viewportData: $viewportData")
     }
 
     /**
@@ -709,6 +709,13 @@ class MapboxNavigationViewportDataSource(
     }
 
     private fun updateFollowingData(cameraState: CameraState) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.updateFollowingData($cameraState). " +
+            "pointsToFrameOnCurrentStep: $pointsToFrameOnCurrentStep, " +
+            "targetLocation: $targetLocation, " +
+            "additionalPointsToFrameForFollowing: $additionalPointsToFrameForFollowing, " +
+            "pointsToFrameAfterCurrentStep: $pointsToFrameAfterCurrentStep"
+        )
+
         val pointsForFollowing: MutableList<Point> = pointsToFrameOnCurrentStep.toMutableList()
         val localTargetLocation = targetLocation
 
@@ -797,6 +804,12 @@ class MapboxNavigationViewportDataSource(
     }
 
     private fun updateOverviewData(cameraState: CameraState) {
+        Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.updateOverviewData($cameraState). " +
+            "simplifiedRemainingPointsOnRoute: $simplifiedRemainingPointsOnRoute, " +
+            "targetLocation: $targetLocation, " +
+            "additionalPointsToFrameForOverview: $additionalPointsToFrameForOverview"
+        )
+
         val pointsForOverview = simplifiedRemainingPointsOnRoute.toMutableList()
 
         val localTargetLocation = targetLocation
