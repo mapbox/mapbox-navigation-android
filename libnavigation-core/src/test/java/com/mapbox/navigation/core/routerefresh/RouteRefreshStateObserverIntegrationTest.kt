@@ -2,8 +2,11 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
+import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -11,12 +14,16 @@ import org.junit.Test
 internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
-    fun emptyRoutesOnDemandRefreshTest() = coroutineRule.runBlockingTest {
+    fun emptyRoutesOnDemandRefreshTest() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(100000)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
-        routeRefreshController.requestPlannedRouteRefresh(emptyList())
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(emptyList(), emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+        )
 
         testDispatcher.advanceTimeBy(100000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
@@ -32,14 +39,16 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun routeRefreshOnDemandForInvalidRoutes() = coroutineRule.runBlockingTest {
+    fun routeRefreshOnDemandForInvalidRoutes() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             enableRefresh = false
         )
         routeRefreshController = createRefreshController(50000)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
 
         testDispatcher.advanceTimeBy(50000)
 
@@ -56,7 +65,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun invalidRoutesRefreshTest() = coroutineRule.runBlockingTest {
+    fun invalidRoutesRefreshTest() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             enableRefresh = false
@@ -65,7 +74,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
 
         testDispatcher.advanceTimeBy(100000)
 
@@ -79,13 +90,15 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun successfulRefreshTest() = coroutineRule.runBlockingTest {
+    fun successfulRefreshTest() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(100000)
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(100000)
 
         assertEquals(
@@ -98,13 +111,15 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun notStartedUntilTimeElapses() = coroutineRule.runBlockingTest {
+    fun notStartedUntilTimeElapses() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(50000)
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(49999)
 
         assertEquals(
@@ -124,7 +139,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun successfulFromSecondAttemptRefreshTest() = coroutineRule.runBlockingTest {
+    fun successfulFromSecondAttemptRefreshTest() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 1
@@ -133,7 +148,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(100000)
 
         assertEquals(
@@ -146,7 +163,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun threeFailedAttemptsThenSuccessfulRefreshTest() = coroutineRule.runBlockingTest {
+    fun threeFailedAttemptsThenSuccessfulRefreshTest() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 3
@@ -155,7 +172,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(120_000)
 
         assertEquals(
@@ -169,12 +188,14 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun successfulRouteRefreshOnDemandTest() = coroutineRule.runBlockingTest {
+    fun successfulRouteRefreshOnDemandTest() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(100_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         routeRefreshController.requestImmediateRouteRefresh()
 
         assertEquals(
@@ -187,7 +208,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun failedRouteRefreshOnDemandTest() = coroutineRule.runBlockingTest {
+    fun failedRouteRefreshOnDemandTest() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 1
@@ -195,7 +216,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(100_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         routeRefreshController.requestImmediateRouteRefresh()
 
         assertEquals(
@@ -208,7 +231,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun multipleRouteRefreshesOnDemandTest() = coroutineRule.runBlockingTest {
+    fun multipleRouteRefreshesOnDemandTest() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             responseDelay = 4000
@@ -216,7 +239,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(200_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         updateProgressWithGeometryIndex(1)
         routeRefreshController.requestImmediateRouteRefresh()
         updateProgressWithGeometryIndex(2)
@@ -251,7 +276,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun routeRefreshOnDemandFailsThenPlannedTest() = coroutineRule.runBlockingTest {
+    fun routeRefreshOnDemandFailsThenPlannedTest() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 1
@@ -259,7 +284,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(50_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         routeRefreshController.requestImmediateRouteRefresh()
 
         testDispatcher.advanceTimeBy(50_000)
@@ -276,7 +303,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun routeRefreshOnDemandFailsBetweenPlannedAttemptsTest() = coroutineRule.runBlockingTest {
+    fun routeRefreshOnDemandFailsBetweenPlannedAttemptsTest() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 2
@@ -284,7 +311,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(50_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(50_000)
         routeRefreshController.requestImmediateRouteRefresh()
         testDispatcher.advanceTimeBy(50_000)
@@ -303,7 +332,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun routeRefreshDoesNotDispatchCancelledStateOnDestroyTest() = coroutineRule.runBlockingTest {
+    fun routeRefreshDoesNotDispatchCancelledStateOnDestroyTest() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 2
@@ -311,7 +340,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
         routeRefreshController = createRefreshController(50_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
 
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(80_000)
 
         routeRefreshController.destroy()
@@ -325,7 +356,7 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
     }
 
     @Test
-    fun pausingRoutesRefreshAddsCancelledState() = coroutineRule.runBlockingTest {
+    fun pausingRoutesRefreshAddsCancelledState() = runBlocking {
         val routes = setUpRoutes(
             "route_response_single_route_refresh.json",
             successfulAttemptNumber = 1,
@@ -333,7 +364,9 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
 
         routeRefreshController = createRefreshController(30_000)
         routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(40_000)
 
         routeRefreshController.pauseRouteRefreshes()

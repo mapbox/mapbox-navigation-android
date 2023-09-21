@@ -583,7 +583,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             directionsSession,
             routesProgressDataProvider,
             evDynamicDataHolder,
-            Time.SystemImpl
+            Time.SystemClockImpl
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController.registerRouteRefreshObserver {
@@ -610,6 +610,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
         registerRoutesObserver(internalRoutesObserver)
+        registerRoutesObserver(routeRefreshController)
         setUpRouteCacheClearer()
 
         roadObjectsStore = RoadObjectsStore(navigator)
@@ -1990,11 +1991,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
-    private fun createInternalRoutesObserver() = RoutesObserver { result ->
+    private fun createInternalRoutesObserver() = RoutesObserver { _ ->
         latestLegIndex = null
         routesProgressDataProvider.onNewRoutes()
-        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-        routeRefreshController.requestPlannedRouteRefresh(result.navigationRoutes)
     }
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->

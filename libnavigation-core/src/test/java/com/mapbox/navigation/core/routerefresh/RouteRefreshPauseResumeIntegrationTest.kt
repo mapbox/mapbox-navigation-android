@@ -1,7 +1,10 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -9,11 +12,13 @@ import org.junit.Test
 internal class RouteRefreshPauseResumeIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
-    fun pause_and_resume_refreshes() = coroutineRule.runBlockingTest {
+    fun pause_and_resume_refreshes() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(refreshInterval = 60_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)
-        routeRefreshController.requestPlannedRouteRefresh(routes)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
         testDispatcher.advanceTimeBy(60_000)
 
         assertEquals(1, refreshObserver.refreshes.size)
@@ -27,31 +32,36 @@ internal class RouteRefreshPauseResumeIntegrationTest : RouteRefreshIntegrationT
         testDispatcher.advanceTimeBy(60_000)
 
         assertEquals(2, refreshObserver.refreshes.size)
+
+        routeRefreshController.destroy()
     }
 
     @Test
-    fun request_new_routes_planned_refresh_when_refresh_is_paused() =
-        coroutineRule.runBlockingTest {
-            val routes = setUpRoutes("route_response_single_route_refresh.json")
-            routeRefreshController = createRefreshController(refreshInterval = 60_000)
-            routeRefreshController.registerRouteRefreshObserver(refreshObserver)
-            routeRefreshController.requestPlannedRouteRefresh(routes)
-            testDispatcher.advanceTimeBy(60_000)
+    fun request_new_routes_planned_refresh_when_refresh_is_paused() = runBlocking {
+        val routes = setUpRoutes("route_response_single_route_refresh.json")
+        routeRefreshController = createRefreshController(refreshInterval = 60_000)
+        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
+        testDispatcher.advanceTimeBy(60_000)
 
-            assertEquals(1, refreshObserver.refreshes.size)
+        assertEquals(1, refreshObserver.refreshes.size)
 
-            routeRefreshController.pauseRouteRefreshes()
-            testDispatcher.advanceTimeBy(90_000)
+        routeRefreshController.pauseRouteRefreshes()
+        testDispatcher.advanceTimeBy(90_000)
 
-            assertEquals(1, refreshObserver.refreshes.size)
+        assertEquals(1, refreshObserver.refreshes.size)
 
-            val newRoutes = setUpRoutes("route_response_route_refresh_multileg.json")
-            routeRefreshController.requestPlannedRouteRefresh(newRoutes)
+        val newRoutes = setUpRoutes("route_response_route_refresh_multileg.json")
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(newRoutes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
 
-            testDispatcher.advanceTimeBy(30_000)
-            assertEquals(1, refreshObserver.refreshes.size)
+        testDispatcher.advanceTimeBy(30_000)
+        assertEquals(1, refreshObserver.refreshes.size)
 
-            testDispatcher.advanceTimeBy(30_000)
-            assertEquals(2, refreshObserver.refreshes.size)
-        }
+        testDispatcher.advanceTimeBy(30_000)
+        assertEquals(2, refreshObserver.refreshes.size)
+    }
 }

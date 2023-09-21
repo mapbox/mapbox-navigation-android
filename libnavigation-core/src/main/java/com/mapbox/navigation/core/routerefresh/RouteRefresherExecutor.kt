@@ -1,17 +1,22 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.route.NavigationRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
+internal sealed class RoutesRefresherExecutorResult {
+
+    internal data class Finished(val value: RoutesRefresherResult) : RoutesRefresherExecutorResult()
+
+    internal object ReplacedByNewer : RoutesRefresherExecutorResult()
+}
+
 private data class QueuedRequest(
     val routes: List<NavigationRoute>,
     val startCallback: () -> Unit,
-    val finishCallback: (Expected<String, RoutesRefresherResult>) -> Unit,
+    val finishCallback: (RoutesRefresherExecutorResult) -> Unit,
 )
 
 internal class RouteRefresherExecutor(
@@ -26,7 +31,7 @@ internal class RouteRefresherExecutor(
     suspend fun executeRoutesRefresh(
         routes: List<NavigationRoute>,
         startCallback: () -> Unit,
-    ): Expected<String, RoutesRefresherResult> = suspendCancellableCoroutine { cont ->
+    ): RoutesRefresherExecutorResult = suspendCancellableCoroutine { cont ->
         cont.invokeOnCancellation {
             currentRequest = null
             queuedRequest = null
@@ -39,10 +44,10 @@ internal class RouteRefresherExecutor(
     private fun executeRoutesRefresh(
         routes: List<NavigationRoute>,
         startCallback: () -> Unit,
-        finishCallback: (Expected<String, RoutesRefresherResult>) -> Unit,
+        finishCallback: (RoutesRefresherExecutorResult) -> Unit,
     ) {
         queuedRequest?.finishCallback?.invoke(
-            ExpectedFactory.createError("Skipping request as a newer one is queued.")
+            RoutesRefresherExecutorResult.ReplacedByNewer
         )
         queuedRequest = QueuedRequest(routes, startCallback, finishCallback)
         runQueue()
@@ -60,7 +65,7 @@ internal class RouteRefresherExecutor(
                     currentRequest = null
                 }
                 runQueue()
-                localCurrentRequest.finishCallback(ExpectedFactory.createValue(result))
+                localCurrentRequest.finishCallback(RoutesRefresherExecutorResult.Finished(result))
             }
         }
     }

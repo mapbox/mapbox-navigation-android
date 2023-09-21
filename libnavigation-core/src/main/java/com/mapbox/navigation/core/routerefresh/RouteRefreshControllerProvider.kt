@@ -57,6 +57,7 @@ internal object RouteRefreshControllerProvider {
             CoroutineUtils.createScope(routeRefreshParentJob, immediateDispatcher),
             routeRefresherResultProcessor,
             routeRefreshResultAttemptProcessor,
+            timeProvider,
         )
         val immediateRouteRefreshController = ImmediateRouteRefreshController(
             routeRefresherExecutor,

@@ -1,10 +1,12 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -19,29 +21,45 @@ internal class ImmediateRouteRefreshController(
     @Throws(IllegalArgumentException::class)
     fun requestRoutesRefresh(
         routes: List<NavigationRoute>,
-        callback: (Expected<String, RoutesRefresherResult>) -> Unit
+        callback: (RoutesRefresherExecutorResult) -> Unit
     ) {
         if (routes.isEmpty()) {
             throw IllegalArgumentException("Routes to refresh should not be empty")
         }
         scope.launch {
-            val result = routeRefresherExecutor.executeRoutesRefresh(
-                routes,
-                startCallback = { stateHolder.onStarted() }
-            )
+            val result = try {
+                routeRefresherExecutor.executeRoutesRefresh(
+                    routes,
+                    startCallback = { stateHolder.onStarted() }
+                )
+            } catch (ex: CancellationException) {
+                stateHolder.onCancel()
+                throw ex
+            }
+
             callback(result)
-            result.fold(
-                { logW("Route refresh on-demand error: $it", RouteRefreshLog.LOG_CATEGORY) },
-                {
-                    attemptListener.onRoutesRefreshAttemptFinished(it)
-                    if (it.anySuccess()) {
+            when (result) {
+                is RoutesRefresherExecutorResult.ReplacedByNewer -> {
+                    logW(
+                        "Route refresh on-demand error: " +
+                            "request is skipped as a newer one is available",
+                        RouteRefreshLog.LOG_CATEGORY
+                    )
+                }
+                is RoutesRefresherExecutorResult.Finished -> {
+                    attemptListener.onRoutesRefreshAttemptFinished(result.value)
+                    if (result.value.anySuccess()) {
                         stateHolder.onSuccess()
                     } else {
                         stateHolder.onFailure(null)
                     }
-                    listener.onRoutesRefreshed(it)
+                    listener.onRoutesRefreshed(result.value)
                 }
-            )
+            }
         }
+    }
+
+    fun cancel() {
+        scope.coroutineContext.job.cancelChildren()
     }
 }

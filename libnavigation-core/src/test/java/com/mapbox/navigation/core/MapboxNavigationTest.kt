@@ -153,20 +153,26 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDispatcher() {
-        createMapboxNavigation()
-        // + 1 for navigationSession
-        // + 1 for routesCacheClearer
-        verify(exactly = 3) { directionsSession.registerSetNavigationRoutesFinishedObserver(any()) }
-    }
-
-    @Test
     fun init_registersRoutesCacheClearerAsObservers() {
         createMapboxNavigation()
         verify(exactly = 1) {
             directionsSession.registerSetNavigationRoutesFinishedObserver(routesCacheClearer)
             routesPreviewController.registerRoutesPreviewObserver(routesCacheClearer)
         }
+    }
+
+    @Test
+    fun init_registerRoutesObservers() {
+        createMapboxNavigation()
+
+        val observers = mutableListOf<RoutesObserver>()
+        coVerify(exactly = 4) {
+            directionsSession.registerSetNavigationRoutesFinishedObserver(capture(observers))
+        }
+
+        assertTrue(observers[2] === routeRefreshController)
+        observers[1].onRoutesChanged(mockk())
+        verify { routeProgressDataProvider.onNewRoutes() }
     }
 
     @Test
@@ -800,9 +806,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             it.onRoutesChanged(RoutesUpdatedResult(routes, ignoredRoutes, reason))
         }
 
-        coVerifyOrder {
+        coVerify(exactly = 1) {
             routeProgressDataProvider.onNewRoutes()
-            routeRefreshController.requestPlannedRouteRefresh(routes)
         }
     }
 
@@ -827,7 +832,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coVerify(exactly = 1) {
             routeProgressDataProvider.onNewRoutes()
         }
-        coVerify(exactly = 1) { routeRefreshController.requestPlannedRouteRefresh(emptyList()) }
     }
 
     @Test
