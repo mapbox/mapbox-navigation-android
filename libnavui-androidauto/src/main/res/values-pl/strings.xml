@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="car_action_search_favorites">Ulubione</string>
+    <string name="car_search_no_results">Brak wyników</string>
+    <string name="car_search_unknown_current_location">Nieznana aktualna lokalizacji</string>
+    <string name="car_search_unknown_search_location">Nieznana lokalizacja wyszukiwania</string>
+    <string name="car_action_preview_title">Podgląd trasy</string>
+    <string name="car_action_preview_no_location">Aktualna lokalizacja nie znaleziona</string>
+    <string name="car_action_preview_navigate_button">Kontuunuj do trasy</string>
+    <string name="car_action_navigation_stop_button">Zatrzymaj</string>
+    <string name="car_settings_title">Ustawienia</string>
+    <string name="car_settings_preload_failure_title">Nie udało się załadować ustawień</string>
+    <string name="car_settings_preload_failure_message">Spróbuj otworzyć aplikację ponownie</string>
+    <string name="car_message_location_permissions">Proszę otwórz aplikację i zaakceptuj dostęp do lokalizacji</string>
+    <string name="car_message_location_permissions_title">Potrzeba dostępu do aktualnej lokalizacji</string>
+</resources>

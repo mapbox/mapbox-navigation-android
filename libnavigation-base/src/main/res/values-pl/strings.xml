@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_unit_hr">godz.</string>
+    <string name="mapbox_unit_min">min.</string>
+    <string name="mapbox_end_navigation">Zatrzymaj Nawigację</string>
+    <string name="mapbox_navigation_is_starting">Nawigacja jest uruchamiana</string>
+    <string name="mapbox_stop_session">Zatrzymaj sesję</string>
+    <string name="mapbox_free_drive_session">Sesja jazdy</string>
+</resources>

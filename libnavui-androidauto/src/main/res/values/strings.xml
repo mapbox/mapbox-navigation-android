@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="car_action_search_favorites" translatable="false">Favorites</string>
+    <string name="car_action_search_favorites">Favorites</string>
     <string name="car_search_no_results">No results</string>
     <string name="car_search_unknown_current_location">Unknown current location</string>
     <string name="car_search_unknown_search_location">Unknown search location</string>
     <string name="car_label_ok">OK</string>
 
-    <string name="car_action_preview_title" translatable="false">Route preview</string>
-    <string name="car_action_preview_no_location" translatable="false">Current location not found</string>
-    <string name="car_action_preview_navigate_button" translatable="false">Continue to route</string>
+    <string name="car_action_preview_title">Route preview</string>
+    <string name="car_action_preview_no_location">Current location not found</string>
+    <string name="car_action_preview_navigate_button">Continue to route</string>
 
-    <string name="car_action_navigation_stop_button" translatable="false">Stop</string>
+    <string name="car_action_navigation_stop_button">Stop</string>
 
-    <string name="car_settings_title" translatable="false">Settings</string>
+    <string name="car_settings_title">Settings</string>
     <string name="car_settings_toggle_place_holder" translatable="false">Settings place holder</string>
     <string name="car_settings_toggle_place_holder_key" translatable="false">settings_place_holder</string>
     <string name="car_settings_preload_failure_title">Failed to pre-load settings</string>
