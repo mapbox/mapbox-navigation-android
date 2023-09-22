@@ -6,6 +6,33 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.17.0-beta.1 - 22 September, 2023
+### Changelog
+[Changes between v2.16.0 and v2.17.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.16.0...v2.17.0-beta.1)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Improved navigation positioning in tunnels. [#7514](https://github.com/mapbox/mapbox-navigation-android/pull/7514)
+- Fixed an issue where route refresh interval might have been too long in case of a specific alternatives update rate.  [#7497](https://github.com/mapbox/mapbox-navigation-android/pull/7497)
+- Map-matching improvement in dead-reckoning. [#7531](https://github.com/mapbox/mapbox-navigation-android/pull/7531)
+- Report Off-Route if LocationOnLeg legIndex is greater than current route leg. [#7531](https://github.com/mapbox/mapbox-navigation-android/pull/7531)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.0))
+- Mapbox Navigation Native `v158.0.0`
+- Mapbox Core Common `v23.8.0`
+- Mapbox Java `v6.13.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0))
+
+
 ## Mapbox Navigation SDK 2.16.0 - 15 September, 2023
 ### Changelog
 [Changes between v2.15.0 and v2.16.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.0...v2.16.0)
