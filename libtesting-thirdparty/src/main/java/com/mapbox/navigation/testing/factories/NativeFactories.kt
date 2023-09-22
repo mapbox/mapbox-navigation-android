@@ -6,6 +6,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigator.ActiveGuidanceInfo
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
+import com.mapbox.navigator.CorrectedLocationData
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.MapMatcherOutput
 import com.mapbox.navigator.NavigationStatus
@@ -19,7 +20,6 @@ import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
-import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
@@ -34,7 +34,6 @@ fun createNavigationStatus(
     primaryRouteId: String? = null,
     stale: Boolean = false,
     location: FixLocation = createFixedLocation(),
-    routeSequenceNumber: Int = 0,
     routeIndex: Int = 0,
     legIndex: Int = 0,
     stepIndex: Int = 0,
@@ -59,7 +58,8 @@ fun createNavigationStatus(
     nextWaypointIndex: Int = 0,
     layer: Int = 0,
     alternativeRouteIndices: List<RouteIndices> = emptyList(),
-    isSyntheticLocation: Boolean = false
+    isSyntheticLocation: Boolean = false,
+    correctedLocationData: CorrectedLocationData? = null,
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
@@ -90,7 +90,8 @@ fun createNavigationStatus(
         upcomingRouteAlertUpdates,
         nextWaypointIndex,
         layer,
-        isSyntheticLocation
+        isSyntheticLocation,
+        correctedLocationData
     )
 }
 

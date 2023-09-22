@@ -121,7 +121,5 @@ class NavigatorTest {
         null,
         null,
         null,
-        null,
-        null,
     )
 }
