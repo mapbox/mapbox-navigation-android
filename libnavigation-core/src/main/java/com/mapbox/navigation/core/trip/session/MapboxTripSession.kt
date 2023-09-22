@@ -117,6 +117,13 @@ internal class MapboxTripSession(
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
                 )
             }
+            is SetRoutes.Reorder -> {
+                setRouteToNativeNavigator(
+                    routes,
+                    setRoutes.initialLegIndex(),
+                    SetRoutesReason.ALTERNATIVE
+                )
+            }
             is SetRoutes.RefreshRoutes -> {
                 if (routes.isNotEmpty()) {
                     val primaryRoute = routes.first()

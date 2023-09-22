@@ -1862,6 +1862,30 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun `setNavigationRoutes alternative for changed primary route`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        val route1 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id1"
+        }
+        val route2 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id2"
+        }
+        val route3 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id3"
+        }
+        every { directionsSession.routes } returns listOf(route1, route2, route3)
+
+        mapboxNavigation.setNavigationRoutes(listOf(route2, route1, route3))
+
+        coVerify(exactly = 1) {
+            tripSession.setRoutes(any(), eq(SetRoutes.Reorder(0)))
+        }
+        verify(exactly = 1) {
+            directionsSession.setNavigationRoutesFinished(any())
+        }
+    }
+
+    @Test
     fun `setNavigationRoutes new routes`() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         val route1 = mockk<NavigationRoute>(relaxed = true) {
