@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
+import com.mapbox.navigation.base.route.LatestRouteRefresh
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -254,10 +255,10 @@ class RouterWrapper(
                         )
                     }
                 },
-                {
+                { directionsResponse ->
                     mainJobControl.scope.launch {
                         withContext(ThreadController.DefaultDispatcher) {
-                            parseDirectionsRouteRefresh(it)
+                            parseDirectionsRouteRefresh(directionsResponse)
                                 .onValue {
                                     logD(
                                         "Parsed route refresh response for route(${route.id})",
@@ -292,12 +293,17 @@ class RouterWrapper(
                                         refreshTtl = routeRefresh.unrecognizedJsonProperties
                                             ?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
                                     )
+                                    route.latestRouteRefresh = LatestRouteRefresh(
+                                        geometryIndex = routeRefreshRequestData.routeGeometryIndex,
+                                        directionsResponse
+                                    )
+                                    route
                                 }
                         }.fold(
                             { throwable ->
                                 callback.onFailure(
                                     RouterFactory.buildNavigationRouterRefreshError(
-                                        "failed for response: $it",
+                                        "failed for response: $directionsResponse",
                                         throwable,
                                     )
                                 )

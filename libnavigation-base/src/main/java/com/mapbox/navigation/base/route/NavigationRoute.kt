@@ -37,6 +37,11 @@ import java.io.InputStreamReader
 import java.net.URL
 import java.nio.ByteBuffer
 
+data class LatestRouteRefresh(
+    val geometryIndex: Int,
+    val directionsApiResponse: String
+)
+
 /**
  * Wraps a route object used across the Navigation SDK features.
  * @param directionsResponse the original response that returned this route object.
@@ -51,7 +56,8 @@ class NavigationRoute internal constructor(
     internal val nativeRoute: RouteInterface,
     internal val unavoidableClosures: List<List<Closure>>,
     internal var expirationTimeElapsedSeconds: Long?,
-) {
+    var latestRouteRefresh: LatestRouteRefresh? = null,
+    ) {
 
     internal constructor(
         directionsResponse: DirectionsResponse,
