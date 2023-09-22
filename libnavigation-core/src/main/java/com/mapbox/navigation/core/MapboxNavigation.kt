@@ -2133,8 +2133,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.routingTilesOptions.tileStore,
             null,
             null,
-            null,
-            THREADS_COUNT,
             TileEndpointConfiguration(
                 navigationOptions.routingTilesOptions.tilesBaseUri.toString(),
                 dataset,
@@ -2174,8 +2172,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         private var hasInstance = false
 
         private const val LOG_CATEGORY = "MapboxNavigation"
-        private const val USER_AGENT: String = "MapboxNavigationNative"
-        private const val THREADS_COUNT = 2
         private const val ONE_SECOND_IN_MILLIS = 1000.0
     }
 }
