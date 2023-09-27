@@ -43,6 +43,8 @@ import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.accounts.BillingController
+import com.mapbox.navigation.core.sensor.SensorData
+import com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -1959,6 +1961,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeAlternativesController.onEVDataUpdated(
             HashMap(evDynamicDataHolder.currentData(emptyMap()))
         )
+    }
+
+    /**
+     * Asynchronously passes in the current sensor data of the user.
+     *
+     * @param data The current sensor data of user
+     * @param callback Callback which is called when the async operation is completed
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun updateExternalSensorData(data: SensorData, callback: UpdateExternalSensorDataCallback) {
+        navigator.updateExternalSensorData(data.toNativeSensorData()) {
+            result -> callback.onResult(result)
+        }
     }
 
     internal fun registerOnRoutesSetStartedObserver(observer: SetNavigationRoutesStartedObserver) {
