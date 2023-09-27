@@ -82,8 +82,10 @@ package com.mapbox.navigation.core {
     method public void requestRoadGraphDataUpdate(com.mapbox.navigation.core.RoadGraphDataUpdateCallback callback);
     method @Deprecated public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterCallback routesRequestCallback);
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.NavigationRouterCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void resetAdasisMessageCallback();
     method @Deprecated public void resetTripSession();
     method public void resetTripSession(com.mapbox.navigation.core.TripSessionResetCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setAdasisMessageCallback(com.mapbox.navigation.core.adasis.AdasisConfig adasisConfig, com.mapbox.navigation.core.adasis.ADASISv2MessageCallback callback);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
@@ -120,6 +122,7 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void updateExternalSensorData(com.mapbox.navigation.core.sensor.SensorData data, com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback callback);
     property public final com.mapbox.navigation.core.EtcGateApi etcGateAPI;
     property public final com.mapbox.navigator.Experimental experimental;
     property public final com.mapbox.navigation.core.trip.session.eh.GraphAccessor graphAccessor;
@@ -142,6 +145,12 @@ package com.mapbox.navigation.core {
     method @Deprecated public static boolean isCreated();
     method @Deprecated public static com.mapbox.navigation.core.MapboxNavigation retrieve();
     field @Deprecated public static final com.mapbox.navigation.core.MapboxNavigationProvider INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationSdkInformationProvider {
+    method public String getVersionName();
+    property public final String versionName;
+    field public static final com.mapbox.navigation.core.NavigationSdkInformationProvider INSTANCE;
   }
 
   public interface NavigationVersionSwitchObserver {
@@ -185,6 +194,214 @@ package com.mapbox.navigation.core {
 
   public fun interface TripSessionResetCallback {
     method public void onTripSessionReset();
+  }
+
+}
+
+package com.mapbox.navigation.core.adasis {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface ADASISv2MessageCallback {
+    method public void onMessage(java.util.List<java.lang.Byte> messageBuffer);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfig {
+    method public com.mapbox.navigation.core.adasis.AdasisConfigDataSending getDataSending();
+    method public com.mapbox.navigation.core.adasis.AdasisConfigPathOptions getPathOptions();
+    property public final com.mapbox.navigation.core.adasis.AdasisConfigDataSending dataSending;
+    property public final com.mapbox.navigation.core.adasis.AdasisConfigPathOptions pathOptions;
+  }
+
+  public static final class AdasisConfig.Builder {
+    ctor public AdasisConfig.Builder();
+    method public com.mapbox.navigation.core.adasis.AdasisConfig build();
+    method public com.mapbox.navigation.core.adasis.AdasisConfig.Builder dataSending(com.mapbox.navigation.core.adasis.AdasisConfigDataSending dataSending);
+    method public com.mapbox.navigation.core.adasis.AdasisConfig.Builder pathOptions(com.mapbox.navigation.core.adasis.AdasisConfigPathOptions pathsOptions);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigDataSending {
+    ctor public AdasisConfigDataSending(com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat messageBinaryFormat, int messageIntervalMs = 80, int messagesInPackage = 20, int metadataCycleSeconds = 5, boolean enableRetransmission = true, int retransmissionMeters = 300);
+    method public boolean getEnableRetransmission();
+    method public com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat getMessageBinaryFormat();
+    method public int getMessageIntervalMs();
+    method public int getMessagesInPackage();
+    method public int getMetadataCycleSeconds();
+    method public int getRetransmissionMeters();
+    property public final boolean enableRetransmission;
+    property public final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat messageBinaryFormat;
+    property public final int messageIntervalMs;
+    property public final int messagesInPackage;
+    property public final int metadataCycleSeconds;
+    property public final int retransmissionMeters;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigMessageOptions {
+    ctor public AdasisConfigMessageOptions(boolean enable = true, int radiusMeters = 2000);
+    method public boolean getEnable();
+    method public int getRadiusMeters();
+    property public final boolean enable;
+    property public final int radiusMeters;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigPathOptions {
+    ctor public AdasisConfigPathOptions(com.mapbox.navigation.core.adasis.Stub stub, com.mapbox.navigation.core.adasis.Segment segment, com.mapbox.navigation.core.adasis.ProfileShort profileShort, com.mapbox.navigation.core.adasis.ProfileLong profileLong);
+    method public com.mapbox.navigation.core.adasis.ProfileLong getProfileLong();
+    method public com.mapbox.navigation.core.adasis.ProfileShort getProfileShort();
+    method public com.mapbox.navigation.core.adasis.Segment getSegment();
+    method public com.mapbox.navigation.core.adasis.Stub getStub();
+    property public final com.mapbox.navigation.core.adasis.ProfileLong profileLong;
+    property public final com.mapbox.navigation.core.adasis.ProfileShort profileShort;
+    property public final com.mapbox.navigation.core.adasis.Segment segment;
+    property public final com.mapbox.navigation.core.adasis.Stub stub;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigProfileLongTypeOptions {
+    ctor public AdasisConfigProfileLongTypeOptions(boolean lat = true, boolean lon = true, boolean trafficSign = false);
+    method public boolean getLat();
+    method public boolean getLon();
+    method public boolean getTrafficSign();
+    property public final boolean lat;
+    property public final boolean lon;
+    property public final boolean trafficSign;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigProfileShortTypeOptions {
+    ctor public AdasisConfigProfileShortTypeOptions(boolean slopeStep = false, boolean curvature = true, boolean roadCondition = true, boolean variableSpeedSign = false, boolean headingChange = true);
+    method public boolean getCurvature();
+    method public boolean getHeadingChange();
+    method public boolean getRoadCondition();
+    method public boolean getSlopeStep();
+    method public boolean getVariableSpeedSign();
+    property public final boolean curvature;
+    property public final boolean headingChange;
+    property public final boolean roadCondition;
+    property public final boolean slopeStep;
+    property public final boolean variableSpeedSign;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class AdasisMessageBinaryFormat {
+    ctor public AdasisMessageBinaryFormat();
+  }
+
+  public static final class AdasisMessageBinaryFormat.AdasisV2BigEndian extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.AdasisV2BigEndian INSTANCE;
+  }
+
+  public static final class AdasisMessageBinaryFormat.AdasisV2LittleEndian extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.AdasisV2LittleEndian INSTANCE;
+  }
+
+  public static final class AdasisMessageBinaryFormat.FlatBuffers extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.FlatBuffers INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class EdgeAdasAttributes {
+    method public java.util.List<com.mapbox.navigation.core.adasis.ValueOnEdge> getCurvatures();
+    method public java.util.List<com.mapbox.navigation.core.adasis.ValueOnEdge> getSlopes();
+    method public java.util.List<com.mapbox.navigation.core.adasis.SpeedLimitInfo> getSpeedLimit();
+    property public final java.util.List<com.mapbox.navigation.core.adasis.ValueOnEdge> curvatures;
+    property public final java.util.List<com.mapbox.navigation.core.adasis.ValueOnEdge> slopes;
+    property public final java.util.List<com.mapbox.navigation.core.adasis.SpeedLimitInfo> speedLimit;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ProfileLong {
+    ctor public ProfileLong(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options, com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions types);
+    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
+    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions getTypes();
+    property public final com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options;
+    property public final com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions types;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ProfileShort {
+    ctor public ProfileShort(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options, com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions types);
+    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
+    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions getTypes();
+    property public final com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options;
+    property public final com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions types;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class Segment {
+    ctor public Segment(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options);
+    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
+    property public final com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SpeedLimitInfo {
+    method public com.mapbox.navigation.core.adasis.SpeedLimitRestriction getRestriction();
+    method public com.mapbox.navigation.base.speed.model.SpeedUnit getSpeedUnit();
+    method public com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type getType();
+    method public int getValue();
+    property public final com.mapbox.navigation.core.adasis.SpeedLimitRestriction restriction;
+    property public final com.mapbox.navigation.base.speed.model.SpeedUnit speedUnit;
+    property public final com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type type;
+    property public final int value;
+  }
+
+  public abstract static class SpeedLimitInfo.Type {
+  }
+
+  public static final class SpeedLimitInfo.Type.Explicit extends com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type.Explicit INSTANCE;
+  }
+
+  public static final class SpeedLimitInfo.Type.Implicit extends com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type.Implicit INSTANCE;
+  }
+
+  public static final class SpeedLimitInfo.Type.Prolonged extends com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type.Prolonged INSTANCE;
+  }
+
+  public static final class SpeedLimitInfo.Type.Unknown extends com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type.Unknown INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SpeedLimitRestriction {
+    method public String getDateTimeCondition();
+    method public java.util.List<java.lang.Byte> getLanes();
+    method public java.util.List<com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType> getVehicleTypes();
+    method public java.util.List<com.mapbox.navigation.core.sensor.SensorData.Weather.Condition> getWeather();
+    property public final String dateTimeCondition;
+    property public final java.util.List<java.lang.Byte> lanes;
+    property public final java.util.List<com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType> vehicleTypes;
+    property public final java.util.List<com.mapbox.navigation.core.sensor.SensorData.Weather.Condition> weather;
+  }
+
+  public abstract static class SpeedLimitRestriction.VehicleType {
+  }
+
+  public static final class SpeedLimitRestriction.VehicleType.Bus extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType.Bus INSTANCE;
+  }
+
+  public static final class SpeedLimitRestriction.VehicleType.Car extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType.Car INSTANCE;
+  }
+
+  public static final class SpeedLimitRestriction.VehicleType.Motorcycle extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType.Motorcycle INSTANCE;
+  }
+
+  public static final class SpeedLimitRestriction.VehicleType.Trailer extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType.Trailer INSTANCE;
+  }
+
+  public static final class SpeedLimitRestriction.VehicleType.Truck extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType.Truck INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class Stub {
+    ctor public Stub(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options);
+    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
+    property public final com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ValueOnEdge {
+    method public double getPercentAlong();
+    method public float getShapeIndex();
+    method public double getValue();
+    property public final double percentAlong;
+    property public final float shapeIndex;
+    property public final double value;
   }
 
 }
@@ -986,6 +1203,50 @@ package com.mapbox.navigation.core.routerefresh {
 
 }
 
+package com.mapbox.navigation.core.sensor {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class SensorData {
+  }
+
+  public static final class SensorData.Lane extends com.mapbox.navigation.core.sensor.SensorData {
+    ctor public SensorData.Lane(int currentLaneIndex, int laneCount);
+    method public int getCurrentLaneIndex();
+    method public int getLaneCount();
+    property public final int currentLaneIndex;
+    property public final int laneCount;
+  }
+
+  public static final class SensorData.Weather extends com.mapbox.navigation.core.sensor.SensorData {
+    ctor public SensorData.Weather(com.mapbox.navigation.core.sensor.SensorData.Weather.Condition condition);
+    method public com.mapbox.navigation.core.sensor.SensorData.Weather.Condition getCondition();
+    property public final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition condition;
+  }
+
+  public abstract static class SensorData.Weather.Condition {
+  }
+
+  public static final class SensorData.Weather.Condition.Fog extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.Fog INSTANCE;
+  }
+
+  public static final class SensorData.Weather.Condition.Rain extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.Rain INSTANCE;
+  }
+
+  public static final class SensorData.Weather.Condition.Snow extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.Snow INSTANCE;
+  }
+
+  public static final class SensorData.Weather.Condition.WetRoad extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.WetRoad INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface UpdateExternalSensorDataCallback {
+    method public void onResult(boolean result);
+  }
+
+}
+
 package com.mapbox.navigation.core.telemetry {
 
   public final class MapboxNavigationTelemetryKt {
@@ -1239,6 +1500,7 @@ package com.mapbox.navigation.core.trip.session.eh {
   }
 
   public final class GraphAccessor {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.adasis.EdgeAdasAttributes? getAdasAttributes(long edgeId);
     method public com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata? getEdgeMetadata(long edgeId);
     method public java.util.List<com.mapbox.geojson.Point>? getEdgeShape(long edgeId);
     method public com.mapbox.geojson.Point? getGraphPositionCoordinate(com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition graphPosition);

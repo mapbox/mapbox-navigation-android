@@ -44,6 +44,8 @@ import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.accounts.BillingController
+import com.mapbox.navigation.core.adasis.ADASISv2MessageCallback
+import com.mapbox.navigation.core.adasis.AdasisConfig
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -92,6 +94,8 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCall
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
+import com.mapbox.navigation.core.sensor.SensorData
+import com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
@@ -1303,6 +1307,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
+        resetAdasisMessageCallback()
 
         isDestroyed = true
         hasInstance = false
@@ -1977,6 +1982,43 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeAlternativesController.onEVDataUpdated(
             HashMap(evDynamicDataHolder.currentData(emptyMap()))
         )
+    }
+
+    /**
+     * Asynchronously passes in the current sensor data of the user.
+     *
+     * @param data The current sensor data of user
+     * @param callback Callback which is called when the async operation is completed
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun updateExternalSensorData(data: SensorData, callback: UpdateExternalSensorDataCallback) {
+        navigator.updateExternalSensorData(data.toNativeSensorData()) {
+            callback.onResult(it)
+        }
+    }
+
+    /**
+     * Sets a callback for ADASIS messages
+     *
+     * @param callback Message callback
+     * @param adasisConfig Adasis config
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun setAdasisMessageCallback(adasisConfig: AdasisConfig, callback: ADASISv2MessageCallback) {
+        navigator.setAdasisMessageCallback(
+            { message ->
+                callback.onMessage(message)
+            },
+            adasisConfig.toNativeAdasisConfig()
+        )
+    }
+
+    /**
+     * Resets a callback for ADASIS messages
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun resetAdasisMessageCallback() {
+        navigator.resetAdasisMessageCallback()
     }
 
     internal fun registerOnRoutesSetStartedObserver(observer: SetNavigationRoutesStartedObserver) {

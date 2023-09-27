@@ -8,6 +8,8 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigator.ADASISv2MessageCallback
+import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
@@ -25,8 +27,10 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouterInterface
+import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
+import com.mapbox.navigator.UpdateExternalSensorDataCallback
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
@@ -179,6 +183,25 @@ interface MapboxNativeNavigator {
     fun createNavigationPredictiveCacheController(
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController
+
+    /**
+     * Asynchronously passes in the current sensor data of the user.
+     * The callback is scheduled using the `common::Scheduler` of the thread calling the `Navigator` constructor.
+     *
+     * @param data The current sensor data of user.
+     * @param callback Callback which is called when the async operation is completed
+     */
+    fun updateExternalSensorData(data: SensorData, callback: UpdateExternalSensorDataCallback)
+
+    /**
+     * Sets a callback for ADASIS messages
+     */
+    fun setAdasisMessageCallback(callback: ADASISv2MessageCallback, adasisConfig: AdasisConfig)
+
+    /**
+     * Resets a callback for ADASIS messages
+     */
+    fun resetAdasisMessageCallback()
 
     val routeAlternativesController: RouteAlternativesControllerInterface
 

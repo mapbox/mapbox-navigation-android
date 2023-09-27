@@ -18,6 +18,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigator.ADASISv2MessageCallback
+import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
@@ -40,9 +42,11 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouterInterface
+import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
+import com.mapbox.navigator.UpdateExternalSensorDataCallback
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
@@ -411,4 +415,22 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS,
             0
         )
+
+    override fun updateExternalSensorData(
+        data: SensorData,
+        callback: UpdateExternalSensorDataCallback,
+    ) {
+        navigator!!.updateExternalSensorData(data, callback)
+    }
+
+    override fun setAdasisMessageCallback(
+        callback: ADASISv2MessageCallback,
+        adasisConfig: AdasisConfig,
+    ) {
+        navigator!!.setAdasisMessageCallback(callback, adasisConfig)
+    }
+
+    override fun resetAdasisMessageCallback() {
+        navigator!!.resetAdasisMessageCallback()
+    }
 }
