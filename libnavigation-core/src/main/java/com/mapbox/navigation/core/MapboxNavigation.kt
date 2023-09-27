@@ -43,8 +43,6 @@ import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.accounts.BillingController
-import com.mapbox.navigation.core.sensor.SensorData
-import com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -93,6 +91,8 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCall
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
+import com.mapbox.navigation.core.sensor.SensorData
+import com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
@@ -136,6 +136,8 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import com.mapbox.navigator.ADASISv2MessageCallback
+import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonOptions
@@ -1972,8 +1974,29 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     fun updateExternalSensorData(data: SensorData, callback: UpdateExternalSensorDataCallback) {
         navigator.updateExternalSensorData(data.toNativeSensorData()) {
-            result -> callback.onResult(result)
+            callback.onResult(it)
         }
+    }
+
+    /**
+     * TODO use platform types?
+     *
+     * Sets a callback for ADASIS messages
+     *
+     * @param callback Message callback
+     * @param adasisConfig Adasis config
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun setAdasisMessageCallback(callback: ADASISv2MessageCallback, adasisConfig: AdasisConfig) {
+        navigator.setAdasisMessageCallback(callback, adasisConfig)
+    }
+
+    /**
+     * Resets a callback for ADASIS messages
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun resetAdasisMessageCallback() {
+        navigator.resetAdasisMessageCallback()
     }
 
     internal fun registerOnRoutesSetStartedObserver(observer: SetNavigationRoutesStartedObserver) {

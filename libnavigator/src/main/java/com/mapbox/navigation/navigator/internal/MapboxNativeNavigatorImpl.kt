@@ -394,4 +394,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     ) {
         navigator!!.updateExternalSensorData(data, callback)
     }
+
+    override fun setAdasisMessageCallback(callback: ADASISv2MessageCallback, adasisConfig: AdasisConfig) {
+        navigator!!.setAdasisMessageCallback(callback, adasisConfig)
+    }
+
+    override fun resetAdasisMessageCallback() {
+        navigator!!.resetAdasisMessageCallback()
+    }
 }

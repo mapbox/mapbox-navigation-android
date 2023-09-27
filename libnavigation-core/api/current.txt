@@ -82,8 +82,10 @@ package com.mapbox.navigation.core {
     method public void requestRoadGraphDataUpdate(com.mapbox.navigation.core.RoadGraphDataUpdateCallback callback);
     method @Deprecated public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterCallback routesRequestCallback);
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.NavigationRouterCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void resetAdasisMessageCallback();
     method @Deprecated public void resetTripSession();
     method public void resetTripSession(com.mapbox.navigation.core.TripSessionResetCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setAdasisMessageCallback(com.mapbox.navigator.ADASISv2MessageCallback callback, com.mapbox.navigator.AdasisConfig adasisConfig);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
@@ -120,6 +122,7 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void updateExternalSensorData(com.mapbox.navigation.core.sensor.SensorData data, com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback callback);
     property public final com.mapbox.navigation.core.EtcGateApi etcGateAPI;
     property public final com.mapbox.navigator.Experimental experimental;
     property public final com.mapbox.navigation.core.trip.session.eh.GraphAccessor graphAccessor;
@@ -950,7 +953,8 @@ package com.mapbox.navigation.core.routeoptions {
 
 package com.mapbox.navigation.core.routerefresh {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteRefreshController {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteRefreshController implements com.mapbox.navigation.core.directions.session.RoutesObserver {
+    method public void onRoutesChanged(com.mapbox.navigation.core.directions.session.RoutesUpdatedResult result);
     method public void pauseRouteRefreshes();
     method public void registerRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
     method public void requestImmediateRouteRefresh();
@@ -979,6 +983,50 @@ package com.mapbox.navigation.core.routerefresh {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface RouteRefreshStatesObserver {
     method public void onNewState(com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult result);
+  }
+
+}
+
+package com.mapbox.navigation.core.sensor {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class SensorData {
+  }
+
+  public static final class SensorData.Lane extends com.mapbox.navigation.core.sensor.SensorData {
+    ctor public SensorData.Lane(int currentLaneIndex, int laneCount);
+    method public int getCurrentLaneIndex();
+    method public int getLaneCount();
+    property public final int currentLaneIndex;
+    property public final int laneCount;
+  }
+
+  public static final class SensorData.Weather extends com.mapbox.navigation.core.sensor.SensorData {
+    ctor public SensorData.Weather(com.mapbox.navigation.core.sensor.SensorData.Weather.Condition condition);
+    method public com.mapbox.navigation.core.sensor.SensorData.Weather.Condition getCondition();
+    property public final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition condition;
+  }
+
+  public abstract static sealed class SensorData.Weather.Condition {
+  }
+
+  public static final class SensorData.Weather.Condition.Fog extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.Fog INSTANCE;
+  }
+
+  public static final class SensorData.Weather.Condition.Rain extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.Rain INSTANCE;
+  }
+
+  public static final class SensorData.Weather.Condition.Snow extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.Snow INSTANCE;
+  }
+
+  public static final class SensorData.Weather.Condition.WetRoad extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.WetRoad INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface UpdateExternalSensorDataCallback {
+    method public void onResult(boolean result);
   }
 
 }

@@ -116,7 +116,6 @@ sealed class SensorData {
     }
 
     internal fun toNativeSensorData(): com.mapbox.navigator.SensorData {
-
         /**
          * NN requires [com.mapbox.navigator.SensorData.monotonicTimestampNanoseconds] to be based
          * on the same source as [com.mapbox.navigator.FixLocation.monotonicTimestampNanoseconds],
@@ -126,7 +125,7 @@ sealed class SensorData {
          */
         val elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
 
-        val (type, value) = when(this) {
+        val (type, value) = when (this) {
             is Weather -> {
                 SensorType.WEATHER to toValue()
             }
@@ -138,7 +137,7 @@ sealed class SensorData {
     }
 
     private fun Weather.toValue(): Value {
-        val order: Long = when(condition) {
+        val order: Long = when (condition) {
             is Weather.Condition.Rain -> 0
             is Weather.Condition.Snow -> 1
             is Weather.Condition.Fog -> 2

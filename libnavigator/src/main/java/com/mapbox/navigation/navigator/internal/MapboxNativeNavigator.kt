@@ -171,6 +171,16 @@ interface MapboxNativeNavigator {
      */
     fun updateExternalSensorData(data: SensorData, callback: UpdateExternalSensorDataCallback)
 
+    /**
+     * Sets a callback for ADASIS messages
+     */
+    fun setAdasisMessageCallback(callback: ADASISv2MessageCallback, adasisConfig: AdasisConfig)
+
+    /**
+     * Resets a callback for ADASIS messages
+     */
+    fun resetAdasisMessageCallback()
+
     val routeAlternativesController: RouteAlternativesControllerInterface
 
     val graphAccessor: GraphAccessor?
