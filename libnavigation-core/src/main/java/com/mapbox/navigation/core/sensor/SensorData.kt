@@ -9,7 +9,7 @@ import com.mapbox.navigator.SensorType
  * Data obtained from sensors
  */
 @ExperimentalPreviewMapboxNavigationAPI
-sealed class SensorData {
+abstract class SensorData internal constructor() {
 
     /**
      * Weather condition obtained from sensors
@@ -49,7 +49,7 @@ sealed class SensorData {
         /**
          * Weather condition type.
          */
-        sealed class Condition {
+        abstract class Condition internal constructor() {
 
             /**
              * Rain weather condition
@@ -127,6 +127,7 @@ sealed class SensorData {
             is Lane -> {
                 SensorType.LANE to toValue()
             }
+            else -> error("Unsupported type: $javaClass")
         }
         return com.mapbox.navigator.SensorData(type, elapsedRealtimeNanos, value)
     }
@@ -136,6 +137,7 @@ sealed class SensorData {
             is Weather.Condition.Rain -> 0
             is Weather.Condition.Snow -> 1
             is Weather.Condition.Fog -> 2
+            else -> error("Unsupported weather condition type: $condition")
         }
         return Value.valueOf(order)
     }

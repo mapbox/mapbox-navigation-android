@@ -989,7 +989,7 @@ package com.mapbox.navigation.core.routerefresh {
 
 package com.mapbox.navigation.core.sensor {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class SensorData {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class SensorData {
   }
 
   public static final class SensorData.Lane extends com.mapbox.navigation.core.sensor.SensorData {
@@ -1006,7 +1006,7 @@ package com.mapbox.navigation.core.sensor {
     property public final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition condition;
   }
 
-  public abstract static sealed class SensorData.Weather.Condition {
+  public abstract static class SensorData.Weather.Condition {
   }
 
   public static final class SensorData.Weather.Condition.Fog extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
