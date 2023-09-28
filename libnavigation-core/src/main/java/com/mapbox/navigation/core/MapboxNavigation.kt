@@ -1290,6 +1290,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
+        resetAdasisMessageCallback()
 
         isDestroyed = true
         hasInstance = false
