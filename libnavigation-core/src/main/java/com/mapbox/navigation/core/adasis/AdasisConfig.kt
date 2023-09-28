@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param pathsOptions ADASISv2 path level specific configurations
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfig(
+class AdasisConfig private constructor(
     val cycleTimes: AdasisConfigCycleTimes,
     val dataSending: AdasisConfigDataSending,
     val pathsOptions: AdasisConfigPathsConfigs,
@@ -60,5 +60,64 @@ class AdasisConfig(
             "dataSending=$dataSending, " +
             "pathsOptions=$pathsOptions" +
             ")"
+    }
+
+    /**
+     * Builder for [AdasisConfig]
+     */
+    class Builder {
+
+        private var cycleTimes: AdasisConfigCycleTimes = AdasisConfigCycleTimes()
+        private var dataSending: AdasisConfigDataSending = AdasisConfigDataSending()
+        private var pathsOptions: AdasisConfigPathsConfigs = AdasisConfigPathsConfigs(
+            mpp = AdasisConfigPathLevelOptions(
+                Stub(AdasisConfigMessageOptions()),
+                Segment(AdasisConfigMessageOptions()),
+                ProfileShort(AdasisConfigMessageOptions(), AdasisConfigProfileShortTypeOptions()),
+                ProfileLong(AdasisConfigMessageOptions(), AdasisConfigProfileLongTypeOptions())
+            ),
+            level1 = AdasisConfigPathLevelOptions(
+                Stub(AdasisConfigMessageOptions()),
+                Segment(AdasisConfigMessageOptions()),
+                ProfileShort(AdasisConfigMessageOptions(), AdasisConfigProfileShortTypeOptions()),
+                ProfileLong(AdasisConfigMessageOptions(), AdasisConfigProfileLongTypeOptions())
+            ),
+            level2 = AdasisConfigPathLevelOptions(
+                Stub(AdasisConfigMessageOptions()),
+                Segment(AdasisConfigMessageOptions()),
+                ProfileShort(AdasisConfigMessageOptions(), AdasisConfigProfileShortTypeOptions()),
+                ProfileLong(AdasisConfigMessageOptions(), AdasisConfigProfileLongTypeOptions())
+            ),
+        )
+
+        /**
+         * Mmessage generation cycle times configuration
+         */
+        fun cycleTimes(cycleTimes: AdasisConfigCycleTimes) = apply {
+            this.cycleTimes = cycleTimes
+        }
+
+        /**
+         * Data sending configuration
+         */
+        fun dataSending(dataSending: AdasisConfigDataSending) = apply {
+            this.dataSending = dataSending
+        }
+
+        /**
+         * ADASISv2 path level specific configurations
+         */
+        fun pathsOptions(pathsOptions: AdasisConfigPathsConfigs) = apply {
+            this.pathsOptions = pathsOptions
+        }
+
+        /**
+         * Build the [AdasisConfig]
+         */
+        fun build() = AdasisConfig(
+            cycleTimes = cycleTimes,
+            dataSending = dataSending,
+            pathsOptions = pathsOptions
+        )
     }
 }

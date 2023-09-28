@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * Callback which is getting called to report ADASISv2Message
  */
 @ExperimentalPreviewMapboxNavigationAPI
-interface ADASISv2MessageCallback {
+fun interface ADASISv2MessageCallback {
 
     /**
      * Called when ADASIS message is available

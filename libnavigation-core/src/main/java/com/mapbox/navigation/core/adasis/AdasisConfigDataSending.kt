@@ -4,20 +4,21 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
  * Data sending configuration
- * * @param messageIntervalMs interval between sending messages in milliseconds
+ *
+ * @param messageIntervalMs interval between sending messages in milliseconds
  * @param messagesInPackage number of messages in one package (one message is 8 bytes)
- * @param sortProfileshortsByOffset if true, profileshorts will be sorted by offset
- * @param sortProfilelongsByOffset if true, profilelongs will be sorted by offset
+ * @param sortProfileShortsByOffset if true, profile shorts will be sorted by offset
+ * @param sortProfileLongsByOffset if true, profile longs will be sorted by offset
  * @param enableRetransmission if true, retransmission will be enabled
  * (package will be appended with retransmission data, messages from previous cycles)
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigDataSending(
-    val messageIntervalMs: Int,
-    val messagesInPackage: Int,
-    val sortProfileshortsByOffset: Boolean,
-    val sortProfilelongsByOffset: Boolean,
-    val enableRetransmission: Boolean,
+    val messageIntervalMs: Int = 80,
+    val messagesInPackage: Int = 20,
+    val sortProfileShortsByOffset: Boolean = true,
+    val sortProfileLongsByOffset: Boolean = true,
+    val enableRetransmission: Boolean = true,
 ) {
 
     @JvmSynthetic
@@ -25,8 +26,8 @@ class AdasisConfigDataSending(
         return com.mapbox.navigator.AdasisConfigDataSending(
             messageIntervalMs,
             messagesInPackage,
-            sortProfileshortsByOffset,
-            sortProfilelongsByOffset,
+            sortProfileShortsByOffset,
+            sortProfileLongsByOffset,
             enableRetransmission,
         )
     }
@@ -42,8 +43,8 @@ class AdasisConfigDataSending(
 
         if (messageIntervalMs != other.messageIntervalMs) return false
         if (messagesInPackage != other.messagesInPackage) return false
-        if (sortProfileshortsByOffset != other.sortProfileshortsByOffset) return false
-        if (sortProfilelongsByOffset != other.sortProfilelongsByOffset) return false
+        if (sortProfileShortsByOffset != other.sortProfileShortsByOffset) return false
+        if (sortProfileLongsByOffset != other.sortProfileLongsByOffset) return false
         if (enableRetransmission != other.enableRetransmission) return false
 
         return true
@@ -55,8 +56,8 @@ class AdasisConfigDataSending(
     override fun hashCode(): Int {
         var result = messageIntervalMs
         result = 31 * result + messagesInPackage
-        result = 31 * result + sortProfileshortsByOffset.hashCode()
-        result = 31 * result + sortProfilelongsByOffset.hashCode()
+        result = 31 * result + sortProfileShortsByOffset.hashCode()
+        result = 31 * result + sortProfileLongsByOffset.hashCode()
         result = 31 * result + enableRetransmission.hashCode()
         return result
     }
@@ -68,8 +69,8 @@ class AdasisConfigDataSending(
         return "AdasisConfigDataSending(" +
             "messageIntervalMs=$messageIntervalMs, " +
             "messagesInPackage=$messagesInPackage, " +
-            "sortProfileshortsByOffset=$sortProfileshortsByOffset, " +
-            "sortProfilelongsByOffset=$sortProfilelongsByOffset, " +
+            "sortProfileShortsByOffset=$sortProfileShortsByOffset, " +
+            "sortProfileLongsByOffset=$sortProfileLongsByOffset, " +
             "enableRetransmission=$enableRetransmission" +
             ")"
     }

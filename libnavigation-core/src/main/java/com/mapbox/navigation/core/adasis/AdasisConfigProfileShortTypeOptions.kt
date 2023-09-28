@@ -4,7 +4,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
  * Profile short message options
- * * @param slopeStep if true, slopeStep type will be generated
+ *
+ * @param slopeStep if true, slopeStep type will be generated
  * @param slopeLinear if true, slopeLinear type will be generated
  * @param curvature if true, curvature type will be generated
  * @param routeNumTypes if true, routeNumTypes type will be generated
@@ -15,14 +16,14 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigProfileShortTypeOptions(
-    val slopeStep: Boolean,
-    val slopeLinear: Boolean,
-    val curvature: Boolean,
-    val routeNumTypes: Boolean,
-    val roadCondition: Boolean,
-    val roadAccessibility: Boolean,
-    val variableSpeedSign: Boolean,
-    val headingChange: Boolean,
+    val slopeStep: Boolean = false,
+    val slopeLinear: Boolean = true,
+    val curvature: Boolean = true,
+    val routeNumTypes: Boolean = false,
+    val roadCondition: Boolean = true,
+    val roadAccessibility: Boolean = true,
+    val variableSpeedSign: Boolean = false,
+    val headingChange: Boolean = true,
 ) {
 
     @JvmSynthetic

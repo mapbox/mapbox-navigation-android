@@ -11,9 +11,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigCycleTimes(
-    val metadataCycleOnStartMs: Int,
-    val metadataCycleSeconds: Int,
-    val positionCycleMs: Int,
+    val metadataCycleOnStartMs: Int = 1000,
+    val metadataCycleSeconds: Int = 5,
+    val positionCycleMs: Int = 200,
 ) {
 
     @JvmSynthetic

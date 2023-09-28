@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * Describes a class holding methods for ADASISv2 messages.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class ADASISv2Message internal constructor(
+class ADASISv2Message private constructor(
     private val nativeMessage: com.mapbox.navigator.ADASISv2Message
 ) {
 
@@ -34,4 +34,10 @@ class ADASISv2Message internal constructor(
      * Converts this message to little endian
      */
     fun toLittleEndian(): Long = nativeMessage.toLittleEndian()
+
+    internal companion object {
+        @JvmSynthetic
+        fun createFromNativeADASISv2Message(nativeMessage: com.mapbox.navigator.ADASISv2Message) =
+            ADASISv2Message(nativeMessage)
+    }
 }

@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.Toast
@@ -21,6 +22,7 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -33,6 +35,7 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.adasis.AdasisConfig
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -431,6 +434,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.startTripSession()
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onStart() {
         super.onStart()
         mapboxNavigation.registerRoutesObserver(routesObserver)
@@ -438,8 +442,12 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.setAdasisMessageCallback(AdasisConfig.Builder().build()) { message ->
+            Log.d("AdasisTest.", "Adasis message: ${message.toFlatBuffer()}")
+        }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onStop() {
         super.onStop()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
@@ -447,6 +455,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation.resetAdasisMessageCallback()
     }
 
     override fun onDestroy() {

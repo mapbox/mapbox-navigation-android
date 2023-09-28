@@ -1986,9 +1986,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @param adasisConfig Adasis config
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun setAdasisMessageCallback(callback: ADASISv2MessageCallback, adasisConfig: AdasisConfig) {
+    fun setAdasisMessageCallback(adasisConfig: AdasisConfig, callback: ADASISv2MessageCallback) {
         navigator.setAdasisMessageCallback(
-            { message -> callback.onMessage(ADASISv2Message(message)) },
+            { message ->
+                callback.onMessage(
+                    ADASISv2Message.createFromNativeADASISv2Message(message)
+                )
+            },
             adasisConfig.toNativeAdasisConfig()
         )
     }

@@ -13,11 +13,11 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigProfileLongTypeOptions(
-    val lat: Boolean,
-    val lon: Boolean,
-    val alt: Boolean,
-    val trafficSign: Boolean,
-    val extendedLane: Boolean,
+    val lat: Boolean = true,
+    val lon: Boolean = true,
+    val alt: Boolean = true,
+    val trafficSign: Boolean = false,
+    val extendedLane: Boolean = false,
 ) {
 
     @JvmSynthetic

@@ -10,9 +10,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigMessageOptions(
-    val enable: Boolean,
-    val radiusMeters: Int,
-    val repetitionMeters: Int,
+    val enable: Boolean = true,
+    val radiusMeters: Int = 2000,
+    val repetitionMeters: Int = 300,
 ) {
 
     @JvmSynthetic
