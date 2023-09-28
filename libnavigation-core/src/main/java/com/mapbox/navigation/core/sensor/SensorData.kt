@@ -110,6 +110,7 @@ abstract class SensorData internal constructor() {
         }
     }
 
+    @JvmSynthetic
     internal fun toNativeSensorData(): com.mapbox.navigator.SensorData {
         /**
          * NN requires [com.mapbox.navigator.SensorData.monotonicTimestampNanoseconds] to be based

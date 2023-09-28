@@ -43,6 +43,9 @@ import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.accounts.BillingController
+import com.mapbox.navigation.core.adasis.ADASISv2Message
+import com.mapbox.navigation.core.adasis.ADASISv2MessageCallback
+import com.mapbox.navigation.core.adasis.AdasisConfig
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -136,8 +139,6 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
-import com.mapbox.navigator.ADASISv2MessageCallback
-import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonOptions
@@ -1979,8 +1980,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * TODO use platform types?
-     *
      * Sets a callback for ADASIS messages
      *
      * @param callback Message callback
@@ -1988,7 +1987,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun setAdasisMessageCallback(callback: ADASISv2MessageCallback, adasisConfig: AdasisConfig) {
-        navigator.setAdasisMessageCallback(callback, adasisConfig)
+        navigator.setAdasisMessageCallback(
+            { message -> callback.onMessage(ADASISv2Message(message)) },
+            adasisConfig.toNativeAdasisConfig()
+        )
     }
 
     /**
