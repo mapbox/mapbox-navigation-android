@@ -8,7 +8,30 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigator.*
+import com.mapbox.navigator.ADASISv2MessageCallback
+import com.mapbox.navigator.AdasisConfig
+import com.mapbox.navigator.CacheHandle
+import com.mapbox.navigator.ConfigHandle
+import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.Experimental
+import com.mapbox.navigator.FallbackVersionsObserver
+import com.mapbox.navigator.FixLocation
+import com.mapbox.navigator.GraphAccessor
+import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigator.RoadObjectMatcher
+import com.mapbox.navigator.RoadObjectsStore
+import com.mapbox.navigator.RoadObjectsStoreObserver
+import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.RouteAlternativesControllerInterface
+import com.mapbox.navigator.RouterInterface
+import com.mapbox.navigator.SensorData
+import com.mapbox.navigator.SetRoutesReason
+import com.mapbox.navigator.SetRoutesResult
+import com.mapbox.navigator.TilesConfig
+import com.mapbox.navigator.UpdateExternalSensorDataCallback
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
