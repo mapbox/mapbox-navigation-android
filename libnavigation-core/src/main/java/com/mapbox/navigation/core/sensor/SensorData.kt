@@ -65,11 +65,6 @@ sealed class SensorData {
              * Fog weather condition
              */
             object Fog : Condition()
-
-            /**
-             * Wet Road weather condition
-             */
-            object WetRoad : Condition()
         }
     }
 
@@ -141,7 +136,6 @@ sealed class SensorData {
             is Weather.Condition.Rain -> 0
             is Weather.Condition.Snow -> 1
             is Weather.Condition.Fog -> 2
-            is Weather.Condition.WetRoad -> 3
         }
         return Value.valueOf(order)
     }

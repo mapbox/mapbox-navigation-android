@@ -1021,10 +1021,6 @@ package com.mapbox.navigation.core.sensor {
     field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.Snow INSTANCE;
   }
 
-  public static final class SensorData.Weather.Condition.WetRoad extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
-    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.WetRoad INSTANCE;
-  }
-
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface UpdateExternalSensorDataCallback {
     method public void onResult(boolean result);
   }
