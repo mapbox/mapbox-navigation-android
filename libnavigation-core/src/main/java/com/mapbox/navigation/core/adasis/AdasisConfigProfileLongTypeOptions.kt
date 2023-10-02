@@ -21,7 +21,7 @@ class AdasisConfigProfileLongTypeOptions(
 ) {
 
     @JvmSynthetic
-    internal fun toNativeAdasisConfigProfilelongTypeOptions():
+    internal fun toNativeAdasisConfigProfileLongTypeOptions():
         com.mapbox.navigator.AdasisConfigProfilelongTypeOptions {
         return com.mapbox.navigator.AdasisConfigProfilelongTypeOptions(
             lat,

@@ -18,7 +18,7 @@ class ProfileLong(
     internal fun toNativeProfileLong(): com.mapbox.navigator.Profilelong {
         return com.mapbox.navigator.Profilelong(
             options.toNativeAdasisConfigMessageOptions(),
-            types.toNativeAdasisConfigProfilelongTypeOptions()
+            types.toNativeAdasisConfigProfileLongTypeOptions()
         )
     }
 
