@@ -198,8 +198,6 @@ fun createRouteInterface(
         return responseJson.toDataRef()
     }
 
-    override fun getResponseJson() = responseJson
-
     override fun getRequestUri() = requestURI
 
     override fun getRouterOrigin() = routerOrigin
@@ -207,8 +205,6 @@ fun createRouteInterface(
     override fun getRouteInfo() = routeInfo
 
     override fun getWaypoints() = waypoints
-
-    override fun getWaypointsJson() = waypointsJson
 
     override fun getExpirationTimeMs(): Long? = expirationTimeMs
 

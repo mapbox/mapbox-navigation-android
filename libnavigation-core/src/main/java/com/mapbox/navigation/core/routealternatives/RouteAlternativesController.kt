@@ -224,7 +224,8 @@ internal class RouteAlternativesController constructor(
                     logE(
                         """
                                 |unable to parse alternative at index $index;
-                                |failure for response: ${routeAlternative.route.responseJson}
+                                |failure for response with uuid: 
+                                |${routeAlternative.route.responseUuid}
                         """.trimMargin(),
                         LOG_CATEGORY
                     )
