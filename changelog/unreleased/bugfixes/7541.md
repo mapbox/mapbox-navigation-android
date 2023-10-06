@@ -1,0 +1,4 @@
+- Improved ramp detection and reduced unexpected jumps between parallel elevated roads.
+- Reduced memory consumption.
+- Improved location accuracy on "walking" and "cycling" profiles.
+- Fixed false-positive "exiting the tunnel" mapmatching errors.
