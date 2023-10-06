@@ -6,6 +6,33 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.17.0-rc.1 - 06 October, 2023
+### Changelog
+[Changes between v2.17.0-beta.1 and v2.17.0-rc.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.0-beta.1...v2.17.0-rc.1)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Improved ramp detection and reduced unexpected jumps between parallel elevated roads. [#7541](https://github.com/mapbox/mapbox-navigation-android/pull/7541)
+- Reduced memory consumption. [#7541](https://github.com/mapbox/mapbox-navigation-android/pull/7541)
+- Improved location accuracy on "walking" and "cycling" profiles. [#7541](https://github.com/mapbox/mapbox-navigation-android/pull/7541)
+- Fixed false-positive "exiting the tunnel" mapmatching errors. [#7541](https://github.com/mapbox/mapbox-navigation-android/pull/7541)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.1))
+- Mapbox Navigation Native `v159.0.0`
+- Mapbox Core Common `v23.8.3`
+- Mapbox Java `v6.13.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0))
+
+
 ## Mapbox Navigation SDK 2.17.0-beta.1 - 22 September, 2023
 ### Changelog
 [Changes between v2.16.0 and v2.17.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.16.0...v2.17.0-beta.1)
