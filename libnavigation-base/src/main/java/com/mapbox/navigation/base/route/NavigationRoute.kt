@@ -48,6 +48,7 @@ class NavigationRoute internal constructor(
     val directionsResponse: DirectionsResponse,
     val routeIndex: Int,
     val routeOptions: RouteOptions,
+    val directionsRoute: DirectionsRoute,
     internal val nativeRoute: RouteInterface,
     internal val unavoidableClosures: List<List<Closure>>,
     internal var expirationTimeElapsedSeconds: Long?,
@@ -57,18 +58,22 @@ class NavigationRoute internal constructor(
         directionsResponse: DirectionsResponse,
         routeIndex: Int,
         routeOptions: RouteOptions,
+        directionsRoute: DirectionsRoute,
         nativeRoute: RouteInterface,
         expirationTimeElapsedSeconds: Long?,
     ) : this(
         directionsResponse,
         routeIndex,
         routeOptions,
+        directionsRoute,
         nativeRoute,
         directionsResponse.routes().getOrNull(routeIndex)?.legs()
             ?.map { leg -> leg.closures().orEmpty() }
             .orEmpty(),
         expirationTimeElapsedSeconds,
     )
+
+
 
     companion object {
 
@@ -98,7 +103,6 @@ class NavigationRoute internal constructor(
                 RouterOrigin.Custom()
             )
         }
-
         /**
          * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponse].
          *
@@ -283,12 +287,13 @@ class NavigationRoute internal constructor(
                 value
             }).mapIndexed { index, routeInterface ->
                 val directionResponseWithoutOtherRoutes = directionsResponse.toBuilder().routes(
-                    directionsResponse.routes().map { directionsResponse.routes()[index] }
+                    emptyList()
                 ).build()
                 NavigationRoute(
                     directionResponseWithoutOtherRoutes,
                     index,
                     routeOptions,
+                    getDirectionsRoute(directionsResponse, index, routeOptions),
                     routeInterface,
                     ifNonNull(
                         directionsResponse.routes().getOrNull(index)?.refreshTtl(),
@@ -322,15 +327,6 @@ class NavigationRoute internal constructor(
      * Describes which router type generated the route.
      */
     val origin: RouterOrigin = nativeRoute.routerOrigin.mapToSdkRouteOrigin()
-
-    /**
-     * [DirectionsRoute] that this [NavigationRoute] represents.
-     */
-    val directionsRoute = directionsResponse.routes()[routeIndex].toBuilder()
-        .requestUuid(directionsResponse.uuid())
-        .routeIndex(routeIndex.toString())
-        .routeOptions(routeOptions)
-        .build()
 
     /**
      * Returns a list of [UpcomingRoadObject] present in a route.
@@ -406,6 +402,7 @@ class NavigationRoute internal constructor(
         directionsResponse,
         routeIndex,
         routeOptions,
+        directionsRoute,
         nativeRoute,
         this.unavoidableClosures,
         expirationTimeElapsedSeconds,
@@ -586,10 +583,12 @@ internal fun DirectionsRoute.toNavigationRoute(
 internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long): NavigationRoute {
     val response = responseJsonRef.toDirectionsResponse()
     val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
+    val routeOptions = RouteOptions.fromUrl(URL(requestUri))
     return NavigationRoute(
-        directionsResponse = response,
-        routeOptions = RouteOptions.fromUrl(URL(requestUri)),
+        directionsResponse = response, //TODO: optimise response
+        routeOptions = routeOptions,
         routeIndex = routeIndex,
+        directionsRoute = getDirectionsRoute(response, routeIndex, routeOptions),
         nativeRoute = this,
         expirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds)
     ).cache()
@@ -733,3 +732,10 @@ private class ByteBufferBackedInputStream(
         return bytesToRead
     }
 }
+
+private fun getDirectionsRoute(response: DirectionsResponse, routeIndex: Int, routeOptions: RouteOptions): DirectionsRoute =
+    response.routes()[routeIndex].toBuilder()
+        .requestUuid(response.uuid())
+        .routeIndex(routeIndex.toString())
+        .routeOptions(routeOptions)
+        .build()
