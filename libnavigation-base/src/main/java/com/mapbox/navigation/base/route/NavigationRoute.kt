@@ -282,8 +282,11 @@ class NavigationRoute internal constructor(
             }, { value ->
                 value
             }).mapIndexed { index, routeInterface ->
+                val directionResponseWithoutOtherRoutes = directionsResponse.toBuilder().routes(
+                    directionsResponse.routes().map { directionsResponse.routes()[index] }
+                ).build()
                 NavigationRoute(
-                    directionsResponse,
+                    directionResponseWithoutOtherRoutes,
                     index,
                     routeOptions,
                     routeInterface,
