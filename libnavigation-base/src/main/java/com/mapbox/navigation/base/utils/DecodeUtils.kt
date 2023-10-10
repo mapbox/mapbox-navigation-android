@@ -180,9 +180,9 @@ object DecodeUtils {
 
     private fun removeAllRoutesExcept(routesToKeep: List<DirectionsRoute>) {
         synchronized(stepsGeometryDecodeCache) {
-            Log.d("vadzim-test", "looking for a route to remove: ${cachedRoutes.joinToString(",") { it.route.routeId() }}")
+            Log.d("vadzim-test", "looking for a route to remove among ${cachedRoutes.joinToString(",") { it.route.routeId() }}, while ${routesToKeep.joinToString(",") { it.routeId() }} should be kept")
             val routesToRemove = cachedRoutes.filter { cached ->
-                routesToKeep.none { it.requestUuid() == cached.route.requestUuid() && it.routeIndex() == it.routeIndex()}
+                routesToKeep.none { it.requestUuid() == cached.route.requestUuid() && it.routeIndex() == cached.route.routeIndex()}
             }
             routesToRemove.forEach {
                 Log.d("vadzim-test", "cleaning caches for route ${it.route.routeId()}")
