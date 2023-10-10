@@ -192,6 +192,7 @@ object DecodeUtils {
                         stepsGeometryDecodeCache.remove(step.geometry()!! to routeToRemove.precision())
                     }
                 }
+                cachedRoutes.remove(it)
             }
             stepsGeometryDecodeCache.resize(cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1))
         }
