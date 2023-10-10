@@ -2,6 +2,7 @@ package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.clearCache
+import com.mapbox.navigation.base.internal.clearCacheExceptFor
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -19,6 +20,9 @@ internal class RoutesCacheClearer : RoutesObserver, RoutesPreviewObserver {
         currentActiveRoutes = result.navigationRoutes
         if (result.navigationRoutes.isEmpty() && currentPreviewsRoutes.isNullOrEmpty()) {
             DecodeUtils.clearCache()
+        }
+        if (result.navigationRoutes.isNotEmpty()) {
+            DecodeUtils.clearCacheExceptFor(result.navigationRoutes.map { it.directionsRoute })
         }
     }
 

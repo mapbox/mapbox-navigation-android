@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.utils
 
+import android.util.Log
 import android.util.LruCache
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -136,6 +137,11 @@ object DecodeUtils {
         completeGeometryDecodeCache.evictAll()
     }
 
+    @JvmStatic
+    internal fun clearCacheInternalExceptFor(routes: List<DirectionsRoute>) {
+        removeAllRoutesExcept(routes)
+    }
+
     /**
      * todo Remove inline references to RouteOptions in favor of taking geometry type as an argument or expose the extensions on top of NavigationRoute instead.
      */
@@ -166,6 +172,24 @@ object DecodeUtils {
                 cachedRoutes.removeFirst()
             }
             cachedRoutes.add(CachedRouteInfo(route, precision, stepCount))
+            stepsGeometryDecodeCache.resize(cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1))
+        }
+    }
+
+    private fun removeAllRoutesExcept(routesToKeep: List<DirectionsRoute>) {
+        synchronized(stepsGeometryDecodeCache) {
+            val routesToRemove = cachedRoutes.filter { cached ->
+                routesToKeep.none { it.requestUuid() == cached.route.requestUuid() && it.routeIndex() == it.routeIndex()}
+            }
+            routesToRemove.forEach {
+                Log.d("vadzim-test", "cleaning caches for route ${it.route.requestUuid()}#${it.route.routeIndex()}")
+                val routeToRemove = it.route
+                it.route.legs()?.forEach {
+                    it.steps()?.forEach { step ->
+                        stepsGeometryDecodeCache.remove(step.geometry()!! to routeToRemove.precision())
+                    }
+                }
+            }
             stepsGeometryDecodeCache.resize(cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1))
         }
     }
