@@ -585,7 +585,7 @@ internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long):
     val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
     return NavigationRoute(
-        directionsResponse = response, //TODO: optimise response
+        directionsResponse = response.toBuilder().routes(emptyList()).build(), //TODO: optimise response
         routeOptions = routeOptions,
         routeIndex = routeIndex,
         directionsRoute = getDirectionsRoute(response, routeIndex, routeOptions),
@@ -600,7 +600,7 @@ private fun List<NavigationRoute>.cache(): List<NavigationRoute> {
 }
 
 private fun NavigationRoute.cache(): NavigationRoute {
-    RouteCompatibilityCache.cacheCreationResult(listOf(this))
+    //RouteCompatibilityCache.cacheCreationResult(listOf(this))
     return this
 }
 
