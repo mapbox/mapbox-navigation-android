@@ -595,7 +595,7 @@ internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long):
 }
 
 private fun List<NavigationRoute>.cache(): List<NavigationRoute> {
-    RouteCompatibilityCache.cacheCreationResult(this)
+    //RouteCompatibilityCache.cacheCreationResult(this)
     return this
 }
 
