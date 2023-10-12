@@ -1,8 +1,7 @@
 package com.mapbox.navigation.core.routealternatives
 
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
-import com.mapbox.navigation.base.internal.utils.parseNativeDirectionsAlternative
-import com.mapbox.navigation.base.internal.utils.parseRouteInterface
+import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -213,30 +212,28 @@ internal class RouteAlternativesController constructor(
         block: suspend (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) = mainJobControl.scope.launch {
         val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
-        val alternatives: List<NavigationRoute> =
-            nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
-                val expected = withContext(ThreadController.DefaultDispatcher) {
-                    parseNativeDirectionsAlternative(routeAlternative, responseTimeElapsedSeconds)
-                }
-                if (expected.isValue) {
-                    expected.value
-                } else {
-                    logE(
-                        """
-                                |unable to parse alternative at index $index;
-                                |failure for response with uuid: 
-                                |${routeAlternative.route.responseUuid}
-                        """.trimMargin(),
-                        LOG_CATEGORY
-                    )
-                    null
-                }
-            }
+
+        // TODO: optimise handling of the same alternatives?
+        val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
+        val expected = withContext(ThreadController.DefaultDispatcher) {
+            parseRouteInterfaces(primaryRoutes + nativeAlternatives.map { it.route }, responseTimeElapsedSeconds)
+        }
+        val alternatives: List<NavigationRoute> = if (expected.isValue) {
+            expected.value
+        } else {
+            logE(
+                """
+                        |unable to parse alternatives;
+                        |failure for response with uuid: 
+                        |${nativeAlternatives.firstOrNull()?.route?.responseUuid}
+                """.trimMargin(),
+                LOG_CATEGORY
+            )
+            null
+        } ?: return@launch
+
         processAlternativesMetadata(alternatives, nativeAlternatives)
-        val newAlternatives = parseRouteInterfaceOrEmptyList(
-            onlinePrimaryRoute,
-            responseTimeElapsedSeconds
-        ) + alternatives
+        val newAlternatives = alternatives
         val origin = nativeAlternatives.find {
             // looking for the first new route,
             // assuming all new routes come from the same request
@@ -293,10 +290,3 @@ private fun com.mapbox.navigator.AlternativeRouteInfo.mapToPlatform(): Alternati
         duration = duration,
     )
 }
-
-private fun parseRouteInterfaceOrEmptyList(
-    onlinePrimaryRoute: RouteInterface?,
-    responseTimeElapsedSeconds: Long
-) = onlinePrimaryRoute?.let {
-    parseRouteInterface(it, responseTimeElapsedSeconds)
-}?.value?.let { listOf(it) } ?: emptyList()

@@ -581,9 +581,8 @@ internal fun DirectionsRoute.toNavigationRoute(
     return NavigationRoute.create(response, options, sdkRouteParser, routerOrigin, null)[routeIndex]
 }
 
-internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long): NavigationRoute {
-    Log.d("vadzim-test", "NavigationRoute: parsing response $responseUuid for the route with index ${this.routeIndex}")
-    val response = responseJsonRef.toDirectionsResponse()
+internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long, directionsResponse: DirectionsResponse? = null): NavigationRoute {
+    val response = directionsResponse ?: responseJsonRef.toDirectionsResponse()
     val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
     return NavigationRoute(
@@ -697,7 +696,7 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
         .build()
 }
 
-private fun DataRef.toDirectionsResponse(): DirectionsResponse {
+fun DataRef.toDirectionsResponse(): DirectionsResponse {
     val stream = ByteBufferBackedInputStream(buffer)
     val reader = InputStreamReader(stream)
     return reader.use { reader ->

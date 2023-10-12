@@ -241,8 +241,8 @@ fun createNavigationRoutes(
 /**
  * Internal API to create a new [NavigationRoute] from a native peer.
  */
-fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long): NavigationRoute {
-    return this.toNavigationRoute(responseTimeElapsedSeconds)
+fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long, directionsResponse: DirectionsResponse? = null): NavigationRoute {
+    return this.toNavigationRoute(responseTimeElapsedSeconds, directionsResponse)
 }
 
 private fun List<LegStep>.updateSteps(

@@ -7,6 +7,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.toDirectionsResponse
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,20 +45,19 @@ suspend fun parseDirectionsResponse(
         }
     }
 
-fun parseNativeDirectionsAlternative(
-    routeAlternative: RouteAlternative,
+// this function assumes that all interfaces are generated to the same
+fun parseRouteInterfaces(
+    routes: List<RouteInterface>,
     responseTimeElapsedSeconds: Long
-): Expected<Throwable, NavigationRoute> {
-    return parseRouteInterface(routeAlternative.route, responseTimeElapsedSeconds)
-}
-
-fun parseRouteInterface(
-    route: RouteInterface,
-    responseTimeElapsedSeconds: Long
-): Expected<Throwable, NavigationRoute> {
+): Expected<Throwable, List<NavigationRoute>> {
+    if (routes.isEmpty()) {
+        return ExpectedFactory.createValue(emptyList())
+    }
     return try {
-        val navigationRoute = route.toNavigationRoute(responseTimeElapsedSeconds)
-        ExpectedFactory.createValue(navigationRoute)
+        val directionsResponse = routes.first().responseJsonRef.toDirectionsResponse()
+        return ExpectedFactory.createValue(routes.map {
+            it.toNavigationRoute(responseTimeElapsedSeconds, directionsResponse)
+        })
     } catch (ex: Exception) {
         when (ex) {
             is JSONException,
