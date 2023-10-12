@@ -6,6 +6,21 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.15.3 - 12 October, 2023
+### Changelog
+[Changes between v2.15.2 and v2.15.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.2...v2.15.3)
+
+#### Bug fixes and improvements
+- Added a boolean option `disableMinDistancePolicyForMultiLegRouteAndReroutes` to custom config which alters the behaviour for `MinDistanceToPass` completion policy via disabling the min distance check for multi-leg routes and reroutes. [#7548](https://github.com/mapbox/mapbox-navigation-android/pull/7548)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.15.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.15.0))
+- Mapbox Navigation Native `v148.0.3`
+- Mapbox Core Common `v23.7.0`
+- Mapbox Java `v6.13.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0))
+
+
 ## Mapbox Navigation SDK 2.15.2 - 13 September, 2023
 ### Changelog
 [Changes between v2.15.1 and v2.15.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.1...v2.15.2)
