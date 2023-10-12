@@ -176,17 +176,18 @@ fun NavigationRoute.update(
     directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder,
     newExpirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
 ): NavigationRoute {
-    val refreshedRoute = directionsRoute.directionsRouteBlock()
-    val refreshedRoutes = directionsResponse.routes().toMutableList()
-    refreshedRoutes[routeIndex] = refreshedRoute
-    val refreshedResponse = directionsResponse.toBuilder()
-        .routes(refreshedRoutes)
-        .directionsResponseBlock()
-        .build()
-    return copy(
-        directionsResponse = refreshedResponse,
-        expirationTimeElapsedSeconds = newExpirationTimeElapsedSeconds
-    )
+//    val refreshedRoute = directionsRoute.directionsRouteBlock()
+//    val refreshedRoutes = directionsResponse.routes().toMutableList()
+//    refreshedRoutes[routeIndex] = refreshedRoute
+//    val refreshedResponse = directionsResponse.toBuilder()
+//        .routes(refreshedRoutes)
+//        .directionsResponseBlock()
+//        .build()
+//    return copy(
+//        directionsResponse = refreshedResponse,
+//        expirationTimeElapsedSeconds = newExpirationTimeElapsedSeconds
+//    )
+    return this
 }
 
 fun NavigationRoute.updateExpirationTime(newExpirationTimeElapsedSeconds: Long?): NavigationRoute {
