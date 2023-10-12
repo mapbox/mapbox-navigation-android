@@ -2,6 +2,7 @@
 
 package com.mapbox.navigation.base.route
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -581,6 +582,7 @@ internal fun DirectionsRoute.toNavigationRoute(
 }
 
 internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long): NavigationRoute {
+    Log.d("vadzim-test", "NavigationRoute: parsing response $responseUuid for the route with index ${this.routeIndex}")
     val response = responseJsonRef.toDirectionsResponse()
     val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
