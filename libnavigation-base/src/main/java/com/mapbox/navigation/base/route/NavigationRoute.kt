@@ -582,7 +582,13 @@ internal fun DirectionsRoute.toNavigationRoute(
 }
 
 internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long, directionsResponse: DirectionsResponse? = null): NavigationRoute {
-    val response = directionsResponse ?: responseJsonRef.toDirectionsResponse()
+    val response = if (directionsResponse != null) {
+        Log.d("vadzim-test", "creating navigation route from parsed response")
+        directionsResponse
+    } else {
+        Log.d("vadzim-test", "parsing directions response from scratch")
+        responseJsonRef.toDirectionsResponse()
+    }
     val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
     return NavigationRoute(

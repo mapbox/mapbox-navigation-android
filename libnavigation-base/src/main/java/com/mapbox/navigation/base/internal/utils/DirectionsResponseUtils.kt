@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.internal.utils
 
+import android.util.Log
 import com.google.gson.JsonSyntaxException
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
@@ -54,7 +55,9 @@ fun parseRouteInterfaces(
         return ExpectedFactory.createValue(emptyList())
     }
     return try {
+        Log.d("vadzim-test", "parsing directions response from the first alternative")
         val directionsResponse = routes.first().responseJsonRef.toDirectionsResponse()
+        Log.d("vadzim-test", "finished parsing response from the first alternative")
         return ExpectedFactory.createValue(routes.map {
             it.toNavigationRoute(responseTimeElapsedSeconds, directionsResponse)
         })
