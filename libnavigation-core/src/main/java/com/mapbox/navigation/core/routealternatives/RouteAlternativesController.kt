@@ -127,13 +127,14 @@ internal class RouteAlternativesController constructor(
                 { value ->
                     // Switch from offline to online primary route isn't implemented for the case
                     // when user manually triggers alternatives refresh
-                    processRouteAlternatives(null, value) { alternatives, origin ->
-                        listener?.onRouteAlternativeRequestFinished(
-                            routeProgress,
-                            alternatives,
-                            origin
-                        )
-                    }
+                    // !!!! The callback is duplicated by on onRouteAlternativesUpdated
+//                    processRouteAlternatives(null, value) { alternatives, origin ->
+//                        listener?.onRouteAlternativeRequestFinished(
+//                            routeProgress,
+//                            alternatives,
+//                            origin
+//                        )
+//                    }
                 }
             )
         }
