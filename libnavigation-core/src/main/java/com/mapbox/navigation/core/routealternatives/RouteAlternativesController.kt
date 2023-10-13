@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.routealternatives
 
+import android.util.Log
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -214,11 +215,18 @@ internal class RouteAlternativesController constructor(
         block: suspend (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) = mainJobControl.scope.launch {
         val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
-
+        if (onlinePrimaryRoute != null || nativeAlternatives.isNotEmpty()) {
+            logD(LOG_CATEGORY) {
+                "waiting for navigation to prepare for new route alternatives"
+            }
+            prepareForRoutesParsing()
+            logD(LOG_CATEGORY) {
+                "navigation is ready for new alternatives, parsing"
+            }
+        }
         // TODO: optimise handling of the same alternatives?
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val expected = withContext(ThreadController.DefaultDispatcher) {
-            prepareForRoutesParsing()
             parseRouteInterfaces(primaryRoutes + nativeAlternatives.map { it.route }, responseTimeElapsedSeconds)
         }
         val alternatives: List<NavigationRoute> = if (expected.isValue) {
