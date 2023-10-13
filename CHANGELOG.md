@@ -6,6 +6,29 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.17.0 - 13 October, 2023
+### Changelog
+[Changes between v2.16.0 and v2.17.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.16.0...v2.17.0)
+
+#### Bug fixes and improvements
+- Optimised memory and network usage. [#7555](https://github.com/mapbox/mapbox-navigation-android/pull/7555)
+- Improved ramp detection and reduced unexpected jumps between parallel elevated roads. [#7541](https://github.com/mapbox/mapbox-navigation-android/pull/7541)
+- Reduced memory consumption. [#7541](https://github.com/mapbox/mapbox-navigation-android/pull/7541)
+- Improved location accuracy on "walking" and "cycling" profiles. [#7541](https://github.com/mapbox/mapbox-navigation-android/pull/7541)
+- Fixed false-positive "exiting the tunnel" mapmatching errors. [#7541](https://github.com/mapbox/mapbox-navigation-android/pull/7541)
+- Improved navigation positioning in tunnels. [#7514](https://github.com/mapbox/mapbox-navigation-android/pull/7514)
+- Fixed an issue where route refresh interval might have been too long in case of a specific alternatives update rate.  [#7497](https://github.com/mapbox/mapbox-navigation-android/pull/7497)
+- Map-matching improvement in dead-reckoning. [#7531](https://github.com/mapbox/mapbox-navigation-android/pull/7531)
+- Report Off-Route if LocationOnLeg legIndex is greater than current route leg. [#7531](https://github.com/mapbox/mapbox-navigation-android/pull/7531)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.1))
+- Mapbox Navigation Native `v160.0.0`
+- Mapbox Core Common `v23.8.3`
+- Mapbox Java `v6.13.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.13.0))
+
+
 ## Mapbox Navigation SDK 2.15.3 - 12 October, 2023
 ### Changelog
 [Changes between v2.15.2 and v2.15.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.15.2...v2.15.3)
