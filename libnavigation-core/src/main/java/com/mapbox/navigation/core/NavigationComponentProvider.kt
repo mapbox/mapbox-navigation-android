@@ -128,12 +128,14 @@ internal object NavigationComponentProvider {
         rerouteOptions: RerouteOptions,
         threadController: ThreadController,
         evDynamicDataHolder: EVDynamicDataHolder,
+        prepareForParsingStrategy: suspend () -> Unit
     ): InternalRerouteController = MapboxRerouteController(
         directionsSession,
         tripSession,
         routeOptionsProvider,
         rerouteOptions,
         threadController,
-        evDynamicDataHolder
+        evDynamicDataHolder,
+        prepareForParsingStrategy
     )
 }

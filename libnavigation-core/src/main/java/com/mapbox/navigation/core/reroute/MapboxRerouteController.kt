@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.ResponseDownloadedCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
@@ -39,6 +40,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
     private val compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter,
+    private val prepareForParsingStrategy: suspend () -> Unit
 ) : InternalRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
@@ -54,13 +56,15 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         rerouteOptions: RerouteOptions,
         threadController: ThreadController,
         evDynamicDataHolder: EVDynamicDataHolder,
+        prepareForParsingStrategy: suspend () -> Unit
     ) : this(
         directionsSession,
         tripSession,
         routeOptionsUpdater,
         rerouteOptions,
         threadController,
-        MapboxRerouteOptionsAdapter(evDynamicDataHolder)
+        MapboxRerouteOptionsAdapter(evDynamicDataHolder),
+        prepareForParsingStrategy
     )
 
     override var state: RerouteState = RerouteState.Idle
@@ -233,7 +237,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         return suspendCancellableCoroutine { cont ->
             val requestId = directionsSession.requestRoutes(
                 routeOptions,
-                object : NavigationRouterCallback {
+                object : NavigationRouterCallback, ResponseDownloadedCallback {
                     override fun onRoutesReady(
                         routes: List<NavigationRoute>,
                         routerOrigin: RouterOrigin
@@ -259,6 +263,10 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                         if (cont.isActive) {
                             cont.resume(RouteRequestResult.Cancellation)
                         }
+                    }
+
+                    override suspend fun onResponseDownloaded() {
+                        prepareForParsingStrategy()
                     }
                 }
             )

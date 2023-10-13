@@ -27,7 +27,8 @@ internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
     private val navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
-    private val threadController: ThreadController
+    private val threadController: ThreadController,
+    private val prepareForRoutesParsing: suspend () -> Unit
 ) : AlternativeMetadataProvider {
 
     private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
@@ -217,6 +218,7 @@ internal class RouteAlternativesController constructor(
         // TODO: optimise handling of the same alternatives?
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val expected = withContext(ThreadController.DefaultDispatcher) {
+            prepareForRoutesParsing()
             parseRouteInterfaces(primaryRoutes + nativeAlternatives.map { it.route }, responseTimeElapsedSeconds)
         }
         val alternatives: List<NavigationRoute> = if (expected.isValue) {

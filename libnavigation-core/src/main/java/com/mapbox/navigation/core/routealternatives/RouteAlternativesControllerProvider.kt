@@ -11,11 +11,13 @@ internal object RouteAlternativesControllerProvider {
         options: RouteAlternativesOptions,
         navigator: MapboxNativeNavigator,
         tripSession: TripSession,
-        threadController: ThreadController
+        threadController: ThreadController,
+        prepareForRoutesParsing: suspend () -> Unit
     ) = RouteAlternativesController(
         options,
         navigator,
         tripSession,
-        threadController
+        threadController,
+        prepareForRoutesParsing
     )
 }

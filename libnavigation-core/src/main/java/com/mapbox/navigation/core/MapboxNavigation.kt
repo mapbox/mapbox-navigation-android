@@ -154,6 +154,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.lang.reflect.Field
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
@@ -574,6 +576,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator,
             tripSession,
             threadController,
+            ::prepareNavigaitonForRoutesParsing
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
@@ -600,7 +603,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeOptionsProvider,
             navigationOptions.rerouteOptions,
             threadController,
-            evDynamicDataHolder
+            evDynamicDataHolder,
+            ::prepareNavigaitonForRoutesParsing
         )
         rerouteController = defaultRerouteController
 
@@ -2164,6 +2168,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun setUpRouteCacheClearer() {
         registerRoutesObserver(routesCacheClearer)
         registerRoutesPreviewObserver(routesCacheClearer)
+    }
+
+    private suspend fun prepareNavigaitonForRoutesParsing() {
+        suspendCoroutine<Unit> { continuation ->
+            setNavigationRoutes(directionsSession.routes.take(1)) {
+                continuation.resume(Unit)
+            }
+        }
     }
 
     private companion object {
