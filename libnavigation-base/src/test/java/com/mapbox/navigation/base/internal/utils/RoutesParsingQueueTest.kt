@@ -1,8 +1,6 @@
 package com.mapbox.navigation.base.internal.utils
 
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
@@ -57,6 +55,60 @@ class RoutesParsingQueueTest {
         assertTrue(newRoutesRequestParsing.isStarted)
         newRoutesRequestParsing.complete("new routes")
         assertEquals("new routes", routesParsingResult.await())
+    }
+
+    @Test
+    fun `parse alternatives in parallel to reroute`() = runBlockingTest {
+        val queue = createParsingQueue()
+        val rerouteResponseParsing = ParsingTask<String>()
+        val alternativesRouteParsing = ParsingTask<String>()
+
+        val rerouteParsingResult = async {
+            queue.parseRouteResponse {
+                rerouteResponseParsing.parse()
+            }
+        }
+        val alternativesParsingResult = async {
+            queue.parseAlternatives {
+                alternativesRouteParsing.parse()
+            }
+        }
+
+        assertTrue(rerouteResponseParsing.isStarted)
+        assertFalse(alternativesRouteParsing.isStarted)
+
+        rerouteResponseParsing.complete("reroute")
+        assertEquals("reroute", rerouteParsingResult.await())
+
+        assertFalse(alternativesRouteParsing.isStarted)
+        assertEquals(AlternativesParsingResult.NotActual, alternativesParsingResult.await())
+    }
+
+    @Test
+    fun `parse alternatives in parallel to reroute`() = runBlockingTest {
+        val queue = createParsingQueue()
+        val rerouteResponseParsing = ParsingTask<String>()
+        val alternativesRouteParsing = ParsingTask<String>()
+
+        val rerouteParsingResult = async {
+            queue.parseRouteResponse {
+                rerouteResponseParsing.parse()
+            }
+        }
+        val alternativesParsingResult = async {
+            queue.parseAlternatives {
+                alternativesRouteParsing.parse()
+            }
+        }
+
+        assertTrue(rerouteResponseParsing.isStarted)
+        assertFalse(alternativesRouteParsing.isStarted)
+
+        rerouteResponseParsing.complete("reroute")
+        assertEquals("reroute", rerouteParsingResult.await())
+
+        assertFalse(alternativesRouteParsing.isStarted)
+        assertEquals(AlternativesParsingResult.NotActual, alternativesParsingResult.await())
     }
 }
 

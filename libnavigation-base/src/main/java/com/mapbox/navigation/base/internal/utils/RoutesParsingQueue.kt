@@ -25,6 +25,10 @@ class RoutesParsingQueue {
     }
 
     suspend fun <T> parseAlternatives(parsing: suspend () -> T): AlternativesParsingResult<T> {
-        return AlternativesParsingResult.Parsed(parsing())
+        return if (mutex.isLocked) {
+            AlternativesParsingResult.NotActual
+        } else {
+            AlternativesParsingResult.Parsed(parseRouteResponse(parsing))
+        }
     }
 }
