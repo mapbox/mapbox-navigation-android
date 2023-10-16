@@ -1,11 +1,5 @@
 package com.mapbox.navigation.base.internal.utils
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -30,5 +24,9 @@ class RoutesParsingQueue {
         } else {
             AlternativesParsingResult.Parsed(parseRouteResponse(parsing))
         }
+    }
+
+    companion object {
+        val instance = RoutesParsingQueue()
     }
 }

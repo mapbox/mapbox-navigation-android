@@ -1,5 +1,9 @@
 package com.mapbox.navigation.core.routealternatives
 
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
+import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -226,7 +230,13 @@ internal class RouteAlternativesController constructor(
         // TODO: optimise handling of the same alternatives?
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val expected = withContext(ThreadController.DefaultDispatcher) {
-            parseRouteInterfaces(primaryRoutes + nativeAlternatives.map { it.route }, responseTimeElapsedSeconds)
+            val result: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> = RoutesParsingQueue.instance.parseAlternatives {
+                parseRouteInterfaces(primaryRoutes + nativeAlternatives.map { it.route }, responseTimeElapsedSeconds)
+            }
+            when (result) {
+                AlternativesParsingResult.NotActual -> ExpectedFactory.createError(Throwable("cancelled because another parsing is already in progress"))
+                is AlternativesParsingResult.Parsed -> result.value
+            }
         }
         val alternatives: List<NavigationRoute> = if (expected.isValue) {
             expected.value
