@@ -855,7 +855,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeOptions: RouteOptions,
         callback: NavigationRouterCallback
     ): Long {
-        return directionsSession.requestRoutes(routeOptions, callback)
+        return directionsSession.requestRoutes(
+            routeOptions,
+            NavigationRouterCallbackWrapperWithNavigationPreparation(
+                callback,
+                ::prepareNavigaitonForRoutesParsing
+            )
+        )
     }
 
     /**
