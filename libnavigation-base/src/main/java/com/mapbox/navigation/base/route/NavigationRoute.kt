@@ -396,6 +396,7 @@ class NavigationRoute internal constructor(
 
     internal fun copy(
         directionsResponse: DirectionsResponse = this.directionsResponse,
+        directionsRoute: DirectionsRoute = this.directionsRoute,
         routeIndex: Int = this.routeIndex,
         routeOptions: RouteOptions = this.routeOptions,
         nativeRoute: RouteInterface = this.nativeRoute,
