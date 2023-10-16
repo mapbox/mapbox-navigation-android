@@ -21,7 +21,6 @@ import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingR
 import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
-import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.refreshTtl
@@ -76,7 +75,6 @@ class NavigationRoute internal constructor(
     )
 
 
-
     companion object {
 
         private const val LOG_CATEGORY = "NavigationRoute"
@@ -105,6 +103,7 @@ class NavigationRoute internal constructor(
                 RouterOrigin.Custom()
             )
         }
+
         /**
          * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponse].
          *
@@ -195,50 +194,48 @@ class NavigationRoute internal constructor(
             responseTimeElapsedSeconds: Long?,
             routeParser: SDKRouteParser = SDKRouteParser.default
         ): List<NavigationRoute> {
-            logI("NavigationRoute.createAsync is called, enqueued", LOG_CATEGORY)
-            return RoutesParsingQueue.instance.parseRouteResponse {
-                logI("NavigationRoute.createAsync: starting parsing", LOG_CATEGORY)
-                coroutineScope {
-                    val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
-                        directionsResponseJson.toDirectionsResponse().also {
-                            logD(
-                                "parsed directions response to java model for ${it.uuid()}",
-                                LOG_CATEGORY
-                            )
-                        }
-                    }
-                    val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
-                        routeParser.parseDirectionsResponse(
-                            directionsResponseJson,
-                            routeRequestUrl,
-                            routerOrigin,
-                        ).also {
-                            logD(
-                                "parsed directions response to RouteInterface " +
-                                    "for ${it.value?.firstOrNull()?.responseUuid}",
-                                LOG_CATEGORY
-                            )
-                        }
-                    }
-                    val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
-                        RouteOptions.fromUrl(URL(routeRequestUrl)).also {
-                            logD(LOG_CATEGORY) {
-                                "parsed request url to RouteOptions: ${it.toUrl("***")}"
-                            }
-                        }
-                    }
-                    create(
-                        deferredNativeParsing.await(),
-                        deferredResponseParsing.await(),
-                        deferredRouteOptionsParsing.await(),
-                        responseTimeElapsedSeconds,
-                    ).also {
+            logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
+
+            return coroutineScope {
+                val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
+                    directionsResponseJson.toDirectionsResponse().also {
                         logD(
-                            "NavigationRoute.createAsync finished " +
-                                "for ${it.firstOrNull()?.directionsResponse?.uuid()}",
+                            "parsed directions response to java model for ${it.uuid()}",
                             LOG_CATEGORY
                         )
                     }
+                }
+                val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
+                    routeParser.parseDirectionsResponse(
+                        directionsResponseJson,
+                        routeRequestUrl,
+                        routerOrigin,
+                    ).also {
+                        logD(
+                            "parsed directions response to RouteInterface " +
+                                "for ${it.value?.firstOrNull()?.responseUuid}",
+                            LOG_CATEGORY
+                        )
+                    }
+                }
+                val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
+                    RouteOptions.fromUrl(URL(routeRequestUrl)).also {
+                        logD(LOG_CATEGORY) {
+                            "parsed request url to RouteOptions: ${it.toUrl("***")}"
+                        }
+                    }
+                }
+                create(
+                    deferredNativeParsing.await(),
+                    deferredResponseParsing.await(),
+                    deferredRouteOptionsParsing.await(),
+                    responseTimeElapsedSeconds,
+                ).also {
+                    logD(
+                        "NavigationRoute.createAsync finished " +
+                            "for ${it.firstOrNull()?.directionsResponse?.uuid()}",
+                        LOG_CATEGORY
+                    )
                 }
             }
         }
@@ -585,7 +582,10 @@ internal fun DirectionsRoute.toNavigationRoute(
     return NavigationRoute.create(response, options, sdkRouteParser, routerOrigin, null)[routeIndex]
 }
 
-internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long, directionsResponse: DirectionsResponse? = null): NavigationRoute {
+internal fun RouteInterface.toNavigationRoute(
+    responseTimeElapsedSeconds: Long,
+    directionsResponse: DirectionsResponse? = null
+): NavigationRoute {
     val response = if (directionsResponse != null) {
         Log.d("vadzim-test", "creating navigation route from parsed response")
         directionsResponse
@@ -596,7 +596,8 @@ internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long, 
     val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
     return NavigationRoute(
-        directionsResponse = response.toBuilder().routes(emptyList()).build(), //TODO: optimise response
+        directionsResponse = response.toBuilder().routes(emptyList())
+            .build(), //TODO: optimise response
         routeOptions = routeOptions,
         routeIndex = routeIndex,
         directionsRoute = getDirectionsRoute(response, routeIndex, routeOptions),
@@ -744,7 +745,11 @@ private class ByteBufferBackedInputStream(
     }
 }
 
-private fun getDirectionsRoute(response: DirectionsResponse, routeIndex: Int, routeOptions: RouteOptions): DirectionsRoute =
+private fun getDirectionsRoute(
+    response: DirectionsResponse,
+    routeIndex: Int,
+    routeOptions: RouteOptions
+): DirectionsRoute =
     response.routes()[routeIndex].toBuilder()
         .requestUuid(response.uuid())
         .routeIndex(routeIndex.toString())

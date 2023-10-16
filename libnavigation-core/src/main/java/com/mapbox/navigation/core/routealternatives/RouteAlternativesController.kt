@@ -164,7 +164,8 @@ internal class RouteAlternativesController constructor(
         override fun onRouteAlternativesChanged(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>
-        ) { }
+        ) {
+        }
 
         override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) {}
 
@@ -218,26 +219,34 @@ internal class RouteAlternativesController constructor(
         block: suspend (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) = mainJobControl.scope.launch {
         val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
-        if (onlinePrimaryRoute != null || nativeAlternatives.isNotEmpty()) {
-            logD(LOG_CATEGORY) {
-                "waiting for navigation to prepare for new route alternatives"
-            }
-            prepareForRoutesParsing()
-            logD(LOG_CATEGORY) {
-                "navigation is ready for new alternatives, parsing"
-            }
-        }
-        // TODO: optimise handling of the same alternatives like when one of two alternatives are removed?
+
+        // TODO: optimise handling of the same alternatives like when one of two alternatives are removed? Should we reuse routes from directions session?
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
-        val expected = withContext(ThreadController.DefaultDispatcher) {
-            val result: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> = RoutesParsingQueue.instance.parseAlternatives {
-                parseRouteInterfaces(primaryRoutes + nativeAlternatives.map { it.route }, responseTimeElapsedSeconds)
+
+        val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
+            RoutesParsingQueue.instance.parseAlternatives {
+                // TODO: what if a single alternative is removed while the other stays?
+                if (onlinePrimaryRoute != null || nativeAlternatives.isNotEmpty()) {
+                    logD(LOG_CATEGORY) {
+                        "waiting for navigation to prepare for new route alternatives"
+                    }
+                    prepareForRoutesParsing()
+                    logD(LOG_CATEGORY) {
+                        "navigation is ready for new alternatives, parsing"
+                    }
+                }
+                withContext(ThreadController.DefaultDispatcher) {
+                    parseRouteInterfaces(
+                        primaryRoutes + nativeAlternatives.map { it.route },
+                        responseTimeElapsedSeconds
+                    )
+                }
             }
-            when (result) {
-                AlternativesParsingResult.NotActual -> ExpectedFactory.createError(Throwable("cancelled because another parsing is already in progress"))
-                is AlternativesParsingResult.Parsed -> result.value
-            }
+        val expected = when (alternativesParsingResult) {
+            AlternativesParsingResult.NotActual -> ExpectedFactory.createError(Throwable("cancelled because another parsing is already in progress"))
+            is AlternativesParsingResult.Parsed -> alternativesParsingResult.value
         }
+
         val alternatives: List<NavigationRoute> = if (expected.isValue) {
             expected.value
         } else {
