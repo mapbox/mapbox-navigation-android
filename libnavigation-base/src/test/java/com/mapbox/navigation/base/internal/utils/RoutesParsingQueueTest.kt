@@ -85,30 +85,31 @@ class RoutesParsingQueueTest {
     }
 
     @Test
-    fun `parse alternatives in parallel to reroute`() = runBlockingTest {
+    fun `parse routes in parallel to alternatives`() = runBlockingTest {
         val queue = createParsingQueue()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
 
-        val rerouteParsingResult = async {
-            queue.parseRouteResponse {
-                rerouteResponseParsing.parse()
-            }
-        }
         val alternativesParsingResult = async {
             queue.parseAlternatives {
                 alternativesRouteParsing.parse()
             }
         }
+        val rerouteParsingResult = async {
+            queue.parseRouteResponse {
+                rerouteResponseParsing.parse()
+            }
+        }
+
+        assertTrue(alternativesRouteParsing.isStarted)
+        assertFalse(rerouteResponseParsing.isStarted)
+
+        alternativesRouteParsing.complete("alternatives")
+        assertEquals(AlternativesParsingResult.Parsed("alternatives"), alternativesParsingResult.await())
 
         assertTrue(rerouteResponseParsing.isStarted)
-        assertFalse(alternativesRouteParsing.isStarted)
-
         rerouteResponseParsing.complete("reroute")
         assertEquals("reroute", rerouteParsingResult.await())
-
-        assertFalse(alternativesRouteParsing.isStarted)
-        assertEquals(AlternativesParsingResult.NotActual, alternativesParsingResult.await())
     }
 }
 
