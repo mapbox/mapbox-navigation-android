@@ -111,6 +111,21 @@ class RoutesParsingQueueTest {
         rerouteResponseParsing.complete("reroute")
         assertEquals("reroute", rerouteParsingResult.await())
     }
+
+    @Test
+    fun `parse routes then alterantives`() = runBlocking {
+        val queue = createParsingQueue()
+
+        val routesParstingResult = queue.parseRouteResponse {
+            "test"
+        }
+        assertEquals("test", routesParstingResult)
+
+        val alternativesParsingResult = queue.parseAlternatives {
+            "test"
+        }
+        assertEquals(AlternativesParsingResult.Parsed("test"), alternativesParsingResult)
+    }
 }
 
 fun createParsingQueue() = RoutesParsingQueue()
