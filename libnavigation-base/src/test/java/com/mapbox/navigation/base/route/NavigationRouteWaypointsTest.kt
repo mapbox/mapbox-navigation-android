@@ -140,15 +140,6 @@ class NavigationRouteWaypointsTest(
     fun waypoints() {
         val route = NavigationRoute(
             DirectionsResponse.builder()
-                .routes(
-                    listOf(
-                        DirectionsRoute.builder()
-                            .distance(1.0)
-                            .duration(2.9)
-                            .waypoints(routeWaypoints)
-                            .build()
-                    )
-                )
                 .waypoints(responseWaypoints)
                 .code("Ok")
                 .build(),
@@ -162,6 +153,11 @@ class NavigationRouteWaypointsTest(
                     )
                 )
                 .waypointsPerRoute(waypointsPerRoute)
+                .build(),
+            DirectionsRoute.builder()
+                .distance(1.0)
+                .duration(2.9)
+                .waypoints(routeWaypoints)
                 .build(),
             mockk(relaxed = true),
             null

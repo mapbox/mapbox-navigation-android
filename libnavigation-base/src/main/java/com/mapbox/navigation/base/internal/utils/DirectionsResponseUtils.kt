@@ -46,7 +46,7 @@ suspend fun parseDirectionsResponse(
         }
     }
 
-// this function assumes that all interfaces are generated to the same
+// this function assumes that all interfaces are generated from the same response
 fun parseRouteInterfaces(
     routes: List<RouteInterface>,
     responseTimeElapsedSeconds: Long

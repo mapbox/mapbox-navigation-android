@@ -351,7 +351,8 @@ class NavigationRouteTest {
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            mockk(relaxed = true),
+            DirectionsRoute.fromJson(routeJson),
+                mockk(relaxed = true),
             null
         )
 
@@ -375,6 +376,7 @@ class NavigationRouteTest {
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
+            DirectionsRoute.fromJson(routeJson),
             mockk(relaxed = true),
             null
         )
@@ -405,6 +407,7 @@ class NavigationRouteTest {
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
+            DirectionsRoute.fromJson(routeJson),
             mockk(relaxed = true),
             null
         )

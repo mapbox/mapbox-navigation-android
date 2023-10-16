@@ -694,44 +694,6 @@ class RouteProgressExTest {
             .build()
         return NavigationRoute(
             DirectionsResponse.builder()
-                .routes(
-                    listOf(
-                        DirectionsRoute.builder()
-                            .duration(10.0)
-                            .distance(distance)
-                            .legs(
-                                mutableListOf(
-                                    RouteLeg.builder()
-                                        .annotation(annotations)
-                                        .incidents(incidents)
-                                        .closures(closures)
-                                        .steps(List(2) { validStep })
-                                        .build()
-                                ).apply {
-                                    if (addLeg) {
-                                        add(
-                                            RouteLeg.builder()
-                                                .annotation(annotations)
-                                                .incidents(incidents)
-                                                .closures(closures)
-                                                .steps(List(2) { validStep })
-                                                .build()
-                                        )
-                                    }
-                                }
-                            )
-                            .geometry(
-                                PolylineUtils.encode(
-                                    listOf(
-                                        Point.fromLngLat(11.22, 33.44),
-                                        Point.fromLngLat(23.34, 34.45)
-                                    ),
-                                    5
-                                )
-                            )
-                            .build()
-                    )
-                )
                 .waypoints(dirWaypoints)
                 .code("Ok")
                 .build(),
@@ -740,6 +702,40 @@ class RouteProgressExTest {
                 every { geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
                 every { waypointsPerRoute() } returns false
             },
+            DirectionsRoute.builder()
+                .duration(10.0)
+                .distance(distance)
+                .legs(
+                    mutableListOf(
+                        RouteLeg.builder()
+                            .annotation(annotations)
+                            .incidents(incidents)
+                            .closures(closures)
+                            .steps(List(2) { validStep })
+                            .build()
+                    ).apply {
+                        if (addLeg) {
+                            add(
+                                RouteLeg.builder()
+                                    .annotation(annotations)
+                                    .incidents(incidents)
+                                    .closures(closures)
+                                    .steps(List(2) { validStep })
+                                    .build()
+                            )
+                        }
+                    }
+                )
+                .geometry(
+                    PolylineUtils.encode(
+                        listOf(
+                            Point.fromLngLat(11.22, 33.44),
+                            Point.fromLngLat(23.34, 34.45)
+                        ),
+                        5
+                    )
+                )
+                .build(),
             mockk {
                 every { routeInfo } returns mockk(relaxed = true)
                 every { routeId } returns ""
@@ -1040,45 +1036,6 @@ class RouteProgressExTest {
                 .build()
             return NavigationRoute(
                 DirectionsResponse.builder()
-                    .routes(
-                        listOf(
-                            DirectionsRoute.builder()
-                                .duration(10.0)
-                                .distance(distance)
-                                .waypoints(routeWaypoints)
-                                .legs(
-                                    mutableListOf(
-                                        RouteLeg.builder()
-                                            .annotation(annotations)
-                                            .incidents(incidents)
-                                            .closures(closures)
-                                            .steps(List(2) { validStep })
-                                            .build()
-                                    ).apply {
-                                        if (addLeg) {
-                                            add(
-                                                RouteLeg.builder()
-                                                    .annotation(annotations)
-                                                    .incidents(incidents)
-                                                    .closures(closures)
-                                                    .steps(List(2) { validStep })
-                                                    .build()
-                                            )
-                                        }
-                                    }
-                                )
-                                .geometry(
-                                    PolylineUtils.encode(
-                                        listOf(
-                                            Point.fromLngLat(11.22, 33.44),
-                                            Point.fromLngLat(23.34, 34.45)
-                                        ),
-                                        5
-                                    )
-                                )
-                                .build()
-                        )
-                    )
                     .waypoints(dirWaypoints)
                     .code("Ok")
                     .build(),
@@ -1087,6 +1044,41 @@ class RouteProgressExTest {
                     every { geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
                     every { waypointsPerRoute() } returns waypointsPerRoute
                 },
+                DirectionsRoute.builder()
+                    .duration(10.0)
+                    .distance(distance)
+                    .waypoints(routeWaypoints)
+                    .legs(
+                        mutableListOf(
+                            RouteLeg.builder()
+                                .annotation(annotations)
+                                .incidents(incidents)
+                                .closures(closures)
+                                .steps(List(2) { validStep })
+                                .build()
+                        ).apply {
+                            if (addLeg) {
+                                add(
+                                    RouteLeg.builder()
+                                        .annotation(annotations)
+                                        .incidents(incidents)
+                                        .closures(closures)
+                                        .steps(List(2) { validStep })
+                                        .build()
+                                )
+                            }
+                        }
+                    )
+                    .geometry(
+                        PolylineUtils.encode(
+                            listOf(
+                                Point.fromLngLat(11.22, 33.44),
+                                Point.fromLngLat(23.34, 34.45)
+                            ),
+                            5
+                        )
+                    )
+                    .build(),
                 mockk {
                     every { routeInfo } returns mockk(relaxed = true)
                     every { routeId } returns ""

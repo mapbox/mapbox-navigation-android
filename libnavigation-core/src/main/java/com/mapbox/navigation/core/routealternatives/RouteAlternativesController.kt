@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.routealternatives
 
-import android.util.Log
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
 import com.mapbox.navigation.base.route.NavigationRoute
