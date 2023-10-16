@@ -227,7 +227,7 @@ internal class RouteAlternativesController constructor(
                 "navigation is ready for new alternatives, parsing"
             }
         }
-        // TODO: optimise handling of the same alternatives?
+        // TODO: optimise handling of the same alternatives like when one of two alternatives are removed?
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val expected = withContext(ThreadController.DefaultDispatcher) {
             val result: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> = RoutesParsingQueue.instance.parseAlternatives {
