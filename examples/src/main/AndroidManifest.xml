@@ -25,7 +25,7 @@
     <activity
         android:name=".camera.MapboxCameraAnimationsActivity"
         android:label="@string/title_camera"
-        android:screenOrientation="landscape">
+        android:screenOrientation="portrait">
     </activity>
 
     <activity

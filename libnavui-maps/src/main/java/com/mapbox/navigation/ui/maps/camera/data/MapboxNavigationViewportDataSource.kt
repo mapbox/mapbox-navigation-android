@@ -334,6 +334,10 @@ class MapboxNavigationViewportDataSource(
         viewportDataSourceUpdateObservers.remove(viewportDataSourceUpdateObserver)
     }
 
+    fun testSetViewPortData(viewportData: ViewportData) {
+        this.viewportData = viewportData
+    }
+
     /**
      * Computes [ViewportData] based on the available data, saves the value,
      * and notifies the [ViewportDataSourceUpdateObserver]s.
@@ -342,6 +346,8 @@ class MapboxNavigationViewportDataSource(
      * @see [getViewportData]
      */
     fun evaluate() {
+        if (true) return
+
         val cameraState = mapboxMap.cameraState
         updateFollowingData(cameraState)
         updateOverviewData(cameraState)

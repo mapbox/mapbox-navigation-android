@@ -5,6 +5,9 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -44,6 +47,7 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.FollowingCameraFramingStrategy
 import com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.data.ViewportData
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -59,8 +63,11 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class MapboxCameraAnimationsActivity : AppCompatActivity(), OnMapLongClickListener {
+
+    private val handler = Handler(Looper.getMainLooper())
 
     private val navigationLocationProvider = NavigationLocationProvider()
     private lateinit var locationComponent: LocationComponentPlugin
@@ -376,7 +383,91 @@ class MapboxCameraAnimationsActivity : AppCompatActivity(), OnMapLongClickListen
         val startPoint = Point.fromLngLat(16.225984418396525, 50.90855472797008)
         val wroclaw = Point.fromLngLat(17.034520251843787, 51.11006892885478)
         findRoute(startPoint, wroclaw)
+
+        playCameraAnimationsFromLog()
         return false
+    }
+
+    private fun postDelayed(delay: Long, action: () -> Unit) {
+        handler.postDelayed(action, delay)
+    }
+
+    private fun playCameraAnimationsFromLog() {
+        val entries = TestCameraData.parseEntries()
+        val first = entries.first()
+        viewportDataSource.testSetViewPortData(first.viewportData)
+
+        postDelayed(TimeUnit.SECONDS.toMillis(5)) {
+            for (i in 1 until entries.size) {
+                val entry = entries[i]
+
+                postDelayed(entry.timeInMillis - first.timeInMillis) {
+                    viewportDataSource.testSetViewPortData(entry.viewportData)
+                }
+            }
+        }
+    }
+
+    private fun playDummyCameraAnimations() {
+        val initial = ViewportData(
+            cameraForFollowing = CameraOptions.Builder()
+                .center(Point.fromLngLat(16.229533171877627, 50.908891707721516))
+                .padding(EdgeInsets(1200.0, 876.0, 460.0, 876.0))
+                .zoom(12.0)
+                .bearing(60.76284790039063)
+                .pitch(.0)
+                .build(),
+            cameraForOverview = CameraOptions.Builder()
+                .center(Point.fromLngLat(16.229533171876852, 50.90889170772178))
+                .padding(EdgeInsets(.0, .0, .0, .0))
+                .zoom(12.0)
+                .bearing(.0)
+                .pitch(.0)
+                .build(),
+        )
+
+        val data1 = ViewportData(
+            cameraForFollowing = CameraOptions.Builder()
+                .center(Point.fromLngLat(16.229533171877627, 50.908891707721516))
+                .padding(EdgeInsets(1200.0, 876.0, 460.0, 876.0))
+                .zoom(15.00181818181818)
+                .bearing(60.76284790039063)
+                .pitch(.0)
+                .build(),
+            cameraForOverview = CameraOptions.Builder()
+                .center(Point.fromLngLat(16.229533171876852, 50.90889170772178))
+                .padding(EdgeInsets(.0, .0, .0, .0))
+                .zoom(16.35)
+                .bearing(.0)
+                .pitch(.0)
+                .build(),
+        )
+
+        val data2 = ViewportData(
+            cameraForFollowing = CameraOptions.Builder()
+                .center(Point.fromLngLat(16.240226585939155, 50.91270601014796))
+                .padding(EdgeInsets(650.0, 293.0, 460.0, 293.0))
+                .zoom(13.94199084406257)
+                .bearing(60.4944559881044)
+                .pitch(.0)
+                .build(),
+            cameraForOverview = CameraOptions.Builder()
+                .center(Point.fromLngLat(16.229533171876852, 50.90889170772178))
+                .padding(EdgeInsets(.0, .0, .0, .0))
+                .zoom(16.35)
+                .bearing(.0)
+                .pitch(.0)
+                .build(),
+        )
+
+        viewportDataSource.testSetViewPortData(initial)
+
+        handler.postDelayed({
+            viewportDataSource.testSetViewPortData(data1)
+            handler.postDelayed({
+                viewportDataSource.testSetViewPortData(data2)
+            }, 10)
+        }, 5000)
     }
 
     override fun onStart() {
