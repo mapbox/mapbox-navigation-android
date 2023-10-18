@@ -68,7 +68,7 @@ class NavigationRoute internal constructor(
         routeOptions,
         directionsRoute,
         nativeRoute,
-        directionsResponse.routes().getOrNull(routeIndex)?.legs()
+        directionsRoute.legs()
             ?.map { leg -> leg.closures().orEmpty() }
             .orEmpty(),
         expirationTimeElapsedSeconds,
