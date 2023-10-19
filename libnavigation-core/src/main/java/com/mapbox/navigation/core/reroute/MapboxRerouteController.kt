@@ -39,7 +39,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
     private val compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter,
-    private val prepareForParsingStrategy: suspend () -> Unit
 ) : InternalRerouteController {
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
@@ -55,7 +54,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         rerouteOptions: RerouteOptions,
         threadController: ThreadController,
         evDynamicDataHolder: EVDynamicDataHolder,
-        prepareForParsingStrategy: suspend () -> Unit
     ) : this(
         directionsSession,
         tripSession,
@@ -63,7 +61,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         rerouteOptions,
         threadController,
         MapboxRerouteOptionsAdapter(evDynamicDataHolder),
-        prepareForParsingStrategy
     )
 
     override var state: RerouteState = RerouteState.Idle
@@ -236,7 +233,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         return suspendCancellableCoroutine { cont ->
             val requestId = directionsSession.requestRoutes(
                 routeOptions,
-                object : NavigationRouterCallback, ResponseDownloadedCallback {
+                object : NavigationRouterCallback {
                     override fun onRoutesReady(
                         routes: List<NavigationRoute>,
                         routerOrigin: RouterOrigin
@@ -262,10 +259,6 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                         if (cont.isActive) {
                             cont.resume(RouteRequestResult.Cancellation)
                         }
-                    }
-
-                    override suspend fun onResponseDownloaded() {
-                        prepareForParsingStrategy()
                     }
                 }
             )

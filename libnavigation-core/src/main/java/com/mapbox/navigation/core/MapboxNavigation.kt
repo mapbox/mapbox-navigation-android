@@ -451,6 +451,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             historyRecorderHandles.composite,
         )
         val routesParsingQueue = RoutesParsingQueue()
+        routesParsingQueue.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(
                 ModuleParams.NavigationRouter(
@@ -579,7 +580,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator,
             tripSession,
             threadController,
-            ::prepareNavigaitonForRoutesParsing,
             routesParsingQueue
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -608,7 +608,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.rerouteOptions,
             threadController,
             evDynamicDataHolder,
-            ::prepareNavigaitonForRoutesParsing
         )
         rerouteController = defaultRerouteController
 
@@ -863,7 +862,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeOptions,
             NavigationRouterCallbackWrapperWithNavigationPreparation(
                 callback,
-                ::prepareNavigaitonForRoutesParsing
+                ::prepareNavigationForRoutesParsing
             )
         )
     }
@@ -2180,7 +2179,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         registerRoutesPreviewObserver(routesCacheClearer)
     }
 
-    private suspend fun prepareNavigaitonForRoutesParsing() {
+    private suspend fun prepareNavigationForRoutesParsing() {
         suspendCoroutine<Unit> { continuation ->
             setNavigationRoutes(directionsSession.routes.take(1)) {
                 continuation.resume(Unit)

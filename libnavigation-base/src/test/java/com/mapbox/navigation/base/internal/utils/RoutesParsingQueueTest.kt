@@ -146,7 +146,7 @@ class RoutesParsingQueueTest {
     }
 
     @Test
-    fun `parse routes then alterantives`() = runBlocking {
+    fun `parse routes then alternatives`() = runBlocking {
         val queue = createParsingQueue()
         var preparedForParsingTimes = 0
 
