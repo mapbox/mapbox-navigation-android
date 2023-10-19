@@ -63,6 +63,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -169,6 +170,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         Pair(MapboxRouteLineUtils.layerGroup3SourceKey, RouteLineFeatureId(null))
     )
 
+    init {
+        logI("BelowLayerId: ${options.routeLineBelowLayerId}", TAG)
+        logI("All options: $options", TAG)
+    }
+
     @TestOnly
     internal fun initPrimaryRouteLineLayerGroup(layerIds: Set<String>) {
         primaryRouteLineLayerGroup = layerIds
@@ -244,6 +250,10 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         callback: RoutesRenderedCallbackWrapper?
     ) {
         rebuildSourcesAndLayersIfNeeded(style)
+        logI("Layers size: ${style.styleLayers.size}", TAG)
+        style.styleLayers.forEach {
+            logI("${it.id} properties: ${style.getStyleLayerProperties(it.id).value}", TAG)
+        }
         val primaryRouteTrafficVisibility = getTrafficVisibility(style)
         val primaryRouteVisibility = getPrimaryRouteVisibility(style)
         val alternativeRouteVisibility = getAlternativeRoutesVisibility(style)
@@ -430,6 +440,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             .forEach { mutationCommand ->
                 mutationCommand()
             }
+
+        logI("Layers moved. New order:", TAG)
+        style.styleLayers.forEach {
+            logI("After render ${it.id} properties: ${style.getStyleLayerProperties(it.id).value}", TAG)
+        }
     }
 
     private fun getRelatedSourceKey(
@@ -459,6 +474,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 }
             }
 
+            val trafficProvider = it.routeLineMaskingLayerDynamicData?.trafficExpressionProvider
             ifNonNull(it.routeLineMaskingLayerDynamicData) { overlayData ->
                 overlayData.restrictedSectionExpressionProvider?.apply {
                     getExpressionUpdateFun(MASKING_LAYER_RESTRICTED, this)(style)
@@ -490,8 +506,12 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 if (
                     overlayData.baseExpressionProvider !is RouteLineTrimExpressionProvider
                 ) {
+                    logI("Move layers up.", TAG)
                     getMaskingLayerMoveCommands(style).forEach { mutationCommand ->
                         mutationCommand()
+                    }
+                    style.styleLayers.forEach {
+                        logI("Moved up ${it.id} properties: ${style.getStyleLayerProperties(it.id).value}", TAG)
                     }
                 }
             }
