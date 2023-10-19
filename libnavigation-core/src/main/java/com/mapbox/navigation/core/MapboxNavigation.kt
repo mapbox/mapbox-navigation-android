@@ -153,6 +153,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.lang.reflect.Field
 import java.util.Locale
 import kotlin.coroutines.resume
@@ -2180,9 +2181,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private suspend fun prepareNavigationForRoutesParsing() {
-        suspendCoroutine<Unit> { continuation ->
-            setNavigationRoutes(directionsSession.routes.take(1)) {
-                continuation.resume(Unit)
+        withContext(Dispatchers.Main.immediate) {
+            suspendCoroutine<Unit> { continuation ->
+                setNavigationRoutes(directionsSession.routes.take(1)) {
+                    continuation.resume(Unit)
+                }
             }
         }
     }
