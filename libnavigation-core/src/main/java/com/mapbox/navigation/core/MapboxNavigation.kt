@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
+import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -449,13 +450,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ),
             historyRecorderHandles.composite,
         )
+        val routesParsingQueue = RoutesParsingQueue()
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(
                 ModuleParams.NavigationRouter(
                     accessToken
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
                     nativeRouter,
-                    threadController
+                    threadController,
+                    routesParsingQueue
                 )
             )
         }

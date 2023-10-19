@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.ResponseDownloadedCallback
+import com.mapbox.navigation.base.internal.route.ResponseDownloadedCallback
 
 internal class NavigationRouterCallbackWrapperWithNavigationPreparation(
     private val wrapped: NavigationRouterCallback,

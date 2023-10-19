@@ -20,7 +20,7 @@ import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.ResponseDownloadedCallback
+import com.mapbox.navigation.base.internal.route.ResponseDownloadedCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshCallback
@@ -54,6 +54,7 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
+    private val routesParsingQueue: RoutesParsingQueue
 ) : NavigationRouterV2, InternalRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
@@ -120,7 +121,7 @@ class RouterWrapper(
                             logD(LOG_CATEGORY) {
                                 "enqueuing"
                             }
-                            RoutesParsingQueue.instance.parseRouteResponse {
+                            routesParsingQueue.parseRouteResponse {
                                 logD(LOG_CATEGORY) {
                                     "starting parsing"
                                 }

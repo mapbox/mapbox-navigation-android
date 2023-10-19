@@ -10,13 +10,12 @@ import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.ResponseDownloadedCallback
+import com.mapbox.navigation.base.internal.route.ResponseDownloadedCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
-import com.mapbox.navigation.core.reroute.MapboxRerouteController.Companion.applyRerouteOptions
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
