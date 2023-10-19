@@ -8,12 +8,21 @@ sealed class AlternativesParsingResult<out T> {
     data class Parsed<T>(val value: T) : AlternativesParsingResult<T>()
 }
 
+typealias PrepareForParsingAction = suspend () -> Unit
+
 class RoutesParsingQueue {
 
     private val mutex = Mutex()
 
+    private var prepareForParsingAction: PrepareForParsingAction = { }
+
+    fun setPrepareForParsingAction(action: PrepareForParsingAction) {
+        prepareForParsingAction = action
+    }
+
     suspend fun <T> parseRouteResponse(parsing: suspend () -> T): T {
         return mutex.withLock {
+            prepareForParsingAction()
             parsing()
         }
     }

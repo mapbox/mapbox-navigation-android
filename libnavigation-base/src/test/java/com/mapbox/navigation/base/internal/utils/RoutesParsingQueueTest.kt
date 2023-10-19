@@ -14,18 +14,32 @@ class RoutesParsingQueueTest {
     @Test
     fun `parse routes`() = runBlocking {
         val queue = createParsingQueue()
+        var preparedForParsing = false
+
+        queue.setPrepareForParsingAction {
+            preparedForParsing = true
+        }
         val result = queue.parseRouteResponse {
             "test"
         }
+
+        assertTrue(preparedForParsing)
         assertEquals("test", result)
     }
 
     @Test
     fun `parse alternatives`() = runBlocking {
         val queue = createParsingQueue()
+        var preparedForParsing = false
+
+        queue.setPrepareForParsingAction {
+            preparedForParsing = true
+        }
         val result = queue.parseAlternatives {
             "test"
         }
+
+        assertTrue(preparedForParsing)
         assertEquals(AlternativesParsingResult.Parsed("test"), result)
     }
 
@@ -34,7 +48,11 @@ class RoutesParsingQueueTest {
         val queue = createParsingQueue()
         val rerouteResponseParsing = ParsingTask<String>()
         val newRoutesRequestParsing = ParsingTask<String>()
+        var preparedForParsingTimes = 0
 
+        queue.setPrepareForParsingAction {
+            preparedForParsingTimes++
+        }
         val rerouteParsingResult = async {
             queue.parseRouteResponse {
                 rerouteResponseParsing.parse()
@@ -48,13 +66,16 @@ class RoutesParsingQueueTest {
 
         assertTrue(rerouteResponseParsing.isStarted)
         assertFalse(newRoutesRequestParsing.isStarted)
+        assertEquals(1, preparedForParsingTimes)
 
         rerouteResponseParsing.complete("reroute")
         assertEquals("reroute", rerouteParsingResult.await())
+        assertEquals(2, preparedForParsingTimes)
 
         assertTrue(newRoutesRequestParsing.isStarted)
         newRoutesRequestParsing.complete("new routes")
         assertEquals("new routes", routesParsingResult.await())
+        assertEquals(2, preparedForParsingTimes)
     }
 
     @Test
@@ -62,7 +83,11 @@ class RoutesParsingQueueTest {
         val queue = createParsingQueue()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
+        var preparedForParsingTimes = 0
 
+        queue.setPrepareForParsingAction {
+            preparedForParsingTimes++
+        }
         val rerouteParsingResult = async {
             queue.parseRouteResponse {
                 rerouteResponseParsing.parse()
@@ -76,12 +101,14 @@ class RoutesParsingQueueTest {
 
         assertTrue(rerouteResponseParsing.isStarted)
         assertFalse(alternativesRouteParsing.isStarted)
+        assertEquals(1, preparedForParsingTimes)
 
         rerouteResponseParsing.complete("reroute")
         assertEquals("reroute", rerouteParsingResult.await())
 
         assertFalse(alternativesRouteParsing.isStarted)
         assertEquals(AlternativesParsingResult.NotActual, alternativesParsingResult.await())
+        assertEquals(1, preparedForParsingTimes)
     }
 
     @Test
@@ -89,7 +116,11 @@ class RoutesParsingQueueTest {
         val queue = createParsingQueue()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
+        var preparedForParsingTimes = 0
 
+        queue.setPrepareForParsingAction {
+            preparedForParsingTimes++
+        }
         val alternativesParsingResult = async {
             queue.parseAlternatives {
                 alternativesRouteParsing.parse()
@@ -103,19 +134,25 @@ class RoutesParsingQueueTest {
 
         assertTrue(alternativesRouteParsing.isStarted)
         assertFalse(rerouteResponseParsing.isStarted)
+        assertEquals(1, preparedForParsingTimes)
 
         alternativesRouteParsing.complete("alternatives")
         assertEquals(AlternativesParsingResult.Parsed("alternatives"), alternativesParsingResult.await())
 
         assertTrue(rerouteResponseParsing.isStarted)
-        rerouteResponseParsing.complete("reroute")
-        assertEquals("reroute", rerouteParsingResult.await())
+        assertEquals(2, preparedForParsingTimes)
+        rerouteResponseParsing.complete("new routes")
+        assertEquals("new routes", rerouteParsingResult.await())
     }
 
     @Test
     fun `parse routes then alterantives`() = runBlocking {
         val queue = createParsingQueue()
+        var preparedForParsingTimes = 0
 
+        queue.setPrepareForParsingAction {
+            preparedForParsingTimes++
+        }
         val routesParstingResult = queue.parseRouteResponse {
             "test"
         }
@@ -125,6 +162,7 @@ class RoutesParsingQueueTest {
             "test"
         }
         assertEquals(AlternativesParsingResult.Parsed("test"), alternativesParsingResult)
+        assertEquals(2, preparedForParsingTimes)
     }
 }
 
