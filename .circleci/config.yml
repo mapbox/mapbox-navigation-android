@@ -127,26 +127,32 @@ workflows:
           requires:
             - assemble-instrumentation-test-internal
       - instrumentation-tests-part:
+          name: instrumentation-tests-part-1
           suite: TestSuitePart1
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests-part:
+          name: instrumentation-tests-part-2
           suite: TestSuitePart2
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests-part:
+          name: instrumentation-tests-part-3
           suite: TestSuitePart3
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests-part:
+          name: instrumentation-tests-part-4
           suite: TestSuitePart4
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests-part:
+          name: instrumentation-tests-part-5
           suite: TestSuitePart5
           requires:
             - assemble-instrumentation-test
       - instrumentation-tests-part:
+          name: instrumentation-tests-part-6
           suite: TestSuitePart6
           requires:
             - assemble-instrumentation-test
