@@ -14,7 +14,7 @@ typealias PrepareForParsingAction = suspend () -> Unit
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RoutesParsingQueue(
-    val longRoutesOptimisationOptions: LongRoutesOptimisationOptions
+    private val longRoutesOptimisationOptions: LongRoutesOptimisationOptions
 ) {
 
     private val mutex = Mutex()
