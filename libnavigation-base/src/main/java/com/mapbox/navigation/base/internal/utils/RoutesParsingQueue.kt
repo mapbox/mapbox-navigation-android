@@ -27,7 +27,7 @@ class RoutesParsingQueue {
         }
     }
 
-    suspend fun <T> parseAlternatives(parsing: suspend () -> T): AlternativesParsingResult<T> {
+    suspend fun <T> parseAlternatives(arguments: ParseAlternativesArguments, parsing: suspend () -> T): AlternativesParsingResult<T> {
         return if (mutex.isLocked) {
             AlternativesParsingResult.NotActual
         } else {
@@ -35,3 +35,8 @@ class RoutesParsingQueue {
         }
     }
 }
+
+data class ParseAlternativesArguments(
+    val newResponseSizeBytes: Int,
+    val currentRouteLength: Double
+)

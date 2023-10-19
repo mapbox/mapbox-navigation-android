@@ -1,5 +1,9 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.base.internal.utils
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -35,7 +39,7 @@ class RoutesParsingQueueTest {
         queue.setPrepareForParsingAction {
             preparedForParsing = true
         }
-        val result = queue.parseAlternatives {
+        val result = queue.parseAlternatives(longRoutesParsingArgs()) {
             "test"
         }
 
@@ -94,7 +98,7 @@ class RoutesParsingQueueTest {
             }
         }
         val alternativesParsingResult = async {
-            queue.parseAlternatives {
+            queue.parseAlternatives(longRoutesParsingArgs()) {
                 alternativesRouteParsing.parse()
             }
         }
@@ -122,7 +126,7 @@ class RoutesParsingQueueTest {
             preparedForParsingTimes++
         }
         val alternativesParsingResult = async {
-            queue.parseAlternatives {
+            queue.parseAlternatives(longRoutesParsingArgs()) {
                 alternativesRouteParsing.parse()
             }
         }
@@ -137,7 +141,10 @@ class RoutesParsingQueueTest {
         assertEquals(1, preparedForParsingTimes)
 
         alternativesRouteParsing.complete("alternatives")
-        assertEquals(AlternativesParsingResult.Parsed("alternatives"), alternativesParsingResult.await())
+        assertEquals(
+            AlternativesParsingResult.Parsed("alternatives"),
+            alternativesParsingResult.await()
+        )
 
         assertTrue(rerouteResponseParsing.isStarted)
         assertEquals(2, preparedForParsingTimes)
@@ -158,7 +165,7 @@ class RoutesParsingQueueTest {
         }
         assertEquals("test", routesParstingResult)
 
-        val alternativesParsingResult = queue.parseAlternatives {
+        val alternativesParsingResult = queue.parseAlternatives(longRoutesParsingArgs()) {
             "test"
         }
         assertEquals(AlternativesParsingResult.Parsed("test"), alternativesParsingResult)
@@ -172,11 +179,25 @@ class ParsingTask<T>() {
     private val completableDeferred = CompletableDeferred<T>()
     var isStarted = false
         private set
+
     fun complete(result: T) {
         completableDeferred.complete(result)
     }
-    suspend fun parse():T {
+
+    suspend fun parse(): T {
         isStarted = true
         return completableDeferred.await()
     }
 }
+
+private fun optimiseLongRoutesConfig() =
+    LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
+        currentRouteLengthMeters = 4000 * 1000,
+        responseToParseSizeBytes = 20 * 1024 * 1024
+    )
+
+private fun longRoutesParsingArgs() =
+    ParseAlternativesArguments(
+        currentRouteLength = (optimiseLongRoutesConfig().currentRouteLengthMeters + 1).toDouble(),
+        newResponseSizeBytes = optimiseLongRoutesConfig().responseToParseSizeBytes + 1
+    )

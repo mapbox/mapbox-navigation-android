@@ -14,7 +14,7 @@ sealed class LongRoutesOptimisationOptions {
      */
     data class OptimiseNavigationForLongRoutes(
         val currentRouteLengthMeters: Int,
-        val responseToParseSizeBytes: Long,
+        val responseToParseSizeBytes: Int,
     ): LongRoutesOptimisationOptions()
 
     object NoOptimisations: LongRoutesOptimisationOptions()

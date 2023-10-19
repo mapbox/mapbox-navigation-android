@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.routealternatives
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
+import com.mapbox.navigation.base.internal.utils.ParseAlternativesArguments
 import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
@@ -220,16 +221,28 @@ internal class RouteAlternativesController constructor(
     ) = mainJobControl.scope.launch {
         val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
 
+        val routeProgress = tripSession.getRouteProgress()
+            ?: run {
+                logD("skipping alternatives update - no progress", LOG_CATEGORY)
+                return@launch
+            }
+
         // TODO: optimise handling of the same alternatives like when one of two alternatives are removed? Should we reuse routes from directions session?
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
+        val allAlterantives = primaryRoutes + nativeAlternatives.map { it.route }
 
+
+        //TODO: don't parse alternatives if there is nothing to parse
+        val args = ParseAlternativesArguments(
+            newResponseSizeBytes = allAlterantives.first().responseJsonRef.buffer.remaining(),
+            currentRouteLength = routeProgress.route.distance()
+        )
         val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
-            //TODO: don't parse alternatives if there is nothing to parse
-            routesParsingQueue.parseAlternatives {
+            routesParsingQueue.parseAlternatives(args) {
                 // TODO: what if a single alternative is removed while the other stays?
                 withContext(ThreadController.DefaultDispatcher) {
                     parseRouteInterfaces(
-                        primaryRoutes + nativeAlternatives.map { it.route },
+                        allAlterantives,
                         responseTimeElapsedSeconds
                     )
                 }
