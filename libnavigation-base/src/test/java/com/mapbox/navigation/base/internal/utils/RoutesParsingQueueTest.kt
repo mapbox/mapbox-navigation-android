@@ -17,7 +17,7 @@ import org.junit.Test
 class RoutesParsingQueueTest {
     @Test
     fun `parse routes`() = runBlocking {
-        val queue = createParsingQueue()
+        val queue = createParsingQueueWithOptimisationsEnabled()
         var preparedForParsing = false
 
         queue.setPrepareForParsingAction {
@@ -33,7 +33,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse alternatives`() = runBlocking {
-        val queue = createParsingQueue()
+        val queue = createParsingQueueWithOptimisationsEnabled()
         var preparedForParsing = false
 
         queue.setPrepareForParsingAction {
@@ -49,7 +49,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse routes in parallel`() = runBlockingTest {
-        val queue = createParsingQueue()
+        val queue = createParsingQueueWithOptimisationsEnabled()
         val rerouteResponseParsing = ParsingTask<String>()
         val newRoutesRequestParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
@@ -84,7 +84,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse alternatives in parallel to reroute`() = runBlockingTest {
-        val queue = createParsingQueue()
+        val queue = createParsingQueueWithOptimisationsEnabled()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
@@ -117,7 +117,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse routes in parallel to alternatives`() = runBlockingTest {
-        val queue = createParsingQueue()
+        val queue = createParsingQueueWithOptimisationsEnabled()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
@@ -154,7 +154,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse routes then alternatives`() = runBlocking {
-        val queue = createParsingQueue()
+        val queue = createParsingQueueWithOptimisationsEnabled()
         var preparedForParsingTimes = 0
 
         queue.setPrepareForParsingAction {
@@ -173,7 +173,7 @@ class RoutesParsingQueueTest {
     }
 }
 
-fun createParsingQueue() = RoutesParsingQueue()
+fun createParsingQueueWithOptimisationsEnabled() = RoutesParsingQueue(optimiseLongRoutesConfig())
 
 class ParsingTask<T>() {
     private val completableDeferred = CompletableDeferred<T>()

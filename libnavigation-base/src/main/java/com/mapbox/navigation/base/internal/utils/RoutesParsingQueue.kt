@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.internal.utils
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -10,7 +12,10 @@ sealed class AlternativesParsingResult<out T> {
 
 typealias PrepareForParsingAction = suspend () -> Unit
 
-class RoutesParsingQueue {
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+class RoutesParsingQueue(
+    val longRoutesOptimisationOptions: LongRoutesOptimisationOptions
+) {
 
     private val mutex = Mutex()
 
@@ -27,7 +32,10 @@ class RoutesParsingQueue {
         }
     }
 
-    suspend fun <T> parseAlternatives(arguments: ParseAlternativesArguments, parsing: suspend () -> T): AlternativesParsingResult<T> {
+    suspend fun <T> parseAlternatives(
+        arguments: ParseAlternativesArguments,
+        parsing: suspend () -> T
+    ): AlternativesParsingResult<T> {
         return if (mutex.isLocked) {
             AlternativesParsingResult.NotActual
         } else {

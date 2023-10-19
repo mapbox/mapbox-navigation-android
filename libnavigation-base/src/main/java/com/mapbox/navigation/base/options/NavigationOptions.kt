@@ -68,7 +68,7 @@ private constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     val copilotOptions: CopilotOptions,
     @ExperimentalPreviewMapboxNavigationAPI
-    val longRoutesOptimisationOptions: LongRoutesOptimisationOptions?
+    val longRoutesOptimisationOptions: LongRoutesOptimisationOptions
 ) {
 
     /**
@@ -218,7 +218,8 @@ private constructor(
         private var enableSensors: Boolean = false
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-        private var longRoutesOptimisationOptions: LongRoutesOptimisationOptions? = null
+        private var longRoutesOptimisationOptions: LongRoutesOptimisationOptions =
+            LongRoutesOptimisationOptions.NoOptimisations
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
@@ -337,7 +338,7 @@ private constructor(
 
         @ExperimentalPreviewMapboxNavigationAPI
         fun longRoutesOptimisationOptions(
-            longRoutesOptimisationOptions: LongRoutesOptimisationOptions?
+            longRoutesOptimisationOptions: LongRoutesOptimisationOptions
         ): Builder =
             apply { this.longRoutesOptimisationOptions = longRoutesOptimisationOptions }
 
