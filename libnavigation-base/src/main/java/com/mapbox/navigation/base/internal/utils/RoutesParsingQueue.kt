@@ -25,8 +25,4 @@ class RoutesParsingQueue {
             AlternativesParsingResult.Parsed(parseRouteResponse(parsing))
         }
     }
-
-    companion object {
-        val instance = RoutesParsingQueue()
-    }
 }

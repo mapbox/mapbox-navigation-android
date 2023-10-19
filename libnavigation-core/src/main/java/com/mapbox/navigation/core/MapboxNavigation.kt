@@ -579,7 +579,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator,
             tripSession,
             threadController,
-            ::prepareNavigaitonForRoutesParsing
+            ::prepareNavigaitonForRoutesParsing,
+            routesParsingQueue
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(

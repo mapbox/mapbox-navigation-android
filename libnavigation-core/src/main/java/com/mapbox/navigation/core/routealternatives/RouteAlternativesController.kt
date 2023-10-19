@@ -32,7 +32,8 @@ internal class RouteAlternativesController constructor(
     private val navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
     private val threadController: ThreadController,
-    private val prepareForRoutesParsing: suspend () -> Unit
+    private val prepareForRoutesParsing: suspend () -> Unit,
+    private val routesParsingQueue: RoutesParsingQueue
 ) : AlternativeMetadataProvider {
 
     private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
@@ -224,7 +225,7 @@ internal class RouteAlternativesController constructor(
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
 
         val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
-            RoutesParsingQueue.instance.parseAlternatives {
+            routesParsingQueue.parseAlternatives {
                 // TODO: what if a single alternative is removed while the other stays?
                 if (onlinePrimaryRoute != null || nativeAlternatives.isNotEmpty()) {
                     logD(LOG_CATEGORY) {
