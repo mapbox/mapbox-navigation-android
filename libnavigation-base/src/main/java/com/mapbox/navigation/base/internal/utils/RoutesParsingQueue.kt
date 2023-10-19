@@ -26,9 +26,13 @@ class RoutesParsingQueue(
     }
 
     suspend fun <T> parseRouteResponse(parsing: suspend () -> T): T {
-        return mutex.withLock {
-            prepareForParsingAction()
+        return if (longRoutesOptimisationOptions is LongRoutesOptimisationOptions.NoOptimisations) {
             parsing()
+        } else {
+            mutex.withLock {
+                prepareForParsingAction()
+                parsing()
+            }
         }
     }
 

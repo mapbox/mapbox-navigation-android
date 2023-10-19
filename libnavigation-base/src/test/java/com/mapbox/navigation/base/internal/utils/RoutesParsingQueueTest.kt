@@ -48,7 +48,7 @@ class RoutesParsingQueueTest {
     }
 
     @Test
-    fun `parse routes in parallel`() = runBlockingTest {
+    fun `parse routes in parallel with optimisations`() = runBlockingTest {
         val queue = createParsingQueueWithOptimisationsEnabled()
         val rerouteResponseParsing = ParsingTask<String>()
         val newRoutesRequestParsing = ParsingTask<String>()
@@ -80,6 +80,40 @@ class RoutesParsingQueueTest {
         newRoutesRequestParsing.complete("new routes")
         assertEquals("new routes", routesParsingResult.await())
         assertEquals(2, preparedForParsingTimes)
+    }
+
+    @Test
+    fun `parse routes in parallel without optimisations`() = runBlockingTest {
+        val queue = createParsingQueueWithOptimisationsDisabled()
+        val rerouteResponseParsing = ParsingTask<String>()
+        val newRoutesRequestParsing = ParsingTask<String>()
+        var preparedForParsingTimes = 0
+
+        queue.setPrepareForParsingAction {
+            preparedForParsingTimes++
+        }
+        val rerouteParsingResult = async {
+            queue.parseRouteResponse {
+                rerouteResponseParsing.parse()
+            }
+        }
+        val routesParsingResult = async {
+            queue.parseRouteResponse {
+                newRoutesRequestParsing.parse()
+            }
+        }
+
+        assertTrue(rerouteResponseParsing.isStarted)
+        assertTrue(newRoutesRequestParsing.isStarted)
+        assertEquals(0, preparedForParsingTimes)
+
+        rerouteResponseParsing.complete("reroute")
+        assertEquals("reroute", rerouteParsingResult.await())
+        assertEquals(0, preparedForParsingTimes)
+
+        newRoutesRequestParsing.complete("new routes")
+        assertEquals("new routes", routesParsingResult.await())
+        assertEquals(0, preparedForParsingTimes)
     }
 
     @Test
@@ -174,6 +208,8 @@ class RoutesParsingQueueTest {
 }
 
 fun createParsingQueueWithOptimisationsEnabled() = RoutesParsingQueue(optimiseLongRoutesConfig())
+
+fun createParsingQueueWithOptimisationsDisabled() = RoutesParsingQueue(LongRoutesOptimisationOptions.NoOptimisations)
 
 class ParsingTask<T>() {
     private val completableDeferred = CompletableDeferred<T>()
