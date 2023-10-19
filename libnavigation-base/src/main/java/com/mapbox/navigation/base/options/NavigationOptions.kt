@@ -67,6 +67,8 @@ private constructor(
     val enableSensors: Boolean,
     @ExperimentalPreviewMapboxNavigationAPI
     val copilotOptions: CopilotOptions,
+    @ExperimentalPreviewMapboxNavigationAPI
+    val longRoutesOptimisationOptions: LongRoutesOptimisationOptions?
 ) {
 
     /**
@@ -92,6 +94,7 @@ private constructor(
         eventsAppMetadata(eventsAppMetadata)
         enableSensors(enableSensors)
         copilotOptions(copilotOptions)
+        longRoutesOptimisationOptions(longRoutesOptimisationOptions)
     }
 
     /**
@@ -215,6 +218,9 @@ private constructor(
         private var enableSensors: Boolean = false
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        private var longRoutesOptimisationOptions: LongRoutesOptimisationOptions? = null
+
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
 
         /**
@@ -329,6 +335,12 @@ private constructor(
         fun copilotOptions(copilotOptions: CopilotOptions): Builder =
             apply { this.copilotOptions = copilotOptions }
 
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun longRoutesOptimisationOptions(
+            longRoutesOptimisationOptions: LongRoutesOptimisationOptions?
+        ): Builder =
+            apply { this.longRoutesOptimisationOptions = longRoutesOptimisationOptions }
+
         /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
@@ -355,6 +367,7 @@ private constructor(
                 eventsAppMetadata = eventsAppMetadata,
                 enableSensors = enableSensors,
                 copilotOptions = copilotOptions,
+                longRoutesOptimisationOptions = longRoutesOptimisationOptions
             )
         }
     }
