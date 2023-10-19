@@ -696,14 +696,17 @@ commands:
 #--------------------------
 jobs:
   instrumentation-tests:
+    executor: ndk-r22-latest-executor
     steps:
       - run: exit 0
 
   static-analysis:
+    executor: ndk-r22-latest-executor
     steps:
       - run: exit 0
 
   prepare-and-assemble:
+    executor: ndk-r22-latest-executor
     steps:
       - run: exit 0
 
