@@ -2,6 +2,7 @@
 
 package com.mapbox.navigation.core.routealternatives
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
@@ -197,7 +198,14 @@ class RouteAlternativesControllerTest {
             nativeObserver.captured.onRouteAlternativesUpdated(
                 null,
                 listOf(
-                    createNativeAlternativeMock()
+                    createNativeAlternativeMock(
+                        alternativeId = 0,
+                        fileName = "route_alternative_from_native.json"
+                    ),
+                    createNativeAlternativeMock(
+                        alternativeId = 1,
+                        fileName = "route_response_new_for_refresh.json"
+                    )
                 ),
                 emptyList()
             )
@@ -206,12 +214,14 @@ class RouteAlternativesControllerTest {
             verify(exactly = 1) {
                 firstObserver.onRouteAlternatives(routeProgress, capture(firstRoutesSlot), any())
             }
-            assertEquals(1, firstRoutesSlot.captured.size)
+            assertEquals(2, firstRoutesSlot.captured.size)
+            assertEquals("FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==", firstRoutesSlot.captured[0].directionsResponse.uuid())
+            assertEquals("route_response_new_for_refresh", firstRoutesSlot.captured[1].directionsResponse.uuid())
             val secondRoutesSlot = slot<List<NavigationRoute>>()
             verify(exactly = 1) {
                 secondObserver.onRouteAlternatives(routeProgress, capture(secondRoutesSlot), any())
             }
-            assertEquals(1, secondRoutesSlot.captured.size)
+            assertEquals(2, secondRoutesSlot.captured.size)
 
             unmockkStatic(RouteOptions::fromUrl)
         }
@@ -905,10 +915,13 @@ class RouteAlternativesControllerTest {
         routerOrigin: com.mapbox.navigator.RouterOrigin = com.mapbox.navigator.RouterOrigin.ONBOARD,
         fileName: String = "route_alternative_from_native.json"
     ): RouteAlternative {
+        val responseJson = FileUtils.loadJsonFixture(fileName)
+        val response = DirectionsResponse.fromJson(responseJson)
         val nativeRoute = createRouteInterface(
             responseJson = FileUtils.loadJsonFixture(fileName),
             requestURI = genericURL.toString(),
-            routerOrigin = routerOrigin
+            routerOrigin = routerOrigin,
+            responseUUID = response.uuid()!!
         )
         return mockk {
             every { route } returns nativeRoute

@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsResponse
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.CoroutineDispatcher
@@ -46,22 +47,23 @@ suspend fun parseDirectionsResponse(
         }
     }
 
-// this function assumes that all interfaces are generated from the same response
 fun parseRouteInterfaces(
     routes: List<RouteInterface>,
     responseTimeElapsedSeconds: Long
 ): Expected<Throwable, List<NavigationRoute>> {
-    if (routes.isEmpty()) {
-        return ExpectedFactory.createValue(emptyList())
-    }
     return try {
-        Log.d("vadzim-test", "parsing directions response from the first alternative")
-        val directionsResponse = routes.first().responseJsonRef.toDirectionsResponse()
-        Log.d("vadzim-test", "finished parsing response from the first alternative")
-        return ExpectedFactory.createValue(routes.map {
-            it.toNavigationRoute(responseTimeElapsedSeconds, directionsResponse)
-        })
-    } catch (ex: Exception) {
+        routes.groupBy { it.responseUuid }
+            .map { (_, routes) ->
+                val directionsResponse = routes.first().responseJsonRef.toDirectionsResponse()
+                routes.map {
+                    it.toNavigationRoute(responseTimeElapsedSeconds, directionsResponse)
+                }
+            }
+            .flatten()
+            .sortedBy { routes.indexOf(it.nativeRoute) }
+            .let { ExpectedFactory.createValue(it) }
+    }
+    catch (ex: Exception) {
         when (ex) {
             is JSONException,
             is IllegalStateException,
