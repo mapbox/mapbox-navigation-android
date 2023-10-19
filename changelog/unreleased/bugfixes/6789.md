@@ -1,0 +1,1 @@
+- Made default rounding increment in `DistanceFormatterOptions` dependent on distance numerical value.
