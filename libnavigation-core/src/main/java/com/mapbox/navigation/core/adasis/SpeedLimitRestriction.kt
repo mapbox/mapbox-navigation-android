@@ -1,18 +1,19 @@
 package com.mapbox.navigation.core.adasis
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.sensor.SensorData
 
 /**
  * Speed limit restriction
  *
  * @param weather Weather conditions where the speed limit is applied. Empty means all
- * @param dateTimeCondition OSM "openning_hours" format, see https://wiki.openstreetmap.org/wiki/Key:opening_hours
+ * @param dateTimeCondition OSM "opening_hours" format, see https://wiki.openstreetmap.org/wiki/Key:opening_hours
  * @param vehicleTypes A list of types of vehicles for that the speed limit is included. Empty means all
  * @param lanes Lane numbers where the speed limit is valid. Empty array means all lanes
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class SpeedLimitRestriction private constructor(
-    val weather: List<Weather>,
+    val weather: List<SensorData.Weather.Condition>,
     val dateTimeCondition: String,
     val vehicleTypes: List<VehicleType>,
     val lanes: List<Byte>
@@ -56,47 +57,6 @@ class SpeedLimitRestriction private constructor(
             "vehicleTypes=$vehicleTypes, " +
             "lanes=$lanes" +
             ")"
-    }
-
-    /**
-     * Weather conditions where the speed limit is applied.
-     *
-     * TODO merge with [com.mapbox.navigation.core.sensor.SensorData.Weather.Condition]?
-     */
-    abstract class Weather internal constructor() {
-
-        /**
-         * Rain weather condition
-         */
-        object Rain : Weather()
-
-        /**
-         * Snow weather condition
-         */
-        object Snow : Weather()
-
-        /**
-         * Fog weather condition
-         */
-        object Fog : Weather()
-
-        /**
-         * Wet road condition
-         */
-        object WetRoad : Weather()
-
-        internal companion object {
-
-            @JvmSynthetic
-            fun createFromNativeObject(nativeObj: com.mapbox.navigator.Weather): Weather {
-                return when (nativeObj) {
-                    com.mapbox.navigator.Weather.RAIN -> Rain
-                    com.mapbox.navigator.Weather.SNOW -> Snow
-                    com.mapbox.navigator.Weather.FOG -> Fog
-                    com.mapbox.navigator.Weather.WET_ROAD -> WetRoad
-                }
-            }
-        }
     }
 
     /**
@@ -149,7 +109,9 @@ class SpeedLimitRestriction private constructor(
         @JvmSynthetic
         fun createFromNativeObject(nativeObj: com.mapbox.navigator.SpeedLimitRestriction) =
             SpeedLimitRestriction(
-                weather = nativeObj.weather.map { Weather.createFromNativeObject(it) },
+                weather = nativeObj.weather.map {
+                    SensorData.Weather.Condition.createFromNativeObject(it)
+                },
                 dateTimeCondition = nativeObj.dateTimeCondition,
                 vehicleTypes = nativeObj.vehicleTypes.map { VehicleType.createFromNativeObject(it) },
                 lanes = nativeObj.lanes,

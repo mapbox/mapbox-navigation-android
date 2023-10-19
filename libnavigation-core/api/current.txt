@@ -374,11 +374,11 @@ package com.mapbox.navigation.core.adasis {
     method public String getDateTimeCondition();
     method public java.util.List<java.lang.Byte> getLanes();
     method public java.util.List<com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType> getVehicleTypes();
-    method public java.util.List<com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather> getWeather();
+    method public java.util.List<com.mapbox.navigation.core.sensor.SensorData.Weather.Condition> getWeather();
     property public final String dateTimeCondition;
     property public final java.util.List<java.lang.Byte> lanes;
     property public final java.util.List<com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType> vehicleTypes;
-    property public final java.util.List<com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather> weather;
+    property public final java.util.List<com.mapbox.navigation.core.sensor.SensorData.Weather.Condition> weather;
   }
 
   public abstract static class SpeedLimitRestriction.VehicleType {
@@ -404,25 +404,6 @@ package com.mapbox.navigation.core.adasis {
     field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.VehicleType.Truck INSTANCE;
   }
 
-  public abstract static class SpeedLimitRestriction.Weather {
-  }
-
-  public static final class SpeedLimitRestriction.Weather.Fog extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather {
-    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather.Fog INSTANCE;
-  }
-
-  public static final class SpeedLimitRestriction.Weather.Rain extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather {
-    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather.Rain INSTANCE;
-  }
-
-  public static final class SpeedLimitRestriction.Weather.Snow extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather {
-    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather.Snow INSTANCE;
-  }
-
-  public static final class SpeedLimitRestriction.Weather.WetRoad extends com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather {
-    field public static final com.mapbox.navigation.core.adasis.SpeedLimitRestriction.Weather.WetRoad INSTANCE;
-  }
-
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class Stub {
     ctor public Stub(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options);
     method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
@@ -430,10 +411,8 @@ package com.mapbox.navigation.core.adasis {
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ValueOnEdge {
-    method public double getPercentAlong();
     method public float getShapeIndex();
     method public double getValue();
-    property public final double percentAlong;
     property public final float shapeIndex;
     property public final double value;
   }
@@ -1267,6 +1246,10 @@ package com.mapbox.navigation.core.sensor {
 
   public static final class SensorData.Weather.Condition.Snow extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
     field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.Snow INSTANCE;
+  }
+
+  public static final class SensorData.Weather.Condition.WetRoad extends com.mapbox.navigation.core.sensor.SensorData.Weather.Condition {
+    field public static final com.mapbox.navigation.core.sensor.SensorData.Weather.Condition.WetRoad INSTANCE;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface UpdateExternalSensorDataCallback {

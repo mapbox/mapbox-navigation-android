@@ -8,14 +8,14 @@ import com.mapbox.navigator.SpeedLimitUnit
 /**
  * Speed limit info.
  *
- * @param value TODO
- * @param speedUnit TODO
- * @param type TODO
- * @param restriction TODO
+ * @param value the numerical value of the limit
+ * @param speedUnit the unit the value is specified in
+ * @param type speed limit type, see [Type]
+ * @param restriction speed limit restriction, see [SpeedLimitRestriction]
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class SpeedLimitInfo private constructor(
-    val value: Byte,
+    val value: Short,
     val speedUnit: SpeedUnit,
     val type: Type,
     val restriction: SpeedLimitRestriction,

@@ -4,6 +4,7 @@ import android.os.SystemClock
 import com.mapbox.bindgen.Value
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigator.SensorType
+import com.mapbox.navigator.Weather
 
 /**
  * Data obtained from sensors
@@ -65,6 +66,24 @@ abstract class SensorData internal constructor() {
              * Fog weather condition
              */
             object Fog : Condition()
+
+            /**
+             * Wet road weather condition
+             */
+            object WetRoad : Condition()
+
+            internal companion object {
+
+                @JvmSynthetic
+                fun createFromNativeObject(nativeObject: com.mapbox.navigator.Weather): Condition {
+                    return when (nativeObject) {
+                        com.mapbox.navigator.Weather.FOG -> Fog
+                        com.mapbox.navigator.Weather.RAIN -> Rain
+                        com.mapbox.navigator.Weather.SNOW -> Snow
+                        com.mapbox.navigator.Weather.WET_ROAD -> WetRoad
+                    }
+                }
+            }
         }
     }
 
@@ -138,6 +157,7 @@ abstract class SensorData internal constructor() {
             is Weather.Condition.Rain -> 0
             is Weather.Condition.Snow -> 1
             is Weather.Condition.Fog -> 2
+            is Weather.Condition.WetRoad -> 3
             else -> error("Unsupported weather condition type: $condition")
         }
         return Value.valueOf(order)
