@@ -229,42 +229,45 @@ internal class RouteAlternativesController constructor(
 
         // TODO: optimise handling of the same alternatives like when one of two alternatives are removed? Should we reuse routes from directions session?
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
-        val allAlterantives = primaryRoutes + nativeAlternatives.map { it.route }
+        val allAlternatives = primaryRoutes + nativeAlternatives.map { it.route }
 
-
-        //TODO: don't parse alternatives if there is nothing to parse
-        val args = ParseAlternativesArguments(
-            newResponseSizeBytes = allAlterantives.first().responseJsonRef.buffer.remaining(),
-            currentRouteLength = routeProgress.route.distance()
-        )
-        val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
-            routesParsingQueue.parseAlternatives(args) {
-                // TODO: what if a single alternative is removed while the other stays?
-                withContext(ThreadController.DefaultDispatcher) {
-                    parseRouteInterfaces(
-                        allAlterantives,
-                        responseTimeElapsedSeconds
-                    )
+        val alternatives: List<NavigationRoute> =  if (allAlternatives.isNotEmpty()) {
+            //TODO: don't parse alternatives if there is nothing to parse
+            val args = ParseAlternativesArguments(
+                newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.remaining(), // TODO: does the position always point to the beginning?
+                currentRouteLength = routeProgress.route.distance()
+            )
+            val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
+                routesParsingQueue.parseAlternatives(args) {
+                    // TODO: what if a single alternative is removed while the other stays?
+                    withContext(ThreadController.DefaultDispatcher) {
+                        parseRouteInterfaces(
+                            allAlternatives,
+                            responseTimeElapsedSeconds
+                        )
+                    }
                 }
+            val expected = when (alternativesParsingResult) {
+                AlternativesParsingResult.NotActual -> ExpectedFactory.createError(Throwable("cancelled because another parsing is already in progress"))
+                is AlternativesParsingResult.Parsed -> alternativesParsingResult.value
             }
-        val expected = when (alternativesParsingResult) {
-            AlternativesParsingResult.NotActual -> ExpectedFactory.createError(Throwable("cancelled because another parsing is already in progress"))
-            is AlternativesParsingResult.Parsed -> alternativesParsingResult.value
-        }
 
-        val alternatives: List<NavigationRoute> = if (expected.isValue) {
-            expected.value
-        } else {
-            logE(
-                """
+            if (expected.isValue) {
+                expected.value
+            } else {
+                logE(
+                    """
                         |unable to parse alternatives;
                         |failure for response with uuid: 
                         |${nativeAlternatives.firstOrNull()?.route?.responseUuid}
                 """.trimMargin(),
-                LOG_CATEGORY
-            )
-            null
-        } ?: return@launch
+                    LOG_CATEGORY
+                )
+                null
+            } ?: return@launch
+        } else {
+            emptyList()
+        }
 
         processAlternativesMetadata(alternatives, nativeAlternatives)
         val newAlternatives = alternatives

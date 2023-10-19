@@ -1,9 +1,14 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.core.routealternatives
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.isExpired
+import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
+import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -64,7 +69,7 @@ class RouteAlternativesControllerTest {
     private val navigator: MapboxNativeNavigator = mockk {
         every { routeAlternativesController } returns controllerInterface
     }
-    private val tripSession: TripSession = mockk(relaxUnitFun = true)
+    private val tripSession: TripSession = mockk(relaxed = true)
     private val responseTime = 12345L
 
     private fun createRouteAlternativesController(
@@ -74,6 +79,7 @@ class RouteAlternativesControllerTest {
         navigator,
         tripSession,
         ThreadController(),
+        RoutesParsingQueue(LongRoutesOptimisationOptions.NoOptimisations)
     )
 
     @Before
@@ -181,7 +187,7 @@ class RouteAlternativesControllerTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-            val routeProgress = mockk<RouteProgress>()
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
             every { tripSession.getRouteProgress() } returns routeProgress
 
             val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
@@ -218,7 +224,7 @@ class RouteAlternativesControllerTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-            val routeProgress = mockk<RouteProgress>()
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
             every { tripSession.getRouteProgress() } returns routeProgress
 
             val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
@@ -250,7 +256,7 @@ class RouteAlternativesControllerTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-            val routeProgress = mockk<RouteProgress>()
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
             every { tripSession.getRouteProgress() } returns routeProgress
 
             val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
@@ -293,7 +299,7 @@ class RouteAlternativesControllerTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-            val routeProgress = mockk<RouteProgress>()
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
             every { tripSession.getRouteProgress() } returns routeProgress
 
             val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
@@ -337,7 +343,7 @@ class RouteAlternativesControllerTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-        every { tripSession.getRouteProgress() } returns mockk {
+        every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
             every { navigationRoute } returns mockk {
                 every { routeOptions } returns mockk()
                 every { directionsRoute } returns mockk(relaxed = true) {
@@ -399,7 +405,7 @@ class RouteAlternativesControllerTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-        every { tripSession.getRouteProgress() } returns mockk()
+        every { tripSession.getRouteProgress() } returns mockk(relaxed = true)
 
         val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
@@ -437,7 +443,7 @@ class RouteAlternativesControllerTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-        every { tripSession.getRouteProgress() } returns mockk()
+        every { tripSession.getRouteProgress() } returns mockk(relaxed = true)
 
         val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
@@ -475,7 +481,7 @@ class RouteAlternativesControllerTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-        every { tripSession.getRouteProgress() } returns mockk()
+        every { tripSession.getRouteProgress() } returns mockk(relaxed = true)
 
         val observer: NavigationRouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(observer)
@@ -526,7 +532,7 @@ class RouteAlternativesControllerTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-            every { tripSession.getRouteProgress() } returns mockk()
+            every { tripSession.getRouteProgress() } returns mockk(relaxed = true)
 
             val observer: NavigationRouteAlternativesObserver = mockk(relaxed = true)
             routeAlternativesController.register(observer)
@@ -676,7 +682,7 @@ class RouteAlternativesControllerTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-            val routeProgress = mockk<RouteProgress>()
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
             every { tripSession.getRouteProgress() } returns routeProgress
 
             val observer: NavigationRouteAlternativesObserver = mockk(relaxed = true)
@@ -718,7 +724,7 @@ class RouteAlternativesControllerTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-            val routeProgress = mockk<RouteProgress>()
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
             every { tripSession.getRouteProgress() } returns routeProgress
 
             val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
@@ -753,7 +759,7 @@ class RouteAlternativesControllerTest {
     fun `metadata for alternative available when set after processing routes`() =
         coroutineRule.runBlockingTest {
             val routeAlternativesController = createRouteAlternativesController()
-            val routeProgress = mockk<RouteProgress>()
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
             every { tripSession.getRouteProgress() } returns routeProgress
 
             val navigationRoute = mockk<NavigationRoute>(relaxed = true) {
@@ -780,7 +786,7 @@ class RouteAlternativesControllerTest {
     @Test
     fun `metadata cleared on routes update`() = coroutineRule.runBlockingTest {
         val routeAlternativesController = createRouteAlternativesController()
-        val routeProgress = mockk<RouteProgress>()
+        val routeProgress = mockk<RouteProgress>(relaxed = true)
         every { tripSession.getRouteProgress() } returns routeProgress
 
         val navigationRoute = mockk<NavigationRoute>(relaxed = true) {
@@ -811,7 +817,7 @@ class RouteAlternativesControllerTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-            val routeProgress = mockk<RouteProgress>()
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
             every { tripSession.getRouteProgress() } returns routeProgress
             routeAlternativesController.register(
                 mockk<NavigationRouteAlternativesObserver>(relaxUnitFun = true)
