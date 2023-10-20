@@ -71,13 +71,14 @@ class RouteAlternativesControllerTest {
     private val responseTime = 12345L
 
     private fun createRouteAlternativesController(
-        options: RouteAlternativesOptions = RouteAlternativesOptions.Builder().build()
+        options: RouteAlternativesOptions = RouteAlternativesOptions.Builder().build(),
+        routesParsingQueue: RoutesParsingQueue = createParsingQueueNoOptimisations()
     ) = RouteAlternativesController(
         options,
         navigator,
         tripSession,
         ThreadController(),
-        RoutesParsingQueue(LongRoutesOptimisationOptions.NoOptimisations)
+        routesParsingQueue
     )
 
     @Before
@@ -210,8 +211,14 @@ class RouteAlternativesControllerTest {
                 firstObserver.onRouteAlternatives(routeProgress, capture(firstRoutesSlot), any())
             }
             assertEquals(2, firstRoutesSlot.captured.size)
-            assertEquals("FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==", firstRoutesSlot.captured[0].directionsResponse.uuid())
-            assertEquals("route_response_new_for_refresh", firstRoutesSlot.captured[1].directionsResponse.uuid())
+            assertEquals(
+                "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==",
+                firstRoutesSlot.captured[0].directionsResponse.uuid()
+            )
+            assertEquals(
+                "route_response_new_for_refresh",
+                firstRoutesSlot.captured[1].directionsResponse.uuid()
+            )
             val secondRoutesSlot = slot<List<NavigationRoute>>()
             verify(exactly = 1) {
                 secondObserver.onRouteAlternatives(routeProgress, capture(secondRoutesSlot), any())
@@ -250,6 +257,11 @@ class RouteAlternativesControllerTest {
     @Test
     fun `should broadcast alternatives cleanup from NN`() =
         coroutineRule.runBlockingTest {
+            val routesParsingQueue = createParsingQueueWithOptimisations()
+            var preparedForParsingTimes = 0
+            routesParsingQueue.setPrepareForParsingAction {
+                preparedForParsingTimes++
+            }
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -276,6 +288,7 @@ class RouteAlternativesControllerTest {
                 secondObserver.onRouteAlternatives(routeProgress, capture(secondRoutesSlot), any())
             }
             assertEquals(0, secondRoutesSlot.captured.size)
+            assertEquals(0, preparedForParsingTimes)
         }
 
     @Test
@@ -954,3 +967,14 @@ class RouteAlternativesControllerTest {
         }
     }
 }
+
+private fun createParsingQueueWithOptimisations() = RoutesParsingQueue(
+    LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
+        0,
+        0
+    )
+)
+
+private fun createParsingQueueNoOptimisations() = RoutesParsingQueue(
+    LongRoutesOptimisationOptions.NoOptimisations
+)
