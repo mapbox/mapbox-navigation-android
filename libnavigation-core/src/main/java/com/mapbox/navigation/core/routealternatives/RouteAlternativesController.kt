@@ -227,17 +227,15 @@ internal class RouteAlternativesController constructor(
     ) = mainJobControl.scope.launch {
         val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
 
-        // TODO: should we ignore update when alternative is removed?
-        val routeProgress = tripSession.getRouteProgress()
-            ?: run {
-                logD("skipping alternatives update - no progress", LOG_CATEGORY)
-                return@launch
-            }
-
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val allAlternatives = primaryRoutes + nativeAlternatives.map { it.route }
 
         val alternatives: List<NavigationRoute> =  if (allAlternatives.isNotEmpty()) {
+            val routeProgress = tripSession.getRouteProgress()
+                ?: run {
+                    logD("skipping alternatives update - no progress", LOG_CATEGORY)
+                    return@launch
+                }
             val args = ParseAlternativesArguments(
                 newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.capacity(),
                 currentRouteLength = routeProgress.route.distance(),
@@ -245,7 +243,6 @@ internal class RouteAlternativesController constructor(
             )
             val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
                 routesParsingQueue.parseAlternatives(args) {
-                    // TODO: what if a single alternative is removed while the other stays?
                     withContext(ThreadController.DefaultDispatcher) {
                         parseRouteInterfaces(
                             allAlternatives,
@@ -276,13 +273,12 @@ internal class RouteAlternativesController constructor(
         }
 
         processAlternativesMetadata(alternatives, nativeAlternatives)
-        val newAlternatives = alternatives
         val origin = nativeAlternatives.find {
             // looking for the first new route,
             // assuming all new routes come from the same request
             it.isNew
         }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-        block(newAlternatives, origin)
+        block(alternatives, origin)
         lastUpdateOrigin = origin
     }
 
