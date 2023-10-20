@@ -239,7 +239,7 @@ internal class RouteAlternativesController constructor(
 
         val alternatives: List<NavigationRoute> =  if (allAlternatives.isNotEmpty()) {
             val args = ParseAlternativesArguments(
-                newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.remaining(), // TODO: does the position always point to the beginning?
+                newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.capacity(),
                 currentRouteLength = routeProgress.route.distance(),
                 userTriggeredAlternativesRefresh = immediateAlternativesRefresh
             )
