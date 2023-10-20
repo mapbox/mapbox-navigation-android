@@ -20,7 +20,6 @@ import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.internal.route.ResponseDownloadedCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshCallback
@@ -114,18 +113,10 @@ class RouterWrapper(
                                     "from router.getRoute for $urlWithoutToken",
                                 LOG_CATEGORY
                             )
-                            logD(LOG_CATEGORY) {
-                                "onResponseDownloaded: " +
-                                    "Waiting for navigation to be ready to parsing"
-                            }
-                            logD(LOG_CATEGORY) {
-                                "enqueuing"
-                            }
                             routesParsingQueue.parseRouteResponse {
                                 logD(LOG_CATEGORY) {
                                     "starting parsing"
                                 }
-                                (callback as? ResponseDownloadedCallback)?.onResponseDownloaded()
                                 logD(LOG_CATEGORY) { "onResponseDownloaded: completed" }
                                 val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
                                 parseDirectionsResponse(
