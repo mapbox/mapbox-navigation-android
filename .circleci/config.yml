@@ -126,27 +126,33 @@ workflows:
       - internal-instrumentation-tests:
           requires:
             - assemble-instrumentation-test-internal
-      - instrumentation-tests:
+      - instrumentation-tests-part:
+          name: instrumentation-tests-part-1
           suite: TestSuitePart1
           requires:
             - assemble-instrumentation-test
-      - instrumentation-tests:
+      - instrumentation-tests-part:
+          name: instrumentation-tests-part-2
           suite: TestSuitePart2
           requires:
             - assemble-instrumentation-test
-      - instrumentation-tests:
+      - instrumentation-tests-part:
+          name: instrumentation-tests-part-3
           suite: TestSuitePart3
           requires:
             - assemble-instrumentation-test
-      - instrumentation-tests:
+      - instrumentation-tests-part:
+          name: instrumentation-tests-part-4
           suite: TestSuitePart4
           requires:
             - assemble-instrumentation-test
-      - instrumentation-tests:
+      - instrumentation-tests-part:
+          name: instrumentation-tests-part-5
           suite: TestSuitePart5
           requires:
             - assemble-instrumentation-test
-      - instrumentation-tests:
+      - instrumentation-tests-part:
+          name: instrumentation-tests-part-6
           suite: TestSuitePart6
           requires:
             - assemble-instrumentation-test
@@ -160,6 +166,29 @@ workflows:
           requires:
             - unit-tests-ui
             - unit-tests-core
+      # stubs for saving old job names
+      - instrumentation-tests:
+          requires:
+            - instrumentation-tests-part-1
+            - instrumentation-tests-part-2
+            - instrumentation-tests-part-3
+            - instrumentation-tests-part-4
+            - instrumentation-tests-part-5
+            - instrumentation-tests-part-6
+            - internal-instrumentation-tests
+      - static-analysis:
+          requires:
+            - verify-codestyle
+            - verify-license
+            - verify-common-sdk-version
+            - check-api-core
+            - check-api-ui
+            - check-api-androidauto
+            - check-public-documentation
+            - run-android-lint
+      - prepare-and-assemble:
+          requires:
+            - assemble
   weekly-snapshot-workflow:
     # Run workflow every Friday at 23:59 UTC
     triggers:
@@ -672,6 +701,21 @@ commands:
 #---------- JOBS ----------
 #--------------------------
 jobs:
+  instrumentation-tests:
+    executor: ndk-r22-latest-executor
+    steps:
+      - run: exit 0
+
+  static-analysis:
+    executor: ndk-r22-latest-executor
+    steps:
+      - run: exit 0
+
+  prepare-and-assemble:
+    executor: ndk-r22-latest-executor
+    steps:
+      - run: exit 0
+
   assemble:
     executor: ndk-r22-latest-executor
     steps:
@@ -834,29 +878,6 @@ jobs:
       - read-workspace
       - run-android-lint
 
-  static-analysis:
-    executor: ndk-r22-latest-executor
-    resource_class: medium+
-    steps:
-      - when:
-          condition:
-            not:
-              matches:
-                pattern: "^add-changelog.*"
-                value: << pipeline.git.branch >>
-          steps:
-            - checkout
-            - restore-gradle-cache
-            - verify-codestyle
-            - verify-license
-            - verify-common-sdk-version
-            - check-api-core
-            - check-api-ui
-            - check-api-androidauto
-            - check-public-documentation
-            - run-android-lint
-      - run: exit 0
-
   publish-documentation:
     executor: ndk-r22-latest-executor
     resource_class: medium+
@@ -940,7 +961,7 @@ jobs:
                 variant: "debug"
       - run: exit 0
 
-  instrumentation-tests:
+  instrumentation-tests-part:
     parameters:
       suite:
         type: string
