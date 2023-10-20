@@ -235,7 +235,7 @@ fun createNavigationRoutes(
 /**
  * Internal API to create a new [NavigationRoute] from a native peer.
  */
-fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long, directionsResponse: DirectionsResponse? = null): NavigationRoute {
+fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long, directionsResponse: DirectionsResponse): NavigationRoute {
     return this.toNavigationRoute(responseTimeElapsedSeconds, directionsResponse)
 }
 

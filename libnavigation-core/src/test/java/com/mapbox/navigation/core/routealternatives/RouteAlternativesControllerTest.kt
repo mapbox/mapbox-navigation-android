@@ -52,7 +52,7 @@ import org.robolectric.RobolectricTestRunner
 import java.net.URL
 
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+//@RunWith(RobolectricTestRunner::class)
 class RouteAlternativesControllerTest {
 
     @get:Rule
