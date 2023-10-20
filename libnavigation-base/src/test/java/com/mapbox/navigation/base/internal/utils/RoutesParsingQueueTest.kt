@@ -89,7 +89,8 @@ class RoutesParsingQueueTest {
     fun `parse routes in parallel with optimisations`() = runBlockingTest {
         val queue = createParsingQueueWithOptimisationsEnabled()
         val rerouteResponseParsing = ParsingTask<String>()
-        val newRoutesRequestParsing = ParsingTask<String>()
+        val newRoutesResponseParsing = ParsingTask<String>()
+        val newRoutesResponseParsing2 = ParsingTask<String>()
         var preparedForParsingTimes = 0
 
         queue.setPrepareForParsingAction {
@@ -100,24 +101,36 @@ class RoutesParsingQueueTest {
                 rerouteResponseParsing.parse()
             }
         }
-        val routesParsingResult = async {
+        val newRoutesParsingResult = async {
             queue.parseRouteResponse {
-                newRoutesRequestParsing.parse()
+                newRoutesResponseParsing.parse()
+            }
+        }
+        val newRoutesParsingResult2 = async {
+            queue.parseRouteResponse {
+                newRoutesResponseParsing2.parse()
             }
         }
 
         assertTrue(rerouteResponseParsing.isStarted)
-        assertFalse(newRoutesRequestParsing.isStarted)
+        assertFalse(newRoutesResponseParsing.isStarted)
+        assertFalse(newRoutesResponseParsing2.isStarted)
         assertEquals(1, preparedForParsingTimes)
 
         rerouteResponseParsing.complete("reroute")
         assertEquals("reroute", rerouteParsingResult.await())
         assertEquals(2, preparedForParsingTimes)
 
-        assertTrue(newRoutesRequestParsing.isStarted)
-        newRoutesRequestParsing.complete("new routes")
-        assertEquals("new routes", routesParsingResult.await())
-        assertEquals(2, preparedForParsingTimes)
+        assertTrue(newRoutesResponseParsing.isStarted)
+        assertFalse(newRoutesResponseParsing2.isStarted)
+        newRoutesResponseParsing.complete("new routes")
+        assertEquals("new routes", newRoutesParsingResult.await())
+        assertEquals(3, preparedForParsingTimes)
+
+        assertTrue(newRoutesResponseParsing2.isStarted)
+        newRoutesResponseParsing2.complete("new routes 2")
+        assertEquals("new routes 2", newRoutesParsingResult2.await())
+        assertEquals(3, preparedForParsingTimes)
     }
 
     @Test
