@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.utils
 
-import android.util.Log
 import android.util.LruCache
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -10,6 +9,9 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.internal.utils.isSameRoute
+import com.mapbox.navigation.utils.internal.logD
+
+private const val LOG_TAG = "DecodeUtils"
 
 /**
  * Provides utilities to decode geometries of [DirectionsRoute]s and [LegStep]s.
@@ -180,21 +182,38 @@ object DecodeUtils {
 
     private fun removeAllRoutesExcept(routesToKeep: List<DirectionsRoute>) {
         synchronized(stepsGeometryDecodeCache) {
-            Log.d("vadzim-test", "looking for a route to remove among ${cachedRoutes.joinToString(",") { it.route.routeId() }}, while ${routesToKeep.joinToString(",") { it.routeId() }} should be kept")
-            val routesToRemove = cachedRoutes.filter { cached ->
-                routesToKeep.none { it.requestUuid() == cached.route.requestUuid() && it.routeIndex() == cached.route.routeIndex()}
+            logD(LOG_TAG) {
+                "Looking for routes to remove among cached:" +
+                    " ${cachedRoutes.joinToString(",") { it.route.routeId() }}, " +
+                    "while ${routesToKeep.joinToString(",") { it.routeId() }} " +
+                    "should be kept"
             }
-            routesToRemove.forEach {
-                Log.d("vadzim-test", "cleaning caches for route ${it.route.routeId()}")
-                val routeToRemove = it.route
-                it.route.legs()?.forEach {
+            val cachedRoutesToRemove = cachedRoutes.filter { cached ->
+                routesToKeep.none {
+                    it.routeId() == cached.route.routeId()
+                }
+            }
+            cachedRoutesToRemove.forEach { cachedRouteToRemove ->
+                logD(LOG_TAG) {
+                    "Cleaning steps geometry caches for route:" +
+                        " ${cachedRouteToRemove.route.routeId()}"
+                }
+                val routeToRemove = cachedRouteToRemove.route
+                cachedRouteToRemove.route.legs()?.forEach {
                     it.steps()?.forEach { step ->
-                        stepsGeometryDecodeCache.remove(step.geometry()!! to routeToRemove.precision())
+                        val stepGeometry = step.geometry()
+                        if (stepGeometry != null) {
+                            stepsGeometryDecodeCache.remove(
+                                stepGeometry to routeToRemove.precision()
+                            )
+                        }
                     }
                 }
-                cachedRoutes.remove(it)
+                cachedRoutes.remove(cachedRouteToRemove)
             }
-            stepsGeometryDecodeCache.resize(cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1))
+            stepsGeometryDecodeCache.resize(
+                cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1)
+            )
         }
     }
 
