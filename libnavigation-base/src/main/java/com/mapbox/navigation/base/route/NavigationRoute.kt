@@ -619,12 +619,12 @@ internal fun RouteInterface.toNavigationRoute(
 }
 
 private fun List<NavigationRoute>.cache(): List<NavigationRoute> {
-    //RouteCompatibilityCache.cacheCreationResult(this)
+    RouteCompatibilityCache.cacheCreationResult(this)
     return this
 }
 
 private fun NavigationRoute.cache(): NavigationRoute {
-    //RouteCompatibilityCache.cacheCreationResult(listOf(this))
+    RouteCompatibilityCache.cacheCreationResult(listOf(this))
     return this
 }
 
