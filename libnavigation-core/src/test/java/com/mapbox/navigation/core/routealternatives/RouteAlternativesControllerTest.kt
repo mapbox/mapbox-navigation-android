@@ -23,6 +23,7 @@ import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createRouteInterface
+import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigator.RouteAlternative
@@ -47,12 +48,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import java.net.URL
 
 @ExperimentalCoroutinesApi
-//@RunWith(RobolectricTestRunner::class)
 class RouteAlternativesControllerTest {
 
     @get:Rule
@@ -64,7 +61,7 @@ class RouteAlternativesControllerTest {
     @get:Rule
     val nativeRouteParserRule = NativeRouteParserRule()
 
-    private val genericURL = URL("https://mock_request_url")
+    private val routeRequestUrl = createRouteOptions().toUrl("***")
 
     private val controllerInterface: RouteAlternativesControllerInterface = mockk(relaxed = true)
     private val navigator: MapboxNativeNavigator = mockk {
@@ -183,8 +180,6 @@ class RouteAlternativesControllerTest {
     @Test
     fun `should broadcast alternative routes changes from nav-native`() =
         coroutineRule.runBlockingTest {
-            mockkStatic(RouteOptions::fromUrl)
-            every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -222,15 +217,11 @@ class RouteAlternativesControllerTest {
                 secondObserver.onRouteAlternatives(routeProgress, capture(secondRoutesSlot), any())
             }
             assertEquals(2, secondRoutesSlot.captured.size)
-
-            unmockkStatic(RouteOptions::fromUrl)
         }
 
     @Test
     fun `should broadcast alternative routes changes from nav-native with online primary route`() =
         coroutineRule.runBlockingTest {
-            mockkStatic(RouteOptions::fromUrl)
-            every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -254,15 +245,44 @@ class RouteAlternativesControllerTest {
             }
             assertEquals(2, firstRoutesSlot.captured.size)
             assertEquals(testOnlinePrimaryRoute.routeId, firstRoutesSlot.captured.first().id)
+        }
 
-            unmockkStatic(RouteOptions::fromUrl)
+    @Test
+    fun `should broadcast alternatives cleanup from NN`() =
+        coroutineRule.runBlockingTest {
+            val routeAlternativesController = createRouteAlternativesController()
+            val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
+            every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
+            val routeProgress = mockk<RouteProgress>(relaxed = true)
+            every { tripSession.getRouteProgress() } returns routeProgress
+
+            val firstObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
+            val secondObserver: NavigationRouteAlternativesObserver = mockk(relaxed = true)
+            routeAlternativesController.register(firstObserver)
+            routeAlternativesController.register(secondObserver)
+            nativeObserver.captured.onRouteAlternativesUpdated(
+                null,
+                emptyList(),
+                emptyList()
+            )
+
+            val firstRoutesSlot = slot<List<NavigationRoute>>()
+            verify(exactly = 1) {
+                firstObserver.onRouteAlternatives(routeProgress, capture(firstRoutesSlot), any())
+            }
+            assertEquals(0, firstRoutesSlot.captured.size)
+            val secondRoutesSlot = slot<List<NavigationRoute>>()
+            verify(exactly = 1) {
+                secondObserver.onRouteAlternatives(routeProgress, capture(secondRoutesSlot), any())
+            }
+            assertEquals(0, secondRoutesSlot.captured.size)
         }
 
     @Test
     fun `should set expiration time when new routes are received with refresh ttl`() =
         coroutineRule.runBlockingTest {
             mockkStatic(RouteOptions::fromUrl)
-            every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+            every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -305,7 +325,7 @@ class RouteAlternativesControllerTest {
     fun `should not set expiration time when new routes are received without refresh ttl`() =
         coroutineRule.runBlockingTest {
             mockkStatic(RouteOptions::fromUrl)
-            every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+            every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -349,7 +369,7 @@ class RouteAlternativesControllerTest {
     @Test
     fun `should not broadcast current route with alternative`() = coroutineRule.runBlockingTest {
         mockkStatic(RouteOptions::fromUrl)
-        every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+        every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -411,7 +431,7 @@ class RouteAlternativesControllerTest {
     fun `should set RouteOptions to alternative routes`() = coroutineRule.runBlockingTest {
         val mockRouteOptions = mockk<RouteOptions>()
         mockkStatic(RouteOptions::fromUrl)
-        every { RouteOptions.fromUrl(eq(genericURL)) } returns mockRouteOptions
+        every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockRouteOptions
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -449,7 +469,7 @@ class RouteAlternativesControllerTest {
     @Test
     fun `should set route index and UUID of alternative routes for refresh`() {
         mockkStatic(RouteOptions::fromUrl)
-        every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+        every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -487,7 +507,7 @@ class RouteAlternativesControllerTest {
     @Test
     fun `broadcasts correct alternatives origin`() = coroutineRule.runBlockingTest {
         mockkStatic(RouteOptions::fromUrl)
-        every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+        every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -538,7 +558,7 @@ class RouteAlternativesControllerTest {
     fun `broadcasts cached origin of previous update if there were no new routes`() =
         coroutineRule.runBlockingTest {
             mockkStatic(RouteOptions::fromUrl)
-            every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+            every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -585,7 +605,7 @@ class RouteAlternativesControllerTest {
     @Test
     fun `should notify callback when on-demand alternatives refresh finishes`() {
         mockkStatic(RouteOptions::fromUrl)
-        every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+        every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
         val alternative: RouteAlternative = createNativeAlternativeMock()
@@ -631,7 +651,7 @@ class RouteAlternativesControllerTest {
     @Test
     fun `should notify callback when on-demand alternatives refresh fails - no progress`() {
         mockkStatic(RouteOptions::fromUrl)
-        every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+        every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
         val alternative: RouteAlternative = createNativeAlternativeMock()
@@ -688,7 +708,7 @@ class RouteAlternativesControllerTest {
     fun `processing job should be canceled if it doesn't keep up`() =
         coroutineRule.runBlockingTest {
             mockkStatic(RouteOptions::fromUrl)
-            every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+            every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -730,7 +750,7 @@ class RouteAlternativesControllerTest {
     fun `metadata for alternative available when generated by native observer`() =
         coroutineRule.runBlockingTest {
             mockkStatic(RouteOptions::fromUrl)
-            every { RouteOptions.fromUrl(eq(genericURL)) } returns mockk()
+            every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -919,7 +939,7 @@ class RouteAlternativesControllerTest {
         val response = DirectionsResponse.fromJson(responseJson)
         val nativeRoute = createRouteInterface(
             responseJson = FileUtils.loadJsonFixture(fileName),
-            requestURI = genericURL.toString(),
+            requestURI = routeRequestUrl.toString(),
             routerOrigin = routerOrigin,
             responseUUID = response.uuid()!!
         )

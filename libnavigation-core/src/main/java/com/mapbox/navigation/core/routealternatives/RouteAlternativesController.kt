@@ -133,9 +133,11 @@ internal class RouteAlternativesController constructor(
                 { value ->
                     // Switch from offline to online primary route isn't implemented for the case
                     // when user manually triggers alternatives refresh
-                    // !!!! The callback is duplicated by on onRouteAlternativesUpdated
-
-                    processRouteAlternatives(null, value, immediateAlternativesRefresh = true) { alternatives, origin ->
+                    processRouteAlternatives(
+                        null,
+                        value,
+                        immediateAlternativesRefresh = true
+                    ) { alternatives, origin ->
                         listener?.onRouteAlternativeRequestFinished(
                             routeProgress,
                             alternatives,
@@ -232,7 +234,6 @@ internal class RouteAlternativesController constructor(
                 return@launch
             }
 
-        // TODO: optimise handling of the same alternatives like when one of two alternatives are removed? Should we reuse routes from directions session?
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val allAlternatives = primaryRoutes + nativeAlternatives.map { it.route }
 
