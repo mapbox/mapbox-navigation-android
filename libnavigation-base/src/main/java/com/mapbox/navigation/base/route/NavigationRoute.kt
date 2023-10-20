@@ -315,7 +315,7 @@ class NavigationRoute internal constructor(
                         refreshTtl + responseTimeElapsedSeconds
                     }
                 )
-            }.cache(optimiseMemory)
+            }.cache()
         }
     }
 
@@ -618,15 +618,13 @@ internal fun RouteInterface.toNavigationRoute(
     ).cache()
 }
 
-private fun List<NavigationRoute>.cache(optimiseMemory: Boolean = false): List<NavigationRoute> {
-    if (!optimiseMemory) {
-        RouteCompatibilityCache.cacheCreationResult(this)
-    }
+private fun List<NavigationRoute>.cache(): List<NavigationRoute> {
+    RouteCompatibilityCache.cacheCreationResult(this)
     return this
 }
 
 private fun NavigationRoute.cache(): NavigationRoute {
-    //RouteCompatibilityCache.cacheCreationResult(listOf(this))
+    RouteCompatibilityCache.cacheCreationResult(listOf(this))
     return this
 }
 
