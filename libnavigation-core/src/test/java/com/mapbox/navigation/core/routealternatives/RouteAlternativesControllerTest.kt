@@ -595,7 +595,7 @@ class RouteAlternativesControllerTest {
         every { controllerInterface.refreshImmediately(capture(nativeObserver)) } answers {
             nativeObserver.captured.run(expected)
         }
-        every { tripSession.getRouteProgress() } returns mockk {
+        every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
             every { navigationRoute } returns mockk {
                 every { routeOptions } returns mockk()
                 every { directionsRoute } returns mockk(relaxed = true)

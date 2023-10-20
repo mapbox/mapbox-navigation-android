@@ -48,6 +48,44 @@ class RoutesParsingQueueTest {
     }
 
     @Test
+    fun `parse immediate alternatives without optimisations`() = runBlocking {
+        val queue = createParsingQueueWithOptimisationsDisabled()
+        var preparedForParsing = false
+
+        queue.setPrepareForParsingAction {
+            preparedForParsing = true
+        }
+        val args = longRoutesParsingArgs(userTriggeredImmediateRefresh = true)
+        val result = queue.parseAlternatives(args) {
+            "test"
+        }
+
+        assertFalse(preparedForParsing)
+        assertEquals(AlternativesParsingResult.Parsed("test"), result)
+    }
+
+    @Test
+    fun `parse immediate alternatives with optimisations`() = runBlocking {
+        val queue = createParsingQueueWithOptimisationsEnabled()
+        val parsingTask = ParsingTask<String>().apply {
+            complete("test")
+        }
+        var preparedForParsing = false
+
+        queue.setPrepareForParsingAction {
+            preparedForParsing = true
+        }
+        val args = longRoutesParsingArgs(userTriggeredImmediateRefresh = true)
+        val result = queue.parseAlternatives(args) {
+            parsingTask.parse()
+        }
+
+        assertFalse(preparedForParsing)
+        assertFalse(parsingTask.isStarted)
+        assertEquals(AlternativesParsingResult.NotActual, result)
+    }
+
+    @Test
     fun `parse routes in parallel with optimisations`() = runBlockingTest {
         val queue = createParsingQueueWithOptimisationsEnabled()
         val rerouteResponseParsing = ParsingTask<String>()
@@ -304,8 +342,11 @@ private fun optimiseLongRoutesConfig() =
         responseToParseSizeBytes = 20 * 1024 * 1024
     )
 
-private fun longRoutesParsingArgs() =
+private fun longRoutesParsingArgs(
+    userTriggeredImmediateRefresh: Boolean = false
+) =
     ParseAlternativesArguments(
         currentRouteLength = (optimiseLongRoutesConfig().currentRouteLengthMeters + 1).toDouble(),
-        newResponseSizeBytes = optimiseLongRoutesConfig().responseToParseSizeBytes + 1
+        newResponseSizeBytes = optimiseLongRoutesConfig().responseToParseSizeBytes + 1,
+        userTriggeredAlternativesRefresh = userTriggeredImmediateRefresh
     )

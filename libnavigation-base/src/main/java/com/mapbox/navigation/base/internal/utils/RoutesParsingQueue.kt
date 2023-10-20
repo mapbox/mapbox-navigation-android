@@ -40,6 +40,9 @@ class RoutesParsingQueue(
         arguments: ParseAlternativesArguments,
         parsing: suspend () -> T
     ): AlternativesParsingResult<T> {
+        if (arguments.userTriggeredAlternativesRefresh && longRoutesOptimisationOptions !is LongRoutesOptimisationOptions.NoOptimisations) {
+            return AlternativesParsingResult.NotActual
+        }
         return if (mutex.isLocked) {
             AlternativesParsingResult.NotActual
         } else {
@@ -50,5 +53,6 @@ class RoutesParsingQueue(
 
 data class ParseAlternativesArguments(
     val newResponseSizeBytes: Int,
-    val currentRouteLength: Double
+    val currentRouteLength: Double,
+    val userTriggeredAlternativesRefresh: Boolean
 )

@@ -134,13 +134,15 @@ internal class RouteAlternativesController constructor(
                     // Switch from offline to online primary route isn't implemented for the case
                     // when user manually triggers alternatives refresh
                     // !!!! The callback is duplicated by on onRouteAlternativesUpdated
-//                    processRouteAlternatives(null, value) { alternatives, origin ->
-//                        listener?.onRouteAlternativeRequestFinished(
-//                            routeProgress,
-//                            alternatives,
-//                            origin
-//                        )
-//                    }
+
+                    processRouteAlternatives(null, value, immediateAlternativesRefresh = true) { alternatives, origin ->
+                        listener?.onRouteAlternativeRequestFinished(
+                            routeProgress,
+                            alternatives,
+                            origin
+                        )
+                    }
+
                 }
             )
         }
@@ -183,7 +185,8 @@ internal class RouteAlternativesController constructor(
             observerProcessingJob =
                 processRouteAlternatives(
                     onlinePrimaryRoute,
-                    routeAlternatives
+                    routeAlternatives,
+                    immediateAlternativesRefresh = false
                 ) { alternatives, origin ->
                     logD("${alternatives.size} alternatives available", LOG_CATEGORY)
 
@@ -217,10 +220,12 @@ internal class RouteAlternativesController constructor(
     private fun processRouteAlternatives(
         onlinePrimaryRoute: RouteInterface?,
         nativeAlternatives: List<RouteAlternative>,
+        immediateAlternativesRefresh: Boolean,
         block: suspend (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) = mainJobControl.scope.launch {
         val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
 
+        // TODO: should we ignore update when alternative is removed?
         val routeProgress = tripSession.getRouteProgress()
             ?: run {
                 logD("skipping alternatives update - no progress", LOG_CATEGORY)
@@ -235,7 +240,8 @@ internal class RouteAlternativesController constructor(
             //TODO: don't parse alternatives if there is nothing to parse
             val args = ParseAlternativesArguments(
                 newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.remaining(), // TODO: does the position always point to the beginning?
-                currentRouteLength = routeProgress.route.distance()
+                currentRouteLength = routeProgress.route.distance(),
+                userTriggeredAlternativesRefresh = immediateAlternativesRefresh
             )
             val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
                 routesParsingQueue.parseAlternatives(args) {
