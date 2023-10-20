@@ -1,0 +1,1 @@
+https://api.mapbox.com/directions/v5/mapbox/driving-traffic/13.323533327548603,52.494284300584894;13.459680057801876,52.52372648556391?steps=true&overview=full&geometries=polyline6&roundabout_exits=true&voice_units=imperial&voice_instructions=true&banner_instructions=true&alternatives=true

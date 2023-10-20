@@ -192,7 +192,8 @@ class NavigationRoute internal constructor(
             routeRequestUrl: String,
             routerOrigin: RouterOrigin,
             responseTimeElapsedSeconds: Long?,
-            routeParser: SDKRouteParser = SDKRouteParser.default
+            routeParser: SDKRouteParser = SDKRouteParser.default,
+            optimiseMemory: Boolean = false
         ): List<NavigationRoute> {
             logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
 
@@ -230,6 +231,7 @@ class NavigationRoute internal constructor(
                     deferredResponseParsing.await(),
                     deferredRouteOptionsParsing.await(),
                     responseTimeElapsedSeconds,
+                    optimiseMemory
                 ).also {
                     logD(
                         "NavigationRoute.createAsync finished " +
@@ -272,7 +274,13 @@ class NavigationRoute internal constructor(
                 routeOptionsUrlString,
                 routerOrigin
             ).run {
-                create(this, directionsResponse, routeOptions, responseTimeElapsedSeconds)
+                create(
+                    this,
+                    directionsResponse,
+                    routeOptions,
+                    responseTimeElapsedSeconds,
+                    optimiseMemory = false
+                )
             }
         }
 
@@ -281,6 +289,7 @@ class NavigationRoute internal constructor(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
             responseTimeElapsedSeconds: Long?,
+            optimiseMemory: Boolean
         ): List<NavigationRoute> {
             return expected.fold({ error ->
                 logE("NavigationRoute", "Failed to parse a route. Reason: $error")
@@ -288,11 +297,13 @@ class NavigationRoute internal constructor(
             }, { value ->
                 value
             }).mapIndexed { index, routeInterface ->
-                val directionResponseWithoutOtherRoutes = directionsResponse.toBuilder().routes(
-                    emptyList()
-                ).build()
+                val responseToSaveInRoute = if (optimiseMemory) {
+                    directionsResponse.toBuilder().routes(
+                        emptyList()
+                    ).build()
+                } else directionsResponse
                 NavigationRoute(
-                    directionResponseWithoutOtherRoutes,
+                    responseToSaveInRoute,
                     index,
                     routeOptions,
                     getDirectionsRoute(directionsResponse, index, routeOptions),
@@ -304,7 +315,7 @@ class NavigationRoute internal constructor(
                         refreshTtl + responseTimeElapsedSeconds
                     }
                 )
-            }.cache()
+            }.cache(optimiseMemory)
         }
     }
 
@@ -607,8 +618,10 @@ internal fun RouteInterface.toNavigationRoute(
     ).cache()
 }
 
-private fun List<NavigationRoute>.cache(): List<NavigationRoute> {
-    //RouteCompatibilityCache.cacheCreationResult(this)
+private fun List<NavigationRoute>.cache(optimiseMemory: Boolean = false): List<NavigationRoute> {
+    if (!optimiseMemory) {
+        RouteCompatibilityCache.cacheCreationResult(this)
+    }
     return this
 }
 
