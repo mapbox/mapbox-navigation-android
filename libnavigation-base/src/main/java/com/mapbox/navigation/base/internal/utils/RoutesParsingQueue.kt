@@ -25,6 +25,7 @@ class RoutesParsingQueue(
         prepareForParsingAction = action
     }
 
+    // TODO: add arguments and prepare for parsing only if that makes sence
     suspend fun <T> parseRouteResponse(parsing: suspend () -> T): T {
         return if (longRoutesOptimisationOptions is LongRoutesOptimisationOptions.NoOptimisations) {
             parsing()
