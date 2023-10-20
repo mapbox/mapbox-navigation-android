@@ -2,7 +2,6 @@
 
 package com.mapbox.navigation.base.route
 
-import android.util.Log
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -596,23 +595,16 @@ internal fun DirectionsRoute.toNavigationRoute(
 
 internal fun RouteInterface.toNavigationRoute(
     responseTimeElapsedSeconds: Long,
-    directionsResponse: DirectionsResponse? = null
+    directionsResponse: DirectionsResponse
 ): NavigationRoute {
-    val response = if (directionsResponse != null) {
-        Log.d("vadzim-test", "creating navigation route from parsed response")
-        directionsResponse
-    } else {
-        Log.d("vadzim-test", "parsing directions response from scratch")
-        responseJsonRef.toDirectionsResponse()
-    }
-    val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
+    val refreshTtl = directionsResponse.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
     return NavigationRoute(
-        directionsResponse = response.toBuilder().routes(emptyList())
+        directionsResponse = directionsResponse.toBuilder().routes(emptyList())
             .build(), //TODO: optimise response
         routeOptions = routeOptions,
         routeIndex = routeIndex,
-        directionsRoute = getDirectionsRoute(response, routeIndex, routeOptions),
+        directionsRoute = getDirectionsRoute(directionsResponse, routeIndex, routeOptions),
         nativeRoute = this,
         expirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds)
     ).cache()
