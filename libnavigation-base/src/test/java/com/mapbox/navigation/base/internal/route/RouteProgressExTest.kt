@@ -18,7 +18,9 @@ import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.factories.TestSDKRouteParser
 import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigation.testing.factories.createIncident
+import com.mapbox.navigation.testing.factories.createManeuver
 import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
+import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.factories.createWaypoint
 import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
@@ -690,60 +692,54 @@ class RouteProgressExTest {
             .duration(2.0)
             .weight(3.0)
             .mode("mode")
-            .maneuver(mockk())
+            .maneuver(createManeuver())
             .build()
-        return NavigationRoute(
+        return com.mapbox.navigation.testing.factories.createNavigationRoutes(
             DirectionsResponse.builder()
                 .waypoints(dirWaypoints)
+                .routes(listOf(DirectionsRoute.builder()
+                    .duration(10.0)
+                    .distance(distance)
+                    .legs(
+                        mutableListOf(
+                            RouteLeg.builder()
+                                .annotation(annotations)
+                                .incidents(incidents)
+                                .closures(closures)
+                                .steps(List(2) { validStep })
+                                .build()
+                        ).apply {
+                            if (addLeg) {
+                                add(
+                                    RouteLeg.builder()
+                                        .annotation(annotations)
+                                        .incidents(incidents)
+                                        .closures(closures)
+                                        .steps(List(2) { validStep })
+                                        .build()
+                                )
+                            }
+                        }
+                    )
+                    .geometry(
+                        PolylineUtils.encode(
+                            listOf(
+                                Point.fromLngLat(11.22, 33.44),
+                                Point.fromLngLat(23.34, 34.45)
+                            ),
+                            5
+                        )
+                    )
+                    .build()))
                 .code("Ok")
                 .build(),
-            0,
-            mockk {
-                every { geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
-                every { waypointsPerRoute() } returns false
-            },
-            DirectionsRoute.builder()
-                .duration(10.0)
-                .distance(distance)
-                .legs(
-                    mutableListOf(
-                        RouteLeg.builder()
-                            .annotation(annotations)
-                            .incidents(incidents)
-                            .closures(closures)
-                            .steps(List(2) { validStep })
-                            .build()
-                    ).apply {
-                        if (addLeg) {
-                            add(
-                                RouteLeg.builder()
-                                    .annotation(annotations)
-                                    .incidents(incidents)
-                                    .closures(closures)
-                                    .steps(List(2) { validStep })
-                                    .build()
-                            )
-                        }
-                    }
-                )
-                .geometry(
-                    PolylineUtils.encode(
-                        listOf(
-                            Point.fromLngLat(11.22, 33.44),
-                            Point.fromLngLat(23.34, 34.45)
-                        ),
-                        5
-                    )
-                )
-                .build(),
-            mockk {
-                every { routeInfo } returns mockk(relaxed = true)
-                every { routeId } returns ""
-                every { routerOrigin } returns RouterOrigin.ONLINE
-                every { waypoints } returns emptyList()
-            },
-            expirationTimeElapsedSeconds = expirationTime
-        )
+            createRouteOptions(
+                waypointsPerRoute = false,
+                geometries = DirectionsCriteria.GEOMETRY_POLYLINE6
+            ),
+            com.mapbox.navigation.base.route.RouterOrigin.Offboard,
+            expirationTime,
+        ).first()
     }
 
     @RunWith(Parameterized::class)
