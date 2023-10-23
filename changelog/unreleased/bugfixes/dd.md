@@ -1,0 +1,1 @@
+- Fixed an issue where route refreshes might not have been paused after invoking `RouteRefreshController#pauseRouteRefreshes`.

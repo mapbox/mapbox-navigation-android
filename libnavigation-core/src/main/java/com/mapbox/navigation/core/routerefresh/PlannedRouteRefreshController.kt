@@ -43,13 +43,16 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT)
     )
 
-    private var plannedRefreshScope = CoroutineUtils.createChildScope(parentScope)
-    private var paused = false
+    // null if refreshes are paused
+    private var plannedRefreshScope: CoroutineScope? = CoroutineUtils.createChildScope(parentScope)
     var routesToRefresh: List<NavigationRoute>? = null
         private set
 
     fun startRoutesRefreshing(routes: List<NavigationRoute>) {
-        recreateScope()
+        if (plannedRefreshScope != null) {
+            plannedRefreshScope?.cancel()
+            plannedRefreshScope = CoroutineUtils.createChildScope(parentScope)
+        }
         if (routes.isEmpty()) {
             routesToRefresh = null
             logI("Routes are empty, nothing to refresh", RouteRefreshLog.LOG_CATEGORY)
@@ -82,15 +85,15 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     }
 
     fun pause() {
-        if (!paused) {
-            paused = true
-            recreateScope()
-        }
+        logI("Pausing refreshes", RouteRefreshLog.LOG_CATEGORY)
+        plannedRefreshScope?.cancel()
+        plannedRefreshScope = null
     }
 
     fun resume() {
-        if (paused) {
-            paused = false
+        logI("Resuming refreshes", RouteRefreshLog.LOG_CATEGORY)
+        if (plannedRefreshScope == null) {
+            plannedRefreshScope = CoroutineUtils.createChildScope(parentScope)
             routesToRefresh?.let {
                 if (retryStrategy.shouldRetry()) {
                     scheduleUpdateRetry(it, shouldNotifyOnStart = true)
@@ -114,7 +117,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     }
 
     private fun postAttempt(shouldResume: Boolean, attemptBlock: suspend () -> Unit) {
-        plannedRefreshScope.launch {
+        plannedRefreshScope?.launch {
             try {
                 if (shouldResume) {
                     delayer.resumeDelay()
@@ -175,11 +178,6 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                 }
             }
         }
-    }
-
-    private fun recreateScope() {
-        plannedRefreshScope.cancel()
-        plannedRefreshScope = CoroutineUtils.createChildScope(parentScope)
     }
 
     companion object {
