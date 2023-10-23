@@ -25,8 +25,11 @@ class RoutesParsingQueue(
         prepareForParsingAction = action
     }
 
-    // TODO: add arguments and prepare for parsing only if that makes sence
-    suspend fun <T> parseRouteResponse(parsing: suspend (ParseArguments) -> T): T {
+    // TODO: add arguments and prepare for parsing only if that makes sense
+    suspend fun <T> parseRouteResponse(
+        routeResponseInfo: RouteResponseInfo,
+        parsing: suspend (ParseArguments) -> T
+    ): T {
         return if (longRoutesOptimisationOptions is LongRoutesOptimisationOptions.NoOptimisations) {
             parsing(ParseArguments(optimiseDirectionsResponseStructure = false))
         } else {
@@ -47,7 +50,7 @@ class RoutesParsingQueue(
         return if (mutex.isLocked) {
             AlternativesParsingResult.NotActual
         } else {
-            AlternativesParsingResult.Parsed(parseRouteResponse(parsing))
+            AlternativesParsingResult.Parsed(parseRouteResponse(arguments.routeResponseInfo, parsing))
         }
     }
 }
