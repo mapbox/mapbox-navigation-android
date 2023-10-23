@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -16,7 +18,6 @@ typealias PrepareForParsingAction = suspend () -> Unit
 interface RouteParsingManager {
     fun setPrepareForParsingAction(action: PrepareForParsingAction)
 
-    // TODO: add arguments and prepare for parsing only if that makes sense
     suspend fun <T> parseRouteResponse(
         routeResponseInfo: RouteResponseInfo,
         parsing: suspend (ParseArguments) -> T
@@ -28,7 +29,6 @@ interface RouteParsingManager {
     ): AlternativesParsingResult<T>
 }
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 fun createRouteParsingManager(longRoutesOptimisationOptions: LongRoutesOptimisationOptions): RouteParsingManager {
     return when (longRoutesOptimisationOptions) {
         LongRoutesOptimisationOptions.NoOptimisations -> NotOptimisedRoutesParsingManager()
@@ -36,7 +36,6 @@ fun createRouteParsingManager(longRoutesOptimisationOptions: LongRoutesOptimisat
     }
 }
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 private class OptimisedRoutesParsingManager(
     private val options: LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes
 ) : RouteParsingManager {
@@ -84,7 +83,7 @@ private class OptimisedRoutesParsingManager(
 
 private class NotOptimisedRoutesParsingManager : RouteParsingManager {
     override fun setPrepareForParsingAction(action: PrepareForParsingAction) {
-        // it never triggers preparation
+        // this implementation never triggers preparation
     }
 
     override suspend fun <T> parseRouteResponse(
