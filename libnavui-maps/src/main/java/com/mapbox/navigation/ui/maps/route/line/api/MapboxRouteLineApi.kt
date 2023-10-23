@@ -59,6 +59,7 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
@@ -1414,6 +1415,7 @@ class MapboxRouteLineApi(
         routes.clear()
         routes.addAll(distinctNewRoutes)
         primaryRoute = distinctNewRoutes.firstOrNull()
+        logD("vadzim-test", "trimming route data caches to size ${distinctNewRoutes.size} because of new routes: ${distinctNewRoutes.joinToString(", ") { it.id }}")
         MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
         this.activeLegIndex = activeLegIndex
 
