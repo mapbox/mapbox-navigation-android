@@ -86,7 +86,7 @@ class RoutesParsingQueueTest {
         }
         val args = longRoutesAlternativesInfo(userTriggeredImmediateRefresh = true)
         val result = queue.parseAlternatives(args) {
-            parsingTask.parse()
+            parsingTask.parse(it)
         }
 
         assertFalse(preparedForParsing)
@@ -107,17 +107,17 @@ class RoutesParsingQueueTest {
         }
         val rerouteParsingResult = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                rerouteResponseParsing.parse()
+                rerouteResponseParsing.parse(it)
             }
         }
         val newRoutesParsingResult = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                newRoutesResponseParsing.parse()
+                newRoutesResponseParsing.parse(it)
             }
         }
         val newRoutesParsingResult2 = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                newRoutesResponseParsing2.parse()
+                newRoutesResponseParsing2.parse(it)
             }
         }
 
@@ -161,23 +161,35 @@ class RoutesParsingQueueTest {
         }
         val rerouteParsingResult = async {
             queue.parseRouteResponse(shortRoutesResponseInfo) {
-                rerouteResponseParsing.parse()
+                rerouteResponseParsing.parse(it)
             }
         }
         val newRoutesParsingResult = async {
             queue.parseRouteResponse(shortRoutesResponseInfo) {
-                newRoutesResponseParsing.parse()
+                newRoutesResponseParsing.parse(it)
             }
         }
         val newRoutesParsingResult2 = async {
             queue.parseRouteResponse(shortRoutesResponseInfo) {
-                newRoutesResponseParsing2.parse()
+                newRoutesResponseParsing2.parse(it)
             }
         }
 
         assertTrue(rerouteResponseParsing.isStarted)
+        assertEquals(
+            true,
+            rerouteResponseParsing.parsingArgs?.optimiseDirectionsResponseStructure
+        )
         assertTrue(newRoutesResponseParsing.isStarted)
+        assertEquals(
+            true,
+            newRoutesResponseParsing.parsingArgs?.optimiseDirectionsResponseStructure
+        )
         assertTrue(newRoutesResponseParsing2.isStarted)
+        assertEquals(
+            true,
+            newRoutesResponseParsing2.parsingArgs?.optimiseDirectionsResponseStructure
+        )
         rerouteResponseParsing.complete("reroute")
         newRoutesResponseParsing.complete("new routes")
         newRoutesResponseParsing2.complete("new routes 2")
@@ -200,12 +212,12 @@ class RoutesParsingQueueTest {
         }
         val rerouteParsingResult = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                rerouteResponseParsing.parse()
+                rerouteResponseParsing.parse(it)
             }
         }
         val routesParsingResult = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                newRoutesRequestParsing.parse()
+                newRoutesRequestParsing.parse(it)
             }
         }
 
@@ -234,12 +246,12 @@ class RoutesParsingQueueTest {
         }
         val rerouteParsingResult = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                rerouteResponseParsing.parse()
+                rerouteResponseParsing.parse(it)
             }
         }
         val alternativesParsingResult = async {
             queue.parseAlternatives(longRoutesAlternativesInfo()) {
-                alternativesRouteParsing.parse()
+                alternativesRouteParsing.parse(it)
             }
         }
 
@@ -267,12 +279,12 @@ class RoutesParsingQueueTest {
         }
         val rerouteParsingResult = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                rerouteResponseParsing.parse()
+                rerouteResponseParsing.parse(it)
             }
         }
         val alternativesParsingResult = async {
             queue.parseAlternatives(longRoutesAlternativesInfo()) {
-                alternativesRouteParsing.parse()
+                alternativesRouteParsing.parse(it)
             }
         }
 
@@ -303,12 +315,12 @@ class RoutesParsingQueueTest {
         }
         val alternativesParsingResult = async {
             queue.parseAlternatives(longRoutesAlternativesInfo()) {
-                alternativesRouteParsing.parse()
+                alternativesRouteParsing.parse(it)
             }
         }
         val rerouteParsingResult = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                rerouteResponseParsing.parse()
+                rerouteResponseParsing.parse(it)
             }
         }
 
@@ -340,12 +352,12 @@ class RoutesParsingQueueTest {
         }
         val alternativesParsingResult = async {
             queue.parseAlternatives(longRoutesAlternativesInfo()) {
-                alternativesRouteParsing.parse()
+                alternativesRouteParsing.parse(it)
             }
         }
         val rerouteParsingResult = async {
             queue.parseRouteResponse(longRoutesResponseInfo()) {
-                rerouteResponseParsing.parse()
+                rerouteResponseParsing.parse(it)
             }
         }
 
@@ -401,12 +413,15 @@ class ParsingTask<T>() {
     var isStarted = false
         private set
 
+    var parsingArgs: ParseArguments? = null
+
     fun complete(result: T) {
         completableDeferred.complete(result)
     }
 
-    suspend fun parse(): T {
+    suspend fun parse(args: ParseArguments): T {
         isStarted = true
+        parsingArgs = args
         return completableDeferred.await()
     }
 }
