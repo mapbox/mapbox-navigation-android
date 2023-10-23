@@ -232,11 +232,6 @@ internal class RouteAlternativesController constructor(
         val allAlternatives = primaryRoutes + nativeAlternatives.map { it.route }
 
         val alternatives: List<NavigationRoute> = if (allAlternatives.isNotEmpty()) {
-            val routeProgress = tripSession.getRouteProgress()
-                ?: run {
-                    logD("skipping alternatives update - no progress", LOG_CATEGORY)
-                    return@launch
-                }
             val args = AlternativesInfo(
                 // TODO: what if there are two response and only one of them is huge?
                 RouteResponseInfo.fromResponse(allAlternatives.first().responseJsonRef.buffer),
