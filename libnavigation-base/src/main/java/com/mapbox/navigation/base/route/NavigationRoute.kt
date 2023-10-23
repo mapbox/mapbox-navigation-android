@@ -714,7 +714,7 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
         .build()
 }
 
-fun DataRef.toDirectionsResponse(): DirectionsResponse {
+internal fun DataRef.toDirectionsResponse(): DirectionsResponse {
     val stream = ByteBufferBackedInputStream(buffer)
     val reader = InputStreamReader(stream)
     return reader.use { reader ->
