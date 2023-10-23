@@ -1032,6 +1032,7 @@ class RouteProgressExTest {
                 .build()
             return NavigationRoute(
                 DirectionsResponse.builder()
+                    .routes(emptyList())
                     .waypoints(dirWaypoints)
                     .code("Ok")
                     .build(),

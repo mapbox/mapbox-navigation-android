@@ -126,6 +126,7 @@ private constructor(
         if (eventsAppMetadata != other.eventsAppMetadata) return false
         if (enableSensors != other.enableSensors) return false
         if (copilotOptions != other.copilotOptions) return false
+        if (longRoutesOptimisationOptions != other.longRoutesOptimisationOptions) return false
 
         return true
     }
@@ -154,6 +155,7 @@ private constructor(
         result = 31 * result + eventsAppMetadata.hashCode()
         result = 31 * result + enableSensors.hashCode()
         result = 31 * result + copilotOptions.hashCode()
+        result = 31 * result + longRoutesOptimisationOptions.hashCode()
         return result
     }
 
@@ -181,7 +183,8 @@ private constructor(
             "historyRecorderOptions=$historyRecorderOptions, " +
             "eventsAppMetadata=$eventsAppMetadata, " +
             "enableSensors=$enableSensors, " +
-            "copilotOptions=$copilotOptions" +
+            "copilotOptions=$copilotOptions, " +
+            "longRoutesOptimisationOptions=$longRoutesOptimisationOptions" +
             ")"
     }
 
