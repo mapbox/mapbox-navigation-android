@@ -238,9 +238,8 @@ internal class RouteAlternativesController constructor(
                     return@launch
                 }
             val args = AlternativesInfo(
-                RouteResponseInfo(
-                    sizeBytes = allAlternatives.first().responseJsonRef.buffer.capacity()
-                ),
+                // TODO: what if there are two response and only one of them is huge?
+                RouteResponseInfo.fromResponse(allAlternatives.first().responseJsonRef.buffer),
                 userTriggeredAlternativesRefresh = immediateAlternativesRefresh
             )
             val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
