@@ -141,6 +141,15 @@ class NavigationRouteWaypointsTest(
         val route = NavigationRoute(
             DirectionsResponse.builder()
                 .waypoints(responseWaypoints)
+                .routes(
+                    listOf(
+                        DirectionsRoute.builder()
+                            .distance(1.0)
+                            .duration(2.9)
+                            .waypoints(routeWaypoints)
+                            .build()
+                    )
+                )
                 .code("Ok")
                 .build(),
             0,
