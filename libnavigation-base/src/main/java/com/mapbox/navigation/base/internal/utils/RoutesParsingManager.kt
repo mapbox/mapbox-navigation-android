@@ -137,6 +137,9 @@ data class RouteResponseInfo(
     companion object {
         fun fromResponse(response: ByteBuffer) =
             RouteResponseInfo(sizeBytes = response.capacity())
+
+        fun fromResponses(responses: List<ByteBuffer>) =
+            RouteResponseInfo(sizeBytes = responses.maxOf { it.capacity() })
     }
 }
 
