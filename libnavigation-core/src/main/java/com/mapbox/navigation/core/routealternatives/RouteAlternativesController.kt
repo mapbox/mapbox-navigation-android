@@ -4,8 +4,8 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.utils.AlternativesInfo
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
+import com.mapbox.navigation.base.internal.utils.RouteParsingManager
 import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
-import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -34,7 +34,7 @@ internal class RouteAlternativesController constructor(
     private val navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
     private val threadController: ThreadController,
-    private val routesParsingQueue: RoutesParsingQueue
+    private val routeParsingManager: RouteParsingManager
 ) : AlternativeMetadataProvider {
 
     private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
@@ -238,7 +238,7 @@ internal class RouteAlternativesController constructor(
                 userTriggeredAlternativesRefresh = immediateAlternativesRefresh
             )
             val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
-                routesParsingQueue.parseAlternatives(args) { parseArgs ->
+                routeParsingManager.parseAlternatives(args) { parseArgs ->
                     withContext(ThreadController.DefaultDispatcher) {
                         parseRouteInterfaces(
                             allAlternatives,

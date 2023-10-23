@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.routealternatives
 
-import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
+import com.mapbox.navigation.base.internal.utils.RouteParsingManager
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -13,12 +13,12 @@ internal object RouteAlternativesControllerProvider {
         navigator: MapboxNativeNavigator,
         tripSession: TripSession,
         threadController: ThreadController,
-        routesParsingQueue: RoutesParsingQueue
+        routeParsingManager: RouteParsingManager
     ) = RouteAlternativesController(
         options,
         navigator,
         tripSession,
         threadController,
-        routesParsingQueue
+        routeParsingManager
     )
 }

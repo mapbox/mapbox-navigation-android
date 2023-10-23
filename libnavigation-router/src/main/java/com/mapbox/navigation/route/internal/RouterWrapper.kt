@@ -15,8 +15,8 @@ import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.Constants
+import com.mapbox.navigation.base.internal.utils.RouteParsingManager
 import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
-import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -54,7 +54,7 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
-    private val routesParsingQueue: RoutesParsingQueue
+    private val routeParsingManager: RouteParsingManager
 ) : NavigationRouterV2, InternalRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
@@ -115,7 +115,7 @@ class RouterWrapper(
                                 LOG_CATEGORY
                             )
                             val responseInfo = RouteResponseInfo.fromResponse(responseBody.buffer)
-                            routesParsingQueue.parseRouteResponse(responseInfo) { parseArguments ->
+                            routeParsingManager.parseRouteResponse(responseInfo) { parseArguments ->
                                 logD(LOG_CATEGORY) {
                                     "starting parsing"
                                 }

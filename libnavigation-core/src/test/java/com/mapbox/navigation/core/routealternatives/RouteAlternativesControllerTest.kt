@@ -8,7 +8,8 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.isExpired
-import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
+import com.mapbox.navigation.base.internal.utils.RouteParsingManager
+import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
 import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
@@ -72,13 +73,13 @@ class RouteAlternativesControllerTest {
 
     private fun createRouteAlternativesController(
         options: RouteAlternativesOptions = RouteAlternativesOptions.Builder().build(),
-        routesParsingQueue: RoutesParsingQueue = createParsingQueueNoOptimisations()
+        routeParsingManager: RouteParsingManager = createParsingQueueNoOptimisations()
     ) = RouteAlternativesController(
         options,
         navigator,
         tripSession,
         ThreadController(),
-        routesParsingQueue
+        routeParsingManager
     )
 
     @Before
@@ -968,13 +969,12 @@ class RouteAlternativesControllerTest {
     }
 }
 
-private fun createParsingQueueWithOptimisations() = RoutesParsingQueue(
+private fun createParsingQueueWithOptimisations() = createRouteParsingManager(
     LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-        0,
-        0
+        20_000,
     )
 )
 
-private fun createParsingQueueNoOptimisations() = RoutesParsingQueue(
+private fun createParsingQueueNoOptimisations() = createRouteParsingManager(
     LongRoutesOptimisationOptions.NoOptimisations
 )

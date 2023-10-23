@@ -13,11 +13,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-
-class RoutesParsingQueueTest {
+class RouteParsingManagerTest {
     @Test
     fun `parse long routes with optimisations`() = runBlocking {
-        val queue = createParsingQueue(optimiseLongRoutesConfig())
+        val queue = createParsingManager(optimiseLongRoutesConfig())
         var preparedForParsing = false
         var parseArguments: ParseArguments? = null
 
@@ -36,7 +35,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse alternatives`() = runBlocking {
-        val queue = createParsingQueue(optimiseLongRoutesConfig())
+        val queue = createParsingManager(optimiseLongRoutesConfig())
         var preparedForParsing = false
         var parseArguments: ParseArguments? = null
 
@@ -55,7 +54,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse immediate alternatives without optimisations`() = runBlocking {
-        val queue = createParsingQueueWithOptimisationsDisabled()
+        val queue = createParsingManagerWithoutOptimisations()
         var preparedForParsing = false
         var parsingArguments: ParseArguments? = null
 
@@ -75,7 +74,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse immediate alternatives with optimisations`() = runBlocking {
-        val queue = createParsingQueue(optimiseLongRoutesConfig())
+        val queue = createParsingManager(optimiseLongRoutesConfig())
         val parsingTask = ParsingTask<String>().apply {
             complete("test")
         }
@@ -96,7 +95,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse long routes in parallel with optimisations`() = runBlockingTest {
-        val queue = createParsingQueue(optimiseLongRoutesConfig())
+        val queue = createParsingManager(optimiseLongRoutesConfig())
         val rerouteResponseParsing = ParsingTask<String>()
         val newRoutesResponseParsing = ParsingTask<String>()
         val newRoutesResponseParsing2 = ParsingTask<String>()
@@ -144,7 +143,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse short routes in parallel with optimisations enabled`() = runBlockingTest {
-        val queue = createParsingQueue(
+        val queue = createParsingManager(
             LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
                 responseToParseSizeBytes = 5_000
             )
@@ -201,7 +200,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse mix of short and long routes in parallel with optimisations enabled`() = runBlockingTest {
-        val queue = createParsingQueue(
+        val queue = createParsingManager(
             LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
                 responseToParseSizeBytes = 500
             )
@@ -261,7 +260,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse routes in parallel without optimisations`() = runBlockingTest {
-        val queue = createParsingQueueWithOptimisationsDisabled()
+        val queue = createParsingManagerWithoutOptimisations()
         val rerouteResponseParsing = ParsingTask<String>()
         val newRoutesRequestParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
@@ -295,7 +294,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse alternatives in parallel to reroute with optimisations`() = runBlockingTest {
-        val queue = createParsingQueue(optimiseLongRoutesConfig())
+        val queue = createParsingManager(optimiseLongRoutesConfig())
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
@@ -328,7 +327,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse alternatives in parallel to reroute without optimisations`() = runBlockingTest {
-        val queue = createParsingQueueWithOptimisationsDisabled()
+        val queue = createParsingManagerWithoutOptimisations()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
@@ -364,7 +363,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse routes in parallel to alternatives with optimisations`() = runBlockingTest {
-        val queue = createParsingQueue(optimiseLongRoutesConfig())
+        val queue = createParsingManager(optimiseLongRoutesConfig())
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
@@ -401,7 +400,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse routes in parallel to alternatives without optimisations`() = runBlockingTest {
-        val queue = createParsingQueueWithOptimisationsDisabled()
+        val queue = createParsingManagerWithoutOptimisations()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
@@ -437,7 +436,7 @@ class RoutesParsingQueueTest {
 
     @Test
     fun `parse routes then alternatives`() = runBlocking {
-        val queue = createParsingQueue(optimiseLongRoutesConfig())
+        val queue = createParsingManager(optimiseLongRoutesConfig())
         var preparedForParsingTimes = 0
 
         queue.setPrepareForParsingAction {
@@ -456,16 +455,16 @@ class RoutesParsingQueueTest {
     }
 }
 
-private fun createParsingQueue(
+private fun createParsingManager(
     config: LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes
 ) =
-    RoutesParsingQueue(
+    createRouteParsingManager(
         config
     )
 
 
-fun createParsingQueueWithOptimisationsDisabled() =
-    RoutesParsingQueue(LongRoutesOptimisationOptions.NoOptimisations)
+fun createParsingManagerWithoutOptimisations() =
+    createRouteParsingManager(LongRoutesOptimisationOptions.NoOptimisations)
 
 class ParsingTask<T>() {
     private val completableDeferred = CompletableDeferred<T>()

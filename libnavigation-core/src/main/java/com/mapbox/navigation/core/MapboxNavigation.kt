@@ -23,7 +23,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
-import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
+import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -451,8 +451,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ),
             historyRecorderHandles.composite,
         )
-        val routesParsingQueue = RoutesParsingQueue(navigationOptions.longRoutesOptimisationOptions)
-        routesParsingQueue.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
+        val routeParsingManager = createRouteParsingManager(navigationOptions.longRoutesOptimisationOptions)
+        routeParsingManager.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(
                 ModuleParams.NavigationRouter(
@@ -460,7 +460,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
                     nativeRouter,
                     threadController,
-                    routesParsingQueue
+                    routeParsingManager
                 )
             )
         }
@@ -581,7 +581,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator,
             tripSession,
             threadController,
-            routesParsingQueue
+            routeParsingManager
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
