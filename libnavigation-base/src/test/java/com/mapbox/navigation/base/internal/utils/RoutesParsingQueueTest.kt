@@ -146,7 +146,6 @@ class RoutesParsingQueueTest {
     fun `parse short routes in parallel with optimisations enabled`() = runBlockingTest {
         val queue = createParsingQueue(
             LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-                currentRouteLengthMeters = 0,
                 responseToParseSizeBytes = 5_000
             )
         )
@@ -204,7 +203,6 @@ class RoutesParsingQueueTest {
     fun `parse mix of short and long routes in parallel with optimisations enabled`() = runBlockingTest {
         val queue = createParsingQueue(
             LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-                currentRouteLengthMeters = 0,
                 responseToParseSizeBytes = 500
             )
         )
@@ -489,7 +487,6 @@ class ParsingTask<T>() {
 
 private fun optimiseLongRoutesConfig() =
     LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-        currentRouteLengthMeters = 4000 * 1000,
         responseToParseSizeBytes = 20 * 1024 * 1024
     )
 
