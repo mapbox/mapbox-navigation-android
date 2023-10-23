@@ -116,10 +116,6 @@ class RouterWrapper(
                             )
                             val responseInfo = RouteResponseInfo.fromResponse(responseBody.buffer)
                             routeParsingManager.parseRouteResponse(responseInfo) { parseArguments ->
-                                logD(LOG_CATEGORY) {
-                                    "starting parsing"
-                                }
-                                logD(LOG_CATEGORY) { "onResponseDownloaded: completed" }
                                 val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
                                 parseDirectionsResponse(
                                     ThreadController.DefaultDispatcher,

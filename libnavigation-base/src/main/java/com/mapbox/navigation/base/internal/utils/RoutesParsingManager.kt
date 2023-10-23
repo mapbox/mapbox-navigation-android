@@ -4,9 +4,12 @@ package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.nio.ByteBuffer
+
+private const val LOG_TAG = "RouteParsingManager"
 
 sealed class AlternativesParsingResult<out T> {
     object NotActual : AlternativesParsingResult<Nothing>()
@@ -55,8 +58,9 @@ private class OptimisedRoutesParsingManager(
         return if (routeResponseInfo.sizeBytes < options.responseToParseSizeBytes) {
             parsing(ParseArguments(optimiseDirectionsResponseStructure = true))
         } else {
+            logD(LOG_TAG) { "Enqueuing routes parsing" }
             mutex.withLock {
-                prepareForParsingAction()
+                prepareForParsing()
                 parsing(ParseArguments(optimiseDirectionsResponseStructure = true))
             }
         }
@@ -67,8 +71,13 @@ private class OptimisedRoutesParsingManager(
         parsing: suspend (ParseArguments) -> T
     ): AlternativesParsingResult<T> {
         return if (arguments.userTriggeredAlternativesRefresh) {
+            logD(LOG_TAG) { "skipping parsing of immediate route alternatives response" }
             AlternativesParsingResult.NotActual
         } else if (mutex.isLocked) {
+            logD(LOG_TAG) {
+                "skipping parsing of routes alternatives" +
+                    " as a different route is being parsed already"
+            }
             AlternativesParsingResult.NotActual
         } else {
             AlternativesParsingResult.Parsed(
@@ -77,6 +86,16 @@ private class OptimisedRoutesParsingManager(
                     parsing
                 )
             )
+        }
+    }
+
+    private suspend fun prepareForParsing() {
+        logD(LOG_TAG) {
+            "Preparing for routes response parsing"
+        }
+        prepareForParsingAction()
+        logD(LOG_TAG) {
+            "Preparation for routes parsing completed"
         }
     }
 }
