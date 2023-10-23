@@ -113,7 +113,7 @@ class RouterWrapper(
                                     "from router.getRoute for $urlWithoutToken",
                                 LOG_CATEGORY
                             )
-                            routesParsingQueue.parseRouteResponse {
+                            routesParsingQueue.parseRouteResponse { parseArguments ->
                                 logD(LOG_CATEGORY) {
                                     "starting parsing"
                                 }
@@ -124,7 +124,8 @@ class RouterWrapper(
                                     responseBody,
                                     routeUrl,
                                     origin.mapToSdkRouteOrigin(),
-                                    responseTimeElapsedSeconds
+                                    responseTimeElapsedSeconds,
+                                    parseArguments
                                 ).fold(
                                     { throwable ->
                                         callback.onFailure(
@@ -132,7 +133,7 @@ class RouterWrapper(
                                                 RouterFailure(
                                                     urlWithoutToken,
                                                     origin.mapToSdkRouteOrigin(),
-                                                    "failed for response: $it",
+                                                    "Failed to parse response",
                                                     throwable = throwable
                                                 )
                                             ),
