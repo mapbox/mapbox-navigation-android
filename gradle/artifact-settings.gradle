@@ -22,7 +22,7 @@ def getVersionName() {
 //    def prefix = project.ext.releaseTagPrefix
 //    def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
 //    def version = cmd.execute().text
-    return "2.17.0-MAP-ANIMATION-TEST-1.0-SNAPSHOT"
+    return "2.17.0-MAP-ANIMATION-TEST-2.0-SNAPSHOT"
 }
 
 def getReleaseVersion(String version) {

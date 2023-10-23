@@ -710,6 +710,7 @@ class MapboxNavigationViewportDataSource(
 
     private fun updateFollowingData(cameraState: CameraState) {
         Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.updateFollowingData($cameraState). " +
+            "options: $options, " +
             "pointsToFrameOnCurrentStep: $pointsToFrameOnCurrentStep, " +
             "targetLocation: $targetLocation, " +
             "additionalPointsToFrameForFollowing: $additionalPointsToFrameForFollowing, " +
@@ -805,6 +806,7 @@ class MapboxNavigationViewportDataSource(
 
     private fun updateOverviewData(cameraState: CameraState) {
         Log.d("MapZoomingTest", "MapboxNavigationViewportDataSource.updateOverviewData($cameraState). " +
+            "options: $options, " +
             "simplifiedRemainingPointsOnRoute: $simplifiedRemainingPointsOnRoute, " +
             "targetLocation: $targetLocation, " +
             "additionalPointsToFrameForOverview: $additionalPointsToFrameForOverview"

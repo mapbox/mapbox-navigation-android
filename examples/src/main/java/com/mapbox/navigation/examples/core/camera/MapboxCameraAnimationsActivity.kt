@@ -24,6 +24,8 @@ import com.mapbox.maps.extension.style.layers.generated.CircleLayer
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
+import com.mapbox.maps.plugin.animation.CameraAnimatorType
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
@@ -315,6 +317,21 @@ class MapboxCameraAnimationsActivity :
         )
 
         init()
+
+        binding.mapView.camera.addCameraAnimationsLifecycleListener(object : CameraAnimationsLifecycleListener {
+            override fun onAnimatorInterrupting(type: CameraAnimatorType, runningAnimator: ValueAnimator, runningAnimatorOwner: String?, newAnimator: ValueAnimator, newAnimatorOwner: String?) {
+                Log.d("MapZoomingTest", "CameraAnimation.onAnimatorInterrupting($type, $runningAnimatorOwner, $newAnimatorOwner)")
+            }
+
+            override fun onAnimatorCancelling(type: CameraAnimatorType, animator: ValueAnimator, owner: String?) {
+            }
+
+            override fun onAnimatorEnding(type: CameraAnimatorType, animator: ValueAnimator, owner: String?) {
+            }
+
+            override fun onAnimatorStarting(type: CameraAnimatorType, animator: ValueAnimator, owner: String?) {
+            }
+        })
     }
 
     @SuppressLint("MissingPermission")
