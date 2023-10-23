@@ -53,9 +53,12 @@ class RoutesParsingQueue(
 }
 
 data class AlternativesInfo(
-    val newResponseSizeBytes: Int,
-    val currentRouteLength: Double,
+    val routeResponseInfo: RouteResponseInfo,
     val userTriggeredAlternativesRefresh: Boolean
+)
+
+data class RouteResponseInfo(
+    val newResponseSizeBytes: Int
 )
 
 data class ParseArguments(

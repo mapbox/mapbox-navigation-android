@@ -2,8 +2,9 @@ package com.mapbox.navigation.core.routealternatives
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
 import com.mapbox.navigation.base.internal.utils.AlternativesInfo
+import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
+import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
 import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
@@ -230,15 +231,16 @@ internal class RouteAlternativesController constructor(
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val allAlternatives = primaryRoutes + nativeAlternatives.map { it.route }
 
-        val alternatives: List<NavigationRoute> =  if (allAlternatives.isNotEmpty()) {
+        val alternatives: List<NavigationRoute> = if (allAlternatives.isNotEmpty()) {
             val routeProgress = tripSession.getRouteProgress()
                 ?: run {
                     logD("skipping alternatives update - no progress", LOG_CATEGORY)
                     return@launch
                 }
             val args = AlternativesInfo(
-                newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.capacity(),
-                currentRouteLength = routeProgress.route.distance(),
+                RouteResponseInfo(
+                    newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.capacity()
+                ),
                 userTriggeredAlternativesRefresh = immediateAlternativesRefresh
             )
             val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =

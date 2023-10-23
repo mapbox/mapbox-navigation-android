@@ -368,7 +368,6 @@ private fun longRoutesParsingArgs(
     userTriggeredImmediateRefresh: Boolean = false
 ) =
     AlternativesInfo(
-        currentRouteLength = (optimiseLongRoutesConfig().currentRouteLengthMeters + 1).toDouble(),
-        newResponseSizeBytes = optimiseLongRoutesConfig().responseToParseSizeBytes + 1,
+        RouteResponseInfo(optimiseLongRoutesConfig().responseToParseSizeBytes + 1),
         userTriggeredAlternativesRefresh = userTriggeredImmediateRefresh
     )
