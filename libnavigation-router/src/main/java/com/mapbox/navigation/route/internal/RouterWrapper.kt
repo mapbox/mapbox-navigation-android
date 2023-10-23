@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.Constants
+import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
 import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
@@ -113,7 +114,8 @@ class RouterWrapper(
                                     "from router.getRoute for $urlWithoutToken",
                                 LOG_CATEGORY
                             )
-                            routesParsingQueue.parseRouteResponse { parseArguments ->
+                            val responseInfo = RouteResponseInfo.fromResponse(responseBody.buffer)
+                            routesParsingQueue.parseRouteResponse(responseInfo) { parseArguments ->
                                 logD(LOG_CATEGORY) {
                                     "starting parsing"
                                 }

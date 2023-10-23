@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.nio.ByteBuffer
 
 sealed class AlternativesParsingResult<out T> {
     object NotActual : AlternativesParsingResult<Nothing>()
@@ -50,7 +51,12 @@ class RoutesParsingQueue(
         return if (mutex.isLocked) {
             AlternativesParsingResult.NotActual
         } else {
-            AlternativesParsingResult.Parsed(parseRouteResponse(arguments.routeResponseInfo, parsing))
+            AlternativesParsingResult.Parsed(
+                parseRouteResponse(
+                    arguments.routeResponseInfo,
+                    parsing
+                )
+            )
         }
     }
 }
@@ -61,8 +67,13 @@ data class AlternativesInfo(
 )
 
 data class RouteResponseInfo(
-    val newResponseSizeBytes: Int
-)
+    val sizeBytes: Int
+) {
+    companion object {
+        fun fromResponse(response: ByteBuffer) =
+            RouteResponseInfo(sizeBytes = response.capacity())
+    }
+}
 
 data class ParseArguments(
     val optimiseDirectionsResponseStructure: Boolean

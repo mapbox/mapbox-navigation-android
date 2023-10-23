@@ -239,7 +239,7 @@ internal class RouteAlternativesController constructor(
                 }
             val args = AlternativesInfo(
                 RouteResponseInfo(
-                    newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.capacity()
+                    sizeBytes = allAlternatives.first().responseJsonRef.buffer.capacity()
                 ),
                 userTriggeredAlternativesRefresh = immediateAlternativesRefresh
             )
