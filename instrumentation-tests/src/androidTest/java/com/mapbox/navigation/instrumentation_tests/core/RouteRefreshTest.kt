@@ -23,7 +23,6 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.compareIdWithIncidentId
 import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
@@ -34,7 +33,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationRe
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
-import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -63,7 +62,7 @@ import org.junit.Test
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
-class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+class RouteRefreshTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -121,8 +120,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 set(routeRefreshOptions, 3_000L)
             }
             mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                NavigationOptions.Builder(context)
+                    .accessToken(getMapboxAccessTokenFromResources(context))
                     .routeRefreshOptions(routeRefreshOptions)
                     .navigatorPredictionMillis(0L)
                     .build()
@@ -354,7 +353,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             FailByRequestMockRequestHandler(
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh",
-                    readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
+                    readRawFileText(context, R.raw.route_response_route_refresh_annotations),
                     // it will fail for alternative refresh since index will be 1
                     routeIndex = 0
                 )
@@ -492,7 +491,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     MockDirectionsRefreshHandler(
                         "route_response_single_route_multileg_alternative",
                         readRawFileText(
-                            activity,
+                            context,
                             R.raw.route_response_single_route_multileg_alternative_refreshed
                         ),
                         acceptedGeometryIndex = 11
@@ -505,7 +504,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .routes
             // alternative which was requested on the second leg of the original route,
             // so the alternative has only one leg while the original route has two
-            val alternativeRoute = alternativeForMultileg(activity)
+            val alternativeRoute = alternativeForMultileg(context)
                 .toNavigationRoutes(RouterOrigin.Offboard) {
                     baseUrl(mockWebServerRule.baseUrl)
                 }.first()
@@ -561,7 +560,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     MockDirectionsRefreshHandler(
                         "route_response_single_route_multileg_alternative",
                         readRawFileText(
-                            activity,
+                            context,
                             R.raw.route_response_single_route_multileg_alternative_refreshed
                         ),
                         acceptedGeometryIndex = 11
@@ -575,7 +574,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             // In this test setup we are considering a case where user was driving along the route,
             // started the second leg and received an alternative, and selected it before the fork.
             // This means that the primary route is shorter than the alternative route (former primary route).
-            val primaryRoute = alternativeForMultileg(activity)
+            val primaryRoute = alternativeForMultileg(context)
                 .toNavigationRoutes(RouterOrigin.Offboard) {
                     baseUrl(mockWebServerRule.baseUrl)
                 }.first()
@@ -796,7 +795,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 MockDirectionsRefreshHandler(
                     "route_response_single_route_multileg_alternative",
                     readRawFileText(
-                        activity,
+                        context,
                         R.raw.route_response_single_route_multileg_alternative_refreshed
                     ),
                     acceptedGeometryIndex = 11
@@ -810,7 +809,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         // In this test setup we are considering a case where user was driving along the route,
         // started the second leg and received an alternative, and selected it before the fork.
         // This means that the primary route is shorter than the alternative route (former primary route).
-        val primaryRoute = alternativeForMultileg(activity)
+        val primaryRoute = alternativeForMultileg(context)
             .toNavigationRoutes(RouterOrigin.Offboard) {
                 baseUrl(mockWebServerRule.baseUrl)
             }.first()
@@ -860,7 +859,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 MockDirectionsRefreshHandler(
                     "route_response_single_route_multileg_alternative",
                     readRawFileText(
-                        activity,
+                        context,
                         R.raw.route_response_single_route_multileg_alternative_refreshed
                     ),
                     acceptedGeometryIndex = 11
@@ -873,7 +872,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .routes
         // alternative which was requested on the second leg of the original route,
         // so the alternative has only one leg while the original route has two
-        val alternativeRoute = alternativeForMultileg(activity)
+        val alternativeRoute = alternativeForMultileg(context)
             .toNavigationRoutes(RouterOrigin.Offboard) {
                 baseUrl(mockWebServerRule.baseUrl)
             }.first()
@@ -959,14 +958,14 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
                 "driving-traffic",
-                readRawFileText(activity, routesResponse),
+                readRawFileText(context, routesResponse),
                 coordinates
             )
         )
         failByRequestRouteRefreshResponse = FailByRequestMockRequestHandler(
             MockDirectionsRefreshHandler(
                 responseTestUuid,
-                readRawFileText(activity, refreshResponse),
+                readRawFileText(context, refreshResponse),
                 acceptedGeometryIndex
             )
         )
@@ -991,7 +990,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             FailByRequestMockRequestHandler(
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh",
-                    readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
+                    readRawFileText(context, R.raw.route_response_route_refresh_annotations),
                     routeIndex = 0
                 )
             )
@@ -1001,7 +1000,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh",
                     readRawFileText(
-                        activity,
+                        context,
                         R.raw.route_response_route_refresh_alternative_annotations
                     ),
                     routeIndex = 1
