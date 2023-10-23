@@ -33,6 +33,8 @@ class RoutesParsingQueue(
     ): T {
         return if (longRoutesOptimisationOptions is LongRoutesOptimisationOptions.NoOptimisations) {
             parsing(ParseArguments(optimiseDirectionsResponseStructure = false))
+        } else if (longRoutesOptimisationOptions is LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes && routeResponseInfo.sizeBytes < longRoutesOptimisationOptions.responseToParseSizeBytes) {
+            parsing(ParseArguments(optimiseDirectionsResponseStructure = false))
         } else {
             mutex.withLock {
                 prepareForParsingAction()
