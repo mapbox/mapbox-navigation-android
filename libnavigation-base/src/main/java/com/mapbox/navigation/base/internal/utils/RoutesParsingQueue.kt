@@ -26,20 +26,20 @@ class RoutesParsingQueue(
     }
 
     // TODO: add arguments and prepare for parsing only if that makes sence
-    suspend fun <T> parseRouteResponse(parsing: suspend () -> T): T {
+    suspend fun <T> parseRouteResponse(parsing: suspend (ParseArguments) -> T): T {
         return if (longRoutesOptimisationOptions is LongRoutesOptimisationOptions.NoOptimisations) {
-            parsing()
+            parsing(ParseArguments(optimiseDirectionsResponseStructure = false))
         } else {
             mutex.withLock {
                 prepareForParsingAction()
-                parsing()
+                parsing(ParseArguments(optimiseDirectionsResponseStructure = true))
             }
         }
     }
 
     suspend fun <T> parseAlternatives(
-        arguments: ParseAlternativesArguments,
-        parsing: suspend () -> T
+        arguments: AlternativesInfo,
+        parsing: suspend (ParseArguments) -> T
     ): AlternativesParsingResult<T> {
         if (arguments.userTriggeredAlternativesRefresh && longRoutesOptimisationOptions !is LongRoutesOptimisationOptions.NoOptimisations) {
             return AlternativesParsingResult.NotActual
@@ -52,8 +52,12 @@ class RoutesParsingQueue(
     }
 }
 
-data class ParseAlternativesArguments(
+data class AlternativesInfo(
     val newResponseSizeBytes: Int,
     val currentRouteLength: Double,
     val userTriggeredAlternativesRefresh: Boolean
+)
+
+data class ParseArguments(
+    val optimiseDirectionsResponseStructure: Boolean
 )

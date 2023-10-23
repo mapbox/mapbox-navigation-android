@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.routealternatives
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
-import com.mapbox.navigation.base.internal.utils.ParseAlternativesArguments
+import com.mapbox.navigation.base.internal.utils.AlternativesInfo
 import com.mapbox.navigation.base.internal.utils.RoutesParsingQueue
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
@@ -236,17 +236,18 @@ internal class RouteAlternativesController constructor(
                     logD("skipping alternatives update - no progress", LOG_CATEGORY)
                     return@launch
                 }
-            val args = ParseAlternativesArguments(
+            val args = AlternativesInfo(
                 newResponseSizeBytes = allAlternatives.first().responseJsonRef.buffer.capacity(),
                 currentRouteLength = routeProgress.route.distance(),
                 userTriggeredAlternativesRefresh = immediateAlternativesRefresh
             )
             val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
-                routesParsingQueue.parseAlternatives(args) {
+                routesParsingQueue.parseAlternatives(args) { parseArgs ->
                     withContext(ThreadController.DefaultDispatcher) {
                         parseRouteInterfaces(
                             allAlternatives,
-                            responseTimeElapsedSeconds
+                            responseTimeElapsedSeconds,
+                            parseArgs
                         )
                     }
                 }

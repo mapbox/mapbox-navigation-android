@@ -106,7 +106,7 @@ class RouterWrapper(
                             }
                         }
                     },
-                    {
+                    { responseBody ->
                         mainJobControl.scope.launch {
                             logI(
                                 "processing successful response " +
@@ -121,7 +121,7 @@ class RouterWrapper(
                                 val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
                                 parseDirectionsResponse(
                                     ThreadController.DefaultDispatcher,
-                                    it,
+                                    responseBody,
                                     routeUrl,
                                     origin.mapToSdkRouteOrigin(),
                                     responseTimeElapsedSeconds

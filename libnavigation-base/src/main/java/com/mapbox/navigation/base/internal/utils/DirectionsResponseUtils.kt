@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.internal.utils
 
-import android.util.Log
 import com.google.gson.JsonSyntaxException
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
@@ -9,8 +8,6 @@ import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsResponse
-import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -21,7 +18,8 @@ suspend fun parseDirectionsResponse(
     responseJson: DataRef,
     requestUrl: String,
     routerOrigin: RouterOrigin,
-    responseTimeElapsedSeconds: Long
+    responseTimeElapsedSeconds: Long,
+    parsingArguments: ParseArguments
 ): Expected<Throwable, List<NavigationRoute>> =
     withContext(dispatcher) {
         return@withContext try {
@@ -29,7 +27,8 @@ suspend fun parseDirectionsResponse(
                 directionsResponseJson = responseJson,
                 routeRequestUrl = requestUrl,
                 routerOrigin,
-                responseTimeElapsedSeconds
+                responseTimeElapsedSeconds,
+                optimiseMemory = parsingArguments.optimiseDirectionsResponseStructure
             )
             if (routes.isEmpty()) {
                 ExpectedFactory.createError(
@@ -49,14 +48,19 @@ suspend fun parseDirectionsResponse(
 
 fun parseRouteInterfaces(
     routes: List<RouteInterface>,
-    responseTimeElapsedSeconds: Long
+    responseTimeElapsedSeconds: Long,
+    parseArgs: ParseArguments
 ): Expected<Throwable, List<NavigationRoute>> {
     return try {
         routes.groupBy { it.responseUuid }
             .map { (_, routes) ->
                 val directionsResponse = routes.first().responseJsonRef.toDirectionsResponse()
                 routes.map {
-                    it.toNavigationRoute(responseTimeElapsedSeconds, directionsResponse)
+                    it.toNavigationRoute(
+                        responseTimeElapsedSeconds,
+                        directionsResponse,
+                        parseArgs.optimiseDirectionsResponseStructure
+                    )
                 }
             }
             .flatten()

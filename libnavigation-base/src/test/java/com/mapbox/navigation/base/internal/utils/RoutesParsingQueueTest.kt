@@ -19,49 +19,58 @@ class RoutesParsingQueueTest {
     fun `parse routes`() = runBlocking {
         val queue = createParsingQueueWithOptimisationsEnabled()
         var preparedForParsing = false
+        var parseArguments: ParseArguments? = null
 
         queue.setPrepareForParsingAction {
             preparedForParsing = true
         }
         val result = queue.parseRouteResponse {
+            parseArguments = it
             "test"
         }
 
         assertTrue(preparedForParsing)
         assertEquals("test", result)
+        assertEquals(true, parseArguments?.optimiseDirectionsResponseStructure)
     }
 
     @Test
     fun `parse alternatives`() = runBlocking {
         val queue = createParsingQueueWithOptimisationsEnabled()
         var preparedForParsing = false
+        var parseArguments: ParseArguments? = null
 
         queue.setPrepareForParsingAction {
             preparedForParsing = true
         }
         val result = queue.parseAlternatives(longRoutesParsingArgs()) {
+            parseArguments = it
             "test"
         }
 
         assertTrue(preparedForParsing)
         assertEquals(AlternativesParsingResult.Parsed("test"), result)
+        assertEquals(true, parseArguments?.optimiseDirectionsResponseStructure)
     }
 
     @Test
     fun `parse immediate alternatives without optimisations`() = runBlocking {
         val queue = createParsingQueueWithOptimisationsDisabled()
         var preparedForParsing = false
+        var parsingArguments: ParseArguments? = null
 
         queue.setPrepareForParsingAction {
             preparedForParsing = true
         }
         val args = longRoutesParsingArgs(userTriggeredImmediateRefresh = true)
         val result = queue.parseAlternatives(args) {
+            parsingArguments = it
             "test"
         }
 
         assertFalse(preparedForParsing)
         assertEquals(AlternativesParsingResult.Parsed("test"), result)
+        assertEquals(false, parsingArguments?.optimiseDirectionsResponseStructure)
     }
 
     @Test
@@ -358,7 +367,7 @@ private fun optimiseLongRoutesConfig() =
 private fun longRoutesParsingArgs(
     userTriggeredImmediateRefresh: Boolean = false
 ) =
-    ParseAlternativesArguments(
+    AlternativesInfo(
         currentRouteLength = (optimiseLongRoutesConfig().currentRouteLengthMeters + 1).toDouble(),
         newResponseSizeBytes = optimiseLongRoutesConfig().responseToParseSizeBytes + 1,
         userTriggeredAlternativesRefresh = userTriggeredImmediateRefresh

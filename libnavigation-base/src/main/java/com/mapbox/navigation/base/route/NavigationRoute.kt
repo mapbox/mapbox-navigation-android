@@ -595,13 +595,16 @@ internal fun DirectionsRoute.toNavigationRoute(
 
 internal fun RouteInterface.toNavigationRoute(
     responseTimeElapsedSeconds: Long,
-    directionsResponse: DirectionsResponse
+    directionsResponse: DirectionsResponse,
+    optimiseDirectionsResponse: Boolean
 ): NavigationRoute {
     val refreshTtl = directionsResponse.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
     return NavigationRoute(
-        directionsResponse = directionsResponse.toBuilder().routes(emptyList())
-            .build(), //TODO: optimise response
+        directionsResponse = if (optimiseDirectionsResponse) {
+            directionsResponse.toBuilder().routes(emptyList())
+                .build()
+        } else directionsResponse,
         routeOptions = routeOptions,
         routeIndex = routeIndex,
         directionsRoute = getDirectionsRoute(directionsResponse, routeIndex, routeOptions),
