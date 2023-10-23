@@ -201,6 +201,67 @@ class RoutesParsingQueueTest {
     }
 
     @Test
+    fun `parse mix of short and long routes in parallel with optimisations enabled`() = runBlockingTest {
+        val queue = createParsingQueue(
+            LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
+                currentRouteLengthMeters = 0,
+                responseToParseSizeBytes = 500
+            )
+        )
+        val rerouteResponseParsing = ParsingTask<String>()
+        val newLongRoutesResponseParsingTask = ParsingTask<String>()
+        val newRoutesResponseParsing2 = ParsingTask<String>()
+        var preparedForParsingTimes = 0
+        val shortRoutesResponseInfo = createRoutesResponseInfo(100)
+        val longRoutesResponseInfo = createRoutesResponseInfo(700)
+
+        queue.setPrepareForParsingAction {
+            preparedForParsingTimes++
+        }
+        val rerouteParsingResult = async {
+            queue.parseRouteResponse(shortRoutesResponseInfo) {
+                rerouteResponseParsing.parse(it)
+            }
+        }
+        val newLongRoutesParsingResult = async {
+            queue.parseRouteResponse(longRoutesResponseInfo) {
+                newLongRoutesResponseParsingTask.parse(it)
+            }
+        }
+        val newRoutesParsingResult2 = async {
+            queue.parseRouteResponse(shortRoutesResponseInfo) {
+                newRoutesResponseParsing2.parse(it)
+            }
+        }
+
+        assertTrue(rerouteResponseParsing.isStarted)
+        assertEquals(
+            true,
+            rerouteResponseParsing.parsingArgs?.optimiseDirectionsResponseStructure
+        )
+        // TODO: maybe long routes should wait until short routes parsing is finished?
+        assertTrue(newLongRoutesResponseParsingTask.isStarted)
+        assertEquals(
+            true,
+            newLongRoutesResponseParsingTask.parsingArgs?.optimiseDirectionsResponseStructure
+        )
+        // TODO: maybe next short routes parsing should wait until long routes parsing is finished?
+        assertTrue(newRoutesResponseParsing2.isStarted)
+        assertEquals(
+            true,
+            newRoutesResponseParsing2.parsingArgs?.optimiseDirectionsResponseStructure
+        )
+        rerouteResponseParsing.complete("reroute")
+        newLongRoutesResponseParsingTask.complete("new routes")
+        newRoutesResponseParsing2.complete("new routes 2")
+
+        assertEquals("reroute", rerouteParsingResult.await())
+        assertEquals("new routes", newLongRoutesParsingResult.await())
+        assertEquals("new routes 2", newRoutesParsingResult2.await())
+        assertEquals(1, preparedForParsingTimes)
+    }
+
+    @Test
     fun `parse routes in parallel without optimisations`() = runBlockingTest {
         val queue = createParsingQueueWithOptimisationsDisabled()
         val rerouteResponseParsing = ParsingTask<String>()
