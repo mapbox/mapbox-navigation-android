@@ -37,6 +37,27 @@ internal class RouteRefreshPauseResumeIntegrationTest : RouteRefreshIntegrationT
     }
 
     @Test
+    fun pause_refresh_while_request_is_in_progress() = runBlocking {
+        val routes = setUpRoutes("route_response_single_route_refresh.json", responseDelay = 2000)
+        routeRefreshController = createRefreshController(refreshInterval = 60_000)
+        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        )
+        testDispatcher.advanceTimeBy(61_000)
+
+        routeRefreshController.pauseRouteRefreshes()
+
+        testDispatcher.advanceTimeBy(1_000)
+
+        assertEquals(0, refreshObserver.refreshes.size)
+
+        testDispatcher.advanceTimeBy(62_000)
+
+        assertEquals(0, refreshObserver.refreshes.size)
+    }
+
+    @Test
     fun request_new_routes_planned_refresh_when_refresh_is_paused() = runBlocking {
         val routes = setUpRoutes("route_response_single_route_refresh.json")
         routeRefreshController = createRefreshController(refreshInterval = 60_000)
@@ -62,6 +83,6 @@ internal class RouteRefreshPauseResumeIntegrationTest : RouteRefreshIntegrationT
         assertEquals(1, refreshObserver.refreshes.size)
 
         testDispatcher.advanceTimeBy(30_000)
-        assertEquals(2, refreshObserver.refreshes.size)
+        assertEquals(1, refreshObserver.refreshes.size)
     }
 }
