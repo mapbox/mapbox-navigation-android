@@ -4,6 +4,7 @@ package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -11,9 +12,14 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 
 class RouteParsingManagerTest {
+
+    @get:Rule
+    val logRule = LoggingFrontendTestRule()
+
     @Test
     fun `parse long routes with optimisations`() = runBlocking {
         val queue = createParsingManager(optimiseLongRoutesConfig())
