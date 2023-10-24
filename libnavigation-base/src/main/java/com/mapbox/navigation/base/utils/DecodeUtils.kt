@@ -178,25 +178,25 @@ object DecodeUtils {
         }
     }
 
-    private fun DirectionsRoute.routeId() = "${requestUuid()}#${routeIndex()}"
+    private fun DirectionsRoute.directionsRouteId() = "${requestUuid()}#${routeIndex()}"
 
     private fun removeAllRoutesExcept(routesToKeep: List<DirectionsRoute>) {
         synchronized(stepsGeometryDecodeCache) {
             logD(LOG_TAG) {
                 "Looking for routes to remove among cached:" +
-                    " ${cachedRoutes.joinToString(",") { it.route.routeId() }}, " +
-                    "while ${routesToKeep.joinToString(",") { it.routeId() }} " +
+                    " ${cachedRoutes.joinToString(",") { it.route.directionsRouteId() }}, " +
+                    "while ${routesToKeep.joinToString(",") { it.directionsRouteId() }} " +
                     "should be kept"
             }
             val cachedRoutesToRemove = cachedRoutes.filter { cached ->
                 routesToKeep.none {
-                    it.routeId() == cached.route.routeId()
+                    it.directionsRouteId() == cached.route.directionsRouteId()
                 }
             }
             cachedRoutesToRemove.forEach { cachedRouteToRemove ->
                 logD(LOG_TAG) {
                     "Cleaning steps geometry caches for route:" +
-                        " ${cachedRouteToRemove.route.routeId()}"
+                        " ${cachedRouteToRemove.route.directionsRouteId()}"
                 }
                 val routeToRemove = cachedRouteToRemove.route
                 cachedRouteToRemove.route.legs()?.forEach {
