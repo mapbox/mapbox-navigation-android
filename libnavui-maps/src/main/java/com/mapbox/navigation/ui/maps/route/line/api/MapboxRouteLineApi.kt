@@ -1402,6 +1402,10 @@ class MapboxRouteLineApi(
                 LOG_CATEGORY
             )
         }
+        logD(LOG_CATEGORY) {
+            "setNewRouteData: distinct routes ids are: " +
+                distinctNewRoutes.joinToString(", ") { it.id }
+        }
         val distinctAlternativeRouteMetadata = alternativeRoutesMetadata.filter { metadata ->
             distinctNewRoutes.find { it.id == metadata.navigationRoute.id } != null
         }
@@ -1415,7 +1419,9 @@ class MapboxRouteLineApi(
         routes.clear()
         routes.addAll(distinctNewRoutes)
         primaryRoute = distinctNewRoutes.firstOrNull()
-        logD("vadzim-test", "trimming route data caches to size ${distinctNewRoutes.size} because of new routes: ${distinctNewRoutes.joinToString(", ") { it.id }}")
+        logD(LOG_CATEGORY) {
+            "trimming route data caches to size ${distinctNewRoutes.size}"
+        }
         MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
         this.activeLegIndex = activeLegIndex
 
