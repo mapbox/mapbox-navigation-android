@@ -618,8 +618,6 @@ class RouteAlternativesControllerTest {
 
     @Test
     fun `should notify callback when on-demand alternatives refresh finishes`() {
-        mockkStatic(RouteOptions::fromUrl)
-        every { RouteOptions.fromUrl(eq(routeRequestUrl)) } returns mockk()
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
         val alternative: RouteAlternative = createNativeAlternativeMock()
@@ -658,8 +656,43 @@ class RouteAlternativesControllerTest {
         assertFalse(alternativesSlot.captured[0].isExpired())
         every { Time.SystemClockImpl.seconds() } returns responseTime + 11
         assertTrue(alternativesSlot.captured[0].isExpired())
+    }
 
-        unmockkStatic(RouteOptions::fromUrl)
+    @Test
+    fun `should notify callback when on-demand alternatives refresh finishes for enabled optimisations`() {
+        val routeAlternativesController = createRouteAlternativesController(
+            routeParsingManager = createParsingQueueWithOptimisations()
+        )
+        val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
+        val alternative: RouteAlternative = createNativeAlternativeMock()
+        val expected = ExpectedFactory.createValue<String, List<RouteAlternative>>(
+            listOf(alternative)
+        )
+        every { controllerInterface.refreshImmediately(capture(nativeObserver)) } answers {
+            nativeObserver.captured.run(expected)
+        }
+        every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+            every { navigationRoute } returns mockk {
+                every { routeOptions } returns mockk()
+                every { directionsRoute } returns mockk(relaxed = true)
+            }
+        }
+
+        val callback = mockk<NavigationRouteAlternativesRequestCallback>(relaxUnitFun = true)
+        routeAlternativesController.triggerAlternativeRequest(callback)
+
+        val routeProgressSlot = slot<RouteProgress>()
+        val alternativesSlot = slot<List<NavigationRoute>>()
+        val routerOriginSlot = slot<RouterOrigin>()
+        verify(exactly = 1) {
+            callback.onRouteAlternativeRequestFinished(
+                capture(routeProgressSlot),
+                capture(alternativesSlot),
+                capture(routerOriginSlot)
+            )
+        }
+        assertEquals(0, alternativesSlot.captured.size)
+        assertEquals(RouterOrigin.Onboard, routerOriginSlot.captured)
     }
 
     @Test
@@ -971,7 +1004,7 @@ class RouteAlternativesControllerTest {
 
 private fun createParsingQueueWithOptimisations() = createRouteParsingManager(
     LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-        20_000,
+        0 // it will trigger optimisation for every route
     )
 )
 

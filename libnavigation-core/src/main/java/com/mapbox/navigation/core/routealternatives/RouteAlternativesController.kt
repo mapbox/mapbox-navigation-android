@@ -137,7 +137,14 @@ internal class RouteAlternativesController constructor(
                     processRouteAlternatives(
                         null,
                         value,
-                        immediateAlternativesRefresh = true
+                        immediateAlternativesRefresh = true,
+                        notActualParsingCallback = {
+                            listener?.onRouteAlternativeRequestFinished(
+                                routeProgress,
+                                emptyList(),
+                                it
+                            )
+                        }
                     ) { alternatives, origin ->
                         listener?.onRouteAlternativeRequestFinished(
                             routeProgress,
@@ -189,6 +196,7 @@ internal class RouteAlternativesController constructor(
                 processRouteAlternatives(
                     onlinePrimaryRoute,
                     routeAlternatives,
+                    notActualParsingCallback = { },
                     immediateAlternativesRefresh = false
                 ) { alternatives, origin ->
                     logD("${alternatives.size} alternatives available", LOG_CATEGORY)
@@ -224,6 +232,7 @@ internal class RouteAlternativesController constructor(
         onlinePrimaryRoute: RouteInterface?,
         nativeAlternatives: List<RouteAlternative>,
         immediateAlternativesRefresh: Boolean,
+        notActualParsingCallback: (RouterOrigin) -> Unit,
         block: suspend (List<NavigationRoute>, RouterOrigin) -> Unit,
     ) = mainJobControl.scope.launch {
         val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
@@ -247,7 +256,10 @@ internal class RouteAlternativesController constructor(
                     }
                 }
             val expected = when (alternativesParsingResult) {
-                AlternativesParsingResult.NotActual -> ExpectedFactory.createError(Throwable("cancelled because another parsing is already in progress"))
+                AlternativesParsingResult.NotActual -> {
+                    notActualParsingCallback(getOrigin(nativeAlternatives))
+                    ExpectedFactory.createError(Throwable("cancelled because another parsing is already in progress"))
+                }
                 is AlternativesParsingResult.Parsed -> alternativesParsingResult.value
             }
 
@@ -269,13 +281,18 @@ internal class RouteAlternativesController constructor(
         }
 
         processAlternativesMetadata(alternatives, nativeAlternatives)
+        val origin = getOrigin(nativeAlternatives)
+        block(alternatives, origin)
+        lastUpdateOrigin = origin
+    }
+
+    private fun getOrigin(nativeAlternatives: List<RouteAlternative>): RouterOrigin {
         val origin = nativeAlternatives.find {
             // looking for the first new route,
             // assuming all new routes come from the same request
             it.isNew
         }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-        block(alternatives, origin)
-        lastUpdateOrigin = origin
+        return origin
     }
 
     fun processAlternativesMetadata(
