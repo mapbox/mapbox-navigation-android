@@ -23,7 +23,8 @@ sealed class LongRoutesOptimisationOptions {
      * 3. Long routes are parsed in a queue internally. New parsing doesn't start until previous
      * is finished. You can get longer response time as a consequence.
      *
-     * 4.
+     * 4. [NavigationRouteAlternativesRequestCallback] returns an empty list of alternatives in case
+     * of success. You will be able to receive new alternatives in [NavigationRouteAlternativesObserver].
      *
      * @param responseToParseSizeBytes - minimum size of incoming response to apply optimisations
      */
