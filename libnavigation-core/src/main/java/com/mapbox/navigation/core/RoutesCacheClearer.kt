@@ -20,9 +20,11 @@ internal class RoutesCacheClearer : RoutesObserver, RoutesPreviewObserver {
         currentActiveRoutes = result.navigationRoutes
         if (result.navigationRoutes.isEmpty() && currentPreviewsRoutes.isNullOrEmpty()) {
             DecodeUtils.clearCache()
-        }
-        if (result.navigationRoutes.isNotEmpty()) {
-            DecodeUtils.clearCacheExceptFor(result.navigationRoutes.map { it.directionsRoute })
+        } else {
+            DecodeUtils.clearCacheExceptFor(
+                result.navigationRoutes.map { it.directionsRoute } +
+                    currentPreviewsRoutes?.map { it.directionsRoute }.orEmpty()
+            )
         }
     }
 
