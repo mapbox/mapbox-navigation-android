@@ -231,7 +231,8 @@ class NavigationRouteTest {
 
         val originalRoute = routes.first()
         val copiedRoute = originalRoute.copy(
-            directionsResponse = originalRoute.directionsResponse.toBuilder().uuid("diff").build()
+            directionsResponse = originalRoute.directionsResponse.toBuilder().uuid("diff").build(),
+            directionsRoute = originalRoute.directionsRoute.toBuilder().requestUuid("diff").build()
         )
 
         verify(exactly = 1) {
