@@ -193,12 +193,19 @@ class RouteAlternativesControllerTest {
                 null,
                 listOf(
                     createNativeAlternativeMock(
+                        alternativeId = 1,
+                        fileName = "route_response_new_for_refresh.json",
+                        routeIndex = 0
+                    ),
+                    createNativeAlternativeMock(
                         alternativeId = 0,
-                        fileName = "route_alternative_from_native.json"
+                        fileName = "route_alternative_from_native.json",
+                        routeIndex = 0
                     ),
                     createNativeAlternativeMock(
                         alternativeId = 1,
-                        fileName = "route_response_new_for_refresh.json"
+                        fileName = "route_response_new_for_refresh.json",
+                        routeIndex = 1
                     )
                 ),
                 emptyList()
@@ -208,20 +215,39 @@ class RouteAlternativesControllerTest {
             verify(exactly = 1) {
                 firstObserver.onRouteAlternatives(routeProgress, capture(firstRoutesSlot), any())
             }
-            assertEquals(2, firstRoutesSlot.captured.size)
+            assertEquals(3, firstRoutesSlot.captured.size)
             assertEquals(
-                "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==",
+                "route_response_new_for_refresh",
                 firstRoutesSlot.captured[0].directionsResponse.uuid()
             )
             assertEquals(
-                "route_response_new_for_refresh",
+                358.657,
+                firstRoutesSlot.captured[0].directionsRoute.duration(),
+                0.001
+            )
+            assertEquals(
+                "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==",
                 firstRoutesSlot.captured[1].directionsResponse.uuid()
+            )
+            assertEquals(
+                383.222,
+                firstRoutesSlot.captured[1].directionsRoute.duration(),
+                0.001
+            )
+            assertEquals(
+                "route_response_new_for_refresh",
+                firstRoutesSlot.captured[2].directionsResponse.uuid()
+            )
+            assertEquals(
+                399.56,
+                firstRoutesSlot.captured[2].directionsRoute.duration(),
+                0.001
             )
             val secondRoutesSlot = slot<List<NavigationRoute>>()
             verify(exactly = 1) {
                 secondObserver.onRouteAlternatives(routeProgress, capture(secondRoutesSlot), any())
             }
-            assertEquals(2, secondRoutesSlot.captured.size)
+            assertEquals(3, secondRoutesSlot.captured.size)
         }
 
     @Test
@@ -935,7 +961,8 @@ class RouteAlternativesControllerTest {
     private fun createNativeAlternativeMock(
         alternativeId: Int = 0,
         routerOrigin: com.mapbox.navigator.RouterOrigin = com.mapbox.navigator.RouterOrigin.ONBOARD,
-        fileName: String = "route_alternative_from_native.json"
+        fileName: String = "route_alternative_from_native.json",
+        routeIndex: Int = 0
     ): RouteAlternative {
         val responseJson = FileUtils.loadJsonFixture(fileName)
         val response = DirectionsResponse.fromJson(responseJson)
@@ -943,7 +970,8 @@ class RouteAlternativesControllerTest {
             responseJson = FileUtils.loadJsonFixture(fileName),
             requestURI = routeRequestUrl.toString(),
             routerOrigin = routerOrigin,
-            responseUUID = response.uuid()!!
+            responseUUID = response.uuid()!!,
+            routeIndex = routeIndex
         )
         return mockk {
             every { route } returns nativeRoute
