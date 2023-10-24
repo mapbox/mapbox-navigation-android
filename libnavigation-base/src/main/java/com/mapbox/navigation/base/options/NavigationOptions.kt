@@ -43,6 +43,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param eventsAppMetadata [EventsAppMetadata] information (optional)
  * @param enableSensors enables sensors for current position calculation (optional)
  * @param copilotOptions defines options for Copilot
+ * @param longRoutesOptimisationOptions defines criteria to turn on the optimisations
  */
 class NavigationOptions
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

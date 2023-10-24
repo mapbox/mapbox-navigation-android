@@ -43,6 +43,7 @@ import java.nio.ByteBuffer
  * @param routeIndex the index of the route that this wrapper tracks
  * from the collection of routes returned in the original response.
  * @param routeOptions options used to generate the [directionsResponse]
+ * @param directionsRoute [DirectionsRoute] that this [NavigationRoute] represents
  */
 class NavigationRoute internal constructor(
     val directionsResponse: DirectionsResponse,
