@@ -30,10 +30,10 @@ sealed class LongRoutesOptimisationOptions {
      */
     data class OptimiseNavigationForLongRoutes(
         val responseToParseSizeBytes: Int,
-    ): LongRoutesOptimisationOptions()
+    ) : LongRoutesOptimisationOptions()
 
     /**
      * Default navigation behavior.
      */
-    object NoOptimisations: LongRoutesOptimisationOptions()
+    object NoOptimisations : LongRoutesOptimisationOptions()
 }

@@ -74,7 +74,6 @@ class NavigationRoute internal constructor(
         expirationTimeElapsedSeconds,
     )
 
-
     companion object {
 
         private const val LOG_CATEGORY = "NavigationRoute"
@@ -301,7 +300,9 @@ class NavigationRoute internal constructor(
                     directionsResponse.toBuilder().routes(
                         emptyList()
                     ).build()
-                } else directionsResponse
+                } else {
+                    directionsResponse
+                }
                 NavigationRoute(
                     responseToSaveInRoute,
                     index,
@@ -601,11 +602,14 @@ internal fun RouteInterface.toNavigationRoute(
 ): NavigationRoute {
     val refreshTtl = directionsResponse.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
+    val response = if (optimiseDirectionsResponse) {
+        directionsResponse.toBuilder().routes(emptyList())
+            .build()
+    } else {
+        directionsResponse
+    }
     return NavigationRoute(
-        directionsResponse = if (optimiseDirectionsResponse) {
-            directionsResponse.toBuilder().routes(emptyList())
-                .build()
-        } else directionsResponse,
+        directionsResponse = response,
         routeOptions = routeOptions,
         routeIndex = routeIndex,
         directionsRoute = getDirectionsRoute(directionsResponse, routeIndex, routeOptions),

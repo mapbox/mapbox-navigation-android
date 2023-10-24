@@ -32,10 +32,13 @@ interface RouteParsingManager {
     ): AlternativesParsingResult<T>
 }
 
-fun createRouteParsingManager(longRoutesOptimisationOptions: LongRoutesOptimisationOptions): RouteParsingManager {
+fun createRouteParsingManager(
+    longRoutesOptimisationOptions: LongRoutesOptimisationOptions
+): RouteParsingManager {
     return when (longRoutesOptimisationOptions) {
         LongRoutesOptimisationOptions.NoOptimisations -> NotOptimisedRoutesParsingManager()
-        is LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes -> OptimisedRoutesParsingManager(longRoutesOptimisationOptions)
+        is LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes ->
+            OptimisedRoutesParsingManager(longRoutesOptimisationOptions)
     }
 }
 

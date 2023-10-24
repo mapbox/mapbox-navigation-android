@@ -697,40 +697,44 @@ class RouteProgressExTest {
         return com.mapbox.navigation.testing.factories.createNavigationRoutes(
             DirectionsResponse.builder()
                 .waypoints(dirWaypoints)
-                .routes(listOf(DirectionsRoute.builder()
-                    .duration(10.0)
-                    .distance(distance)
-                    .legs(
-                        mutableListOf(
-                            RouteLeg.builder()
-                                .annotation(annotations)
-                                .incidents(incidents)
-                                .closures(closures)
-                                .steps(List(2) { validStep })
-                                .build()
-                        ).apply {
-                            if (addLeg) {
-                                add(
+                .routes(
+                    listOf(
+                        DirectionsRoute.builder()
+                            .duration(10.0)
+                            .distance(distance)
+                            .legs(
+                                mutableListOf(
                                     RouteLeg.builder()
                                         .annotation(annotations)
                                         .incidents(incidents)
                                         .closures(closures)
                                         .steps(List(2) { validStep })
                                         .build()
+                                ).apply {
+                                    if (addLeg) {
+                                        add(
+                                            RouteLeg.builder()
+                                                .annotation(annotations)
+                                                .incidents(incidents)
+                                                .closures(closures)
+                                                .steps(List(2) { validStep })
+                                                .build()
+                                        )
+                                    }
+                                }
+                            )
+                            .geometry(
+                                PolylineUtils.encode(
+                                    listOf(
+                                        Point.fromLngLat(11.22, 33.44),
+                                        Point.fromLngLat(23.34, 34.45)
+                                    ),
+                                    5
                                 )
-                            }
-                        }
+                            )
+                            .build()
                     )
-                    .geometry(
-                        PolylineUtils.encode(
-                            listOf(
-                                Point.fromLngLat(11.22, 33.44),
-                                Point.fromLngLat(23.34, 34.45)
-                            ),
-                            5
-                        )
-                    )
-                    .build()))
+                )
                 .code("Ok")
                 .build(),
             createRouteOptions(

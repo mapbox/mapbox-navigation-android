@@ -66,8 +66,7 @@ fun parseRouteInterfaces(
             .flatten()
             .sortedBy { routes.indexOf(it.nativeRoute) }
             .let { ExpectedFactory.createValue(it) }
-    }
-    catch (ex: Exception) {
+    } catch (ex: Exception) {
         when (ex) {
             is JSONException,
             is IllegalStateException,
