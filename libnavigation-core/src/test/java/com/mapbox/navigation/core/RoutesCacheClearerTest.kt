@@ -3,9 +3,12 @@ package com.mapbox.navigation.core
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.clearCache
 import com.mapbox.navigation.base.utils.DecodeUtils
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import io.mockk.clearStaticMockk
 import io.mockk.every
 import io.mockk.mockk
@@ -14,10 +17,14 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RoutesCacheClearerTest {
+
+    @get:Rule
+    val logRule = LoggingFrontendTestRule()
 
     private val sut = RoutesCacheClearer()
 
@@ -40,7 +47,7 @@ class RoutesCacheClearerTest {
 
     @Test
     fun onRoutesChanged_nonEmptyNoPreviewedRoutes() {
-        sut.onRoutesChanged(createRoutesUpdatedResult(listOf(mockk()), ""))
+        sut.onRoutesChanged(createRoutesUpdatedResult(createNavigationRoutes(), ""))
 
         verify(exactly = 0) { DecodeUtils.clearCache() }
     }
@@ -99,7 +106,7 @@ class RoutesCacheClearerTest {
 
     @Test
     fun routesPreviewUpdated_nullPreviewAndHasActiveRoutes() {
-        sut.onRoutesChanged(createRoutesUpdatedResult(listOf(mockk()), ""))
+        sut.onRoutesChanged(createRoutesUpdatedResult(createNavigationRoutes(), ""))
         clearStaticMockk(DecodeUtils::class)
 
         sut.routesPreviewUpdated(RoutesPreviewUpdate("", null))
@@ -109,7 +116,7 @@ class RoutesCacheClearerTest {
 
     @Test
     fun routesPreviewUpdated_emptyRoutesAndHasActiveRoutes() {
-        sut.onRoutesChanged(createRoutesUpdatedResult(listOf(mockk()), ""))
+        sut.onRoutesChanged(createRoutesUpdatedResult(createNavigationRoutes(), RoutesExtra.ROUTES_UPDATE_REASON_NEW))
         clearStaticMockk(DecodeUtils::class)
 
         sut.routesPreviewUpdated(
@@ -121,7 +128,7 @@ class RoutesCacheClearerTest {
 
     @Test
     fun routesPreviewUpdated_nullPreviewAndClearedActiveRoutes() {
-        sut.onRoutesChanged(createRoutesUpdatedResult(listOf(mockk()), ""))
+        sut.onRoutesChanged(createRoutesUpdatedResult(createNavigationRoutes(), ""))
         sut.onRoutesChanged(createRoutesUpdatedResult(emptyList(), ""))
         clearStaticMockk(DecodeUtils::class)
 
@@ -132,7 +139,7 @@ class RoutesCacheClearerTest {
 
     @Test
     fun routesPreviewUpdated_emptyRoutesAndClearedActiveRoutes() {
-        sut.onRoutesChanged(createRoutesUpdatedResult(listOf(mockk()), ""))
+        sut.onRoutesChanged(createRoutesUpdatedResult(createNavigationRoutes(), ""))
         sut.onRoutesChanged(createRoutesUpdatedResult(emptyList(), ""))
         clearStaticMockk(DecodeUtils::class)
 
