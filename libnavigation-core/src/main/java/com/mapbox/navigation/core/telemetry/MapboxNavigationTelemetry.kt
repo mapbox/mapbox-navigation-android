@@ -229,7 +229,9 @@ internal object MapboxNavigationTelemetry {
                 }
                 resetLocalVariables()
                 resetDynamicValues()
-                routeData.originalRouteMetrics = MetricsDirectionsRoute(routes.first().directionsRoute)
+                routeData.originalRouteMetrics = MetricsDirectionsRoute(
+                    routes.first().directionsRoute
+                )
                 routeData.needHandleDeparture = true
             }
             reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
@@ -239,7 +241,9 @@ internal object MapboxNavigationTelemetry {
                 handleReroute(routes.first().directionsRoute)
             }
             reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
-                routeData.originalRouteMetrics = MetricsDirectionsRoute(routes.first().directionsRoute)
+                routeData.originalRouteMetrics = MetricsDirectionsRoute(
+                    routes.first().directionsRoute
+                )
             }
             else -> logW(
                 "Unknown route update reason: [$reason]",

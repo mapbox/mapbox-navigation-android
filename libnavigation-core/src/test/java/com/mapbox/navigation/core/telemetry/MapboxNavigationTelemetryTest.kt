@@ -1345,7 +1345,8 @@ class MapboxNavigationTelemetryTest {
         every { anotherRouteOptions.profile() } returns ANOTHER_ROUTE_OPTIONS_PROFILE
         every { anotherRouteOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
         every { anotherRoute.directionsResponse.uuid() } returns ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
-        every { anotherRoute.directionsRoute.requestUuid() } returns ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
+        every { anotherRoute.directionsRoute.requestUuid() } returns
+            ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
         every { anotherRouteLeg.steps() } returns progressRouteSteps
         every { anotherRouteStep.maneuver() } returns anotherStepManeuver
         every { anotherStepManeuver.location() } returns anotherStepManeuverLocation

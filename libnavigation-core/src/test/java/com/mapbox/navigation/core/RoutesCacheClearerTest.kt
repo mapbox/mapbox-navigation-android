@@ -46,7 +46,6 @@ class RoutesCacheClearerTest {
 
         verify(exactly = 1) { DecodeUtils.clearCache() }
         verify(exactly = 0) { DecodeUtils.clearCacheExceptFor(any()) }
-
     }
 
     @Test
@@ -55,7 +54,9 @@ class RoutesCacheClearerTest {
         sut.onRoutesChanged(createRoutesUpdatedResult(testRoutes, ""))
 
         verify(exactly = 0) { DecodeUtils.clearCache() }
-        verify(exactly = 1) { DecodeUtils.clearCacheExceptFor(testRoutes.first().directionsResponse.routes()) }
+        verify(exactly = 1) {
+            DecodeUtils.clearCacheExceptFor(testRoutes.first().directionsResponse.routes())
+        }
     }
 
     @Test
@@ -64,14 +65,25 @@ class RoutesCacheClearerTest {
             createDirectionsResponse(uuid = "preview")
         )
         sut.routesPreviewUpdated(
-            RoutesPreviewUpdate("", RoutesPreview(testPreviewRoutes, emptyList(), testPreviewRoutes, 0))
+            RoutesPreviewUpdate(
+                "",
+                RoutesPreview(testPreviewRoutes, emptyList(), testPreviewRoutes, 0)
+            )
         )
         clearStaticMockk(DecodeUtils::class)
 
         sut.onRoutesChanged(createRoutesUpdatedResult(emptyList(), ""))
 
         verify(exactly = 0) { DecodeUtils.clearCache() }
-        verify(exactly = 1) { DecodeUtils.clearCacheExceptFor(match { it.map { it.requestUuid() } == listOf("preview") }) }
+        verify(exactly = 1) {
+            DecodeUtils.clearCacheExceptFor(
+                match {
+                    it.map { it.requestUuid() } == listOf(
+                        "preview"
+                    )
+                }
+            )
+        }
     }
 
     @Test
@@ -131,7 +143,12 @@ class RoutesCacheClearerTest {
 
     @Test
     fun routesPreviewUpdated_emptyRoutesAndHasActiveRoutes() {
-        sut.onRoutesChanged(createRoutesUpdatedResult(createNavigationRoutes(), RoutesExtra.ROUTES_UPDATE_REASON_NEW))
+        sut.onRoutesChanged(
+            createRoutesUpdatedResult(
+                createNavigationRoutes(),
+                RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            )
+        )
         clearStaticMockk(DecodeUtils::class)
 
         sut.routesPreviewUpdated(
@@ -177,7 +194,10 @@ class RoutesCacheClearerTest {
             response = createDirectionsResponse(uuid = "active")
         )
         sut.routesPreviewUpdated(
-            RoutesPreviewUpdate("", RoutesPreview(testPreviewRoutes, emptyList(), testPreviewRoutes, 0))
+            RoutesPreviewUpdate(
+                "",
+                RoutesPreview(testPreviewRoutes, emptyList(), testPreviewRoutes, 0)
+            )
         )
         clearStaticMockk(DecodeUtils::class)
 
@@ -187,7 +207,7 @@ class RoutesCacheClearerTest {
         verify(exactly = 1) {
             DecodeUtils.clearCacheExceptFor(
                 match {
-                    it.map { it.requestUuid() }.sortedBy { it } == listOf("active", "preview", )
+                    it.map { it.requestUuid() }.sortedBy { it } == listOf("active", "preview")
                 }
             )
         }

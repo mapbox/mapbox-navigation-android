@@ -451,7 +451,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ),
             historyRecorderHandles.composite,
         )
-        val routeParsingManager = createRouteParsingManager(navigationOptions.longRoutesOptimisationOptions)
+        val routeParsingManager = createRouteParsingManager(
+            navigationOptions.longRoutesOptimisationOptions
+        )
         routeParsingManager.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(

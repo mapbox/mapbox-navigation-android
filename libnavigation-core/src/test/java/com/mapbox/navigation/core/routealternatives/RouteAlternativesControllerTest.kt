@@ -456,7 +456,6 @@ class RouteAlternativesControllerTest {
 
     @Test
     fun `should set RouteOptions to alternative routes`() = coroutineRule.runBlockingTest {
-
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs

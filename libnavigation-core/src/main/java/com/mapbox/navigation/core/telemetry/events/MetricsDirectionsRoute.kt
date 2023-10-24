@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.telemetry.obtainStepCount
 
 internal data class MetricsDirectionsRoute(

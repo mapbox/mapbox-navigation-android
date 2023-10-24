@@ -152,7 +152,6 @@ internal class RouteAlternativesController constructor(
                             origin
                         )
                     }
-
                 }
             )
         }
@@ -245,7 +244,8 @@ internal class RouteAlternativesController constructor(
                 RouteResponseInfo.fromResponses(allAlternatives.map { it.responseJsonRef.buffer }),
                 userTriggeredAlternativesRefresh = immediateAlternativesRefresh
             )
-            val alternativesParsingResult: AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
+            val alternativesParsingResult:
+                AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
                 routeParsingManager.parseAlternatives(args) { parseArgs ->
                     withContext(ThreadController.DefaultDispatcher) {
                         parseRouteInterfaces(
@@ -258,7 +258,9 @@ internal class RouteAlternativesController constructor(
             val expected = when (alternativesParsingResult) {
                 AlternativesParsingResult.NotActual -> {
                     notActualParsingCallback(getOrigin(nativeAlternatives))
-                    ExpectedFactory.createError(Throwable("cancelled because another parsing is already in progress"))
+                    ExpectedFactory.createError(
+                        Throwable("cancelled because another parsing is already in progress")
+                    )
                 }
                 is AlternativesParsingResult.Parsed -> alternativesParsingResult.value
             }
@@ -271,7 +273,7 @@ internal class RouteAlternativesController constructor(
                         |unable to parse alternatives;
                         |failure for response with uuid: 
                         |${nativeAlternatives.firstOrNull()?.route?.responseUuid}
-                """.trimMargin(),
+                    """.trimMargin(),
                     LOG_CATEGORY
                 )
                 null
