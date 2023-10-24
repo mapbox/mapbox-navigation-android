@@ -339,6 +339,10 @@ private constructor(
         fun copilotOptions(copilotOptions: CopilotOptions): Builder =
             apply { this.copilotOptions = copilotOptions }
 
+        /**
+         * Defines configuration which triggers optimised behaviour which is different from regular.
+         * See [LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes] for more details.
+         */
         @ExperimentalPreviewMapboxNavigationAPI
         fun longRoutesOptimisationOptions(
             longRoutesOptimisationOptions: LongRoutesOptimisationOptions
