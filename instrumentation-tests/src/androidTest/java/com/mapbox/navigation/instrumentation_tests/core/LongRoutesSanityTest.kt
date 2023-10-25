@@ -10,6 +10,7 @@ import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
+import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -55,13 +56,8 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun requestNewRoutesWhileLongRoutesAreSet() = sdkTest {
-        val routeOptions = longRouteOptions()
-        val handler = MockDirectionsRequestHandler(
-            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
-            expectedCoordinates = routeOptions.coordinatesList()
-        )
-        mockWebServerRule.requestHandlers.add(handler)
+        val longRoutesOptions = setupLongRoutes()
+        val shortRoutesOptions = setupShortRoutes()
         withMapboxNavigation(
             longRoutesOptimisationOptions = LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
                 responseToParseSizeBytes = 5.megabytesInBytes()
@@ -69,12 +65,15 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             navigation.setNavigationRoutesAsync(
                 navigation
-                    .requestRoutes(routeOptions)
+                    .requestRoutes(longRoutesOptions)
                     .getSuccessfulResultOrThrowException().routes
             )
             assertEquals(2, navigation.getNavigationRoutes().size)
 
-            val newRoutes = navigation.requestRoutes(routeOptions)
+            val shortRoutes = navigation.requestRoutes(shortRoutesOptions)
+            assertEquals(2, navigation.getNavigationRoutes().size)
+
+            val newRoutes = navigation.requestRoutes(longRoutesOptions)
                 .getSuccessfulResultOrThrowException()
             assertEquals(1, navigation.getNavigationRoutes().size)
         }
@@ -82,13 +81,8 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun requestNewRoutesWhileLongRoutesArePreviewed() = sdkTest {
-        val routeOptions = longRouteOptions()
-        val handler = MockDirectionsRequestHandler(
-            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
-            expectedCoordinates = routeOptions.coordinatesList()
-        )
-        mockWebServerRule.requestHandlers.add(handler)
+        val longRoutesOptions = setupLongRoutes()
+        val shortRoutesOptions = setupShortRoutes()
         withMapboxNavigation(
             longRoutesOptimisationOptions = LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
                 responseToParseSizeBytes = 5.megabytesInBytes()
@@ -96,7 +90,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             navigation.setRoutesPreview(
                 navigation
-                    .requestRoutes(routeOptions)
+                    .requestRoutes(longRoutesOptions)
                     .getSuccessfulResultOrThrowException().routes
             )
 
@@ -109,10 +103,24 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
                     .routesList.size
             )
 
-            val newRoutes = navigation.requestRoutes(routeOptions)
+            val shortRoutes = navigation.requestRoutes(shortRoutesOptions)
+            assertEquals(2, navigation.getRoutesPreview()?.routesList?.size)
+
+            val newLongRoutes = navigation.requestRoutes(longRoutesOptions)
                 .getSuccessfulResultOrThrowException()
             assertEquals(1, navigation.getRoutesPreview()?.routesList?.size)
         }
+    }
+
+    private fun setupLongRoutes(): RouteOptions {
+        val routeOptions = longRouteOptions()
+        val handler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
+            expectedCoordinates = routeOptions.coordinatesList()
+        )
+        mockWebServerRule.requestHandlers.add(handler)
+        return routeOptions
     }
 
     private fun longRouteOptions(): RouteOptions {
@@ -131,6 +139,14 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             .enableRefresh(true)
             .build()
         return routeOptions
+    }
+
+    private fun setupShortRoutes(): RouteOptions {
+        val shortRoute = RoutesProvider.dc_very_short(context)
+        mockWebServerRule.requestHandlers.addAll(shortRoute.mockRequestHandlers)
+        return RouteOptions.builder().applyDefaultNavigationOptions()
+            .coordinatesList(shortRoute.routeWaypoints)
+            .build()
     }
 }
 
