@@ -2184,6 +2184,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 }
             }
         }
+        val preview = getRoutesPreview()
+        if (preview != null) {
+            suspendCoroutine<Unit> { continuation ->
+                routesPreviewController.previewNavigationRoutes(
+                    listOf(preview.originalRoutesList[preview.primaryRouteIndex])
+                ) {
+                    continuation.resume(Unit)
+                }
+            }
+        }
     }
 
     private companion object {
