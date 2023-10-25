@@ -14,8 +14,12 @@ import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
+import com.mapbox.navigation.testing.ui.utils.coroutines.routesPreviewUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -73,6 +77,41 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             val newRoutes = navigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
             assertEquals(1, navigation.getNavigationRoutes().size)
+        }
+    }
+
+    @Test
+    fun requestNewRoutesWhileLongRoutesArePreviewed() = sdkTest {
+        val routeOptions = longRouteOptions()
+        val handler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
+            expectedCoordinates = routeOptions.coordinatesList()
+        )
+        mockWebServerRule.requestHandlers.add(handler)
+        withMapboxNavigation(
+            longRoutesOptimisationOptions = LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
+                responseToParseSizeBytes = 5.megabytesInBytes()
+            )
+        ) { navigation ->
+            navigation.setRoutesPreview(
+                navigation
+                    .requestRoutes(routeOptions)
+                    .getSuccessfulResultOrThrowException().routes
+            )
+
+            assertEquals(
+                2,
+                navigation.routesPreviewUpdates()
+                    .map { it.routesPreview }
+                    .filterNotNull()
+                    .first()
+                    .routesList.size
+            )
+
+            val newRoutes = navigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+            assertEquals(1, navigation.getRoutesPreview()?.routesList?.size)
         }
     }
 
