@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
@@ -28,7 +30,6 @@ import kotlinx.coroutines.flow.map
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@ExperimentalPreviewMapboxNavigationAPI
 class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     override fun setupMockLocation(): Location {
