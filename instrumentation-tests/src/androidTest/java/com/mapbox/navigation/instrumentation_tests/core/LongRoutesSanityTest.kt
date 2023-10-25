@@ -3,7 +3,9 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
@@ -14,8 +16,10 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrTh
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
+@ExperimentalPreviewMapboxNavigationAPI
 class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     override fun setupMockLocation(): Location {
@@ -27,20 +31,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun requestAndSetLongRouteWithoutOnboardTiles() = sdkTest(timeout = 120_000) {
-        val routeOptions = RouteOptions.builder()
-            .baseUrl(mockWebServerRule.baseUrl) // comment to use real Directions API
-            .applyDefaultNavigationOptions()
-            .coordinates(
-                "4.898473756907066,52.37373595766587" +
-                    ";5.359980783143584,43.280050656855906" +
-                    ";11.571179644010442,48.145540095763664" +
-                    ";13.394784408007155,52.51274942160785" +
-                    ";-9.143239539655042,38.70880224984026" +
-                    ";9.21595128801522,45.4694220491258"
-            )
-            .alternatives(true)
-            .enableRefresh(true)
-            .build()
+        val routeOptions = longRouteOptions()
         val handler = MockDirectionsRequestHandler(
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
             lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
@@ -57,4 +48,51 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             navigation.setNavigationRoutesAsync(routes)
         }
     }
+
+    @Test
+    fun requestNewRoutesWhileLongRoutesAreSet() = sdkTest {
+        val routeOptions = longRouteOptions()
+        val handler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
+            expectedCoordinates = routeOptions.coordinatesList()
+        )
+        mockWebServerRule.requestHandlers.add(handler)
+        withMapboxNavigation(
+            longRoutesOptimisationOptions = LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
+                responseToParseSizeBytes = 5.megabytesInBytes()
+            )
+        ) { navigation ->
+            navigation.setNavigationRoutesAsync(
+                navigation
+                    .requestRoutes(routeOptions)
+                    .getSuccessfulResultOrThrowException().routes
+            )
+            assertEquals(2, navigation.getNavigationRoutes().size)
+
+            val newRoutes = navigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+            assertEquals(1, navigation.getNavigationRoutes().size)
+        }
+    }
+
+    private fun longRouteOptions(): RouteOptions {
+        val routeOptions = RouteOptions.builder()
+            .baseUrl(mockWebServerRule.baseUrl) // comment to use real Directions API
+            .applyDefaultNavigationOptions()
+            .coordinates(
+                "4.898473756907066,52.37373595766587" +
+                    ";5.359980783143584,43.280050656855906" +
+                    ";11.571179644010442,48.145540095763664" +
+                    ";13.394784408007155,52.51274942160785" +
+                    ";-9.143239539655042,38.70880224984026" +
+                    ";9.21595128801522,45.4694220491258"
+            )
+            .alternatives(true)
+            .enableRefresh(true)
+            .build()
+        return routeOptions
+    }
 }
+
+private fun Int.megabytesInBytes() = this * 1024 * 1024
