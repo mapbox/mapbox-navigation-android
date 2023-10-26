@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -17,6 +18,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTe
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
+import com.mapbox.navigation.instrumentation_tests.utils.openRawResource
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
@@ -42,6 +44,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.io.InputStreamReader
 
 /**
  * This test ensures that alternative route recommendations
@@ -142,6 +145,19 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 assertNotNull(
                     "alternative route $it doesn't have metadata",
                     mapboxNavigation.getAlternativeMetadataFor(it)
+                )
+            }
+
+            val mockedAlternativesResponse = InputStreamReader(
+                openRawResource(context, R.raw.route_response_alternative_continue)
+            ).use {
+                DirectionsResponse.fromJson(it)
+            }
+            newAlternatives.forEach {
+                assertEquals(
+                    "some info was lost during NN -> Nav SDK transition",
+                    it.directionsRoute.toBuilder().routeOptions(null).build(),
+                    mockedAlternativesResponse.routes()[it.routeIndex]
                 )
             }
         }
