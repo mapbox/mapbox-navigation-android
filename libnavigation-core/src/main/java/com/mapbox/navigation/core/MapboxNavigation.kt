@@ -2178,19 +2178,23 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private suspend fun prepareNavigationForRoutesParsing() {
         withContext(Dispatchers.Main.immediate) {
-            suspendCoroutine<Unit> { continuation ->
-                setNavigationRoutes(directionsSession.routes.take(1)) {
-                    continuation.resume(Unit)
+            if (directionsSession.routes.size > 1) {
+                suspendCoroutine<Unit> { continuation ->
+                    setNavigationRoutes(directionsSession.routes.take(1)) {
+                        continuation.resume(Unit)
+                    }
                 }
             }
-        }
-        val preview = getRoutesPreview()
-        if (preview != null) {
-            suspendCoroutine<Unit> { continuation ->
-                routesPreviewController.previewNavigationRoutes(
-                    listOf(preview.originalRoutesList[preview.primaryRouteIndex])
-                ) {
-                    continuation.resume(Unit)
+            val preview = getRoutesPreview()
+            if (preview != null) {
+                if (preview.routesList.size > 1) {
+                    suspendCoroutine<Unit> { continuation ->
+                        routesPreviewController.previewNavigationRoutes(
+                            listOf(preview.originalRoutesList[preview.primaryRouteIndex])
+                        ) {
+                            continuation.resume(Unit)
+                        }
+                    }
                 }
             }
         }
