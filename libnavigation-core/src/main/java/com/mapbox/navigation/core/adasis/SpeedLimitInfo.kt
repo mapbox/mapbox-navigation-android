@@ -15,7 +15,7 @@ import com.mapbox.navigator.SpeedLimitUnit
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class SpeedLimitInfo private constructor(
-    val value: Short,
+    val value: Int,
     val speedUnit: SpeedUnit,
     val type: Type,
     val restriction: SpeedLimitRestriction,
