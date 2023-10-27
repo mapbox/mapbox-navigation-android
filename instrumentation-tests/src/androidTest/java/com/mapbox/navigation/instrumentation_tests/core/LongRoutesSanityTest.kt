@@ -31,7 +31,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 // old devices parse long routes very slowly
-private const val EXTENDED_TIMEOUT_FOR_SLOW_PARSING = 120_000L
+private const val EXTENDED_TIMEOUT_FOR_SLOW_PARSING = 200_000L
 
 class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
