@@ -231,7 +231,8 @@ class NavigationRouteTest {
 
         val originalRoute = routes.first()
         val copiedRoute = originalRoute.copy(
-            directionsResponse = originalRoute.directionsResponse.toBuilder().uuid("diff").build()
+            directionsResponse = originalRoute.directionsResponse.toBuilder().uuid("diff").build(),
+            directionsRoute = originalRoute.directionsRoute.toBuilder().requestUuid("diff").build()
         )
 
         verify(exactly = 1) {
@@ -351,6 +352,7 @@ class NavigationRouteTest {
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
+            DirectionsRoute.fromJson(routeJson),
             mockk(relaxed = true),
             null
         )
@@ -375,6 +377,7 @@ class NavigationRouteTest {
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
+            DirectionsRoute.fromJson(routeJson),
             mockk(relaxed = true),
             null
         )
@@ -405,11 +408,50 @@ class NavigationRouteTest {
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
+            DirectionsRoute.fromJson(routeJson),
             mockk(relaxed = true),
             null
         )
 
         route.updateExpirationTime(45)
         assertEquals(45L, route.expirationTimeElapsedSeconds)
+    }
+
+    @Test
+    fun `optimised navigation route`() = runBlocking<Unit> {
+        val responseString = FileUtils.loadJsonFixture("route_with_alternatives_response.json")
+        val responseDataRef = responseString.toDataRef()
+        val requestUrl = FileUtils.loadJsonFixture("route_with_alternatives_request.txt")
+
+        val navigationRoutes = NavigationRoute.createAsync(
+            responseDataRef,
+            requestUrl,
+            RouterOrigin.Offboard,
+            null,
+            optimiseMemory = true
+        )
+
+        assertEquals(3, navigationRoutes.size)
+        assertEquals(emptyList<DirectionsRoute>(), navigationRoutes[0].directionsResponse.routes())
+        assertEquals(emptyList<DirectionsRoute>(), navigationRoutes[1].directionsResponse.routes())
+        assertEquals(emptyList<DirectionsRoute>(), navigationRoutes[2].directionsResponse.routes())
+    }
+
+    @Test
+    fun `not optimised navigation route`() = runBlocking<Unit> {
+        val responseString = FileUtils.loadJsonFixture("route_with_alternatives_response.json")
+        val responseDataRef = responseString.toDataRef()
+        val requestUrl = FileUtils.loadJsonFixture("route_with_alternatives_request.txt")
+
+        val navigationRoutes = NavigationRoute.createAsync(
+            responseDataRef,
+            requestUrl,
+            RouterOrigin.Offboard,
+            null,
+            optimiseMemory = false
+        )
+
+        assertEquals(3, navigationRoutes.size)
+        assertEquals(listOf(3, 3, 3), navigationRoutes.map { it.directionsResponse.routes().size })
     }
 }

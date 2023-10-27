@@ -43,11 +43,13 @@ import java.nio.ByteBuffer
  * @param routeIndex the index of the route that this wrapper tracks
  * from the collection of routes returned in the original response.
  * @param routeOptions options used to generate the [directionsResponse]
+ * @param directionsRoute [DirectionsRoute] that this [NavigationRoute] represents
  */
 class NavigationRoute internal constructor(
     val directionsResponse: DirectionsResponse,
     val routeIndex: Int,
     val routeOptions: RouteOptions,
+    val directionsRoute: DirectionsRoute,
     internal val nativeRoute: RouteInterface,
     internal val unavoidableClosures: List<List<Closure>>,
     internal var expirationTimeElapsedSeconds: Long?,
@@ -57,14 +59,16 @@ class NavigationRoute internal constructor(
         directionsResponse: DirectionsResponse,
         routeIndex: Int,
         routeOptions: RouteOptions,
+        directionsRoute: DirectionsRoute,
         nativeRoute: RouteInterface,
         expirationTimeElapsedSeconds: Long?,
     ) : this(
         directionsResponse,
         routeIndex,
         routeOptions,
+        directionsRoute,
         nativeRoute,
-        directionsResponse.routes().getOrNull(routeIndex)?.legs()
+        directionsRoute.legs()
             ?.map { leg -> leg.closures().orEmpty() }
             .orEmpty(),
         expirationTimeElapsedSeconds,
@@ -187,9 +191,11 @@ class NavigationRoute internal constructor(
             routeRequestUrl: String,
             routerOrigin: RouterOrigin,
             responseTimeElapsedSeconds: Long?,
-            routeParser: SDKRouteParser = SDKRouteParser.default
+            routeParser: SDKRouteParser = SDKRouteParser.default,
+            optimiseMemory: Boolean = false
         ): List<NavigationRoute> {
             logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
+
             return coroutineScope {
                 val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
                     directionsResponseJson.toDirectionsResponse().also {
@@ -224,6 +230,7 @@ class NavigationRoute internal constructor(
                     deferredResponseParsing.await(),
                     deferredRouteOptionsParsing.await(),
                     responseTimeElapsedSeconds,
+                    optimiseMemory
                 ).also {
                     logD(
                         "NavigationRoute.createAsync finished " +
@@ -266,7 +273,13 @@ class NavigationRoute internal constructor(
                 routeOptionsUrlString,
                 routerOrigin
             ).run {
-                create(this, directionsResponse, routeOptions, responseTimeElapsedSeconds)
+                create(
+                    this,
+                    directionsResponse,
+                    routeOptions,
+                    responseTimeElapsedSeconds,
+                    optimiseMemory = false
+                )
             }
         }
 
@@ -275,6 +288,7 @@ class NavigationRoute internal constructor(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
             responseTimeElapsedSeconds: Long?,
+            optimiseMemory: Boolean
         ): List<NavigationRoute> {
             return expected.fold({ error ->
                 logE("NavigationRoute", "Failed to parse a route. Reason: $error")
@@ -282,10 +296,18 @@ class NavigationRoute internal constructor(
             }, { value ->
                 value
             }).mapIndexed { index, routeInterface ->
+                val responseToSaveInRoute = if (optimiseMemory) {
+                    directionsResponse.toBuilder().routes(
+                        emptyList()
+                    ).build()
+                } else {
+                    directionsResponse
+                }
                 NavigationRoute(
-                    directionsResponse,
+                    responseToSaveInRoute,
                     index,
                     routeOptions,
+                    getDirectionsRoute(directionsResponse, index, routeOptions),
                     routeInterface,
                     ifNonNull(
                         directionsResponse.routes().getOrNull(index)?.refreshTtl(),
@@ -319,15 +341,6 @@ class NavigationRoute internal constructor(
      * Describes which router type generated the route.
      */
     val origin: RouterOrigin = nativeRoute.routerOrigin.mapToSdkRouteOrigin()
-
-    /**
-     * [DirectionsRoute] that this [NavigationRoute] represents.
-     */
-    val directionsRoute = directionsResponse.routes()[routeIndex].toBuilder()
-        .requestUuid(directionsResponse.uuid())
-        .routeIndex(routeIndex.toString())
-        .routeOptions(routeOptions)
-        .build()
 
     /**
      * Returns a list of [UpcomingRoadObject] present in a route.
@@ -395,6 +408,7 @@ class NavigationRoute internal constructor(
 
     internal fun copy(
         directionsResponse: DirectionsResponse = this.directionsResponse,
+        directionsRoute: DirectionsRoute = this.directionsRoute,
         routeIndex: Int = this.routeIndex,
         routeOptions: RouteOptions = this.routeOptions,
         nativeRoute: RouteInterface = this.nativeRoute,
@@ -403,6 +417,7 @@ class NavigationRoute internal constructor(
         directionsResponse,
         routeIndex,
         routeOptions,
+        directionsRoute,
         nativeRoute,
         this.unavoidableClosures,
         expirationTimeElapsedSeconds,
@@ -580,13 +595,24 @@ internal fun DirectionsRoute.toNavigationRoute(
     return NavigationRoute.create(response, options, sdkRouteParser, routerOrigin, null)[routeIndex]
 }
 
-internal fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long): NavigationRoute {
-    val response = responseJsonRef.toDirectionsResponse()
-    val refreshTtl = response.routes().getOrNull(routeIndex)?.refreshTtl()
+internal fun RouteInterface.toNavigationRoute(
+    responseTimeElapsedSeconds: Long,
+    directionsResponse: DirectionsResponse,
+    optimiseDirectionsResponse: Boolean
+): NavigationRoute {
+    val refreshTtl = directionsResponse.routes().getOrNull(routeIndex)?.refreshTtl()
+    val routeOptions = RouteOptions.fromUrl(URL(requestUri))
+    val response = if (optimiseDirectionsResponse) {
+        directionsResponse.toBuilder().routes(emptyList())
+            .build()
+    } else {
+        directionsResponse
+    }
     return NavigationRoute(
         directionsResponse = response,
-        routeOptions = RouteOptions.fromUrl(URL(requestUri)),
+        routeOptions = routeOptions,
         routeIndex = routeIndex,
+        directionsRoute = getDirectionsRoute(directionsResponse, routeIndex, routeOptions),
         nativeRoute = this,
         expirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds)
     ).cache()
@@ -693,7 +719,7 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
         .build()
 }
 
-private fun DataRef.toDirectionsResponse(): DirectionsResponse {
+internal fun DataRef.toDirectionsResponse(): DirectionsResponse {
     val stream = ByteBufferBackedInputStream(buffer)
     val reader = InputStreamReader(stream)
     return reader.use { reader ->
@@ -730,3 +756,14 @@ private class ByteBufferBackedInputStream(
         return bytesToRead
     }
 }
+
+private fun getDirectionsRoute(
+    response: DirectionsResponse,
+    routeIndex: Int,
+    routeOptions: RouteOptions
+): DirectionsRoute =
+    response.routes()[routeIndex].toBuilder()
+        .requestUuid(response.uuid())
+        .routeIndex(routeIndex.toString())
+        .routeOptions(routeOptions)
+        .build()

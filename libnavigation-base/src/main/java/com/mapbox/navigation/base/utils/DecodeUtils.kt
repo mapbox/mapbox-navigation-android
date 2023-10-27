@@ -9,6 +9,9 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.internal.utils.isSameRoute
+import com.mapbox.navigation.utils.internal.logD
+
+private const val LOG_TAG = "DecodeUtils"
 
 /**
  * Provides utilities to decode geometries of [DirectionsRoute]s and [LegStep]s.
@@ -136,6 +139,11 @@ object DecodeUtils {
         completeGeometryDecodeCache.evictAll()
     }
 
+    @JvmStatic
+    internal fun clearCacheInternalExceptFor(routes: List<DirectionsRoute>) {
+        removeAllRoutesExcept(routes)
+    }
+
     /**
      * todo Remove inline references to RouteOptions in favor of taking geometry type as an argument or expose the extensions on top of NavigationRoute instead.
      */
@@ -167,6 +175,45 @@ object DecodeUtils {
             }
             cachedRoutes.add(CachedRouteInfo(route, precision, stepCount))
             stepsGeometryDecodeCache.resize(cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1))
+        }
+    }
+
+    private fun DirectionsRoute.routeIdForLogs() = "${requestUuid()}#${routeIndex()}"
+
+    private fun removeAllRoutesExcept(routesToKeep: List<DirectionsRoute>) {
+        synchronized(stepsGeometryDecodeCache) {
+            logD(LOG_TAG) {
+                "Looking for routes to remove among cached:" +
+                    " ${cachedRoutes.joinToString(",") { it.route.routeIdForLogs() }}, " +
+                    "while ${routesToKeep.joinToString(",") { it.routeIdForLogs() }} " +
+                    "should be kept"
+            }
+            val cachedRoutesToRemove = cachedRoutes.filter { cached ->
+                routesToKeep.none {
+                    cached.route.isSameRoute(it)
+                }
+            }
+            cachedRoutesToRemove.forEach { cachedRouteToRemove ->
+                logD(LOG_TAG) {
+                    "Cleaning steps geometry caches for route:" +
+                        " ${cachedRouteToRemove.route.routeIdForLogs()}"
+                }
+                val routeToRemove = cachedRouteToRemove.route
+                cachedRouteToRemove.route.legs()?.forEach {
+                    it.steps()?.forEach { step ->
+                        val stepGeometry = step.geometry()
+                        if (stepGeometry != null) {
+                            stepsGeometryDecodeCache.remove(
+                                stepGeometry to routeToRemove.precision()
+                            )
+                        }
+                    }
+                }
+                cachedRoutes.remove(cachedRouteToRemove)
+            }
+            stepsGeometryDecodeCache.resize(
+                cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1)
+            )
         }
     }
 

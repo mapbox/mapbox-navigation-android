@@ -134,6 +134,6 @@ internal object NavigationComponentProvider {
         routeOptionsProvider,
         rerouteOptions,
         threadController,
-        evDynamicDataHolder
+        evDynamicDataHolder,
     )
 }

@@ -19,20 +19,9 @@ interface NavigationRouteAlternativesRequestCallback {
      * The [alternatives] list always represent all available, up-to-date, alternatives for the current route.
      *
      * The alternatives are not automatically added to [MapboxNavigation],
-     * you need to add them manually to trigger [RoutesObserver], for example:
-     * ```kotlin
-     * mapboxNavigation.requestAlternativeRoutes(
-     *     NavigationRouteAlternativesRequestListener { routeProgress, alternatives, routerOrigin ->
-     *         val newRoutes = mutableListOf<NavigationRoute>().apply {
-     *             add(mapboxNavigation.getNavigationRoutes().first())
-     *             addAll(alternatives)
-     *         }
-     *         mapboxNavigation.setRoutes(newRoutes)
-     *     }
-     * )
-     * ```
-     *
-     * You can filter the alternatives out before setting them back to [MapboxNavigation] based on requirements.
+     * you need to add them manually to trigger [RoutesObserver].
+     * The result will also be delivered to [NavigationRouteAlternativesObserver], we recommend you
+     * to filter and set routes there.
      *
      * @param routeProgress the current route's progress.
      * @param alternatives list of alternative routes, can be empty.

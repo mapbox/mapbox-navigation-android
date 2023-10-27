@@ -15,6 +15,8 @@ import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.Constants
+import com.mapbox.navigation.base.internal.utils.RouteParsingManager
+import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -52,6 +54,7 @@ class RouterWrapper(
     private val accessToken: String,
     private val router: RouterInterface,
     private val threadController: ThreadController,
+    private val routeParsingManager: RouteParsingManager
 ) : NavigationRouterV2, InternalRouter {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
@@ -104,45 +107,49 @@ class RouterWrapper(
                             }
                         }
                     },
-                    {
+                    { responseBody ->
                         mainJobControl.scope.launch {
                             logI(
                                 "processing successful response " +
                                     "from router.getRoute for $urlWithoutToken",
                                 LOG_CATEGORY
                             )
-                            val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
-                            parseDirectionsResponse(
-                                ThreadController.DefaultDispatcher,
-                                it,
-                                routeUrl,
-                                origin.mapToSdkRouteOrigin(),
-                                responseTimeElapsedSeconds
-                            ).fold(
-                                { throwable ->
-                                    callback.onFailure(
-                                        listOf(
-                                            RouterFailure(
-                                                urlWithoutToken,
-                                                origin.mapToSdkRouteOrigin(),
-                                                "failed for response: $it",
-                                                throwable = throwable
-                                            )
-                                        ),
-                                        routeOptions
-                                    )
-                                },
-                                { routes ->
-                                    val metadata =
-                                        routes.firstOrNull()?.directionsResponse?.metadata()
-                                    logI("Response metadata: $metadata", LOG_CATEGORY)
+                            val responseInfo = RouteResponseInfo.fromResponse(responseBody.buffer)
+                            routeParsingManager.parseRouteResponse(responseInfo) { parseArguments ->
+                                val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
+                                parseDirectionsResponse(
+                                    ThreadController.DefaultDispatcher,
+                                    responseBody,
+                                    routeUrl,
+                                    origin.mapToSdkRouteOrigin(),
+                                    responseTimeElapsedSeconds,
+                                    parseArguments
+                                ).fold(
+                                    { throwable ->
+                                        callback.onFailure(
+                                            listOf(
+                                                RouterFailure(
+                                                    urlWithoutToken,
+                                                    origin.mapToSdkRouteOrigin(),
+                                                    "Failed to parse response",
+                                                    throwable = throwable
+                                                )
+                                            ),
+                                            routeOptions
+                                        )
+                                    },
+                                    { routes ->
+                                        val metadata =
+                                            routes.firstOrNull()?.directionsResponse?.metadata()
+                                        logI("Response metadata: $metadata", LOG_CATEGORY)
 
-                                    callback.onRoutesReady(
-                                        routes,
-                                        origin.mapToSdkRouteOrigin()
-                                    )
-                                }
-                            )
+                                        callback.onRoutesReady(
+                                            routes,
+                                            origin.mapToSdkRouteOrigin()
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 )

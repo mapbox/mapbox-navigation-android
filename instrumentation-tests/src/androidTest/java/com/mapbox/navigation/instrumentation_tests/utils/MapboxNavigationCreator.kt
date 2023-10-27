@@ -6,6 +6,8 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
 import com.mapbox.common.TileStoreOptions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -14,10 +16,13 @@ import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import java.net.URI
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     useRealTiles: Boolean = false,
     tileStore: TileStore? = null,
     historyRecorderRule: MapboxHistoryTestRule? = null, // TODO: copy features to new infra
+    longRoutesOptimisationOptions: LongRoutesOptimisationOptions =
+        LongRoutesOptimisationOptions.NoOptimisations,
     block: (navigation: MapboxNavigation) -> Unit
 ) {
     val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
@@ -38,6 +43,7 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
                     .build()
                 routingTilesOptions(routingTilesOptions)
             }
+            .longRoutesOptimisationOptions(longRoutesOptimisationOptions)
             .build()
     )
     historyRecorderRule?.historyRecorder = navigation.historyRecorder

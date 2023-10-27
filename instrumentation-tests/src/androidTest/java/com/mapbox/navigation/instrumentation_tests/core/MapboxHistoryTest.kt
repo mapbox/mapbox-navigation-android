@@ -21,12 +21,11 @@ import com.mapbox.navigation.core.history.model.HistoryEventGetStatus
 import com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
-import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
-import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
@@ -45,7 +44,7 @@ import org.junit.Test
 import java.io.File
 import java.io.InputStream
 
-class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -64,7 +63,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
     @Before
     fun createTestDirectory() {
-        testDirectory = File(activity.filesDir, "mapbox_history_test_directory")
+        testDirectory = File(context.filesDir, "mapbox_history_test_directory")
             .also { it.mkdirs() }
     }
 
@@ -79,8 +78,8 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                NavigationOptions.Builder(context)
+                    .accessToken(getMapboxAccessTokenFromResources(context))
                     .historyRecorderOptions(
                         HistoryRecorderOptions.Builder()
                             .build()
@@ -97,13 +96,13 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun verify_history_files_are_recorded_and_readable() {
         // prepare
-        val mockRoute = RoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(context)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         routeCompleteIdlingResource.register()
 
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
-            .applyLanguageAndVoiceUnitOptions(activity)
+            .applyLanguageAndVoiceUnitOptions(context)
             .baseUrl(mockWebServerRule.baseUrl)
             .coordinatesList(mockRoute.routeWaypoints).build()
 
@@ -154,13 +153,13 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun verify_history_files_are_recorded_and_readable_with_silent_waypoints() {
         // prepare
-        val mockRoute = RoutesProvider.dc_very_short_two_legs_with_silent_waypoint(activity)
+        val mockRoute = RoutesProvider.dc_very_short_two_legs_with_silent_waypoint(context)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         routeCompleteIdlingResource.register()
 
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
-            .applyLanguageAndVoiceUnitOptions(activity)
+            .applyLanguageAndVoiceUnitOptions(context)
             .baseUrl(mockWebServerRule.baseUrl)
             .coordinatesList(mockRoute.routeWaypoints)
             .waypointIndicesList(listOf(0, 2))
@@ -353,7 +352,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     private fun historyReaderFromAssetFile(
         name: String
     ): MapboxHistoryReader {
-        val inputStream: InputStream = activity.assets.open(name)
+        val inputStream: InputStream = context.assets.open(name)
         val outputFile = File(testDirectory, name)
         outputFile.outputStream().use { fileOut ->
             inputStream.copyTo(fileOut)
