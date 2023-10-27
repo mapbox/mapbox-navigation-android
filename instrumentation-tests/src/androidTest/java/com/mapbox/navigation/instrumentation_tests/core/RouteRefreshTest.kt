@@ -2,7 +2,6 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
@@ -24,19 +23,18 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.compareIdWithIncidentId
-import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
-import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -47,16 +45,13 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -68,16 +63,13 @@ import org.junit.Test
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
-class RouteRefreshTest : BaseCoreNoCleanUpTest() {
+class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
-
-    @get:Rule
-    val historyRecorderRule = MapboxHistoryTestRule()
 
     @get:Rule
     val idlingPolicyRule = IdlingPolicyTimeoutRule(35, TimeUnit.SECONDS)
@@ -129,23 +121,17 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                 set(routeRefreshOptions, 3_000L)
             }
             mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(context)
-                    .accessToken(getMapboxAccessTokenFromResources(context))
+                NavigationOptions.Builder(activity)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
                     .routeRefreshOptions(routeRefreshOptions)
                     .navigatorPredictionMillis(0L)
                     .build()
             )
-            historyRecorderRule.historyRecorder = mapboxNavigation.historyRecorder
-            mapboxNavigation.historyRecorder.startRecording()
         }
     }
 
     @After
     fun tearDown() {
-        runBlocking(Dispatchers.Main) {
-            val path = mapboxNavigation.historyRecorder.stopRecording()
-            Log.i("Test history file", "history file recorder: $path")
-        }
         if (this::failByRequestRouteRefreshResponse.isInitialized) {
             failByRequestRouteRefreshResponse.failResponse = false
         }
@@ -368,7 +354,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
             FailByRequestMockRequestHandler(
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh",
-                    readRawFileText(context, R.raw.route_response_route_refresh_annotations),
+                    readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
                     // it will fail for alternative refresh since index will be 1
                     routeIndex = 0
                 )
@@ -469,42 +455,26 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
+
+            mapboxNavigation.setNavigationRoutes(requestedRoutes)
+            mapboxNavigation.startTripSession()
             // corresponds to currentRouteGeometryIndex = 3
-            stayOnPosition(38.577344, -121.496248, bearing = 190f) {
-                mapboxNavigation.setNavigationRoutes(requestedRoutes)
-                mapboxNavigation.startTripSession()
-                mapboxNavigation.routeProgressUpdates()
-                    .filter { it.currentRouteGeometryIndex == 3 }
-                    .first()
-                val refreshedRoutes = mapboxNavigation.routesUpdates()
-                    .filter {
-                        it.reason == ROUTES_UPDATE_REASON_REFRESH
-                    }
-                    .first()
-                    .navigationRoutes
+            stayOnPosition(38.577344, -121.496248, bearing = 190f)
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentRouteGeometryIndex == 3 }
+                .first()
+            val refreshedRoutes = mapboxNavigation.routesUpdates()
+                .filter {
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH
+                }
+                .first()
+                .navigationRoutes
 
-                assertEquals(
-                    224.224,
-                    requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                    0.0001
-                )
-                assertEquals(
-                    172.175,
-                    refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                    0.0001
-                )
+            assertEquals(224.224, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(172.175, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
 
-                assertEquals(
-                    227.918,
-                    requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                    0.0001
-                )
-                assertEquals(
-                    235.641,
-                    refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                    0.0001
-                )
-            }
+            assertEquals(227.918, requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(235.641, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
         }
 
     @Test
@@ -522,7 +492,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                     MockDirectionsRefreshHandler(
                         "route_response_single_route_multileg_alternative",
                         readRawFileText(
-                            context,
+                            activity,
                             R.raw.route_response_single_route_multileg_alternative_refreshed
                         ),
                         acceptedGeometryIndex = 11
@@ -535,7 +505,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                 .routes
             // alternative which was requested on the second leg of the original route,
             // so the alternative has only one leg while the original route has two
-            val alternativeRoute = alternativeForMultileg(context)
+            val alternativeRoute = alternativeForMultileg(activity)
                 .toNavigationRoutes(RouterOrigin.Offboard) {
                     baseUrl(mockWebServerRule.baseUrl)
                 }.first()
@@ -591,7 +561,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                     MockDirectionsRefreshHandler(
                         "route_response_single_route_multileg_alternative",
                         readRawFileText(
-                            context,
+                            activity,
                             R.raw.route_response_single_route_multileg_alternative_refreshed
                         ),
                         acceptedGeometryIndex = 11
@@ -605,59 +575,53 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
             // In this test setup we are considering a case where user was driving along the route,
             // started the second leg and received an alternative, and selected it before the fork.
             // This means that the primary route is shorter than the alternative route (former primary route).
-            val primaryRoute = alternativeForMultileg(context)
+            val primaryRoute = alternativeForMultileg(activity)
                 .toNavigationRoutes(RouterOrigin.Offboard) {
                     baseUrl(mockWebServerRule.baseUrl)
                 }.first()
+
             // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
-            stayOnPosition(
-                latitude = 38.581798,
-                longitude = -121.476146,
-                bearing = 0f
-            ) {
-                mapboxNavigation.setNavigationRoutes(
-                    listOf(primaryRoute) + alternativeRoutes,
-                    initialLegIndex = 0
-                )
-                mapboxNavigation.startTripSession()
+            mockLocationUpdatesRule.pushLocationUpdate(
+                mockLocationUpdatesRule.generateLocationUpdate {
+                    latitude = 38.581798
+                    longitude = -121.476146
+                }
+            )
 
-                mapboxNavigation.routeProgressUpdates()
-                    .filter {
-                        it.currentRouteGeometryIndex == 11
-                    }
-                    .first()
+            mapboxNavigation.setNavigationRoutes(
+                listOf(primaryRoute) + alternativeRoutes,
+                initialLegIndex = 0
+            )
+            mapboxNavigation.startTripSession()
 
-                val refreshedRoutes = mapboxNavigation.routesUpdates()
-                    .filter {
-                        it.reason == ROUTES_UPDATE_REASON_REFRESH
-                    }
-                    .first()
-                    .navigationRoutes
+            mapboxNavigation.routeProgressUpdates()
+                .filter {
+                    it.currentRouteGeometryIndex == 11
+                }
+                .first()
 
-                assertEquals(
-                    alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                    refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                    0.0001
-                )
+            val refreshedRoutes = mapboxNavigation.routesUpdates()
+                .filter {
+                    it.reason == ROUTES_UPDATE_REASON_REFRESH
+                }
+                .first()
+                .navigationRoutes
 
-                assertEquals(
-                    201.673,
-                    alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
-                    0.0001
-                )
-                assertEquals(
-                    202.881,
-                    refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(1),
-                    0.0001
-                )
+            assertEquals(
+                alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001
+            )
 
-                assertEquals(194.3, primaryRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-                assertEquals(
-                    187.126,
-                    refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                    0.0001
-                )
-            }
+            assertEquals(
+                201.673,
+                alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
+                0.0001
+            )
+            assertEquals(202.881, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
+
+            assertEquals(194.3, primaryRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+            assertEquals(187.126, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
         }
 
     @Test
@@ -832,7 +796,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                 MockDirectionsRefreshHandler(
                     "route_response_single_route_multileg_alternative",
                     readRawFileText(
-                        context,
+                        activity,
                         R.raw.route_response_single_route_multileg_alternative_refreshed
                     ),
                     acceptedGeometryIndex = 11
@@ -846,38 +810,40 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
         // In this test setup we are considering a case where user was driving along the route,
         // started the second leg and received an alternative, and selected it before the fork.
         // This means that the primary route is shorter than the alternative route (former primary route).
-        val primaryRoute = alternativeForMultileg(context)
+        val primaryRoute = alternativeForMultileg(activity)
             .toNavigationRoutes(RouterOrigin.Offboard) {
                 baseUrl(mockWebServerRule.baseUrl)
             }.first()
+
         // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
-        stayOnPosition(
-            latitude = 38.581798,
-            longitude = -121.476146,
-            bearing = 0f
-        ) {
-            mapboxNavigation.setNavigationRoutes(
-                listOf(primaryRoute) + alternativeRoutes,
-                initialLegIndex = 0
-            )
-            mapboxNavigation.startTripSession()
+        mockLocationUpdatesRule.pushLocationUpdate(
+            mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.581798
+                longitude = -121.476146
+            }
+        )
 
-            mapboxNavigation.routeProgressUpdates()
-                .filter {
-                    it.currentRouteGeometryIndex == 11
-                }
-                .first()
+        mapboxNavigation.setNavigationRoutes(
+            listOf(primaryRoute) + alternativeRoutes,
+            initialLegIndex = 0
+        )
+        mapboxNavigation.startTripSession()
 
-            mapboxNavigation.routesUpdates()
-                .filter {
-                    (it.reason == ROUTES_UPDATE_REASON_REFRESH).also {
-                        if (it) {
-                            assertEquals(0, mapboxNavigation.currentLegIndex())
-                        }
+        mapboxNavigation.routeProgressUpdates()
+            .filter {
+                it.currentRouteGeometryIndex == 11
+            }
+            .first()
+
+        mapboxNavigation.routesUpdates()
+            .filter {
+                (it.reason == ROUTES_UPDATE_REASON_REFRESH).also {
+                    if (it) {
+                        assertEquals(0, mapboxNavigation.currentLegIndex())
                     }
                 }
-                .first()
-        }
+            }
+            .first()
     }
 
     @Test
@@ -894,7 +860,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                 MockDirectionsRefreshHandler(
                     "route_response_single_route_multileg_alternative",
                     readRawFileText(
-                        context,
+                        activity,
                         R.raw.route_response_single_route_multileg_alternative_refreshed
                     ),
                     acceptedGeometryIndex = 11
@@ -907,7 +873,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
             .routes
         // alternative which was requested on the second leg of the original route,
         // so the alternative has only one leg while the original route has two
-        val alternativeRoute = alternativeForMultileg(context)
+        val alternativeRoute = alternativeForMultileg(activity)
             .toNavigationRoutes(RouterOrigin.Offboard) {
                 baseUrl(mockWebServerRule.baseUrl)
             }.first()
@@ -993,14 +959,14 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
                 "driving-traffic",
-                readRawFileText(context, routesResponse),
+                readRawFileText(activity, routesResponse),
                 coordinates
             )
         )
         failByRequestRouteRefreshResponse = FailByRequestMockRequestHandler(
             MockDirectionsRefreshHandler(
                 responseTestUuid,
-                readRawFileText(context, refreshResponse),
+                readRawFileText(activity, refreshResponse),
                 acceptedGeometryIndex
             )
         )
@@ -1025,7 +991,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
             FailByRequestMockRequestHandler(
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh",
-                    readRawFileText(context, R.raw.route_response_route_refresh_annotations),
+                    readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
                     routeIndex = 0
                 )
             )
@@ -1035,7 +1001,7 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh",
                     readRawFileText(
-                        context,
+                        activity,
                         R.raw.route_response_route_refresh_alternative_annotations
                     ),
                     routeIndex = 1
