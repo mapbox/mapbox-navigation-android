@@ -6,6 +6,27 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.17.2 - 27 October, 2023
+### Changelog
+[Changes between v2.17.1 and v2.17.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.1...v2.17.2)
+
+#### Features
+- Introduced `NavigationOptions#longRoutesOptimisationOptions` which changes the Nav SDK behavior so that it's able to handle heavy routes objects. See documentation of `OptimiseNavigationForLongRoutes` to learn more about it.    [#7564](https://github.com/mapbox/mapbox-navigation-android/pull/7564)
+- Route refresh now refreshes `LegAnnotation#freeflowSpeed` and `LegAnnotation#currentSpeed`. [#7587](https://github.com/mapbox/mapbox-navigation-android/pull/7587)
+
+#### Bug fixes and improvements
+- Fixed an issue where route refreshes might not have been paused after invoking `RouteRefreshController#pauseRouteRefreshes`. [#7581](https://github.com/mapbox/mapbox-navigation-android/pull/7581)
+- Fixed backward positioning jumps after GPS signal jump detection. [#7586](https://github.com/mapbox/mapbox-navigation-android/pull/7586)
+- Improved processing of ETC signals. [#7586](https://github.com/mapbox/mapbox-navigation-android/pull/7586)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.1))
+- Mapbox Navigation Native `v161.0.0`
+- Mapbox Core Common `v23.8.3`
+- Mapbox Java `v6.14.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.14.0))
+
+
 ## Mapbox Navigation SDK 2.17.1 - 18 October, 2023
 ### Changelog
 [Changes between v2.17.0 and v2.17.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.0...v2.17.1)
