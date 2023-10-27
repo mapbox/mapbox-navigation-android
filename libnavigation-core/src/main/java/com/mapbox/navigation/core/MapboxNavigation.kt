@@ -2180,7 +2180,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         withContext(Dispatchers.Main.immediate) {
             if (directionsSession.routes.size > 1) {
                 suspendCoroutine<Unit> { continuation ->
-                    setNavigationRoutes(directionsSession.routes.take(1)) {
+                    setNavigationRoutes(directionsSession.routes.take(1), currentLegIndex()) {
                         continuation.resume(Unit)
                     }
                 }
