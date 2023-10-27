@@ -30,6 +30,9 @@ import kotlinx.coroutines.flow.map
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+// old devices parse long routes very slowly
+private const val EXTENDED_TIMEOUT_FOR_SLOW_PARSING = 120_000L
+
 class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     override fun setupMockLocation(): Location {
@@ -60,7 +63,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun requestNewRoutesWhileLongRoutesAreSet() = sdkTest {
+    fun requestNewRoutesWhileLongRoutesAreSet() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
         val longRoutesOptions = setupLongRoutes()
         val shortRoutesOptions = setupShortRoutes()
         withMapboxNavigation(
@@ -86,7 +89,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun requestNewRoutesWhileLongRoutesArePreviewed() = sdkTest {
+    fun requestNewRoutesWhileLongRoutesArePreviewed() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
         val longRoutesOptions = setupLongRoutes()
         val shortRoutesOptions = setupShortRoutes()
         withMapboxNavigation(
@@ -120,7 +123,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun rerouteOnLongRoute() = sdkTest(60_000) {
+    fun rerouteOnLongRoute() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
         val longRoutesOptions = setupLongRoutes()
         val longRoutesRerouteOptions = setupLongRoutesReroute()
         withMapboxNavigation(
