@@ -13,14 +13,13 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
-import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.ArrivalIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
-import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -28,7 +27,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+class SanityCoreRouteTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -56,8 +55,8 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
 
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                NavigationOptions.Builder(context)
+                    .accessToken(getMapboxAccessTokenFromResources(context))
                     .build()
             )
             mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
@@ -71,7 +70,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     @Test
     fun route_completes() {
         // prepare
-        val mockRoute = RoutesProvider.dc_very_short(activity)
+        val mockRoute = RoutesProvider.dc_very_short(context)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         routeCompleteIdlingResource.register()
 
@@ -89,7 +88,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
-                    .applyLanguageAndVoiceUnitOptions(activity)
+                    .applyLanguageAndVoiceUnitOptions(context)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .coordinatesList(mockRoute.routeWaypoints).build(),
                 object : RouterCallback {
@@ -129,7 +128,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     @Test
     fun route_with_two_legs_completes() {
         // prepare
-        val mockRoute = RoutesProvider.dc_very_short_two_legs(activity)
+        val mockRoute = RoutesProvider.dc_very_short_two_legs(context)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         val arrivalIdlingResource = ArrivalIdlingResource(mapboxNavigation)
         arrivalIdlingResource.register()
@@ -150,7 +149,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
-                    .applyLanguageAndVoiceUnitOptions(activity)
+                    .applyLanguageAndVoiceUnitOptions(context)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .coordinatesList(mockRoute.routeWaypoints).build(),
                 object : RouterCallback {

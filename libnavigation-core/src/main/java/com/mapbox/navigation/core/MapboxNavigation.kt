@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
+import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -152,8 +153,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.lang.reflect.Field
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
@@ -447,13 +451,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ),
             historyRecorderHandles.composite,
         )
+        val routeParsingManager = createRouteParsingManager(
+            navigationOptions.longRoutesOptimisationOptions
+        )
+        routeParsingManager.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(
                 ModuleParams.NavigationRouter(
                     accessToken
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
                     nativeRouter,
-                    threadController
+                    threadController,
+                    routeParsingManager
                 )
             )
         }
@@ -574,6 +583,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator,
             tripSession,
             threadController,
+            routeParsingManager
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
@@ -600,7 +610,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeOptionsProvider,
             navigationOptions.rerouteOptions,
             threadController,
-            evDynamicDataHolder
+            evDynamicDataHolder,
         )
         rerouteController = defaultRerouteController
 
@@ -2164,6 +2174,30 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun setUpRouteCacheClearer() {
         registerRoutesObserver(routesCacheClearer)
         registerRoutesPreviewObserver(routesCacheClearer)
+    }
+
+    private suspend fun prepareNavigationForRoutesParsing() {
+        withContext(Dispatchers.Main.immediate) {
+            if (directionsSession.routes.size > 1) {
+                suspendCoroutine<Unit> { continuation ->
+                    setNavigationRoutes(directionsSession.routes.take(1), currentLegIndex()) {
+                        continuation.resume(Unit)
+                    }
+                }
+            }
+            val preview = getRoutesPreview()
+            if (preview != null) {
+                if (preview.routesList.size > 1) {
+                    suspendCoroutine<Unit> { continuation ->
+                        routesPreviewController.previewNavigationRoutes(
+                            listOf(preview.originalRoutesList[preview.primaryRouteIndex])
+                        ) {
+                            continuation.resume(Unit)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private companion object {

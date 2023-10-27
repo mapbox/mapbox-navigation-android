@@ -197,6 +197,7 @@ class NavigationRouteEqualsTest(
             directionsResponse1,
             0,
             routeOptions1,
+            directionsResponse1.routes().first(),
             mockk(relaxUnitFun = true) {
                 every { routeId } returns id1
                 every { responseUuid } returns "uuid#0"
@@ -210,6 +211,7 @@ class NavigationRouteEqualsTest(
             directionsResponse2,
             0,
             routeOptions2,
+            directionsResponse2.routes().first(),
             mockk(relaxUnitFun = true) {
                 every { routeId } returns id2
                 every { responseUuid } returns "uuid#1"

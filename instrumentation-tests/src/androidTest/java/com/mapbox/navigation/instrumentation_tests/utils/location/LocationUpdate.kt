@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.utils.location
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -18,7 +19,7 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
     block: suspend () -> Unit
 ) {
     coroutineScope {
-        val updateLocations = launch {
+        val updateLocations = launch(start = CoroutineStart.UNDISPATCHED) {
             while (true) {
                 mockLocationUpdatesRule.pushLocationUpdate {
                     this.latitude = latitude

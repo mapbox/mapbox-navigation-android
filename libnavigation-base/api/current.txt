@@ -439,6 +439,21 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.IncidentsOptions.Builder graph(String graph);
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class LongRoutesOptimisationOptions {
+  }
+
+  public static final class LongRoutesOptimisationOptions.NoOptimisations extends com.mapbox.navigation.base.options.LongRoutesOptimisationOptions {
+    field public static final com.mapbox.navigation.base.options.LongRoutesOptimisationOptions.NoOptimisations INSTANCE;
+  }
+
+  public static final class LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes extends com.mapbox.navigation.base.options.LongRoutesOptimisationOptions {
+    ctor public LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(int responseToParseSizeBytes);
+    method public int component1();
+    method public com.mapbox.navigation.base.options.LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes copy(int responseToParseSizeBytes);
+    method public int getResponseToParseSizeBytes();
+    property public final int responseToParseSizeBytes;
+  }
+
   public final class NavigationOptions {
     method public String? getAccessToken();
     method public android.content.Context getApplicationContext();
@@ -452,6 +467,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.IncidentsOptions getIncidentsOptions();
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
     method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
+    method public com.mapbox.navigation.base.options.LongRoutesOptimisationOptions getLongRoutesOptimisationOptions();
     method public long getNavigatorPredictionMillis();
     method public com.mapbox.navigation.base.options.RerouteOptions getRerouteOptions();
     method public com.mapbox.navigation.base.route.RouteAlternativesOptions getRouteAlternativesOptions();
@@ -473,6 +489,7 @@ package com.mapbox.navigation.base.options {
     property public final boolean isDebugLoggingEnabled;
     property public final com.mapbox.android.core.location.LocationEngine locationEngine;
     property public final com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest;
+    property public final com.mapbox.navigation.base.options.LongRoutesOptimisationOptions longRoutesOptimisationOptions;
     property public final long navigatorPredictionMillis;
     property public final com.mapbox.navigation.base.options.RerouteOptions rerouteOptions;
     property public final com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions;
@@ -496,6 +513,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngine(com.mapbox.android.core.location.LocationEngine locationEngine);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.NavigationOptions.Builder longRoutesOptimisationOptions(com.mapbox.navigation.base.options.LongRoutesOptimisationOptions longRoutesOptimisationOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder rerouteOptions(com.mapbox.navigation.base.options.RerouteOptions rerouteOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeAlternativesOptions(com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions);
@@ -1845,6 +1863,9 @@ package com.mapbox.navigation.base.utils {
     method public static java.util.List<java.util.List<com.mapbox.geojson.LineString>> stepsGeometryToLineString(com.mapbox.api.directions.v5.models.DirectionsRoute);
     method public static java.util.List<java.util.List<java.util.List<com.mapbox.geojson.Point>>> stepsGeometryToPoints(com.mapbox.api.directions.v5.models.DirectionsRoute);
     field public static final com.mapbox.navigation.base.utils.DecodeUtils INSTANCE;
+  }
+
+  public final class DecodeUtilsKt {
   }
 
   public final class NullUtilsKt {

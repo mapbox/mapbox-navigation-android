@@ -12,7 +12,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -192,7 +191,7 @@ internal object MapboxNavigationTelemetry {
                 field = value
                 onRouteDataChanged.invoke()
             }
-        var originalRoute: NavigationRoute? = null
+        var originalRouteMetrics: MetricsDirectionsRoute? = null
             set(value) {
                 field = value
                 onRouteDataChanged.invoke()
@@ -205,7 +204,7 @@ internal object MapboxNavigationTelemetry {
             }
 
         fun hasRouteAndRouteProgress(): Boolean {
-            return routeData.originalRoute != null && routeData.routeProgress != null
+            return routeData.originalRouteMetrics != null && routeData.routeProgress != null
         }
     }
 
@@ -225,12 +224,14 @@ internal object MapboxNavigationTelemetry {
             reason == RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP || routes.isEmpty() -> Unit
             reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW -> {
                 log("handle a new route")
-                if (routeData.originalRoute != null && sessionState is ActiveGuidance) {
+                if (routeData.originalRouteMetrics != null && sessionState is ActiveGuidance) {
                     handleCancelNavigation()
                 }
                 resetLocalVariables()
                 resetDynamicValues()
-                routeData.originalRoute = routes.first()
+                routeData.originalRouteMetrics = MetricsDirectionsRoute(
+                    routes.first().directionsRoute
+                )
                 routeData.needHandleDeparture = true
             }
             reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
@@ -240,7 +241,9 @@ internal object MapboxNavigationTelemetry {
                 handleReroute(routes.first().directionsRoute)
             }
             reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
-                routeData.originalRoute = routes.first()
+                routeData.originalRouteMetrics = MetricsDirectionsRoute(
+                    routes.first().directionsRoute
+                )
             }
             else -> logW(
                 "Unknown route update reason: [$reason]",
@@ -448,7 +451,7 @@ internal object MapboxNavigationTelemetry {
                 lifecycleMonitor?.obtainForegroundPercentage(),
                 EVENT_VERSION,
                 PhoneState.newInstance(applicationContext),
-                MetricsDirectionsRoute(routeData.originalRoute),
+                routeData.originalRouteMetrics ?: MetricsDirectionsRoute(null),
                 MetricsRouteProgress(routeData.routeProgress),
                 createAppMetadata(),
                 locationsCollector
@@ -826,7 +829,7 @@ internal object MapboxNavigationTelemetry {
         val distanceTraveled = sessionMetadata?.dynamicValues.retrieveDistanceTraveled()
         this.populate(
             this@MapboxNavigationTelemetry.sdkIdentifier,
-            MetricsDirectionsRoute(routeData.originalRoute),
+            routeData.originalRouteMetrics ?: MetricsDirectionsRoute(null),
             MetricsRouteProgress(routeData.routeProgress),
             locationsCollector.lastLocation?.toPoint(),
             locationEngineNameExternal,
@@ -895,7 +898,7 @@ internal object MapboxNavigationTelemetry {
 
     private fun resetOriginalRoute() {
         log("resetOriginalRoute")
-        routeData.originalRoute = null
+        routeData.originalRouteMetrics = null
     }
 
     private fun getSessionMetadataIfTelemetryRunning(): SessionMetadata? =

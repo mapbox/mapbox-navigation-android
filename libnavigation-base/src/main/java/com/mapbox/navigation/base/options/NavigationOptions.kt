@@ -43,6 +43,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param eventsAppMetadata [EventsAppMetadata] information (optional)
  * @param enableSensors enables sensors for current position calculation (optional)
  * @param copilotOptions defines options for Copilot
+ * @param longRoutesOptimisationOptions defines criteria to turn on the optimisations
  */
 class NavigationOptions
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -67,6 +68,8 @@ private constructor(
     val enableSensors: Boolean,
     @ExperimentalPreviewMapboxNavigationAPI
     val copilotOptions: CopilotOptions,
+    @ExperimentalPreviewMapboxNavigationAPI
+    val longRoutesOptimisationOptions: LongRoutesOptimisationOptions
 ) {
 
     /**
@@ -92,6 +95,7 @@ private constructor(
         eventsAppMetadata(eventsAppMetadata)
         enableSensors(enableSensors)
         copilotOptions(copilotOptions)
+        longRoutesOptimisationOptions(longRoutesOptimisationOptions)
     }
 
     /**
@@ -123,6 +127,7 @@ private constructor(
         if (eventsAppMetadata != other.eventsAppMetadata) return false
         if (enableSensors != other.enableSensors) return false
         if (copilotOptions != other.copilotOptions) return false
+        if (longRoutesOptimisationOptions != other.longRoutesOptimisationOptions) return false
 
         return true
     }
@@ -151,6 +156,7 @@ private constructor(
         result = 31 * result + eventsAppMetadata.hashCode()
         result = 31 * result + enableSensors.hashCode()
         result = 31 * result + copilotOptions.hashCode()
+        result = 31 * result + longRoutesOptimisationOptions.hashCode()
         return result
     }
 
@@ -178,7 +184,8 @@ private constructor(
             "historyRecorderOptions=$historyRecorderOptions, " +
             "eventsAppMetadata=$eventsAppMetadata, " +
             "enableSensors=$enableSensors, " +
-            "copilotOptions=$copilotOptions" +
+            "copilotOptions=$copilotOptions, " +
+            "longRoutesOptimisationOptions=$longRoutesOptimisationOptions" +
             ")"
     }
 
@@ -213,6 +220,10 @@ private constructor(
             HistoryRecorderOptions.Builder().build()
         private var eventsAppMetadata: EventsAppMetadata? = null
         private var enableSensors: Boolean = false
+
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        private var longRoutesOptimisationOptions: LongRoutesOptimisationOptions =
+            LongRoutesOptimisationOptions.NoOptimisations
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
@@ -330,6 +341,16 @@ private constructor(
             apply { this.copilotOptions = copilotOptions }
 
         /**
+         * Defines configuration which triggers optimised behaviour which is different from regular.
+         * See [LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes] for more details.
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun longRoutesOptimisationOptions(
+            longRoutesOptimisationOptions: LongRoutesOptimisationOptions
+        ): Builder =
+            apply { this.longRoutesOptimisationOptions = longRoutesOptimisationOptions }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -355,6 +376,7 @@ private constructor(
                 eventsAppMetadata = eventsAppMetadata,
                 enableSensors = enableSensors,
                 copilotOptions = copilotOptions,
+                longRoutesOptimisationOptions = longRoutesOptimisationOptions
             )
         }
     }
