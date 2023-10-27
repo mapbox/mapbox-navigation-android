@@ -48,6 +48,16 @@ internal object AnnotationsRefresher {
             newAnnotation,
             startingLegGeometryIndex,
         ) { maxspeed() }
+        val freeFlowSpeed = mergeAnnotationProperty(
+            oldAnnotation,
+            newAnnotation,
+            startingLegGeometryIndex,
+        ) { freeflowSpeed() }
+        val currentSpeed = mergeAnnotationProperty(
+            oldAnnotation,
+            newAnnotation,
+            startingLegGeometryIndex,
+        ) { currentSpeed() }
         val unrecognizedProperties = oldAnnotation.unrecognizedPropertiesNames
             .union(newAnnotation?.unrecognizedPropertiesNames ?: emptySet())
             .associateNonNullValuesWith { propertyName ->
@@ -76,6 +86,8 @@ internal object AnnotationsRefresher {
             .distance(distance)
             .duration(duration)
             .speed(speed)
+            .freeflowSpeed(freeFlowSpeed)
+            .currentSpeed(currentSpeed)
             .build()
     }
 

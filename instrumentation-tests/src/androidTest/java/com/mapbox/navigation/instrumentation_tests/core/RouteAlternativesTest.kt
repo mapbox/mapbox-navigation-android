@@ -1,8 +1,13 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
+import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -15,8 +20,10 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.instrumentation_tests.utils.http.MockDynamicDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
+import com.mapbox.navigation.instrumentation_tests.utils.openRawResource
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
@@ -42,6 +49,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.io.InputStreamReader
+import java.net.URL
 
 /**
  * This test ensures that alternative route recommendations
@@ -142,6 +151,147 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 assertNotNull(
                     "alternative route $it doesn't have metadata",
                     mapboxNavigation.getAlternativeMetadataFor(it)
+                )
+            }
+
+            val mockedAlternativesResponse = InputStreamReader(
+                openRawResource(context, R.raw.route_response_alternative_continue)
+            ).use {
+                DirectionsResponse.fromJson(it)
+            }
+            newAlternatives.forEach {
+                assertEquals(
+                    "some info was lost during NN -> Nav SDK transition",
+                    it.directionsRoute.toBuilder().routeOptions(null).build(),
+                    mockedAlternativesResponse.routes()[it.routeIndex].toBuilder()
+                        .legs(
+                            mockedAlternativesResponse.routes()[it.routeIndex].legs()
+                                ?.map { originalLeg ->
+                                    originalLeg.toBuilder()
+                                        .incidents(originalLeg.incidents().orEmpty())
+                                        .build()
+                                }
+                        )
+                        .build()
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun refresh_alternatives_before_passing_a_fork_point() = sdkTest {
+        val refreshedCongestionNumericValue = 20
+        val freeFlowSpeedRefreshedValue = 60
+        val currentSpeedRefreshedValue = 32
+        val speedRefreshedValue = 77.2
+        val refreshedDistanceValue = 1.0
+        val refreshedDurationValue = 2.0
+        val testRouteOptions = setup3AlternativesInParisWithRefresh(
+            transformFreeFlowSpeed = {
+                MutableList(it.size) { freeFlowSpeedRefreshedValue }
+            },
+            transformCongestionsNumeric = {
+                MutableList(it.size) { refreshedCongestionNumericValue }
+            },
+            transformCurrentSpeed = {
+                MutableList(it.size) { currentSpeedRefreshedValue }
+            },
+            transformSpeed = {
+                MutableList(it.size) { speedRefreshedValue }
+            },
+            transformDistance = {
+                MutableList(it.size) { refreshedDistanceValue }
+            },
+            transformDuration = {
+                MutableList(it.size) { refreshedDurationValue }
+            }
+        )
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { mapboxNavigation ->
+            mapboxNavigation.registerRouteAlternativesObserver(
+                AdvancedAlternativesObserverFromDocumentation(mapboxNavigation)
+            )
+            val testRoutes = mapboxNavigation.requestRoutes(testRouteOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            mapboxNavigation.setNavigationRoutesAsync(testRoutes)
+            mockLocationReplayerRule.playRoute(testRoutes.first().directionsRoute)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.flowLocationMatcherResult().first()
+            mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
+
+            val remainingAlternatives = mapboxNavigation.routesUpdates()
+                .filter { it.navigationRoutes != testRoutes } // skip initial routes
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE }
+                .filter { it.navigationRoutes.size > 1 }
+                .first()
+                .navigationRoutes
+                .drop(1)
+
+            remainingAlternatives.forEach {
+                assertNotNull(
+                    "alternative route $it doesn't have metadata",
+                    mapboxNavigation.getAlternativeMetadataFor(it)
+                )
+            }
+
+            remainingAlternatives.forEach {
+                assertEquals(
+                    "Test expects alternatives to be from the original repose",
+                    testRoutes.first().directionsResponse.uuid(),
+                    it.directionsResponse.uuid()
+                )
+                // checking only the end because refresh happens during movement
+                assertEquals(
+                    MutableList(50) { refreshedCongestionNumericValue },
+                    it.directionsRoute.legs()
+                        ?.first()
+                        ?.annotation()
+                        ?.congestionNumeric()
+                        ?.takeLast(50)
+                )
+                assertEquals(
+                    MutableList(50) { speedRefreshedValue },
+                    it.directionsRoute.legs()
+                        ?.first()
+                        ?.annotation()
+                        ?.speed()
+                        ?.takeLast(50)
+                )
+                assertEquals(
+                    MutableList(50) { refreshedDistanceValue },
+                    it.directionsRoute.legs()
+                        ?.first()
+                        ?.annotation()
+                        ?.distance()
+                        ?.takeLast(50)
+                )
+                assertEquals(
+                    MutableList(50) { refreshedDurationValue },
+                    it.directionsRoute.legs()
+                        ?.first()
+                        ?.annotation()
+                        ?.duration()
+                        ?.takeLast(50)
+                )
+
+                assertEquals(
+                    MutableList(50) { freeFlowSpeedRefreshedValue },
+                    it.directionsRoute.legs()
+                        ?.first()
+                        ?.annotation()
+                        ?.freeflowSpeed()
+                        ?.takeLast(50)
+                )
+                assertEquals(
+                    MutableList(50) { currentSpeedRefreshedValue },
+                    it.directionsRoute.legs()
+                        ?.first()
+                        ?.annotation()
+                        ?.currentSpeed()
+                        ?.takeLast(50)
                 )
             }
         }
@@ -344,6 +494,78 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             .getSuccessfulResultOrThrowException()
             .routes
     }
+
+    private fun setup3AlternativesInParisWithRefresh(
+        transformFreeFlowSpeed: (List<Int>) -> List<Int> = { it },
+        transformCurrentSpeed: (List<Int>) -> List<Int> = { it },
+        transformCongestionsNumeric: (List<Int>) -> List<Int> = { it },
+        transformDistance: (List<Double>) -> List<Double> = { it },
+        transformDuration: (List<Double>) -> List<Double> = { it },
+        transformSpeed: (List<Double>) -> List<Double> = { it },
+    ): RouteOptions {
+        val routeOptions = RouteOptions.fromUrl(
+            URL(readRawFileText(context, R.raw.three_alternatives_paris_request))
+        ).toBuilder().baseUrl(mockWebServerRule.baseUrl).build()
+        val fullResponse = readRawFileText(context, R.raw.three_alternatives_paris_response)
+        val parsedResponse = DirectionsResponse.fromJson(fullResponse)
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                routeOptions.profile(),
+                fullResponse,
+                routeOptions.coordinatesList()
+            )
+        )
+        mockWebServerRule.requestHandlers.add(
+            MockDynamicDirectionsRefreshHandler { params ->
+                val leg = parsedResponse.routes()[params.routeIndex]
+                    .legs()!![params.legIndex]
+                val refreshAnnotations = leg.annotation()?.let { legAnnotation ->
+                    legAnnotation.toBuilder()
+                        .currentSpeed(
+                            legAnnotation.currentSpeed()
+                                ?.drop(params.geometryIndex)
+                                ?.let(transformCurrentSpeed)
+                        )
+                        .freeflowSpeed(
+                            legAnnotation.freeflowSpeed()
+                                ?.drop(params.geometryIndex)
+                                ?.let(transformFreeFlowSpeed)
+                        )
+                        .duration(
+                            legAnnotation.duration()
+                                ?.drop(params.geometryIndex)
+                                ?.let(transformDuration)
+                        )
+                        .congestionNumeric(
+                            legAnnotation.congestionNumeric()
+                                ?.drop(params.geometryIndex)
+                                ?.let(transformCongestionsNumeric)
+                        )
+                        .distance(
+                            legAnnotation.distance()
+                                ?.drop(params.geometryIndex)
+                                ?.let(transformDistance)
+                        )
+                        .speed(
+                            legAnnotation.speed()
+                                ?.drop(params.geometryIndex)
+                                ?.let(transformSpeed)
+                        )
+                        .build()
+                }
+                DirectionsRouteRefresh.builder().legs(
+                    listOf(
+                        RouteLegRefresh.builder()
+                            .annotation(refreshAnnotations)
+                            .incidents(leg.incidents())
+                            .closures(leg.closures())
+                            .build()
+                    )
+                ).build()
+            }
+        )
+        return routeOptions
+    }
 }
 
 private fun CoroutineScope.firstAlternativesUpdateDeferred(mapboxNavigation: MapboxNavigation) =
@@ -362,3 +584,11 @@ private fun CoroutineScope.firstNonEmptyAlternativesUpdateDeferred(
             .filterNot { it.alternatives.isEmpty() }
             .first()
     }
+
+private fun DirectionsRoute.removeKnownDifferentFields(): DirectionsRoute {
+    return this.toBuilder().routeOptions(null).legs(
+        this.legs()?.map {
+            it.toBuilder().incidents(emptyList()).build()
+        }
+    ).build()
+}

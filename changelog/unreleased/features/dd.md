@@ -1,0 +1,1 @@
+- Route refresh now refreshes `LegAnnotation#freeflowSpeed` and `LegAnnotation#currentSpeed`.

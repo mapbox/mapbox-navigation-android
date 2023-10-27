@@ -78,6 +78,12 @@ internal class DirectionsRouteDiffProvider {
         if (oldLegAnnotation?.stateOfCharge() != newLegAnnotation?.stateOfCharge()) {
             updatedAnnotations.add("state_of_charge")
         }
+        if (oldLegAnnotation?.currentSpeed() != newLegAnnotation?.currentSpeed()) {
+            updatedAnnotations.add("current_speed")
+        }
+        if (oldLegAnnotation?.freeflowSpeed() != newLegAnnotation?.freeflowSpeed()) {
+            updatedAnnotations.add("freeflow_speed")
+        }
         return updatedAnnotations
     }
 

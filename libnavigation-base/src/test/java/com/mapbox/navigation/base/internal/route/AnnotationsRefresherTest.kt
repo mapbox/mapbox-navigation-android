@@ -219,6 +219,8 @@ class AnnotationsRefresherTest(
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
                         .duration(listOf(11.2, 33.4, 55.6, 77.8, 99.0))
                         .speed(listOf(41.0, 42.5, 43.1, 44.6, 45.9))
+                        .freeflowSpeed(listOf(1, 2, 3, 4, 5))
+                        .currentSpeed(listOf(2, 3, 4, 5, 6))
                         .maxspeed(List(5) { MaxSpeed.builder().speed(it * 10).unit("mph").build() })
                         .build(),
                     LegAnnotation.builder()
@@ -235,6 +237,8 @@ class AnnotationsRefresherTest(
                         .distance(listOf(2.1, 4.3, 6.5, 8.7, 0.9))
                         .duration(listOf(22.1, 44.3, 66.5, 88.7, 110.9))
                         .speed(listOf(51.0, 52.5, 53.1, 54.6, 55.9))
+                        .freeflowSpeed(listOf(5, 4, 3, 2, 1))
+                        .currentSpeed(listOf(6, 5, 4, 3, 2))
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
@@ -261,6 +265,8 @@ class AnnotationsRefresherTest(
                                 MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
                             }
                         )
+                        .freeflowSpeed(listOf(5, 4, 3, 2, 1))
+                        .currentSpeed(listOf(6, 5, 4, 3, 2))
                         .build(),
                     "Everything is filled, index = 0. New annotation properties are used."
                 ),
@@ -279,6 +285,8 @@ class AnnotationsRefresherTest(
                         .distance(listOf(1.2, 3.4, 5.6, 7.8, 9.0))
                         .duration(listOf(11.2, 33.4, 55.6, 77.8, 99.0))
                         .speed(listOf(41.0, 42.5, 43.1, 44.6, 45.9))
+                        .freeflowSpeed(listOf(1, 2, 3, 4, 5))
+                        .currentSpeed(listOf(2, 3, 4, 5, 6))
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10).unit("mph").build()
@@ -299,6 +307,8 @@ class AnnotationsRefresherTest(
                         .distance(listOf(8.7, 0.9))
                         .duration(listOf(88.7, 110.9))
                         .speed(listOf(54.6, 55.9))
+                        .freeflowSpeed(listOf(11, 22))
+                        .currentSpeed(listOf(33, 44))
                         .maxspeed(
                             List(2) {
                                 MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
@@ -328,6 +338,8 @@ class AnnotationsRefresherTest(
                                     MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
                                 }
                         )
+                        .freeflowSpeed(listOf(1, 2, 3, 11, 22))
+                        .currentSpeed(listOf(2, 3, 4, 33, 44))
                         .build(),
                     "Everything is filled, index = 3. " +
                         "Old annotations properties are used before current index."
@@ -361,6 +373,8 @@ class AnnotationsRefresherTest(
                         .duration(emptyList())
                         .speed(emptyList())
                         .maxspeed(emptyList())
+                        .freeflowSpeed(emptyList())
+                        .currentSpeed(emptyList())
                         .build(),
                     5,
                     LegAnnotation.builder()
