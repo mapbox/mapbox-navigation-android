@@ -20,6 +20,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
+import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesPreviewUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
@@ -75,16 +76,28 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             navigation.setNavigationRoutesAsync(
                 navigation
                     .requestRoutes(longRoutesOptions)
-                    .getSuccessfulResultOrThrowException().routes
+                    .getSuccessfulResultOrThrowException().routes,
+                1
             )
             assertEquals(2, navigation.getNavigationRoutes().size)
 
             val shortRoutes = navigation.requestRoutes(shortRoutesOptions)
             assertEquals(2, navigation.getNavigationRoutes().size)
 
-            val newRoutes = navigation.requestRoutes(longRoutesOptions)
-                .getSuccessfulResultOrThrowException()
-            assertEquals(1, navigation.getNavigationRoutes().size)
+            val secondWaypoint = longRoutesOptions.coordinatesList()[1]
+            stayOnPosition(
+                longitude = secondWaypoint.longitude(),
+                latitude = secondWaypoint.latitude(),
+                bearing = 190.0f
+            ) {
+                navigation.startTripSession()
+                navigation.routeProgressUpdates().first()
+
+                val newRoutes = navigation.requestRoutes(longRoutesOptions)
+                    .getSuccessfulResultOrThrowException()
+                assertEquals(1, navigation.getNavigationRoutes().size)
+                assertEquals(1, navigation.currentLegIndex())
+            }
         }
     }
 
