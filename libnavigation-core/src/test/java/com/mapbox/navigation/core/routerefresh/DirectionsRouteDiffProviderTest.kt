@@ -30,7 +30,7 @@ class DirectionsRouteDiffProviderTest {
         )
         val newRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89)
+                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89, 34, 22)
             ),
             waypointsPerRoute = true,
             waypoints = listOf(waypoint1)
@@ -52,7 +52,7 @@ class DirectionsRouteDiffProviderTest {
         )
         val newRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89)
+                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89, 34, 22)
             ),
             waypointsPerRoute = true,
             waypoints = listOf(waypoint2)
@@ -70,7 +70,7 @@ class DirectionsRouteDiffProviderTest {
         val waypoint1 = createTestWaypoint(chargeAtArrival = 80)
         val oldRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89)
+                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89, 34, 22)
             ),
             waypointsPerRoute = true,
             waypoints = listOf(waypoint1)
@@ -92,7 +92,7 @@ class DirectionsRouteDiffProviderTest {
         val waypoint2 = createTestWaypoint(chargeAtArrival = 75)
         val oldRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89)
+                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89, 34, 22)
             ),
             waypointsPerRoute = true,
             waypoints = listOf(waypoint1)
@@ -114,15 +114,15 @@ class DirectionsRouteDiffProviderTest {
     fun buildRouteDiffs_oldRouteHasMoreLegs() {
         val oldRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42, 89),
-                createTestLeg(57.14, 8.571, 42.85, 90, "low", 71, 90),
+                createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42, 89, 34, 22),
+                createTestLeg(57.14, 8.571, 42.85, 90, "low", 71, 90, 34, 22),
             ),
             waypointsPerRoute = true,
             waypoints = emptyList()
         )
         val newRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89),
+                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89, 34, 22),
             ),
             waypointsPerRoute = true,
             waypoints = emptyList()
@@ -140,15 +140,15 @@ class DirectionsRouteDiffProviderTest {
     fun buildRouteDiffs_newRouteHasMoreLegs() {
         val oldRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89),
+                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89, 34, 22),
             ),
             waypointsPerRoute = true,
             waypoints = emptyList()
         )
         val newRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42, 89),
-                createTestLeg(57.14, 8.571, 42.85, 90, "low", 71, 90),
+                createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42, 89, 34, 22),
+                createTestLeg(57.14, 8.571, 42.85, 90, "low", 71, 90, 34, 22),
             ),
             waypointsPerRoute = true,
             waypoints = emptyList()
@@ -168,11 +168,11 @@ class DirectionsRouteDiffProviderTest {
         val waypoint2 = createTestWaypoint(chargeAtArrival = 81)
         val oldRoute = createTestNavigationRoute(
             listOf(
-                createTestLeg(57.14, 8.571, 42.85, 90, "low", 71, 90),
-                createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42, 89),
-                createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14, 87),
-                createTestLeg(71.42, 14.28, 85.71, 90, "low", 57, 85),
-                createTestLeg(42.85, 57.14, 28.57, 120, "low", 28, 80),
+                createTestLeg(57.14, 8.571, 42.85, 90, "low", 71, 90, 34, 22),
+                createTestLeg(142.8, 28.57, 71.42, 120, "unknown", 42, 89, 34, 22),
+                createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14, 87, 34, 22),
+                createTestLeg(71.42, 14.28, 85.71, 90, "low", 57, 85, 34, 22),
+                createTestLeg(42.85, 57.14, 28.57, 120, "low", 28, 80, 34, 22),
                 createRouteLeg(),
             ),
             waypointsPerRoute = true,
@@ -181,10 +181,10 @@ class DirectionsRouteDiffProviderTest {
         val newRoute = createTestNavigationRoute(
             listOf(
                 createRouteLeg(annotation = null),
-                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89),
-                createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14, 87),
-                createTestLeg(71.42, 28.57, 42.85, 120, "unknown", 57, 84),
-                createTestLeg(142.8, 57.14, 28.57, 90, "low", 71, 79),
+                createTestLeg(57.14, 14.28, 85.71, 120, "low", 42, 89, 34, 22),
+                createTestLeg(85.71, 42.85, 57.14, 90, "unknown", 14, 87, 34, 22),
+                createTestLeg(71.42, 28.57, 42.85, 120, "unknown", 57, 84, 37, 22),
+                createTestLeg(142.8, 57.14, 28.57, 90, "low", 71, 79, 34, 62),
                 createRouteLeg(
                     incidents = listOf(createIncident()),
                     closures = listOf(createClosure())
@@ -197,9 +197,9 @@ class DirectionsRouteDiffProviderTest {
         assertEquals(
             listOf(
                 "Updated distance, duration, speed, congestion at route testDiff#0 leg 1",
-                "Updated duration, speed, maxSpeed, congestion, state_of_charge " +
+                "Updated duration, speed, maxSpeed, congestion, state_of_charge, freeflow_speed " +
                     "at route testDiff#0 leg 3",
-                "Updated distance, maxSpeed, congestionNumeric, state_of_charge " +
+                "Updated distance, maxSpeed, congestionNumeric, state_of_charge, current_speed " +
                     "at route testDiff#0 leg 4",
                 "Updated incidents, closures at route testDiff#0 leg 5",
                 "Updated waypoints at route testDiff#0",
@@ -245,6 +245,8 @@ class DirectionsRouteDiffProviderTest {
         congestion: String,
         congestionNumeric: Int,
         stateOfCharge: Int,
+        freeFlowSpeed: Int,
+        currentSpeed: Int
     ): RouteLeg {
         return createRouteLeg(
             createRouteLegAnnotation(
@@ -255,6 +257,8 @@ class DirectionsRouteDiffProviderTest {
                 duration = listOf(duration),
                 speed = listOf(speed),
                 stateOfCharge = listOf(stateOfCharge),
+                freeFlowSpeed = listOf(freeFlowSpeed),
+                currentSpeed = listOf(currentSpeed)
             ),
         )
     }
