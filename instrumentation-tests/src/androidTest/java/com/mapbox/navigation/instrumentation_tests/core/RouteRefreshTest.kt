@@ -2,6 +2,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.content.Context
 import android.location.Location
+import android.util.Log
 import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
@@ -24,6 +25,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.compareIdWithIncidentId
+import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
@@ -45,13 +47,16 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -70,6 +75,9 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
+
+    @get:Rule
+    val historyRecorderRule = MapboxHistoryTestRule()
 
     @get:Rule
     val idlingPolicyRule = IdlingPolicyTimeoutRule(35, TimeUnit.SECONDS)
@@ -127,11 +135,17 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                     .navigatorPredictionMillis(0L)
                     .build()
             )
+            historyRecorderRule.historyRecorder = mapboxNavigation.historyRecorder
+            mapboxNavigation.historyRecorder.startRecording()
         }
     }
 
     @After
     fun tearDown() {
+        runBlocking(Dispatchers.Main) {
+            val path = mapboxNavigation.historyRecorder.stopRecording()
+            Log.i("Test history file", "history file recorder: $path")
+        }
         if (this::failByRequestRouteRefreshResponse.isInitialized) {
             failByRequestRouteRefreshResponse.failResponse = false
         }
