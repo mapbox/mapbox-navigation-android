@@ -1,0 +1,2 @@
+- Fixed backward positioning jumps after GPS signal jump detection.
+- Improved processing of ETC signals.

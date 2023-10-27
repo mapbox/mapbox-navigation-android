@@ -163,7 +163,16 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 assertEquals(
                     "some info was lost during NN -> Nav SDK transition",
                     it.directionsRoute.toBuilder().routeOptions(null).build(),
-                    mockedAlternativesResponse.routes()[it.routeIndex]
+                    mockedAlternativesResponse.routes()[it.routeIndex].toBuilder()
+                        .legs(
+                            mockedAlternativesResponse.routes()[it.routeIndex].legs()
+                                ?.map { originalLeg ->
+                                    originalLeg.toBuilder()
+                                        .incidents(originalLeg.incidents().orEmpty())
+                                        .build()
+                                }
+                        )
+                        .build()
                 )
             }
         }
@@ -268,23 +277,22 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                         ?.takeLast(50)
                 )
 
-                // TODO: uncomment after NN update
-//                assertEquals(
-//                    MutableList(50) { freeFlowSpeedRefreshedValue },
-//                    it.directionsRoute.legs()
-//                        ?.first()
-//                        ?.annotation()
-//                        ?.freeflowSpeed()
-//                        ?.takeLast(50)
-//                )
-//                assertEquals(
-//                    MutableList(50) { currentSpeedRefreshedValue },
-//                    it.directionsRoute.legs()
-//                        ?.first()
-//                        ?.annotation()
-//                        ?.currentSpeed()
-//                        ?.takeLast(50)
-//                )
+                assertEquals(
+                    MutableList(50) { freeFlowSpeedRefreshedValue },
+                    it.directionsRoute.legs()
+                        ?.first()
+                        ?.annotation()
+                        ?.freeflowSpeed()
+                        ?.takeLast(50)
+                )
+                assertEquals(
+                    MutableList(50) { currentSpeedRefreshedValue },
+                    it.directionsRoute.legs()
+                        ?.first()
+                        ?.annotation()
+                        ?.currentSpeed()
+                        ?.takeLast(50)
+                )
             }
         }
     }
