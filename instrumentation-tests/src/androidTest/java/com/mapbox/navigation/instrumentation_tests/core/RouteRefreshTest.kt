@@ -469,26 +469,42 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
-
-            mapboxNavigation.setNavigationRoutes(requestedRoutes)
-            mapboxNavigation.startTripSession()
             // corresponds to currentRouteGeometryIndex = 3
-            stayOnPosition(38.577344, -121.496248, bearing = 190f)
-            mapboxNavigation.routeProgressUpdates()
-                .filter { it.currentRouteGeometryIndex == 3 }
-                .first()
-            val refreshedRoutes = mapboxNavigation.routesUpdates()
-                .filter {
-                    it.reason == ROUTES_UPDATE_REASON_REFRESH
-                }
-                .first()
-                .navigationRoutes
+            stayOnPosition(38.577344, -121.496248, bearing = 190f) {
+                mapboxNavigation.setNavigationRoutes(requestedRoutes)
+                mapboxNavigation.startTripSession()
+                mapboxNavigation.routeProgressUpdates()
+                    .filter { it.currentRouteGeometryIndex == 3 }
+                    .first()
+                val refreshedRoutes = mapboxNavigation.routesUpdates()
+                    .filter {
+                        it.reason == ROUTES_UPDATE_REASON_REFRESH
+                    }
+                    .first()
+                    .navigationRoutes
 
-            assertEquals(224.224, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-            assertEquals(172.175, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+                assertEquals(
+                    224.224,
+                    requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001
+                )
+                assertEquals(
+                    172.175,
+                    refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001
+                )
 
-            assertEquals(227.918, requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-            assertEquals(235.641, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+                assertEquals(
+                    227.918,
+                    requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001
+                )
+                assertEquals(
+                    235.641,
+                    refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001
+                )
+            }
         }
 
     @Test
@@ -593,7 +609,6 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
                 .toNavigationRoutes(RouterOrigin.Offboard) {
                     baseUrl(mockWebServerRule.baseUrl)
                 }.first()
-
             // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
             stayOnPosition(
                 latitude = 38.581798,
@@ -835,7 +850,6 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
             .toNavigationRoutes(RouterOrigin.Offboard) {
                 baseUrl(mockWebServerRule.baseUrl)
             }.first()
-
         // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
         stayOnPosition(
             latitude = 38.581798,
