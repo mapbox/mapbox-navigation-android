@@ -30,6 +30,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequ
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
@@ -815,34 +816,33 @@ class RouteRefreshTest : BaseCoreNoCleanUpTest() {
             }.first()
 
         // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
-        mockLocationUpdatesRule.pushLocationUpdate(
-            mockLocationUpdatesRule.generateLocationUpdate {
-                latitude = 38.581798
-                longitude = -121.476146
-            }
-        )
+        stayOnPosition(
+            latitude = 38.581798,
+            longitude = -121.476146,
+            bearing = 0f
+        ) {
+            mapboxNavigation.setNavigationRoutes(
+                listOf(primaryRoute) + alternativeRoutes,
+                initialLegIndex = 0
+            )
+            mapboxNavigation.startTripSession()
 
-        mapboxNavigation.setNavigationRoutes(
-            listOf(primaryRoute) + alternativeRoutes,
-            initialLegIndex = 0
-        )
-        mapboxNavigation.startTripSession()
+            mapboxNavigation.routeProgressUpdates()
+                .filter {
+                    it.currentRouteGeometryIndex == 11
+                }
+                .first()
 
-        mapboxNavigation.routeProgressUpdates()
-            .filter {
-                it.currentRouteGeometryIndex == 11
-            }
-            .first()
-
-        mapboxNavigation.routesUpdates()
-            .filter {
-                (it.reason == ROUTES_UPDATE_REASON_REFRESH).also {
-                    if (it) {
-                        assertEquals(0, mapboxNavigation.currentLegIndex())
+            mapboxNavigation.routesUpdates()
+                .filter {
+                    (it.reason == ROUTES_UPDATE_REASON_REFRESH).also {
+                        if (it) {
+                            assertEquals(0, mapboxNavigation.currentLegIndex())
+                        }
                     }
                 }
-            }
-            .first()
+                .first()
+        }
     }
 
     @Test
