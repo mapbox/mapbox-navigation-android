@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.route.internal
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
@@ -7,12 +9,15 @@ import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.route.createNavigationRoutes
 import com.mapbox.navigation.base.internal.route.isExpired
+import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
+import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
@@ -165,6 +170,7 @@ class RouterWrapperTests {
             accessToken,
             router,
             ThreadController(),
+            createRouteParsingManager(LongRoutesOptimisationOptions.NoOptimisations)
         )
     }
 
@@ -338,7 +344,7 @@ class RouterWrapperTests {
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
                     .toUrl(),
                 routerOrigin = Onboard,
-                message = "failed for response: ${routerResultSuccessEmptyRoutes.value}",
+                message = "Failed to parse response",
                 throwable = IllegalStateException(
                     "no routes returned, collection is empty"
                 )
@@ -374,7 +380,7 @@ class RouterWrapperTests {
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
                     .toUrl(),
                 routerOrigin = Onboard,
-                message = "failed for response: ${routerResultSuccessErroneousValue.value}",
+                message = "Failed to parse response",
                 throwable = IllegalStateException(
                     "java.lang.IllegalStateException: Property \"routes\" has not been set"
                 )

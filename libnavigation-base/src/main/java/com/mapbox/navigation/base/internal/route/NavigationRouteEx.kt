@@ -177,14 +177,9 @@ fun NavigationRoute.update(
     newExpirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
 ): NavigationRoute {
     val refreshedRoute = directionsRoute.directionsRouteBlock()
-    val refreshedRoutes = directionsResponse.routes().toMutableList()
-    refreshedRoutes[routeIndex] = refreshedRoute
-    val refreshedResponse = directionsResponse.toBuilder()
-        .routes(refreshedRoutes)
-        .directionsResponseBlock()
-        .build()
     return copy(
-        directionsResponse = refreshedResponse,
+        directionsRoute = refreshedRoute,
+        directionsResponse = directionsResponse.toBuilder().directionsResponseBlock().build(),
         expirationTimeElapsedSeconds = newExpirationTimeElapsedSeconds
     )
 }
@@ -240,8 +235,16 @@ fun createNavigationRoutes(
 /**
  * Internal API to create a new [NavigationRoute] from a native peer.
  */
-fun RouteInterface.toNavigationRoute(responseTimeElapsedSeconds: Long): NavigationRoute {
-    return this.toNavigationRoute(responseTimeElapsedSeconds)
+fun RouteInterface.toNavigationRoute(
+    responseTimeElapsedSeconds: Long,
+    directionsResponse: DirectionsResponse,
+    optimiseDirectionsResponseStructure: Boolean
+): NavigationRoute {
+    return this.toNavigationRoute(
+        responseTimeElapsedSeconds,
+        directionsResponse,
+        optimiseDirectionsResponseStructure
+    )
 }
 
 private fun List<LegStep>.updateSteps(

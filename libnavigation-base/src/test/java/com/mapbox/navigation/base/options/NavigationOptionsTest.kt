@@ -84,6 +84,11 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .copilotOptions(
                 CopilotOptions.Builder().shouldSendHistoryOnlyWithFeedback(true).build()
             )
+            .longRoutesOptimisationOptions(
+                LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
+                    20 * 1024
+                )
+            )
     }
 
     @Test

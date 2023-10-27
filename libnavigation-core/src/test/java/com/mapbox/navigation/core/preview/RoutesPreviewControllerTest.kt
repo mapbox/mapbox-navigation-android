@@ -15,6 +15,7 @@ import kotlinx.coroutines.CompletableDeferred
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -41,6 +42,7 @@ class RoutesPreviewControllerTest {
         routesPreviewController.registerRoutesPreviewObserver {
             previewUpdate = it
         }
+        var completed = false
 
         val testRoutes = createNavigationRoutes(
             response = createDirectionsResponse(
@@ -51,7 +53,9 @@ class RoutesPreviewControllerTest {
                 )
             )
         )
-        routesPreviewController.previewNavigationRoutes(testRoutes)
+        routesPreviewController.previewNavigationRoutes(testRoutes) {
+            completed = true
+        }
 
         assertNotNull(previewUpdate)
         assertEquals(previewUpdate!!.routesPreview, routesPreviewController.getRoutesPreview())
@@ -63,6 +67,7 @@ class RoutesPreviewControllerTest {
         assertEquals(testRoutes.first(), preview.primaryRoute)
         assertEquals(testRoutes[1], preview.alternativesMetadata.first().navigationRoute)
         assertEquals(0, preview.primaryRouteIndex)
+        assertTrue(completed)
     }
 
     @Test

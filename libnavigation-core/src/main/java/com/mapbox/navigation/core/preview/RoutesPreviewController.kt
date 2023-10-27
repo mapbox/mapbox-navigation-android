@@ -51,12 +51,14 @@ internal class RoutesPreviewController(
 
     fun previewNavigationRoutes(
         routesToPreview: List<NavigationRoute>,
-        primaryRouteIndex: Int = 0
+        primaryRouteIndex: Int = 0,
+        onCompleted: () -> Unit = {}
     ) {
         scope.launch {
             mutex.withLock {
                 previewRoutesInternal(routesToPreview, primaryRouteIndex)
             }
+            onCompleted()
         }
     }
 

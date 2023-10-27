@@ -59,6 +59,7 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
@@ -1401,6 +1402,10 @@ class MapboxRouteLineApi(
                 LOG_CATEGORY
             )
         }
+        logD(LOG_CATEGORY) {
+            "setNewRouteData: distinct routes ids are: " +
+                distinctNewRoutes.joinToString(", ") { it.id }
+        }
         val distinctAlternativeRouteMetadata = alternativeRoutesMetadata.filter { metadata ->
             distinctNewRoutes.find { it.id == metadata.navigationRoute.id } != null
         }
@@ -1414,6 +1419,9 @@ class MapboxRouteLineApi(
         routes.clear()
         routes.addAll(distinctNewRoutes)
         primaryRoute = distinctNewRoutes.firstOrNull()
+        logD(LOG_CATEGORY) {
+            "trimming route data caches to size ${distinctNewRoutes.size}"
+        }
         MapboxRouteLineUtils.trimRouteDataCacheToSize(size = distinctNewRoutes.size)
         this.activeLegIndex = activeLegIndex
 

@@ -334,6 +334,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
             jsonResponse = offlineRoutes.first().directionsResponse
                 .toBuilder()
+                .routes(offlineRoutes.map { it.directionsRoute })
                 .uuid("route-similar-to-$primaryRouteResponseUUID")
                 .build()
                 .toJson(),

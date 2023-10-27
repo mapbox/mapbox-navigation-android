@@ -5,12 +5,12 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.api.directions.v5.models.Bearing
+import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
@@ -244,6 +244,7 @@ fun createRouteOptions(
     waypointsPerRoute: Boolean? = null,
     bearingList: List<Bearing?>? = null,
     avoidManeuverRadius: Double? = null,
+    @DirectionsCriteria.GeometriesCriteria geometries: String = DirectionsCriteria.GEOMETRY_POLYLINE6
 ): RouteOptions {
     return RouteOptions
         .builder()
@@ -254,6 +255,7 @@ fun createRouteOptions(
         .unrecognizedJsonProperties(unrecognizedProperties)
         .bearingsList(bearingList)
         .avoidManeuverRadius(avoidManeuverRadius)
+        .geometries(geometries)
         .build()
 }
 
