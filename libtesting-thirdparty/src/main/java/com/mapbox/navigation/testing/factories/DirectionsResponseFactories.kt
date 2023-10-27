@@ -157,7 +157,9 @@ fun createRouteLegAnnotation(
     duration: List<Double> = listOf(2.0, 2.0),
     maxSpeed: List<MaxSpeed> = listOf(createMaxSpeed(40), createMaxSpeed(60)),
     speed: List<Double> = listOf(40.4, 60.7),
-    stateOfCharge: List<Int> = listOf(80, 79)
+    stateOfCharge: List<Int> = listOf(80, 79),
+    freeFlowSpeed: List<Int> = listOf(2, 5),
+    currentSpeed: List<Int> = listOf(5, 9),
 ): LegAnnotation {
     return LegAnnotation.builder()
         .distance(distance)
@@ -166,6 +168,8 @@ fun createRouteLegAnnotation(
         .congestionNumeric(congestionNumeric)
         .maxspeed(maxSpeed)
         .speed(speed)
+        .freeflowSpeed(freeFlowSpeed)
+        .currentSpeed(currentSpeed)
         .unrecognizedJsonProperties(
             mapOf(
                 "state_of_charge" to JsonArray().apply {
