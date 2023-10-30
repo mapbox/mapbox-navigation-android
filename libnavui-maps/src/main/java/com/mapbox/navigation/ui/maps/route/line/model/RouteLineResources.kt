@@ -9,6 +9,8 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_D
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LINE_OPACITY
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LINE_WIDTH
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ROUNDED_LINE_CAP
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ROUTE_LINE_BLUR
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ROUTE_LINE_BLUR_OPACITY
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TRAFFIC_BACKFILL_ROAD_CLASSES
 
 /**
@@ -35,6 +37,10 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TRAFFIC_BACKFILL_
  * @param restrictedRoadDashArray the dash array for the [LineLayer] used for displaying restricted roads
  * @param restrictedRoadOpacity the opacity of the restricted road [LineLayer]
  * @param restrictedRoadLineWidth the width of the restricted road [LineLayer]
+ * @param routeLineBlur blur applied to the line, in pixels
+ * @param routeLineBlurWidth the width of the blurred route line.
+ * Blur line should be wider than route line itself to be visible
+ * @param routeLineBlurOpacity the opacity of the blurred route line
  */
 class RouteLineResources private constructor(
     val routeLineColorResources: RouteLineColorResources,
@@ -50,7 +56,10 @@ class RouteLineResources private constructor(
     val alternativeRouteTrafficLineScaleExpression: Expression,
     val restrictedRoadDashArray: List<Double>,
     val restrictedRoadOpacity: Double,
-    val restrictedRoadLineWidth: Double
+    val restrictedRoadLineWidth: Double,
+    val routeLineBlur: Double,
+    val routeLineBlurWidth: Expression,
+    val routeLineBlurOpacity: Double,
 ) {
 
     /**
@@ -72,6 +81,9 @@ class RouteLineResources private constructor(
             .restrictedRoadDashArray(restrictedRoadDashArray)
             .restrictedRoadOpacity(restrictedRoadOpacity)
             .restrictedRoadLineWidth(restrictedRoadLineWidth)
+            .routeLineBlur(routeLineBlur)
+            .routeLineBlurWidth(routeLineBlurWidth)
+            .routeLineBlurOpacity(routeLineBlurOpacity)
     }
 
     /**
@@ -102,7 +114,10 @@ class RouteLineResources private constructor(
             "trafficBackfillRoadClasses=$trafficBackfillRoadClasses, " +
             "restrictedRoadDashArray=$restrictedRoadDashArray, " +
             "restrictedRoadOpacity=$restrictedRoadOpacity, " +
-            "restrictedRoadLineWidth=$restrictedRoadLineWidth" +
+            "restrictedRoadLineWidth=$restrictedRoadLineWidth, " +
+            "routeLineBlur=$routeLineBlur, " +
+            "routeLineBlurWidth=$routeLineBlurWidth, " +
+            "routeLineBlurOpacity=$routeLineBlurOpacity" +
             ")"
     }
 
@@ -142,6 +157,10 @@ class RouteLineResources private constructor(
         if (restrictedRoadOpacity != other.restrictedRoadOpacity) return false
         if (restrictedRoadLineWidth != other.restrictedRoadLineWidth) return false
 
+        if (routeLineBlur != other.routeLineBlur) return false
+        if (routeLineBlurWidth != other.routeLineBlurWidth) return false
+        if (routeLineBlurOpacity != other.routeLineBlurOpacity) return false
+
         return true
     }
 
@@ -163,6 +182,9 @@ class RouteLineResources private constructor(
         result = 31 * result + restrictedRoadDashArray.hashCode()
         result = 31 * result + restrictedRoadOpacity.hashCode()
         result = 31 * result + restrictedRoadLineWidth.hashCode()
+        result = 31 * result + routeLineBlur.hashCode()
+        result = 31 * result + routeLineBlurWidth.hashCode()
+        result = 31 * result + routeLineBlurOpacity.hashCode()
         return result
     }
 
@@ -178,6 +200,9 @@ class RouteLineResources private constructor(
         private var restrictedRoadDashArray: List<Double> = RESTRICTED_ROAD_DASH_ARRAY
         private var restrictedRoadOpacity: Double = RESTRICTED_ROAD_LINE_OPACITY
         private var restrictedRoadLineWidth: Double = RESTRICTED_ROAD_LINE_WIDTH
+
+        private var routeLineBlur: Double = ROUTE_LINE_BLUR
+        private var routeLineBlurOpacity: Double = ROUTE_LINE_BLUR_OPACITY
 
         private var routeLineScaleExpression: Expression = buildScalingExpression(
             listOf(
@@ -235,6 +260,16 @@ class RouteLineResources private constructor(
                 RouteLineScaleValue(16f, 10f, 1f),
                 RouteLineScaleValue(19f, 14f, 1f),
                 RouteLineScaleValue(22f, 18f, 1f)
+            )
+        )
+
+        private var routeLineBlurWidth: Expression = buildScalingExpression(
+            listOf(
+                RouteLineScaleValue(10f, 14f, 1f),
+                RouteLineScaleValue(14f, 21f, 1f),
+                RouteLineScaleValue(16.5f, 31f, 1f),
+                RouteLineScaleValue(19f, 48f, 1f),
+                RouteLineScaleValue(22f, 58f, 1f)
             )
         )
 
@@ -379,6 +414,31 @@ class RouteLineResources private constructor(
             apply { this.restrictedRoadLineWidth = width }
 
         /**
+         * Blur applied to the route line, in pixels.
+         *
+         * @param blur the blur value
+         */
+        fun routeLineBlur(blur: Double): Builder =
+            apply { this.routeLineBlur = blur }
+
+        /**
+         * The width of the blurred route line.
+         * Blur line should be wider than route line itself to be visible.
+         *
+         * @param width the width of the blurred route line
+         */
+        fun routeLineBlurWidth(width: Expression): Builder =
+            apply { this.routeLineBlurWidth = width }
+
+        /**
+         * The opacity of the blurred route line
+         *
+         * @param opacity the opacity value
+         */
+        fun routeLineBlurOpacity(opacity: Double): Builder =
+            apply { this.routeLineBlurOpacity = opacity }
+
+        /**
          * Creates a instance of RouteLineResources
          *
          * @return the instance
@@ -400,7 +460,10 @@ class RouteLineResources private constructor(
                 alternativeRouteTrafficLineScaleExpression,
                 restrictedRoadDashArray,
                 restrictedRoadOpacity,
-                restrictedRoadLineWidth
+                restrictedRoadLineWidth,
+                routeLineBlur,
+                routeLineBlurWidth,
+                routeLineBlurOpacity,
             )
         }
     }

@@ -94,6 +94,7 @@ internal object MapboxRouteLineUtils {
 
     // ordering is important
     val layerGroup1SourceLayerIds = setOf(
+        RouteLayerConstants.LAYER_GROUP_1_BLURRED_BACKGROUND,
         RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
         RouteLayerConstants.LAYER_GROUP_1_TRAIL,
         RouteLayerConstants.LAYER_GROUP_1_CASING,
@@ -1394,6 +1395,23 @@ internal object MapboxRouteLineUtils {
             }
         }
 
+        if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_BLURRED_BACKGROUND)) {
+            LineLayer(
+                RouteLayerConstants.LAYER_GROUP_1_BLURRED_BACKGROUND,
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+            )
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
+                .lineOpacity(options.resourceProvider.routeLineBlurOpacity)
+                .lineBlur(options.resourceProvider.routeLineBlur)
+                .lineWidth(options.resourceProvider.routeLineBlurWidth)
+                .lineColor(options.resourceProvider.routeLineColorResources.routeDefaultColor)
+                .apply {
+                    style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
+                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                }
+        }
+
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
@@ -1646,6 +1664,7 @@ internal object MapboxRouteLineUtils {
             style.styleSourceExists(RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID) &&
             style.styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_BLURRED_BACKGROUND) &&
             style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING) &&
             style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL) &&
             style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_CASING) &&
@@ -1992,6 +2011,7 @@ internal object MapboxRouteLineUtils {
     internal fun removeLayers(style: Style) {
         style.removeStyleLayer(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
         style.removeStyleLayer(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
+        style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_BLURRED_BACKGROUND)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_TRAIL)
         style.removeStyleLayer(RouteLayerConstants.LAYER_GROUP_1_CASING)

@@ -95,6 +95,8 @@ object RouteLayerConstants {
     internal const val RESTRICTED_ROAD_LINE_WIDTH = 7.0
     internal val RESTRICTED_ROAD_DASH_ARRAY = listOf(.5, 2.0)
     internal const val DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO = 62_500_000L
+    internal const val ROUTE_LINE_BLUR = 5.0
+    internal const val ROUTE_LINE_BLUR_OPACITY = .3
 
     internal val LOW_CONGESTION_RANGE = 0..39
 
@@ -210,6 +212,7 @@ object RouteLayerConstants {
     internal val MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE: Int =
         R.drawable.mapbox_ic_arrow_head_casing
 
+    internal const val LAYER_GROUP_1_BLURRED_BACKGROUND = "mapbox-layerGroup-1-blur"
     internal const val LAYER_GROUP_1_TRAIL_CASING = "mapbox-layerGroup-1-trailCasing"
     internal const val LAYER_GROUP_1_TRAIL = "mapbox-layerGroup-1-trail"
     internal const val LAYER_GROUP_1_CASING = "mapbox-layerGroup-1-casing"

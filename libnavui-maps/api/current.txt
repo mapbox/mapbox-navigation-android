@@ -590,7 +590,7 @@ package com.mapbox.navigation.ui.maps.camera.view {
 
 package com.mapbox.navigation.ui.maps.guidance.junction.api {
 
-  public final class MapboxJunctionApi {
+  @UiThread public final class MapboxJunctionApi {
     ctor public MapboxJunctionApi(String accessToken);
     method public void cancelAll();
     method public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue>> consumer);
@@ -1402,6 +1402,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public double getRestrictedRoadOpacity();
     method public boolean getRoundedLineCap();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteCasingLineScaleExpression();
+    method public double getRouteLineBlur();
+    method public double getRouteLineBlurOpacity();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineBlurWidth();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources getRouteLineColorResources();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineScaleExpression();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteTrafficLineScaleExpression();
@@ -1417,6 +1420,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final double restrictedRoadOpacity;
     property public final boolean roundedLineCap;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeCasingLineScaleExpression;
+    property public final double routeLineBlur;
+    property public final double routeLineBlurOpacity;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineBlurWidth;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineScaleExpression;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeTrafficLineScaleExpression;
@@ -1436,6 +1442,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder restrictedRoadOpacity(double opacity);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder roundedLineCap(boolean roundLineCap);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeCasingLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineBlur(double blur);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineBlurOpacity(double opacity);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineBlurWidth(com.mapbox.maps.extension.style.expressions.generated.Expression width);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineColorResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeTrafficLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
