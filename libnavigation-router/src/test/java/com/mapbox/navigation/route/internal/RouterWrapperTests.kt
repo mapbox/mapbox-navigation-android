@@ -35,6 +35,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createRouterError
 import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -360,6 +361,7 @@ class RouterWrapperTests {
             assertEquals(expected.routerOrigin, failure.routerOrigin)
             assertEquals(expected.url, failure.url)
             assertEquals(expected.throwable!!.message, failure.throwable!!.message)
+            assertFalse(failure.isRetryable)
         }
 
     @Test
@@ -396,6 +398,112 @@ class RouterWrapperTests {
             assertEquals(expected.routerOrigin, failure.routerOrigin)
             assertEquals(expected.url, failure.url)
             assertEquals(expected.throwable!!.message, failure.throwable!!.message)
+            assertFalse(failure.isRetryable)
+        }
+
+    @Test
+    fun `route request network failure`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createError(
+                    createRouterError(
+                        type = RouterErrorType.NETWORK_ERROR
+                    )
+                ),
+                nativeOriginOnboard
+            )
+
+            val failures = slot<List<RouterFailure>>()
+            verify(exactly = 1) {
+                navigationRouterCallback.onFailure(capture(failures), routerOptions)
+            }
+            val failure: RouterFailure = failures.captured[0]
+            assertTrue(failure.isRetryable)
+        }
+
+    @Test
+    fun `route request directions api not critical error`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createError(
+                    createRouterError(
+                        type = RouterErrorType.DIRECTIONS_ERROR
+                    )
+                ),
+                nativeOriginOnboard
+            )
+
+            val failures = slot<List<RouterFailure>>()
+            verify(exactly = 1) {
+                navigationRouterCallback.onFailure(capture(failures), routerOptions)
+            }
+            val failure: RouterFailure = failures.captured[0]
+            assertTrue(failure.isRetryable)
+        }
+
+    @Test
+    fun `route request directions api critical error`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createError(
+                    createRouterError(
+                        type = RouterErrorType.DIRECTIONS_CRITICAL_ERROR
+                    )
+                ),
+                nativeOriginOnboard
+            )
+
+            val failures = slot<List<RouterFailure>>()
+            verify(exactly = 1) {
+                navigationRouterCallback.onFailure(capture(failures), routerOptions)
+            }
+            val failure: RouterFailure = failures.captured[0]
+            assertFalse(failure.isRetryable)
+        }
+
+    @Test
+    fun `route request unknown error`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createError(
+                    createRouterError(
+                        type = RouterErrorType.UNKNOWN
+                    )
+                ),
+                nativeOriginOnboard
+            )
+
+            val failures = slot<List<RouterFailure>>()
+            verify(exactly = 1) {
+                navigationRouterCallback.onFailure(capture(failures), routerOptions)
+            }
+            val failure: RouterFailure = failures.captured[0]
+            assertFalse(failure.isRetryable)
+        }
+
+    @Test
+    fun `route request throttling error`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, navigationRouterCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createError(
+                    createRouterError(
+                        type = RouterErrorType.THROTTLING_ERROR
+                    )
+                ),
+                nativeOriginOnboard
+            )
+
+            val failures = slot<List<RouterFailure>>()
+            verify(exactly = 1) {
+                navigationRouterCallback.onFailure(capture(failures), routerOptions)
+            }
+            val failure: RouterFailure = failures.captured[0]
+            assertFalse(failure.isRetryable)
         }
 
     @Test
