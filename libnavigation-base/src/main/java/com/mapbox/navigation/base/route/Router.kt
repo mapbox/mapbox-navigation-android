@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.RetryableThrowable
 import java.net.URL
 
 /**
@@ -78,4 +79,9 @@ data class RouterFailure @JvmOverloads constructor(
     val message: String,
     val code: Int? = null,
     val throwable: Throwable? = null
-)
+) {
+    /**
+     * If false, it doesn't make sense to retry route request
+     */
+    val isRetryable get() = throwable is RetryableThrowable
+}
