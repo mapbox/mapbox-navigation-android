@@ -57,9 +57,11 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @Test
     fun error500Unknown() = sdkTest {
-        mockWebServerRule.requestHandlers.add(MockRequestHandler {
-            MockResponse().setBody("unexpected server error").setResponseCode(500)
-        })
+        mockWebServerRule.requestHandlers.add(
+            MockRequestHandler {
+                MockResponse().setBody("unexpected server error").setResponseCode(500)
+            }
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
@@ -72,11 +74,13 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @Test
     fun invalidInput() = sdkTest {
-        mockWebServerRule.requestHandlers.add(MockRequestHandler {
-            MockResponse()
-                .setBody(readRawFileText(context, R.raw.invalid_alternative_response_body))
-                .setResponseCode(422)
-        })
+        mockWebServerRule.requestHandlers.add(
+            MockRequestHandler {
+                MockResponse()
+                    .setBody(readRawFileText(context, R.raw.invalid_alternative_response_body))
+                    .setResponseCode(422)
+            }
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
@@ -89,11 +93,13 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @Test
     fun wrongSegment() = sdkTest {
-        mockWebServerRule.requestHandlers.add(MockRequestHandler {
-            MockResponse()
-                .setBody(readRawFileText(context, R.raw.wrong_segment_response_body))
-                .setResponseCode(200)
-        })
+        mockWebServerRule.requestHandlers.add(
+            MockRequestHandler {
+                MockResponse()
+                    .setBody(readRawFileText(context, R.raw.wrong_segment_response_body))
+                    .setResponseCode(200)
+            }
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
@@ -106,11 +112,13 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @Test
     fun noRouteFound() = sdkTest {
-        mockWebServerRule.requestHandlers.add(MockRequestHandler {
-            MockResponse()
-                .setBody("{\"code\":\"NoRoute\",\"message\":\"No route found\",\"routes\":[]}")
-                .setResponseCode(200)
-        })
+        mockWebServerRule.requestHandlers.add(
+            MockRequestHandler {
+                MockResponse()
+                    .setBody("{\"code\":\"NoRoute\",\"message\":\"No route found\",\"routes\":[]}")
+                    .setResponseCode(200)
+            }
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
@@ -123,11 +131,13 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @Test
     fun invalidAccessToken() = sdkTest {
-        mockWebServerRule.requestHandlers.add(MockRequestHandler {
-            MockResponse()
-                .setBody("{\"message\":\"Not Authorized - Invalid Token\"}")
-                .setResponseCode(401)
-        })
+        mockWebServerRule.requestHandlers.add(
+            MockRequestHandler {
+                MockResponse()
+                    .setBody("{\"message\":\"Not Authorized - Invalid Token\"}")
+                    .setResponseCode(401)
+            }
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
@@ -140,11 +150,13 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @Test
     fun noAccessToken() = sdkTest {
-        mockWebServerRule.requestHandlers.add(MockRequestHandler {
-            MockResponse()
-                .setBody(readRawFileText(context, R.raw.no_access_token_response_body))
-                .setResponseCode(401)
-        })
+        mockWebServerRule.requestHandlers.add(
+            MockRequestHandler {
+                MockResponse()
+                    .setBody(readRawFileText(context, R.raw.no_access_token_response_body))
+                    .setResponseCode(401)
+            }
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
@@ -157,11 +169,13 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @Test
     fun forbidden() = sdkTest {
-        mockWebServerRule.requestHandlers.add(MockRequestHandler {
-            MockResponse()
-                .setBody("{\"message\":\"Forbidden\"}")
-                .setResponseCode(403)
-        })
+        mockWebServerRule.requestHandlers.add(
+            MockRequestHandler {
+                MockResponse()
+                    .setBody("{\"message\":\"Forbidden\"}")
+                    .setResponseCode(403)
+            }
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
@@ -174,11 +188,13 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @Test
     fun profileNotFound() = sdkTest {
-        mockWebServerRule.requestHandlers.add(MockRequestHandler {
-            MockResponse()
-                .setBody("{\"message\":\"Profile not found\"}")
-                .setResponseCode(401)
-        })
+        mockWebServerRule.requestHandlers.add(
+            MockRequestHandler {
+                MockResponse()
+                    .setBody("{\"message\":\"Profile not found\"}")
+                    .setResponseCode(401)
+            }
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { navigation ->
@@ -205,4 +221,3 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
             .build()
     }
 }
-
