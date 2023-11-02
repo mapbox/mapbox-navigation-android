@@ -81,6 +81,7 @@ data class RouterFailure @JvmOverloads constructor(
     val throwable: Throwable? = null
 ) {
     /**
+     * Indicates if it makes sense to retry for this type of failure.
      * If false, it doesn't make sense to retry route request
      */
     val isRetryable get() = throwable is RetryableThrowable
