@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.route.isRetryable
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
@@ -49,8 +50,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
             withoutInternet {
                 val routes = navigation.requestRoutes(createTestRouteOptions())
                 assertTrue(routes is RouteRequestResult.Failure)
-                val failture = (routes as RouteRequestResult.Failure).reasons.first()
-                assertTrue(failture.isRetryable)
+                val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+                assertTrue(isRetryable)
             }
         }
     }
@@ -67,8 +68,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val routes = navigation.requestRoutes(createTestRouteOptions())
             assertTrue(routes is RouteRequestResult.Failure)
-            val failture = (routes as RouteRequestResult.Failure).reasons.first()
-            assertFalse(failture.isRetryable)
+            val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+            assertFalse(isRetryable)
         }
     }
 
@@ -86,8 +87,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val routes = navigation.requestRoutes(createTestRouteOptions())
             assertTrue(routes is RouteRequestResult.Failure)
-            val failture = (routes as RouteRequestResult.Failure).reasons.first()
-            assertFalse(failture.isRetryable)
+            val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+            assertFalse(isRetryable)
         }
     }
 
@@ -105,8 +106,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val routes = navigation.requestRoutes(createTestRouteOptions())
             assertTrue(routes is RouteRequestResult.Failure)
-            val failture = (routes as RouteRequestResult.Failure).reasons.first()
-            assertFalse(failture.isRetryable)
+            val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+            assertFalse(isRetryable)
         }
     }
 
@@ -124,8 +125,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val routes = navigation.requestRoutes(createTestRouteOptions())
             assertTrue(routes is RouteRequestResult.Failure)
-            val failture = (routes as RouteRequestResult.Failure).reasons.first()
-            assertFalse(failture.isRetryable)
+            val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+            assertFalse(isRetryable)
         }
     }
 
@@ -143,8 +144,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val routes = navigation.requestRoutes(createTestRouteOptions())
             assertTrue(routes is RouteRequestResult.Failure)
-            val failture = (routes as RouteRequestResult.Failure).reasons.first()
-            assertFalse(failture.isRetryable)
+            val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+            assertFalse(isRetryable)
         }
     }
 
@@ -162,8 +163,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val routes = navigation.requestRoutes(createTestRouteOptions())
             assertTrue(routes is RouteRequestResult.Failure)
-            val failture = (routes as RouteRequestResult.Failure).reasons.first()
-            assertFalse(failture.isRetryable)
+            val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+            assertFalse(isRetryable)
         }
     }
 
@@ -181,8 +182,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val routes = navigation.requestRoutes(createTestRouteOptions())
             assertTrue(routes is RouteRequestResult.Failure)
-            val failture = (routes as RouteRequestResult.Failure).reasons.first()
-            assertFalse(failture.isRetryable)
+            val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+            assertFalse(isRetryable)
         }
     }
 
@@ -200,8 +201,8 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val routes = navigation.requestRoutes(createTestRouteOptions())
             assertTrue(routes is RouteRequestResult.Failure)
-            val failture = (routes as RouteRequestResult.Failure).reasons.first()
-            assertFalse(failture.isRetryable)
+            val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
+            assertFalse(isRetryable)
         }
     }
 
