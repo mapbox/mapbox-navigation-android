@@ -205,17 +205,6 @@ class RouterWrapperTests {
         routerWrapper.getRoute(routerOptions, navigationRouterCallback)
         getRouteSlot.captured.run(routerResultFailureDataRef, nativeOriginOnline)
 
-        val expected = listOf(
-            RouterFailure(
-                url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
-                    .toUrl(),
-                routerOrigin = Offboard,
-                message = FAILURE_MESSAGE,
-                code = FAILURE_CODE,
-                throwable = null
-            )
-        )
-
         verify {
             router.getRoute(
                 routeUrl,
@@ -223,7 +212,20 @@ class RouterWrapperTests {
                 any<com.mapbox.navigator.RouterDataRefCallback>()
             )
         }
-        verify { navigationRouterCallback.onFailure(expected, routerOptions) }
+        verify {
+            navigationRouterCallback.onFailure(
+                match {
+                    val failure = it.singleOrNull() ?: return@match false
+                    failure.url == routeUrl.toHttpUrlOrNull()!!
+                        .redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
+                        .toUrl() &&
+                        failure.message == FAILURE_MESSAGE &&
+                        failure.code == FAILURE_CODE &&
+                        failure.routerOrigin == Offboard
+                },
+                routerOptions
+            )
+        }
     }
 
     @Test
@@ -440,7 +442,7 @@ class RouterWrapperTests {
                 navigationRouterCallback.onFailure(capture(failures), routerOptions)
             }
             val failure: RouterFailure = failures.captured[0]
-            assertTrue(failure.isRetryable)
+            assertFalse(failure.isRetryable)
         }
 
     @Test
@@ -820,78 +822,80 @@ class RouterWrapperTests {
     }
 
     @Test // TODO
-    fun `route refresh successful with refresh ttl updates route expiration data`() = runBlockingTest {
-        val options = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .coordinatesList(
-                listOf(
-                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
-                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
-                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
-                    Point.fromLngLat(17.032132688234814, 51.10720758039439)
+    fun `route refresh successful with refresh ttl updates route expiration data`() =
+        runBlockingTest {
+            val options = RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .coordinatesList(
+                    listOf(
+                        Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                        Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                        Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                        Point.fromLngLat(17.032132688234814, 51.10720758039439)
+                    )
                 )
+                .build()
+            val route = NavigationRoute.create(
+                DirectionsResponse.fromJson(
+                    testRouteFixtures.loadMultiLegRouteForRefresh(),
+                    options
+                ),
+                options,
+                com.mapbox.navigation.base.route.RouterOrigin.Custom()
+            ).first()
+
+            routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+            refreshRouteSlot.captured.run(
+                ExpectedFactory.createValue(
+                    testRouteFixtures.loadRefreshForMultiLegRouteWithRefreshTtl()
+                ),
+                nativeOriginOnboard,
+                hashMapOf()
             )
-            .build()
-        val route = NavigationRoute.create(
-            DirectionsResponse.fromJson(
-                testRouteFixtures.loadMultiLegRouteForRefresh(),
-                options
-            ),
-            options,
-            com.mapbox.navigation.base.route.RouterOrigin.Custom()
-        ).first()
 
-        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        refreshRouteSlot.captured.run(
-            ExpectedFactory.createValue(
-                testRouteFixtures.loadRefreshForMultiLegRouteWithRefreshTtl()
-            ),
-            nativeOriginOnboard,
-            hashMapOf()
-        )
+            val routeCaptor = slot<NavigationRoute>()
+            verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor)) }
 
-        val routeCaptor = slot<NavigationRoute>()
-        verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor)) }
-
-        every { Time.SystemClockImpl.seconds() } returns responseTime + 49
-        assertFalse(routeCaptor.captured.isExpired())
-        every { Time.SystemClockImpl.seconds() } returns responseTime + 51
-        assertTrue(routeCaptor.captured.isExpired())
-    }
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 49
+            assertFalse(routeCaptor.captured.isExpired())
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 51
+            assertTrue(routeCaptor.captured.isExpired())
+        }
 
     @Test
-    fun `route refresh successful without refresh ttl does not update route expiration data`() = runBlockingTest {
-        val options = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .coordinatesList(
-                listOf(
-                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
-                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
-                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
-                    Point.fromLngLat(17.032132688234814, 51.10720758039439)
+    fun `route refresh successful without refresh ttl does not update route expiration data`() =
+        runBlockingTest {
+            val options = RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .coordinatesList(
+                    listOf(
+                        Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                        Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                        Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                        Point.fromLngLat(17.032132688234814, 51.10720758039439)
+                    )
                 )
-            )
-            .build()
-        val route = createNavigationRoutes(
-            DirectionsResponse.fromJson(
-                testRouteFixtures.loadMultiLegRouteForRefresh(),
-                options
-            ),
-            options,
-            SDKRouteParser.default,
-            com.mapbox.navigation.base.route.RouterOrigin.Custom(),
-            100L
-        ).first()
+                .build()
+            val route = createNavigationRoutes(
+                DirectionsResponse.fromJson(
+                    testRouteFixtures.loadMultiLegRouteForRefresh(),
+                    options
+                ),
+                options,
+                SDKRouteParser.default,
+                com.mapbox.navigation.base.route.RouterOrigin.Custom(),
+                100L
+            ).first()
 
-        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
+            routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+            refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
 
-        val routeCaptor = slot<NavigationRoute>()
-        verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor)) }
+            val routeCaptor = slot<NavigationRoute>()
+            verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor)) }
 
-        every { Time.SystemClockImpl.seconds() } returns responseTime + 10000
-        assertFalse(routeCaptor.captured.isExpired())
-    }
+            every { Time.SystemClockImpl.seconds() } returns responseTime + 10000
+            assertFalse(routeCaptor.captured.isExpired())
+        }
 
     private fun provideDefaultRouteOptions(): RouteOptions {
         return RouteOptions.builder()

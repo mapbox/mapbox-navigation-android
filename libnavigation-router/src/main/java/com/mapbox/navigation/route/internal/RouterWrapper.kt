@@ -88,8 +88,7 @@ class RouterWrapper(
                                 callback.onCanceled(routeOptions, origin.mapToSdkRouteOrigin())
                             } else {
                                 val isErrorRetryable = it.type in listOf(
-                                    RouterErrorType.NETWORK_ERROR,
-                                    RouterErrorType.DIRECTIONS_ERROR
+                                    RouterErrorType.NETWORK_ERROR
                                 )
                                 val failureReasons = listOf(
                                     RouterFailure(

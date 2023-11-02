@@ -1,7 +1,10 @@
 package com.mapbox.navigation.testing.ui.http
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -9,6 +12,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.lang.StringBuilder
+import kotlin.time.Duration
 
 /**
  * Creates and initializes a [MockWebServer] for each test.
@@ -81,10 +85,24 @@ class MockWebServerRule : TestWatcher() {
             block()
         } finally {
             withContext(Dispatchers.IO) {
-                webServer = MockWebServer()
+                retryStarting(previousPort)
                 initDispatcher()
-                webServer.start(previousPort)
             }
         }
+    }
+
+    private suspend fun retryStarting(port: Int) {
+        withTimeoutOrNull(30_000) {
+            while (true) {
+                try {
+                    webServer = MockWebServer()
+                    webServer.start(port)
+                    break
+                } catch (t: Throwable) {
+                    Log.e("MockWebServerRule", "error starting mock web server", t)
+                }
+                delay(500)
+            }
+        } ?: error("can't start mock server on port $port")
     }
 }
