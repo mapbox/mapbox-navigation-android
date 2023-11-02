@@ -117,7 +117,7 @@ sealed class RerouteState {
          * Indicates if it makes sense to retry for this type of failures.
          * If false, it doesn't make sense to retry route request
          */
-        val isRetyable get() = reasons.isRetryable
+        val isRetryable get() = reasons.isRetryable
     }
 
     /**

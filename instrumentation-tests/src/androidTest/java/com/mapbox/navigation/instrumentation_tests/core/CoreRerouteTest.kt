@@ -17,7 +17,6 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.isRetryable
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
@@ -928,7 +927,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                         .rerouteStates()
                         .filterIsInstance<RerouteState.Failed>()
                         .first()
-                    assertTrue(failedState.reasons.isRetryable)
+                    assertTrue(failedState.isRetryable)
                 }
                 mapboxNavigation.getRerouteController()!!
                     .reroute { routes, _ ->
