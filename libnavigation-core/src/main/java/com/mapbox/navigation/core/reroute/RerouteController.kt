@@ -4,6 +4,7 @@ import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.route.isRetryable
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
@@ -110,7 +111,14 @@ sealed class RerouteState {
         val message: String,
         val throwable: Throwable? = null,
         val reasons: List<RouterFailure>? = null
-    ) : RerouteState()
+    ) : RerouteState() {
+
+        /**
+         * Indicates if it makes sense to retry for this type of failures.
+         * If false, it doesn't make sense to retry route request
+         */
+        val isRetryable get() = reasons.isRetryable
+    }
 
     /**
      * Route fetching is in progress.

@@ -28,9 +28,10 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
+import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
-import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -107,6 +108,15 @@ fun MapboxNavigation.offRouteUpdates(): Flow<Boolean> {
         { registerOffRouteObserver(it) },
         { unregisterOffRouteObserver(it) },
         "OffRoute"
+    )
+}
+
+fun RerouteController.rerouteStates(): Flow<RerouteState> {
+    return loggedCallbackFlow(
+        { RerouteController.RerouteStateObserver(it) },
+        { registerRerouteStateObserver(it) },
+        { unregisterRerouteStateObserver(it) },
+        "RerouteState"
     )
 }
 

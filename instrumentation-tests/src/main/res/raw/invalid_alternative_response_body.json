@@ -1,0 +1,4 @@
+{
+  "message": "annotations value must be one of duration, distance, speed, congestion, congestion_numeric, closure, state_of_charge, maxspeed",
+  "code": "InvalidInput"
+}
