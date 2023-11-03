@@ -920,8 +920,8 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                 mapboxNavigation.flowLocationMatcherResult().first()
                 mapboxNavigation.setNavigationRoutesAndWaitForUpdate(originalRoutes)
             }
-            stayOnPosition(offRouteLocationUpdate) {
-                withoutInternet {
+            withoutInternet {
+                stayOnPosition(offRouteLocationUpdate) {
                     mapboxNavigation.offRouteUpdates().filter { it }.first()
                     val failedState = mapboxNavigation.getRerouteController()!!
                         .rerouteStates()
@@ -929,6 +929,8 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                         .first()
                     assertTrue(failedState.isRetryable)
                 }
+            }
+            stayOnPosition(offRouteLocationUpdate) {
                 mapboxNavigation.getRerouteController()!!
                     .reroute { routes, _ ->
                         mapboxNavigation.setNavigationRoutes(routes)
