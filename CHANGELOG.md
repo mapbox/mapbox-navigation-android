@@ -6,6 +6,27 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.17.3 - 03 November, 2023
+### Changelog
+[Changes between v2.17.2 and v2.17.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.2...v2.17.3)
+
+#### Features
+- Introduced `RouterFailure#isRetryable` which indicates if that makes sense to retry with this type of failure. [#7597](https://github.com/mapbox/mapbox-navigation-android/pull/7597)
+
+For convenience, you can use an extension property `isRetryable` for the list of `RouterFailure` in `NavigationRouterCallback.onFailure`.
+In case of reroute use `RerouteState.Failed.isRetryable`.
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.1))
+- Mapbox Navigation Native `v161.0.1`
+- Mapbox Core Common `v23.8.3`
+- Mapbox Java `v6.14.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.14.0))
+
+
 ## Mapbox Navigation SDK 2.17.2 - 27 October, 2023
 ### Changelog
 [Changes between v2.17.1 and v2.17.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.1...v2.17.2)
