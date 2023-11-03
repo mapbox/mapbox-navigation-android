@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.utils.location
 
+import android.location.Location
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
@@ -35,6 +36,20 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
             updateLocations.cancel()
         }
     }
+}
+
+suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
+    location: Location,
+    frequencyHz: Int = 1,
+    block: suspend () -> Unit
+) {
+    stayOnPosition(
+        latitude = location.latitude,
+        longitude = location.longitude,
+        bearing = location.bearing,
+        frequencyHz = frequencyHz,
+        block = block,
+    )
 }
 
 suspend fun BaseCoreNoCleanUpTest.stayOnPositionAndWaitForUpdate(
