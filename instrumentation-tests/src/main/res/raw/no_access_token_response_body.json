@@ -1,0 +1,4 @@
+{
+  "message": "Not Authorized - Invalid Token",
+  "error_detail": "No valid token prefix found in access_token parameter"
+}

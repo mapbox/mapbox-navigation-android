@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.InternalRouter
+import com.mapbox.navigation.base.internal.route.RetryableThrowable
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.Constants
@@ -86,12 +87,20 @@ class RouterWrapper(
                                 )
                                 callback.onCanceled(routeOptions, origin.mapToSdkRouteOrigin())
                             } else {
+                                val isErrorRetryable = it.type in listOf(
+                                    RouterErrorType.NETWORK_ERROR
+                                )
                                 val failureReasons = listOf(
                                     RouterFailure(
                                         url = urlWithoutToken,
                                         routerOrigin = origin.mapToSdkRouteOrigin(),
                                         message = it.message,
-                                        code = it.code
+                                        code = it.code,
+                                        throwable = if (isErrorRetryable) {
+                                            RetryableThrowable()
+                                        } else {
+                                            null
+                                        }
                                     )
                                 )
 

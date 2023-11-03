@@ -16,6 +16,8 @@ import com.mapbox.navigator.RouteIndices
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.RouterError
+import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.SpeedLimitSign
@@ -217,3 +219,17 @@ fun String.toDataRef(): DataRef {
     buffer.put(responseBytes)
     return DataRef(buffer)
 }
+
+fun createRouterError(
+    message: String = "test error",
+    code: Int = 0,
+    type: RouterErrorType = RouterErrorType.UNKNOWN,
+    requestId: Long = 0L,
+    refreshTtl: Int? = null
+) = RouterError(
+    message,
+    code,
+    type,
+    requestId,
+    refreshTtl
+)
