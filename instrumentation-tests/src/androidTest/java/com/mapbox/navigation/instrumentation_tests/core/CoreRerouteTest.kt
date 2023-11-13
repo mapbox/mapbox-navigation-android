@@ -877,8 +877,10 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         assertEquals(routes[1], rerouteResult.navigationRoutes.first())
     }
 
+    // Restarting mock web server takes up to 30 seconds.
+    // Let it finish and skip the test if it did not succeed.
     @Test
-    fun reroute_with_retryable_error() = sdkTest {
+    fun reroute_with_retryable_error() = sdkTest(timeout = 50_000) {
         val mockRoute = RoutesProvider.dc_very_short(context)
         val originLocation = mockRoute.routeWaypoints.first()
         val initialLocation = mockLocationUpdatesRule.generateLocationUpdate {

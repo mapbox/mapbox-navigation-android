@@ -2,13 +2,18 @@ package com.mapbox.navigation.testing.ui.http
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
+import org.junit.Assume.assumeTrue
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.lang.StringBuilder
@@ -85,24 +90,34 @@ class MockWebServerRule : TestWatcher() {
             block()
         } finally {
             withContext(Dispatchers.IO) {
-                retryStarting(previousPort)
+                val serverRestarted = retryStarting(previousPort)
+                assumeTrue("Mock web server could not be restarted", serverRestarted)
                 initDispatcher()
             }
         }
     }
 
-    private suspend fun retryStarting(port: Int) {
-        withTimeoutOrNull(30_000) {
-            while (true) {
-                try {
-                    webServer = MockWebServer()
-                    webServer.start(port)
-                    break
-                } catch (t: Throwable) {
-                    Log.e("MockWebServerRule", "error starting mock web server", t)
+    private suspend fun retryStarting(port: Int): Boolean {
+        try {
+            withTimeout(30_000) {
+                while (true) {
+                    if (!isActive) {
+                        Log.e("MockWebServerRule", "can't start mock server on port $port")
+                        return@withTimeout false
+                    }
+                    try {
+                        webServer = MockWebServer()
+                        webServer.start(port)
+                        return@withTimeout true
+                    } catch (t: Throwable) {
+                        Log.e("MockWebServerRule", "error starting mock web server", t)
+                    }
+                    delay(500)
                 }
-                delay(500)
             }
-        } ?: error("can't start mock server on port $port")
+        } catch (ex: TimeoutCancellationException) {
+            return false
+        }
+        return false
     }
 }
