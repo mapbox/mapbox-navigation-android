@@ -1,0 +1,1 @@
+- Supported ETC 2.0 payment method.
