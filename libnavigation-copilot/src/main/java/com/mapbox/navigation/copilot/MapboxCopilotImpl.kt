@@ -13,7 +13,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.DeviceType
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.copyToAndRemove
@@ -27,7 +26,6 @@ import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.utcTimeNow
 import com.mapbox.navigation.copilot.internal.CopilotMetadata
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
-import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState.ActiveGuidance
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState.FreeDrive
@@ -43,12 +41,9 @@ import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallbac
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import com.mapbox.navigation.utils.internal.ThreadController
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
 
@@ -59,8 +54,7 @@ import java.util.Locale
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapboxCopilotImpl(
-    private val mapboxNavigation: MapboxNavigation,
-    private val computationDispatcher: CoroutineDispatcher = ThreadController.DefaultDispatcher
+    private val mapboxNavigation: MapboxNavigation
 ) {
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
@@ -135,21 +129,6 @@ internal class MapboxCopilotImpl(
             cancelRecordingHistory()
         }
     }
-    private var initRoute = false
-    private val routesObserver = RoutesObserver { routesResult ->
-        val navigationRoutes = routesResult.navigationRoutes
-        if (initialRoute(navigationRoutes)) {
-            initRouteSerializationJob = mainJobController.scope.launch {
-                val route = navigationRoutes.first().directionsRoute
-                val initRoute = InitRoute(route.requestUuid(), route)
-                val preSerializedInitRoute = withContext(computationDispatcher) {
-                    toEventJson(initRoute)
-                }
-                push(InitRouteEvent(initRoute, preSerializedInitRoute))
-            }
-            initRoute = true
-        }
-    }
     private var arrivedAtFinalDestination = false
     private val arrivalObserver = object : ArrivalObserver {
 
@@ -204,14 +183,8 @@ internal class MapboxCopilotImpl(
      */
     fun push(historyEvent: HistoryEvent) {
         val eventType = historyEvent.snakeCaseEventName
-        val eventJson = when (historyEvent) {
-            is InitRouteEvent -> historyEvent.preSerializedInitRoute
-            else -> toEventJson(historyEvent.eventDTO)
-        }
+        val eventJson = toEventJson(historyEvent.eventDTO)
         when (historyEvent) {
-            is InitRouteEvent -> {
-                addActiveGuidance(eventType, eventJson)
-            }
             is DriveEndsEvent, GoingToBackgroundEvent, GoingToForegroundEvent -> {
                 pushHistoryJson(eventType, eventJson)
             }
@@ -278,7 +251,6 @@ internal class MapboxCopilotImpl(
             is FreeDrive -> "free-drive"
             else -> throw IllegalArgumentException("Should not try and track idle state")
         }
-        mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
         restartRecordingHistoryJob = mainJobController.scope.launch {
             while (true) {
@@ -294,10 +266,6 @@ internal class MapboxCopilotImpl(
     ): String {
         return utcTimeNow(format, locale)
     }
-
-    private fun initialRoute(navigationRoutes: List<NavigationRoute>): Boolean =
-        currentHistoryRecordingSessionState is ActiveGuidance &&
-            navigationRoutes.isNotEmpty() && !initRoute
 
     private fun toEventJson(event: EventDTO): String {
         val eventJson = gson.toJson(event) ?: ""
@@ -470,8 +438,6 @@ internal class MapboxCopilotImpl(
             historyFilePath ?: return@stopRecording
             callback(historyFilePath)
         }
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        initRoute = false
         hasFeedback = false
         mapboxNavigation.unregisterArrivalObserver(arrivalObserver)
         arrivedAtFinalDestination = false
