@@ -14,7 +14,6 @@ sealed class HistoryEvent(internal val snakeCaseEventName: String, internal val 
 
 internal const val SEARCH_RESULTS_EVENT_NAME = "search_results"
 internal const val SEARCH_RESULT_USED_EVENT_NAME = "search_result_used"
-internal const val INIT_ROUTE_EVENT_NAME = "init_route"
 internal const val DRIVE_ENDS_EVENT_NAME = "drive_ends"
 internal const val GOING_TO_FOREGROUND_EVENT_NAME = "going_to_foreground"
 internal const val GOING_TO_BACKGROUND_EVENT_NAME = "going_to_background"
@@ -41,10 +40,6 @@ data class SearchResultsEvent(val searchResults: SearchResults) :
 @ExperimentalPreviewMapboxNavigationAPI
 data class SearchResultUsedEvent(val searchResultUsed: SearchResultUsed) :
     HistoryEvent(SEARCH_RESULT_USED_EVENT_NAME, searchResultUsed)
-
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal data class InitRouteEvent(val initRoute: InitRoute, val preSerializedInitRoute: String) :
-    HistoryEvent(INIT_ROUTE_EVENT_NAME, initRoute)
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal data class DriveEndsEvent(val driveEnds: DriveEnds) :
