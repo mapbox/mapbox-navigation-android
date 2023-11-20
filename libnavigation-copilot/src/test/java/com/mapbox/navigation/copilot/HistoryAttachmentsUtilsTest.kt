@@ -57,7 +57,7 @@ class HistoryAttachmentsUtilsTest {
 
         val sessionId = HistoryAttachmentsUtils.generateSessionId(navigationSession, "owner")
 
-        val expectedSessionId = "co-pilot/owner/1.1/mbx-debug/-/-/free-drive/" +
+        val expectedSessionId = "co-pilot/owner/1.2/mbx-debug/-/-/free-drive/" +
             "-/3e48fd7a-fc82-42a8-9bae-baeb724f92ce"
         assertEquals(expectedSessionId, sessionId)
     }

@@ -45,7 +45,7 @@ internal object HistoryAttachmentsUtils {
             "$PATH_SEPARATOR${copilotMetadata.driveMode}$PATH_SEPARATOR$HYPHEN" +
             "$PATH_SEPARATOR${copilotMetadata.driveId}"
 
-    fun retrieveSpecVersion(): String = "1.1"
+    fun retrieveSpecVersion(): String = "1.2"
 
     fun retrieveNavSdkVersion(): String = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
 
