@@ -51,12 +51,13 @@ class MockWebServerRule : TestWatcher() {
     private fun initDispatcher() {
         webServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
-                requestHandlers.forEach {
+                val currentRequestHandlers = requestHandlers.toList()
+                currentRequestHandlers.forEach {
                     it.handle(request)?.run { return this }
                 }
 
                 val formattedHandlersBuilder = StringBuilder()
-                requestHandlers.forEach {
+                currentRequestHandlers.forEach {
                     formattedHandlersBuilder.append("$it\n|")
                 }
                 return MockResponse().setResponseCode(500)

@@ -25,6 +25,9 @@ import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationRe
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
 import com.mapbox.navigation.instrumentation_tests.utils.openRawResource
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
+import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.http.MockRequestHandler
@@ -44,6 +47,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
 import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -51,6 +55,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.InputStreamReader
 import java.net.URL
+import java.util.concurrent.CountDownLatch
 
 /**
  * This test ensures that alternative route recommendations
@@ -446,6 +451,57 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 "DD8MJ37zcI2gU4XXhtt-Gz1vdFShCMtf7AOyEHVylhqcEyreYNiT6Q==",
                 alternativesUpdate.alternatives.firstOrNull()?.directionsRoute?.requestUuid()
             )
+        }
+    }
+
+    @Test
+    fun offlineRouteCalculatedFasterThenOnline() = sdkTest(
+        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
+    ) {
+        val originalTestRoute = EvRoutesProvider.getBerlinEvRoute(
+            context,
+            mockWebServerRule.baseUrl
+        )
+        val onlineCalculationBlocker = CountDownLatch(1)
+        mockWebServerRule.requestHandlers.add(object : MockRequestHandler {
+            override fun handle(request: RecordedRequest): MockResponse? {
+                val routeOptions = try {
+                    RouteOptions.fromUrl(request.requestUrl!!.toUrl()).apply {
+                        coordinatesList() // make sure that coordinates could be parsed
+                    }
+                } catch (t: Throwable) {
+                    return null
+                }
+                onlineCalculationBlocker.await()
+                return null
+            }
+        })
+        mockWebServerRule.requestHandlers.add(originalTestRoute.mockWebServerHandler)
+        withMapboxNavigationAndOfflineTilesForRegion(
+            OfflineRegions.Berlin,
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { navigation ->
+            navigation.registerRouteAlternativesObserver(
+                AdvancedAlternativesObserverFromDocumentation(navigation)
+            )
+            navigation.startTripSession()
+            stayOnPosition(
+                originalTestRoute.origin.latitude(),
+                originalTestRoute.origin.longitude(),
+                0.0f,
+            ) {
+                val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
+                    .getSuccessfulResultOrThrowException()
+                assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
+                navigation.setNavigationRoutesAsync(requestResult.routes)
+                onlineCalculationBlocker.countDown()
+                mockWebServerRule.requestHandlers.clear() // don't handle other requests
+            }
+            val onlineRoutes = navigation.routesUpdates().first {
+                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW &&
+                    it.navigationRoutes.first().origin == RouterOrigin.Offboard
+            }
+            assertEquals(2, onlineRoutes.navigationRoutes.size)
         }
     }
 
