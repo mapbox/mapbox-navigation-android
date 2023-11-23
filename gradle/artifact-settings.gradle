@@ -16,13 +16,14 @@ ext {
 }
 
 def getVersionName() {
-    if (project.hasProperty('VERSION_NAME')) {
-      return project.property('VERSION_NAME')
-    }
-    def prefix = project.ext.releaseTagPrefix
-    def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
-    def version = cmd.execute().text
-    return project.ext.snapshot ? getSnapshotVersion(version) : getReleaseVersion(version)
+//    if (project.hasProperty('VERSION_NAME')) {
+//      return project.property('VERSION_NAME')
+//    }
+//    def prefix = project.ext.releaseTagPrefix
+//    def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
+//    def version = cmd.execute().text
+//    return project.ext.snapshot ? getSnapshotVersion(version) : getReleaseVersion(version)
+    return "2.17.4-3D-buildings-2-SNAPSHOT"
 }
 
 def getReleaseVersion(String version) {
