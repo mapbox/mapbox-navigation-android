@@ -27,7 +27,6 @@ import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RerouteStateTransitionAssertion
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
@@ -44,7 +43,6 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.t
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.withoutInternet
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
-import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.navigateNextRouteLeg
