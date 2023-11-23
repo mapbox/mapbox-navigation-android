@@ -1,0 +1,6507 @@
+{
+  "routes": [
+    {
+      "weight_typical": 397.923,
+      "duration_typical": 335.919,
+      "weight_name": "auto",
+      "weight": 397.923,
+      "duration": 335.919,
+      "distance": 1954.811,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "USA",
+              "iso_3166_1": "US"
+            }
+          ],
+          "annotation": {
+            "maxspeed": [
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 48,
+                "unit": "km/h"
+              },
+              {
+                "speed": 48,
+                "unit": "km/h"
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 48,
+                "unit": "km/h"
+              },
+              {
+                "speed": 48,
+                "unit": "km/h"
+              },
+              {
+                "speed": 48,
+                "unit": "km/h"
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 32,
+                "unit": "km/h"
+              },
+              {
+                "speed": 32,
+                "unit": "km/h"
+              },
+              {
+                "speed": 32,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              }
+            ],
+            "congestion_numeric": [
+              null,
+              null,
+              null,
+              0,
+              0,
+              0,
+              0,
+              null,
+              null,
+              3,
+              null,
+              null,
+              null,
+              null,
+              1,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              8,
+              8,
+              null,
+              null,
+              null,
+              null,
+              null,
+              0,
+              0,
+              0,
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "speed": [
+              3.1,
+              3,
+              10.2,
+              12.6,
+              12.6,
+              12.8,
+              12.9,
+              11.6,
+              11.2,
+              9.8,
+              9.5,
+              10.2,
+              10.4,
+              11.7,
+              11.7,
+              10.3,
+              9.9,
+              10,
+              6.8,
+              7,
+              7,
+              6.9,
+              6.8,
+              8.5,
+              8.3,
+              8.3,
+              8.2,
+              8.3,
+              8.3,
+              8.7,
+              6.2,
+              6.1,
+              6.1,
+              6.2,
+              6.2,
+              4.4,
+              4.4,
+              4.5,
+              4.6,
+              6.8,
+              7.3,
+              5.3,
+              5.3,
+              5.2,
+              5,
+              5.4,
+              9.1,
+              9.2,
+              9.1,
+              9.5,
+              4.2,
+              4.1,
+              4.1,
+              4.3,
+              5.6,
+              5.6,
+              5.6,
+              5.5,
+              6.3,
+              6.1,
+              6.1,
+              6.1,
+              6.1,
+              6,
+              5.4,
+              8.8,
+              8.4,
+              8,
+              8,
+              8.1
+            ],
+            "distance": [
+              5.9,
+              14.7,
+              19.4,
+              11.5,
+              27,
+              62,
+              61.3,
+              12.2,
+              7.9,
+              140.5,
+              8.3,
+              12.6,
+              11.8,
+              42.2,
+              71.3,
+              29.1,
+              10.5,
+              15.6,
+              16.7,
+              32.3,
+              49.2,
+              22.9,
+              9.7,
+              12.3,
+              52.7,
+              33,
+              35.6,
+              50.4,
+              5.4,
+              10.5,
+              11.1,
+              44.8,
+              53.6,
+              44.3,
+              17.4,
+              17.9,
+              66.7,
+              31.4,
+              12.5,
+              8.8,
+              9.4,
+              16,
+              122.5,
+              34.5,
+              7.6,
+              9.2,
+              14.9,
+              120.5,
+              33.6,
+              15.5,
+              19.2,
+              28.6,
+              32.7,
+              17.4,
+              18.1,
+              29.3,
+              32.4,
+              17.8,
+              13.5,
+              19.1,
+              38,
+              46.5,
+              5.8,
+              12.7,
+              2.7,
+              4.3,
+              9.5,
+              12,
+              6.9,
+              1.6
+            ],
+            "duration": [
+              1.898,
+              4.916,
+              9.295,
+              2.919,
+              2.14,
+              4.852,
+              4.781,
+              3.062,
+              0.709,
+              16.407,
+              2.881,
+              3.239,
+              1.156,
+              5.607,
+              6.093,
+              2.829,
+              1.089,
+              1.564,
+              7.843,
+              4.615,
+              7.056,
+              3.319,
+              1.462,
+              3.448,
+              6.381,
+              5.967,
+              4.32,
+              8.07,
+              0.657,
+              1.207,
+              3.807,
+              7.371,
+              8.843,
+              7.207,
+              2.806,
+              6.058,
+              15.082,
+              6.982,
+              2.707,
+              3.303,
+              3.303,
+              7.669,
+              23.123,
+              6.632,
+              1.535,
+              1.713,
+              3.655,
+              13.099,
+              3.709,
+              1.645,
+              6.584,
+              6.967,
+              7.92,
+              6.099,
+              5.248,
+              5.239,
+              5.76,
+              3.247,
+              4.135,
+              3.131,
+              6.203,
+              7.556,
+              0.954,
+              2.135,
+              0.491,
+              0.516,
+              1.117,
+              1.522,
+              0.863,
+              0.202
+            ]
+          },
+          "weight_typical": 397.923,
+          "duration_typical": 335.919,
+          "weight": 397.923,
+          "duration": 335.919,
+          "steps": [
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive south on <say-as interpret-as=\"address\">12th Street Southwest</say-as>. Then Turn left onto <say-as interpret-as=\"address\">Independence Avenue Southwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Drive south on 12th Street Southwest. Then Turn left onto Independence Avenue Southwest.",
+                  "distanceAlongGeometry": 20.635
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    180
+                  ],
+                  "duration": 1.898,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 2.183,
+                  "geometry_index": 0,
+                  "location": [
+                    -77.028186,
+                    38.887758
+                  ]
+                },
+                {
+                  "bearings": [
+                    0,
+                    89,
+                    180,
+                    270
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "turn_weight": 1.5,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "geometry_index": 1,
+                  "location": [
+                    -77.028186,
+                    38.887705
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Independence Avenue Southwest"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "Independence Avenue Southwest"
+                  },
+                  "distanceAlongGeometry": 20.635
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive south on 12th Street Southwest.",
+                "bearing_after": 180,
+                "bearing_before": 0,
+                "location": [
+                  -77.028186,
+                  38.887758
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "12th Street Southwest",
+              "weight_typical": 9.329,
+              "duration_typical": 6.814,
+              "duration": 6.814,
+              "distance": 20.635,
+              "driving_side": "right",
+              "weight": 9.329,
+              "mode": "driving",
+              "geometry": "{sodiArtl|qChB?fG@"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Turn left onto <say-as interpret-as=\"address\">7th Street Southwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Turn left onto 7th Street Southwest.",
+                  "distanceAlongGeometry": 529.876
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn left onto <say-as interpret-as=\"address\">7th Street Southwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn left onto 7th Street Southwest.",
+                  "distanceAlongGeometry": 85.333
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.028187,
+                    38.887573
+                  ],
+                  "geometry_index": 2,
+                  "admin_index": 0,
+                  "weight": 24.685,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 7.395,
+                  "turn_weight": 22.5,
+                  "duration": 9.295,
+                  "bearings": [
+                    0,
+                    90,
+                    179,
+                    270
+                  ],
+                  "out": 1,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.027964,
+                    38.887573
+                  ],
+                  "geometry_index": 3,
+                  "admin_index": 0,
+                  "weight": 5.01,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.007,
+                  "turn_weight": 1.5,
+                  "duration": 5.059,
+                  "bearings": [
+                    3,
+                    90,
+                    184,
+                    270
+                  ],
+                  "out": 1,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    90,
+                    270
+                  ],
+                  "duration": 4.852,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 5.58,
+                  "geometry_index": 5,
+                  "location": [
+                    -77.027519,
+                    38.887573
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    7,
+                    90,
+                    270
+                  ],
+                  "duration": 4.781,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 5.49,
+                  "geometry_index": 6,
+                  "location": [
+                    -77.026804,
+                    38.887575
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    91,
+                    180,
+                    270
+                  ],
+                  "duration": 3.062,
+                  "turn_duration": 2.008,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 1.212,
+                  "geometry_index": 7,
+                  "location": [
+                    -77.026096,
+                    38.887575
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3,
+                  "bearings": [
+                    4,
+                    90,
+                    179,
+                    271
+                  ],
+                  "duration": 0.709,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 0.808,
+                  "geometry_index": 8,
+                  "location": [
+                    -77.025955,
+                    38.887574
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.025864,
+                    38.887574
+                  ],
+                  "geometry_index": 9,
+                  "admin_index": 0,
+                  "weight": 17.06,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.007,
+                  "turn_weight": 0.5,
+                  "duration": 16.407,
+                  "bearings": [
+                    90,
+                    180,
+                    270
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    91,
+                    179,
+                    270
+                  ],
+                  "duration": 2.881,
+                  "turn_duration": 2.008,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 1.025,
+                  "geometry_index": 10,
+                  "location": [
+                    -77.024243,
+                    38.887575
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    91,
+                    182,
+                    271
+                  ],
+                  "duration": 3.239,
+                  "turn_duration": 2.008,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 1.447,
+                  "geometry_index": 11,
+                  "location": [
+                    -77.024147,
+                    38.887574
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3,
+                  "bearings": [
+                    0,
+                    89,
+                    180,
+                    271
+                  ],
+                  "duration": 1.156,
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.336,
+                  "geometry_index": 12,
+                  "location": [
+                    -77.024002,
+                    38.887573
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.023865,
+                    38.887574
+                  ],
+                  "geometry_index": 13,
+                  "admin_index": 0,
+                  "weight": 5.23,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.007,
+                  "turn_weight": 1,
+                  "duration": 5.607,
+                  "bearings": [
+                    25,
+                    90,
+                    182,
+                    269
+                  ],
+                  "out": 1,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    144,
+                    270
+                  ],
+                  "duration": 6.093,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 7.151,
+                  "geometry_index": 14,
+                  "location": [
+                    -77.023378,
+                    38.887574
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    207,
+                    270
+                  ],
+                  "duration": 2.829,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 3.315,
+                  "geometry_index": 15,
+                  "location": [
+                    -77.022556,
+                    38.887573
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    0,
+                    89,
+                    270
+                  ],
+                  "duration": 1.089,
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.258,
+                  "geometry_index": 16,
+                  "location": [
+                    -77.02222,
+                    38.887573
+                  ]
+                },
+                {
+                  "bearings": [
+                    0,
+                    90,
+                    180,
+                    269
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 17,
+                  "location": [
+                    -77.022098,
+                    38.887574
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "7th Street Southwest"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "7th Street Southwest"
+                  },
+                  "distanceAlongGeometry": 543.21
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto Independence Avenue Southwest.",
+                "modifier": "left",
+                "bearing_after": 90,
+                "bearing_before": 180,
+                "location": [
+                  -77.028187,
+                  38.887573
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "Independence Avenue Southwest",
+              "weight_typical": 82.436,
+              "duration_typical": 68.623,
+              "duration": 68.623,
+              "distance": 543.21,
+              "driving_side": "right",
+              "weight": 82.436,
+              "mode": "driving",
+              "geometry": "ihodiAttl|qC?}LBiGCoRCuk@?gk@@yG?uDAidB@_E@aHAqG?m]@kr@?_TAsF?gJ"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for a half mile.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for a half mile.",
+                  "distanceAlongGeometry": 635.237
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Turn left onto <say-as interpret-as=\"address\">Pennsylvania Avenue Northwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Turn left onto Pennsylvania Avenue Northwest.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn left.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn left.",
+                  "distanceAlongGeometry": 53.333
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    179,
+                    270,
+                    360
+                  ],
+                  "duration": 7.843,
+                  "turn_weight": 10,
+                  "turn_duration": 5.395,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 12.876,
+                  "geometry_index": 18,
+                  "location": [
+                    -77.021918,
+                    38.887574
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    0,
+                    92,
+                    180,
+                    270
+                  ],
+                  "duration": 4.615,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 5.414,
+                  "geometry_index": 19,
+                  "location": [
+                    -77.021919,
+                    38.887724
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    180,
+                    360
+                  ],
+                  "duration": 7.056,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 8.291,
+                  "geometry_index": 20,
+                  "location": [
+                    -77.021919,
+                    38.888014
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    1,
+                    90,
+                    180
+                  ],
+                  "duration": 3.319,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 3.974,
+                  "geometry_index": 21,
+                  "location": [
+                    -77.02192,
+                    38.888456
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    89,
+                    181,
+                    269,
+                    359
+                  ],
+                  "duration": 1.462,
+                  "turn_duration": 0.022,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 1.728,
+                  "geometry_index": 22,
+                  "location": [
+                    -77.021916,
+                    38.888661
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.021917,
+                    38.888749
+                  ],
+                  "geometry_index": 23,
+                  "admin_index": 0,
+                  "weight": 2.728,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.008,
+                  "turn_weight": 1,
+                  "duration": 3.448,
+                  "bearings": [
+                    1,
+                    89,
+                    179,
+                    269
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    89,
+                    181,
+                    269,
+                    360
+                  ],
+                  "duration": 6.381,
+                  "turn_duration": 0.021,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 7.632,
+                  "geometry_index": 24,
+                  "location": [
+                    -77.021914,
+                    38.888859
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    89,
+                    180,
+                    269,
+                    360
+                  ],
+                  "duration": 5.967,
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 4.752,
+                  "geometry_index": 25,
+                  "location": [
+                    -77.021915,
+                    38.889332
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    0,
+                    180
+                  ],
+                  "duration": 4.32,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 5.184,
+                  "geometry_index": 26,
+                  "location": [
+                    -77.021916,
+                    38.889629
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    90,
+                    180,
+                    269,
+                    360
+                  ],
+                  "duration": 8.727,
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 8.064,
+                  "geometry_index": 27,
+                  "location": [
+                    -77.021913,
+                    38.889949
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    0,
+                    89,
+                    180,
+                    269
+                  ],
+                  "duration": 1.207,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 1.44,
+                  "geometry_index": 29,
+                  "location": [
+                    -77.021915,
+                    38.89045
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.021915,
+                    38.890544
+                  ],
+                  "geometry_index": 30,
+                  "admin_index": 0,
+                  "weight": 3.16,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.007,
+                  "turn_weight": 1,
+                  "duration": 3.807,
+                  "bearings": [
+                    0,
+                    89,
+                    180,
+                    270
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    92,
+                    180,
+                    270,
+                    360
+                  ],
+                  "duration": 7.371,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 8.836,
+                  "geometry_index": 31,
+                  "location": [
+                    -77.021914,
+                    38.890644
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    90,
+                    180,
+                    360
+                  ],
+                  "duration": 8.843,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 10.604,
+                  "geometry_index": 32,
+                  "location": [
+                    -77.021915,
+                    38.891046
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    1,
+                    90,
+                    180
+                  ],
+                  "duration": 7.207,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 8.64,
+                  "geometry_index": 33,
+                  "location": [
+                    -77.021916,
+                    38.891528
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    92,
+                    181,
+                    270,
+                    358
+                  ],
+                  "duration": 2.806,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.024,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 3.338,
+                  "geometry_index": 34,
+                  "location": [
+                    -77.021909,
+                    38.891926
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight",
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.021915,
+                    38.892082
+                  ],
+                  "geometry_index": 35,
+                  "admin_index": 0,
+                  "weight": 7.86,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.008,
+                  "turn_weight": 3,
+                  "duration": 6.058,
+                  "bearings": [
+                    0,
+                    90,
+                    178,
+                    270
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    90,
+                    180,
+                    270,
+                    360
+                  ],
+                  "duration": 15.082,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 18.09,
+                  "geometry_index": 36,
+                  "location": [
+                    -77.021915,
+                    38.892243
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    0,
+                    180,
+                    270
+                  ],
+                  "duration": 6.982,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 8.37,
+                  "geometry_index": 37,
+                  "location": [
+                    -77.021917,
+                    38.892842
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    108,
+                    180,
+                    289,
+                    360
+                  ],
+                  "duration": 2.707,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid_indication": "left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 3.24,
+                  "geometry_index": 38,
+                  "location": [
+                    -77.021917,
+                    38.893124
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid_indication": "left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.021918,
+                    38.893236
+                  ],
+                  "geometry_index": 39,
+                  "admin_index": 0,
+                  "weight": 3.588,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.007,
+                  "turn_weight": 2,
+                  "duration": 3.303,
+                  "bearings": [
+                    0,
+                    110,
+                    180,
+                    289
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "bearings": [
+                    0,
+                    110,
+                    180,
+                    290
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 40,
+                  "location": [
+                    -77.021918,
+                    38.893315
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Pennsylvania Avenue Northwest"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "Pennsylvania Avenue Northwest"
+                  },
+                  "distanceAlongGeometry": 648.571
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto 7th Street Southwest.",
+                "modifier": "left",
+                "bearing_after": 360,
+                "bearing_before": 90,
+                "location": [
+                  -77.021918,
+                  38.887574
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "7th Street Southwest",
+              "weight_typical": 139.397,
+              "duration_typical": 121.814,
+              "duration": 121.814,
+              "distance": 648.571,
+              "driving_side": "right",
+              "weight": 139.397,
+              "mode": "driving",
+              "geometry": "khodiAzl`|qCkH@cQ?sZ@yKGoD@{EEq\\@qQ@_SEg[@aB@{D?gEAcX@c]@{WMwHJaI?md@BsP?_F@}C?iD?"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for a half mile.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for a half mile.",
+                  "distanceAlongGeometry": 729.062
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Your destination will be on the left.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Your destination will be on the left.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the left.</prosody></amazon:effect></speak>",
+                  "announcement": "Your destination is on the left.",
+                  "distanceAlongGeometry": 55.556
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.021918,
+                    38.8934
+                  ],
+                  "geometry_index": 41,
+                  "admin_index": 0,
+                  "weight": 13.714,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 4.637,
+                  "turn_weight": 10,
+                  "duration": 7.669,
+                  "bearings": [
+                    0,
+                    108,
+                    180,
+                    290
+                  ],
+                  "out": 3,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    1,
+                    110,
+                    182,
+                    290
+                  ],
+                  "duration": 23.123,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 27.739,
+                  "geometry_index": 42,
+                  "location": [
+                    -77.022092,
+                    38.893448
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    110,
+                    290
+                  ],
+                  "duration": 6.632,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 7.958,
+                  "geometry_index": 43,
+                  "location": [
+                    -77.023423,
+                    38.893818
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    110,
+                    162,
+                    289,
+                    342
+                  ],
+                  "duration": 1.535,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 1.819,
+                  "geometry_index": 44,
+                  "location": [
+                    -77.023799,
+                    38.893922
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    163,
+                    290,
+                    349
+                  ],
+                  "duration": 1.713,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "turn_duration": 0.008,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 2.046,
+                  "geometry_index": 45,
+                  "location": [
+                    -77.023881,
+                    38.893944
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.023981,
+                    38.893972
+                  ],
+                  "geometry_index": 46,
+                  "admin_index": 0,
+                  "weight": 3.964,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.019,
+                  "turn_weight": 2,
+                  "duration": 3.655,
+                  "bearings": [
+                    3,
+                    110,
+                    184,
+                    289
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    1,
+                    109,
+                    182,
+                    290
+                  ],
+                  "duration": 13.099,
+                  "turn_duration": 0.008,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 15.709,
+                  "geometry_index": 47,
+                  "location": [
+                    -77.024144,
+                    38.894016
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    110,
+                    289
+                  ],
+                  "duration": 3.709,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 4.451,
+                  "geometry_index": 48,
+                  "location": [
+                    -77.025453,
+                    38.894381
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    165,
+                    292,
+                    344
+                  ],
+                  "duration": 1.645,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.008,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 1.964,
+                  "geometry_index": 49,
+                  "location": [
+                    -77.02582,
+                    38.89448
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.025985,
+                    38.894533
+                  ],
+                  "geometry_index": 50,
+                  "admin_index": 0,
+                  "weight": 6.472,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.024,
+                  "turn_weight": 1,
+                  "duration": 6.584,
+                  "bearings": [
+                    0,
+                    112,
+                    169,
+                    191,
+                    289
+                  ],
+                  "out": 4,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    175,
+                    289,
+                    356
+                  ],
+                  "duration": 6.967,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 8.352,
+                  "geometry_index": 51,
+                  "location": [
+                    -77.026195,
+                    38.894588
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    290
+                  ],
+                  "duration": 7.92,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 9.504,
+                  "geometry_index": 52,
+                  "location": [
+                    -77.026507,
+                    38.894673
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "location": [
+                    -77.026862,
+                    38.894771
+                  ],
+                  "geometry_index": 53,
+                  "admin_index": 0,
+                  "weight": 4.896,
+                  "is_urban": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "traffic_signal": true,
+                  "turn_duration": 2.019,
+                  "duration": 6.099,
+                  "bearings": [
+                    6,
+                    110,
+                    187,
+                    289
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.027052,
+                    38.894823
+                  ],
+                  "geometry_index": 54,
+                  "admin_index": 0,
+                  "weight": 5.388,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.008,
+                  "turn_weight": 1.5,
+                  "duration": 5.248,
+                  "bearings": [
+                    6,
+                    109,
+                    186,
+                    290
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    23,
+                    110,
+                    182,
+                    289
+                  ],
+                  "duration": 5.239,
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 6.264,
+                  "geometry_index": 55,
+                  "location": [
+                    -77.027248,
+                    38.894878
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    289
+                  ],
+                  "duration": 5.76,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 6.912,
+                  "geometry_index": 56,
+                  "location": [
+                    -77.027567,
+                    38.894965
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    175,
+                    289,
+                    355
+                  ],
+                  "duration": 3.247,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 3.888,
+                  "geometry_index": 57,
+                  "location": [
+                    -77.02792,
+                    38.895062
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.028114,
+                    38.895115
+                  ],
+                  "geometry_index": 58,
+                  "admin_index": 0,
+                  "weight": 4.053,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.008,
+                  "turn_weight": 1.5,
+                  "duration": 4.135,
+                  "bearings": [
+                    1,
+                    109,
+                    183,
+                    290
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    3,
+                    110,
+                    191,
+                    290
+                  ],
+                  "duration": 9.334,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 11.426,
+                  "geometry_index": 59,
+                  "location": [
+                    -77.02826,
+                    38.895157
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    108,
+                    289
+                  ],
+                  "duration": 8.509,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 10.424,
+                  "geometry_index": 61,
+                  "location": [
+                    -77.028885,
+                    38.895321
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    6,
+                    109,
+                    184,
+                    289
+                  ],
+                  "duration": 2.135,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 2.606,
+                  "geometry_index": 63,
+                  "location": [
+                    -77.029456,
+                    38.895473
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    290
+                  ],
+                  "duration": 0.491,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 0.601,
+                  "geometry_index": 64,
+                  "location": [
+                    -77.029594,
+                    38.895511
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "location": [
+                    -77.029623,
+                    38.895519
+                  ],
+                  "geometry_index": 65,
+                  "admin_index": 0,
+                  "weight": 2.108,
+                  "is_urban": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "turn_duration": 0.019,
+                  "turn_weight": 1.5,
+                  "duration": 0.516,
+                  "bearings": [
+                    110,
+                    184,
+                    288,
+                    358
+                  ],
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    108,
+                    287
+                  ],
+                  "duration": 1.117,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.369,
+                  "geometry_index": 66,
+                  "location": [
+                    -77.029671,
+                    38.895531
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    1,
+                    107,
+                    182,
+                    281
+                  ],
+                  "duration": 2.385,
+                  "turn_duration": 0.026,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 2.889,
+                  "geometry_index": 67,
+                  "location": [
+                    -77.029775,
+                    38.895556
+                  ]
+                },
+                {
+                  "bearings": [
+                    101,
+                    274
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 69,
+                  "location": [
+                    -77.029989,
+                    38.895589
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination will be on the left"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "Your destination will be on the left"
+                  },
+                  "distanceAlongGeometry": 742.395
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination is on the left"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "Your destination is on the left"
+                  },
+                  "distanceAlongGeometry": 55.556
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto Pennsylvania Avenue Northwest.",
+                "modifier": "left",
+                "bearing_after": 290,
+                "bearing_before": 0,
+                "location": [
+                  -77.021918,
+                  38.8934
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "Pennsylvania Avenue Northwest",
+              "weight_typical": 166.762,
+              "duration_typical": 138.668,
+              "duration": 138.668,
+              "distance": 742.395,
+              "driving_side": "right",
+              "weight": 166.762,
+              "mode": "driving",
+              "geometry": "otzdiAzl`|qC_BzIcVdrAoEnVk@bDw@fEwAdIyUxpAeE|UiBhImBbLiDnRcEdUgBzJmBfKmD|RaE`UiBbKsAbHsB~KsE`YmGt^a@~BkArGOx@W~Aq@nEo@lGQ|CAd@"
+            },
+            {
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    94
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 70,
+                  "location": [
+                    -77.030008,
+                    38.89559
+                  ]
+                }
+              ],
+              "bannerInstructions": [],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "Your destination is on the left.",
+                "modifier": "left",
+                "bearing_after": 0,
+                "bearing_before": 274,
+                "location": [
+                  -77.030008,
+                  38.89559
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "Pennsylvania Avenue Northwest",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "k}~diAnfp|qC??"
+            }
+          ],
+          "distance": 1954.811,
+          "summary": "7th Street Southwest, Pennsylvania Avenue Northwest"
+        }
+      ],
+      "geometry": "{sodiArtl|qChB?fG@?}LBiGCoRCuk@?gk@@yG?uDAidB@_E@aHAqG?m]@kr@?_TAsF?gJkH@cQ?sZ@yKGoD@{EEq\\@qQ@_SEg[@aB@{D?gEAcX@c]@{WMwHJaI?md@BsP?_F@}C?iD?_BzIcVdrAoEnVk@bDw@fEwAdIyUxpAeE|UiBhImBbLiDnRcEdUgBzJmBfKmD|RaE`UiBbKsAbHsB~KsE`YmGt^a@~BkArGOx@W~Aq@nEo@lGQ|CAd@",
+      "voiceLocale": "en-US",
+      "refresh_ttl": 21600
+    },
+    {
+      "weight_typical": 430.915,
+      "duration_typical": 338.581,
+      "weight_name": "auto",
+      "weight": 430.915,
+      "duration": 338.581,
+      "distance": 1972.566,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "USA",
+              "iso_3166_1": "US"
+            }
+          ],
+          "annotation": {
+            "maxspeed": [
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 48,
+                "unit": "km/h"
+              },
+              {
+                "speed": 48,
+                "unit": "km/h"
+              },
+              {
+                "speed": 48,
+                "unit": "km/h"
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "unknown": true
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              },
+              {
+                "speed": 32,
+                "unit": "km/h"
+              },
+              {
+                "speed": 32,
+                "unit": "km/h"
+              },
+              {
+                "speed": 32,
+                "unit": "km/h"
+              },
+              {
+                "speed": 40,
+                "unit": "km/h"
+              }
+            ],
+            "congestion_numeric": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              22,
+              27,
+              27,
+              27,
+              27,
+              27,
+              null,
+              null,
+              11,
+              4,
+              4,
+              null,
+              12,
+              12,
+              12,
+              null,
+              null,
+              null,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0,
+              8,
+              8,
+              null,
+              null,
+              null,
+              null,
+              null,
+              0,
+              0,
+              0,
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "speed": [
+              3.1,
+              3,
+              10.2,
+              12.5,
+              12.8,
+              14.4,
+              14.7,
+              4.2,
+              4.2,
+              4.2,
+              4.2,
+              4.1,
+              9.9,
+              9.9,
+              9.9,
+              10.6,
+              10.3,
+              9.4,
+              8.5,
+              9.6,
+              9.2,
+              7.5,
+              7.6,
+              7.8,
+              9.9,
+              10.4,
+              10.2,
+              10.4,
+              4.4,
+              4.4,
+              4.5,
+              4.6,
+              6.8,
+              7.3,
+              5.3,
+              5.3,
+              5.2,
+              5,
+              5.4,
+              9.1,
+              9.2,
+              9.1,
+              9.5,
+              4.2,
+              4.1,
+              4.1,
+              4.3,
+              5.6,
+              5.6,
+              5.6,
+              5.5,
+              6.3,
+              6.1,
+              6.1,
+              6.1,
+              6.1,
+              6,
+              5.4,
+              8.8,
+              8.4,
+              8,
+              8,
+              8.1
+            ],
+            "distance": [
+              5.9,
+              14.7,
+              19.4,
+              15.6,
+              97,
+              102.6,
+              120.8,
+              32.4,
+              46.5,
+              67.8,
+              5,
+              16.8,
+              16.3,
+              25.4,
+              52.5,
+              74.3,
+              12.8,
+              11.6,
+              2.8,
+              9.4,
+              73.3,
+              46.2,
+              24.3,
+              12.4,
+              12.6,
+              32.4,
+              116.5,
+              16.2,
+              17.9,
+              66.7,
+              31.3,
+              12.5,
+              8.8,
+              9.5,
+              16,
+              122.4,
+              34.6,
+              7.5,
+              9.2,
+              15,
+              120.4,
+              33.7,
+              15.5,
+              19.2,
+              28.6,
+              32.6,
+              17.5,
+              18,
+              29.3,
+              32.4,
+              17.9,
+              13.4,
+              19.2,
+              38,
+              46.4,
+              5.9,
+              12.7,
+              2.6,
+              4.4,
+              9.4,
+              12,
+              6.9,
+              1.7
+            ],
+            "duration": [
+              1.898,
+              4.916,
+              9.295,
+              8.277,
+              7.614,
+              7.131,
+              8.228,
+              7.79,
+              11.189,
+              16.302,
+              1.199,
+              4.136,
+              8.141,
+              2.578,
+              5.307,
+              7.017,
+              1.239,
+              3.241,
+              2.334,
+              0.989,
+              7.971,
+              6.14,
+              3.2,
+              1.607,
+              3.284,
+              3.121,
+              11.384,
+              1.564,
+              11.445,
+              15.082,
+              6.982,
+              2.707,
+              3.303,
+              3.303,
+              7.669,
+              23.123,
+              6.632,
+              1.535,
+              1.713,
+              3.655,
+              13.099,
+              3.709,
+              1.645,
+              6.584,
+              6.967,
+              7.92,
+              6.099,
+              5.248,
+              5.239,
+              5.76,
+              3.247,
+              4.135,
+              3.131,
+              6.203,
+              7.556,
+              0.954,
+              2.135,
+              0.491,
+              0.516,
+              1.117,
+              1.522,
+              0.863,
+              0.202
+            ]
+          },
+          "weight_typical": 430.915,
+          "duration_typical": 338.581,
+          "weight": 430.915,
+          "duration": 338.581,
+          "steps": [
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive south on <say-as interpret-as=\"address\">12th Street Southwest</say-as>. Then Turn left onto <say-as interpret-as=\"address\">Independence Avenue Southwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Drive south on 12th Street Southwest. Then Turn left onto Independence Avenue Southwest.",
+                  "distanceAlongGeometry": 20.635
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    180
+                  ],
+                  "duration": 1.898,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 2.183,
+                  "geometry_index": 0,
+                  "location": [
+                    -77.028186,
+                    38.887758
+                  ]
+                },
+                {
+                  "bearings": [
+                    0,
+                    89,
+                    180,
+                    270
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "turn_weight": 1.5,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "geometry_index": 1,
+                  "location": [
+                    -77.028186,
+                    38.887705
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "sub": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "12th Street Expressway"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "12th Street Expressway"
+                  },
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Independence Avenue Southwest"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "Independence Avenue Southwest"
+                  },
+                  "distanceAlongGeometry": 20.635
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive south on 12th Street Southwest.",
+                "bearing_after": 180,
+                "bearing_before": 0,
+                "location": [
+                  -77.028186,
+                  38.887758
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "12th Street Southwest",
+              "weight_typical": 9.329,
+              "duration_typical": 6.814,
+              "duration": 6.814,
+              "distance": 20.635,
+              "driving_side": "right",
+              "weight": 9.329,
+              "mode": "driving",
+              "geometry": "{sodiArtl|qChB?fG@"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn left to take the <say-as interpret-as=\"address\">12th Street Expressway</say-as> ramp.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn left to take the 12th Street Expressway ramp.",
+                  "distanceAlongGeometry": 19.323
+                }
+              ],
+              "intersections": [
+                {
+                  "bearings": [
+                    0,
+                    90,
+                    179,
+                    270
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "turn_weight": 22.5,
+                  "turn_duration": 7.395,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 2,
+                  "location": [
+                    -77.028187,
+                    38.887573
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "12th Street Expressway"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "12th Street Expressway"
+                  },
+                  "distanceAlongGeometry": 19.323
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto Independence Avenue Southwest.",
+                "modifier": "left",
+                "bearing_after": 90,
+                "bearing_before": 180,
+                "location": [
+                  -77.028187,
+                  38.887573
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "Independence Avenue Southwest",
+              "weight_typical": 24.685,
+              "duration_typical": 9.295,
+              "duration": 9.295,
+              "distance": 19.323,
+              "driving_side": "right",
+              "weight": 24.685,
+              "mode": "driving",
+              "geometry": "ihodiAttl|qC?}L"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Turn right onto <say-as interpret-as=\"address\">U.S. 1</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Turn right onto U.S. 1.",
+                  "distanceAlongGeometry": 476.567
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn right onto <say-as interpret-as=\"address\">U.S. 1</say-as>, <say-as interpret-as=\"address\">U.S. 50</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn right onto U.S. 1, U.S. 50.",
+                  "distanceAlongGeometry": 84.444
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary_link"
+                  },
+                  "location": [
+                    -77.027964,
+                    38.887573
+                  ],
+                  "geometry_index": 3,
+                  "admin_index": 0,
+                  "weight": 9.44,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 7.025,
+                  "turn_weight": 8,
+                  "duration": 8.277,
+                  "bearings": [
+                    3,
+                    90,
+                    184,
+                    270
+                  ],
+                  "out": 0,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    0,
+                    93,
+                    183,
+                    258
+                  ],
+                  "duration": 7.614,
+                  "turn_duration": 0.022,
+                  "mapbox_streets_v8": {
+                    "class": "primary_link"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 8.73,
+                  "geometry_index": 4,
+                  "location": [
+                    -77.027956,
+                    38.887713
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "tunnel"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    180,
+                    356
+                  ],
+                  "duration": 7.131,
+                  "mapbox_streets_v8": {
+                    "class": "primary_link"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 8.2,
+                  "geometry_index": 5,
+                  "location": [
+                    -77.027955,
+                    38.888585
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "location": [
+                    -77.028046,
+                    38.889504
+                  ],
+                  "geometry_index": 6,
+                  "admin_index": 0,
+                  "weight": 25.452,
+                  "is_urban": true,
+                  "turn_weight": 16,
+                  "duration": 8.228,
+                  "bearings": [
+                    176,
+                    182,
+                    360
+                  ],
+                  "out": 2,
+                  "in": 0,
+                  "turn_duration": 0.009,
+                  "classes": [
+                    "tunnel",
+                    "motorway"
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "motorway"
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    180,
+                    360
+                  ],
+                  "duration": 36.48,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 42.864,
+                  "geometry_index": 7,
+                  "location": [
+                    -77.028048,
+                    38.890589
+                  ]
+                },
+                {
+                  "bearings": [
+                    92,
+                    176,
+                    270,
+                    341
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "classes": [
+                    "motorway"
+                  ],
+                  "in": 1,
+                  "turn_duration": 0.056,
+                  "mapbox_streets_v8": {
+                    "class": "motorway"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "geometry_index": 11,
+                  "location": [
+                    -77.028073,
+                    38.891949
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "mapbox_shield": {
+                          "text_color": "black",
+                          "name": "us-highway",
+                          "display_ref": "1",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "imageBaseURL": "https://api.mapbox.com/public/shields/v4.1/US/us-1",
+                        "type": "icon",
+                        "text": "US 1"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "mapbox_shield": {
+                          "text_color": "black",
+                          "name": "us-highway",
+                          "display_ref": "50",
+                          "base_url": "https://api.mapbox.com/styles/v1"
+                        },
+                        "imageBaseURL": "https://api.mapbox.com/public/shields/v4.1/US/us-50",
+                        "type": "icon",
+                        "text": "US 50"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "right",
+                    "text": "US 1 / US 50"
+                  },
+                  "distanceAlongGeometry": 504.567
+                }
+              ],
+              "destinations": "12th Street Expressway",
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left to take the 12th Street Expressway ramp.",
+                "modifier": "left",
+                "bearing_after": 3,
+                "bearing_before": 90,
+                "location": [
+                  -77.027964,
+                  38.887573
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "12th Street Expressway",
+              "weight_typical": 99.582,
+              "duration_typical": 71.866,
+              "duration": 71.866,
+              "distance": 504.567,
+              "driving_side": "right",
+              "weight": 99.582,
+              "mode": "driving",
+              "geometry": "ihodiAvfl|qCwGOou@Amx@tDybABeQ@cYBae@BsAf@}GzB"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Turn left onto <say-as interpret-as=\"address\">7th Street Northwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Turn left onto 7th Street Northwest.",
+                  "distanceAlongGeometry": 525.593
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn left onto <say-as interpret-as=\"address\">7th Street Northwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn left onto 7th Street Northwest.",
+                  "distanceAlongGeometry": 71.111
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "location": [
+                    -77.028135,
+                    38.892092
+                  ],
+                  "geometry_index": 12,
+                  "admin_index": 0,
+                  "weight": 8.475,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 6.495,
+                  "turn_weight": 6.5,
+                  "duration": 8.141,
+                  "bearings": [
+                    90,
+                    161,
+                    193,
+                    270,
+                    359
+                  ],
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3,
+                  "bearings": [
+                    1,
+                    90,
+                    182,
+                    270
+                  ],
+                  "duration": 2.578,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 3.086,
+                  "geometry_index": 13,
+                  "location": [
+                    -77.027947,
+                    38.892092
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    229,
+                    270
+                  ],
+                  "duration": 5.307,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 6.36,
+                  "geometry_index": 14,
+                  "location": [
+                    -77.027654,
+                    38.892092
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    180,
+                    270
+                  ],
+                  "duration": 7.017,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 8.413,
+                  "geometry_index": 15,
+                  "location": [
+                    -77.027048,
+                    38.89209
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    91,
+                    183,
+                    270
+                  ],
+                  "duration": 1.239,
+                  "turn_duration": 0.008,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 1.478,
+                  "geometry_index": 16,
+                  "location": [
+                    -77.02619,
+                    38.892089
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    1,
+                    90,
+                    271
+                  ],
+                  "duration": 3.241,
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.481,
+                  "geometry_index": 17,
+                  "location": [
+                    -77.026043,
+                    38.892088
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    1,
+                    90,
+                    270
+                  ],
+                  "duration": 2.334,
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 0.393,
+                  "geometry_index": 18,
+                  "location": [
+                    -77.025909,
+                    38.892088
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3,
+                  "bearings": [
+                    18,
+                    90,
+                    199,
+                    270
+                  ],
+                  "duration": 0.989,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.178,
+                  "geometry_index": 19,
+                  "location": [
+                    -77.025877,
+                    38.892088
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    177,
+                    270
+                  ],
+                  "duration": 7.971,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 9.556,
+                  "geometry_index": 20,
+                  "location": [
+                    -77.025768,
+                    38.892088
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    180,
+                    270
+                  ],
+                  "duration": 6.14,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 7.36,
+                  "geometry_index": 21,
+                  "location": [
+                    -77.024922,
+                    38.892086
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    90,
+                    270
+                  ],
+                  "duration": 3.2,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 3.84,
+                  "geometry_index": 22,
+                  "location": [
+                    -77.024389,
+                    38.892085
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    172,
+                    270,
+                    355
+                  ],
+                  "duration": 1.607,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 1.92,
+                  "geometry_index": 23,
+                  "location": [
+                    -77.024109,
+                    38.892084
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight",
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "location": [
+                    -77.023965,
+                    38.892084
+                  ],
+                  "geometry_index": 24,
+                  "admin_index": 0,
+                  "weight": 3.018,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.019,
+                  "turn_weight": 1.5,
+                  "duration": 3.284,
+                  "bearings": [
+                    89,
+                    180,
+                    270,
+                    359
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3,
+                  "bearings": [
+                    11,
+                    90,
+                    191,
+                    269
+                  ],
+                  "duration": 3.121,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 3.736,
+                  "geometry_index": 25,
+                  "location": [
+                    -77.02382,
+                    38.892085
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    90,
+                    270
+                  ],
+                  "duration": 11.384,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 13.661,
+                  "geometry_index": 26,
+                  "location": [
+                    -77.023446,
+                    38.892084
+                  ]
+                },
+                {
+                  "bearings": [
+                    90,
+                    180,
+                    270,
+                    359
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 27,
+                  "location": [
+                    -77.022101,
+                    38.892082
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "7th Street Northwest"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "7th Street Northwest"
+                  },
+                  "distanceAlongGeometry": 538.926
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn right onto US 1/US 50/Constitution Avenue Northwest.",
+                "modifier": "right",
+                "bearing_after": 90,
+                "bearing_before": 341,
+                "location": [
+                  -77.028135,
+                  38.892092
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "Constitution Avenue Northwest",
+              "weight_typical": 75.822,
+              "duration_typical": 69.117,
+              "duration": 69.117,
+              "distance": 538.926,
+              "driving_side": "right",
+              "weight": 75.822,
+              "mode": "driving",
+              "ref": "US 1; US 50",
+              "geometry": "wbxdiAlql|qC?wJ?iQB{d@@st@@eH?kG?_A?yEB{s@@i`@@oP?_HAaH@kVBasA?sJ"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 500 feet, Turn left onto <say-as interpret-as=\"address\">Pennsylvania Avenue Northwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "In 500 feet, Turn left onto Pennsylvania Avenue Northwest.",
+                  "distanceAlongGeometry": 133.387
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn left.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn left.",
+                  "distanceAlongGeometry": 53.333
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.021915,
+                    38.892082
+                  ],
+                  "geometry_index": 28,
+                  "admin_index": 0,
+                  "weight": 19.86,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 7.395,
+                  "turn_weight": 15,
+                  "duration": 11.445,
+                  "bearings": [
+                    0,
+                    90,
+                    177,
+                    270
+                  ],
+                  "out": 0,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    90,
+                    180,
+                    270,
+                    360
+                  ],
+                  "duration": 15.082,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 18.09,
+                  "geometry_index": 29,
+                  "location": [
+                    -77.021915,
+                    38.892243
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    0,
+                    180,
+                    270
+                  ],
+                  "duration": 6.982,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 8.37,
+                  "geometry_index": 30,
+                  "location": [
+                    -77.021917,
+                    38.892842
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    108,
+                    180,
+                    289,
+                    360
+                  ],
+                  "duration": 2.707,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid_indication": "left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 3.24,
+                  "geometry_index": 31,
+                  "location": [
+                    -77.021917,
+                    38.893124
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "left"
+                      ],
+                      "valid_indication": "left",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.021918,
+                    38.893236
+                  ],
+                  "geometry_index": 32,
+                  "admin_index": 0,
+                  "weight": 3.588,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.007,
+                  "turn_weight": 2,
+                  "duration": 3.303,
+                  "bearings": [
+                    0,
+                    110,
+                    180,
+                    289
+                  ],
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "bearings": [
+                    0,
+                    110,
+                    180,
+                    290
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "turn_duration": 2.007,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 33,
+                  "location": [
+                    -77.021918,
+                    38.893315
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Pennsylvania Avenue Northwest"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "Pennsylvania Avenue Northwest"
+                  },
+                  "distanceAlongGeometry": 146.72
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto 7th Street Northwest.",
+                "modifier": "left",
+                "bearing_after": 0,
+                "bearing_before": 90,
+                "location": [
+                  -77.021915,
+                  38.892082
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "7th Street Northwest",
+              "weight_typical": 54.735,
+              "duration_typical": 42.821,
+              "duration": 42.821,
+              "distance": 146.72,
+              "driving_side": "right",
+              "weight": 54.735,
+              "mode": "driving",
+              "geometry": "cbxdiAtl`|qCaI?md@BsP?_F@}C?iD?"
+            },
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for a half mile.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue for a half mile.",
+                  "distanceAlongGeometry": 729.062
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Your destination will be on the left.</prosody></amazon:effect></speak>",
+                  "announcement": "In a quarter mile, Your destination will be on the left.",
+                  "distanceAlongGeometry": 402.336
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the left.</prosody></amazon:effect></speak>",
+                  "announcement": "Your destination is on the left.",
+                  "distanceAlongGeometry": 55.556
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.021918,
+                    38.8934
+                  ],
+                  "geometry_index": 34,
+                  "admin_index": 0,
+                  "weight": 13.714,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 4.637,
+                  "turn_weight": 10,
+                  "duration": 7.669,
+                  "bearings": [
+                    0,
+                    108,
+                    180,
+                    290
+                  ],
+                  "out": 3,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    1,
+                    110,
+                    182,
+                    290
+                  ],
+                  "duration": 23.123,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 27.739,
+                  "geometry_index": 35,
+                  "location": [
+                    -77.022092,
+                    38.893448
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    110,
+                    290
+                  ],
+                  "duration": 6.632,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 7.958,
+                  "geometry_index": 36,
+                  "location": [
+                    -77.023423,
+                    38.893818
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    110,
+                    162,
+                    289,
+                    342
+                  ],
+                  "duration": 1.535,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 1.819,
+                  "geometry_index": 37,
+                  "location": [
+                    -77.023799,
+                    38.893922
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    163,
+                    290,
+                    349
+                  ],
+                  "duration": 1.713,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "turn_duration": 0.008,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 2.046,
+                  "geometry_index": 38,
+                  "location": [
+                    -77.023881,
+                    38.893944
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.023981,
+                    38.893972
+                  ],
+                  "geometry_index": 39,
+                  "admin_index": 0,
+                  "weight": 3.964,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.019,
+                  "turn_weight": 2,
+                  "duration": 3.655,
+                  "bearings": [
+                    3,
+                    110,
+                    184,
+                    289
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    1,
+                    109,
+                    182,
+                    290
+                  ],
+                  "duration": 13.099,
+                  "turn_duration": 0.008,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 15.709,
+                  "geometry_index": 40,
+                  "location": [
+                    -77.024144,
+                    38.894016
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    110,
+                    289
+                  ],
+                  "duration": 3.709,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 4.451,
+                  "geometry_index": 41,
+                  "location": [
+                    -77.025453,
+                    38.894381
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    165,
+                    292,
+                    344
+                  ],
+                  "duration": 1.645,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.008,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 1.964,
+                  "geometry_index": 42,
+                  "location": [
+                    -77.02582,
+                    38.89448
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.025985,
+                    38.894533
+                  ],
+                  "geometry_index": 43,
+                  "admin_index": 0,
+                  "weight": 6.472,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.024,
+                  "turn_weight": 1,
+                  "duration": 6.584,
+                  "bearings": [
+                    0,
+                    112,
+                    169,
+                    191,
+                    289
+                  ],
+                  "out": 4,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    175,
+                    289,
+                    356
+                  ],
+                  "duration": 6.967,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 8.352,
+                  "geometry_index": 44,
+                  "location": [
+                    -77.026195,
+                    38.894588
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    290
+                  ],
+                  "duration": 7.92,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 9.504,
+                  "geometry_index": 45,
+                  "location": [
+                    -77.026507,
+                    38.894673
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "location": [
+                    -77.026862,
+                    38.894771
+                  ],
+                  "geometry_index": 46,
+                  "admin_index": 0,
+                  "weight": 4.896,
+                  "is_urban": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "traffic_signal": true,
+                  "turn_duration": 2.019,
+                  "duration": 6.099,
+                  "bearings": [
+                    6,
+                    110,
+                    187,
+                    289
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.027052,
+                    38.894823
+                  ],
+                  "geometry_index": 47,
+                  "admin_index": 0,
+                  "weight": 5.388,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.008,
+                  "turn_weight": 1.5,
+                  "duration": 5.248,
+                  "bearings": [
+                    6,
+                    109,
+                    186,
+                    290
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    23,
+                    110,
+                    182,
+                    289
+                  ],
+                  "duration": 5.239,
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 6.264,
+                  "geometry_index": 48,
+                  "location": [
+                    -77.027248,
+                    38.894878
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    289
+                  ],
+                  "duration": 5.76,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 6.912,
+                  "geometry_index": 49,
+                  "location": [
+                    -77.027567,
+                    38.894965
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    175,
+                    289,
+                    355
+                  ],
+                  "duration": 3.247,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 3.888,
+                  "geometry_index": 50,
+                  "location": [
+                    -77.02792,
+                    38.895062
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.028114,
+                    38.895115
+                  ],
+                  "geometry_index": 51,
+                  "admin_index": 0,
+                  "weight": 4.053,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 2.008,
+                  "turn_weight": 1.5,
+                  "duration": 4.135,
+                  "bearings": [
+                    1,
+                    109,
+                    183,
+                    290
+                  ],
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    3,
+                    110,
+                    191,
+                    290
+                  ],
+                  "duration": 9.334,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 11.426,
+                  "geometry_index": 52,
+                  "location": [
+                    -77.02826,
+                    38.895157
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    108,
+                    289
+                  ],
+                  "duration": 8.509,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 10.424,
+                  "geometry_index": 54,
+                  "location": [
+                    -77.028885,
+                    38.895321
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    6,
+                    109,
+                    184,
+                    289
+                  ],
+                  "duration": 2.135,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 2.606,
+                  "geometry_index": 56,
+                  "location": [
+                    -77.029456,
+                    38.895473
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    109,
+                    290
+                  ],
+                  "duration": 0.491,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 0.601,
+                  "geometry_index": 57,
+                  "location": [
+                    -77.029594,
+                    38.895511
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "location": [
+                    -77.029623,
+                    38.895519
+                  ],
+                  "geometry_index": 58,
+                  "admin_index": 0,
+                  "weight": 2.108,
+                  "is_urban": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "turn_duration": 0.019,
+                  "turn_weight": 1.5,
+                  "duration": 0.516,
+                  "bearings": [
+                    110,
+                    184,
+                    288,
+                    358
+                  ],
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    108,
+                    287
+                  ],
+                  "duration": 1.117,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.369,
+                  "geometry_index": 59,
+                  "location": [
+                    -77.029671,
+                    38.895531
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    1,
+                    107,
+                    182,
+                    281
+                  ],
+                  "duration": 2.385,
+                  "turn_duration": 0.026,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "weight": 2.889,
+                  "geometry_index": 60,
+                  "location": [
+                    -77.029775,
+                    38.895556
+                  ]
+                },
+                {
+                  "bearings": [
+                    101,
+                    274
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 62,
+                  "location": [
+                    -77.029989,
+                    38.895589
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination will be on the left"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "Your destination will be on the left"
+                  },
+                  "distanceAlongGeometry": 742.395
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination is on the left"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "Your destination is on the left"
+                  },
+                  "distanceAlongGeometry": 55.556
+                }
+              ],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto Pennsylvania Avenue Northwest.",
+                "modifier": "left",
+                "bearing_after": 290,
+                "bearing_before": 0,
+                "location": [
+                  -77.021918,
+                  38.8934
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "Pennsylvania Avenue Northwest",
+              "weight_typical": 166.762,
+              "duration_typical": 138.668,
+              "duration": 138.668,
+              "distance": 742.395,
+              "driving_side": "right",
+              "weight": 166.762,
+              "mode": "driving",
+              "geometry": "otzdiAzl`|qC_BzIcVdrAoEnVk@bDw@fEwAdIyUxpAeE|UiBhImBbLiDnRcEdUgBzJmBfKmD|RaE`UiBbKsAbHsB~KsE`YmGt^a@~BkArGOx@W~Aq@nEo@lGQ|CAd@"
+            },
+            {
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    94
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 63,
+                  "location": [
+                    -77.030008,
+                    38.89559
+                  ]
+                }
+              ],
+              "bannerInstructions": [],
+              "speedLimitUnit": "mph",
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "Your destination is on the left.",
+                "modifier": "left",
+                "bearing_after": 0,
+                "bearing_before": 274,
+                "location": [
+                  -77.030008,
+                  38.89559
+                ]
+              },
+              "speedLimitSign": "mutcd",
+              "name": "Pennsylvania Avenue Northwest",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "k}~diAnfp|qC??"
+            }
+          ],
+          "distance": 1972.566,
+          "summary": "US 1, Pennsylvania Avenue Northwest"
+        }
+      ],
+      "geometry": "{sodiArtl|qChB?fG@?}LwGOou@Amx@tDybABeQ@cYBae@BsAf@}GzB?wJ?iQB{d@@st@@eH?kG?_A?yEB{s@@i`@@oP?_HAaH@kVBasA?sJaI?md@BsP?_F@}C?iD?_BzIcVdrAoEnVk@bDw@fEwAdIyUxpAeE|UiBhImBbLiDnRcEdUgBzJmBfKmD|RaE`UiBbKsAbHsB~KsE`YmGt^a@~BkArGOx@W~Aq@nEo@lGQ|CAd@",
+      "voiceLocale": "en-US",
+      "refresh_ttl": 21600
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 2.236,
+      "name": "12th Street Southwest",
+      "location": [
+        -77.028186,
+        38.887758
+      ]
+    },
+    {
+      "distance": 15.29,
+      "name": "Pennsylvania Avenue Northwest",
+      "location": [
+        -77.030008,
+        38.89559
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "zkp2lpurAQWOl9AAMsAh-y5HnUnIx7uJU-rZObjADtX5wXPNQiKDzw==_eu-west-1"
+}
