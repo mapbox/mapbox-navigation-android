@@ -658,30 +658,21 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { mapboxNavigation ->
-            val mockRoute = RoutesProvider.dc_short_with_alternative(context)
-            // on alternative
-            val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
-                latitude = 38.893403
-                longitude = -77.032033
-            }
+            val mockRoute = RoutesProvider.dc_short_with_alternative_same_beginning(context)
 
             mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-
-            mapboxNavigation.startTripSession()
             val routes = mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
                     .applyLanguageAndVoiceUnitOptions(context)
                     .baseUrl(mockWebServerRule.baseUrl)
+                    .alternatives(true)
                     .coordinatesList(mockRoute.routeWaypoints).build()
             ).getSuccessfulResultOrThrowException().routes
-            mapboxNavigation.setNavigationRoutes(routes)
 
-            mockLocationReplayerRule.loopUpdateUntil(offRouteLocationUpdate) {
-                mapboxNavigation.routeProgressUpdates()
-                    .filter { it.currentState == RouteProgressState.OFF_ROUTE }
-                    .first()
-            }
+            mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutes(routes)
 
             val rerouteResult = mapboxNavigation.routesUpdates().filter {
                 (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {

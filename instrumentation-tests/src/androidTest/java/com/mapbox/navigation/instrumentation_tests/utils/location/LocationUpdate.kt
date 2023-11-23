@@ -2,6 +2,7 @@ package com.mapbox.navigation.instrumentation_tests.utils.location
 
 import android.location.Location
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
