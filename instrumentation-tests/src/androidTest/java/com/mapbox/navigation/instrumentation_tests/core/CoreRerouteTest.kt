@@ -441,42 +441,6 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun reroute_to_alternative_route() = sdkTest {
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule
-        ) { mapboxNavigation ->
-            val routes = RoutesProvider.dc_short_with_alternative(context).toNavigationRoutes(
-                routerOrigin = RouterOrigin.Offboard
-            )
-            val origin = routes.first().routeOptions.coordinatesList().first()
-            mockLocationUpdatesRule.pushLocationUpdate {
-                latitude = origin.latitude()
-                longitude = origin.longitude()
-            }
-            mapboxNavigation.registerRouteAlternativesObserver(
-                AdvancedAlternativesObserverFromDocumentation(mapboxNavigation)
-            )
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutes(routes)
-            mapboxNavigation.routesUpdates().first { it.navigationRoutes == routes }
-
-            mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
-            val rerouteUpdate = mapboxNavigation.routesUpdates().first {
-                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
-            }
-            assertEquals(
-                listOf(routes[1], routes[0]),
-                rerouteUpdate.navigationRoutes
-            )
-
-            val removePassedAlternativeUpdate = mapboxNavigation.routesUpdates().first {
-                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE &&
-                    !it.navigationRoutes.contains(routes[0])
-            }
-        }
-    }
-
-    @Test
     fun events_order_are_guaranteed_during_reroute_to_alternative_with_custom_reroute_controller() =
         sdkTest {
             val mapboxNavigation = createMapboxNavigation()
@@ -658,6 +622,9 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
         ) { mapboxNavigation ->
+            mapboxNavigation.registerRouteAlternativesObserver(
+                AdvancedAlternativesObserverFromDocumentation(mapboxNavigation)
+            )
             val mockRoute = RoutesProvider.dc_short_with_alternative_same_beginning(context)
 
             mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
@@ -682,6 +649,11 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
                 }
             }.first()
             assertEquals(routes[1], rerouteResult.navigationRoutes.first())
+
+            val removePassedAlternativeUpdate = mapboxNavigation.routesUpdates().first {
+                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE &&
+                    !it.navigationRoutes.contains(routes[0])
+            }
         }
     }
 
