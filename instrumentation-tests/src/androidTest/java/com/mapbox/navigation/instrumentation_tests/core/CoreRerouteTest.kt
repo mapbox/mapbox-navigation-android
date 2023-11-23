@@ -663,36 +663,27 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             historyRecorderRule = mapboxHistoryTestRule
         ) { mapboxNavigation ->
             val mockRoute = RoutesProvider.dc_short_two_legs_with_alternative(context)
-            val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
-                latitude = 38.888565
-                longitude = -77.039343
-            }
             mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-            var routes = listOf<NavigationRoute>()
-            stayOnPosition(
-                mockRoute.routeWaypoints.first(),
-                bearing = 315.0f
-            ) {
-                mapboxNavigation.startTripSession()
-                routes = mapboxNavigation.requestRoutes(
-                    RouteOptions.builder()
-                        .applyDefaultNavigationOptions()
-                        .applyLanguageAndVoiceUnitOptions(context)
-                        .baseUrl(mockWebServerRule.baseUrl)
-                        .coordinatesList(mockRoute.routeWaypoints).build()
-                ).getSuccessfulResultOrThrowException().routes
-                mapboxNavigation.setNavigationRoutesAsync(routes)
-            }
-            stayOnPosition(offRouteLocationUpdate) {
-                val rerouteResult = mapboxNavigation.routesUpdates().filter {
-                    (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
-                        if (it) {
-                            assertEquals(0, mapboxNavigation.currentLegIndex())
-                        }
+            val routes = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(context)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(mockRoute.routeWaypoints).build()
+            ).getSuccessfulResultOrThrowException().routes
+
+            mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+
+            val rerouteResult = mapboxNavigation.routesUpdates().filter {
+                (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                    if (it) {
+                        assertEquals(0, mapboxNavigation.currentLegIndex())
                     }
-                }.first()
-                assertEquals(routes[1], rerouteResult.navigationRoutes.first())
-            }
+                }
+            }.first()
+            assertEquals(routes[1], rerouteResult.navigationRoutes.first())
         }
     }
 
