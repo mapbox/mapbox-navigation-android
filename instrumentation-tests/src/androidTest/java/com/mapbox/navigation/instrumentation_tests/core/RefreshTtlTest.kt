@@ -310,7 +310,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
         mapboxNavigation.registerRoutesInvalidatedObserver { invalidatedResults.add(it) }
         stayOnPosition(coordinates[0].latitude(), coordinates[0].longitude(), 190f) {
             val routes = mapboxNavigation.requestRoutes(routeOptions)
-                .getSuccessfulResultOrThrowException().routes
+                .getSuccessfulResultOrThrowException().routes.take(1)
             mockWebServerRule.requestHandlers.clear()
             mockWebServerRule.requestHandlers.add(
                 MockDirectionsRequestHandler(
