@@ -8,7 +8,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.Flow
@@ -87,19 +86,3 @@ class ViewLifecycleRegistry(
         }
     }
 }
-
-/**
- * Launches a coroutine whenever this lifecycle reaches [Lifecycle.State.STARTED] or higher.
- * If the lifecycle state triggers [Lifecycle.Event.ON_STOP] or beyond, the launched coroutines are canceled.
- *
- * If the state reaches [Lifecycle.State.STARTED] again, the coroutines are restarted.
- *
- * This is useful when paired with [ViewLifecycleRegistry] because the coroutines will keep being canceled and restarted
- * as the target [View] is detached and re-attached to window.
- *
- * This function uses [repeatOnLifecycle] under the hood.
- */
-fun LifecycleOwner.keepExecutingWhenStarted(block: suspend CoroutineScope.() -> Unit) =
-    lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED, block)
-    }

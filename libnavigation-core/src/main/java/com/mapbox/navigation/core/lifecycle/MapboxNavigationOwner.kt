@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.lifecycle
 
-import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -17,9 +18,19 @@ internal class MapboxNavigationOwner {
     private var mapboxNavigation: MapboxNavigation? = null
     private var attached = false
 
-    internal val carAppLifecycleObserver = object : DefaultLifecycleObserver {
+    internal val carAppLifecycleObserver = object : LifecycleEventObserver {
 
-        override fun onStart(owner: LifecycleOwner) {
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            when (event) {
+                Lifecycle.Event.ON_START -> onStart(source)
+                Lifecycle.Event.ON_STOP -> onStop(source)
+                else -> {
+                    // no-op
+                }
+            }
+        }
+
+        private fun onStart(owner: LifecycleOwner) {
             logI("onStart", LOG_CATEGORY)
             check(!MapboxNavigationProvider.isCreated()) {
                 "MapboxNavigation should only be created by the MapboxNavigationOwner"
@@ -31,7 +42,7 @@ internal class MapboxNavigationOwner {
             services.forEach { it.onAttached(mapboxNavigation) }
         }
 
-        override fun onStop(owner: LifecycleOwner) {
+        private fun onStop(owner: LifecycleOwner) {
             logI("onStop", LOG_CATEGORY)
             attached = false
             services.forEach { it.onDetached(mapboxNavigation!!) }

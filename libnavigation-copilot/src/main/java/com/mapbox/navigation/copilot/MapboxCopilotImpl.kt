@@ -3,8 +3,8 @@ package com.mapbox.navigation.copilot
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.SystemClock
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.gson.GsonBuilder
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory
@@ -85,12 +85,20 @@ internal class MapboxCopilotImpl(
     private var appUserId = mapboxNavigation.navigationOptions.eventsAppMetadata?.userId ?: "_"
     private var endedAt = ""
     private var driveMode = ""
-    private val foregroundBackgroundLifecycleObserver = object : DefaultLifecycleObserver {
-        override fun onResume(owner: LifecycleOwner) {
+    private val foregroundBackgroundLifecycleObserver = object : LifecycleEventObserver {
+
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> onResume(source)
+                Lifecycle.Event.ON_PAUSE -> onPause(source)
+            }
+        }
+        
+        private fun onResume(owner: LifecycleOwner) {
             push(GoingToForegroundEvent)
         }
 
-        override fun onPause(owner: LifecycleOwner) {
+        private fun onPause(owner: LifecycleOwner) {
             push(GoingToBackgroundEvent)
         }
     }

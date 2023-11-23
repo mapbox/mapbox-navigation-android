@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.location.Location
 import android.view.View
-import androidx.core.view.isVisible
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -39,7 +38,7 @@ class RecenterButtonComponent(
 
         coroutineScope.launch {
             contract.isVisible.collect { visible ->
-                recenterButton.isVisible = visible
+                recenterButton.visibility = if (visible) View.VISIBLE else View.GONE
             }
         }
     }
