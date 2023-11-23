@@ -443,63 +443,63 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
     @Test
     fun events_order_are_guaranteed_during_reroute_to_alternative_with_custom_reroute_controller() =
         sdkTest {
-            val mapboxNavigation = createMapboxNavigation()
-            val routes = RoutesProvider.dc_short_with_alternative(context).toNavigationRoutes()
-            var latestRouteProgress: RouteProgress? = null
-            mapboxNavigation.registerRouteProgressObserver {
-                latestRouteProgress = it
-            }
-            val navigationStateDuringReroute =
-                CompletableDeferred<NavigationStateDuringReroute>()
-            mapboxNavigation.setRerouteController(object : NavigationRerouteController {
-                override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
-                    navigationStateDuringReroute.complete(
-                        NavigationStateDuringReroute(
-                            latestRouteProgress,
-                            mapboxNavigation.getNavigationRoutes()
+            withMapboxNavigation(
+                historyRecorderRule = mapboxHistoryTestRule
+            ) { mapboxNavigation ->
+                val routes = RoutesProvider.dc_short_with_alternative_same_beginning(context)
+                    .toNavigationRoutes()
+                var latestRouteProgress: RouteProgress? = null
+                mapboxNavigation.registerRouteProgressObserver {
+                    latestRouteProgress = it
+                }
+                val navigationStateDuringReroute =
+                    CompletableDeferred<NavigationStateDuringReroute>()
+                mapboxNavigation.setRerouteController(object : NavigationRerouteController {
+                    override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
+                        navigationStateDuringReroute.complete(
+                            NavigationStateDuringReroute(
+                                latestRouteProgress,
+                                mapboxNavigation.getNavigationRoutes()
+                            )
                         )
-                    )
-                }
+                    }
 
-                override fun reroute(routesCallback: RerouteController.RoutesCallback) {
-                }
+                    override fun reroute(routesCallback: RerouteController.RoutesCallback) {
+                    }
 
-                override val state: RerouteState = RerouteState.Idle
-                override fun interrupt() {
-                }
+                    override val state: RerouteState = RerouteState.Idle
+                    override fun interrupt() {
+                    }
 
-                override fun registerRerouteStateObserver(
-                    rerouteStateObserver: RerouteController.RerouteStateObserver
-                ): Boolean {
-                    return false
-                }
+                    override fun registerRerouteStateObserver(
+                        rerouteStateObserver: RerouteController.RerouteStateObserver
+                    ): Boolean {
+                        return false
+                    }
 
-                override fun unregisterRerouteStateObserver(
-                    rerouteStateObserver: RerouteController.RerouteStateObserver
-                ): Boolean {
-                    return false
-                }
-            })
-            val origin = routes.first().routeOptions.coordinatesList().first()
-            mockLocationUpdatesRule.pushLocationUpdate {
-                latitude = origin.latitude()
-                longitude = origin.longitude()
+                    override fun unregisterRerouteStateObserver(
+                        rerouteStateObserver: RerouteController.RerouteStateObserver
+                    ): Boolean {
+                        return false
+                    }
+                })
+
+                mapboxNavigation.setNavigationRoutes(routes)
+                mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
+                mapboxNavigation.startTripSession()
+
+                mapboxNavigation.routesUpdates().first { it.navigationRoutes == routes }
+
+                val state = navigationStateDuringReroute.await()
+                assertEquals(
+                    routes[1].id,
+                    state.latestRouteProgress?.routeAlternativeId
+                )
+                assertEquals(
+                    routes,
+                    state.routes
+                )
             }
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutes(routes)
-            mapboxNavigation.routesUpdates().first { it.navigationRoutes == routes }
-
-            mockLocationReplayerRule.playRoute(routes[1].directionsRoute)
-
-            val state = navigationStateDuringReroute.await()
-            assertEquals(
-                routes[1].id,
-                state.latestRouteProgress?.routeAlternativeId
-            )
-            assertEquals(
-                routes,
-                state.routes
-            )
         }
 
     @Test
