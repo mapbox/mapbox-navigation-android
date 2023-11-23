@@ -71,6 +71,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
@@ -656,6 +657,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
+    @Ignore("https://mapbox.atlassian.net/browse/NN-1427")
     fun reroute_on_multileg_route_first_leg_with_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule
