@@ -43,6 +43,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.withoutInternet
+import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -55,6 +56,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
@@ -76,7 +78,7 @@ import org.junit.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
-class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+class CoreRerouteTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -691,40 +693,41 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
     @Test
     fun reroute_on_multileg_route_first_leg_with_alternatives() = sdkTest {
-        val mapboxNavigation = createMapboxNavigation()
-        val mockRoute = RoutesProvider.dc_short_two_legs_with_alternative(context)
-        val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
-            latitude = 38.888565
-            longitude = -77.039343
-        }
-
-        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-
-        mapboxNavigation.startTripSession()
-        val routes = mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions()
-                .applyLanguageAndVoiceUnitOptions(context)
-                .baseUrl(mockWebServerRule.baseUrl)
-                .coordinatesList(mockRoute.routeWaypoints).build()
-        ).getSuccessfulResultOrThrowException().routes
-        mapboxNavigation.setNavigationRoutes(routes)
-
-        mapboxNavigation.routeProgressUpdates().first()
-        mockLocationReplayerRule.loopUpdateUntil(offRouteLocationUpdate) {
-            mapboxNavigation.routeProgressUpdates()
-                .filter { it.currentState == RouteProgressState.OFF_ROUTE }
-                .first()
-        }
-
-        val rerouteResult = mapboxNavigation.routesUpdates().filter {
-            (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
-                if (it) {
-                    assertEquals(0, mapboxNavigation.currentLegIndex())
-                }
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { mapboxNavigation ->
+            val mockRoute = RoutesProvider.dc_short_two_legs_with_alternative(context)
+            val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.888565
+                longitude = -77.039343
             }
-        }.first()
-        assertEquals(routes[1], rerouteResult.navigationRoutes.first())
+            mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+            var routes = listOf<NavigationRoute>()
+            stayOnPosition(
+                mockRoute.routeWaypoints.first(),
+                bearing = 315.0f
+            ) {
+                mapboxNavigation.startTripSession()
+                routes = mapboxNavigation.requestRoutes(
+                    RouteOptions.builder()
+                        .applyDefaultNavigationOptions()
+                        .applyLanguageAndVoiceUnitOptions(context)
+                        .baseUrl(mockWebServerRule.baseUrl)
+                        .coordinatesList(mockRoute.routeWaypoints).build()
+                ).getSuccessfulResultOrThrowException().routes
+                mapboxNavigation.setNavigationRoutesAsync(routes)
+            }
+            stayOnPosition(offRouteLocationUpdate) {
+                val rerouteResult = mapboxNavigation.routesUpdates().filter {
+                    (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                        if (it) {
+                            assertEquals(0, mapboxNavigation.currentLegIndex())
+                        }
+                    }
+                }.first()
+                assertEquals(routes[1], rerouteResult.navigationRoutes.first())
+            }
+        }
     }
 
     @Test
