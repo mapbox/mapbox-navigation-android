@@ -47,8 +47,12 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
         mapboxReplayer = null
     }
 
-    fun playRoute(directionsRoute: DirectionsRoute) {
+    fun playRoute(
+        directionsRoute: DirectionsRoute,
+        eventsToDrop: Int = 0
+    ) {
         val replayEvents = mapper.mapDirectionsRouteGeometry(directionsRoute)
+            .drop(eventsToDrop)
         mapboxReplayer?.clearEvents()
         mapboxReplayer?.pushEvents(replayEvents)
         mapboxReplayer?.seekTo(replayEvents.first())

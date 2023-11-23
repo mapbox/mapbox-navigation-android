@@ -743,19 +743,8 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             historyRecorderRule = mapboxHistoryTestRule
         ) { mapboxNavigation ->
             val mockRoute = RoutesProvider.dc_short_alternative_has_more_legs(context)
-            val onRouteLocation = mockLocationUpdatesRule.generateLocationUpdate {
-                latitude = 38.895469
-                longitude = -77.030394
-                bearing = 90f
-            }
-            val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
-                latitude = 38.895873
-                longitude = -77.029556
-                bearing = 0f
-            }
             mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
 
-            mapboxNavigation.startTripSession()
             val routes = mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
@@ -765,18 +754,16 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
                     .coordinatesList(mockRoute.routeWaypoints).build()
             ).getSuccessfulResultOrThrowException().routes
 
+            mockLocationReplayerRule.playRoute(
+                routes[1].directionsRoute,
+                eventsToDrop = 15
+            )
+            mapboxNavigation.startTripSession()
             mapboxNavigation.setNavigationRoutes(routes)
 
-            mockLocationReplayerRule.loopUpdateUntil(onRouteLocation) {
-                mapboxNavigation.routeProgressUpdates()
-                    .filter { it.currentLegProgress?.legIndex == 0 && it.currentRouteGeometryIndex > 5 }
-                    .first()
-            }
-            mockLocationReplayerRule.loopUpdateUntil(offRouteLocationUpdate) {
-                mapboxNavigation.routeProgressUpdates()
-                    .filter { it.currentState == RouteProgressState.OFF_ROUTE }
-                    .first()
-            }
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentLegProgress?.legIndex == 0 && it.currentRouteGeometryIndex > 5 }
+                .first()
 
             val rerouteResult = mapboxNavigation.routesUpdates().filter {
                 (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
