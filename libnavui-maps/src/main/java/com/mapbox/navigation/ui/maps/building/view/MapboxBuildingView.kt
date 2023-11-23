@@ -1,17 +1,17 @@
 package com.mapbox.navigation.ui.maps.building.view
 
 import androidx.annotation.UiThread
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueriedFeature
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
-import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.Layer
-import com.mapbox.maps.extension.style.layers.addPersistentLayer
-import com.mapbox.maps.extension.style.layers.generated.FillExtrusionLayer
-import com.mapbox.maps.extension.style.layers.getLayerAs
 import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
+
+/**
+ * TODO open questions:
+ * 1) Is it safe to check if style is 3d by presence of "building-extrusion" layer
+ * 2) Do we need to allow customers to choose which layer to modify or that'll always be "building-extrusion" layer
+ */
 
 /**
  * Mapbox default view that adds/updates/removes building layer and building highlight
@@ -25,18 +25,20 @@ import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptio
 @UiThread
 class MapboxBuildingView {
 
-    /**
-     * Access the expression used to create the building's height.
-     */
-    private val buildingHeightExpression: Expression =
-        Expression.interpolate(
-            Expression.linear(),
-            Expression.zoom(),
-            literal(15.0),
-            literal(0),
-            literal(15.05),
-            Expression.get(HEIGHT)
-        )
+    private val view2D = Mapbox2DBuildingView()
+    private val view3D = Mapbox3DBuildingView()
+
+    // TODO is it correct impl?
+    private val Style.is3DStyle: Boolean
+        get() = styleLayerExists("building-extrusion")
+
+    private fun viewForStyle(style: Style): BuildingView {
+        return if (style.is3DStyle) {
+            view3D
+        } else {
+            view2D
+        }
+    }
 
     /**
      * Highlight all [buildings] obtained by querying the [MapboxMap]. If the list of buildings
@@ -52,7 +54,7 @@ class MapboxBuildingView {
         buildings: List<QueriedFeature>,
         options: MapboxBuildingHighlightOptions = MapboxBuildingHighlightOptions.Builder().build()
     ) {
-        updateBuildingLayer(style, buildings, options)
+        viewForStyle(style).highlightBuilding(style, buildings, options)
     }
 
     /**
@@ -66,57 +68,13 @@ class MapboxBuildingView {
         style: Style,
         options: MapboxBuildingHighlightOptions = MapboxBuildingHighlightOptions.Builder().build()
     ) {
-        updateBuildingLayer(style, emptyList(), options)
+        viewForStyle(style).removeBuildingHighlight(style, options)
     }
 
     /**
      * Remove the building layer and source.
      */
     fun clear(style: Style) {
-        style.removeStyleLayer(HIGHLIGHT_BUILDING_LAYER_ID)
-    }
-
-    @OptIn(MapboxExperimental::class)
-    private fun updateBuildingLayer(
-        style: Style,
-        buildings: List<QueriedFeature>,
-        options: MapboxBuildingHighlightOptions
-    ) {
-        val ids = buildings.mapNotNull { it.feature.id()?.toLong() }
-        val selectedBuilding = Expression.inExpression(Expression.id(), literal(ids))
-        if (!style.styleLayerExists(HIGHLIGHT_BUILDING_LAYER_ID)) {
-            style.addPersistentLayer(
-                FillExtrusionLayer(HIGHLIGHT_BUILDING_LAYER_ID, COMPOSITE_SOURCE_ID)
-                    .sourceLayer(BUILDING_LAYER_ID)
-                    .filter(selectedBuilding)
-                    .fillExtrusionColor(options.fillExtrusionColor)
-                    .fillExtrusionOpacity(options.fillExtrusionOpacity)
-                    .fillExtrusionBase(Expression.get(MIN_HEIGHT))
-                    .fillExtrusionHeight(buildingHeightExpression)
-            )
-        } else {
-            style
-                .getLayerAs<FillExtrusionLayer>(HIGHLIGHT_BUILDING_LAYER_ID)
-                ?.filter(selectedBuilding)
-        }
-    }
-
-    private companion object {
-        /**
-         * Layer_id used for highlighting a building.
-         */
-        private const val HIGHLIGHT_BUILDING_LAYER_ID = "mapbox-building-highlight-layer"
-
-        /**
-         * Source_id used for highlighting a building.
-         */
-        private const val COMPOSITE_SOURCE_ID = "composite"
-
-        /**
-         * Source layer that includes building height.
-         */
-        private const val BUILDING_LAYER_ID = "building"
-        private const val MIN_HEIGHT = "min-height"
-        private const val HEIGHT = "height"
+        viewForStyle(style).clear(style)
     }
 }
