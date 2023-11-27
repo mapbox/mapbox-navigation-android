@@ -73,6 +73,20 @@ import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigator.ADASISv2Message
+import com.mapbox.navigator.ADASISv2MessageCallback
+import com.mapbox.navigator.AdasisConfig
+import com.mapbox.navigator.AdasisConfigCycleTimes
+import com.mapbox.navigator.AdasisConfigDataSending
+import com.mapbox.navigator.AdasisConfigMessageOptions
+import com.mapbox.navigator.AdasisConfigPathLevelOptions
+import com.mapbox.navigator.AdasisConfigPathsConfigs
+import com.mapbox.navigator.AdasisConfigProfilelongTypeOptions
+import com.mapbox.navigator.AdasisConfigProfileshortTypeOptions
+import com.mapbox.navigator.Profilelong
+import com.mapbox.navigator.Profileshort
+import com.mapbox.navigator.Segment
+import com.mapbox.navigator.Stub
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -271,6 +285,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         logD("sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}", LOG_CATEGORY)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -432,6 +447,37 @@ class MapboxNavigationActivity : AppCompatActivity() {
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set, also receiving route progress updates
         mapboxNavigation.startTripSession()
+        mapboxNavigation.setAdasisMessageCallback(
+            object : ADASISv2MessageCallback {
+                override fun run(message: ADASISv2Message) {
+                    println("[Adasis] message: ${message.toJson()}")
+                }
+            },
+            AdasisConfig(
+                AdasisConfigCycleTimes(),
+                AdasisConfigDataSending(),
+                AdasisConfigPathsConfigs(
+                    AdasisConfigPathLevelOptions(
+                        Stub(AdasisConfigMessageOptions()),
+                        Segment(AdasisConfigMessageOptions()),
+                        Profileshort(AdasisConfigMessageOptions(), AdasisConfigProfileshortTypeOptions()),
+                        Profilelong(AdasisConfigMessageOptions(), AdasisConfigProfilelongTypeOptions())
+                    ),
+                    AdasisConfigPathLevelOptions(
+                        Stub(AdasisConfigMessageOptions()),
+                        Segment(AdasisConfigMessageOptions()),
+                        Profileshort(AdasisConfigMessageOptions(), AdasisConfigProfileshortTypeOptions()),
+                        Profilelong(AdasisConfigMessageOptions(), AdasisConfigProfilelongTypeOptions())
+                    ),
+                    AdasisConfigPathLevelOptions(
+                        Stub(AdasisConfigMessageOptions()),
+                        Segment(AdasisConfigMessageOptions()),
+                        Profileshort(AdasisConfigMessageOptions(), AdasisConfigProfileshortTypeOptions()),
+                        Profilelong(AdasisConfigMessageOptions(), AdasisConfigProfilelongTypeOptions())
+                    ),
+                )
+            )
+        )
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
