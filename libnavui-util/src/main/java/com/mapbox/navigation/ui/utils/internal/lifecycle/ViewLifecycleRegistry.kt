@@ -6,10 +6,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.util.concurrent.Flow
 
 /**
@@ -66,13 +62,13 @@ class ViewLifecycleRegistry(
 
         hostingLifecycleOwner?.lifecycle?.removeObserver(hostingLifecycleObserver)
 
-        val hostingLifecycleOwner = ViewTreeLifecycleOwner.get(view)
-            ?: throw IllegalStateException(
-                "Please ensure that the hosting activity/fragment is a valid LifecycleOwner"
-            )
-        currentState = hostingLifecycleOwner.lifecycle.currentState
-        hostingLifecycleOwner.lifecycle.addObserver(hostingLifecycleObserver)
-        this@ViewLifecycleRegistry.hostingLifecycleOwner = hostingLifecycleOwner
+//        val hostingLifecycleOwner = ViewTreeLifecycleOwner.get(view)
+//            ?: throw IllegalStateException(
+//                "Please ensure that the hosting activity/fragment is a valid LifecycleOwner"
+//            )
+//        currentState = hostingLifecycleOwner.lifecycle.currentState
+//        hostingLifecycleOwner.lifecycle.addObserver(hostingLifecycleObserver)
+//        this@ViewLifecycleRegistry.hostingLifecycleOwner = hostingLifecycleOwner
         isAttached = true
     }
 

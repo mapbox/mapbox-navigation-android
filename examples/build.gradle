@@ -7,7 +7,7 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion androidVersions.compileSdkVersion
+    compileSdkVersion 30
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
