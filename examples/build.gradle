@@ -92,6 +92,13 @@ task downloadUnstrippedNativeLibsDir(type: com.mapbox.gradle.NativeDownloadTask)
             : System.getenv('SDK_REGISTRY_TOKEN')
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("androidx.core:core-ktx:1.5.0")
+        force("androidx.core:core:1.5.0")
+    }
+}
+
 dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')

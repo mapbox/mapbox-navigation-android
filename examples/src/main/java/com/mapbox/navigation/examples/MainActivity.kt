@@ -185,13 +185,13 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         ) {
             permissionsToRequest.add(permission.WRITE_EXTERNAL_STORAGE)
         }
-        if (
+        /*if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
         ) {
             permissionsToRequest.add(permission.POST_NOTIFICATIONS)
-        }
+        }*/
         if (permissionsToRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 this,

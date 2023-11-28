@@ -1,5 +1,5 @@
 ext {
-  def kotlinVersion = "1.5.31"
+  def kotlinVersion = "1.6.21"
 
   androidVersions = [
       minSdkVersion           : 21,
