@@ -16,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -26,7 +27,7 @@ import kotlin.coroutines.suspendCoroutine
 class ThreadControllerTest {
 
     @get:Rule
-    private val testCoroutineRule = MainCoroutineRule()
+    val testCoroutineRule = MainCoroutineRule()
 
     private val threadController = ThreadController()
 
@@ -143,15 +144,25 @@ class ThreadControllerTest {
     @Test
     fun destroy_thread_controller() {
         val handler = CompletableDeferred<Unit>()
+        var errorMessage: String? = null
         threadController.getIOScopeAndRootJob().scope.launch {
             handler.await()
-            fail("IO scope should be cancelled")
+            errorMessage = "IO scope should be cancelled"
         }
         threadController.getMainScopeAndRootJob().scope.launch {
             handler.await()
-            fail("UI scope should be cancelled")
+            errorMessage = "UI scope should be cancelled"
         }
         threadController.destroy()
         handler.complete(Unit)
+        assertNull(errorMessage)
+
+        threadController.getIOScopeAndRootJob().scope.launch {
+            errorMessage = "IO scope should be cancelled"
+        }
+        threadController.getMainScopeAndRootJob().scope.launch {
+            errorMessage = "UI scope should be cancelled"
+        }
+        assertNull(errorMessage)
     }
 }

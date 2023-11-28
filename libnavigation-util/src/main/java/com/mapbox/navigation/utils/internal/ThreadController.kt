@@ -103,6 +103,8 @@ class ThreadController {
     }
 
     fun destroy() {
-
+        val reason = CancellationException("thread controller is destroyed")
+        mainRootJob.cancel(reason)
+        ioRootJob.cancel(reason)
     }
 }
