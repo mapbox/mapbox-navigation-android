@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.utils.tiles
 import android.util.Log
 import com.mapbox.common.TileRegionLoadOptions
 import com.mapbox.geojson.Geometry
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
@@ -50,12 +51,14 @@ suspend fun loadRegion(navigation: MapboxNavigation, region: OfflineRegion) {
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForRegion(
     region: OfflineRegion,
     historyRecorderRule: MapboxHistoryTestRule? = null,
+    routeRefreshOptions: RouteRefreshOptions? = null,
     block: (MapboxNavigation) -> Unit
 ) {
     withMapboxNavigation(
         useRealTiles = true, // TODO: use mocked tiles instead of real NAVAND-1351
         tileStore = createTileStore(),
-        historyRecorderRule = historyRecorderRule
+        historyRecorderRule = historyRecorderRule,
+        routeRefreshOptions = routeRefreshOptions
     ) { navigation ->
         val tilesAreLoaded = withTimeoutOrNull(TIME_TO_LOAD_TILES) {
             loadRegion(navigation, region)
