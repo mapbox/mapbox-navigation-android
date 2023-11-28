@@ -1,15 +1,20 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
+import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
@@ -27,6 +32,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.NavigationRouteAlternat
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.alternativesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.testing.ui.utils.coroutines.refreshStates
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
@@ -39,6 +45,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 
 // TODO: remove in the scope of NAVAND-1351
 const val INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE = DEFAULT_TIMEOUT_FOR_SDK_TEST +
@@ -300,6 +307,76 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                         "onboard router doesn't add waypoints",
                         newRoutes.navigationRoutes.map { 2 },
                         newRoutes.navigationRoutes.map { it.waypoints?.size }
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun refresh_online_ev_route_offline() = sdkTest(
+        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
+    ) {
+        val originalTestRoute = setupBerlinEvRoute()
+
+        val routeRefreshOptions = RouteRefreshOptions.Builder()
+            .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+            .build()
+        RouteRefreshOptions::class.java.getDeclaredField("intervalMillis").apply {
+            isAccessible = true
+            set(routeRefreshOptions, 1_500L)
+        }
+
+        withMapboxNavigationAndOfflineTilesForRegion(
+            OfflineRegions.Berlin,
+            historyRecorderRule = mapboxHistoryTestRule,
+            routeRefreshOptions = routeRefreshOptions
+        ) { navigation ->
+            stayOnPosition(
+                latitude = originalTestRoute.origin.latitude(),
+                longitude = originalTestRoute.origin.longitude(),
+                bearing = 280.0f
+            ) {
+                navigation.startTripSession()
+                val onlineResult = navigation.requestRoutes(originalTestRoute.routeOptions)
+                    .getSuccessfulResultOrThrowException()
+                assertEquals(RouterOrigin.Offboard, onlineResult.routerOrigin)
+                assertEquals(
+                    "online route for this case is expected to add charging station",
+                    listOf(3, 3),
+                    onlineResult.routes.map { it.waypoints?.size }
+                )
+                navigation.setNavigationRoutesAsync(onlineResult.routes)
+
+                withoutInternet {
+                    navigation.refreshStates().first {
+                        it.state == RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED
+                    }
+                    val refreshedInOfflineResult = navigation.routesUpdates()
+                        .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+                    assertEquals(
+                        RouterOrigin.Offboard,
+                        refreshedInOfflineResult.navigationRoutes.first().origin
+                    )
+                    assertEquals(
+                        "waypoints have been updated after failed refresh",
+                        onlineResult.routes.map { it.waypoints },
+                        refreshedInOfflineResult.navigationRoutes.map { it.waypoints }
+                    )
+                    assertEquals(
+                        "SOC annotations have been changed during failed route refresh",
+                        onlineResult.routes.map {
+                            it.directionsRoute.legs()?.map {
+                                it.annotation()
+                                    ?.getUnrecognizedProperty("state_of_charge")
+                            }
+                        },
+                        refreshedInOfflineResult.navigationRoutes.map {
+                            it.directionsRoute.legs()?.map {
+                                it.annotation()
+                                    ?.getUnrecognizedProperty("state_of_charge")
+                            }
+                        }
                     )
                 }
             }

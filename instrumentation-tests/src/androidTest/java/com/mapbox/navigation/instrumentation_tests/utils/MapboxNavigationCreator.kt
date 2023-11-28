@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
@@ -23,6 +24,7 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     historyRecorderRule: MapboxHistoryTestRule? = null, // TODO: copy features to new infra
     longRoutesOptimisationOptions: LongRoutesOptimisationOptions =
         LongRoutesOptimisationOptions.NoOptimisations,
+    routeRefreshOptions: RouteRefreshOptions? = null,
     block: (navigation: MapboxNavigation) -> Unit
 ) {
     val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
@@ -42,6 +44,10 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
                     .tileStore(tileStore)
                     .build()
                 routingTilesOptions(routingTilesOptions)
+            }.apply {
+                if (routeRefreshOptions != null) {
+                    this.routeRefreshOptions(routeRefreshOptions)
+                }
             }
             .longRoutesOptimisationOptions(longRoutesOptimisationOptions)
             .build()

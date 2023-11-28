@@ -98,26 +98,18 @@ class MockWebServerRule : TestWatcher() {
     }
 
     private suspend fun retryStarting(port: Int): Boolean {
-        try {
-            withTimeout(30_000) {
-                while (true) {
-                    if (!isActive) {
-                        Log.e("MockWebServerRule", "can't start mock server on port $port")
-                        return@withTimeout false
-                    }
-                    try {
-                        webServer = MockWebServer()
-                        webServer.start(port)
-                        return@withTimeout true
-                    } catch (t: Throwable) {
-                        Log.e("MockWebServerRule", "error starting mock web server", t)
-                    }
-                    delay(500)
+        return withTimeoutOrNull(30_000) {
+            while (true) {
+                try {
+                    webServer = MockWebServer()
+                    webServer.start(port)
+                    break
+                } catch (t: Throwable) {
+                    Log.e("MockWebServerRule", "error starting mock web server", t)
                 }
+                delay(500)
             }
-        } catch (ex: TimeoutCancellationException) {
-            return false
-        }
-        return false
+            true
+        } ?: false
     }
 }
