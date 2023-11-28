@@ -27,6 +27,7 @@ import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.BlockResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RerouteStateTransitionAssertion
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
@@ -70,6 +71,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -893,6 +895,58 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
                     .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW }
             }
         }
+    }
+
+    @Test
+    fun reroute_during_destroy_of_navigation() = sdkTest {
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_very_short(context)
+        val originLocation = mockRoute.routeWaypoints.first()
+        val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = originLocation.latitude() + 0.002
+            longitude = originLocation.longitude()
+        }
+
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val rerouteResponseBlock = BlockResponseModifier()
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                jsonResponse = readRawFileText(context, R.raw.reroute_response_dc_very_short),
+                expectedCoordinates = listOf(
+                    Point.fromLngLat(
+                        offRouteLocationUpdate.longitude,
+                        offRouteLocationUpdate.latitude
+                    ),
+                    mockRoute.routeWaypoints.last()
+                ),
+                relaxedExpectedCoordinates = true
+            ).apply {
+                jsonResponseModifier = rerouteResponseBlock
+            }
+        )
+
+        mapboxNavigation.startTripSession()
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints).build()
+        ).getSuccessfulResultOrThrowException().routes
+        mapboxNavigation.setNavigationRoutes(routes)
+
+        mockLocationReplayerRule.loopUpdateUntil(offRouteLocationUpdate) {
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentState == RouteProgressState.OFF_ROUTE }
+                .first()
+        }
+        mapboxNavigation.onDestroy()
+        mapboxNavigation.registerRoutesObserver {
+            fail("routes shouldn't be updated after destroy, but received $it")
+        }
+        rerouteResponseBlock.release()
+        delay(3000)
     }
 
     private fun createMapboxNavigation(customRefreshInterval: Long? = null): MapboxNavigation {
