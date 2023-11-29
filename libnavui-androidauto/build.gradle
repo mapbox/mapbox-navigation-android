@@ -59,7 +59,7 @@ dependencies {
     testImplementation(project(':libtesting-utils'))
     testImplementation project(':libtesting-navigation-util')
     testImplementation(dependenciesList.androidXArchCoreTesting)
-    testImplementation(dependenciesList.androidXLifecycleTesting)
+//    testImplementation(dependenciesList.androidXLifecycleTesting)
 
     // Needed for the instrumentation tests in the androidTest module
     androidTestImplementation(dependenciesList.testRunner)
