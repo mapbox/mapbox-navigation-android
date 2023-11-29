@@ -56,6 +56,7 @@ import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.set
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
@@ -229,15 +230,17 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
 
     private val routesObserver = RoutesObserver { result ->
-        if (result.routes.isNotEmpty()) {
+        if (result.navigationRoutes.isNotEmpty()) {
+
             // generate route geometries asynchronously and render them
             CoroutineScope(Dispatchers.Main).launch {
-                val result = routeLineAPI.setRoutes(
-                    listOf(RouteLine(result.routes.first(), null))
-                )
-                val style = mapboxMap.getStyle()
-                if (style != null) {
-                    routeLineView.renderRouteDrawData(style, result)
+                routeLineAPI.setNavigationRoutes(
+                    result.navigationRoutes,
+                    mapboxNavigation.getAlternativeMetadataFor(result.navigationRoutes)
+                ) { value ->
+                    mapboxMap.getStyle()?.apply {
+                        routeLineView.renderRouteDrawData(this, value)
+                    }
                 }
             }
 
@@ -468,6 +471,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
+                .alternatives(true)
+                .baseUrl("https://api-valhalla-freeflow-alts-us-east-1.mapbox.com")
                 .coordinatesList(listOf(origin, destination))
                 .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .build(),

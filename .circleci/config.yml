@@ -45,7 +45,7 @@ workflows:
               ignore:
                 - main
                 - /release-v.*/
-                - compile-sdk-30
+#                - compile-sdk-30
       - release-snapshot:
           requires:
             - release-snapshot-start
@@ -55,7 +55,7 @@ workflows:
               only:
                 - main
                 - /release-v.*/
-                - compile-sdk-30
+#                - compile-sdk-30
       - release:
           filters:
             tags:

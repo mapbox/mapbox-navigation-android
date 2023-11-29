@@ -101,8 +101,8 @@ configurations.all {
 
 dependencies {
     // Mapbox Navigation SDK
-//    implementation "com.mapbox.navigation:android:2.17.0-compile-sdk-30-SNAPSHOT"
-    implementation project(':libnavigation-android')
+    implementation "com.mapbox.navigation:android:2.17.0-compile-sdk-30-SNAPSHOT"
+//    implementation project(':libnavigation-android')
 
     // test
     androidTestImplementation project(':libtesting-ui')
