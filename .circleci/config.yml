@@ -55,6 +55,7 @@ workflows:
               only:
                 - main
                 - /release-v.*/
+                - dd-compile-sdk-30-cal-sprint
       - release:
           filters:
             tags:
