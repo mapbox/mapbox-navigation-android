@@ -45,6 +45,7 @@ workflows:
               ignore:
                 - main
                 - /release-v.*/
+                - dd-compile-sdk-30-cal-sprint
       - release-snapshot:
           requires:
             - release-snapshot-start
