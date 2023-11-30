@@ -828,6 +828,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
     }
 
+    fun setRefreshedPrimarySingleLegRoute(
+        routes: List<NavigationRoute>,
+    ) {
+        internalSetNavigationRoutes(
+            routes,
+            reason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+        )
+    }
+
     /**
      * Requests road graph data update and invokes the callback on result.
      * Use this method if the frequency of application relaunch is too low

@@ -3,8 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.mapbox.maps.token'
 apply from: "${rootDir}/gradle/script-git-version.gradle"
 apply from: "${rootDir}/gradle/ktlint.gradle"
-apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.firebase.crashlytics'
+//apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -28,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.mapbox.navigation.examples"
+        applicationId "com.mapbox.navigation.examples.copy"
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         multiDexEnabled true
@@ -62,12 +62,12 @@ android {
             minifyEnabled true
             signingConfig signingConfigs.release
             manifestPlaceholders = [enableCrashReporting: "true"]
-            firebaseCrashlytics {
-                mappingFileUploadEnabled = true
-                nativeSymbolUploadEnabled = true
-                strippedNativeLibsDir = 'build/intermediates/stripped_native_libs/release/out/lib/'
-                unstrippedNativeLibsDir = com.mapbox.gradle.NativeDownloadTask.UNSTRIPPED_NATIVE_LIBS_PATH
-            }
+//            firebaseCrashlytics {
+//                mappingFileUploadEnabled = true
+//                nativeSymbolUploadEnabled = true
+//                strippedNativeLibsDir = 'build/intermediates/stripped_native_libs/release/out/lib/'
+//                unstrippedNativeLibsDir = com.mapbox.gradle.NativeDownloadTask.UNSTRIPPED_NATIVE_LIBS_PATH
+//            }
         }
     }
 
@@ -95,6 +95,7 @@ task downloadUnstrippedNativeLibsDir(type: com.mapbox.gradle.NativeDownloadTask)
 dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
+    implementation project(':libnavigation-router')
 
     // test
     androidTestImplementation project(':libtesting-ui')
@@ -122,5 +123,5 @@ dependencies {
     debugImplementation dependenciesList.leakCanaryDebug
 
     // Crashlytics
-    implementation dependenciesList.firebaseCrashlyticsNdk
+//    implementation dependenciesList.firebaseCrashlyticsNdk
 }

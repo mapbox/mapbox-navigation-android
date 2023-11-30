@@ -5,13 +5,19 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
+import com.mapbox.common.LogConfiguration
+import com.mapbox.common.LoggingLevel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -25,16 +31,25 @@ import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.options.DeviceProfile
+import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.core.replay.history.ReplaySetRoute
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
@@ -42,6 +57,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
 import com.mapbox.navigation.examples.util.Utils
+import com.mapbox.navigation.route.internal.RouterWrapper
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -72,7 +88,10 @@ import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.net.URL
 import java.util.Locale
 
 class MapboxNavigationActivity : AppCompatActivity() {
@@ -88,6 +107,9 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     // location puck integration
     private val navigationLocationProvider = NavigationLocationProvider()
+
+    private val replayer = MapboxReplayer()
+    private val mapper = ReplayRouteMapper()
 
     // camera
     private lateinit var navigationCamera: NavigationCamera
@@ -197,6 +219,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     private val routeProgressObserver =
         RouteProgressObserver { routeProgress ->
+            Log.d("test", "lp_test, eta: ${routeProgress.durationRemaining}")
+
             // update the camera position to account for the progressed fragment of the route
             viewportDataSource.onRouteProgressChanged(routeProgress)
             viewportDataSource.evaluate()
@@ -274,6 +298,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         binding = LayoutActivityNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
+        LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
 
         // initialize the location puck
         binding.mapView.location.apply {
@@ -296,6 +321,9 @@ class MapboxNavigationActivity : AppCompatActivity() {
                         BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME
                     ).build()
                 )
+                .deviceProfile(DeviceProfile.Builder().deviceType(DeviceType.AUTOMOBILE).build())
+                .routeRefreshOptions(RouteRefreshOptions.Builder().intervalMillis(Long.MAX_VALUE).build())
+                .locationEngine(ReplayLocationEngine(replayer))
                 .build()
         )
         // move the camera to current location on the first update
@@ -429,6 +457,78 @@ class MapboxNavigationActivity : AppCompatActivity() {
         // start the trip session to being receiving location updates in free drive
         // and later when a route is set, also receiving route progress updates
         mapboxNavigation.startTripSession()
+
+        lifecycleScope.launch {
+            delay(2000)
+            simulate()
+        }
+    }
+
+    data class ReplaySetRefresh(
+        override val eventTimestamp: Double,
+        val currentLegGeometryIndex: Int,
+        val refreshResponseJson: String,
+    ) : ReplayEventBase
+
+    private fun getStringFromAssets(fileName: String): String {
+        return assets.open(fileName).bufferedReader().use { it.readText() }
+    }
+
+    private fun getDirectionsRouteFromAssets(fileName: String): DirectionsRoute {
+        val routeResponseJson = getStringFromAssets(fileName)
+        val routeResponse = DirectionsResponse.fromJson(
+            routeResponseJson,
+            RouteOptions.fromUrl(URL(JSONObject(routeResponseJson).getString("url")))
+        )
+        return routeResponse.routes().first()
+    }
+
+    private fun getReplaySetRouteFromAssets(timestamp: Double, fileName: String): ReplaySetRoute {
+        return ReplaySetRoute(timestamp, getDirectionsRouteFromAssets(fileName))
+    }
+
+    private fun getReplaySetRefreshFromAssets(
+        timestamp: Double,
+        fileName: String
+    ): ReplaySetRefresh {
+        val json = getStringFromAssets(fileName)
+        return ReplaySetRefresh(
+            timestamp,
+            0,//JSONObject(json).getInt("current_route_geometry_index"),
+            json
+        )
+    }
+
+    fun simulate() {
+        val route = getDirectionsRouteFromAssets("route_response_customer.json")
+        val events = mutableListOf<ReplayEventBase>()
+        events += (mapper.mapDirectionsRouteGeometry(route)[1025] as ReplayEventUpdateLocation).copy(eventTimestamp = 0.0)
+        events += getReplaySetRouteFromAssets(2.0, "route_response_customer.json")
+        events += getReplaySetRefreshFromAssets(12.0, "refresh_response_customer.json")
+
+        replayer.pushEvents(events)
+
+        replayer.registerObserver {
+            it.forEach { event ->
+                when (event) {
+                    is ReplaySetRoute -> {
+                        setRouteAndStartNavigation(event.route?.let { listOf(it) } ?: emptyList())
+                    }
+
+                    is ReplaySetRefresh -> {
+                        val refreshedRoute = RouterWrapper.refreshRoute(
+                            mapboxNavigation.getNavigationRoutes().first(),
+                            legIndex = 0,
+                            event.refreshResponseJson,
+                        ).value!!
+                        mapboxNavigation.setRefreshedPrimarySingleLegRoute(
+                            listOf(refreshedRoute),
+                        )
+                    }
+                }
+            }
+        }
+        replayer.play()
     }
 
     override fun onStart() {
@@ -476,7 +576,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    setRouteAndStartNavigation(routes)
+                    // setRouteAndStartNavigation2(routes)
                 }
 
                 override fun onFailure(
@@ -493,7 +593,22 @@ class MapboxNavigationActivity : AppCompatActivity() {
         )
     }
 
-    private fun setRouteAndStartNavigation(route: List<NavigationRoute>) {
+    private fun setRouteAndStartNavigation(route: List<DirectionsRoute>) {
+        // set route
+        mapboxNavigation.setRoutes(route)
+
+        // show UI elements
+        binding.soundButton.visibility = VISIBLE
+        binding.routeOverview.visibility = VISIBLE
+        binding.tripProgressCard.visibility = VISIBLE
+        binding.routeOverview.showTextAndExtend(2000L)
+        binding.soundButton.unmuteAndExtend(2000L)
+
+        // move the camera to overview when new route is available
+        navigationCamera.requestNavigationCameraToOverview()
+    }
+
+    private fun setRouteAndStartNavigation2(route: List<NavigationRoute>) {
         // set route
         mapboxNavigation.setNavigationRoutes(route)
 

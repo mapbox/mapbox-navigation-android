@@ -8,6 +8,8 @@ import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.InternalRouter
 import com.mapbox.navigation.base.internal.route.refreshRoute
@@ -220,31 +222,7 @@ class RouterWrapper(
                 {
                     mainJobControl.scope.launch {
                         withContext(ThreadController.DefaultDispatcher) {
-                            parseDirectionsRouteRefresh(it)
-                                .onValue {
-                                    logD(
-                                        "Parsed route refresh response for route(${route.id})",
-                                        LOG_CATEGORY
-                                    )
-                                }
-                                .onError {
-                                    logD(
-                                        "Failed to parse route refresh response for " +
-                                            "route(${route.id})",
-                                        LOG_CATEGORY
-                                    )
-                                }
-                                .mapValue { routeRefresh ->
-                                    route.refreshRoute(
-                                        initialLegIndex = refreshOptions.legIndex,
-                                        legAnnotations = routeRefresh.legs()?.map {
-                                            it.annotation()
-                                        },
-                                        incidents = routeRefresh.legs()?.map {
-                                            it.incidents()
-                                        }
-                                    )
-                                }
+                            refreshRoute(route, refreshOptions.legIndex, it)
                         }.fold(
                             { throwable ->
                                 callback.onFailure(
@@ -299,8 +277,41 @@ class RouterWrapper(
         router.cancelAll()
     }
 
-    private companion object {
+    companion object {
+
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
+
+        fun refreshRoute(
+            route: NavigationRoute,
+            legIndex: Int,
+            refreshResponseJson: String,
+        ): Expected<Throwable, NavigationRoute> {
+            return parseDirectionsRouteRefresh(refreshResponseJson)
+                .onValue {
+                    logD(
+                        "Parsed route refresh response for route(${route.id})",
+                        LOG_CATEGORY
+                    )
+                }
+                .onError {
+                    logD(
+                        "Failed to parse route refresh response for " +
+                            "route(${route.id})\n$it",
+                        LOG_CATEGORY
+                    )
+                }
+                .mapValue { routeRefresh ->
+                    route.refreshRoute(
+                        initialLegIndex = legIndex,
+                        legAnnotations = routeRefresh.legs()?.map {
+                            it.annotation()
+                        },
+                        incidents = routeRefresh.legs()?.map {
+                            it.incidents()
+                        }
+                    )
+                }
+        }
     }
 }
