@@ -8,6 +8,7 @@ import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
@@ -273,42 +274,14 @@ class RouterWrapper(
                 {
                     mainJobControl.scope.launch {
                         withContext(ThreadController.DefaultDispatcher) {
-                            parseDirectionsRouteRefresh(it)
-                                .onValue {
-                                    logD(
-                                        "Parsed route refresh response for route(${route.id})",
-                                        LOG_CATEGORY
-                                    )
-                                }
-                                .onError {
-                                    logD(
-                                        "Failed to parse route refresh response for " +
-                                            "route(${route.id})",
-                                        LOG_CATEGORY
-                                    )
-                                }
-                                .mapValue { routeRefresh ->
-                                    val updatedWaypoints = WaypointsParser.parse(
-                                        routeRefresh.unrecognizedJsonProperties
-                                            ?.get(Constants.RouteResponse.KEY_WAYPOINTS)
-                                    )
-                                    route.refreshRoute(
-                                        initialLegIndex = refreshOptions.legIndex,
-                                        currentLegGeometryIndex = routeRefreshRequestData
-                                            .legGeometryIndex,
-                                        legAnnotations = routeRefresh.legs()?.map {
-                                            it.annotation()
-                                        },
-                                        incidents = routeRefresh.legs()?.map {
-                                            it.incidents()
-                                        },
-                                        closures = routeRefresh.legs()?.map { it.closures() },
-                                        waypoints = updatedWaypoints,
-                                        responseTimeElapsedSeconds = responseTimeElapsedSeconds,
-                                        refreshTtl = routeRefresh.unrecognizedJsonProperties
-                                            ?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
-                                    )
-                                }
+                            refreshRoute(
+                                route = route,
+                                initialLegIndex = refreshOptions.legIndex,
+                                currentLegGeometryIndex = routeRefreshRequestData
+                                    .legGeometryIndex,
+                                responseTimeElapsedSeconds = responseTimeElapsedSeconds,
+                                refreshResponseJson = it
+                            )
                         }.fold(
                             { throwable ->
                                 callback.onFailure(
@@ -366,9 +339,53 @@ class RouterWrapper(
         router.cancelAll()
     }
 
-    private companion object {
+    companion object {
 
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
+
+        fun refreshRoute(
+            route: NavigationRoute,
+            initialLegIndex: Int,
+            currentLegGeometryIndex: Int?,
+            responseTimeElapsedSeconds: Long,
+            refreshResponseJson: String
+        ): Expected<Throwable, NavigationRoute> {
+            return parseDirectionsRouteRefresh(refreshResponseJson)
+                .onValue {
+                    logD(
+                        "Parsed route refresh response for route(${route.id})",
+                        LOG_CATEGORY
+                    )
+                }
+                .onError {
+                    logD(
+                        "Failed to parse route refresh response for " +
+                            "route(${route.id})",
+                        LOG_CATEGORY
+                    )
+                }
+                .mapValue { routeRefresh ->
+                    val updatedWaypoints = WaypointsParser.parse(
+                        routeRefresh.unrecognizedJsonProperties
+                            ?.get(Constants.RouteResponse.KEY_WAYPOINTS)
+                    )
+                    route.refreshRoute(
+                        initialLegIndex = initialLegIndex,
+                        currentLegGeometryIndex = currentLegGeometryIndex,
+                        legAnnotations = routeRefresh.legs()?.map {
+                            it.annotation()
+                        },
+                        incidents = routeRefresh.legs()?.map {
+                            it.incidents()
+                        },
+                        closures = routeRefresh.legs()?.map { it.closures() },
+                        waypoints = updatedWaypoints,
+                        responseTimeElapsedSeconds = responseTimeElapsedSeconds,
+                        refreshTtl = routeRefresh.unrecognizedJsonProperties
+                            ?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
+                    )
+                }
+        }
     }
 }

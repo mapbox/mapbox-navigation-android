@@ -59,6 +59,7 @@ import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
+import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.telemetry.CustomEvent
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.utils.InternalUtils
@@ -949,6 +950,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routes,
             setRoutesInfo,
             callback,
+        )
+    }
+
+    fun setRefreshedPrimarySingleLegRoute(
+        routes: List<NavigationRoute>,
+        routeProgressData: RouteProgressData,
+    ) {
+        internalSetNavigationRoutes(
+            routes,
+            SetRoutes.RefreshRoutes(routeProgressData)
         )
     }
 
