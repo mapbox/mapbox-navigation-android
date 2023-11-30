@@ -7,7 +7,7 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 30
+    compileSdk 30
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -29,8 +29,8 @@ android {
 
     defaultConfig {
         applicationId "com.mapbox.navigation.examples"
-        minSdkVersion androidVersions.minSdkVersion
-        targetSdkVersion androidVersions.targetSdkVersion
+        minSdkVersion 23
+        targetSdkVersion 30
         multiDexEnabled true
         versionCode gitVersionCode
         versionName gitVersionName
@@ -94,8 +94,8 @@ task downloadUnstrippedNativeLibsDir(type: com.mapbox.gradle.NativeDownloadTask)
 
 configurations.all {
     resolutionStrategy {
-        force("androidx.core:core-ktx:1.5.0")
-        force("androidx.core:core:1.5.0")
+        force("androidx.core:core-ktx:1.6.0")
+        force("androidx.core:core:1.6.0")
     }
 }
 
