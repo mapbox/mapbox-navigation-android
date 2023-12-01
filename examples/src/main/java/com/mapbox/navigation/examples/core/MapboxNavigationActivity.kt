@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.Toast
@@ -47,6 +48,7 @@ import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -218,6 +220,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     private val routeProgressObserver =
         RouteProgressObserver { routeProgress ->
+            Log.d("test", "lp_test, eta: ${routeProgress.durationRemaining}")
             // update the camera position to account for the progressed fragment of the route
             viewportDataSource.onRouteProgressChanged(routeProgress)
             viewportDataSource.evaluate()
@@ -491,7 +494,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         val json = getStringFromAssets(fileName)
         return ReplaySetRefresh(
             timestamp,
-            JSONObject(json).getInt("current_route_geometry_index"),
+            0,//JSONObject(json).getInt("current_route_geometry_index"),
             json
         )
     }
@@ -499,9 +502,9 @@ class MapboxNavigationActivity : AppCompatActivity() {
     fun simulate() {
         val route = getDirectionsRouteFromAssets("route_response_customer.json")
         val events = mutableListOf<ReplayEventBase>()
-        events += mapper.mapDirectionsRouteGeometry(route)[910]
+        events += (mapper.mapDirectionsRouteGeometry(route)[910] as ReplayEventUpdateLocation).copy(eventTimestamp = 0.0)
         events += getReplaySetRouteFromAssets(2.0, "route_response_customer.json")
-        // events += getReplaySetRefreshFromAssets(12.0, "refresh_response_1.json")
+        events += getReplaySetRefreshFromAssets(12.0, "refresh_response_customer.json")
 
         replayer.pushEvents(events)
 
@@ -513,17 +516,17 @@ class MapboxNavigationActivity : AppCompatActivity() {
                     }
 
                     is ReplaySetRefresh -> {
-                        // val refreshedRoute = RouterWrapper.refreshRoute(
-                        //     mapboxNavigation.getNavigationRoutes().first(),
-                        //     initialLegIndex = 0,
-                        //     currentLegGeometryIndex = event.currentLegGeometryIndex,
-                        //     responseTimeElapsedSeconds = 0,
-                        //     event.refreshResponseJson,
-                        // ).value!!
-                        // mapboxNavigation.setRefreshedPrimarySingleLegRoute(
-                        //     listOf(refreshedRoute),
-                        //     routeProgressData = RouteProgressData(0, 0, 0)
-                        // )
+                        val refreshedRoute = RouterWrapper.refreshRoute(
+                            mapboxNavigation.getNavigationRoutes().first(),
+                            initialLegIndex = 0,
+                            currentLegGeometryIndex = event.currentLegGeometryIndex,
+                            responseTimeElapsedSeconds = 0,
+                            event.refreshResponseJson,
+                        ).value!!
+                        mapboxNavigation.setRefreshedPrimarySingleLegRoute(
+                            listOf(refreshedRoute),
+                            routeProgressData = RouteProgressData(0, 0, 0)
+                        )
                     }
                 }
             }
