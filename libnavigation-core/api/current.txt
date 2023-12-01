@@ -194,16 +194,8 @@ package com.mapbox.navigation.core {
 
 package com.mapbox.navigation.core.adasis {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ADASISv2Message {
-    method public long toBigEndian();
-    method public java.util.List<java.lang.Byte> toFlatBuffer();
-    method public String toHex();
-    method public String toJson();
-    method public long toLittleEndian();
-  }
-
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface ADASISv2MessageCallback {
-    method public void onMessage(com.mapbox.navigation.core.adasis.ADASISv2Message message);
+    method public void onMessage(java.util.List<java.lang.Byte> messageBuffer);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfig {
@@ -234,13 +226,15 @@ package com.mapbox.navigation.core.adasis {
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigDataSending {
-    ctor public AdasisConfigDataSending(int messageIntervalMs = 80, int messagesInPackage = 20, boolean sortProfileShortsByOffset = true, boolean sortProfileLongsByOffset = true, boolean enableRetransmission = true);
+    ctor public AdasisConfigDataSending(com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat messageBinaryFormat, int messageIntervalMs = 80, int messagesInPackage = 20, boolean sortProfileShortsByOffset = true, boolean sortProfileLongsByOffset = true, boolean enableRetransmission = true);
     method public boolean getEnableRetransmission();
+    method public com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat getMessageBinaryFormat();
     method public int getMessageIntervalMs();
     method public int getMessagesInPackage();
     method public boolean getSortProfileLongsByOffset();
     method public boolean getSortProfileShortsByOffset();
     property public final boolean enableRetransmission;
+    property public final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat messageBinaryFormat;
     property public final int messageIntervalMs;
     property public final int messagesInPackage;
     property public final boolean sortProfileLongsByOffset;
@@ -313,6 +307,22 @@ package com.mapbox.navigation.core.adasis {
     property public final boolean variableSpeedSign;
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class AdasisMessageBinaryFormat {
+    ctor public AdasisMessageBinaryFormat();
+  }
+
+  public static final class AdasisMessageBinaryFormat.AdasisV2BigEndian extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.AdasisV2BigEndian INSTANCE;
+  }
+
+  public static final class AdasisMessageBinaryFormat.AdasisV2LittleEndian extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.AdasisV2LittleEndian INSTANCE;
+  }
+
+  public static final class AdasisMessageBinaryFormat.FlatBuffers extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.FlatBuffers INSTANCE;
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class EdgeAdasAttributes {
     method public java.util.List<com.mapbox.navigation.core.adasis.ValueOnEdge> getCurvatures();
     method public java.util.List<com.mapbox.navigation.core.adasis.ValueOnEdge> getSlopes();
@@ -348,11 +358,11 @@ package com.mapbox.navigation.core.adasis {
     method public com.mapbox.navigation.core.adasis.SpeedLimitRestriction getRestriction();
     method public com.mapbox.navigation.base.speed.model.SpeedUnit getSpeedUnit();
     method public com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type getType();
-    method public byte getValue();
+    method public int getValue();
     property public final com.mapbox.navigation.core.adasis.SpeedLimitRestriction restriction;
     property public final com.mapbox.navigation.base.speed.model.SpeedUnit speedUnit;
     property public final com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type type;
-    property public final byte value;
+    property public final int value;
   }
 
   public abstract static class SpeedLimitInfo.Type {
@@ -364,6 +374,10 @@ package com.mapbox.navigation.core.adasis {
 
   public static final class SpeedLimitInfo.Type.Implicit extends com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type {
     field public static final com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type.Implicit INSTANCE;
+  }
+
+  public static final class SpeedLimitInfo.Type.Prolonged extends com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type {
+    field public static final com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type.Prolonged INSTANCE;
   }
 
   public static final class SpeedLimitInfo.Type.Unknown extends com.mapbox.navigation.core.adasis.SpeedLimitInfo.Type {
@@ -411,8 +425,10 @@ package com.mapbox.navigation.core.adasis {
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ValueOnEdge {
+    method public double getPercentAlong();
     method public float getShapeIndex();
     method public double getValue();
+    property public final double percentAlong;
     property public final float shapeIndex;
     property public final double value;
   }
