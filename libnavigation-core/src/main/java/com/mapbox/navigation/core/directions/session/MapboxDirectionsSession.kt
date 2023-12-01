@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.internal.utils.initialLegIndex
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -47,10 +48,16 @@ internal class MapboxDirectionsSession(
             return
         }
         RouteCompatibilityCache.setDirectionsSessionResult(routes.acceptedRoutes)
-
+        val oldRoutesUpdateResult = routesUpdatedResult
         val result = routes.toRoutesUpdatedResult().also { routesUpdatedResult = it }
         onSetNavigationRoutesFinishedObservers.forEach {
             it.onRoutesChanged(result)
+        }
+        if (routes.setRoutesInfo is SetRoutes.RefreshRoutes) {
+            oldRoutesUpdateResult?.navigationRoutes?.forEach {
+                it.upcomingRoadObjects = emptyList()
+                it.debugInfo = "cleaned up"
+            }
         }
     }
 

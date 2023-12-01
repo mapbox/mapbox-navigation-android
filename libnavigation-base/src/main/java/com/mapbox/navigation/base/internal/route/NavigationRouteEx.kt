@@ -136,7 +136,8 @@ fun NavigationRoute.refreshRoute(
     return update(
         directionsRouteBlock,
         directionsResponseBlock,
-        newExpirationTimeElapsedSeconds ?: expirationTimeElapsedSeconds
+        newExpirationTimeElapsedSeconds ?: expirationTimeElapsedSeconds,
+
     )
 }
 
@@ -185,7 +186,9 @@ fun NavigationRoute.update(
         .build()
     return copy(
         directionsResponse = refreshedResponse,
-        expirationTimeElapsedSeconds = newExpirationTimeElapsedSeconds
+        expirationTimeElapsedSeconds = newExpirationTimeElapsedSeconds,
+        upcomingRoadObjects = emptyList(),
+        debugInfo = "updated"
     )
 }
 
@@ -203,7 +206,7 @@ fun NavigationRoute.isExpired(): Boolean {
  *
  * At the moment, all fields are `val`s, so a simple re-instantiation is enough.
  */
-fun NavigationRoute.refreshNativePeer(): NavigationRoute = copy()
+fun NavigationRoute.refreshNativePeer(): NavigationRoute = copy(debugInfo = "refreshed native peers")
 
 /**
  * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.

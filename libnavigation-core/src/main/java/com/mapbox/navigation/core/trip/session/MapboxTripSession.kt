@@ -143,6 +143,7 @@ internal class MapboxTripSession(
                     (lastSavedResultValue ?: refreshRouteResult).fold(
                         { NativeSetRouteError(it) },
                         { value ->
+                            // TODO: refresh upcoming road objects in alternatives
                             val refreshedPrimaryRoute = primaryRoute.refreshNativePeer()
                             this@MapboxTripSession.primaryRoute = refreshedPrimaryRoute
                             roadObjects = refreshedPrimaryRoute.upcomingRoadObjects

@@ -51,6 +51,8 @@ class NavigationRoute internal constructor(
     internal val nativeRoute: RouteInterface,
     internal val unavoidableClosures: List<List<Closure>>,
     internal var expirationTimeElapsedSeconds: Long?,
+    var upcomingRoadObjects: List<UpcomingRoadObject> = nativeRoute.routeInfo.alerts.toUpcomingRoadObjects(),
+    var debugInfo: String? = "created"
 ) {
 
     internal constructor(
@@ -68,6 +70,7 @@ class NavigationRoute internal constructor(
             ?.map { leg -> leg.closures().orEmpty() }
             .orEmpty(),
         expirationTimeElapsedSeconds,
+        debugInfo = "created"
     )
 
     companion object {
@@ -332,7 +335,7 @@ class NavigationRoute internal constructor(
     /**
      * Returns a list of [UpcomingRoadObject] present in a route.
      */
-    val upcomingRoadObjects = nativeRoute.routeInfo.alerts.toUpcomingRoadObjects()
+
 
     /**
      * Compatibility function to always access the valid [DirectionsWaypoint]s collection.
@@ -399,6 +402,8 @@ class NavigationRoute internal constructor(
         routeOptions: RouteOptions = this.routeOptions,
         nativeRoute: RouteInterface = this.nativeRoute,
         expirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
+        upcomingRoadObjects: List<UpcomingRoadObject> = nativeRoute.routeInfo.alerts.toUpcomingRoadObjects(),
+        debugInfo: String? = "copied by unknown"
     ): NavigationRoute = NavigationRoute(
         directionsResponse,
         routeIndex,
@@ -406,6 +411,8 @@ class NavigationRoute internal constructor(
         nativeRoute,
         this.unavoidableClosures,
         expirationTimeElapsedSeconds,
+        upcomingRoadObjects = upcomingRoadObjects,
+        debugInfo = debugInfo
     ).cache()
 }
 
