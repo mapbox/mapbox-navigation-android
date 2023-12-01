@@ -43,7 +43,6 @@ import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.accounts.BillingController
-import com.mapbox.navigation.core.adasis.ADASISv2Message
 import com.mapbox.navigation.core.adasis.ADASISv2MessageCallback
 import com.mapbox.navigation.core.adasis.AdasisConfig
 import com.mapbox.navigation.core.arrival.ArrivalController
@@ -1990,9 +1989,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun setAdasisMessageCallback(adasisConfig: AdasisConfig, callback: ADASISv2MessageCallback) {
         navigator.setAdasisMessageCallback(
             { message ->
-                callback.onMessage(
-                    ADASISv2Message.createFromNativeADASISv2Message(message)
-                )
+                callback.onMessage(message)
             },
             adasisConfig.toNativeAdasisConfig()
         )

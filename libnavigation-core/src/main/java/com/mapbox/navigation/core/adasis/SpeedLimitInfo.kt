@@ -42,7 +42,7 @@ class SpeedLimitInfo private constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = value.toInt()
+        var result = value
         result = 31 * result + speedUnit.hashCode()
         result = 31 * result + type.hashCode()
         result = 31 * result + restriction.hashCode()
@@ -72,6 +72,12 @@ class SpeedLimitInfo private constructor(
         object Explicit : Type()
 
         /**
+         * Edge does not start the way, no sign on the edge.
+         * Speed limit time is the same of on previous edge.
+         */
+        object Prolonged : Type()
+
+        /**
          * Type is unknown.
          */
         object Unknown : Type()
@@ -83,6 +89,7 @@ class SpeedLimitInfo private constructor(
                 return when (nativeObj) {
                     SpeedLimitType.IMPLICIT -> Implicit
                     SpeedLimitType.EXPLICIT -> Explicit
+                    SpeedLimitType.PROLONGED -> Prolonged
                     SpeedLimitType.UNKNOWN -> Unknown
                 }
             }

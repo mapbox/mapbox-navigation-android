@@ -5,6 +5,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 /**
  * Data sending configuration
  *
+ * @param messageBinaryFormat binary format in which Adasis message will be sent
  * @param messageIntervalMs interval between sending messages in milliseconds
  * @param messagesInPackage number of messages in one package (one message is 8 bytes)
  * @param sortProfileShortsByOffset if true, profile shorts will be sorted by offset
@@ -14,6 +15,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigDataSending(
+    val messageBinaryFormat: AdasisMessageBinaryFormat,
     val messageIntervalMs: Int = 80,
     val messagesInPackage: Int = 20,
     val sortProfileShortsByOffset: Boolean = true,
@@ -24,6 +26,7 @@ class AdasisConfigDataSending(
     @JvmSynthetic
     internal fun toNativeAdasisConfigDataSending(): com.mapbox.navigator.AdasisConfigDataSending {
         return com.mapbox.navigator.AdasisConfigDataSending(
+            messageBinaryFormat.toNativeMessageBinaryFormat(),
             messageIntervalMs,
             messagesInPackage,
             sortProfileShortsByOffset,
@@ -41,6 +44,7 @@ class AdasisConfigDataSending(
 
         other as AdasisConfigDataSending
 
+        if (messageBinaryFormat != other.messageBinaryFormat) return false
         if (messageIntervalMs != other.messageIntervalMs) return false
         if (messagesInPackage != other.messagesInPackage) return false
         if (sortProfileShortsByOffset != other.sortProfileShortsByOffset) return false
@@ -55,6 +59,7 @@ class AdasisConfigDataSending(
      */
     override fun hashCode(): Int {
         var result = messageIntervalMs
+        result = 31 * result + messageBinaryFormat.hashCode()
         result = 31 * result + messagesInPackage
         result = 31 * result + sortProfileShortsByOffset.hashCode()
         result = 31 * result + sortProfileLongsByOffset.hashCode()
@@ -67,6 +72,7 @@ class AdasisConfigDataSending(
      */
     override fun toString(): String {
         return "AdasisConfigDataSending(" +
+            "messageBinaryFormat=$messageBinaryFormat, " +
             "messageIntervalMs=$messageIntervalMs, " +
             "messagesInPackage=$messagesInPackage, " +
             "sortProfileShortsByOffset=$sortProfileShortsByOffset, " +

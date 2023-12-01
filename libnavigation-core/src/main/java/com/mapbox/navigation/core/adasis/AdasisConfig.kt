@@ -68,7 +68,7 @@ class AdasisConfig private constructor(
     class Builder {
 
         private var cycleTimes: AdasisConfigCycleTimes = AdasisConfigCycleTimes()
-        private var dataSending: AdasisConfigDataSending = AdasisConfigDataSending()
+        private var dataSending: AdasisConfigDataSending = AdasisConfigDataSending(AdasisMessageBinaryFormat.FlatBuffers)
         private var pathsOptions: AdasisConfigPathsConfigs = AdasisConfigPathsConfigs(
             mpp = AdasisConfigPathLevelOptions(
                 Stub(AdasisConfigMessageOptions()),

@@ -443,7 +443,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
         mapboxNavigation.setAdasisMessageCallback(AdasisConfig.Builder().build()) { message ->
-            Log.d("AdasisTest.", "Adasis message: ${message.toFlatBuffer()}")
+            Log.d("AdasisTest.", "Adasis message: $message")
         }
     }
 
