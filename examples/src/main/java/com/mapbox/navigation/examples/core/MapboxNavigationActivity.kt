@@ -30,6 +30,8 @@ import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.options.DeviceProfile
+import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -317,6 +319,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
                         BuildConfig.VERSION_NAME
                     ).build()
                 )
+                .deviceProfile(DeviceProfile.Builder().deviceType(DeviceType.AUTOMOBILE).build())
                 .routeRefreshOptions(RouteRefreshOptions.Builder().intervalMillis(Long.MAX_VALUE).build())
                 .locationEngine(ReplayLocationEngine(replayer))
                 .build()
@@ -494,11 +497,11 @@ class MapboxNavigationActivity : AppCompatActivity() {
     }
 
     fun simulate() {
-        val route = getDirectionsRouteFromAssets("route_response.json")
+        val route = getDirectionsRouteFromAssets("route_response_customer.json")
         val events = mutableListOf<ReplayEventBase>()
-        events += mapper.mapDirectionsRouteGeometry(route).first()
-        events += getReplaySetRouteFromAssets(2.0, "route_response.json")
-        events += getReplaySetRefreshFromAssets(12.0, "refresh_response_1.json")
+        events += mapper.mapDirectionsRouteGeometry(route)[910]
+        events += getReplaySetRouteFromAssets(2.0, "route_response_customer.json")
+        // events += getReplaySetRefreshFromAssets(12.0, "refresh_response_1.json")
 
         replayer.pushEvents(events)
 
@@ -510,17 +513,17 @@ class MapboxNavigationActivity : AppCompatActivity() {
                     }
 
                     is ReplaySetRefresh -> {
-                        val refreshedRoute = RouterWrapper.refreshRoute(
-                            mapboxNavigation.getNavigationRoutes().first(),
-                            initialLegIndex = 0,
-                            currentLegGeometryIndex = event.currentLegGeometryIndex,
-                            responseTimeElapsedSeconds = 0,
-                            event.refreshResponseJson,
-                        ).value!!
-                        mapboxNavigation.setRefreshedPrimarySingleLegRoute(
-                            listOf(refreshedRoute),
-                            routeProgressData = RouteProgressData(0, 0, 0)
-                        )
+                        // val refreshedRoute = RouterWrapper.refreshRoute(
+                        //     mapboxNavigation.getNavigationRoutes().first(),
+                        //     initialLegIndex = 0,
+                        //     currentLegGeometryIndex = event.currentLegGeometryIndex,
+                        //     responseTimeElapsedSeconds = 0,
+                        //     event.refreshResponseJson,
+                        // ).value!!
+                        // mapboxNavigation.setRefreshedPrimarySingleLegRoute(
+                        //     listOf(refreshedRoute),
+                        //     routeProgressData = RouteProgressData(0, 0, 0)
+                        // )
                     }
                 }
             }
@@ -573,7 +576,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    // setRouteAndStartNavigation(routes)
+                    // setRouteAndStartNavigation2(routes)
                 }
 
                 override fun onFailure(
@@ -593,6 +596,21 @@ class MapboxNavigationActivity : AppCompatActivity() {
     private fun setRouteAndStartNavigation(route: List<DirectionsRoute>) {
         // set route
         mapboxNavigation.setRoutes(route)
+
+        // show UI elements
+        binding.soundButton.visibility = VISIBLE
+        binding.routeOverview.visibility = VISIBLE
+        binding.tripProgressCard.visibility = VISIBLE
+        binding.routeOverview.showTextAndExtend(2000L)
+        binding.soundButton.unmuteAndExtend(2000L)
+
+        // move the camera to overview when new route is available
+        navigationCamera.requestNavigationCameraToOverview()
+    }
+
+    private fun setRouteAndStartNavigation2(route: List<NavigationRoute>) {
+        // set route
+        mapboxNavigation.setNavigationRoutes(route)
 
         // show UI elements
         binding.soundButton.visibility = VISIBLE
