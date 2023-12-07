@@ -147,6 +147,12 @@ package com.mapbox.navigation.core {
     field @Deprecated public static final com.mapbox.navigation.core.MapboxNavigationProvider INSTANCE;
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NavigationSdkInformationProvider {
+    method public String getVersionName();
+    property public final String versionName;
+    field public static final com.mapbox.navigation.core.NavigationSdkInformationProvider INSTANCE;
+  }
+
   public interface NavigationVersionSwitchObserver {
     method public void onSwitchToFallbackVersion(String? tilesVersion);
     method public void onSwitchToTargetVersion(String? tilesVersion);
