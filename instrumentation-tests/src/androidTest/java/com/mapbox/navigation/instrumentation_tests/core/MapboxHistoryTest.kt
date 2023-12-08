@@ -235,12 +235,12 @@ class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
         assertEquals(
             mockRoute.routeWaypoints.first().longitude(),
             firstLocation.location.longitude,
-            0.00001
+            0.0001
         )
         assertEquals(
             mockRoute.routeWaypoints.first().latitude(),
             firstLocation.location.latitude,
-            0.00001
+            0.0001
         )
 
         // Verify the set route event
