@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.ShieldSprite
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.shield.internal.loader.Loader
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
@@ -18,6 +19,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -27,12 +29,18 @@ class RoadShieldContentManagerImplTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private lateinit var sut: RoadShieldContentManagerImpl
+    private lateinit var loader: Loader<RouteShieldToDownload, RouteShield>
+
+    @Before
+    fun setUp() {
+        loader = mockk()
+        sut = RoadShieldContentManagerImpl(loader)
+    }
+
     @Test
     fun `request waits for all results to be available (success and manual cancellation), async`() =
         coroutineRule.runBlockingTest {
-            val cache = mockk<ShieldResultCache>()
-            val contentManager = createContentManager(cache)
-
             val legacyUrl = "url_legacy"
             val downloadUrl = legacyUrl.plus(".svg")
             val toDownloadLegacy = mockk<RouteShieldToDownload.MapboxLegacy> {
@@ -53,7 +61,7 @@ class RoadShieldContentManagerImplTest {
                 )
             )
             coEvery {
-                cache.getOrRequest(toDownloadLegacy)
+                loader.load(toDownloadLegacy)
             } coAnswers {
                 delay(500L)
                 ExpectedFactory.createValue(expectedLegacyShield)
@@ -69,26 +77,28 @@ class RoadShieldContentManagerImplTest {
                 RoadShieldContentManagerImpl.CANCELED_MESSAGE
             )
             coEvery {
-                cache.getOrRequest(toDownloadDesign)
+                loader.load(toDownloadDesign)
             } coAnswers {
                 try {
                     delay(1000L)
-                    ExpectedFactory.createError("error")
+                    ExpectedFactory.createError(Error("error"))
                 } catch (ex: CancellationException) {
-                    ExpectedFactory.createError(RoadShieldContentManagerImpl.CANCELED_MESSAGE)
+                    ExpectedFactory.createError(
+                        Error(RoadShieldContentManagerImpl.CANCELED_MESSAGE)
+                    )
                 }
             }
 
             var result: List<Expected<RouteShieldError, RouteShieldResult>>? = null
             pauseDispatcher {
                 launch {
-                    result = contentManager.getShields(listOf(toDownloadLegacy, toDownloadDesign))
+                    result = sut.getShields(listOf(toDownloadLegacy, toDownloadDesign))
                 }
                 // run coroutines until they hit the download delays
                 runCurrent()
                 // advance by enough to only download one shield
                 advanceTimeBy(600L)
-                contentManager.cancelAll()
+                sut.cancelAll()
             }
             assertEquals(expectedLegacyResult, result!![0].value)
             assertEquals(expectedDesignResult, result!![1].error)
@@ -97,9 +107,6 @@ class RoadShieldContentManagerImplTest {
     @Test
     fun `request waits for all results to be available (success and job cancellation), async`() =
         coroutineRule.runBlockingTest {
-            val cache = mockk<ShieldResultCache>()
-            val contentManager = createContentManager(cache)
-
             val legacyUrl = "url_legacy"
             val downloadUrl = legacyUrl.plus(".svg")
             val toDownloadLegacy = mockk<RouteShieldToDownload.MapboxLegacy> {
@@ -120,7 +127,7 @@ class RoadShieldContentManagerImplTest {
                 )
             )
             coEvery {
-                cache.getOrRequest(toDownloadLegacy)
+                loader.load(toDownloadLegacy)
             } coAnswers {
                 delay(500L)
                 ExpectedFactory.createValue(expectedLegacyShield)
@@ -136,16 +143,16 @@ class RoadShieldContentManagerImplTest {
                 RoadShieldContentManagerImpl.CANCELED_MESSAGE
             )
             coEvery {
-                cache.getOrRequest(toDownloadDesign)
+                loader.load(toDownloadDesign)
             } coAnswers {
                 delay(1000L)
-                ExpectedFactory.createError("error")
+                ExpectedFactory.createError(Error("error"))
             }
 
             var result: List<Expected<RouteShieldError, RouteShieldResult>>? = null
             pauseDispatcher {
                 val job = launch {
-                    result = contentManager.getShields(listOf(toDownloadLegacy, toDownloadDesign))
+                    result = sut.getShields(listOf(toDownloadLegacy, toDownloadDesign))
                 }
                 // run coroutines until they hit the download delays
                 runCurrent()
@@ -161,9 +168,6 @@ class RoadShieldContentManagerImplTest {
     @Test
     fun `request waits for all results to be available (success and failure), async`() =
         coroutineRule.runBlockingTest {
-            val cache = mockk<ShieldResultCache>()
-            val contentManager = createContentManager(cache)
-
             val legacyUrl = "url_legacy"
             val downloadUrl = legacyUrl.plus(".svg")
             val toDownloadLegacy = mockk<RouteShieldToDownload.MapboxLegacy> {
@@ -184,7 +188,7 @@ class RoadShieldContentManagerImplTest {
                 )
             )
             coEvery {
-                cache.getOrRequest(toDownloadLegacy)
+                loader.load(toDownloadLegacy)
             } coAnswers {
                 delay(1000L)
                 ExpectedFactory.createValue(expectedLegacyShield)
@@ -200,15 +204,15 @@ class RoadShieldContentManagerImplTest {
                 "error"
             )
             coEvery {
-                cache.getOrRequest(toDownloadDesign)
+                loader.load(toDownloadDesign)
             } coAnswers {
                 delay(500L)
-                ExpectedFactory.createError("error")
+                ExpectedFactory.createError(Error("error"))
             }
 
             var result: List<Expected<RouteShieldError, RouteShieldResult>>? = null
             pauseDispatcher {
-                result = contentManager.getShields(listOf(toDownloadLegacy, toDownloadDesign))
+                result = sut.getShields(listOf(toDownloadLegacy, toDownloadDesign))
             }
             assertEquals(expectedLegacyResult, result!![0].value)
             assertEquals(expectedDesignResult, result!![1].error)
@@ -217,9 +221,6 @@ class RoadShieldContentManagerImplTest {
     @Test
     fun `request waits for all results to be available (success and failure), sync`() =
         coroutineRule.runBlockingTest {
-            val cache = mockk<ShieldResultCache>()
-            val contentManager = createContentManager(cache)
-
             val legacyUrl = "url_legacy"
             val downloadUrl = legacyUrl.plus(".svg")
             val toDownloadLegacy = mockk<RouteShieldToDownload.MapboxLegacy> {
@@ -240,7 +241,7 @@ class RoadShieldContentManagerImplTest {
                 )
             )
             coEvery {
-                cache.getOrRequest(toDownloadLegacy)
+                loader.load(toDownloadLegacy)
             } returns ExpectedFactory.createValue(expectedLegacyShield)
 
             val designShieldUrl = "url"
@@ -253,10 +254,10 @@ class RoadShieldContentManagerImplTest {
                 "error"
             )
             coEvery {
-                cache.getOrRequest(toDownloadDesign)
-            } returns ExpectedFactory.createError("error")
+                loader.load(toDownloadDesign)
+            } returns ExpectedFactory.createError(Error("error"))
 
-            val result = contentManager.getShields(listOf(toDownloadLegacy, toDownloadDesign))
+            val result = sut.getShields(listOf(toDownloadLegacy, toDownloadDesign))
 
             assertEquals(expectedLegacyResult, result[0].value)
             assertEquals(expectedDesignResult, result[1].error)
@@ -265,9 +266,6 @@ class RoadShieldContentManagerImplTest {
     @Test
     fun `unsuccessful design shield results with successful fallback`() =
         coroutineRule.runBlockingTest {
-            val cache = mockk<ShieldResultCache>()
-            val contentManager = createContentManager(cache)
-
             val initialUrl = "url_legacy"
             val downloadUrl = initialUrl.plus(".svg")
             val expectedLegacyShield = RouteShield.MapboxLegacyShield(
@@ -291,13 +289,13 @@ class RoadShieldContentManagerImplTest {
                 )
             )
             coEvery {
-                cache.getOrRequest(toDownload)
-            } returns ExpectedFactory.createError("error")
+                loader.load(toDownload)
+            } returns ExpectedFactory.createError(Error("error"))
             coEvery {
-                cache.getOrRequest(legacyToDownload)
+                loader.load(legacyToDownload)
             } returns ExpectedFactory.createValue(expectedLegacyShield)
 
-            val result = contentManager.getShields(listOf(toDownload))
+            val result = sut.getShields(listOf(toDownload))
 
             assertEquals(expectedResult, result.first().value)
         }
@@ -305,9 +303,6 @@ class RoadShieldContentManagerImplTest {
     @Test
     fun `unsuccessful design shield results with unsuccessful fallback`() =
         coroutineRule.runBlockingTest {
-            val cache = mockk<ShieldResultCache>()
-            val contentManager = createContentManager(cache)
-
             val legacyUrl = "url_legacy"
             val legacyToDownload = RouteShieldToDownload.MapboxLegacy(legacyUrl)
             val shieldUrl = "url_design"
@@ -318,32 +313,29 @@ class RoadShieldContentManagerImplTest {
             val expectedResult = RouteShieldError(
                 shieldUrl,
                 """
-                    |original request failed with:
-                    |url: url_design
-                    |error: error
-                    |
-                    |fallback request failed with:
-                    |url: url_legacy.svg
-                    |error: error_legacy
+                |original request failed with:
+                |url: url_design
+                |error: error
+                |
+                |fallback request failed with:
+                |url: url_legacy.svg
+                |error: error_legacy
                 """.trimMargin()
             )
             coEvery {
-                cache.getOrRequest(toDownload)
-            } returns ExpectedFactory.createError("error")
+                loader.load(toDownload)
+            } returns ExpectedFactory.createError(Error("error"))
             coEvery {
-                cache.getOrRequest(legacyToDownload)
-            } returns ExpectedFactory.createError("error_legacy")
+                loader.load(legacyToDownload)
+            } returns ExpectedFactory.createError(Error("error_legacy"))
 
-            val result = contentManager.getShields(listOf(toDownload))
+            val result = sut.getShields(listOf(toDownload))
 
             assertEquals(expectedResult, result.first().error)
         }
 
     @Test
     fun `unsuccessful design shield results without fallback`() = coroutineRule.runBlockingTest {
-        val cache = mockk<ShieldResultCache>()
-        val contentManager = createContentManager(cache)
-
         val shieldUrl = "url_design"
         val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
             every { url } returns shieldUrl
@@ -355,19 +347,16 @@ class RoadShieldContentManagerImplTest {
         )
 
         coEvery {
-            cache.getOrRequest(toDownload)
-        } returns ExpectedFactory.createError("error")
+            loader.load(toDownload)
+        } returns ExpectedFactory.createError(Error("error"))
 
-        val result = contentManager.getShields(listOf(toDownload))
+        val result = sut.getShields(listOf(toDownload))
 
         assertEquals(expectedResult, result.first().error)
     }
 
     @Test
     fun `successful design shield results`() = coroutineRule.runBlockingTest {
-        val cache = mockk<ShieldResultCache>()
-        val contentManager = createContentManager(cache)
-
         val shieldUrl = "url_design"
         val mapboxShield = mockk<MapboxShield>()
         val sprite = mockk<ShieldSprite>()
@@ -390,19 +379,16 @@ class RoadShieldContentManagerImplTest {
         )
 
         coEvery {
-            cache.getOrRequest(toDownload)
+            loader.load(toDownload)
         } returns ExpectedFactory.createValue(expectedShield)
 
-        val result = contentManager.getShields(listOf(toDownload))
+        val result = sut.getShields(listOf(toDownload))
 
         assertEquals(expectedResult, result.first().value)
     }
 
     @Test
     fun `successful legacy shield results`() = coroutineRule.runBlockingTest {
-        val cache = mockk<ShieldResultCache>()
-        val contentManager = createContentManager(cache)
-
         val initialUrl = "url_legacy"
         val downloadUrl = initialUrl.plus(".svg")
         val toDownload = RouteShieldToDownload.MapboxLegacy(initialUrl)
@@ -421,19 +407,16 @@ class RoadShieldContentManagerImplTest {
         )
 
         coEvery {
-            cache.getOrRequest(toDownload)
+            loader.load(toDownload)
         } returns ExpectedFactory.createValue(expectedShield)
 
-        val result = contentManager.getShields(listOf(toDownload))
+        val result = sut.getShields(listOf(toDownload))
 
         assertEquals(expectedResult, result.first().value)
     }
 
     @Test
     fun `unsuccessful legacy shield results`() = coroutineRule.runBlockingTest {
-        val cache = mockk<ShieldResultCache>()
-        val contentManager = createContentManager(cache)
-
         val initialUrl = "url_legacy"
         val toDownload = RouteShieldToDownload.MapboxLegacy(initialUrl)
         val expectedResult = RouteShieldError(
@@ -442,15 +425,11 @@ class RoadShieldContentManagerImplTest {
         )
 
         coEvery {
-            cache.getOrRequest(toDownload)
-        } returns ExpectedFactory.createError("error")
+            loader.load(toDownload)
+        } returns ExpectedFactory.createError(Error("error"))
 
-        val result = contentManager.getShields(listOf(toDownload))
+        val result = sut.getShields(listOf(toDownload))
 
         assertEquals(expectedResult, result.first().error)
     }
-
-    private fun createContentManager(
-        shieldResultCache: ShieldResultCache = mockk()
-    ): RoadShieldContentManagerImpl = RoadShieldContentManagerImpl(shieldResultCache)
 }

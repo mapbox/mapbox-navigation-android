@@ -6,6 +6,7 @@ import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
+import com.mapbox.navigation.ui.shield.internal.RoadShieldDownloader
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
@@ -100,7 +101,7 @@ internal class RoadShieldDownloaderTest {
 
             val result = sut.download(url)
 
-            assertEquals(expectedError, result.error)
+            assertEquals(expectedError, result.error?.message)
         }
 
     @Test
@@ -119,7 +120,7 @@ internal class RoadShieldDownloaderTest {
 
             val result = sut.download(url)
 
-            assertEquals(expectedError, result.error)
+            assertEquals(expectedError, result.error?.message)
         }
 
     @Test
@@ -137,7 +138,7 @@ internal class RoadShieldDownloaderTest {
 
         val result = sut.download(url)
 
-        assertEquals(expectedError, result.error)
+        assertEquals(expectedError, result.error?.message)
     }
 
     private fun givenResourceLoaderResponse(
