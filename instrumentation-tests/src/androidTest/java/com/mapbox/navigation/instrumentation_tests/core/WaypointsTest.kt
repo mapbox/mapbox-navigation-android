@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.ApproximateCoordinates
+import com.mapbox.navigation.instrumentation_tests.utils.assertions.waitUntilHasSize
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
@@ -37,7 +38,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -276,15 +276,6 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     private fun checkLocation(expected: Point, actual: Point) {
         assertEquals(expected.latitude(), actual.latitude(), 0.00001)
         assertEquals(expected.longitude(), actual.longitude(), 0.00001)
-    }
-
-    private suspend fun List<*>.waitUntilHasSize(size: Int) {
-        val list = this
-        withTimeout(10000) {
-            while (list.size < size) {
-                delay(50)
-            }
-        }
     }
 
     private fun stayOnPosition(point: Point, bearing: Float = 0f) {
