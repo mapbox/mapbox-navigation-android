@@ -1995,11 +1995,23 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
         runIfNotDestroyed {
+            val previousState = tripSession.getState()
             tripSession.start(
                 withTripService = withTripService,
                 withReplayEnabled = withReplayEnabled
             )
-            resetTripSessionRoutes()
+            // It's possible that we are in a state when routes are set,
+            // but session is not started. In this case, as soon as routes are set,
+            // NN starts generating status updates (which results in our route progress updates,
+            // voice and banner instructions events, etc.).
+            // If we first set the routes and then start the session, we might lose all the events
+            // between these two actions (because native status observer is only registered
+            // when the session is started). To avoid that,
+            // we set the routes again on session start. Then NN will generate all the
+            // relevant events again, because it will treat the routes as completely new.
+            if (previousState == TripSessionState.STOPPED) {
+                resetTripSessionRoutes()
+            }
             notificationChannelField?.let {
                 monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
             }

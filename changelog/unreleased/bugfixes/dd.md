@@ -1,0 +1,1 @@
+- Fixed an issue where the first voice instruction might have been played thrice when switching between regular session and replay with route being set.
