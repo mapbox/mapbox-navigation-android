@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
@@ -84,7 +85,9 @@ internal open class MapboxNavigationBaseTest {
     val cache: CacheHandle = mockk(relaxUnitFun = true)
     val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     val tripService: TripService = mockk(relaxUnitFun = true)
-    val tripSession: TripSession = mockk(relaxUnitFun = true)
+    val tripSession: TripSession = mockk(relaxUnitFun = true) {
+        every { getState() } returns TripSessionState.STOPPED
+    }
     val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)

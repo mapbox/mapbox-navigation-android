@@ -122,7 +122,32 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun `trip session route is reset after trip session is restarted`() {
+    fun `trip session route is reset after trip session is started`() {
+        createMapboxNavigation()
+        val primary = mockk<NavigationRoute>()
+        val routes = listOf(primary, mockk())
+        val currentLegIndex = 3
+        every { directionsSession.routes } returns routes
+        every { directionsSession.initialLegIndex } returns 2
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns currentLegIndex
+            }
+        }
+        mapboxNavigation.stopTripSession()
+        every { tripSession.getState() } returns TripSessionState.STOPPED
+        mapboxNavigation.startTripSession()
+
+        coVerify(exactly = 1) {
+            tripSession.setRoutes(
+                routes,
+                SetRoutes.NewRoutes(currentLegIndex)
+            )
+        }
+    }
+
+    @Test
+    fun `trip session route is not reset after trip session is started twice`() {
         createMapboxNavigation()
         val primary = mockk<NavigationRoute>()
         val routes = listOf(primary, mockk())
@@ -136,12 +161,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
         mapboxNavigation.stopTripSession()
         mapboxNavigation.startTripSession()
+        clearAllMocks(answers = false)
+        every { tripSession.getState() } returns TripSessionState.STARTED
+        mapboxNavigation.startTripSession()
 
-        coVerify(exactly = 1) {
-            tripSession.setRoutes(
-                routes,
-                SetRoutes.NewRoutes(currentLegIndex)
-            )
+        coVerify(exactly = 0) {
+            tripSession.setRoutes(any(), any())
         }
     }
 
@@ -1794,6 +1819,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     directionsSession.routes
                 } returns (firstArg() as DirectionsSessionRoutes).acceptedRoutes
             }
+            every { tripSession.getState() } returns TripSessionState.STOPPED
 
             pauseDispatcher {
                 mapboxNavigation.setNavigationRoutes(inputRoutes)
