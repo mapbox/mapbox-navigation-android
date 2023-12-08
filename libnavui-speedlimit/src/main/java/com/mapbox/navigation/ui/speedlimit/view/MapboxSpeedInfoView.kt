@@ -3,6 +3,8 @@ package com.mapbox.navigation.ui.speedlimit.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.annotation.UiThread
@@ -14,8 +16,6 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.widget.TextViewCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
@@ -455,4 +455,16 @@ class MapboxSpeedInfoView : FrameLayout {
 
         set.applyTo(speedInfoViennaLayout)
     }
+
+    private inline fun View.updateLayoutParams(block: ViewGroup.LayoutParams.() -> Unit) {
+        val params = layoutParams
+        block(params)
+        layoutParams = params
+    }
+
+    private var View.isVisible: Boolean
+        get() = visibility == View.VISIBLE
+        set(value) {
+            visibility = if (value) View.VISIBLE else View.GONE
+        }
 }

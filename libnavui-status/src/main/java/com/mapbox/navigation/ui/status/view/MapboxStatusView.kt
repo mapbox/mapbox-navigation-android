@@ -1,11 +1,13 @@
 package com.mapbox.navigation.ui.status.view
 
 import android.animation.Animator
+import android.animation.Animator.AnimatorListener
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.annotation.AnimatorRes
@@ -13,9 +15,6 @@ import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.animation.doOnStart
-import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import com.mapbox.navigation.ui.status.R
 import com.mapbox.navigation.ui.status.databinding.MapboxStatusViewLayoutBinding
 import com.mapbox.navigation.ui.status.internal.extensions.doOnFinish
@@ -60,7 +59,7 @@ class MapboxStatusView : FrameLayout {
     /**
      * Returns `true` if this view is visible.
      */
-    val isRendered: Boolean get() = isVisible
+    val isRendered: Boolean get() = visibility == View.VISIBLE
 
     /**
      * A resource identifier for the Show Animator.
@@ -91,7 +90,7 @@ class MapboxStatusView : FrameLayout {
         defStyleRes: Int
     ) : super(context, attrs, defStyleAttr, defStyleRes) {
         if (!isInEditMode) {
-            isInvisible = true
+            visibility = View.GONE
         }
 
         context.theme.obtainStyledAttributes(
@@ -212,10 +211,25 @@ class MapboxStatusView : FrameLayout {
     private fun showAnimator(status: Status): Animator =
         AnimatorInflater.loadAnimator(context, showAnimRes).apply {
             setTarget(this@MapboxStatusView)
-            doOnStart {
-                isInvisible = false
-                updateView(status)
-            }
+            addListener(
+                object : AnimatorListener {
+                    override fun onAnimationStart(p0: Animator) {
+                            visibility = View.VISIBLE
+                            updateView(status)
+                    }
+
+                    override fun onAnimationEnd(p0: Animator) {
+
+                    }
+
+                    override fun onAnimationCancel(p0: Animator) {
+                    }
+
+                    override fun onAnimationRepeat(p0: Animator) {
+                    }
+
+                }
+            )
         }
 
     private fun hideAnimator(delay: Long = 0): Animator =
@@ -223,11 +237,18 @@ class MapboxStatusView : FrameLayout {
             setTarget(this@MapboxStatusView)
             startDelay = delay
             doOnFinish {
-                isInvisible = true
+                visibility = View.GONE
             }
         }
 
     private fun cancelPendingAnimations() {
         pendingHideAnimation?.cancel()
     }
+
+    private var View.isVisible: Boolean
+        get() = visibility == View.VISIBLE
+        set(value) {
+            visibility = if (value) View.VISIBLE else View.GONE
+        }
+
 }

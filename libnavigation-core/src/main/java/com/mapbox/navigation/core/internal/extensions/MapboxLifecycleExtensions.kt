@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.internal.extensions
 
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -9,44 +8,70 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachCreated(vararg observers: T) = apply {
-    lifecycle.addObserver(object : DefaultLifecycleObserver {
-        override fun onCreate(owner: LifecycleOwner) {
+    lifecycle.addObserver(object : LifecycleEventObserver {
+
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            when (event) {
+                Lifecycle.Event.ON_DESTROY -> onDestroy(source)
+                Lifecycle.Event.ON_CREATE -> onCreate(source)
+            }
+        }
+
+        private fun onCreate(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.registerObserver(it) }
         }
 
-        override fun onDestroy(owner: LifecycleOwner) {
+        private fun onDestroy(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.unregisterObserver(it) }
         }
     })
 }
 
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachStarted(vararg observers: T) = apply {
-    lifecycle.addObserver(object : DefaultLifecycleObserver {
-        override fun onStart(owner: LifecycleOwner) {
+    lifecycle.addObserver(object : LifecycleEventObserver {
+
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            when (event) {
+                Lifecycle.Event.ON_DESTROY -> onDestroy(source)
+                Lifecycle.Event.ON_START -> onStart(source)
+                Lifecycle.Event.ON_STOP -> onStop(source)
+            }
+        }
+
+        private fun onStart(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.registerObserver(it) }
         }
 
-        override fun onStop(owner: LifecycleOwner) {
+        private fun onStop(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.unregisterObserver(it) }
         }
 
-        override fun onDestroy(owner: LifecycleOwner) {
+        private fun onDestroy(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.unregisterObserver(it) }
         }
     })
 }
 
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachResumed(vararg observers: T) = apply {
-    lifecycle.addObserver(object : DefaultLifecycleObserver {
-        override fun onResume(owner: LifecycleOwner) {
+    lifecycle.addObserver(object : LifecycleEventObserver {
+
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            when (event) {
+                Lifecycle.Event.ON_DESTROY -> onDestroy(source)
+                Lifecycle.Event.ON_RESUME -> onResume(source)
+                Lifecycle.Event.ON_PAUSE -> onPause(source)
+            }
+        }
+
+        private fun onResume(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.registerObserver(it) }
         }
 
-        override fun onPause(owner: LifecycleOwner) {
+        private fun onPause(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.unregisterObserver(it) }
         }
 
-        override fun onDestroy(owner: LifecycleOwner) {
+        private fun onDestroy(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.unregisterObserver(it) }
         }
     })

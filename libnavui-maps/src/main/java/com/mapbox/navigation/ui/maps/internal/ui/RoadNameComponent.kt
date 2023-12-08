@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import androidx.core.view.isVisible
+import android.view.View
 import com.mapbox.bindgen.Expected
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
@@ -49,7 +49,7 @@ class RoadNameComponent(
             mapStyle to roadInfo
         }.observe { (mapStyle, road) ->
             if (mapStyle != null && road != null && road.isRoadNameAvailable()) {
-                roadNameView.isVisible = true
+                roadNameView.visibility = View.VISIBLE
 
                 roadNameView.renderRoadName(road)
 
@@ -61,7 +61,7 @@ class RoadNameComponent(
                 )
                 roadNameView.renderRoadNameWith(result)
             } else {
-                roadNameView.isVisible = false
+                roadNameView.visibility = View.GONE
             }
         }
     }

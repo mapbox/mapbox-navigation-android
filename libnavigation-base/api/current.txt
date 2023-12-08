@@ -845,6 +845,10 @@ package com.mapbox.navigation.base.route {
     method public void onRoutesReady(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
   }
 
+  public final class RouterExKt {
+    method public static boolean isRetryable(java.util.List<com.mapbox.navigation.base.route.RouterFailure>?);
+  }
+
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RouterFactory {
     method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null, Throwable? throwable = null, com.mapbox.navigation.base.route.RouterFailure? routerFailure = null, Integer? refreshTtl = null);
     method public com.mapbox.navigation.base.route.NavigationRouterRefreshError buildNavigationRouterRefreshError(String? message = null, Throwable? throwable = null, com.mapbox.navigation.base.route.RouterFailure? routerFailure = null);
@@ -869,7 +873,9 @@ package com.mapbox.navigation.base.route {
     method public com.mapbox.navigation.base.route.RouterOrigin getRouterOrigin();
     method public Throwable? getThrowable();
     method public java.net.URL getUrl();
+    method public boolean isRetryable();
     property public final Integer? code;
+    property public final boolean isRetryable;
     property public final String message;
     property public final com.mapbox.navigation.base.route.RouterOrigin routerOrigin;
     property public final Throwable? throwable;

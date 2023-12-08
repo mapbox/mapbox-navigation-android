@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name" translatable="false">Compile SDK 30</string>
+
+    <string name="title_navigation" translatable="false">Turn By Turn </string>
+    <string name="description_navigation" translatable="false">Demonstrates basic turn by turn navigation.</string>
+
+    <string name="label_start_navigation" translatable="false">Start Navigation</string>
+</resources>

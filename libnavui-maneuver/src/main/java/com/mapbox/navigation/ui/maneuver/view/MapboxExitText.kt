@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -11,8 +12,6 @@ import androidx.annotation.StyleRes
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.TextViewCompat
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
@@ -252,5 +251,30 @@ class MapboxExitText : AppCompatTextView {
     private fun Drawable?.adjustDrawableHeight(): Drawable? {
         val bitmap = this?.toBitmap(lineHeight, lineHeight, Bitmap.Config.ARGB_8888)
         return bitmap?.toDrawable(context.resources)
+    }
+
+    private fun Bitmap.toDrawable(resources: Resources) = BitmapDrawable(resources, this)
+
+    fun Drawable.toBitmap(
+        width: Int = intrinsicWidth,
+        height: Int = intrinsicHeight,
+        config: Bitmap.Config? = null
+    ): Bitmap {
+        if (this is BitmapDrawable) {
+            if (config == null || bitmap.config == config) {
+                // Fast-path to return original. Bitmap.createScaledBitmap will do this check, but it
+                // involves allocation and two jumps into native code so we perform the check ourselves.
+                if (width == intrinsicWidth && height == intrinsicHeight) {
+                    return bitmap
+                }
+                return Bitmap.createScaledBitmap(bitmap, width, height, true)
+            }
+        }
+        val oldBounds = bounds
+        val bitmap = Bitmap.createBitmap(width, height, config ?: Bitmap.Config.ARGB_8888)
+        setBounds(0, 0, width, height)
+        draw(Canvas(bitmap))
+        setBounds(oldBounds.left, oldBounds.top, oldBounds.right, oldBounds.bottom)
+        return bitmap
     }
 }
