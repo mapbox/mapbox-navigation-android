@@ -802,9 +802,13 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
                 .coordinatesList(mockRoute.routeWaypoints).build()
         ).getSuccessfulResultOrThrowException().routes.reversed()
 
-        mapboxNavigation.setNavigationRoutes(routes)
-
-        mapboxNavigation.routeProgressUpdates().first()
+        stayOnPosition(
+            mockRoute.routeWaypoints.first(),
+            0f
+        ) {
+            mapboxNavigation.setNavigationRoutes(routes)
+            mapboxNavigation.routeProgressUpdates().first()
+        }
         mapboxNavigation.navigateNextRouteLeg()
         mockLocationReplayerRule.loopUpdateUntil(secondLegLocation) {
             mapboxNavigation.routeProgressUpdates()
