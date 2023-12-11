@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.isRetryable
 import com.mapbox.navigation.instrumentation_tests.R
@@ -25,6 +26,7 @@ import org.junit.Test
  * See https://docs.mapbox.com/api/navigation/directions/#directions-api-errors for info
  * about different Directions API failures
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteRequestTests : BaseCoreNoCleanUpTest() {
 
     @get:Rule

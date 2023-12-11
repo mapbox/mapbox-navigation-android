@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
@@ -77,6 +78,7 @@ import org.junit.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CoreRerouteTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule

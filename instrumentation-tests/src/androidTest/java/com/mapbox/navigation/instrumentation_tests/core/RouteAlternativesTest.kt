@@ -56,6 +56,7 @@ import java.net.URL
  * This test ensures that alternative route recommendations
  * are given during active guidance.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
