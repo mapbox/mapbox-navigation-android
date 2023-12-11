@@ -56,6 +56,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.description_navigation),
                 MapboxNavigationActivity::class.java
             ),
+            SampleItem(
+                getString(R.string.title_navigation_dropin),
+                getString(R.string.description_navigation_dropin),
+                DropInUIActivity::class.java
+            ),
         )
     }
 

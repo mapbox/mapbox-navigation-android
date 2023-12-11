@@ -108,31 +108,21 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
 
-    // test
-    androidTestImplementation project(':libtesting-ui')
-    androidTestImplementation dependenciesList.testRunner
-    androidTestUtil dependenciesList.testOrchestrator
+    // Mapbox Drop-in UI example
+    implementation project(':libnavui-dropin')
 
-    // Kotlin support
+    // Android and kotlin libraries
     implementation dependenciesList.kotlinStdLib
-
-    //Coroutines
     implementation dependenciesList.coroutinesAndroid
-
-    // Support libraries
     implementation dependenciesList.androidXCore
     implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXConstraintLayout
-
     implementation dependenciesList.gmsLocation
-
     implementation dependenciesList.multidex
 
-    // Leak Canary
-    debugImplementation dependenciesList.leakCanaryDebug
-
-    // Crashlytics
+    // Quality
     implementation dependenciesList.firebaseCrashlyticsNdk
+    debugImplementation dependenciesList.leakCanaryDebug
 }

@@ -36,6 +36,7 @@ buildscript {
     classpath pluginDependencies.dokka
     classpath pluginDependencies.firebaseCrashlytics
     classpath pluginDependencies.googleServices
+      classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21'
   }
 }
 
