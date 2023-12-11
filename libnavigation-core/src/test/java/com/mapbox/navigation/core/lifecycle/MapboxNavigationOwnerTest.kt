@@ -55,7 +55,7 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with (mapboxNavigationOwner.carAppLifecycleObserver) {
+        with(mapboxNavigationOwner.carAppLifecycleObserver) {
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_CREATE)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_RESUME)
@@ -69,7 +69,7 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with (mapboxNavigationOwner.carAppLifecycleObserver) {
+        with(mapboxNavigationOwner.carAppLifecycleObserver) {58
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_CREATE)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_RESUME)
@@ -91,7 +91,7 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with (mapboxNavigationOwner.carAppLifecycleObserver) {
+        with(mapboxNavigationOwner.carAppLifecycleObserver) {
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_STOP)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
@@ -115,7 +115,7 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(secondObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with (mapboxNavigationOwner.carAppLifecycleObserver) {
+        with(mapboxNavigationOwner.carAppLifecycleObserver) {
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_STOP)
         }

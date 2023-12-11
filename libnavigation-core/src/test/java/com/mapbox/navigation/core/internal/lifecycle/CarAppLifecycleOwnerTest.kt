@@ -164,7 +164,7 @@ class CarAppLifecycleOwnerTest {
     fun `verify the lifecycle is not stopped when only one attached lifecycle is destroyed`() {
         val testLifecycleOwnerA = TestLifecycleOwner()
         val testLifecycleOwnerB = TestLifecycleOwner()
-        with (carAppLifecycleOwner.startedReferenceCounter) {
+        with(carAppLifecycleOwner.startedReferenceCounter) {
             onStateChanged(testLifecycleOwnerA, Lifecycle.Event.ON_CREATE)
             onStateChanged(testLifecycleOwnerA, Lifecycle.Event.ON_START)
             onStateChanged(testLifecycleOwnerA, Lifecycle.Event.ON_RESUME)
