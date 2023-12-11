@@ -94,8 +94,7 @@ internal class BackPressedComponent(
     }
 }
 
-
-public suspend fun Lifecycle.repeatOnLifecycle(
+suspend fun Lifecycle.repeatOnLifecycle(
     state: Lifecycle.State,
     block: suspend CoroutineScope.() -> Unit
 ) {

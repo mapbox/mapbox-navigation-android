@@ -214,20 +214,15 @@ class MapboxStatusView : FrameLayout {
             addListener(
                 object : AnimatorListener {
                     override fun onAnimationStart(p0: Animator) {
-                            visibility = View.VISIBLE
-                            updateView(status)
+                        visibility = View.VISIBLE
+                        updateView(status)
                     }
 
-                    override fun onAnimationEnd(p0: Animator) {
+                    override fun onAnimationEnd(p0: Animator) = Unit
 
-                    }
+                    override fun onAnimationCancel(p0: Animator) = Unit
 
-                    override fun onAnimationCancel(p0: Animator) {
-                    }
-
-                    override fun onAnimationRepeat(p0: Animator) {
-                    }
-
+                    override fun onAnimationRepeat(p0: Animator) = Unit
                 }
             )
         }
@@ -250,5 +245,4 @@ class MapboxStatusView : FrameLayout {
         set(value) {
             visibility = if (value) View.VISIBLE else View.GONE
         }
-
 }

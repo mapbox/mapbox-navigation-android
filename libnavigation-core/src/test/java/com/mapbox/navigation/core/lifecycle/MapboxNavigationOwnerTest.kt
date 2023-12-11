@@ -69,7 +69,7 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with(mapboxNavigationOwner.carAppLifecycleObserver) {58
+        with(mapboxNavigationOwner.carAppLifecycleObserver) {
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_CREATE)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
             onStateChanged(lifecycleOwner, Lifecycle.Event.ON_RESUME)
