@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.shield
 
 import android.util.LruCache
-import com.google.gson.JsonSyntaxException
 import com.mapbox.api.directions.v5.models.ShieldSprites
 import com.mapbox.api.directions.v5.models.ShieldSvg
 import com.mapbox.bindgen.Expected
@@ -152,21 +151,42 @@ internal class ShieldResultCache(
         }
 
         val mapboxShieldUrl = toDownload.url
-        return shieldByteArrayCache.getOrRequest(mapboxShieldUrl).mapValue { shieldByteArray ->
-            val svgJson = String(shieldByteArray)
-            val svg = appendTextToShield(
-                text = toDownload.mapboxShield.displayRef(),
-                shieldSvg = ShieldSvg.fromJson(svgJson).svg(),
-                textColor = toDownload.mapboxShield.textColor(),
-                placeholder = placeholder
-            ).toByteArray()
-            RouteShield.MapboxDesignedShield(
-                mapboxShieldUrl,
-                svg,
-                toDownload.mapboxShield,
-                sprite
-            )
-        }
+        return shieldByteArrayCache.getOrRequest(mapboxShieldUrl).fold(
+            { throwable ->
+                ExpectedFactory.createError(throwable)
+            },
+            { shieldByteArray ->
+                val svgJson = String(shieldByteArray)
+                val shieldSvg: Expected<Throwable, String> = try {
+                    ExpectedFactory.createValue(ShieldSvg.fromJson(svgJson).svg())
+                } catch (ex: Throwable) {
+                    ExpectedFactory.createError(ex)
+                }
+                shieldSvg.fold(
+                    { svgError ->
+                        ExpectedFactory.createError(
+                            "Error parsing shield svg: ${svgError.message}"
+                        )
+                    },
+                    { value ->
+                        val svg = appendTextToShield(
+                            text = toDownload.mapboxShield.displayRef(),
+                            shieldSvg = value,
+                            textColor = toDownload.mapboxShield.textColor(),
+                            placeholder = placeholder
+                        ).toByteArray()
+                        ExpectedFactory.createValue(
+                            RouteShield.MapboxDesignedShield(
+                                mapboxShieldUrl,
+                                svg,
+                                toDownload.mapboxShield,
+                                sprite
+                            )
+                        )
+                    }
+                )
+            }
+        )
     }
 
     private fun appendTextToShield(
@@ -207,7 +227,7 @@ internal class ShieldSpritesCache : ResourceCache<String, ShieldSprites>(8) {
                 val shieldSprites = ShieldSprites.fromJson(spriteJson)
                 shieldSprites
             }
-        } catch (exception: JsonSyntaxException) {
+        } catch (exception: Throwable) {
             val json = result.value?.let { String(it) } ?: "null"
             ExpectedFactory.createError(
                 """

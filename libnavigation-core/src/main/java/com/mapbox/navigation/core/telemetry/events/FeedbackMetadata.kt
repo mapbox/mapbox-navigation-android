@@ -112,6 +112,8 @@ class FeedbackMetadata internal constructor(
     companion object {
         /**
          * Create a new instance of [FeedbackMetadata] from json.
+         *
+         * @throws Throwable if json is not a valid FeedbackMetadata
          */
         @JvmStatic
         @ExperimentalPreviewMapboxNavigationAPI

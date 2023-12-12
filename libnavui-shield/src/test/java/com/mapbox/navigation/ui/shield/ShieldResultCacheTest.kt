@@ -16,6 +16,7 @@ import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -85,6 +86,42 @@ class ShieldResultCacheTest {
         val result = cache.getOrRequest(toDownload)
 
         assertEquals(expected, result.value)
+    }
+
+    @Test
+    fun `design shield - parsing failure`() = coroutineRule.runBlockingTest {
+        val rawShieldJson =
+            """
+                {"svg":{"aa":"bb"}}
+            """.trimIndent()
+
+        val shieldUrl = "shield-url"
+        val spriteUrl = "sprite-url"
+        val shieldSprites = mockk<ShieldSprites>()
+        val shieldSprite = mockk<ShieldSprite> {
+            every { spriteAttributes() } returns mockk {
+                every { placeholder() } returns listOf(10.0, 4.0, 18.0, 10.0)
+            }
+        }
+        val toDownload = mockk<RouteShieldToDownload.MapboxDesign> {
+            every { url } returns shieldUrl
+            every { generateSpriteSheetUrl() } returns spriteUrl
+            every { getSpriteFrom(shieldSprites) } returns shieldSprite
+            every { mapboxShield } returns mockk {
+                every { textColor() } returns "black"
+                every { displayRef() } returns "RT-82"
+            }
+        }
+        coEvery {
+            shieldSpritesCache.getOrRequest(spriteUrl)
+        } returns ExpectedFactory.createValue(shieldSprites)
+        coEvery {
+            shieldByteArrayCache.getOrRequest(shieldUrl)
+        } returns ExpectedFactory.createValue(rawShieldJson.toByteArray())
+
+        val result = cache.getOrRequest(toDownload)
+
+        assertTrue(result.error!!.startsWith("Error parsing shield svg:"))
     }
 
     @Test
