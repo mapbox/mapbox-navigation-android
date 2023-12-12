@@ -6,6 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.17.8 - 12 December, 2023
+### Changelog
+[Changes between v2.17.7 and v2.17.8](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.7...v2.17.8)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where route parsing might have crashes for invalid Directions Response. [#7667](https://github.com/mapbox/mapbox-navigation-android/pull/7667)
+- Fixed an issue where the first voice instruction might have been played thrice when switching between regular session and replay with route being set. [#7661](https://github.com/mapbox/mapbox-navigation-android/pull/7661)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.3))
+- Mapbox Navigation Native `v162.0.0`
+- Mapbox Core Common `v23.8.5`
+- Mapbox Java `v6.15.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.15.0))
+
+
 ## Mapbox Navigation SDK 2.17.7 - 08 December, 2023
 ### Changelog
 [Changes between v2.17.6 and v2.17.7](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.6...v2.17.7)
