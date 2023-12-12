@@ -1,0 +1,1 @@
+- Fixed an issue where route parsing might have crashes for invalid Directions Response.

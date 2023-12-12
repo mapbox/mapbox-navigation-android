@@ -135,6 +135,8 @@ class NavigationRoute internal constructor(
          *
          * @param directionsResponseJson response to be parsed into [NavigationRoute]s
          * @param routeRequestUrl URL used to generate the [directionsResponse]
+         *
+         * @throws DirectionsResponseParsingException if `directionsResponseJson` is invalid
          */
         @Deprecated(
             "Navigation route requires RouterOrigin. " +
@@ -161,6 +163,8 @@ class NavigationRoute internal constructor(
          * @param directionsResponseJson response to be parsed into [NavigationRoute]s
          * @param routeRequestUrl URL used to generate the [directionsResponse]
          * @param routerOrigin origin where route was fetched from
+         *
+         * @throws DirectionsResponseParsingException if `directionsResponseJson` is invalid
          */
         @JvmStatic
         fun create(
@@ -168,8 +172,14 @@ class NavigationRoute internal constructor(
             routeRequestUrl: String,
             routerOrigin: RouterOrigin,
         ): List<NavigationRoute> {
+            val directionsResponse = try {
+                DirectionsResponse.fromJson(directionsResponseJson)
+            } catch (ex: Throwable) {
+                logE(LOG_CATEGORY) { "Error parsing directions response" }
+                throw DirectionsResponseParsingException(ex)
+            }
             return create(
-                directionsResponse = DirectionsResponse.fromJson(directionsResponseJson),
+                directionsResponse = directionsResponse,
                 directionsResponseJson = directionsResponseJson,
                 routeOptions = RouteOptions.fromUrl(URL(routeRequestUrl)),
                 routeOptionsUrlString = routeRequestUrl,
