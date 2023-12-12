@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.internal.utils
 
-import com.google.gson.JsonSyntaxException
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -8,10 +7,10 @@ import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.toDirectionsResponse
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import org.json.JSONException
 
 suspend fun parseDirectionsResponse(
     dispatcher: CoroutineDispatcher,
@@ -37,12 +36,9 @@ suspend fun parseDirectionsResponse(
             } else {
                 ExpectedFactory.createValue(routes)
             }
-        } catch (ex: Exception) {
-            when (ex) {
-                is JSONException,
-                is JsonSyntaxException -> ExpectedFactory.createError(ex)
-                else -> throw ex
-            }
+        } catch (ex: Throwable) {
+            logE { "Route parsing failed: ${ex.message}" }
+            ExpectedFactory.createError(ex)
         }
     }
 
@@ -66,12 +62,8 @@ fun parseRouteInterfaces(
             .flatten()
             .sortedBy { routes.indexOf(it.nativeRoute) }
             .let { ExpectedFactory.createValue(it) }
-    } catch (ex: Exception) {
-        when (ex) {
-            is JSONException,
-            is IllegalStateException,
-            is IllegalArgumentException -> ExpectedFactory.createError(ex)
-            else -> throw ex
-        }
+    } catch (ex: Throwable) {
+        logE { "Alternative route parsing failed: ${ex.message}" }
+        ExpectedFactory.createError(ex)
     }
 }

@@ -178,6 +178,53 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Test
+    fun invalid_continuous_alternatives_do_not_crash() = sdkTest {
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_alternative_start),
+                startCoordinates
+            )
+        )
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_alternative_continue_invalid),
+                continueCoordinates,
+            )
+        )
+
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule
+        ) { mapboxNavigation ->
+            val testRoutes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
+            mockLocationReplayerRule.playRoute(testRoutes.first().directionsRoute)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.flowLocationMatcherResult().first()
+
+            mapboxNavigation.setNavigationRoutes(testRoutes)
+            mapboxNavigation.registerRouteAlternativesObserver(
+                object : NavigationRouteAlternativesObserver {
+                    override fun onRouteAlternatives(
+                        routeProgress: RouteProgress,
+                        alternatives: List<NavigationRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                    }
+
+                    override fun onRouteAlternativesError(error: RouteAlternativesError) {
+                    }
+                }
+            )
+
+            // no crash
+            mapboxNavigation.routeProgressUpdates().first {
+                it.distanceTraveled >= 150
+            }
+        }
+    }
+
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun refresh_alternatives_before_passing_a_fork_point() = sdkTest {
