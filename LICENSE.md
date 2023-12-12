@@ -1349,7 +1349,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Android Support Library compat (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
-URL: [https://developer.android.com/jetpack/androidx/releases/core#1.7.0](https://developer.android.com/jetpack/androidx/releases/core#1.7.0)
+URL: [https://developer.android.com/jetpack/androidx/releases/core#1.6.0](https://developer.android.com/jetpack/androidx/releases/core#1.6.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -1426,12 +1426,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the AndroidX Futures (Androidx implementation of Guava's ListenableFuture).
-URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the AndroidX Widget ViewPager2.
 URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1439,7 +1433,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Core Kotlin Extensions (Kotlin extensions for 'core' artifact).
-URL: [https://developer.android.com/jetpack/androidx/releases/core#1.7.0](https://developer.android.com/jetpack/androidx/releases/core#1.7.0)
+URL: [https://developer.android.com/jetpack/androidx/releases/core#1.6.0](https://developer.android.com/jetpack/androidx/releases/core#1.6.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -1452,27 +1446,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 Mapbox Navigation uses portions of the Gson.
 License: [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Guava ListenableFuture only (Contains Guava's com.google.common.util.concurrent.ListenableFuture class,
-    without any of its other classes -- but is also available in a second
-    "version" that omits the class to avoid conflicts with the copy in Guava
-    itself. The idea is:
-
-    - If users want only ListenableFuture, they depend on listenablefuture-1.0.
-
-    - If users want all of Guava, they depend on guava, which, as of Guava
-    27.0, depends on
-    listenablefuture-9999.0-empty-to-avoid-conflict-with-guava. The 9999.0-...
-    version number is enough for some build systems (notably, Gradle) to select
-    that empty artifact over the "real" listenablefuture-1.0 -- avoiding a
-    conflict with the copy of ListenableFuture in guava itself. If users are
-    using an older version of Guava or a build system other than Gradle, they
-    may see class conflicts. If so, they can solve them by manually excluding
-    the listenablefuture artifact or manually forcing their build systems to
-    use 9999.0-....).
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
