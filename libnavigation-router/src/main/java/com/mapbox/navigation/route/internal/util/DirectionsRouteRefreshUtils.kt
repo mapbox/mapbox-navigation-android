@@ -15,7 +15,7 @@ internal fun parseDirectionsRouteRefresh(
         } else {
             ExpectedFactory.createError(IllegalStateException("no route refresh returned"))
         }
-    } catch (ex: Exception) {
+    } catch (ex: Throwable) {
         ExpectedFactory.createError(ex)
     }
 }
