@@ -2,7 +2,6 @@
 
 package com.mapbox.navigation.core.lifecycle
 
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -55,11 +54,9 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with(mapboxNavigationOwner.carAppLifecycleObserver) {
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_CREATE)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_RESUME)
-        }
+        mapboxNavigationOwner.carAppLifecycleObserver.onCreate(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onResume(lifecycleOwner)
     }
 
     @Test
@@ -69,14 +66,12 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with(mapboxNavigationOwner.carAppLifecycleObserver) {
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_CREATE)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_RESUME)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_STOP)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_DESTROY)
-        }
+        mapboxNavigationOwner.carAppLifecycleObserver.onCreate(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onResume(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onPause(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStop(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onDestroy(lifecycleOwner)
 
         verifyOrder {
             mapboxNavigationObserver.onAttached(any())
@@ -91,12 +86,10 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(mapboxNavigationObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with(mapboxNavigationOwner.carAppLifecycleObserver) {
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_STOP)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_STOP)
-        }
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStop(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStop(lifecycleOwner)
 
         verifyOrder {
             mapboxNavigationObserver.onAttached(any())
@@ -115,10 +108,8 @@ class MapboxNavigationOwnerTest {
         mapboxNavigationOwner.register(secondObserver)
 
         val lifecycleOwner: LifecycleOwner = mockk()
-        with(mapboxNavigationOwner.carAppLifecycleObserver) {
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(lifecycleOwner, Lifecycle.Event.ON_STOP)
-        }
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStop(lifecycleOwner)
 
         verifyOrder {
             firstObserver.onAttached(any())
@@ -132,9 +123,7 @@ class MapboxNavigationOwnerTest {
     fun `attach and detach observer when navigation is started`() {
         mapboxNavigationOwner.setup(navigationOptionsProvider)
         val lifecycleOwner: LifecycleOwner = mockk()
-
-        mapboxNavigationOwner.carAppLifecycleObserver
-            .onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
 
         val observer = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         mapboxNavigationOwner.register(observer)
@@ -164,8 +153,7 @@ class MapboxNavigationOwnerTest {
 
         verify(exactly = 0) { navigationOptionsProvider.createNavigationOptions() }
 
-        mapboxNavigationOwner.carAppLifecycleObserver
-            .onStateChanged(mockk(), Lifecycle.Event.ON_START)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(mockk())
 
         verify(exactly = 1) { navigationOptionsProvider.createNavigationOptions() }
     }
@@ -176,17 +164,14 @@ class MapboxNavigationOwnerTest {
         val lifecycleOwner = mockk<LifecycleOwner>()
         val navigationOptionsA = mockk<NavigationOptions>()
         every { navigationOptionsProvider.createNavigationOptions() } returns navigationOptionsA
-        mapboxNavigationOwner.carAppLifecycleObserver
-            .onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
 
         assertEquals(navigationOptionsA, mapboxNavigationOwner.current()?.navigationOptions)
 
-        mapboxNavigationOwner.carAppLifecycleObserver
-            .onStateChanged(lifecycleOwner, Lifecycle.Event.ON_STOP)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStop(lifecycleOwner)
         val navigationOptionsB = mockk<NavigationOptions>()
         every { navigationOptionsProvider.createNavigationOptions() } returns navigationOptionsB
-        mapboxNavigationOwner.carAppLifecycleObserver
-            .onStateChanged(lifecycleOwner, Lifecycle.Event.ON_START)
+        mapboxNavigationOwner.carAppLifecycleObserver.onStart(lifecycleOwner)
 
         assertEquals(navigationOptionsB, mapboxNavigationOwner.current()?.navigationOptions)
     }

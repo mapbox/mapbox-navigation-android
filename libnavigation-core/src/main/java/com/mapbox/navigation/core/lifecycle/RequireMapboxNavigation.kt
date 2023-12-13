@@ -3,10 +3,10 @@
 package com.mapbox.navigation.core.lifecycle
 
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp.lifecycleOwner
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -88,44 +88,29 @@ internal class RequireMapboxNavigationDelegate(
     private val onInitialize: (() -> Unit)? = null
 ) : ReadOnlyProperty<Any, MapboxNavigation> {
 
-    private val lifecycleObserver = object : LifecycleEventObserver {
-
-        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-            when (event) {
-                Lifecycle.Event.ON_CREATE -> onCreate(source)
-                Lifecycle.Event.ON_DESTROY -> onDestroy(source)
-                Lifecycle.Event.ON_START -> onStart(source)
-                Lifecycle.Event.ON_STOP -> onStop(source)
-                Lifecycle.Event.ON_RESUME -> onResume(source)
-                Lifecycle.Event.ON_PAUSE -> onPause(source)
-                else -> {
-                    // no-op
-                }
-            }
-        }
-
-        fun onCreate(owner: LifecycleOwner) {
+    private val lifecycleObserver = object : DefaultLifecycleObserver() {
+        override fun onCreate(owner: LifecycleOwner) {
             onInitialize?.invoke()
             onCreatedObserver?.let { MapboxNavigationApp.registerObserver(it) }
         }
 
-        fun onDestroy(owner: LifecycleOwner) {
+        override fun onDestroy(owner: LifecycleOwner) {
             onCreatedObserver?.let { MapboxNavigationApp.unregisterObserver(it) }
         }
 
-        fun onStart(owner: LifecycleOwner) {
+        override fun onStart(owner: LifecycleOwner) {
             onStartedObserver?.let { MapboxNavigationApp.registerObserver(it) }
         }
 
-        fun onStop(owner: LifecycleOwner) {
+        override fun onStop(owner: LifecycleOwner) {
             onStartedObserver?.let { MapboxNavigationApp.unregisterObserver(it) }
         }
 
-        fun onResume(owner: LifecycleOwner) {
+        override fun onResume(owner: LifecycleOwner) {
             onResumedObserver?.let { MapboxNavigationApp.registerObserver(it) }
         }
 
-        fun onPause(owner: LifecycleOwner) {
+        override fun onPause(owner: LifecycleOwner) {
             onResumedObserver?.let { MapboxNavigationApp.unregisterObserver(it) }
         }
     }

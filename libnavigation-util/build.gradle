@@ -28,6 +28,7 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidXCore
+    implementation dependenciesList.androidXLifecycleRuntime
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxCommonNative
     implementation dependenciesList.mapboxCommonOkHttp

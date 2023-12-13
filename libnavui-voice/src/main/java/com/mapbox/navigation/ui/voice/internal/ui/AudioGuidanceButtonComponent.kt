@@ -1,12 +1,12 @@
 package com.mapbox.navigation.ui.voice.internal.ui
 
-import android.view.View
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.utils.internal.extensions.slice
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
+import com.mapbox.navigation.utils.internal.isVisible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -66,7 +66,7 @@ class AudioGuidanceButtonComponent(
         }
 
         contract.isVisible.observe {
-            audioGuidanceButton.visibility = if (it) View.VISIBLE else View.GONE
+            audioGuidanceButton.isVisible = it
         }
 
         audioGuidanceButton.setOnClickListener {

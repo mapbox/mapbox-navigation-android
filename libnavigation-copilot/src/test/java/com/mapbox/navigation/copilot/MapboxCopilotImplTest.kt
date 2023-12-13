@@ -8,8 +8,8 @@ import android.content.pm.PackageInfo
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Base64
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.common.UploadOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -528,7 +528,7 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val foregroundBackgroundLifecycleObserver = slot<LifecycleEventObserver>()
+        val foregroundBackgroundLifecycleObserver = slot<DefaultLifecycleObserver>()
         every {
             mockedProcessLifecycleOwner.lifecycle.addObserver(
                 capture(foregroundBackgroundLifecycleObserver)
@@ -538,8 +538,7 @@ class MapboxCopilotImplTest {
         mapboxCopilot.start()
         val mockedLifecycleOwner = mockk<LifecycleOwner>()
 
-        foregroundBackgroundLifecycleObserver.captured
-            .onStateChanged(mockedLifecycleOwner, Lifecycle.Event.ON_RESUME)
+        foregroundBackgroundLifecycleObserver.captured.onResume(mockedLifecycleOwner)
 
         verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(GOING_TO_FOREGROUND_EVENT_NAME, "{}")
@@ -554,7 +553,7 @@ class MapboxCopilotImplTest {
         every {
             mockedMapboxNavigation.retrieveCopilotHistoryRecorder()
         } returns mockedHistoryRecorder
-        val foregroundBackgroundLifecycleObserver = slot<LifecycleEventObserver>()
+        val foregroundBackgroundLifecycleObserver = slot<DefaultLifecycleObserver>()
         every {
             mockedProcessLifecycleOwner.lifecycle.addObserver(
                 capture(foregroundBackgroundLifecycleObserver)
@@ -564,8 +563,7 @@ class MapboxCopilotImplTest {
         mapboxCopilot.start()
         val mockedLifecycleOwner = mockk<LifecycleOwner>()
 
-        foregroundBackgroundLifecycleObserver.captured
-            .onStateChanged(mockedLifecycleOwner, Lifecycle.Event.ON_PAUSE)
+        foregroundBackgroundLifecycleObserver.captured.onPause(mockedLifecycleOwner)
 
         verify(exactly = 1) {
             mockedHistoryRecorder.pushHistory(GOING_TO_BACKGROUND_EVENT_NAME, "{}")

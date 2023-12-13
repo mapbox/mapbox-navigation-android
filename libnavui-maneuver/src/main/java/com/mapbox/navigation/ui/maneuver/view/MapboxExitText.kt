@@ -20,6 +20,8 @@ import com.mapbox.navigation.ui.maneuver.model.ComponentNode
 import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.toBitmap
+import com.mapbox.navigation.utils.internal.toDrawable
 
 /**
  * Default Exit View that renders exit number in a specific style.
@@ -251,30 +253,5 @@ class MapboxExitText : AppCompatTextView {
     private fun Drawable?.adjustDrawableHeight(): Drawable? {
         val bitmap = this?.toBitmap(lineHeight, lineHeight, Bitmap.Config.ARGB_8888)
         return bitmap?.toDrawable(context.resources)
-    }
-
-    private fun Bitmap.toDrawable(resources: Resources) = BitmapDrawable(resources, this)
-
-    fun Drawable.toBitmap(
-        width: Int = intrinsicWidth,
-        height: Int = intrinsicHeight,
-        config: Bitmap.Config? = null
-    ): Bitmap {
-        if (this is BitmapDrawable) {
-            if (config == null || bitmap.config == config) {
-                // Fast-path to return original. Bitmap.createScaledBitmap will do this check, but it
-                // involves allocation and two jumps into native code so we perform the check ourselves.
-                if (width == intrinsicWidth && height == intrinsicHeight) {
-                    return bitmap
-                }
-                return Bitmap.createScaledBitmap(bitmap, width, height, true)
-            }
-        }
-        val oldBounds = bounds
-        val bitmap = Bitmap.createBitmap(width, height, config ?: Bitmap.Config.ARGB_8888)
-        setBounds(0, 0, width, height)
-        draw(Canvas(bitmap))
-        setBounds(oldBounds.left, oldBounds.top, oldBounds.right, oldBounds.bottom)
-        return bitmap
     }
 }

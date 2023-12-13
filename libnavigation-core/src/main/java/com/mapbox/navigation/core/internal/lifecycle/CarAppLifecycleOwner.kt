@@ -6,9 +6,9 @@ import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.logI
 
 class CarAppLifecycleOwner : LifecycleOwner {
@@ -29,18 +29,8 @@ class CarAppLifecycleOwner : LifecycleOwner {
         .apply { currentState = Lifecycle.State.INITIALIZED }
 
     @VisibleForTesting
-    internal val startedReferenceCounter = object : LifecycleEventObserver {
-
-        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-            when (event) {
-                Lifecycle.Event.ON_CREATE -> onCreate(source)
-                Lifecycle.Event.ON_START -> onStart(source)
-                Lifecycle.Event.ON_STOP -> onStop(source)
-                Lifecycle.Event.ON_DESTROY -> onDestroy(source)
-            }
-        }
-
-        fun onCreate(owner: LifecycleOwner) {
+    internal val startedReferenceCounter = object : DefaultLifecycleObserver() {
+        override fun onCreate(owner: LifecycleOwner) {
             if (!lifecycleCreated.add(owner)) return
             if (createdChangingConfiguration > 0) {
                 createdChangingConfiguration--
@@ -52,7 +42,7 @@ class CarAppLifecycleOwner : LifecycleOwner {
             }
         }
 
-        fun onStart(owner: LifecycleOwner) {
+        override fun onStart(owner: LifecycleOwner) {
             if (!lifecycleForegrounded.add(owner)) return
             if (foregroundedChangingConfiguration > 0) {
                 foregroundedChangingConfiguration--
@@ -64,7 +54,7 @@ class CarAppLifecycleOwner : LifecycleOwner {
             }
         }
 
-        fun onStop(owner: LifecycleOwner) {
+        override fun onStop(owner: LifecycleOwner) {
             if (!lifecycleForegrounded.remove(owner)) return
             if (owner.isChangingConfigurations()) {
                 foregroundedChangingConfiguration++
@@ -79,7 +69,7 @@ class CarAppLifecycleOwner : LifecycleOwner {
             }
         }
 
-        fun onDestroy(owner: LifecycleOwner) {
+        override fun onDestroy(owner: LifecycleOwner) {
             if (!lifecycleCreated.remove(owner)) return
             if (owner.isChangingConfigurations()) {
                 createdChangingConfiguration++
@@ -193,13 +183,13 @@ class CarAppLifecycleOwner : LifecycleOwner {
         lifecycleOwner.lifecycle.removeObserver(startedReferenceCounter)
         val currentState = lifecycleOwner.lifecycle.currentState
         if (currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            startedReferenceCounter.onStateChanged(lifecycleOwner, Lifecycle.Event.ON_PAUSE)
+            startedReferenceCounter.onPause(lifecycleOwner)
         }
         if (currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            startedReferenceCounter.onStateChanged(lifecycleOwner, Lifecycle.Event.ON_STOP)
+            startedReferenceCounter.onStop(lifecycleOwner)
         }
         if (currentState.isAtLeast(Lifecycle.State.CREATED)) {
-            startedReferenceCounter.onStateChanged(lifecycleOwner, Lifecycle.Event.ON_DESTROY)
+            startedReferenceCounter.onDestroy(lifecycleOwner)
         }
     }
 

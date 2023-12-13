@@ -3,8 +3,6 @@ package com.mapbox.navigation.ui.speedlimit.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.annotation.UiThread
@@ -26,6 +24,8 @@ import com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection
 import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
 import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
 import com.mapbox.navigation.ui.speedlimit.model.ViewConstraints
+import com.mapbox.navigation.utils.internal.isVisible
+import com.mapbox.navigation.utils.internal.updateLayoutParams
 
 /**
  * A view component responsible to render posted speed limit and current speed produced by
@@ -455,16 +455,4 @@ class MapboxSpeedInfoView : FrameLayout {
 
         set.applyTo(speedInfoViennaLayout)
     }
-
-    private inline fun View.updateLayoutParams(block: ViewGroup.LayoutParams.() -> Unit) {
-        val params = layoutParams
-        block(params)
-        layoutParams = params
-    }
-
-    private var View.isVisible: Boolean
-        get() = visibility == View.VISIBLE
-        set(value) {
-            visibility = if (value) View.VISIBLE else View.GONE
-        }
 }

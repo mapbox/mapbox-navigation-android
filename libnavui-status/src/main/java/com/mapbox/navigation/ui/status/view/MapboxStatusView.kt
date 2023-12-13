@@ -19,6 +19,8 @@ import com.mapbox.navigation.ui.status.R
 import com.mapbox.navigation.ui.status.databinding.MapboxStatusViewLayoutBinding
 import com.mapbox.navigation.ui.status.internal.extensions.doOnFinish
 import com.mapbox.navigation.ui.status.model.Status
+import com.mapbox.navigation.utils.internal.isInvisible
+import com.mapbox.navigation.utils.internal.isVisible
 
 /**
  * View for rendering [Status] information.
@@ -59,7 +61,7 @@ class MapboxStatusView : FrameLayout {
     /**
      * Returns `true` if this view is visible.
      */
-    val isRendered: Boolean get() = visibility == View.VISIBLE
+    val isRendered: Boolean get() = isVisible
 
     /**
      * A resource identifier for the Show Animator.
@@ -90,7 +92,7 @@ class MapboxStatusView : FrameLayout {
         defStyleRes: Int
     ) : super(context, attrs, defStyleAttr, defStyleRes) {
         if (!isInEditMode) {
-            visibility = View.GONE
+            isInvisible = true
         }
 
         context.theme.obtainStyledAttributes(
@@ -214,7 +216,7 @@ class MapboxStatusView : FrameLayout {
             addListener(
                 object : AnimatorListener {
                     override fun onAnimationStart(p0: Animator) {
-                        visibility = View.VISIBLE
+                        isInvisible = false
                         updateView(status)
                     }
 
@@ -232,17 +234,11 @@ class MapboxStatusView : FrameLayout {
             setTarget(this@MapboxStatusView)
             startDelay = delay
             doOnFinish {
-                visibility = View.GONE
+                isInvisible = true
             }
         }
 
     private fun cancelPendingAnimations() {
         pendingHideAnimation?.cancel()
     }
-
-    private var View.isVisible: Boolean
-        get() = visibility == View.VISIBLE
-        set(value) {
-            visibility = if (value) View.VISIBLE else View.GONE
-        }
 }

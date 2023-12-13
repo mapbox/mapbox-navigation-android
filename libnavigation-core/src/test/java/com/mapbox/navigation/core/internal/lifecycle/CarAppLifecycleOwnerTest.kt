@@ -76,13 +76,13 @@ class CarAppLifecycleOwnerTest {
     @Test
     fun `verify order when the lifecycle is backgrounded and foregrounded`() {
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_CREATE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_RESUME)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_STOP)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_RESUME)
+            onCreate(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
+            onResume(carAppLifecycleOwner)
+            onPause(carAppLifecycleOwner)
+            onStop(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
+            onResume(carAppLifecycleOwner)
         }
 
         verifyOrder {
@@ -97,9 +97,9 @@ class CarAppLifecycleOwnerTest {
     @Test
     fun `verify order when the car is started without the app`() {
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_CREATE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_RESUME)
+            onCreate(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
+            onResume(carAppLifecycleOwner)
         }
 
         verifyOrder {
@@ -113,16 +113,15 @@ class CarAppLifecycleOwnerTest {
     fun `verify the lifecycle is not stopped when the activities are destroyed`() {
         val activity = mockActivity()
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_CREATE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_START)
+            onCreate(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
         }
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
             onActivityCreated(activity, mockk())
             onActivityStarted(activity)
             onActivityStopped(activity)
         }
-        carAppLifecycleOwner.startedReferenceCounter
-            .onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_STOP)
+        carAppLifecycleOwner.startedReferenceCounter.onStop(carAppLifecycleOwner)
         carAppLifecycleOwner.activityLifecycleCallbacks.onActivityDestroyed(activity)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -142,15 +141,14 @@ class CarAppLifecycleOwnerTest {
             onActivityResumed(activity)
         }
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_CREATE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_RESUME)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_STOP)
+            onCreate(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
+            onResume(carAppLifecycleOwner)
+            onPause(carAppLifecycleOwner)
+            onStop(carAppLifecycleOwner)
         }
         carAppLifecycleOwner.activityLifecycleCallbacks.onActivityStopped(activity)
-        carAppLifecycleOwner.startedReferenceCounter
-            .onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_DESTROY)
+        carAppLifecycleOwner.startedReferenceCounter.onDestroy(carAppLifecycleOwner)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
@@ -164,18 +162,16 @@ class CarAppLifecycleOwnerTest {
     fun `verify the lifecycle is not stopped when only one attached lifecycle is destroyed`() {
         val testLifecycleOwnerA = TestLifecycleOwner()
         val testLifecycleOwnerB = TestLifecycleOwner()
-        with(carAppLifecycleOwner.startedReferenceCounter) {
-            onStateChanged(testLifecycleOwnerA, Lifecycle.Event.ON_CREATE)
-            onStateChanged(testLifecycleOwnerA, Lifecycle.Event.ON_START)
-            onStateChanged(testLifecycleOwnerA, Lifecycle.Event.ON_RESUME)
-            onStateChanged(testLifecycleOwnerB, Lifecycle.Event.ON_CREATE)
-            onStateChanged(testLifecycleOwnerB, Lifecycle.Event.ON_START)
-            onStateChanged(testLifecycleOwnerB, Lifecycle.Event.ON_RESUME)
-            onStateChanged(testLifecycleOwnerB, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(testLifecycleOwnerB, Lifecycle.Event.ON_STOP)
-            onStateChanged(testLifecycleOwnerA, Lifecycle.Event.ON_STOP)
-            onStateChanged(testLifecycleOwnerB, Lifecycle.Event.ON_DESTROY)
-        }
+        carAppLifecycleOwner.startedReferenceCounter.onCreate(testLifecycleOwnerA)
+        carAppLifecycleOwner.startedReferenceCounter.onStart(testLifecycleOwnerA)
+        carAppLifecycleOwner.startedReferenceCounter.onResume(testLifecycleOwnerA)
+        carAppLifecycleOwner.startedReferenceCounter.onCreate(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onStart(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onResume(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onPause(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onStop(testLifecycleOwnerB)
+        carAppLifecycleOwner.startedReferenceCounter.onStop(testLifecycleOwnerA)
+        carAppLifecycleOwner.startedReferenceCounter.onDestroy(testLifecycleOwnerB)
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
         verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
@@ -266,19 +262,19 @@ class CarAppLifecycleOwnerTest {
         carAppLifecycleOwner.startedReferenceCounter.apply {
             val activityA = mockComponentActivity()
             val activityB = mockComponentActivity()
-            onStateChanged(activityA, Lifecycle.Event.ON_CREATE)
-            onStateChanged(activityA, Lifecycle.Event.ON_START)
-            onStateChanged(activityA, Lifecycle.Event.ON_RESUME)
-            onStateChanged(activityB, Lifecycle.Event.ON_CREATE)
-            onStateChanged(activityB, Lifecycle.Event.ON_START)
-            onStateChanged(activityB, Lifecycle.Event.ON_RESUME)
+            onCreate(activityA)
+            onStart(activityA)
+            onResume(activityA)
+            onCreate(activityB)
+            onStart(activityB)
+            onResume(activityB)
             every { activityA.isChangingConfigurations } returns true
-            onStateChanged(activityA, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(activityA, Lifecycle.Event.ON_STOP)
-            onStateChanged(activityA, Lifecycle.Event.ON_DESTROY)
-            onStateChanged(activityB, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(activityB, Lifecycle.Event.ON_STOP)
-            onStateChanged(activityB, Lifecycle.Event.ON_DESTROY)
+            onPause(activityA)
+            onStop(activityA)
+            onDestroy(activityA)
+            onPause(activityB)
+            onStop(activityB)
+            onDestroy(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -293,11 +289,11 @@ class CarAppLifecycleOwnerTest {
         carAppLifecycleOwner.startedReferenceCounter.apply {
             val activityA = mockComponentActivity()
             val activityB = mockComponentActivity()
-            onStateChanged(activityA, Lifecycle.Event.ON_CREATE)
-            onStateChanged(activityB, Lifecycle.Event.ON_CREATE)
+            onCreate(activityA)
+            onCreate(activityB)
             every { activityA.isChangingConfigurations } returns true
-            onStateChanged(activityA, Lifecycle.Event.ON_DESTROY)
-            onStateChanged(activityB, Lifecycle.Event.ON_DESTROY)
+            onDestroy(activityA)
+            onDestroy(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -314,19 +310,19 @@ class CarAppLifecycleOwnerTest {
             val parentActivityB = mockActivity()
             val fragmentA = mockk<Fragment> { every { activity } returns parentActivityA }
             val fragmentB = mockk<Fragment> { every { activity } returns parentActivityB }
-            onStateChanged(fragmentA, Lifecycle.Event.ON_CREATE)
-            onStateChanged(fragmentA, Lifecycle.Event.ON_START)
-            onStateChanged(fragmentA, Lifecycle.Event.ON_RESUME)
-            onStateChanged(fragmentB, Lifecycle.Event.ON_CREATE)
-            onStateChanged(fragmentB, Lifecycle.Event.ON_START)
-            onStateChanged(fragmentB, Lifecycle.Event.ON_RESUME)
+            onCreate(fragmentA)
+            onStart(fragmentA)
+            onResume(fragmentA)
+            onCreate(fragmentB)
+            onStart(fragmentB)
+            onResume(fragmentB)
             every { parentActivityA.isChangingConfigurations } returns true
-            onStateChanged(fragmentA, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(fragmentA, Lifecycle.Event.ON_STOP)
-            onStateChanged(fragmentA, Lifecycle.Event.ON_DESTROY)
-            onStateChanged(fragmentB, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(fragmentB, Lifecycle.Event.ON_STOP)
-            onStateChanged(fragmentB, Lifecycle.Event.ON_DESTROY)
+            onPause(fragmentA)
+            onStop(fragmentA)
+            onDestroy(fragmentA)
+            onPause(fragmentB)
+            onStop(fragmentB)
+            onDestroy(fragmentB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -342,11 +338,11 @@ class CarAppLifecycleOwnerTest {
             val parentActivityA = mockActivity()
             val activityB = mockComponentActivity()
             val fragmentA = mockk<Fragment> { every { activity } returns parentActivityA }
-            onStateChanged(fragmentA, Lifecycle.Event.ON_CREATE)
-            onStateChanged(activityB, Lifecycle.Event.ON_CREATE)
+            onCreate(fragmentA)
+            onCreate(activityB)
             every { parentActivityA.isChangingConfigurations } returns true
-            onStateChanged(fragmentA, Lifecycle.Event.ON_DESTROY)
-            onStateChanged(activityB, Lifecycle.Event.ON_DESTROY)
+            onDestroy(fragmentA)
+            onDestroy(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -365,9 +361,9 @@ class CarAppLifecycleOwnerTest {
             onActivityResumed(activity)
         }
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_CREATE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_RESUME)
+            onCreate(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
+            onResume(carAppLifecycleOwner)
         }
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
             onActivityPaused(activity)
@@ -375,12 +371,12 @@ class CarAppLifecycleOwnerTest {
             onActivityDestroyed(activity)
         }
         carAppLifecycleOwner.startedReferenceCounter.apply {
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_STOP)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_DESTROY)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_CREATE)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_START)
-            onStateChanged(carAppLifecycleOwner, Lifecycle.Event.ON_RESUME)
+            onPause(carAppLifecycleOwner)
+            onStop(carAppLifecycleOwner)
+            onDestroy(carAppLifecycleOwner)
+            onCreate(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
+            onResume(carAppLifecycleOwner)
         }
 
         verifyOrder {
@@ -493,15 +489,15 @@ class CarAppLifecycleOwnerTest {
     fun `startedReferenceCounter verify repeated attach will not affect subsequent detach`() {
         carAppLifecycleOwner.startedReferenceCounter.apply {
             val activity = mockComponentActivity()
-            onStateChanged(activity, Lifecycle.Event.ON_CREATE)
-            onStateChanged(activity, Lifecycle.Event.ON_START)
-            onStateChanged(activity, Lifecycle.Event.ON_RESUME)
-            onStateChanged(activity, Lifecycle.Event.ON_CREATE)
-            onStateChanged(activity, Lifecycle.Event.ON_START)
-            onStateChanged(activity, Lifecycle.Event.ON_RESUME)
-            onStateChanged(activity, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(activity, Lifecycle.Event.ON_STOP)
-            onStateChanged(activity, Lifecycle.Event.ON_DESTROY)
+            onCreate(activity)
+            onStart(activity)
+            onResume(activity)
+            onCreate(activity)
+            onStart(activity)
+            onResume(activity)
+            onPause(activity)
+            onStop(activity)
+            onDestroy(activity)
 
             verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
             verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
@@ -536,12 +532,12 @@ class CarAppLifecycleOwnerTest {
     fun `startedReferenceCounter verify detach without attach will not affect subsequent attach`() {
         carAppLifecycleOwner.startedReferenceCounter.apply {
             val activity = mockComponentActivity()
-            onStateChanged(activity, Lifecycle.Event.ON_PAUSE)
-            onStateChanged(activity, Lifecycle.Event.ON_STOP)
-            onStateChanged(activity, Lifecycle.Event.ON_DESTROY)
-            onStateChanged(activity, Lifecycle.Event.ON_CREATE)
-            onStateChanged(activity, Lifecycle.Event.ON_START)
-            onStateChanged(activity, Lifecycle.Event.ON_RESUME)
+            onPause(activity)
+            onStop(activity)
+            onDestroy(activity)
+            onCreate(activity)
+            onStart(activity)
+            onResume(activity)
 
             verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
             verify(exactly = 1) { testLifecycleObserver.onStart(any()) }

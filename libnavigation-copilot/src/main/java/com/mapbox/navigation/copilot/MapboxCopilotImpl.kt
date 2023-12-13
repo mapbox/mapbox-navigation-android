@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.SystemClock
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.gson.GsonBuilder
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory
@@ -40,6 +39,7 @@ import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -85,20 +85,12 @@ internal class MapboxCopilotImpl(
     private var appUserId = mapboxNavigation.navigationOptions.eventsAppMetadata?.userId ?: "_"
     private var endedAt = ""
     private var driveMode = ""
-    private val foregroundBackgroundLifecycleObserver = object : LifecycleEventObserver {
-
-        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> onResume(source)
-                Lifecycle.Event.ON_PAUSE -> onPause(source)
-            }
-        }
-
-        private fun onResume(owner: LifecycleOwner) {
+    private val foregroundBackgroundLifecycleObserver = object : DefaultLifecycleObserver() {
+        override fun onResume(owner: LifecycleOwner) {
             push(GoingToForegroundEvent)
         }
 
-        private fun onPause(owner: LifecycleOwner) {
+        override fun onPause(owner: LifecycleOwner) {
             push(GoingToBackgroundEvent)
         }
     }

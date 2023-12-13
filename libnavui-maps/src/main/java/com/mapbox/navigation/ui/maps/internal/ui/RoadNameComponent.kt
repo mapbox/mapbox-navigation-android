@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import android.view.View
 import com.mapbox.bindgen.Expected
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
@@ -16,6 +15,7 @@ import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import com.mapbox.navigation.ui.utils.internal.Provider
+import com.mapbox.navigation.utils.internal.isVisible
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +49,7 @@ class RoadNameComponent(
             mapStyle to roadInfo
         }.observe { (mapStyle, road) ->
             if (mapStyle != null && road != null && road.isRoadNameAvailable()) {
-                roadNameView.visibility = View.VISIBLE
+                roadNameView.isVisible = true
 
                 roadNameView.renderRoadName(road)
 
@@ -61,7 +61,7 @@ class RoadNameComponent(
                 )
                 roadNameView.renderRoadNameWith(result)
             } else {
-                roadNameView.visibility = View.GONE
+                roadNameView.isVisible = false
             }
         }
     }
