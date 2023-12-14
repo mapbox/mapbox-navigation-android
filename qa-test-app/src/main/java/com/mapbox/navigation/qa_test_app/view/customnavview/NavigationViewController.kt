@@ -1,7 +1,8 @@
 package com.mapbox.navigation.qa_test_app.view.customnavview
 
 import android.location.Location
-import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -19,7 +20,7 @@ import kotlinx.coroutines.flow.first
 internal class NavigationViewController(
     lifecycleOwner: LifecycleOwner,
     private val navigationView: NavigationView
-) : DefaultLifecycleObserver, UIComponent() {
+) : LifecycleEventObserver, UIComponent() {
     init {
         lifecycleOwner.lifecycle.addObserver(this)
     }
@@ -27,12 +28,15 @@ internal class NavigationViewController(
     val location = MutableStateFlow<Location?>(null)
     private val mapboxNavigation = MutableStateFlow<MapboxNavigation?>(null)
 
-    override fun onCreate(owner: LifecycleOwner) {
-        MapboxNavigationApp.registerObserver(this)
-    }
-
-    override fun onDestroy(owner: LifecycleOwner) {
-        MapboxNavigationApp.unregisterObserver(this)
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        when (event) {
+            Lifecycle.Event.ON_CREATE -> {
+                MapboxNavigationApp.registerObserver(this)
+            }
+            Lifecycle.Event.ON_DESTROY -> {
+                MapboxNavigationApp.unregisterObserver(this)
+            }
+        }
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {

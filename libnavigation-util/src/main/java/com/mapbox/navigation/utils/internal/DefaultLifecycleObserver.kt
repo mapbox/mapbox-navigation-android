@@ -4,7 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 
-abstract class DefaultLifecycleObserver: LifecycleEventObserver {
+abstract class DefaultLifecycleObserver : LifecycleEventObserver {
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
@@ -18,26 +18,20 @@ abstract class DefaultLifecycleObserver: LifecycleEventObserver {
     }
 
     open fun onCreate(owner: LifecycleOwner) {
-
     }
 
     open fun onStart(owner: LifecycleOwner) {
-
     }
 
     open fun onResume(owner: LifecycleOwner) {
-
     }
 
     open fun onPause(owner: LifecycleOwner) {
-
     }
 
     open fun onStop(owner: LifecycleOwner) {
-
     }
 
     open fun onDestroy(owner: LifecycleOwner) {
-
     }
 }

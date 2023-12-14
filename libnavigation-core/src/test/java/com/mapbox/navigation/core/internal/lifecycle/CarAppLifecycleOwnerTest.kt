@@ -4,14 +4,15 @@ import android.app.Activity
 import androidx.core.app.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.Before
@@ -24,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @Suppress("MaxLineLength")
 class CarAppLifecycleOwnerTest {
-    private val testLifecycleObserver: DefaultLifecycleObserver = mockk(relaxUnitFun = true)
+    private val testLifecycleObserver = spyk(object : DefaultLifecycleObserver() {})
     private val carAppLifecycleOwner = CarAppLifecycleOwner()
 
     @get:Rule

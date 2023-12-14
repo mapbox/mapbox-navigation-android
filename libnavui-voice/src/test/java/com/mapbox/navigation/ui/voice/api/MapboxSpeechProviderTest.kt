@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.net.Uri
-import androidx.core.net.toUri
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.NetworkRestriction
@@ -107,7 +106,7 @@ internal class MapboxSpeechProviderTest {
         sut.load(instructions)
 
         val loadRequest = requestCapture.captured
-        val loadRequestUri = loadRequest.url.toUri()
+        val loadRequestUri = Uri.parse(loadRequest.url)
         assertEquals("https", loadRequestUri.scheme)
         assertEquals("example.com", loadRequestUri.authority)
         assertEquals(

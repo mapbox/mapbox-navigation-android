@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 
-
 fun Drawable.toBitmap(
     width: Int = intrinsicWidth,
     height: Int = intrinsicHeight,

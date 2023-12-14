@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -266,11 +266,17 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         ).apply {
             requestNavigationCameraToFollowing()
             registerNavigationCameraStateChangeObserver { navigationCameraState ->
-                binding.recenterButton.isVisible = navigationCameraState in listOf(
-                    NavigationCameraState.TRANSITION_TO_OVERVIEW,
-                    NavigationCameraState.OVERVIEW,
-                    NavigationCameraState.IDLE,
-                )
+                binding.recenterButton.visibility = if (
+                    navigationCameraState in listOf(
+                        NavigationCameraState.TRANSITION_TO_OVERVIEW,
+                        NavigationCameraState.OVERVIEW,
+                        NavigationCameraState.IDLE,
+                    )
+                ) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             }
         }
 

@@ -20,4 +20,3 @@ inline fun View.updateLayoutParams(block: ViewGroup.LayoutParams.() -> Unit) {
     block(params)
     layoutParams = params
 }
-

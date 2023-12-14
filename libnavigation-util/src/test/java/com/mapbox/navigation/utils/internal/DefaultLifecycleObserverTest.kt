@@ -29,7 +29,6 @@ class DefaultLifecycleObserverTest {
 
             override fun onDestroy(owner: LifecycleOwner) {
             }
-
         }
     )
     private val owner = mockk<LifecycleOwner>()

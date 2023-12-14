@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.speedlimit.view
 
 import android.content.Context
 import android.os.Build
-import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
@@ -10,6 +9,7 @@ import com.mapbox.navigation.base.speed.model.SpeedUnit
 import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
 import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
+import com.mapbox.navigation.utils.internal.isVisible
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

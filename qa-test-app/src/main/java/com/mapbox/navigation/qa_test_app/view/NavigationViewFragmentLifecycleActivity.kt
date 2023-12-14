@@ -10,7 +10,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.NavigationView
@@ -21,7 +22,6 @@ import com.mapbox.navigation.utils.internal.logD
 private const val FIRST_FRAGMENT_TAG = "FirstFragment"
 private const val SECOND_FRAGMENT_TAG = "SecondFragment"
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class NavigationViewFragmentLifecycleActivity : AppCompatActivity() {
 
     private lateinit var binding: LayoutActivityNavigationViewFragmentLifecycleBinding
@@ -129,32 +129,21 @@ class PageNavigationFragment : Fragment() {
 
 private const val TAG = "navigation_view_lifecycle_debug"
 
-private class LifecycleLogger(val name: String) : DefaultLifecycleObserver {
-    override fun onCreate(owner: LifecycleOwner) {
-        log("onCreate")
-    }
-
-    override fun onStart(owner: LifecycleOwner) {
-        log("onStart")
-    }
-
-    override fun onResume(owner: LifecycleOwner) {
-        log("onResume")
-    }
-
-    override fun onPause(owner: LifecycleOwner) {
-        log("onPause")
-    }
-
-    override fun onStop(owner: LifecycleOwner) {
-        log("onStop")
-    }
-
-    override fun onDestroy(owner: LifecycleOwner) {
-        log("onDestroy")
-    }
-
+private class LifecycleLogger(val name: String) : LifecycleEventObserver {
     private fun log(state: String) {
         logD("$name - $state", TAG)
+    }
+
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        val message = when (event) {
+            Lifecycle.Event.ON_CREATE -> "onCreate"
+            Lifecycle.Event.ON_START -> "onStart"
+            Lifecycle.Event.ON_RESUME -> "onResume"
+            Lifecycle.Event.ON_PAUSE -> "onPause"
+            Lifecycle.Event.ON_STOP -> "onStop"
+            Lifecycle.Event.ON_DESTROY -> "onDestroy"
+            Lifecycle.Event.ON_ANY -> "onAny"
+        }
+        log(message)
     }
 }

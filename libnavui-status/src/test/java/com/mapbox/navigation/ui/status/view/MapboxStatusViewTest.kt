@@ -2,10 +2,10 @@ package com.mapbox.navigation.ui.status.view
 
 import android.content.Context
 import android.os.Build
-import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.ui.status.R
+import com.mapbox.navigation.utils.internal.isVisible
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

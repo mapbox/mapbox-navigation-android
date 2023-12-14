@@ -3,7 +3,6 @@
 package com.mapbox.navigation.core.lifecycle
 
 import androidx.core.app.ComponentActivity
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -12,11 +11,13 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.internal.lifecycle.CarAppLifecycleOwnerTest
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.runs
+import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
@@ -175,7 +176,7 @@ class MapboxNavigationAppDelegateTest {
         val (activity, lifecycle) = mockActivityLifecycle()
         mapboxNavigationApp.attach(activity)
 
-        val observer = mockk<DefaultLifecycleObserver>(relaxUnitFun = true)
+        val observer = spyk(object : DefaultLifecycleObserver() {})
         mapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(observer)
         lifecycle.currentState = Lifecycle.State.RESUMED
 
@@ -190,7 +191,7 @@ class MapboxNavigationAppDelegateTest {
     // Specifically the CarAppLifecycleOwner.foregroundedChangingConfiguration counter
     @Test
     fun `verify lifecycleOwner handles orientation changes`() {
-        val observer = mockk<DefaultLifecycleObserver>(relaxUnitFun = true)
+        val observer = spyk(object : DefaultLifecycleObserver() {})
         mapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(observer)
 
         // An activity is created and resumed.
