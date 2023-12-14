@@ -770,9 +770,9 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache:
-          additional_gradle_parameters: "-PWORK_MANAGER_VERSION=2.6.0"
+          additional_gradle_parameters: "-PWORK_MANAGER_VERSION=2.6.0 -PANDROIDX_LIFECYCLE_VERSION=2.3.0"
       - assemble-old-deps-compat-release:
-          additional_gradle_parameters: "-PWORK_MANAGER_VERSION=2.6.0"
+          additional_gradle_parameters: "\"-PWORK_MANAGER_VERSION=2.6.0 -PANDROIDX_LIFECYCLE_VERSION=2.3.0\""
 
   assemble-instrumentation-test:
     executor: ndk-r22-latest-executor

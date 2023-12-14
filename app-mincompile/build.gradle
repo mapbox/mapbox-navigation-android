@@ -95,7 +95,9 @@ task downloadUnstrippedNativeLibsDir(type: com.mapbox.gradle.NativeDownloadTask)
 configurations.all {
     resolutionStrategy {
         force("androidx.work:work-runtime-ktx:2.6.0")
-    }
+        force("androidx.lifecycle:lifecycle-runtime-ktx:2.3.0")
+        force("androidx.lifecycle:lifecycle-livedata-ktx:2.3.0")
+        force("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0")    }
 }
 
 dependencies {
