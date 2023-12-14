@@ -90,6 +90,7 @@ workflows:
       - assemble
       - assemble-instrumentation-test
       - assemble-instrumentation-test-internal
+      - assemble-app-mincompile
       - changelog-verification:
           filters:
             branches:
@@ -333,6 +334,24 @@ commands:
                 echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/<< parameters.module_target >>/src/androidTest/res/values/mapbox_access_token.xml
             fi
             ./gradlew << parameters.module_target >>:assembleAndroidTest
+
+  assemble-app-mincompile:
+    parameters:
+      inject_token:
+        description: whether to inject an access token file
+        type: boolean
+        default: false
+    steps:
+      - run:
+          name: Assemble App Mincompile Example APK
+          command: |
+            if << parameters.inject_token >>; then
+                echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/app-mincompile/src/main/res/values/mapbox_access_token.xml
+            fi
+            ./gradlew :app-mincompile:assembleDebug
+      - store_artifacts:
+          path: app-mincompile/build/outputs/apk
+          destination: app-mincompile/apk
 
   login-google-cloud-platform:
     steps:
@@ -739,6 +758,16 @@ jobs:
           inject_token: true
       - assemble-instrumentation-test:
           module_target: "instrumentation-tests"
+      - write-workspace
+
+  assemble-app-mincompile:
+    executor: ndk-r22-latest-executor
+    resource_class: medium+
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-app-mincompile:
+          inject_token: true
       - write-workspace
 
   assemble-instrumentation-test-internal:
