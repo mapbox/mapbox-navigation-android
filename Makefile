@@ -102,7 +102,11 @@ assemble-core-debug:
 
 .PHONY: assemble-core-release
 assemble-core-release:
-	$(call run-gradle-tasks,$(CORE_MODULES),assembleRelease)
+	$(call run-gradle-tasks,$(CORE_MODULES),assembleRelease $(additional_gradle_parameters))
+
+.PHONY: assemble-core-release-old-deps-compat
+assemble-core-release-old-deps-compat:
+	$(call run-gradle-tasks,$(CORE_MODULES),assembleRelease -PWORK_MANAGER_VERSION=2.6.0)
 
 .PHONY: core-unit-tests
 core-unit-tests:
@@ -148,7 +152,11 @@ assemble-ui-debug:
 
 .PHONY: assemble-ui-release
 assemble-ui-release:
-	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease)
+	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease $(additional_gradle_parameters))
+
+.PHONY: assemble-ui-release-old-deps-compat
+assemble-ui-release-old-deps-compat:
+	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease -PWORK_MANAGER_VERSION=2.6.0)
 
 .PHONY: assemble-androidauto-release
 assemble-androidauto-release:

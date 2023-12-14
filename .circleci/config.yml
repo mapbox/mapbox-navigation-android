@@ -88,6 +88,7 @@ workflows:
   default:
     jobs:
       - assemble
+      - assemble-old-deps-compat
       - assemble-instrumentation-test
       - assemble-instrumentation-test-internal
       - assemble-app-mincompile
@@ -241,6 +242,11 @@ commands:
           at: ~/code
 
   restore-gradle-cache:
+    parameters:
+      additional_gradle_parameters:
+        description: additional gradle parameters
+        type: string
+        default: ""
     steps:
       - run:
           name: Create checksum file
@@ -251,7 +257,7 @@ commands:
             - deps-
       - run:
           name: Download Dependencies
-          command: ./gradlew androidDependencies
+          command: ./gradlew androidDependencies << parameters.additional_gradle_parameters >>
       - save_cache:
           paths:
             - ~/.gradle
@@ -398,6 +404,20 @@ commands:
       - run:
           name: Assemble Navigation UI SDK (release)
           command: make assemble-ui-release
+
+  assemble-old-deps-compat-release:
+    parameters:
+      additional_gradle_parameters:
+        description: module target
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: Assemble Navigation Core SDK with old dependencies (release)
+          command: make additional_gradle_parameters=<< parameters.additional_gradle_parameters >> assemble-core-release
+      - run:
+          name: Assemble Navigation UI SDK with old dependencies (release)
+          command: make additional_gradle_parameters=<< parameters.additional_gradle_parameters >> assemble-ui-release
 
   check-api-core:
     steps:
@@ -744,6 +764,15 @@ jobs:
       - assemble-ui-debug
       - assemble-core-release
       - assemble-ui-release
+
+  assemble-old-deps-compat:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - restore-gradle-cache:
+          additional_gradle_parameters: "-PWORK_MANAGER_VERSION=2.6.0"
+      - assemble-old-deps-compat-release:
+          additional_gradle_parameters: "-PWORK_MANAGER_VERSION=2.6.0"
 
   assemble-instrumentation-test:
     executor: ndk-r22-latest-executor
