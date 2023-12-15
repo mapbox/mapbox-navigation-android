@@ -558,6 +558,11 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
     fun reroute_on_multieg_route_without_alternatives() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()
         val mockRoute = RoutesProvider.dc_very_short_two_legs(context)
+        val originalLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = mockRoute.routeWaypoints.first().latitude()
+            longitude = mockRoute.routeWaypoints.first().longitude()
+        }
+
         val secondLegLocation = mockLocationUpdatesRule.generateLocationUpdate {
             latitude = mockRoute.routeWaypoints[1].latitude()
             longitude = mockRoute.routeWaypoints[1].longitude()
@@ -596,7 +601,9 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
         ).getSuccessfulResultOrThrowException().routes
         mapboxNavigation.setNavigationRoutes(routes)
 
-        mapboxNavigation.routeProgressUpdates().first()
+        mockLocationReplayerRule.loopUpdateUntil(originalLocation) {
+            mapboxNavigation.routeProgressUpdates().first()
+        }
         mapboxNavigation.navigateNextRouteLeg()
         mockLocationReplayerRule.loopUpdateUntil(secondLegLocation) {
             mapboxNavigation.routeProgressUpdates()
