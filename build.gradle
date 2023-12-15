@@ -64,9 +64,7 @@ allprojects {
     // we allow access to snapshots repo if ALLOW_SNAPSHOT_REPOSITORY is set, what means we are running on CI
     // with Navigation Native forced to be some snapshot version
     // if you need to use snapshots while development, just set `addSnapshotsRepo` to true manually
-    // TODO remove when NN release is ready
-    def addSnapshotsRepo = true
-//    def addSnapshotsRepo = project.hasProperty('ALLOW_SNAPSHOT_REPOSITORY') ? project.property('ALLOW_SNAPSHOT_REPOSITORY') : (System.getenv("ALLOW_SNAPSHOT_REPOSITORY")?.toBoolean() ?: false)
+    def addSnapshotsRepo = project.hasProperty('ALLOW_SNAPSHOT_REPOSITORY') ? project.property('ALLOW_SNAPSHOT_REPOSITORY') : (System.getenv("ALLOW_SNAPSHOT_REPOSITORY")?.toBoolean() ?: false)
     if (addSnapshotsRepo) {
       println("Snapshot repository reference added.")
       maven {
