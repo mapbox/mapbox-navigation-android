@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.trip.session.VOICE_INSTRUCTION_LOG
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
@@ -15,6 +16,7 @@ import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -158,10 +160,16 @@ class MapboxSpeechApi @JvmOverloads constructor(
     private suspend fun retrieveVoiceFile(
         voiceInstruction: VoiceInstructions,
     ): Expected<SpeechError, SpeechValue> {
+        logI(VOICE_INSTRUCTION_LOG) {
+            "retrieving voice instruction for $voiceInstruction"
+        }
         when (val result = voiceAPI.retrieveVoiceFile(voiceInstruction)) {
             is VoiceState.VoiceFile -> {
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
+                logI(VOICE_INSTRUCTION_LOG) {
+                    "successfully retrieved for $voiceInstruction"
+                }
                 return ExpectedFactory.createValue(
                     SpeechValue(
                         // Can't be null as it's checked in retrieveVoiceFile
@@ -175,6 +183,12 @@ class MapboxSpeechApi @JvmOverloads constructor(
             is VoiceState.VoiceError -> {
                 val fallback = getFallbackAnnouncement(voiceInstruction)
                 val speechError = SpeechError(result.exception, null, fallback)
+                logI(VOICE_INSTRUCTION_LOG) {
+                    "error retrieving voice instruction $voiceInstruction"
+                }
+                logI(VOICE_INSTRUCTION_LOG) {
+                    "Falling back to $fallback"
+                }
                 return ExpectedFactory.createError(speechError)
             }
         }

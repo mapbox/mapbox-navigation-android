@@ -52,6 +52,8 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 
+const val VOICE_INSTRUCTION_LOG = "VoiceInstructionTroubleshooting"
+
 /**
  * Default implementation of [TripSession]
  *
@@ -659,6 +661,9 @@ internal class MapboxTripSession(
             "navigatorObserver#onStatus; banner instruction: [${status.bannerInstruction}]," +
                 " voice instruction: [${status.voiceInstruction}]"
         }
+        logI(VOICE_INSTRUCTION_LOG) {
+            "received status with voice instruction from NN: ${status.voiceInstruction}"
+        }
 
         val tripStatus = status.getTripStatusFrom(primaryRoute)
         val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
@@ -744,6 +749,9 @@ internal class MapboxTripSession(
         val voiceInstructions = progress?.voiceInstructions
         val navigatorTriggeredNewInstruction = status.voiceInstruction != null
         if (voiceInstructions != null && navigatorTriggeredNewInstruction) {
+            logI(VOICE_INSTRUCTION_LOG) {
+                "Triggering onNewVoiceInstructions with $voiceInstructions"
+            }
             voiceInstructionsObservers.forEach {
                 it.onNewVoiceInstructions(voiceInstructions)
             }

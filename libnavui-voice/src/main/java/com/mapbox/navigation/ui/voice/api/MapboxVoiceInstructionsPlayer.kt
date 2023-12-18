@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import androidx.annotation.UiThread
+import com.mapbox.navigation.core.trip.session.VOICE_INSTRUCTION_LOG
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.voice.api.AudioFocusDelegateProvider.defaultAudioFocusDelegate
@@ -9,6 +10,7 @@ import com.mapbox.navigation.ui.voice.model.AudioFocusOwner
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
+import com.mapbox.navigation.utils.internal.logI
 import java.util.Locale
 import java.util.Queue
 import java.util.Timer
@@ -121,6 +123,9 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         announcement: SpeechAnnouncement,
         consumer: MapboxNavigationConsumer<SpeechAnnouncement>
     ) {
+        logI(VOICE_INSTRUCTION_LOG) {
+            "playing $announcement"
+        }
         playCallbackQueue.add(PlayCallback(announcement, consumer))
         if (playCallbackQueue.size == 1) {
             play()
