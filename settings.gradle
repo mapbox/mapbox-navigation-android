@@ -30,4 +30,5 @@ include ':examples',
         ':android-auto-app',
         ':libtesting-thirdparty',
         ':libtesting-navigation-base',
-        ':libtesting-navigation-util'
+        ':libtesting-navigation-util',
+        ':benchmark'

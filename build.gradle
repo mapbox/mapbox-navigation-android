@@ -36,6 +36,8 @@ buildscript {
     classpath pluginDependencies.dokka
     classpath pluginDependencies.firebaseCrashlytics
     classpath pluginDependencies.googleServices
+    classpath 'androidx.benchmark:benchmark-gradle-plugin:1.1.1'
+    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.21'
   }
 }
 
