@@ -23,7 +23,7 @@ def getVersionName() {
 //    def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
 //    def version = cmd.execute().text
 //    return project.ext.snapshot ? getSnapshotVersion(version) : getReleaseVersion(version)
-    return "2.17.0-adas-preview-5-SNAPSHOT"
+    return "2.17.0-adas-preview-5-voice-instructions-logs-SNAPSHOT"
 }
 
 def getReleaseVersion(String version) {
