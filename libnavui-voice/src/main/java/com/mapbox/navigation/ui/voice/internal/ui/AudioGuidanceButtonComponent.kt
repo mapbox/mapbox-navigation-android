@@ -6,7 +6,7 @@ import com.mapbox.navigation.ui.utils.internal.Provider
 import com.mapbox.navigation.ui.utils.internal.extensions.slice
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
-import com.mapbox.navigation.utils.internal.isVisible
+import com.mapbox.navigation.utils.internal.android.isVisible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

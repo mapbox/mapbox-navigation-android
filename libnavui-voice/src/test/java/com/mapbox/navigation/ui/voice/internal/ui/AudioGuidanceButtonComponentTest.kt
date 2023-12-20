@@ -8,7 +8,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
-import com.mapbox.navigation.utils.internal.isVisible
+import com.mapbox.navigation.utils.internal.android.isVisible
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

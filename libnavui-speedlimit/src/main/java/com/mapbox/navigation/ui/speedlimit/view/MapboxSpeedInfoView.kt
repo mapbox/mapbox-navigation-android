@@ -24,8 +24,8 @@ import com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection
 import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
 import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
 import com.mapbox.navigation.ui.speedlimit.model.ViewConstraints
-import com.mapbox.navigation.utils.internal.isVisible
-import com.mapbox.navigation.utils.internal.updateLayoutParams
+import com.mapbox.navigation.utils.internal.android.isVisible
+import com.mapbox.navigation.utils.internal.android.updateLayoutParams
 
 /**
  * A view component responsible to render posted speed limit and current speed produced by

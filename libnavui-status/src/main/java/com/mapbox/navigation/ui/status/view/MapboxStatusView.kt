@@ -18,8 +18,8 @@ import com.mapbox.navigation.ui.status.R
 import com.mapbox.navigation.ui.status.databinding.MapboxStatusViewLayoutBinding
 import com.mapbox.navigation.ui.status.internal.extensions.doOnFinish
 import com.mapbox.navigation.ui.status.model.Status
-import com.mapbox.navigation.utils.internal.isInvisible
-import com.mapbox.navigation.utils.internal.isVisible
+import com.mapbox.navigation.utils.internal.android.isInvisible
+import com.mapbox.navigation.utils.internal.android.isVisible
 
 /**
  * View for rendering [Status] information.

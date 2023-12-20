@@ -1,4 +1,4 @@
-package com.mapbox.navigation.utils.internal
+package com.mapbox.navigation.utils.internal.android
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver

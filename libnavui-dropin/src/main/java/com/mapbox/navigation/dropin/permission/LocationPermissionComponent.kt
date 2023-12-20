@@ -11,8 +11,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
+import com.mapbox.navigation.utils.internal.android.repeatOnLifecycle
 import com.mapbox.navigation.utils.internal.logW
-import com.mapbox.navigation.utils.internal.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 

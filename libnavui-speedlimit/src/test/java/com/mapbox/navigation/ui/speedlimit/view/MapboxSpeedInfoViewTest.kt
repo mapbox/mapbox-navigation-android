@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.speed.model.SpeedUnit
 import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
 import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
-import com.mapbox.navigation.utils.internal.isVisible
+import com.mapbox.navigation.utils.internal.android.isVisible
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

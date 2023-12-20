@@ -15,7 +15,7 @@ import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import com.mapbox.navigation.ui.utils.internal.Provider
-import com.mapbox.navigation.utils.internal.isVisible
+import com.mapbox.navigation.utils.internal.android.isVisible
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

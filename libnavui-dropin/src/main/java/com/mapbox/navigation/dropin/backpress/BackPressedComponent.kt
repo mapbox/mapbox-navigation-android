@@ -15,8 +15,8 @@ import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
+import com.mapbox.navigation.utils.internal.android.repeatOnLifecycle
 import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigation.utils.internal.repeatOnLifecycle
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch

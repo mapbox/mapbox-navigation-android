@@ -15,7 +15,7 @@ import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
-import com.mapbox.navigation.utils.internal.isVisible
+import com.mapbox.navigation.utils.internal.android.isVisible
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic

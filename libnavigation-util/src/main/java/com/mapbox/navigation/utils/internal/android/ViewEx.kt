@@ -1,4 +1,4 @@
-package com.mapbox.navigation.utils.internal
+package com.mapbox.navigation.utils.internal.android
 
 import android.view.View
 import android.view.ViewGroup

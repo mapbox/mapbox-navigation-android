@@ -19,8 +19,8 @@ import com.mapbox.navigation.ui.maneuver.model.ComponentNode
 import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.toBitmap
-import com.mapbox.navigation.utils.internal.toDrawable
+import com.mapbox.navigation.utils.internal.android.toBitmap
+import com.mapbox.navigation.utils.internal.android.toDrawable
 
 /**
  * Default Exit View that renders exit number in a specific style.
