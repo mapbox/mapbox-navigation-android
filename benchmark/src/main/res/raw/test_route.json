@@ -1,0 +1,1825 @@
+{
+  "routes": [
+    {
+      "weight_typical": 195.557,
+      "duration_typical": 214.601,
+      "weight_name": "auto",
+      "weight": 1750.014,
+      "duration": 214.486,
+      "distance": 5504.372,
+      "legs": [
+        {
+          "summary": "E 28",
+          "distance": 5504.372,
+          "steps": [
+            {
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive west on <say-as interpret-as=\"address\">S6</say-as>, <say-as interpret-as=\"address\">E 28</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Drive west on S6, E 28.",
+                  "distanceAlongGeometry": 5504.373
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue on <say-as interpret-as=\"address\">E 28</say-as> for 3 miles.</prosody></amazon:effect></speak>",
+                  "announcement": "Continue on E 28 for 3 miles.",
+                  "distanceAlongGeometry": 5464.373
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 1 mile, Your destination will be on the right.</prosody></amazon:effect></speak>",
+                  "announcement": "In 1 mile, Your destination will be on the right.",
+                  "distanceAlongGeometry": 1609.344
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a half mile, Your destination will be on the right.</prosody></amazon:effect></speak>",
+                  "announcement": "In a half mile, Your destination will be on the right.",
+                  "distanceAlongGeometry": 804.672
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the right.</prosody></amazon:effect></speak>",
+                  "announcement": "Your destination is on the right.",
+                  "distanceAlongGeometry": 125
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    260
+                  ],
+                  "duration": 7.153,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 59.683,
+                  "geometry_index": 0,
+                  "location": [
+                    18.036371,
+                    54.558522
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    77,
+                    83,
+                    263
+                  ],
+                  "duration": 9.841,
+                  "turn_weight": 0.75,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 82.689,
+                  "geometry_index": 4,
+                  "location": [
+                    18.033813,
+                    54.558306
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    89,
+                    269
+                  ],
+                  "duration": 29.338,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 244.224,
+                  "geometry_index": 10,
+                  "location": [
+                    18.029846,
+                    54.558151
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    91,
+                    270
+                  ],
+                  "duration": 1.619,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 13.391,
+                  "geometry_index": 23,
+                  "location": [
+                    18.017984,
+                    54.558312
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    90,
+                    270
+                  ],
+                  "duration": 22.657,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 183.646,
+                  "geometry_index": 24,
+                  "location": [
+                    18.017329,
+                    54.558311
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    87,
+                    267
+                  ],
+                  "duration": 2.863,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 23.328,
+                  "geometry_index": 31,
+                  "location": [
+                    18.008168,
+                    54.558174
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    87,
+                    267
+                  ],
+                  "duration": 16.827,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 136.384,
+                  "geometry_index": 32,
+                  "location": [
+                    18.006999,
+                    54.558143
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    94,
+                    275
+                  ],
+                  "duration": 0.308,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 2.356,
+                  "geometry_index": 40,
+                  "location": [
+                    18.000053,
+                    54.558136
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    95,
+                    275
+                  ],
+                  "duration": 49.444,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 400.646,
+                  "geometry_index": 41,
+                  "location": [
+                    17.999922,
+                    54.558142
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    117,
+                    297
+                  ],
+                  "duration": 0.422,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 3.507,
+                  "geometry_index": 65,
+                  "location": [
+                    17.980599,
+                    54.561678
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    117,
+                    297
+                  ],
+                  "duration": 28.051,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 227.268,
+                  "geometry_index": 66,
+                  "location": [
+                    17.980447,
+                    54.561723
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    126,
+                    307
+                  ],
+                  "duration": 0.491,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 4.033,
+                  "geometry_index": 80,
+                  "location": [
+                    17.970318,
+                    54.565107
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    127,
+                    307
+                  ],
+                  "duration": 3.931,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 31.866,
+                  "geometry_index": 81,
+                  "location": [
+                    17.970159,
+                    54.565176
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    128,
+                    310
+                  ],
+                  "duration": 3.746,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 30.375,
+                  "geometry_index": 83,
+                  "location": [
+                    17.968857,
+                    54.565755
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    130,
+                    309
+                  ],
+                  "duration": 4.689,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 37.846,
+                  "geometry_index": 84,
+                  "location": [
+                    17.967663,
+                    54.566326
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    128,
+                    307,
+                    315
+                  ],
+                  "duration": 3.088,
+                  "lanes": [
+                    {
+                      "indications": [],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [
+                        "right"
+                      ],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "trunk"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 24.994,
+                  "geometry_index": 87,
+                  "location": [
+                    17.9662,
+                    54.567026
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    127,
+                    305
+                  ],
+                  "duration": 3.214,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 26.169,
+                  "geometry_index": 89,
+                  "location": [
+                    17.965241,
+                    54.567446
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    125,
+                    305
+                  ],
+                  "duration": 0.633,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 5.234,
+                  "geometry_index": 91,
+                  "location": [
+                    17.964361,
+                    54.567808
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [],
+                      "valid": false,
+                      "active": false
+                    },
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    125,
+                    304
+                  ],
+                  "duration": 7.398,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 59.815,
+                  "geometry_index": 93,
+                  "location": [
+                    17.964186,
+                    54.567878
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    115,
+                    122,
+                    302
+                  ],
+                  "duration": 2.617,
+                  "turn_weight": 0.5,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 21.707,
+                  "geometry_index": 97,
+                  "location": [
+                    17.962101,
+                    54.56866
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    122,
+                    303
+                  ],
+                  "duration": 4.714,
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 38.249,
+                  "geometry_index": 99,
+                  "location": [
+                    17.961369,
+                    54.568927
+                  ]
+                },
+                {
+                  "lanes": [
+                    {
+                      "indications": [
+                        "straight"
+                      ],
+                      "valid_indication": "straight",
+                      "valid": true,
+                      "active": true
+                    },
+                    {
+                      "indications": [],
+                      "valid": false,
+                      "active": false
+                    }
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    119,
+                    298
+                  ],
+                  "duration": 10.965,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 88.995,
+                  "geometry_index": 101,
+                  "location": [
+                    17.960029,
+                    54.569389
+                  ]
+                },
+                {
+                  "bearings": [
+                    110,
+                    115,
+                    291
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 2,
+                  "geometry_index": 108,
+                  "location": [
+                    17.956749,
+                    54.57029
+                  ]
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination will be on the right"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "right",
+                    "text": "Your destination will be on the right"
+                  },
+                  "distanceAlongGeometry": 5504.373
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination is on the right"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "right",
+                    "text": "Your destination is on the right"
+                  },
+                  "distanceAlongGeometry": 125
+                }
+              ],
+              "destinations": "S6, E 28: Szczecin",
+              "speedLimitUnit": "km/h",
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive west on S6/E 28/Trasa Kaszubska. Continue on E 28.",
+                "bearing_after": 260,
+                "bearing_before": 0,
+                "location": [
+                  18.036371,
+                  54.558522
+                ]
+              },
+              "speedLimitSign": "vienna",
+              "name": "Trasa Kaszubska",
+              "weight_typical": 195.557,
+              "duration_typical": 214.601,
+              "duration": 214.486,
+              "distance": 5504.373,
+              "driving_side": "right",
+              "weight": 1750.014,
+              "mode": "driving",
+              "ref": "S6; E 28",
+              "geometry": "sr~`gBehzka@n@jM`Dlv@pBlh@jBro@fAt`@d@lTlAhn@t@zn@z@zgAFvWR~h@@zCCni@M|e@CxMi@`s@e@lk@oAd`B}@p_Bk@z_B_@j_BQv_BE~P@|g@Bzk@N~wAb@z_Bj@h_Bv@r_BhAb`Bj@vr@|@`hAz@bbA`AtvAD|GNho@?lo@o@l_Bo@ho@e@z[KdGMxIoA|n@{Apn@sB`o@_C|n@oC`o@}Czm@gD~l@sDfl@IfBqExm@{Efm@iNz{AePvzAeRtyAiInl@kI|j@eJ|k@gJhj@cKlk@aMfm@cWdqAiXpuAaBlIyAnHoRraAcXrtAmXzuA}Kri@aLfi@aOxo@sDxPqSny@_Nxg@gPvj@cMvb@{Mhb@sIfXi@`BiC|HcA~Caa@jkAub@riAsP~c@{Phc@gGbQgLd]_Lv\\cO~e@oE~No@rB{AhF_DpKqNdg@eN`h@cLnc@iHpXkFdS_Jz[{Pzu@{J`e@oF~UgFrW{Inf@_DnRiF~\\oEh]y@`GCL"
+            },
+            {
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    111
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 110,
+                  "location": [
+                    17.956613,
+                    54.570321
+                  ]
+                }
+              ],
+              "bannerInstructions": [],
+              "speedLimitUnit": "km/h",
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "Your destination is on the right.",
+                "modifier": "right",
+                "bearing_after": 0,
+                "bearing_before": 291,
+                "location": [
+                  17.956613,
+                  54.570321
+                ]
+              },
+              "speedLimitSign": "vienna",
+              "name": "Trasa Kaszubska",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "ref": "S6; E 28",
+              "geometry": "atuagBio~fa@??"
+            }
+          ],
+          "closures": [
+            {
+              "geometry_index_end": 110,
+              "geometry_index_start": 0
+            }
+          ],
+          "weight": 1750.014,
+          "duration": 214.486,
+          "duration_typical": 214.601,
+          "weight_typical": 195.557,
+          "annotation": {
+            "maxspeed": [
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 120,
+                "unit": "km/h"
+              },
+              {
+                "speed": 90,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 70,
+                "unit": "km/h"
+              },
+              {
+                "speed": 90,
+                "unit": "km/h"
+              },
+              {
+                "speed": 90,
+                "unit": "km/h"
+              }
+            ],
+            "congestion_numeric": [
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100
+            ],
+            "speed": [
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.1,
+              26.4,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              27.5,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.7,
+              26.1,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.9,
+              26.1,
+              26.9,
+              26.9,
+              26.7,
+              26.1,
+              26.1,
+              26.1,
+              25.3,
+              25.3,
+              21.7,
+              21.7,
+              21.7,
+              21.7,
+              21.7,
+              21.7,
+              21.7,
+              21.7,
+              21.4,
+              21.4,
+              21.4,
+              21.4,
+              21.4,
+              21.4,
+              21.4,
+              21.4,
+              21.4,
+              21.4,
+              21.4,
+              20,
+              20
+            ],
+            "distance": [
+              15.1,
+              58,
+              43.2,
+              50.6,
+              35,
+              22.3,
+              49,
+              49.6,
+              75.3,
+              25.6,
+              43.4,
+              5,
+              43.9,
+              40.2,
+              15.3,
+              53.8,
+              46,
+              100.5,
+              99.8,
+              100,
+              99.6,
+              99.9,
+              18.6,
+              42.3,
+              46.3,
+              92,
+              100,
+              99.6,
+              99.8,
+              100.4,
+              53.5,
+              75.5,
+              69.4,
+              90.7,
+              9.2,
+              49.9,
+              50.1,
+              99.6,
+              50,
+              29.9,
+              8.5,
+              11.1,
+              49.8,
+              49.3,
+              50.1,
+              50,
+              50.3,
+              49.2,
+              48.4,
+              47.8,
+              3.4,
+              49.8,
+              49.3,
+              99.7,
+              99.6,
+              99.7,
+              50.4,
+              49,
+              50.6,
+              49,
+              50.7,
+              53.9,
+              95.2,
+              100.1,
+              12.1,
+              11,
+              77.1,
+              99.1,
+              100.5,
+              49.7,
+              49.4,
+              58,
+              20.9,
+              70.7,
+              49.9,
+              54.6,
+              44.7,
+              45,
+              32.3,
+              3.9,
+              12.8,
+              6.4,
+              99.5,
+              99.9,
+              49.5,
+              49.1,
+              23.8,
+              39.1,
+              38.5,
+              49.5,
+              20.1,
+              4.6,
+              9.2,
+              15.7,
+              49.9,
+              50.3,
+              44.3,
+              31.2,
+              24.7,
+              35.6,
+              65,
+              44.7,
+              27.2,
+              28.5,
+              45.2,
+              22,
+              33.6,
+              33.4,
+              8.9,
+              0.5
+            ],
+            "duration": [
+              0.647,
+              2.484,
+              1.854,
+              2.168,
+              1.348,
+              0.852,
+              1.879,
+              1.897,
+              2.885,
+              0.979,
+              1.662,
+              0.193,
+              1.681,
+              1.54,
+              0.586,
+              2.061,
+              1.76,
+              3.848,
+              3.822,
+              3.833,
+              3.813,
+              3.827,
+              0.712,
+              1.619,
+              1.775,
+              3.521,
+              3.833,
+              3.811,
+              3.824,
+              3.845,
+              2.049,
+              2.863,
+              2.603,
+              3.399,
+              0.346,
+              1.871,
+              1.876,
+              3.736,
+              1.874,
+              1.121,
+              0.308,
+              0.42,
+              1.864,
+              1.852,
+              1.877,
+              1.876,
+              1.886,
+              1.845,
+              1.816,
+              1.792,
+              0.128,
+              1.865,
+              1.849,
+              3.74,
+              3.734,
+              3.739,
+              1.892,
+              1.837,
+              1.894,
+              1.838,
+              1.902,
+              2.023,
+              3.568,
+              3.755,
+              0.453,
+              0.422,
+              2.861,
+              3.678,
+              3.73,
+              1.844,
+              1.835,
+              2.151,
+              0.777,
+              2.622,
+              1.852,
+              2.028,
+              1.658,
+              1.673,
+              1.196,
+              0.146,
+              0.491,
+              0.238,
+              3.693,
+              3.746,
+              1.894,
+              1.884,
+              0.911,
+              1.566,
+              1.522,
+              2.283,
+              0.931,
+              0.212,
+              0.421,
+              0.726,
+              2.303,
+              2.321,
+              2.047,
+              1.465,
+              1.152,
+              1.675,
+              3.039,
+              2.087,
+              1.274,
+              1.333,
+              2.111,
+              1.029,
+              1.571,
+              1.56,
+              0.453,
+              0.025
+            ]
+          },
+          "incidents": [
+            {
+              "id": "678168490765892",
+              "type": "road_closure",
+              "creation_time": "2023-12-18T17:45:00Z",
+              "start_time": "2021-08-08T18:00:00Z",
+              "end_time": "2025-03-31T06:00:00Z",
+              "iso_3166_1_alpha2": "PL",
+              "iso_3166_1_alpha3": "POL",
+              "description": "S6 W/B: road closed from S6 Węzeł Strzebielino to Węzeł Łęczyce",
+              "long_description": "Road closed due to new road construction on S6 Westbound from S6 Węzeł Strzebielino to Węzeł Łęczyce.",
+              "alertc_codes": [
+                401
+              ],
+              "traffic_codes": {
+                "incident_primary_code": 401
+              },
+              "lanes_blocked": [],
+              "length": 5643,
+              "south": 54.558067,
+              "west": 17.956417,
+              "north": 54.570365,
+              "east": 18.038249,
+              "closed": true,
+              "congestion": {
+                "value": 101
+              },
+              "geometry_index_start": 0,
+              "geometry_index_end": 109,
+              "affected_road_names": [
+                "S6/E 28/Trasa Kaszubska",
+                "Trasa Kaszubska/6/E 28",
+                "Szczecińska/6/E 28"
+              ],
+              "affected_road_names_pl": [
+                "S6/E 28/Trasa Kaszubska",
+                "Trasa Kaszubska/6/E 28",
+                "Szczecińska/6/E 28"
+              ]
+            }
+          ],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "POL",
+              "iso_3166_1": "PL"
+            }
+          ],
+          "via_waypoints": []
+        }
+      ],
+      "geometry": "sr~`gBehzka@n@jM`Dlv@pBlh@jBro@fAt`@d@lTlAhn@t@zn@z@zgAFvWR~h@@zCCni@M|e@CxMi@`s@e@lk@oAd`B}@p_Bk@z_B_@j_BQv_BE~P@|g@Bzk@N~wAb@z_Bj@h_Bv@r_BhAb`Bj@vr@|@`hAz@bbA`AtvAD|GNho@?lo@o@l_Bo@ho@e@z[KdGMxIoA|n@{Apn@sB`o@_C|n@oC`o@}Czm@gD~l@sDfl@IfBqExm@{Efm@iNz{AePvzAeRtyAiInl@kI|j@eJ|k@gJhj@cKlk@aMfm@cWdqAiXpuAaBlIyAnHoRraAcXrtAmXzuA}Kri@aLfi@aOxo@sDxPqSny@_Nxg@gPvj@cMvb@{Mhb@sIfXi@`BiC|HcA~Caa@jkAub@riAsP~c@{Phc@gGbQgLd]_Lv\\cO~e@oE~No@rB{AhF_DpKqNdg@eN`h@cLnc@iHpXkFdS_Jz[{Pzu@{J`e@oF~UgFrW{Inf@_DnRiF~\\oEh]y@`GCL",
+      "voiceLocale": "en-US",
+      "refresh_ttl": 21600
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 5.535,
+      "name": "S6",
+      "location": [
+        18.036371,
+        54.558522
+      ]
+    },
+    {
+      "distance": 26.036,
+      "name": "Szczecińska",
+      "location": [
+        17.956613,
+        54.570321
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "iAw2M-v6LERxCjb2Ob4rrxq76N0mgHD5UoUOojneFLz0RWu-bhGP9Q==_eu-west-1"
+}

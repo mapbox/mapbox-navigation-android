@@ -15,6 +15,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val LOG_TAG = "vadzim-test"
+
 /**
  * Benchmark, which will execute on an Android device.
  *
@@ -33,22 +35,24 @@ class ExampleBenchmark {
     @Test
     fun log() {
         LogConfiguration.setLoggingLevel(LoggingLevel.DEBUG)
-        val response = readRawFileText(context, R.raw.long_route_7k)
+        val response = readRawFileText(context, R.raw.test_route)
         val route = RouteParser.parseDirectionsResponse(
             response,
-            "http://localhost:44685/directions/v5/mapbox/driving-traffic/4.898473756907066,52.37373595766587;5.359980783143584,43.280050656855906;11.571179644010442,48.145540095763664;13.394784408007155,52.51274942160785;-9.143239539655042,38.70880224984026;9.21595128801522,45.4694220491258?access_token=test&geometries=polyline6&alternatives=true&overview=full&steps=true&continue_straight=true&annotations=congestion_numeric%2Cmaxspeed%2Cclosure%2Cspeed%2Cduration%2Cdistance&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true",
+            "https://api.mapbox.com/directions/v5/mapbox/driving/18.047275378041377,54.56050010079204;17.952359140908555,54.57131787223446?access_token=***&geometries=polyline6&alternatives=true&overview=full&steps=true&continue_straight=true&annotations=congestion_numeric%2Cmaxspeed%2Cclosure%2Cspeed%2Cduration%2Cdistance&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true",
             RouterOrigin.ONLINE
         ).onError {
-            Log.d("benchmark", "error parsing route $it")
-            Log.d("benchmark", "response was $response")
+            Log.d(LOG_TAG, "error parsing route $it")
+            Log.d(LOG_TAG, "response was $response")
         }
             .value!!.first()
         val alertsCount = route.routeInfo.alerts.size
-        Log.d("benchmark", "alerts count is $alertsCount")
+        val location = route.routeInfo.alerts.map { it.roadObject.location }
+        Log.d(LOG_TAG, "alerts count is $alertsCount")
+        Log.d(LOG_TAG, "locations are $location")
         benchmarkRule.measureRepeated {
             val alerts = route.routeInfo.alerts
             this.runWithTimingDisabled {
-                System.gc()
+                Runtime.getRuntime().gc();
             }
         }
     }
