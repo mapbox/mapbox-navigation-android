@@ -9,11 +9,11 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.databinding.LayoutActivityNavigationViewLifecycleTestBinding
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.logD
 
 private const val FIRST_FRAGMENT_TAG = "FirstFragment"
@@ -117,7 +117,7 @@ class PageNavigationFragment(private val logTag: String) : Fragment() {
 
 private const val TAG = "navigation_view_lifecycle_debug"
 
-private class LifecycleLogger(val name: String) : DefaultLifecycleObserver {
+private class LifecycleLogger(val name: String) : DefaultLifecycleObserver() {
     override fun onCreate(owner: LifecycleOwner) {
         log("onCreate")
     }

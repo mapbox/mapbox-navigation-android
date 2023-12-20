@@ -2,11 +2,11 @@
 
 package com.mapbox.navigation.core.lifecycle
 
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp.lifecycleOwner
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -88,7 +88,7 @@ internal class RequireMapboxNavigationDelegate(
     private val onInitialize: (() -> Unit)? = null
 ) : ReadOnlyProperty<Any, MapboxNavigation> {
 
-    private val lifecycleObserver = object : DefaultLifecycleObserver {
+    private val lifecycleObserver = object : DefaultLifecycleObserver() {
         override fun onCreate(owner: LifecycleOwner) {
             onInitialize?.invoke()
             onCreatedObserver?.let { MapboxNavigationApp.registerObserver(it) }

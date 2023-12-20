@@ -1,0 +1,4 @@
+- Fixed an issue where some old tiles were never evicted.
+- Fixed an error of retrieving an offline route on app start.
+- Improved switching to online route: now in case of too long response time, the request will not be cancelled when offline rout is built, but the alternative online route will be available as soon the calcultion finishes.
+- Improved map matching in dead reckoning mode for high curvature road edges.

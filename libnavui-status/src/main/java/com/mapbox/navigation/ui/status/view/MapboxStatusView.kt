@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.status.view
 
 import android.animation.Animator
+import android.animation.Animator.AnimatorListener
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
 import android.content.Context
@@ -13,13 +14,12 @@ import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.animation.doOnStart
-import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import com.mapbox.navigation.ui.status.R
 import com.mapbox.navigation.ui.status.databinding.MapboxStatusViewLayoutBinding
 import com.mapbox.navigation.ui.status.internal.extensions.doOnFinish
 import com.mapbox.navigation.ui.status.model.Status
+import com.mapbox.navigation.utils.internal.android.isInvisible
+import com.mapbox.navigation.utils.internal.android.isVisible
 
 /**
  * View for rendering [Status] information.
@@ -212,10 +212,20 @@ class MapboxStatusView : FrameLayout {
     private fun showAnimator(status: Status): Animator =
         AnimatorInflater.loadAnimator(context, showAnimRes).apply {
             setTarget(this@MapboxStatusView)
-            doOnStart {
-                isInvisible = false
-                updateView(status)
-            }
+            addListener(
+                object : AnimatorListener {
+                    override fun onAnimationStart(p0: Animator) {
+                        isInvisible = false
+                        updateView(status)
+                    }
+
+                    override fun onAnimationEnd(p0: Animator) = Unit
+
+                    override fun onAnimationCancel(p0: Animator) = Unit
+
+                    override fun onAnimationRepeat(p0: Animator) = Unit
+                }
+            )
         }
 
     private fun hideAnimator(delay: Long = 0): Animator =

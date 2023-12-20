@@ -8,7 +8,6 @@ import android.content.pm.PackageInfo
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Base64
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.common.UploadOptions
@@ -36,6 +35,7 @@ import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallbac
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.logD
 import io.mockk.Ordering
 import io.mockk.Runs

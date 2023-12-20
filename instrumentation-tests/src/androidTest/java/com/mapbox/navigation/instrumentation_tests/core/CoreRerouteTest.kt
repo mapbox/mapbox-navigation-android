@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
@@ -77,6 +78,7 @@ import org.junit.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CoreRerouteTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
@@ -556,6 +558,11 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
     fun reroute_on_multieg_route_without_alternatives() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()
         val mockRoute = RoutesProvider.dc_very_short_two_legs(context)
+        val originalLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = mockRoute.routeWaypoints.first().latitude()
+            longitude = mockRoute.routeWaypoints.first().longitude()
+        }
+
         val secondLegLocation = mockLocationUpdatesRule.generateLocationUpdate {
             latitude = mockRoute.routeWaypoints[1].latitude()
             longitude = mockRoute.routeWaypoints[1].longitude()
@@ -594,7 +601,9 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
         ).getSuccessfulResultOrThrowException().routes
         mapboxNavigation.setNavigationRoutes(routes)
 
-        mapboxNavigation.routeProgressUpdates().first()
+        mockLocationReplayerRule.loopUpdateUntil(originalLocation) {
+            mapboxNavigation.routeProgressUpdates().first()
+        }
         mapboxNavigation.navigateNextRouteLeg()
         mockLocationReplayerRule.loopUpdateUntil(secondLegLocation) {
             mapboxNavigation.routeProgressUpdates()

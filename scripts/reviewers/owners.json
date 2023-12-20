@@ -6,6 +6,7 @@
     ],
     "modules": [
       "examples",
+      "app-mincompile",
       "app-tests-wrapper",
       "instrumentation-tests",
       "qa-test-app",

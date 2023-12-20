@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import androidx.core.view.isVisible
 import com.mapbox.bindgen.Expected
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
@@ -16,6 +15,7 @@ import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.RouteShieldError
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import com.mapbox.navigation.ui.utils.internal.Provider
+import com.mapbox.navigation.utils.internal.android.isVisible
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

@@ -1,12 +1,12 @@
 package com.mapbox.navigation.core.lifecycle
 
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -307,7 +307,7 @@ class RequireMapboxNavigationTest {
         }
         every { MapboxNavigationApp.attach(any()) } answers {
             attachedLifecycleOwner.add(firstArg())
-            firstArg<LifecycleOwner>().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            firstArg<LifecycleOwner>().lifecycle.addObserver(object : DefaultLifecycleObserver() {
                 override fun onCreate(owner: LifecycleOwner) {
                     if (isSetup) {
                         mockMapboxNavigation = mockk()

@@ -16,7 +16,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
@@ -608,7 +607,7 @@ class MapboxVoiceInstructionsPlayerTest {
     fun `should abandon focus after a options#abandonFocusDelay`() {
         val announcement: SpeechAnnouncement = SpeechAnnouncement
             .Builder("In 100 meters, turn left.").build()
-        val timer = spyk(instantTimer())
+        val timer = TestTimer()
         val options = VoiceInstructionsPlayerOptions.Builder()
             .abandonFocusDelay(2000L)
             .build()
@@ -627,8 +626,9 @@ class MapboxVoiceInstructionsPlayerTest {
         )
         sut.play(announcement) { /* no-op */ }
 
-        verifyOrder {
-            timer.schedule(any(), options.abandonFocusDelay)
+        assert(timer.tasks.size == 1)
+        assert(timer.tasks[0].second == options.abandonFocusDelay)
+        verify {
             mockedAudioFocusDelegate.abandonFocus(any())
         }
     }
@@ -684,8 +684,12 @@ class MapboxVoiceInstructionsPlayerTest {
             }
         }
     }
+}
 
-    private fun instantTimer(): Timer = object : Timer() {
-        override fun schedule(task: TimerTask, delay: Long) = task.run()
+private class TestTimer : Timer() {
+    val tasks = mutableListOf<Pair<TimerTask, Long>>()
+    override fun schedule(task: TimerTask, delay: Long) {
+        tasks.add(task to delay)
+        task.run()
     }
 }

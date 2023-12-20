@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.utils.tiles
 import android.util.Log
 import com.mapbox.common.TileRegionLoadOptions
 import com.mapbox.geojson.Geometry
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.instrumentation_tests.utils.createTileStore
@@ -48,6 +49,7 @@ suspend fun loadRegion(navigation: MapboxNavigation, region: OfflineRegion) {
     }
 }
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigationAndOfflineTilesForRegion(
     region: OfflineRegion,
     historyRecorderRule: MapboxHistoryTestRule? = null,

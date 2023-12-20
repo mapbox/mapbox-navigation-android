@@ -1,11 +1,11 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.content.Context
-import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
+import com.mapbox.navigation.utils.internal.android.isVisible
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

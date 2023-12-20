@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice.internal.ui
 
 import android.content.Context
-import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -9,6 +8,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidance
 import com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState
 import com.mapbox.navigation.ui.voice.view.MapboxAudioGuidanceButton
+import com.mapbox.navigation.utils.internal.android.isVisible
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

@@ -55,6 +55,7 @@ import java.util.concurrent.CountDownLatch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
     BasicNavigationViewActivity::class.java
 ) {

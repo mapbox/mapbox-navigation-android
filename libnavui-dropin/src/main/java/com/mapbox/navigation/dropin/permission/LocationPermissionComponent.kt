@@ -6,12 +6,12 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.tripsession.TripSessionStarterAction
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
+import com.mapbox.navigation.utils.internal.android.repeatOnLifecycle
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
@@ -76,7 +76,7 @@ internal class LocationPermissionComponent(
      */
     private fun notifyGrantedOnForegrounded() {
         coroutineScope.launch {
-            componentActivityRef.get()?.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            componentActivityRef.get()?.lifecycle?.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 store.dispatch(TripSessionStarterAction.RefreshLocationPermissions)
             }
         }

@@ -11,8 +11,6 @@ import androidx.annotation.StyleRes
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.TextViewCompat
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
@@ -21,6 +19,8 @@ import com.mapbox.navigation.ui.maneuver.model.ComponentNode
 import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.ui.maneuver.model.MapboxExitProperties
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.android.toBitmap
+import com.mapbox.navigation.utils.internal.android.toDrawable
 
 /**
  * Default Exit View that renders exit number in a specific style.

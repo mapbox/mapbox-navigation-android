@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core.lifecycle
 
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.jvm.Throws
@@ -17,7 +17,7 @@ internal class MapboxNavigationOwner {
     private var mapboxNavigation: MapboxNavigation? = null
     private var attached = false
 
-    internal val carAppLifecycleObserver = object : DefaultLifecycleObserver {
+    internal val carAppLifecycleObserver = object : DefaultLifecycleObserver() {
 
         override fun onStart(owner: LifecycleOwner) {
             logI("onStart", LOG_CATEGORY)

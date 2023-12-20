@@ -14,8 +14,6 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.widget.TextViewCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
@@ -26,6 +24,8 @@ import com.mapbox.navigation.ui.speedlimit.model.CurrentSpeedDirection
 import com.mapbox.navigation.ui.speedlimit.model.MapboxSpeedInfoOptions
 import com.mapbox.navigation.ui.speedlimit.model.SpeedInfoValue
 import com.mapbox.navigation.ui.speedlimit.model.ViewConstraints
+import com.mapbox.navigation.utils.internal.android.isVisible
+import com.mapbox.navigation.utils.internal.android.updateLayoutParams
 
 /**
  * A view component responsible to render posted speed limit and current speed produced by

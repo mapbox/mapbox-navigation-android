@@ -1,15 +1,15 @@
 package com.mapbox.navigation.core.internal.extensions
 
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachCreated(vararg observers: T) = apply {
-    lifecycle.addObserver(object : DefaultLifecycleObserver {
+    lifecycle.addObserver(object : DefaultLifecycleObserver() {
         override fun onCreate(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.registerObserver(it) }
         }
@@ -21,7 +21,7 @@ fun <T : MapboxNavigationObserver> LifecycleOwner.attachCreated(vararg observers
 }
 
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachStarted(vararg observers: T) = apply {
-    lifecycle.addObserver(object : DefaultLifecycleObserver {
+    lifecycle.addObserver(object : DefaultLifecycleObserver() {
         override fun onStart(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.registerObserver(it) }
         }
@@ -37,7 +37,7 @@ fun <T : MapboxNavigationObserver> LifecycleOwner.attachStarted(vararg observers
 }
 
 fun <T : MapboxNavigationObserver> LifecycleOwner.attachResumed(vararg observers: T) = apply {
-    lifecycle.addObserver(object : DefaultLifecycleObserver {
+    lifecycle.addObserver(object : DefaultLifecycleObserver() {
         override fun onResume(owner: LifecycleOwner) {
             observers.forEach { MapboxNavigationApp.registerObserver(it) }
         }

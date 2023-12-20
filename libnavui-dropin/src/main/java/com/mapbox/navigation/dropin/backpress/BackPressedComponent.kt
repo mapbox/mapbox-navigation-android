@@ -4,7 +4,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.NavigationView
 import com.mapbox.navigation.ui.app.internal.Store
@@ -16,6 +15,7 @@ import com.mapbox.navigation.ui.app.internal.navigation.NavigationStateAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutePreviewAction
 import com.mapbox.navigation.ui.app.internal.routefetch.RoutesAction
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
+import com.mapbox.navigation.utils.internal.android.repeatOnLifecycle
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
@@ -73,7 +73,7 @@ internal class BackPressedComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         coroutineScope.launch {
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 store.select { it.navigation != NavigationState.FreeDrive }
                     .onCompletion { onBackPressedCallback.isEnabled = false }
                     .collect { onBackPressedCallback.isEnabled = it }
