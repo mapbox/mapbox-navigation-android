@@ -82,6 +82,11 @@ allprojects {
     }
     gradlePluginPortal()
   }
+  tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+      freeCompilerArgs += '-opt-in=com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI'
+    }
+  }
 }
 
 subprojects {
