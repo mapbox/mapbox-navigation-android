@@ -11,6 +11,7 @@ import com.mapbox.common.LogConfiguration
 import com.mapbox.common.LoggingLevel
 import com.mapbox.geojson.LineString
 import com.mapbox.navigator.RoadObjectType
+import com.mapbox.navigator.RouteAlertLocation
 import com.mapbox.navigator.RouteParser
 import com.mapbox.navigator.RouterOrigin
 import org.junit.Rule
@@ -60,6 +61,12 @@ class ExampleBenchmark {
         Log.d(LOG_TAG, "Line string coordinates count is $lineStringCoordinates")
         benchmarkRule.measureRepeated {
             val alerts = route.routeInfo.alerts
+            alerts.forEach {
+                val location = it.roadObject.location
+                if (location.isRouteAlertLocation) {
+                    location.routeAlertLocation.shape
+                }
+            }
             this.runWithTimingDisabled {
                 Runtime.getRuntime().gc();
             }
