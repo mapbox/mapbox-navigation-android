@@ -468,6 +468,30 @@ class MapboxCopilotImplTest {
     }
 
     @Test
+    fun `activity Lifecycle Callbacks is unregistered when stop if MapboxNavigationApp is not setup`() {
+        val mockedMapboxNavigation = prepareBasicMockks()
+        val mockedAppLifecycle = prepareCarAppLifecycleOwnerMockk()
+        val historyRecordingStateChangeObserver = slot<HistoryRecordingStateChangeObserver>()
+        every {
+            mockedMapboxNavigation.registerHistoryRecordingStateChangeObserver(
+                capture(historyRecordingStateChangeObserver)
+            )
+        } just Runs
+        val mapboxCopilot = createMapboxCopilotImplementation(mockedMapboxNavigation)
+        mapboxCopilot.start()
+        val activeGuidanceHistoryRecordingSessionState =
+            mockk<HistoryRecordingSessionState.ActiveGuidance>(relaxed = true)
+        historyRecordingStateChangeObserver.captured.onShouldStartRecording(
+            activeGuidanceHistoryRecordingSessionState
+        )
+
+        mapboxCopilot.stop()
+
+        verify(exactly = 1) { anyConstructed<CarAppLifecycleOwner>().attachAllActivities(any()) }
+        verify(exactly = 1) { anyConstructed<CarAppLifecycleOwner>().detachAllActivities(any()) }
+    }
+
+    @Test
     fun `unregisterHistoryRecordingStateChangeObserver is called when stop`() {
         val mockedMapboxNavigation = prepareBasicMockks()
         prepareLifecycleOwnerMockk()
