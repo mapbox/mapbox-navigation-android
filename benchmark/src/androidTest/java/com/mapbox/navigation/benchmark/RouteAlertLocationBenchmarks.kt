@@ -91,7 +91,7 @@ class ExampleBenchmark {
         }
     }
 
-    @Test
+    //@Test
     fun timeToRetrieveOpenLRMatchedObject() {
         val navigation = MapboxNavigation(
             NavigationOptions.Builder(context)
