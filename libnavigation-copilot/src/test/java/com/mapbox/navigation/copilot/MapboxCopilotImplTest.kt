@@ -34,6 +34,7 @@ import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.logD
@@ -72,6 +73,9 @@ class MapboxCopilotImplTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
+
+    @get:Rule
+    val loggingFrontendTestRule = LoggingFrontendTestRule()
 
     @Before
     fun setUp() {
