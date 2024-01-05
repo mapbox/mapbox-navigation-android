@@ -151,6 +151,9 @@ internal open class MapboxNavigationBaseTest {
                 any(),
             )
         } returns mockk(relaxed = true)
+        every {
+            NavigatorLoader.createCacheHandle(any(), any(), any())
+        } returns mockk()
 
         mockkObject(MapboxSDKCommon)
         every {

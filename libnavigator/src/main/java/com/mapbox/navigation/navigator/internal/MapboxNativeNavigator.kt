@@ -27,7 +27,6 @@ import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
-import com.mapbox.navigator.TilesConfig
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
@@ -38,9 +37,9 @@ interface MapboxNativeNavigator {
      * Initialize the navigator with a device profile
      */
     fun create(
+        cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface?,
     ): MapboxNativeNavigator
@@ -49,9 +48,9 @@ interface MapboxNativeNavigator {
      * Reinitialize the navigator with a device profile
      */
     fun recreate(
+        cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface,
     )

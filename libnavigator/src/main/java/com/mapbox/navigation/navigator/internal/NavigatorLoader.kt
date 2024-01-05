@@ -49,39 +49,45 @@ object NavigatorLoader {
     }
 
     internal fun createNavigator(
+        cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        tilesConfig: TilesConfig,
         router: RouterInterface?,
     ): NativeComponents {
-        val cache = CacheFactory.build(tilesConfig, config, historyRecorderComposite)
         val navigator = Navigator(
             config,
-            cache,
+            cacheHandle,
             historyRecorderComposite,
             router,
         )
-        val graphAccessor = GraphAccessor(cache)
-        val roadObjectMatcher = RoadObjectMatcher(cache)
+        val graphAccessor = GraphAccessor(cacheHandle)
+        val roadObjectMatcher = RoadObjectMatcher(cacheHandle)
 
         return NativeComponents(
             navigator,
             graphAccessor,
-            cache,
+            cacheHandle,
             roadObjectMatcher,
             navigator.routeAlternativesController,
         )
     }
 
-    fun createNativeRouterInterface(
+    fun createCacheHandle(
         config: ConfigHandle,
         tilesConfig: TilesConfig,
         historyRecorder: HistoryRecorderHandle?,
+    ): CacheHandle {
+        return CacheFactory.build(tilesConfig, config, historyRecorder)
+    }
+
+    fun createNativeRouterInterface(
+        cacheHandle: CacheHandle,
+        config: ConfigHandle,
+        historyRecorder: HistoryRecorderHandle?,
     ): RouterInterface {
-        val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
         return RouterFactory.build(
             RouterType.HYBRID,
-            cache,
+            cacheHandle,
             config,
             historyRecorder,
         )
