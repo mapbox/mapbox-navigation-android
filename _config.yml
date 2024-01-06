@@ -1,4 +1,4 @@
-baseurl: /android/navigation/api
+baseurl: /android/navigation/v2/api
 permalink: /:title/index.html # required for redirects
 exclude:
   - .artifacts.yml
