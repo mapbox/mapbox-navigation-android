@@ -25,10 +25,10 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImp
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.RouterInterface
-import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineScope
 
 internal object NavigationComponentProvider {
@@ -38,15 +38,15 @@ internal object NavigationComponentProvider {
     ): DirectionsSession = MapboxDirectionsSession(router)
 
     fun createNativeNavigator(
+        cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface,
     ): MapboxNativeNavigator = MapboxNativeNavigatorImpl.create(
+        cacheHandle,
         config,
         historyRecorderComposite,
-        tilesConfig,
         accessToken,
         router,
     )

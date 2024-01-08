@@ -906,15 +906,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `verify tile config path`() {
         threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
-        every {
-            NavigationComponentProvider.createNativeNavigator(
-                any(),
-                any(),
-                capture(slot),
-                any(),
-                any(),
-            )
-        } returns navigator
+
+        every { NavigatorLoader.createCacheHandle(any(), capture(slot), any()) } returns mockk()
+
         val options = navigationOptions.toBuilder()
             .routingTilesOptions(RoutingTilesOptions.Builder().build())
             .build()
@@ -928,15 +922,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `verify tile config dataset`() {
         threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
-        every {
-            NavigationComponentProvider.createNativeNavigator(
-                any(),
-                any(),
-                capture(slot),
-                any(),
-                any(),
-            )
-        } returns navigator
+
+        every { NavigatorLoader.createCacheHandle(any(), capture(slot), any()) } returns mockk()
+
         val options = navigationOptions.toBuilder()
             .routingTilesOptions(
                 RoutingTilesOptions.Builder()
@@ -1220,15 +1208,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun `verify tile config tilesVersion and isFallback on init`() {
         threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
-        every {
-            NavigationComponentProvider.createNativeNavigator(
-                any(),
-                any(),
-                capture(slot),
-                any(),
-                any(),
-            )
-        } returns navigator
+
+        every { NavigatorLoader.createCacheHandle(any(), capture(slot), any()) } returns mockk()
+
         val tilesVersion = "tilesVersion"
         val options = navigationOptions.toBuilder()
             .routingTilesOptions(
@@ -1261,15 +1243,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         val tileConfigSlot = slot<TilesConfig>()
+
         every {
-            navigator.recreate(
-                any(),
-                any(),
-                capture(tileConfigSlot),
-                any(),
-                any(),
-            )
-        } just Runs
+            NavigatorLoader.createCacheHandle(any(), capture(tileConfigSlot), any())
+        } returns mockk()
 
         val tilesVersion = "tilesVersion"
         val latestTilesVersion = "latestTilesVersion"
@@ -1301,15 +1278,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
             val tileConfigSlot = slot<TilesConfig>()
+
             every {
-                navigator.recreate(
-                    any(),
-                    any(),
-                    capture(tileConfigSlot),
-                    any(),
-                    any(),
-                )
-            } just Runs
+                NavigatorLoader.createCacheHandle(any(), capture(tileConfigSlot), any())
+            } returns mockk()
 
             fallbackObserverSlot.captured.onCanReturnToLatest("")
 

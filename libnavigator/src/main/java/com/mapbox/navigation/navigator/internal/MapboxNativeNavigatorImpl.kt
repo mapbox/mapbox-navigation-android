@@ -43,7 +43,6 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
-import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
@@ -79,18 +78,18 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * functions within [MapboxNativeNavigatorImpl]
      */
     override fun create(
+        cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface,
     ): MapboxNativeNavigator {
         navigator?.shutdown()
 
         val nativeComponents = NavigatorLoader.createNavigator(
+            cacheHandle,
             config,
             historyRecorderComposite,
-            tilesConfig,
             router,
         )
         navigator = nativeComponents.navigator
@@ -109,14 +108,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Recreate native objects and notify listeners.
      */
     override fun recreate(
+        cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        tilesConfig: TilesConfig,
         accessToken: String,
         router: RouterInterface
     ) {
         val storeNavSessionState = navigator!!.storeNavigationSession()
-        create(config, historyRecorderComposite, tilesConfig, accessToken, router)
+        create(cacheHandle, config, historyRecorderComposite, accessToken, router)
         navigator!!.restoreNavigationSession(storeNavSessionState)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
