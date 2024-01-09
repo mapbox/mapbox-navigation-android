@@ -6,6 +6,33 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.18.0 - 09 January, 2024
+### Changelog
+[Changes between v2.17.0 and v2.18.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.0...v2.18.0)
+
+#### Features
+
+- Adds support for applications compiled with compileSdkVersion 30 or above. [#7663](https://github.com/mapbox/mapbox-navigation-android/pull/7663)
+
+#### Bug fixes and improvements
+- Improved Map Matching to avoid false deviation of the location puck to a parallel street. [#7694](https://github.com/mapbox/mapbox-navigation-android/pull/7694)
+- Improved handling of no storage available during navigation tiles downloading. [#7694](https://github.com/mapbox/mapbox-navigation-android/pull/7694)
+- Improved handling of invalid config in `DeviceProfile#customConfig`. [#7694](https://github.com/mapbox/mapbox-navigation-android/pull/7694)
+- Fixed a native crash in E-Horizon implementation caused by internal race condition. [#7694](https://github.com/mapbox/mapbox-navigation-android/pull/7694)
+- Fixed a bug with multiple instances of cache which resulted in excessive memory consumption. [#7688](https://github.com/mapbox/mapbox-navigation-android/pull/7688)
+- Fixed an issue where some old tiles were never evicted. [#7663](https://github.com/mapbox/mapbox-navigation-android/pull/7663)
+- Fixed an error of retrieving an offline route on app start. [#7663](https://github.com/mapbox/mapbox-navigation-android/pull/7663)
+- Improved switching to online route: now in case of too long response time, the request will not be cancelled when offline rout is built, but the alternative online route will be available as soon the calculation finishes. [#7663](https://github.com/mapbox/mapbox-navigation-android/pull/7663)
+- Improved map matching in dead reckoning mode for high curvature road edges. [#7663](https://github.com/mapbox/mapbox-navigation-android/pull/7663)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.4))
+- Mapbox Navigation Native `v182.0.0`
+- Mapbox Core Common `v23.8.6`
+- Mapbox Java `v6.15.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.15.0))
+
+
 ## Mapbox Navigation SDK 2.18.0-beta.1 - 20 December, 2023
 ### Changelog
 [Changes between v2.17.8 and v2.18.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.8...v2.18.0-beta.1)
