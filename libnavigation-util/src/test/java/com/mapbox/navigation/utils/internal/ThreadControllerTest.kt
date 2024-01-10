@@ -1,7 +1,9 @@
 package com.mapbox.navigation.utils.internal
 
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,12 +16,18 @@ import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
+import org.junit.Rule
 import org.junit.Test
 import kotlin.coroutines.suspendCoroutine
 
 class ThreadControllerTest {
+
+    @get:Rule
+    val testCoroutineRule = MainCoroutineRule()
 
     private val threadController = ThreadController()
 
@@ -131,5 +139,30 @@ class ThreadControllerTest {
             CoroutineScope(mainJobController.job + Dispatchers.Main).toString(),
             mainJobController.scope.toString()
         )
+    }
+
+    @Test
+    fun destroy_thread_controller() {
+        val handler = CompletableDeferred<Unit>()
+        var errorMessage: String? = null
+        threadController.getIOScopeAndRootJob().scope.launch {
+            handler.await()
+            errorMessage = "IO scope should be cancelled"
+        }
+        threadController.getMainScopeAndRootJob().scope.launch {
+            handler.await()
+            errorMessage = "UI scope should be cancelled"
+        }
+        threadController.destroy()
+        handler.complete(Unit)
+        assertNull(errorMessage)
+
+        threadController.getIOScopeAndRootJob().scope.launch {
+            errorMessage = "IO scope should be cancelled"
+        }
+        threadController.getMainScopeAndRootJob().scope.launch {
+            errorMessage = "UI scope should be cancelled"
+        }
+        assertNull(errorMessage)
     }
 }

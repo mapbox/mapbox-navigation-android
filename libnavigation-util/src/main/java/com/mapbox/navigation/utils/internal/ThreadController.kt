@@ -101,4 +101,10 @@ class ThreadController {
         val parentJob = SupervisorJob(mainRootJob)
         return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main))
     }
+
+    fun destroy() {
+        val reason = CancellationException("thread controller is destroyed")
+        mainRootJob.cancel(reason)
+        ioRootJob.cancel(reason)
+    }
 }
