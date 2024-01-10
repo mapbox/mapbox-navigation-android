@@ -6,6 +6,23 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.17.9 - 10 January, 2024
+### Changelog
+[Changes between v2.17.8 and v2.17.9](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.8...v2.17.9)
+
+
+#### Bug fixes and improvements
+- Fixed a bug with multiple instances of cache which resulted in excessive memory consumption. [#7692](https://github.com/mapbox/mapbox-navigation-android/pull/7692)
+- Fixed a bug where old navigation tiles could stay on the disk instead of being cleaned up. [#7702](https://github.com/mapbox/mapbox-navigation-android/pull/7702)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.3))
+- Mapbox Navigation Native `v162.0.1`
+- Mapbox Core Common `v23.8.5`
+- Mapbox Java `v6.15.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.15.0))
+
+
 ## Mapbox Navigation SDK 2.17.8 - 12 December, 2023
 ### Changelog
 [Changes between v2.17.7 and v2.17.8](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.7...v2.17.8)
