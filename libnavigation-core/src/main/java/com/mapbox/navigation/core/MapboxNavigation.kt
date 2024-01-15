@@ -46,6 +46,7 @@ import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.adasis.ADASISv2MessageCallback
 import com.mapbox.navigation.core.adasis.AdasisConfig
+import com.mapbox.navigation.core.adasis.AdasisMessageContext
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -2006,8 +2007,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     fun setAdasisMessageCallback(adasisConfig: AdasisConfig, callback: ADASISv2MessageCallback) {
         navigator.setAdasisMessageCallback(
-            { message ->
-                callback.onMessage(message)
+            { message, context ->
+                context.positionMonotonicTimestampNanoseconds
+                callback.onMessage(message, AdasisMessageContext.createFromNativeObject(context))
             },
             adasisConfig.toNativeAdasisConfig()
         )
