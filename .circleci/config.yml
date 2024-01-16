@@ -36,8 +36,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
-                - release-v.*
+                - NAVAND-1667-billing-explanation-logs
       - release:
           filters:
             tags:

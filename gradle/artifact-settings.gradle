@@ -16,6 +16,7 @@ ext {
 }
 
 def getVersionName() {
+    return "2.10.1-BILLING-EXPLANATION-LOGS-SNAPSHOT"
     if (project.hasProperty('VERSION_NAME')) {
       return project.property('VERSION_NAME')
     }
