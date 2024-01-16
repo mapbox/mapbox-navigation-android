@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants.UNIT_METRES
 import com.mapbox.turf.TurfMeasurement
@@ -189,6 +190,7 @@ internal class BillingController(
 
     private companion object {
         private const val logCategory = "BillingController"
+        private const val BILLING_EXPLANATION_CATEGORY = "BillingExplanation"
         private const val MAX_WAYPOINTS_DISTANCE_DIFF_METERS = 100.0
     }
 
@@ -211,18 +213,23 @@ internal class BillingController(
                 is NavigationSessionState.Idle -> {
                     getRunningOrPausedSessionSkuId()?.let {
                         billingService.pauseBillingSession(it)
+                        logI(BILLING_EXPLANATION_CATEGORY) {
+                            "${it.publicName} has been paused because Nav SDK is in Idle state"
+                        }
                     }
                 }
                 is NavigationSessionState.FreeDrive -> {
                     resumeOrBeginBillingSession(
                         SessionSKUIdentifier.NAV2_SES_FDTRIP,
-                        validity = TimeUnit.HOURS.toMillis(1) // validity of 1hr
+                        validity = TimeUnit.HOURS.toMillis(1), // validity of 1hr
+                        "Nav SDK is in free drive state"
                     )
                 }
                 is NavigationSessionState.ActiveGuidance -> {
                     resumeOrBeginBillingSession(
                         SessionSKUIdentifier.NAV2_SES_TRIP,
-                        validity = 0 // default validity, 12hrs
+                        validity = 0, // default validity, 12hrs
+                        "Nav SDK is in Active Guidance state"
                     )
                 }
             }
@@ -243,7 +250,8 @@ internal class BillingController(
             }
             beginBillingSession(
                 SessionSKUIdentifier.NAV2_SES_TRIP,
-                validity = 0 // default validity, 12hrs
+                validity = 0, // default validity, 12hrs
+                "Nav SDK switched to the next route leg"
             )
         }
 
@@ -286,10 +294,17 @@ internal class BillingController(
                 ) == BillingSessionStatus.SESSION_PAUSED
                 beginBillingSession(
                     SessionSKUIdentifier.NAV2_SES_TRIP,
-                    validity = 0 // default validity, 12hrs
+                    validity = 0, // default validity, 12hrs
+                    "destination has been changed. " +
+                        "Old waypoints: $currentRemainingWaypoints," +
+                        "new waypoints: $newWaypoints"
                 )
                 if (wasSessionPaused) {
                     billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+                    logI(BILLING_EXPLANATION_CATEGORY) {
+                        "${runningSessionSkuId.publicName} has been paused because " +
+                            "it used to be paused before destinations update"
+                    }
                 }
             }
         }
@@ -300,6 +315,9 @@ internal class BillingController(
         arrivalProgressObserver.unregisterObserver(arrivalObserver)
         getRunningOrPausedSessionSkuId()?.let {
             billingService.stopBillingSession(it)
+            logI(BILLING_EXPLANATION_CATEGORY) {
+                "${it.publicName} has been stopped because Nav SDK is destroyed"
+            }
         }
     }
 
@@ -308,7 +326,8 @@ internal class BillingController(
      */
     private fun resumeOrBeginBillingSession(
         skuId: SessionSKUIdentifier,
-        validity: Long
+        validity: Long,
+        reason: String
     ) {
         val runningSessionSkuId = getRunningOrPausedSessionSkuId()
         if (runningSessionSkuId == skuId) {
@@ -319,11 +338,18 @@ internal class BillingController(
                         "Session resumption failed, starting a new one instead.",
                         logCategory
                     )
-                    beginBillingSession(skuId, validity)
+                    logI(BILLING_EXPLANATION_CATEGORY) {
+                        "Failed to resume ${skuId.publicName}(${it.message})."
+                    }
+                    beginBillingSession(skuId, validity, reason)
+                } else {
+                    logI(BILLING_EXPLANATION_CATEGORY) {
+                        "${skuId.publicName} has ben resumed because $reason"
+                    }
                 }
             }
         } else {
-            beginBillingSession(skuId, validity)
+            beginBillingSession(skuId, validity, reason)
         }
     }
 
@@ -332,11 +358,15 @@ internal class BillingController(
      */
     private fun beginBillingSession(
         skuId: SessionSKUIdentifier,
-        validity: Long
+        validity: Long,
+        reason: String
     ) {
         val runningSessionSkuId = getRunningOrPausedSessionSkuId()
         if (runningSessionSkuId != null) {
             billingService.stopBillingSession(runningSessionSkuId)
+            logI(BILLING_EXPLANATION_CATEGORY) {
+                "${runningSessionSkuId.publicName} has been stopped because $reason"
+            }
         }
         billingService.beginBillingSession(
             accessToken,
@@ -347,6 +377,9 @@ internal class BillingController(
             },
             validity
         )
+        logI(BILLING_EXPLANATION_CATEGORY) {
+            "${skuId.publicName} has been started because $reason"
+        }
     }
 
     private fun getRunningOrPausedSessionSkuId(): SessionSKUIdentifier? {
@@ -438,3 +471,8 @@ internal class BillingController(
 }
 
 private data class Waypoint(val index: Int, val point: Point)
+
+private val SessionSKUIdentifier.publicName get() = when (this) {
+    SessionSKUIdentifier.NAV2_SES_TRIP -> "Active Guidance Trip Session"
+    SessionSKUIdentifier.NAV2_SES_FDTRIP -> "Free Drive Trip Session"
+}
