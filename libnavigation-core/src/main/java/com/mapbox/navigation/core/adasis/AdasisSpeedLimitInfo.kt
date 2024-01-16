@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.adasis
 
+import androidx.annotation.IntDef
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.speed.model.SpeedUnit
-import com.mapbox.navigator.SpeedLimitType
 import com.mapbox.navigator.SpeedLimitUnit
 
 /**
@@ -10,14 +10,14 @@ import com.mapbox.navigator.SpeedLimitUnit
  *
  * @param value the numerical value of the limit
  * @param speedUnit the unit the value is specified in
- * @param type speed limit type, see [Type]
+ * @param speedLimitType speed limit type, see [SpeedLimitType]
  * @param restriction speed limit restriction, see [AdasisSpeedLimitRestriction]
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisSpeedLimitInfo private constructor(
     val value: Int,
     val speedUnit: SpeedUnit,
-    val type: Type,
+    @SpeedLimitType.Type val speedLimitType: Int,
     val restriction: AdasisSpeedLimitRestriction,
 ) {
 
@@ -32,7 +32,7 @@ class AdasisSpeedLimitInfo private constructor(
 
         if (value != other.value) return false
         if (speedUnit != other.speedUnit) return false
-        if (type != other.type) return false
+        if (speedLimitType != other.speedLimitType) return false
         return restriction == other.restriction
     }
 
@@ -42,7 +42,7 @@ class AdasisSpeedLimitInfo private constructor(
     override fun hashCode(): Int {
         var result = value
         result = 31 * result + speedUnit.hashCode()
-        result = 31 * result + type.hashCode()
+        result = 31 * result + speedLimitType.hashCode()
         result = 31 * result + restriction.hashCode()
         return result
     }
@@ -54,7 +54,7 @@ class AdasisSpeedLimitInfo private constructor(
         return "SpeedLimitInfo(" +
             "value=$value, " +
             "speedUnit=$speedUnit, " +
-            "type=$type, " +
+            "speedLimitInfoType=$speedLimitType, " +
             "restriction=$restriction" +
             ")"
     }
@@ -62,47 +62,48 @@ class AdasisSpeedLimitInfo private constructor(
     /**
      * Speed limit type.
      */
-    abstract class Type private constructor() {
+    object SpeedLimitType {
 
         /**
          * Implicit type.
          */
-        object Implicit : Type()
+        const val IMPLICIT = 0
 
         /**
          * Explicit type.
          */
-        object Explicit : Type()
+        const val EXPLICIT = 1
 
         /**
          * Edge does not start the way, no sign on the edge.
          * Speed limit time is the same of on previous edge.
          */
-        object Prolonged : Type()
+        const val PROLONGED = 2
 
         /**
          * Type is unknown.
          */
-        object Unknown : Type()
+        const val UNKNOWN = 3
 
-        internal companion object {
-
-            @JvmSynthetic
-            fun createFromNativeObject(nativeObj: SpeedLimitType): Type {
-                return when (nativeObj) {
-                    SpeedLimitType.IMPLICIT -> Implicit
-                    SpeedLimitType.EXPLICIT -> Explicit
-                    SpeedLimitType.PROLONGED -> Prolonged
-                    SpeedLimitType.UNKNOWN -> Unknown
-                }
-            }
-        }
+        /**
+         * Retention policy for the [SpeedLimitType]
+         */
+        @Retention(AnnotationRetention.BINARY)
+        @IntDef(
+            IMPLICIT,
+            EXPLICIT,
+            PROLONGED,
+            UNKNOWN,
+        )
+        annotation class Type
     }
 
     internal companion object {
 
         @JvmSynthetic
-        fun createFromNativeObject(nativeObj: com.mapbox.navigator.SpeedLimitInfo): AdasisSpeedLimitInfo {
+        fun createFromNativeObject(
+            nativeObj: com.mapbox.navigator.SpeedLimitInfo
+        ): AdasisSpeedLimitInfo {
             val speedUnit = when (nativeObj.unit) {
                 SpeedLimitUnit.KILOMETRES_PER_HOUR -> SpeedUnit.KILOMETERS_PER_HOUR
                 SpeedLimitUnit.MILES_PER_HOUR -> SpeedUnit.MILES_PER_HOUR
@@ -110,9 +111,22 @@ class AdasisSpeedLimitInfo private constructor(
             return AdasisSpeedLimitInfo(
                 value = nativeObj.value,
                 speedUnit = speedUnit,
-                type = Type.createFromNativeObject(nativeObj.type),
-                restriction = AdasisSpeedLimitRestriction.createFromNativeObject(nativeObj.restriction)
+                speedLimitType = createSpeedLimitType(nativeObj.type),
+                restriction = AdasisSpeedLimitRestriction.createFromNativeObject(
+                    nativeObj.restriction
+                )
             )
+        }
+
+        @JvmSynthetic
+        @SpeedLimitType.Type
+        private fun createSpeedLimitType(nativeObj: com.mapbox.navigator.SpeedLimitType): Int {
+            return when (nativeObj) {
+                com.mapbox.navigator.SpeedLimitType.IMPLICIT -> SpeedLimitType.IMPLICIT
+                com.mapbox.navigator.SpeedLimitType.EXPLICIT -> SpeedLimitType.EXPLICIT
+                com.mapbox.navigator.SpeedLimitType.PROLONGED -> SpeedLimitType.PROLONGED
+                com.mapbox.navigator.SpeedLimitType.UNKNOWN -> SpeedLimitType.UNKNOWN
+            }
         }
     }
 }
