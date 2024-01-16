@@ -11,14 +11,14 @@ import com.mapbox.navigator.SpeedLimitUnit
  * @param value the numerical value of the limit
  * @param speedUnit the unit the value is specified in
  * @param type speed limit type, see [Type]
- * @param restriction speed limit restriction, see [SpeedLimitRestriction]
+ * @param restriction speed limit restriction, see [AdasisSpeedLimitRestriction]
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class SpeedLimitInfo private constructor(
+class AdasisSpeedLimitInfo private constructor(
     val value: Int,
     val speedUnit: SpeedUnit,
     val type: Type,
-    val restriction: SpeedLimitRestriction,
+    val restriction: AdasisSpeedLimitRestriction,
 ) {
 
     /**
@@ -28,7 +28,7 @@ class SpeedLimitInfo private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as SpeedLimitInfo
+        other as AdasisSpeedLimitInfo
 
         if (value != other.value) return false
         if (speedUnit != other.speedUnit) return false
@@ -102,16 +102,16 @@ class SpeedLimitInfo private constructor(
     internal companion object {
 
         @JvmSynthetic
-        fun createFromNativeObject(nativeObj: com.mapbox.navigator.SpeedLimitInfo): SpeedLimitInfo {
+        fun createFromNativeObject(nativeObj: com.mapbox.navigator.SpeedLimitInfo): AdasisSpeedLimitInfo {
             val speedUnit = when (nativeObj.unit) {
                 SpeedLimitUnit.KILOMETRES_PER_HOUR -> SpeedUnit.KILOMETERS_PER_HOUR
                 SpeedLimitUnit.MILES_PER_HOUR -> SpeedUnit.MILES_PER_HOUR
             }
-            return SpeedLimitInfo(
+            return AdasisSpeedLimitInfo(
                 value = nativeObj.value,
                 speedUnit = speedUnit,
                 type = Type.createFromNativeObject(nativeObj.type),
-                restriction = SpeedLimitRestriction.createFromNativeObject(nativeObj.restriction)
+                restriction = AdasisSpeedLimitRestriction.createFromNativeObject(nativeObj.restriction)
             )
         }
     }

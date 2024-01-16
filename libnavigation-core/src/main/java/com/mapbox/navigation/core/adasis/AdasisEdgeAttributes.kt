@@ -16,9 +16,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisEdgeAttributes private constructor(
-    val speedLimit: List<SpeedLimitInfo>,
-    val slopes: List<ValueOnEdge>,
-    val curvatures: List<ValueOnEdge>,
+    val speedLimit: List<AdasisSpeedLimitInfo>,
+    val slopes: List<AdasisValueOnEdge>,
+    val curvatures: List<AdasisValueOnEdge>,
 ) {
 
     /**
@@ -57,9 +57,15 @@ class AdasisEdgeAttributes private constructor(
         @JvmSynthetic
         fun createFromNativeObject(nativeObj: com.mapbox.navigator.EdgeAdasAttributes) =
             AdasisEdgeAttributes(
-                speedLimit = nativeObj.speedLimit.map { SpeedLimitInfo.createFromNativeObject(it) },
-                slopes = nativeObj.slopes.map { ValueOnEdge.createFromNativeObject(it) },
-                curvatures = nativeObj.curvatures.map { ValueOnEdge.createFromNativeObject(it) }
+                speedLimit = nativeObj.speedLimit.map {
+                    AdasisSpeedLimitInfo.createFromNativeObject(it)
+                },
+                slopes = nativeObj.slopes.map {
+                    AdasisValueOnEdge.createFromNativeObject(it)
+                },
+                curvatures = nativeObj.curvatures.map {
+                    AdasisValueOnEdge.createFromNativeObject(it)
+                },
             )
     }
 }

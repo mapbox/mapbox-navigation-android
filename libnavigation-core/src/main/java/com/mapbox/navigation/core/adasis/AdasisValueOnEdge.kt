@@ -13,7 +13,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param value Floating point value, e.g. curvature in 1/m or slope in degrees
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class ValueOnEdge private constructor(
+class AdasisValueOnEdge private constructor(
     val shapeIndex: Float,
     val percentAlong: Double,
     val value: Double,
@@ -26,7 +26,7 @@ class ValueOnEdge private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as ValueOnEdge
+        other as AdasisValueOnEdge
 
         if (shapeIndex != other.shapeIndex) return false
         if (percentAlong != other.percentAlong) return false
@@ -58,7 +58,7 @@ class ValueOnEdge private constructor(
 
         @JvmSynthetic
         fun createFromNativeObject(nativeObj: com.mapbox.navigator.ValueOnEdge) =
-            ValueOnEdge(
+            AdasisValueOnEdge(
                 shapeIndex = nativeObj.shapeIndex,
                 percentAlong = nativeObj.percentAlong,
                 value = nativeObj.value
