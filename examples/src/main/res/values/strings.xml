@@ -36,6 +36,9 @@
     <string name="title_building_highlight" translatable="false">BuildingHighlight Example</string>
     <string name="description_building_highlight" translatable="false">Demonstrates how to highlight and extrude buildings on arrival.</string>
 
+    <string name="title_adasis" translatable="false">Adasis Example</string>
+    <string name="description_adasis" translatable="false">Demonstrates to to access Adasis functionality.</string>
+
     <string name="label_start_navigation" translatable="false">Start Navigation</string>
     <string name="play_history" translatable="false">Play history</string>
     <string name="select_history" translatable="false">Select history</string>

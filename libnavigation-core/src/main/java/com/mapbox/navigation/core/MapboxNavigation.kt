@@ -2008,7 +2008,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun setAdasisMessageCallback(adasisConfig: AdasisConfig, callback: AdasisV2MessageCallback) {
         navigator.setAdasisMessageCallback(
             { message, context ->
-                context.positionMonotonicTimestampNanoseconds
                 callback.onMessage(message, AdasisMessageContext.createFromNativeObject(context))
             },
             adasisConfig.toNativeAdasisConfig()
