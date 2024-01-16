@@ -3,12 +3,12 @@ package com.mapbox.navigation.core.adasis
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
- * Stub message options
+ * Segment message options
  *
- * @param options common options for stub
+ * @param options common options for segment
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class Stub private constructor(
+class AdasisSegmentOptions private constructor(
     val options: AdasisConfigMessageOptions,
 ) {
 
@@ -19,8 +19,8 @@ class Stub private constructor(
         .options(options)
 
     @JvmSynthetic
-    internal fun toNativeStub(): com.mapbox.navigator.Stub {
-        return com.mapbox.navigator.Stub(
+    internal fun toNativeSegment(): com.mapbox.navigator.Segment {
+        return com.mapbox.navigator.Segment(
             options.toNativeAdasisConfigMessageOptions()
         )
     }
@@ -32,7 +32,7 @@ class Stub private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Stub
+        other as AdasisSegmentOptions
 
         return options == other.options
     }
@@ -48,11 +48,11 @@ class Stub private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "Stub(options=$options)"
+        return "Segment(options=$options)"
     }
 
     /**
-     * Builder for [Stub].
+     * Builder for [AdasisSegmentOptions].
      */
     class Builder {
 
@@ -66,8 +66,8 @@ class Stub private constructor(
         }
 
         /**
-         * Build the [Stub]
+         * Build the [AdasisSegmentOptions]
          */
-        fun build() = Stub(options)
+        fun build() = AdasisSegmentOptions(options)
     }
 }

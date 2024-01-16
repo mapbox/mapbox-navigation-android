@@ -4,12 +4,12 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class StubTest : BuilderTest<Stub, Stub.Builder>() {
+class AdasisStubOptionsTest : BuilderTest<AdasisStubOptions, AdasisStubOptions.Builder>() {
 
-    override fun getImplementationClass() = Stub::class
+    override fun getImplementationClass() = AdasisStubOptions::class
 
-    override fun getFilledUpBuilder(): Stub.Builder {
-        return Stub.Builder()
+    override fun getFilledUpBuilder(): AdasisStubOptions.Builder {
+        return AdasisStubOptions.Builder()
             .options(AdasisConfigMessageOptions.Builder().radiusMeters(12345).build())
     }
 

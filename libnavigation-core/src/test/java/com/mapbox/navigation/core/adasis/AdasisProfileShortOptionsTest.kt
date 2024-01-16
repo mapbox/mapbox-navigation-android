@@ -4,16 +4,16 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class ProfileShortTest : BuilderTest<ProfileShort, ProfileShort.Builder>() {
+class AdasisProfileShortOptionsTest : BuilderTest<AdasisProfileShortOptions, AdasisProfileShortOptions.Builder>() {
 
-    override fun getImplementationClass() = ProfileShort::class
+    override fun getImplementationClass() = AdasisProfileShortOptions::class
 
-    override fun getFilledUpBuilder(): ProfileShort.Builder {
-        return ProfileShort.Builder()
+    override fun getFilledUpBuilder(): AdasisProfileShortOptions.Builder {
+        return AdasisProfileShortOptions.Builder()
             .options(
                 AdasisConfigMessageOptions.Builder().enable(false).radiusMeters(123).build()
             )
-            .types(
+            .profileOptions(
                 AdasisConfigProfileShortTypeOptions.Builder().slopeStep(true).build()
             )
     }

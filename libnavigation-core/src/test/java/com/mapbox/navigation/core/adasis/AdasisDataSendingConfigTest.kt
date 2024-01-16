@@ -4,13 +4,13 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class AdasisConfigDataSendingTest :
-    BuilderTest<AdasisConfigDataSending, AdasisConfigDataSending.Builder>() {
+class AdasisDataSendingConfigTest :
+    BuilderTest<AdasisDataSendingConfig, AdasisDataSendingConfig.Builder>() {
 
-    override fun getImplementationClass() = AdasisConfigDataSending::class
+    override fun getImplementationClass() = AdasisDataSendingConfig::class
 
-    override fun getFilledUpBuilder(): AdasisConfigDataSending.Builder {
-        return AdasisConfigDataSending.Builder(AdasisMessageBinaryFormat.AdasisV2LittleEndian)
+    override fun getFilledUpBuilder(): AdasisDataSendingConfig.Builder {
+        return AdasisDataSendingConfig.Builder(AdasisMessageBinaryFormat.AdasisV2LittleEndian)
             .messageIntervalMs(100)
             .messagesInPackage(200)
             .metadataCycleSeconds(300)

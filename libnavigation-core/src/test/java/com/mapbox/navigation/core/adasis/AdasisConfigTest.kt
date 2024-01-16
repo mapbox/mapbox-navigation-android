@@ -9,7 +9,7 @@ class AdasisConfigTest : BuilderTest<AdasisConfig, AdasisConfig.Builder>() {
     override fun getImplementationClass() = AdasisConfig::class
 
     override fun getFilledUpBuilder(): AdasisConfig.Builder {
-        val dataSending = AdasisConfigDataSending.Builder(
+        val dataSending = AdasisDataSendingConfig.Builder(
             AdasisMessageBinaryFormat.AdasisV2BigEndian
         )
             .messageIntervalMs(100)
@@ -25,14 +25,14 @@ class AdasisConfigTest : BuilderTest<AdasisConfig, AdasisConfig.Builder>() {
             .build()
 
         val pathOptions = AdasisConfigPathOptions.Builder()
-            .stub(Stub.Builder().options(messageOptions).build())
-            .segment(Segment.Builder().options(messageOptions).build())
-            .profileShort(ProfileShort.Builder().options(messageOptions).build())
-            .profileLong(ProfileLong.Builder().options(messageOptions).build())
+            .stubOptions(AdasisStubOptions.Builder().options(messageOptions).build())
+            .segmentOptions(AdasisSegmentOptions.Builder().options(messageOptions).build())
+            .profileShortOptions(AdasisProfileShortOptions.Builder().options(messageOptions).build())
+            .profileLongOptions(AdasisProfileLongOptions.Builder().options(messageOptions).build())
             .build()
 
         return AdasisConfig.Builder()
-            .dataSending(dataSending)
+            .dataSendingConfig(dataSending)
             .pathOptions(pathOptions)
     }
 

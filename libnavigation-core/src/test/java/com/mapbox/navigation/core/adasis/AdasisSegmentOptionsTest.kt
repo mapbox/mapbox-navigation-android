@@ -4,12 +4,12 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class SegmentTest : BuilderTest<Segment, Segment.Builder>() {
+class AdasisSegmentOptionsTest : BuilderTest<AdasisSegmentOptions, AdasisSegmentOptions.Builder>() {
 
-    override fun getImplementationClass() = Segment::class
+    override fun getImplementationClass() = AdasisSegmentOptions::class
 
-    override fun getFilledUpBuilder(): Segment.Builder {
-        return Segment.Builder()
+    override fun getFilledUpBuilder(): AdasisSegmentOptions.Builder {
+        return AdasisSegmentOptions.Builder()
             .options(AdasisConfigMessageOptions.Builder().radiusMeters(12345).build())
     }
 

@@ -16,10 +16,10 @@ class AdasisConfigPathOptionsTest :
             .build()
 
         return AdasisConfigPathOptions.Builder()
-            .stub(Stub.Builder().options(messageOptions).build())
-            .segment(Segment.Builder().options(messageOptions).build())
-            .profileShort(ProfileShort.Builder().options(messageOptions).build())
-            .profileLong(ProfileLong.Builder().options(messageOptions).build())
+            .stubOptions(AdasisStubOptions.Builder().options(messageOptions).build())
+            .segmentOptions(AdasisSegmentOptions.Builder().options(messageOptions).build())
+            .profileShortOptions(AdasisProfileShortOptions.Builder().options(messageOptions).build())
+            .profileLongOptions(AdasisProfileLongOptions.Builder().options(messageOptions).build())
     }
 
     override fun trigger() {

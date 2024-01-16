@@ -5,36 +5,36 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 /**
  * Path level options
  *
- * @param stub Stub message options
- * @param segment Segment message options
- * @param profileShort Profile short message options
- * @param profileLong Profile long message options
+ * @param stubOptions Stub message options
+ * @param segmentOptions Segment message options
+ * @param profileShortOptions Profile short message options
+ * @param profileLongOptions Profile long message options
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigPathOptions private constructor(
-    val stub: Stub,
-    val segment: Segment,
-    val profileShort: ProfileShort,
-    val profileLong: ProfileLong,
+    val stubOptions: AdasisStubOptions,
+    val segmentOptions: AdasisSegmentOptions,
+    val profileShortOptions: AdasisProfileShortOptions,
+    val profileLongOptions: AdasisProfileLongOptions,
 ) {
 
     /**
      * Get a builder to customize a subset of current options.
      */
     fun toBuilder(): Builder = Builder()
-        .stub(stub)
-        .segment(segment)
-        .profileShort(profileShort)
-        .profileLong(profileLong)
+        .stubOptions(stubOptions)
+        .segmentOptions(segmentOptions)
+        .profileShortOptions(profileShortOptions)
+        .profileLongOptions(profileLongOptions)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfigPathOptions():
         com.mapbox.navigator.AdasisConfigPathOptions {
         return com.mapbox.navigator.AdasisConfigPathOptions(
-            stub.toNativeStub(),
-            segment.toNativeSegment(),
-            profileShort.toNativeProfileShort(),
-            profileLong.toNativeProfileLong(),
+            stubOptions.toNativeStub(),
+            segmentOptions.toNativeSegment(),
+            profileShortOptions.toNativeProfileShort(),
+            profileLongOptions.toNativeProfileLong(),
         )
     }
 
@@ -47,20 +47,20 @@ class AdasisConfigPathOptions private constructor(
 
         other as AdasisConfigPathOptions
 
-        if (stub != other.stub) return false
-        if (segment != other.segment) return false
-        if (profileShort != other.profileShort) return false
-        return profileLong == other.profileLong
+        if (stubOptions != other.stubOptions) return false
+        if (segmentOptions != other.segmentOptions) return false
+        if (profileShortOptions != other.profileShortOptions) return false
+        return profileLongOptions == other.profileLongOptions
     }
 
     /**
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = stub.hashCode()
-        result = 31 * result + segment.hashCode()
-        result = 31 * result + profileShort.hashCode()
-        result = 31 * result + profileLong.hashCode()
+        var result = stubOptions.hashCode()
+        result = 31 * result + segmentOptions.hashCode()
+        result = 31 * result + profileShortOptions.hashCode()
+        result = 31 * result + profileLongOptions.hashCode()
         return result
     }
 
@@ -69,10 +69,10 @@ class AdasisConfigPathOptions private constructor(
      */
     override fun toString(): String {
         return "AdasisConfigPathLevelOptions(" +
-            "stub=$stub, " +
-            "segment=$segment, " +
-            "profileShort=$profileShort, " +
-            "profileLong=$profileLong" +
+            "stubOptions=$stubOptions, " +
+            "segmentOptions=$segmentOptions, " +
+            "profileShortOptions=$profileShortOptions, " +
+            "profileLongOptions=$profileLongOptions" +
             ")"
     }
 
@@ -81,47 +81,47 @@ class AdasisConfigPathOptions private constructor(
      */
     class Builder {
 
-        private var stub = Stub.Builder().build()
-        private var segment = Segment.Builder().build()
-        private var profileShort = ProfileShort.Builder().build()
-        private var profileLong = ProfileLong.Builder().build()
+        private var stubOptions = AdasisStubOptions.Builder().build()
+        private var segmentOptions = AdasisSegmentOptions.Builder().build()
+        private var profileShortOptions = AdasisProfileShortOptions.Builder().build()
+        private var profileLongOptions = AdasisProfileLongOptions.Builder().build()
 
         /**
          * Stub message options
          */
-        fun stub(stub: Stub) = apply {
-            this.stub = stub
+        fun stubOptions(stubOptions: AdasisStubOptions) = apply {
+            this.stubOptions = stubOptions
         }
 
         /**
          * Segment message options
          */
-        fun segment(segment: Segment) = apply {
-            this.segment = segment
+        fun segmentOptions(segmentOptions: AdasisSegmentOptions) = apply {
+            this.segmentOptions = segmentOptions
         }
 
         /**
          * Profile short message options
          */
-        fun profileShort(profileShort: ProfileShort) = apply {
-            this.profileShort = profileShort
+        fun profileShortOptions(profileShortOptions: AdasisProfileShortOptions) = apply {
+            this.profileShortOptions = profileShortOptions
         }
 
         /**
          * ProfileLong Profile long message options
          */
-        fun profileLong(profileLong: ProfileLong) = apply {
-            this.profileLong = profileLong
+        fun profileLongOptions(profileLongOptions: AdasisProfileLongOptions) = apply {
+            this.profileLongOptions = profileLongOptions
         }
 
         /**
          * Build the [AdasisConfigPathOptions]
          */
         fun build() = AdasisConfigPathOptions(
-            stub = stub,
-            segment = segment,
-            profileShort = profileShort,
-            profileLong = profileLong,
+            stubOptions = stubOptions,
+            segmentOptions = segmentOptions,
+            profileShortOptions = profileShortOptions,
+            profileLongOptions = profileLongOptions,
         )
     }
 }

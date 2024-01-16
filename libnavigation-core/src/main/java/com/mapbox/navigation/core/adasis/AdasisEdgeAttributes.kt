@@ -15,7 +15,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * and fractional part is a position on the segment
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class EdgeAdasAttributes private constructor(
+class AdasisEdgeAttributes private constructor(
     val speedLimit: List<SpeedLimitInfo>,
     val slopes: List<ValueOnEdge>,
     val curvatures: List<ValueOnEdge>,
@@ -28,7 +28,7 @@ class EdgeAdasAttributes private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as EdgeAdasAttributes
+        other as AdasisEdgeAttributes
 
         if (speedLimit != other.speedLimit) return false
         if (slopes != other.slopes) return false
@@ -56,7 +56,7 @@ class EdgeAdasAttributes private constructor(
 
         @JvmSynthetic
         fun createFromNativeObject(nativeObj: com.mapbox.navigator.EdgeAdasAttributes) =
-            EdgeAdasAttributes(
+            AdasisEdgeAttributes(
                 speedLimit = nativeObj.speedLimit.map { SpeedLimitInfo.createFromNativeObject(it) },
                 slopes = nativeObj.slopes.map { ValueOnEdge.createFromNativeObject(it) },
                 curvatures = nativeObj.curvatures.map { ValueOnEdge.createFromNativeObject(it) }

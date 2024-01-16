@@ -3,15 +3,15 @@ package com.mapbox.navigation.core.adasis
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
- * Profile short message options
+ * Profile long message options
  *
- * @param options common options for profile short message
- * @param types options for each type of profile short message
+ * @param options common options for profile long message
+ * @param profileOptions options for each type of profile long message
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class ProfileShort private constructor(
+class AdasisProfileLongOptions private constructor(
     val options: AdasisConfigMessageOptions,
-    val types: AdasisConfigProfileShortTypeOptions,
+    val profileOptions: AdasisConfigProfileLongTypeOptions,
 ) {
 
     /**
@@ -19,13 +19,13 @@ class ProfileShort private constructor(
      */
     fun toBuilder(): Builder = Builder()
         .options(options)
-        .types(types)
+        .profileOptions(profileOptions)
 
     @JvmSynthetic
-    internal fun toNativeProfileShort(): com.mapbox.navigator.Profileshort {
-        return com.mapbox.navigator.Profileshort(
+    internal fun toNativeProfileLong(): com.mapbox.navigator.Profilelong {
+        return com.mapbox.navigator.Profilelong(
             options.toNativeAdasisConfigMessageOptions(),
-            types.toNativeAdasisConfigProfileShortTypeOptions(),
+            profileOptions.toNativeAdasisConfigProfileLongTypeOptions()
         )
     }
 
@@ -36,10 +36,10 @@ class ProfileShort private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as ProfileShort
+        other as AdasisProfileLongOptions
 
         if (options != other.options) return false
-        return types == other.types
+        return profileOptions == other.profileOptions
     }
 
     /**
@@ -47,7 +47,7 @@ class ProfileShort private constructor(
      */
     override fun hashCode(): Int {
         var result = options.hashCode()
-        result = 31 * result + types.hashCode()
+        result = 31 * result + profileOptions.hashCode()
         return result
     }
 
@@ -55,16 +55,16 @@ class ProfileShort private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "ProfileShort(options=$options, types=$types)"
+        return "ProfileLong(options=$options, profileOptions=$profileOptions)"
     }
 
     /**
-     * Builder for [ProfileShort].
+     * Builder for [AdasisProfileLongOptions].
      */
     class Builder {
 
         private var options = AdasisConfigMessageOptions.Builder().build()
-        private var types = AdasisConfigProfileShortTypeOptions.Builder().build()
+        private var profileOptions = AdasisConfigProfileLongTypeOptions.Builder().build()
 
         /**
          * Common options for profile long message
@@ -74,18 +74,18 @@ class ProfileShort private constructor(
         }
 
         /**
-         * Types options for each type of profile short message
+         * Types options for each type of profile long message
          */
-        fun types(types: AdasisConfigProfileShortTypeOptions) = apply {
-            this.types = types
+        fun profileOptions(profileOptions: AdasisConfigProfileLongTypeOptions) = apply {
+            this.profileOptions = profileOptions
         }
 
         /**
-         * Build the [ProfileShort]
+         * Build the [AdasisProfileLongOptions]
          */
-        fun build() = ProfileShort(
+        fun build() = AdasisProfileLongOptions(
             options = options,
-            types = types,
+            profileOptions = profileOptions,
         )
     }
 }

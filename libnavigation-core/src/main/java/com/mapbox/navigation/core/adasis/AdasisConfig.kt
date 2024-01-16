@@ -5,12 +5,12 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 /**
  * Configuration of ADASISv2 feature.
  *
- * @param dataSending data sending configuration
+ * @param dataSendingConfig data sending configuration
  * @param pathOptions ADASISv2 path level specific configurations
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfig private constructor(
-    val dataSending: AdasisConfigDataSending,
+    val dataSendingConfig: AdasisDataSendingConfig,
     val pathOptions: AdasisConfigPathOptions,
 ) {
 
@@ -18,13 +18,13 @@ class AdasisConfig private constructor(
      * Get a builder to customize a subset of current configuration.
      */
     fun toBuilder(): Builder = Builder()
-        .dataSending(dataSending)
+        .dataSendingConfig(dataSendingConfig)
         .pathOptions(pathOptions)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfig(): com.mapbox.navigator.AdasisConfig {
         return com.mapbox.navigator.AdasisConfig(
-            dataSending.toNativeAdasisConfigDataSending(),
+            dataSendingConfig.toNativeAdasisConfigDataSending(),
             pathOptions.toNativeAdasisConfigPathOptions(),
         )
     }
@@ -38,7 +38,7 @@ class AdasisConfig private constructor(
 
         other as AdasisConfig
 
-        if (dataSending != other.dataSending) return false
+        if (dataSendingConfig != other.dataSendingConfig) return false
         return pathOptions == other.pathOptions
     }
 
@@ -46,7 +46,7 @@ class AdasisConfig private constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = dataSending.hashCode()
+        var result = dataSendingConfig.hashCode()
         result = 31 * result + pathOptions.hashCode()
         return result
     }
@@ -56,7 +56,7 @@ class AdasisConfig private constructor(
      */
     override fun toString(): String {
         return "AdasisConfig(" +
-            "dataSending=$dataSending, " +
+            "dataSendingConfig=$dataSendingConfig, " +
             "pathOptions=$pathOptions" +
             ")"
     }
@@ -66,7 +66,7 @@ class AdasisConfig private constructor(
      */
     class Builder {
 
-        private var dataSending = AdasisConfigDataSending.Builder(
+        private var dataSendingConfig = AdasisDataSendingConfig.Builder(
             AdasisMessageBinaryFormat.FlatBuffers
         ).build()
 
@@ -75,8 +75,8 @@ class AdasisConfig private constructor(
         /**
          * Data sending configuration
          */
-        fun dataSending(dataSending: AdasisConfigDataSending) = apply {
-            this.dataSending = dataSending
+        fun dataSendingConfig(dataSending: AdasisDataSendingConfig) = apply {
+            this.dataSendingConfig = dataSending
         }
 
         /**
@@ -90,7 +90,7 @@ class AdasisConfig private constructor(
          * Build the [AdasisConfig]
          */
         fun build() = AdasisConfig(
-            dataSending = dataSending,
+            dataSendingConfig = dataSendingConfig,
             pathOptions = pathOptions,
         )
     }

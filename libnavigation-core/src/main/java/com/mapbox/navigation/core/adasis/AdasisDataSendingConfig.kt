@@ -14,7 +14,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param retransmissionMeters after passing this distance, messages will not be retransmitted
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfigDataSending private constructor(
+class AdasisDataSendingConfig private constructor(
     val messageBinaryFormat: AdasisMessageBinaryFormat,
     val messageIntervalMs: Int,
     val messagesInPackage: Int,
@@ -52,7 +52,7 @@ class AdasisConfigDataSending private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as AdasisConfigDataSending
+        other as AdasisDataSendingConfig
 
         if (messageBinaryFormat != other.messageBinaryFormat) return false
         if (messageIntervalMs != other.messageIntervalMs) return false
@@ -91,7 +91,7 @@ class AdasisConfigDataSending private constructor(
     }
 
     /**
-     * Builder for [AdasisConfigDataSending].
+     * Builder for [AdasisDataSendingConfig].
      *
      * @param messageBinaryFormat Binary format in which Adasis message will be sent
      */
@@ -140,9 +140,9 @@ class AdasisConfigDataSending private constructor(
         }
 
         /**
-         * Build the [AdasisConfigDataSending]
+         * Build the [AdasisDataSendingConfig]
          */
-        fun build() = AdasisConfigDataSending(
+        fun build() = AdasisDataSendingConfig(
             messageBinaryFormat = messageBinaryFormat,
             messageIntervalMs = messageIntervalMs,
             messagesInPackage = messagesInPackage,

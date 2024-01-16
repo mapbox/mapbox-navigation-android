@@ -10,7 +10,7 @@ fun interface AdasisV2MessageCallback {
 
     /**
      * Called when Adasis message is available
-     * @param messageBuffer Message buffer in format specified via [AdasisConfigDataSending.messageBinaryFormat]
+     * @param messageBuffer Message buffer in format specified via [AdasisDataSendingConfig.messageBinaryFormat]
      * @param context Additional context with metadata related to the current messages package
      */
     fun onMessage(messageBuffer: List<Byte>, context: AdasisMessageContext)
