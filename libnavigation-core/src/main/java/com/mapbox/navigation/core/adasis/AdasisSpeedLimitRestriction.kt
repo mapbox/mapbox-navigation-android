@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.adasis
 
+import androidx.annotation.IntDef
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo.SpeedLimitType
 import com.mapbox.navigation.core.sensor.SensorData
 
 /**
@@ -8,14 +10,14 @@ import com.mapbox.navigation.core.sensor.SensorData
  *
  * @param weather Weather conditions where the speed limit is applied. Empty means all
  * @param dateTimeCondition OSM "opening_hours" format, see https://wiki.openstreetmap.org/wiki/Key:opening_hours
- * @param vehicleTypes A list of types of vehicles for that the speed limit is included. Empty means all
+ * @param vehicleTypes A list of [VehicleType.Type] types for that the speed limit is included. Empty means all
  * @param lanes Lane numbers where the speed limit is valid. Empty array means all lanes
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisSpeedLimitRestriction private constructor(
     val weather: List<SensorData.Weather.Condition>,
     val dateTimeCondition: String,
-    val vehicleTypes: List<VehicleType>,
+    val vehicleTypes: List<Int>,
     val lanes: List<Byte>
 ) {
 
@@ -60,46 +62,45 @@ class AdasisSpeedLimitRestriction private constructor(
     /**
      * Type of vehicle for which the speed limit is included.
      */
-    abstract class VehicleType internal constructor() {
+    object VehicleType {
 
         /**
          * Car vehicle type
          */
-        object Car : VehicleType()
+        const val CAR = 0
 
         /**
          * Truck vehicle type
          */
-        object Truck : VehicleType()
+        const val TRUCK = 1
 
         /**
          * Bus vehicle type
          */
-        object Bus : VehicleType()
+        const val BUS = 2
 
         /**
          * Trailer vehicle type
          */
-        object Trailer : VehicleType()
+        const val TRAILER = 3
 
         /**
          * Motorcycle vehicle type
          */
-        object Motorcycle : VehicleType()
+        const val MOTORCYCLE = 4
 
-        internal companion object {
-
-            @JvmSynthetic
-            fun createFromNativeObject(nativeObj: com.mapbox.navigator.VehicleType): VehicleType {
-                return when (nativeObj) {
-                    com.mapbox.navigator.VehicleType.CAR -> Car
-                    com.mapbox.navigator.VehicleType.TRUCK -> Truck
-                    com.mapbox.navigator.VehicleType.BUS -> Bus
-                    com.mapbox.navigator.VehicleType.TRAILER -> Trailer
-                    com.mapbox.navigator.VehicleType.MOTORCYCLE -> Motorcycle
-                }
-            }
-        }
+        /**
+         * Retention policy for the [VehicleType]
+         */
+        @Retention(AnnotationRetention.BINARY)
+        @IntDef(
+            CAR,
+            TRUCK,
+            BUS,
+            TRAILER,
+            MOTORCYCLE
+        )
+        annotation class Type
     }
 
     internal companion object {
@@ -111,10 +112,20 @@ class AdasisSpeedLimitRestriction private constructor(
                     SensorData.Weather.Condition.createFromNativeObject(it)
                 },
                 dateTimeCondition = nativeObj.dateTimeCondition,
-                vehicleTypes = nativeObj.vehicleTypes.map {
-                    VehicleType.createFromNativeObject(it)
-                },
+                vehicleTypes = nativeObj.vehicleTypes.map { createVehicleType(it) },
                 lanes = nativeObj.lanes,
             )
+
+        @JvmSynthetic
+        @VehicleType.Type
+        private fun createVehicleType(nativeObj: com.mapbox.navigator.VehicleType): Int {
+            return when (nativeObj) {
+                com.mapbox.navigator.VehicleType.CAR -> VehicleType.CAR
+                com.mapbox.navigator.VehicleType.TRUCK -> VehicleType.TRUCK
+                com.mapbox.navigator.VehicleType.BUS -> VehicleType.BUS
+                com.mapbox.navigator.VehicleType.TRAILER -> VehicleType.TRAILER
+                com.mapbox.navigator.VehicleType.MOTORCYCLE -> VehicleType.MOTORCYCLE
+            }
+        }
     }
 }
