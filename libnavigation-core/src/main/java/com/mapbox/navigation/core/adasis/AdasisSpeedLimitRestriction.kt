@@ -2,20 +2,19 @@ package com.mapbox.navigation.core.adasis
 
 import androidx.annotation.IntDef
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo.SpeedLimitType
 import com.mapbox.navigation.core.sensor.SensorData
 
 /**
  * Speed limit restriction
  *
- * @param weather Weather conditions where the speed limit is applied. Empty means all
+ * @param weatherConditionTypes A list of [SensorData.Weather.ConditionType] types where the speed limit is applied. Empty means all
  * @param dateTimeCondition OSM "opening_hours" format, see https://wiki.openstreetmap.org/wiki/Key:opening_hours
  * @param vehicleTypes A list of [VehicleType.Type] types for that the speed limit is included. Empty means all
  * @param lanes Lane numbers where the speed limit is valid. Empty array means all lanes
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisSpeedLimitRestriction private constructor(
-    val weather: List<SensorData.Weather.Condition>,
+    val weatherConditionTypes: List<Int>,
     val dateTimeCondition: String,
     val vehicleTypes: List<Int>,
     val lanes: List<Byte>
@@ -30,7 +29,7 @@ class AdasisSpeedLimitRestriction private constructor(
 
         other as AdasisSpeedLimitRestriction
 
-        if (weather != other.weather) return false
+        if (weatherConditionTypes != other.weatherConditionTypes) return false
         if (dateTimeCondition != other.dateTimeCondition) return false
         if (vehicleTypes != other.vehicleTypes) return false
         return lanes == other.lanes
@@ -40,7 +39,7 @@ class AdasisSpeedLimitRestriction private constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = weather.hashCode()
+        var result = weatherConditionTypes.hashCode()
         result = 31 * result + dateTimeCondition.hashCode()
         result = 31 * result + vehicleTypes.hashCode()
         result = 31 * result + lanes.hashCode()
@@ -52,7 +51,7 @@ class AdasisSpeedLimitRestriction private constructor(
      */
     override fun toString(): String {
         return "SpeedLimitRestriction(" +
-            "weather=$weather, " +
+            "weatherConditionTypes=$weatherConditionTypes, " +
             "dateTimeCondition='$dateTimeCondition', " +
             "vehicleTypes=$vehicleTypes, " +
             "lanes=$lanes" +
@@ -101,6 +100,18 @@ class AdasisSpeedLimitRestriction private constructor(
             MOTORCYCLE
         )
         annotation class Type
+
+        @JvmSynthetic
+        @Type
+        internal fun createVehicleType(nativeObj: com.mapbox.navigator.VehicleType): Int {
+            return when (nativeObj) {
+                com.mapbox.navigator.VehicleType.CAR -> CAR
+                com.mapbox.navigator.VehicleType.TRUCK -> TRUCK
+                com.mapbox.navigator.VehicleType.BUS -> BUS
+                com.mapbox.navigator.VehicleType.TRAILER -> TRAILER
+                com.mapbox.navigator.VehicleType.MOTORCYCLE -> MOTORCYCLE
+            }
+        }
     }
 
     internal companion object {
@@ -108,24 +119,12 @@ class AdasisSpeedLimitRestriction private constructor(
         @JvmSynthetic
         fun createFromNativeObject(nativeObj: com.mapbox.navigator.SpeedLimitRestriction) =
             AdasisSpeedLimitRestriction(
-                weather = nativeObj.weather.map {
-                    SensorData.Weather.Condition.createFromNativeObject(it)
+                weatherConditionTypes = nativeObj.weather.map {
+                    SensorData.Weather.ConditionType.createConditionType(it)
                 },
                 dateTimeCondition = nativeObj.dateTimeCondition,
-                vehicleTypes = nativeObj.vehicleTypes.map { createVehicleType(it) },
+                vehicleTypes = nativeObj.vehicleTypes.map { VehicleType.createVehicleType(it) },
                 lanes = nativeObj.lanes,
             )
-
-        @JvmSynthetic
-        @VehicleType.Type
-        private fun createVehicleType(nativeObj: com.mapbox.navigator.VehicleType): Int {
-            return when (nativeObj) {
-                com.mapbox.navigator.VehicleType.CAR -> VehicleType.CAR
-                com.mapbox.navigator.VehicleType.TRUCK -> VehicleType.TRUCK
-                com.mapbox.navigator.VehicleType.BUS -> VehicleType.BUS
-                com.mapbox.navigator.VehicleType.TRAILER -> VehicleType.TRAILER
-                com.mapbox.navigator.VehicleType.MOTORCYCLE -> VehicleType.MOTORCYCLE
-            }
-        }
     }
 }

@@ -4,7 +4,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class AdasisProfileLongOptionsTest : BuilderTest<AdasisProfileLongOptions, AdasisProfileLongOptions.Builder>() {
+class AdasisProfileLongOptionsTest :
+    BuilderTest<AdasisProfileLongOptions, AdasisProfileLongOptions.Builder>() {
 
     override fun getImplementationClass() = AdasisProfileLongOptions::class
 

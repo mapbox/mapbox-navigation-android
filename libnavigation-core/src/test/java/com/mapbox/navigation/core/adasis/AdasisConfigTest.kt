@@ -25,10 +25,18 @@ class AdasisConfigTest : BuilderTest<AdasisConfig, AdasisConfig.Builder>() {
             .build()
 
         val pathOptions = AdasisConfigPathOptions.Builder()
-            .stubOptions(AdasisStubOptions.Builder().options(messageOptions).build())
-            .segmentOptions(AdasisSegmentOptions.Builder().options(messageOptions).build())
-            .profileShortOptions(AdasisProfileShortOptions.Builder().options(messageOptions).build())
-            .profileLongOptions(AdasisProfileLongOptions.Builder().options(messageOptions).build())
+            .stubOptions(
+                AdasisStubOptions.Builder().options(messageOptions).build()
+            )
+            .segmentOptions(
+                AdasisSegmentOptions.Builder().options(messageOptions).build()
+            )
+            .profileShortOptions(
+                AdasisProfileShortOptions.Builder().options(messageOptions).build()
+            )
+            .profileLongOptions(
+                AdasisProfileLongOptions.Builder().options(messageOptions).build()
+            )
             .build()
 
         return AdasisConfig.Builder()

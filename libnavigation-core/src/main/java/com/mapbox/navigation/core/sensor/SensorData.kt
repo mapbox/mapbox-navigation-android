@@ -1,10 +1,10 @@
 package com.mapbox.navigation.core.sensor
 
 import android.os.SystemClock
+import androidx.annotation.IntDef
 import com.mapbox.bindgen.Value
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigator.SensorType
-import com.mapbox.navigator.Weather
 
 /**
  * Data obtained from sensors
@@ -15,9 +15,9 @@ abstract class SensorData internal constructor() {
     /**
      * Weather condition obtained from sensors
      *
-     * @param condition weather condition type
+     * @param conditionType weather condition type
      */
-    class Weather(val condition: Condition) : SensorData() {
+    class Weather(@ConditionType.Type val conditionType: Int) : SensorData() {
 
         /**
          * Indicates whether some other object is "equal to" this one.
@@ -28,60 +28,68 @@ abstract class SensorData internal constructor() {
 
             other as Weather
 
-            if (condition != other.condition) return false
-
-            return true
+            return conditionType == other.conditionType
         }
 
         /**
          * Returns a hash code value for the object.
          */
         override fun hashCode(): Int {
-            return condition.hashCode()
+            return conditionType.hashCode()
         }
 
         /**
          * Returns a string representation of the object.
          */
         override fun toString(): String {
-            return "Weather(condition=$condition)"
+            return "Weather(condition=$conditionType)"
         }
 
         /**
          * Weather condition type.
          */
-        abstract class Condition internal constructor() {
+        object ConditionType {
 
             /**
              * Rain weather condition
              */
-            object Rain : Condition()
+            const val RAIN = 0
 
             /**
              * Snow weather condition
              */
-            object Snow : Condition()
+            const val SNOW = 1
 
             /**
              * Fog weather condition
              */
-            object Fog : Condition()
+            const val FOG = 2
 
             /**
              * Wet road weather condition
              */
-            object WetRoad : Condition()
+            const val WET_ROAD = 3
 
-            internal companion object {
+            /**
+             * Retention policy for the [ConditionType]
+             */
+            @Retention(AnnotationRetention.BINARY)
+            @IntDef(
+                RAIN,
+                SNOW,
+                FOG,
+                WET_ROAD
+            )
+            annotation class Type
 
-                @JvmSynthetic
-                fun createFromNativeObject(nativeObject: com.mapbox.navigator.Weather): Condition {
-                    return when (nativeObject) {
-                        com.mapbox.navigator.Weather.FOG -> Fog
-                        com.mapbox.navigator.Weather.RAIN -> Rain
-                        com.mapbox.navigator.Weather.SNOW -> Snow
-                        com.mapbox.navigator.Weather.WET_ROAD -> WetRoad
-                    }
+            @JvmSynthetic
+            @Type
+            internal fun createConditionType(nativeObject: com.mapbox.navigator.Weather): Int {
+                return when (nativeObject) {
+                    com.mapbox.navigator.Weather.FOG -> FOG
+                    com.mapbox.navigator.Weather.RAIN -> RAIN
+                    com.mapbox.navigator.Weather.SNOW -> SNOW
+                    com.mapbox.navigator.Weather.WET_ROAD -> WET_ROAD
                 }
             }
         }
@@ -107,9 +115,7 @@ abstract class SensorData internal constructor() {
             other as Lane
 
             if (currentLaneIndex != other.currentLaneIndex) return false
-            if (laneCount != other.laneCount) return false
-
-            return true
+            return laneCount == other.laneCount
         }
 
         /**
@@ -153,12 +159,12 @@ abstract class SensorData internal constructor() {
     }
 
     private fun Weather.toValue(): Value {
-        val order: Long = when (condition) {
-            is Weather.Condition.Rain -> 0
-            is Weather.Condition.Snow -> 1
-            is Weather.Condition.Fog -> 2
-            is Weather.Condition.WetRoad -> 3
-            else -> error("Unsupported weather condition type: $condition")
+        val order: Long = when (conditionType) {
+            Weather.ConditionType.RAIN -> 0
+            Weather.ConditionType.SNOW -> 1
+            Weather.ConditionType.FOG -> 2
+            Weather.ConditionType.WET_ROAD -> 3
+            else -> error("Unsupported weather condition type: $conditionType")
         }
         return Value.valueOf(order)
     }
