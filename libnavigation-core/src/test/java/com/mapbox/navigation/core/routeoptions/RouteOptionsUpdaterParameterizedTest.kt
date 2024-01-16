@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -17,17 +18,19 @@ import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 class RouteOptionsUpdaterParameterizedTest(
+    private val coordinatesSize: Int,
     private val initWaypointNames: String,
-    private val initWaypointIndices: String,
+    private val initWaypointIndices: String?,
     private val nextCoordinateIndex: Int,
     private val expectedWaypointNames: String,
-    private val expectedWaypointIndices: String
+    private val expectedWaypointIndices: String?
 ) {
 
     companion object {
@@ -35,31 +38,63 @@ class RouteOptionsUpdaterParameterizedTest(
         @JvmStatic
         @Parameterized.Parameters
         fun data() = listOf(
-            arrayOf("start;finish", "0;6", 1, "start;finish", "0;6"),
-            arrayOf("start;finish", "0;6", 3, "start;finish", "0;4"),
-            arrayOf("start;finish", "0;6", 6, "start;finish", "0;1"),
-            arrayOf("start;mid;finish", "0;2;6", 2, "start;mid;finish", "0;1;5"),
-            arrayOf("start;mid;finish", "0;2;6", 3, "mid;finish", "0;4"),
-            arrayOf("start;mid;finish", "0;2;6", 4, "mid;finish", "0;3"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 2, "start;mid1;mid2;finish", "0;1;3;5"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 3, "mid1;mid2;finish", "0;2;4"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 4, "mid1;mid2;finish", "0;1;3"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 5, "mid2;finish", "0;2"),
-            arrayOf("start;mid1;mid2;finish", "0;2;4;6", 6, "mid2;finish", "0;1"),
-            arrayOf("start;mid1;mid2;finish", "0;2;3;6", 3, "mid1;mid2;finish", "0;1;4"),
-            arrayOf("start;mid1;mid2;finish", "0;2;3;6", 4, "mid2;finish", "0;3"),
+            arrayOf(2, "start;finish", null, 1, ";finish", null),
+            arrayOf(7, "start;finish", "0;6", 1, ";finish", "0;6"),
+            arrayOf(7, "start;finish", "0;6", 3, ";finish", "0;4"),
+            arrayOf(7, "start;finish", "0;6", 6, ";finish", "0;1"),
+            arrayOf(3, "start;mid;finish", null, 1, ";mid;finish", null),
+            arrayOf(3, "start;mid;finish", null, 2, ";finish", null),
+            arrayOf(7, "start;mid;finish", "0;2;6", 2, ";mid;finish", "0;1;5"),
+            arrayOf(7, "start;mid;finish", "0;2;6", 3, ";finish", "0;4"),
+            arrayOf(7, "start;mid;finish", "0;2;6", 4, ";finish", "0;3"),
+            arrayOf(4, "start;mid1;mid2;finish", null, 1, ";mid1;mid2;finish", null),
+            arrayOf(4, "start;mid1;mid2;finish", null, 2, ";mid2;finish", null),
+            arrayOf(4, "start;mid1;mid2;finish", null, 3, ";finish", null),
+            arrayOf(7, "start;mid1;mid2;finish", "0;2;4;6", 2, ";mid1;mid2;finish", "0;1;3;5"),
+            arrayOf(7, "start;mid1;mid2;finish", "0;2;4;6", 3, ";mid2;finish", "0;2;4"),
+            arrayOf(7, "start;mid1;mid2;finish", "0;2;4;6", 4, ";mid2;finish", "0;1;3"),
+            arrayOf(7, "start;mid1;mid2;finish", "0;2;4;6", 5, ";finish", "0;2"),
+            arrayOf(7, "start;mid1;mid2;finish", "0;2;4;6", 6, ";finish", "0;1"),
+            arrayOf(7, "start;mid1;mid2;finish", "0;2;3;6", 3, ";mid2;finish", "0;1;4"),
+            arrayOf(7, "start;mid1;mid2;finish", "0;2;3;6", 4, ";finish", "0;3"),
             arrayOf(
+                7,
+                "start;mid1;mid2;mid3;mid4;mid5;finish",
+                null,
+                1,
+                ";mid1;mid2;mid3;mid4;mid5;finish",
+                null
+            ),
+            arrayOf(
+                7,
+                "start;mid1;mid2;mid3;mid4;mid5;finish",
+                null,
+                3,
+                ";mid3;mid4;mid5;finish",
+                null
+            ),
+            arrayOf(
+                7,
+                "start;mid1;mid2;mid3;mid4;mid5;finish",
+                null,
+                5,
+                ";mid5;finish",
+                null
+            ),
+            arrayOf(
+                7,
                 "start;mid1;mid2;mid3;mid4;mid5;finish",
                 "0;1;2;3;4;5;6",
                 1,
-                "start;mid1;mid2;mid3;mid4;mid5;finish",
+                ";mid1;mid2;mid3;mid4;mid5;finish",
                 "0;1;2;3;4;5;6"
             ),
             arrayOf(
+                7,
                 "start;mid1;mid2;mid3;mid4;mid5;finish",
                 "0;1;2;3;4;5;6",
                 5,
-                "mid4;mid5;finish",
+                ";mid5;finish",
                 "0;1;2"
             )
         )
@@ -67,6 +102,9 @@ class RouteOptionsUpdaterParameterizedTest(
 
     private lateinit var routeRefreshAdapter: RouteOptionsUpdater
     private lateinit var locationMatcherResult: LocationMatcherResult
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @Before
     fun setup() {
@@ -77,7 +115,7 @@ class RouteOptionsUpdaterParameterizedTest(
     }
 
     @Test
-    fun new_options_return_with_all_silent_waypoints() {
+    fun new_options_return_modified_waypoints() {
         mockkStatic(::indexOfNextRequestedCoordinate) {
             val routeOptions = provideRouteOptionsWithCoordinates()
                 .toBuilder()
@@ -128,15 +166,9 @@ class RouteOptionsUpdaterParameterizedTest(
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
             .coordinatesList(
-                listOf(
-                    Point.fromLngLat(1.0, 1.0),
-                    Point.fromLngLat(1.0, 1.0),
-                    Point.fromLngLat(1.0, 1.0),
-                    Point.fromLngLat(1.0, 1.0),
-                    Point.fromLngLat(1.0, 1.0),
-                    Point.fromLngLat(1.0, 1.0),
+                List(coordinatesSize) {
                     Point.fromLngLat(1.0, 1.0)
-                )
+                }
             )
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .annotationsList(

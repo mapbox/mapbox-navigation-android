@@ -626,6 +626,87 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
+    fun reroute_on_multileg_route_with_waypoint_names_and_targets_without_indices() = sdkTest {
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_very_short_two_legs(context)
+        val originalLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = mockRoute.routeWaypoints.first().latitude()
+            longitude = mockRoute.routeWaypoints.first().longitude()
+        }
+
+        val secondLegLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = mockRoute.routeWaypoints[1].latitude()
+            longitude = mockRoute.routeWaypoints[1].longitude()
+        }
+        val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = secondLegLocation.latitude + 0.002
+            longitude = secondLegLocation.longitude
+        }
+
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                jsonResponse = readRawFileText(
+                    context,
+                    R.raw.reroute_response_dc_very_short_two_legs
+                ),
+                expectedCoordinates = listOf(
+                    Point.fromLngLat(
+                        offRouteLocationUpdate.longitude,
+                        offRouteLocationUpdate.latitude
+                    ),
+                    mockRoute.routeWaypoints.last()
+                ),
+                relaxedExpectedCoordinates = true
+            )
+        )
+
+        mapboxNavigation.startTripSession()
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .waypointNames("waypoint1;waypoint2;waypoint3")
+                .waypointTargetsList(mockRoute.routeWaypoints)
+                .build()
+        ).getSuccessfulResultOrThrowException().routes
+        mapboxNavigation.setNavigationRoutes(routes)
+
+        mockLocationReplayerRule.loopUpdateUntil(originalLocation) {
+            mapboxNavigation.routeProgressUpdates().first()
+        }
+        mapboxNavigation.navigateNextRouteLeg()
+        mockLocationReplayerRule.loopUpdateUntil(secondLegLocation) {
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentLegProgress?.legIndex == 1 }
+                .first()
+        }
+        mockLocationReplayerRule.loopUpdateUntil(offRouteLocationUpdate) {
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentState == RouteProgressState.OFF_ROUTE }
+                .first()
+        }
+
+        mapboxNavigation.routesUpdates().filter { result ->
+            (result.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
+                if (it) {
+                    assertEquals(
+                        ";waypoint3",
+                        result.navigationRoutes.first().routeOptions.waypointNames()
+                    )
+                    assertEquals(
+                        listOf(null, mockRoute.routeWaypoints[2]),
+                        result.navigationRoutes.first().routeOptions.waypointTargetsList()
+                    )
+                }
+            }
+        }.first()
+    }
+
+    @Test
     fun reroute_on_single_leg_route_with_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule

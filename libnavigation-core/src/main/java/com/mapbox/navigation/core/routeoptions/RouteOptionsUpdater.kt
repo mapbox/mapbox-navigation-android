@@ -266,19 +266,24 @@ class RouteOptionsUpdater {
     }
 
     private fun <T> getUpdatedWaypointsList(
-        waypointsList: List<T>?,
+        waypointsList: List<T?>?,
         waypointIndicesList: List<Int>?,
         nextCoordinateIndex: Int
-    ): MutableList<T> {
+    ): MutableList<T?> {
         if (waypointsList.isNullOrEmpty()) {
             return mutableListOf()
         }
-        return mutableListOf<T>().also { updatedWaypointsList ->
+        val explicitWaypointsIndicesList = if (waypointIndicesList.isNullOrEmpty()) {
+            waypointsList?.indices?.toList()
+        } else {
+            waypointIndicesList
+        }
+        return mutableListOf<T?>().also { updatedWaypointsList ->
             val updatedStartWaypointsListIndex = getUpdatedStartWaypointsListIndex(
-                waypointIndicesList,
+                explicitWaypointsIndicesList,
                 nextCoordinateIndex
             )
-            updatedWaypointsList.add(waypointsList[updatedStartWaypointsListIndex])
+            updatedWaypointsList.add(null)
             updatedWaypointsList.addAll(
                 waypointsList.subList(
                     updatedStartWaypointsListIndex + 1,

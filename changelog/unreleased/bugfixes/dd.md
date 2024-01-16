@@ -1,0 +1,1 @@
+- Fixed an issue where reroute for multi-leg routes used to fail in case waypoint_names or waypoint_targets parameters were specified without an explicit waypoint_indices parameter.
