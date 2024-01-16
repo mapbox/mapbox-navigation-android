@@ -33,9 +33,7 @@ class SpeedLimitInfo private constructor(
         if (value != other.value) return false
         if (speedUnit != other.speedUnit) return false
         if (type != other.type) return false
-        if (restriction != other.restriction) return false
-
-        return true
+        return restriction == other.restriction
     }
 
     /**

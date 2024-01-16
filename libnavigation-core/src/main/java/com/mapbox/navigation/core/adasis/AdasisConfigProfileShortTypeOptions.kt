@@ -12,13 +12,23 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param headingChange if true, headingChange type will be generated
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfigProfileShortTypeOptions(
-    val slopeStep: Boolean = false,
-    val curvature: Boolean = true,
-    val roadCondition: Boolean = true,
-    val variableSpeedSign: Boolean = false,
-    val headingChange: Boolean = true,
+class AdasisConfigProfileShortTypeOptions private constructor(
+    val slopeStep: Boolean,
+    val curvature: Boolean,
+    val roadCondition: Boolean,
+    val variableSpeedSign: Boolean,
+    val headingChange: Boolean,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder = Builder()
+        .slopeStep(slopeStep)
+        .curvature(curvature)
+        .roadCondition(roadCondition)
+        .variableSpeedSign(variableSpeedSign)
+        .headingChange(headingChange)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfigProfileShortTypeOptions():
@@ -45,9 +55,7 @@ class AdasisConfigProfileShortTypeOptions(
         if (curvature != other.curvature) return false
         if (roadCondition != other.roadCondition) return false
         if (variableSpeedSign != other.variableSpeedSign) return false
-        if (headingChange != other.headingChange) return false
-
-        return true
+        return headingChange == other.headingChange
     }
 
     /**
@@ -73,5 +81,63 @@ class AdasisConfigProfileShortTypeOptions(
             "variableSpeedSign=$variableSpeedSign, " +
             "headingChange=$headingChange" +
             ")"
+    }
+
+    /**
+     * Builder for [AdasisConfigProfileShortTypeOptions].
+     */
+    class Builder {
+
+        private var slopeStep: Boolean = false
+        private var curvature: Boolean = true
+        private var roadCondition: Boolean = true
+        private var variableSpeedSign: Boolean = false
+        private var headingChange: Boolean = true
+
+        /**
+         * If true, slopeStep type will be generated
+         */
+        fun slopeStep(slopeStep: Boolean) = apply {
+            this.slopeStep = slopeStep
+        }
+
+        /**
+         * If true, curvature type will be generated
+         */
+        fun curvature(curvature: Boolean) = apply {
+            this.curvature = curvature
+        }
+
+        /**
+         * If true, roadCondition type will be generated
+         */
+        fun roadCondition(roadCondition: Boolean) = apply {
+            this.roadCondition = roadCondition
+        }
+
+        /**
+         * If true, variableSpeedSign type will be generated
+         */
+        fun variableSpeedSign(variableSpeedSign: Boolean) = apply {
+            this.variableSpeedSign = variableSpeedSign
+        }
+
+        /**
+         * If true, headingChange type will be generated
+         */
+        fun headingChange(headingChange: Boolean) = apply {
+            this.headingChange = headingChange
+        }
+
+        /**
+         * Build the [AdasisConfigProfileShortTypeOptions]
+         */
+        fun build() = AdasisConfigProfileShortTypeOptions(
+            slopeStep = slopeStep,
+            curvature = curvature,
+            roadCondition = roadCondition,
+            variableSpeedSign = variableSpeedSign,
+            headingChange = headingChange,
+        )
     }
 }

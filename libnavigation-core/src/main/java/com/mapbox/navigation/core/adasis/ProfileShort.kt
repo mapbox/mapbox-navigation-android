@@ -9,10 +9,17 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param types options for each type of profile short message
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class ProfileShort(
+class ProfileShort private constructor(
     val options: AdasisConfigMessageOptions,
     val types: AdasisConfigProfileShortTypeOptions,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder = Builder()
+        .options(options)
+        .types(types)
 
     @JvmSynthetic
     internal fun toNativeProfileShort(): com.mapbox.navigator.Profileshort {
@@ -32,9 +39,7 @@ class ProfileShort(
         other as ProfileShort
 
         if (options != other.options) return false
-        if (types != other.types) return false
-
-        return true
+        return types == other.types
     }
 
     /**
@@ -51,5 +56,36 @@ class ProfileShort(
      */
     override fun toString(): String {
         return "ProfileShort(options=$options, types=$types)"
+    }
+
+    /**
+     * Builder for [ProfileShort].
+     */
+    class Builder {
+
+        private var options = AdasisConfigMessageOptions.Builder().build()
+        private var types = AdasisConfigProfileShortTypeOptions.Builder().build()
+
+        /**
+         * Common options for profile long message
+         */
+        fun options(options: AdasisConfigMessageOptions) = apply {
+            this.options = options
+        }
+
+        /**
+         * Types options for each type of profile short message
+         */
+        fun types(types: AdasisConfigProfileShortTypeOptions) = apply {
+            this.types = types
+        }
+
+        /**
+         * Build the [ProfileShort]
+         */
+        fun build() = ProfileShort(
+            options = options,
+            types = types,
+        )
     }
 }

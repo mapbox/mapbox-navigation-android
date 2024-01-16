@@ -8,10 +8,17 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param radiusMeters distance along EH path in meters, for which message will be generated
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfigMessageOptions(
-    val enable: Boolean = true,
-    val radiusMeters: Int = 2000,
+class AdasisConfigMessageOptions private constructor(
+    val enable: Boolean,
+    val radiusMeters: Int,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder = Builder()
+        .enable(enable)
+        .radiusMeters(radiusMeters)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfigMessageOptions():
@@ -32,9 +39,7 @@ class AdasisConfigMessageOptions(
         other as AdasisConfigMessageOptions
 
         if (enable != other.enable) return false
-        if (radiusMeters != other.radiusMeters) return false
-
-        return true
+        return radiusMeters == other.radiusMeters
     }
 
     /**
@@ -54,5 +59,36 @@ class AdasisConfigMessageOptions(
             "enable=$enable, " +
             "radiusMeters=$radiusMeters" +
             ")"
+    }
+
+    /**
+     * Builder for [AdasisConfigMessageOptions].
+     */
+    class Builder {
+
+        private var enable: Boolean = true
+        private var radiusMeters: Int = 2000
+
+        /**
+         * If true, message of that type will be generated
+         */
+        fun enable(enable: Boolean) = apply {
+            this.enable = enable
+        }
+
+        /**
+         * Distance along EH path in meters, for which message will be generated
+         */
+        fun radiusMeters(radiusMeters: Int) = apply {
+            this.radiusMeters = radiusMeters
+        }
+
+        /**
+         * Build the [AdasisConfigMessageOptions]
+         */
+        fun build() = AdasisConfigMessageOptions(
+            enable = enable,
+            radiusMeters = radiusMeters,
+        )
     }
 }

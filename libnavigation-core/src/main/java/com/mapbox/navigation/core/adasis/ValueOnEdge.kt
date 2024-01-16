@@ -30,9 +30,7 @@ class ValueOnEdge private constructor(
 
         if (shapeIndex != other.shapeIndex) return false
         if (percentAlong != other.percentAlong) return false
-        if (value != other.value) return false
-
-        return true
+        return value == other.value
     }
 
     /**

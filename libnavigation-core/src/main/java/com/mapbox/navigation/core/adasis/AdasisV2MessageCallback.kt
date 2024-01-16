@@ -3,13 +3,13 @@ package com.mapbox.navigation.core.adasis
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
- * Callback which is getting called to report ADASISv2Message
+ * Callback which is getting called to report Adasis message
  */
 @ExperimentalPreviewMapboxNavigationAPI
-fun interface ADASISv2MessageCallback {
+fun interface AdasisV2MessageCallback {
 
     /**
-     * Called when ADASIS message is available
+     * Called when Adasis message is available
      * @param messageBuffer Message buffer in format specified via [AdasisConfigDataSending.messageBinaryFormat]
      * @param context Additional context with metadata related to the current messages package
      */

@@ -8,9 +8,15 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param options common options for segment
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class Segment(
+class Segment private constructor(
     val options: AdasisConfigMessageOptions,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder = Builder()
+        .options(options)
 
     @JvmSynthetic
     internal fun toNativeSegment(): com.mapbox.navigator.Segment {
@@ -28,9 +34,7 @@ class Segment(
 
         other as Segment
 
-        if (options != other.options) return false
-
-        return true
+        return options == other.options
     }
 
     /**
@@ -45,5 +49,25 @@ class Segment(
      */
     override fun toString(): String {
         return "Segment(options=$options)"
+    }
+
+    /**
+     * Builder for [Segment].
+     */
+    class Builder {
+
+        private var options = AdasisConfigMessageOptions.Builder().build()
+
+        /**
+         * Common options for segment
+         */
+        fun options(options: AdasisConfigMessageOptions) = apply {
+            this.options = options
+        }
+
+        /**
+         * Build the [Segment]
+         */
+        fun build() = Segment(options)
     }
 }

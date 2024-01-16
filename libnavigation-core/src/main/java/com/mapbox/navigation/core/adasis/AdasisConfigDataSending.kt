@@ -14,14 +14,24 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param retransmissionMeters after passing this distance, messages will not be retransmitted
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfigDataSending(
+class AdasisConfigDataSending private constructor(
     val messageBinaryFormat: AdasisMessageBinaryFormat,
-    val messageIntervalMs: Int = 80,
-    val messagesInPackage: Int = 20,
-    val metadataCycleSeconds: Int = 5,
-    val enableRetransmission: Boolean = true,
-    val retransmissionMeters: Int = 300,
+    val messageIntervalMs: Int,
+    val messagesInPackage: Int,
+    val metadataCycleSeconds: Int,
+    val enableRetransmission: Boolean,
+    val retransmissionMeters: Int,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder = Builder(messageBinaryFormat)
+        .messageIntervalMs(messageIntervalMs)
+        .messagesInPackage(messagesInPackage)
+        .metadataCycleSeconds(metadataCycleSeconds)
+        .enableRetransmission(enableRetransmission)
+        .retransmissionMeters(retransmissionMeters)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfigDataSending(): com.mapbox.navigator.AdasisConfigDataSending {
@@ -49,9 +59,7 @@ class AdasisConfigDataSending(
         if (messagesInPackage != other.messagesInPackage) return false
         if (metadataCycleSeconds != other.metadataCycleSeconds) return false
         if (enableRetransmission != other.enableRetransmission) return false
-        if (retransmissionMeters != other.retransmissionMeters) return false
-
-        return true
+        return retransmissionMeters == other.retransmissionMeters
     }
 
     /**
@@ -80,5 +88,67 @@ class AdasisConfigDataSending(
             "enableRetransmission=$enableRetransmission, " +
             "retransmissionMeters=$retransmissionMeters" +
             ")"
+    }
+
+    /**
+     * Builder for [AdasisConfigDataSending].
+     *
+     * @param messageBinaryFormat Binary format in which Adasis message will be sent
+     */
+    class Builder(private val messageBinaryFormat: AdasisMessageBinaryFormat) {
+
+        private var messageIntervalMs: Int = 80
+        private var messagesInPackage: Int = 20
+        private var metadataCycleSeconds: Int = 5
+        private var enableRetransmission: Boolean = true
+        private var retransmissionMeters: Int = 300
+
+        /**
+         * Interval between sending messages in milliseconds
+         */
+        fun messageIntervalMs(messageIntervalMs: Int) = apply {
+            this.messageIntervalMs = messageIntervalMs
+        }
+
+        /**
+         * Number of messages in one package (one message is 8 bytes)
+         */
+        fun messagesInPackage(messagesInPackage: Int) = apply {
+            this.messagesInPackage = messagesInPackage
+        }
+
+        /**
+         * Time in seconds between repetition of META-DATA message
+         */
+        fun metadataCycleSeconds(metadataCycleSeconds: Int) = apply {
+            this.metadataCycleSeconds = metadataCycleSeconds
+        }
+
+        /**
+         * If true, retransmission will be enabled.
+         * (package will be appended with retransmission data, messages from previous cycles)
+         */
+        fun enableRetransmission(enableRetransmission: Boolean) = apply {
+            this.enableRetransmission = enableRetransmission
+        }
+
+        /**
+         * After passing this distance, messages will not be retransmitted
+         */
+        fun retransmissionMeters(retransmissionMeters: Int) = apply {
+            this.retransmissionMeters = retransmissionMeters
+        }
+
+        /**
+         * Build the [AdasisConfigDataSending]
+         */
+        fun build() = AdasisConfigDataSending(
+            messageBinaryFormat = messageBinaryFormat,
+            messageIntervalMs = messageIntervalMs,
+            messagesInPackage = messagesInPackage,
+            metadataCycleSeconds = metadataCycleSeconds,
+            enableRetransmission = enableRetransmission,
+            retransmissionMeters = retransmissionMeters,
+        )
     }
 }

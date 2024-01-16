@@ -10,11 +10,19 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param trafficSign if true, Traffic Sign type will be generated
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfigProfileLongTypeOptions(
-    val lat: Boolean = true,
-    val lon: Boolean = true,
-    val trafficSign: Boolean = false,
+class AdasisConfigProfileLongTypeOptions private constructor(
+    val lat: Boolean,
+    val lon: Boolean,
+    val trafficSign: Boolean,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder = Builder()
+        .lat(lat)
+        .lon(lon)
+        .trafficSign(trafficSign)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfigProfileLongTypeOptions():
@@ -37,9 +45,7 @@ class AdasisConfigProfileLongTypeOptions(
 
         if (lat != other.lat) return false
         if (lon != other.lon) return false
-        if (trafficSign != other.trafficSign) return false
-
-        return true
+        return trafficSign == other.trafficSign
     }
 
     /**
@@ -61,5 +67,45 @@ class AdasisConfigProfileLongTypeOptions(
             "lon=$lon, " +
             "trafficSign=$trafficSign, " +
             ")"
+    }
+
+    /**
+     * Builder for [AdasisConfigProfileLongTypeOptions].
+     */
+    class Builder {
+
+        private var lat: Boolean = true
+        private var lon: Boolean = true
+        private var trafficSign: Boolean = false
+
+        /**
+         * If true, latitude type will be generated
+         */
+        fun lat(lat: Boolean) = apply {
+            this.lat = lat
+        }
+
+        /**
+         * If true, longitude type will be generated
+         */
+        fun lon(lon: Boolean) = apply {
+            this.lon = lon
+        }
+
+        /**
+         * If true, Traffic Sign type will be generated
+         */
+        fun trafficSign(trafficSign: Boolean) = apply {
+            this.trafficSign = trafficSign
+        }
+
+        /**
+         * Build the [AdasisConfigProfileLongTypeOptions]
+         */
+        fun build() = AdasisConfigProfileLongTypeOptions(
+            lat = lat,
+            lon = lon,
+            trafficSign = trafficSign,
+        )
     }
 }

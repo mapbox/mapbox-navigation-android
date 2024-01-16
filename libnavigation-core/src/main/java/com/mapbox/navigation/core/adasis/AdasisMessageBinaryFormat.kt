@@ -27,6 +27,7 @@ abstract class AdasisMessageBinaryFormat {
      */
     object FlatBuffers : AdasisMessageBinaryFormat()
 
+    @JvmSynthetic
     internal fun toNativeMessageBinaryFormat(): MessageBinaryFormat {
         return when (this) {
             is AdasisV2BigEndian -> MessageBinaryFormat.ADASISV2_BE

@@ -11,12 +11,21 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param profileLong Profile long message options
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfigPathOptions(
+class AdasisConfigPathOptions private constructor(
     val stub: Stub,
     val segment: Segment,
     val profileShort: ProfileShort,
     val profileLong: ProfileLong,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder = Builder()
+        .stub(stub)
+        .segment(segment)
+        .profileShort(profileShort)
+        .profileLong(profileLong)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfigPathOptions():
@@ -41,9 +50,7 @@ class AdasisConfigPathOptions(
         if (stub != other.stub) return false
         if (segment != other.segment) return false
         if (profileShort != other.profileShort) return false
-        if (profileLong != other.profileLong) return false
-
-        return true
+        return profileLong == other.profileLong
     }
 
     /**
@@ -67,5 +74,54 @@ class AdasisConfigPathOptions(
             "profileShort=$profileShort, " +
             "profileLong=$profileLong" +
             ")"
+    }
+
+    /**
+     * Builder for [AdasisConfigPathOptions].
+     */
+    class Builder {
+
+        private var stub = Stub.Builder().build()
+        private var segment = Segment.Builder().build()
+        private var profileShort = ProfileShort.Builder().build()
+        private var profileLong = ProfileLong.Builder().build()
+
+        /**
+         * Stub message options
+         */
+        fun stub(stub: Stub) = apply {
+            this.stub = stub
+        }
+
+        /**
+         * Segment message options
+         */
+        fun segment(segment: Segment) = apply {
+            this.segment = segment
+        }
+
+        /**
+         * Profile short message options
+         */
+        fun profileShort(profileShort: ProfileShort) = apply {
+            this.profileShort = profileShort
+        }
+
+        /**
+         * ProfileLong Profile long message options
+         */
+        fun profileLong(profileLong: ProfileLong) = apply {
+            this.profileLong = profileLong
+        }
+
+        /**
+         * Build the [AdasisConfigPathOptions]
+         */
+        fun build() = AdasisConfigPathOptions(
+            stub = stub,
+            segment = segment,
+            profileShort = profileShort,
+            profileLong = profileLong,
+        )
     }
 }

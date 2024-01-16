@@ -14,6 +14,13 @@ class AdasisConfig private constructor(
     val pathOptions: AdasisConfigPathOptions,
 ) {
 
+    /**
+     * Get a builder to customize a subset of current configuration.
+     */
+    fun toBuilder(): Builder = Builder()
+        .dataSending(dataSending)
+        .pathOptions(pathOptions)
+
     @JvmSynthetic
     internal fun toNativeAdasisConfig(): com.mapbox.navigator.AdasisConfig {
         return com.mapbox.navigator.AdasisConfig(
@@ -32,9 +39,7 @@ class AdasisConfig private constructor(
         other as AdasisConfig
 
         if (dataSending != other.dataSending) return false
-        if (pathOptions != other.pathOptions) return false
-
-        return true
+        return pathOptions == other.pathOptions
     }
 
     /**
@@ -52,7 +57,7 @@ class AdasisConfig private constructor(
     override fun toString(): String {
         return "AdasisConfig(" +
             "dataSending=$dataSending, " +
-            "pathsOptions=$pathOptions" +
+            "pathOptions=$pathOptions" +
             ")"
     }
 
@@ -61,16 +66,11 @@ class AdasisConfig private constructor(
      */
     class Builder {
 
-        private var dataSending: AdasisConfigDataSending = AdasisConfigDataSending(
+        private var dataSending = AdasisConfigDataSending.Builder(
             AdasisMessageBinaryFormat.FlatBuffers
-        )
+        ).build()
 
-        private var pathOptions: AdasisConfigPathOptions = AdasisConfigPathOptions(
-            Stub(AdasisConfigMessageOptions()),
-            Segment(AdasisConfigMessageOptions()),
-            ProfileShort(AdasisConfigMessageOptions(), AdasisConfigProfileShortTypeOptions()),
-            ProfileLong(AdasisConfigMessageOptions(), AdasisConfigProfileLongTypeOptions())
-        )
+        private var pathOptions = AdasisConfigPathOptions.Builder().build()
 
         /**
          * Data sending configuration
@@ -91,7 +91,7 @@ class AdasisConfig private constructor(
          */
         fun build() = AdasisConfig(
             dataSending = dataSending,
-            pathOptions = pathOptions
+            pathOptions = pathOptions,
         )
     }
 }

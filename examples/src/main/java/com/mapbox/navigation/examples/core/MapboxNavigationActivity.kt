@@ -442,7 +442,9 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
-        mapboxNavigation.setAdasisMessageCallback(AdasisConfig.Builder().build()) { message, context ->
+        mapboxNavigation.setAdasisMessageCallback(
+            AdasisConfig.Builder().build()
+        ) { message, context ->
             Log.d("AdasisTest.", "Adasis message: $message, context: $context")
         }
     }

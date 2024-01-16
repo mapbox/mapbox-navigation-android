@@ -40,7 +40,9 @@ class AdasisMessageContext private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "AdasisMessageContext(positionMonotonicTimestampNanoseconds=$positionMonotonicTimestampNanoseconds)"
+        return "AdasisMessageContext(" +
+            "positionMonotonicTimestampNanoseconds=$positionMonotonicTimestampNanoseconds" +
+            ")"
     }
 
     internal companion object {

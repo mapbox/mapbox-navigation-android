@@ -32,9 +32,7 @@ class EdgeAdasAttributes private constructor(
 
         if (speedLimit != other.speedLimit) return false
         if (slopes != other.slopes) return false
-        if (curvatures != other.curvatures) return false
-
-        return true
+        return curvatures == other.curvatures
     }
 
     /**

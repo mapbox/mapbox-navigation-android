@@ -9,10 +9,17 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param types options for each type of profile long message
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class ProfileLong(
+class ProfileLong private constructor(
     val options: AdasisConfigMessageOptions,
     val types: AdasisConfigProfileLongTypeOptions,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder = Builder()
+        .options(options)
+        .types(types)
 
     @JvmSynthetic
     internal fun toNativeProfileLong(): com.mapbox.navigator.Profilelong {
@@ -32,9 +39,7 @@ class ProfileLong(
         other as ProfileLong
 
         if (options != other.options) return false
-        if (types != other.types) return false
-
-        return true
+        return types == other.types
     }
 
     /**
@@ -51,5 +56,36 @@ class ProfileLong(
      */
     override fun toString(): String {
         return "ProfileLong(options=$options, types=$types)"
+    }
+
+    /**
+     * Builder for [ProfileLong].
+     */
+    class Builder {
+
+        private var options = AdasisConfigMessageOptions.Builder().build()
+        private var types = AdasisConfigProfileLongTypeOptions.Builder().build()
+
+        /**
+         * Common options for profile long message
+         */
+        fun options(options: AdasisConfigMessageOptions) = apply {
+            this.options = options
+        }
+
+        /**
+         * Types options for each type of profile long message
+         */
+        fun types(types: AdasisConfigProfileLongTypeOptions) = apply {
+            this.types = types
+        }
+
+        /**
+         * Build the [ProfileLong]
+         */
+        fun build() = ProfileLong(
+            options = options,
+            types = types,
+        )
     }
 }

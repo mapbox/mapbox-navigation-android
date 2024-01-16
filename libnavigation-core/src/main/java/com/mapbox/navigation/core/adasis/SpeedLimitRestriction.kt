@@ -31,9 +31,7 @@ class SpeedLimitRestriction private constructor(
         if (weather != other.weather) return false
         if (dateTimeCondition != other.dateTimeCondition) return false
         if (vehicleTypes != other.vehicleTypes) return false
-        if (lanes != other.lanes) return false
-
-        return true
+        return lanes == other.lanes
     }
 
     /**
