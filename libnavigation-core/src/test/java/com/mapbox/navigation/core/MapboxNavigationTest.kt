@@ -11,6 +11,9 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.adasis.AdasisConfig
+import com.mapbox.navigation.core.adasis.AdasisMessageContext
+import com.mapbox.navigation.core.adasis.AdasisV2MessageCallback
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSessionRoutes
@@ -36,6 +39,8 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshObserver
 import com.mapbox.navigation.core.routerefresh.RouteRefresherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.routerefresh.RoutesRefresherResult
+import com.mapbox.navigation.core.sensor.SensorData
+import com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -52,6 +57,7 @@ import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
+import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteAlternative
@@ -2379,6 +2385,81 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             routeRefreshController.unregisterRoutesInvalidatedObserver(routesInvalidatedObserver)
+        }
+    }
+
+    @Test
+    fun updateExternalSensorData() {
+        createMapboxNavigation()
+
+        val nativeCallbackSlot = slot<com.mapbox.navigator.UpdateExternalSensorDataCallback>()
+        every { navigator.updateExternalSensorData(any(), capture(nativeCallbackSlot)) } answers {
+            nativeCallbackSlot.captured.run(true)
+        }
+
+        val weatherSensorData = SensorData.Weather(SensorData.Weather.ConditionType.FOG)
+        val callback = mockk<UpdateExternalSensorDataCallback>(relaxed = true)
+        mapboxNavigation.updateExternalSensorData(weatherSensorData, callback)
+
+        verify(exactly = 1) {
+            navigator.updateExternalSensorData(
+                eq(weatherSensorData.toNativeSensorData()),
+                eq(nativeCallbackSlot.captured)
+            )
+        }
+
+        verify(exactly = 1) {
+            callback.onResult(eq(true))
+        }
+    }
+
+    @Test
+    fun setAdasisMessageCallback() {
+        createMapboxNavigation()
+
+        val testMessageBuffer = listOf<Byte>(1, 2, 3)
+        val testMessageContext = com.mapbox.navigator.AdasisMessageContext(123)
+        val nativeCallbackSlot = slot<ADASISv2MessageCallback>()
+        every { navigator.setAdasisMessageCallback(capture(nativeCallbackSlot), any()) } answers {
+            nativeCallbackSlot.captured.run(testMessageBuffer, testMessageContext)
+        }
+
+        val adasisConfig = AdasisConfig.Builder().build()
+        val callback = mockk<AdasisV2MessageCallback>(relaxed = true)
+        mapboxNavigation.setAdasisMessageCallback(adasisConfig, callback)
+
+        verify(exactly = 1) {
+            navigator.setAdasisMessageCallback(
+                nativeCallbackSlot.captured,
+                adasisConfig.toNativeAdasisConfig()
+            )
+        }
+
+        verify(exactly = 1) {
+            callback.onMessage(
+                eq(testMessageBuffer),
+                eq(AdasisMessageContext.createFromNativeObject(testMessageContext))
+            )
+        }
+    }
+
+    @Test
+    fun resetAdasisMessageCallback() {
+        createMapboxNavigation()
+        mapboxNavigation.resetAdasisMessageCallback()
+
+        verify(exactly = 1) {
+            navigator.resetAdasisMessageCallback()
+        }
+    }
+
+    @Test
+    fun destroy_resetAdasisMessageCallback() {
+        createMapboxNavigation()
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) {
+            navigator.resetAdasisMessageCallback()
         }
     }
 
