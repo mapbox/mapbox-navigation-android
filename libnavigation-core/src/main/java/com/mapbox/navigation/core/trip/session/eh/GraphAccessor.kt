@@ -8,7 +8,7 @@ import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPath
 import com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.adasis.AdasisEdgeAttributes
+import com.mapbox.navigation.core.adas.AdasEdgeAttributes
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 /**
@@ -74,9 +74,9 @@ class GraphAccessor internal constructor(
      * Returns ADAS data for a given Edge. If no ADAS data is available, returns null
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun getAdasisEdgeAttributes(edgeId: Long): AdasisEdgeAttributes? {
+    fun getAdasisEdgeAttributes(edgeId: Long): AdasEdgeAttributes? {
         return navigator.graphAccessor?.getAdasAttributes(edgeId)?.let {
-            AdasisEdgeAttributes.createFromNativeObject(it)
+            AdasEdgeAttributes.createFromNativeObject(it)
         }
     }
 }

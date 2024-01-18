@@ -11,9 +11,10 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.adasis.AdasisConfig
-import com.mapbox.navigation.core.adasis.AdasisMessageContext
-import com.mapbox.navigation.core.adasis.AdasisV2MessageCallback
+import com.mapbox.navigation.core.adas.AdasisConfig
+import com.mapbox.navigation.core.adas.AdasisDataSendingConfig
+import com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat
+import com.mapbox.navigation.core.adas.AdasisV2MessageObserver
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSessionRoutes
@@ -2414,19 +2415,22 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun setAdasisMessageCallback() {
+    fun setAdasisMessageObserver() {
         createMapboxNavigation()
 
         val testMessageBuffer = listOf<Byte>(1, 2, 3)
-        val testMessageContext = com.mapbox.navigator.AdasisMessageContext(123)
         val nativeCallbackSlot = slot<ADASISv2MessageCallback>()
         every { navigator.setAdasisMessageCallback(capture(nativeCallbackSlot), any()) } answers {
-            nativeCallbackSlot.captured.run(testMessageBuffer, testMessageContext)
+            nativeCallbackSlot.captured.run(testMessageBuffer)
         }
 
-        val adasisConfig = AdasisConfig.Builder().build()
-        val callback = mockk<AdasisV2MessageCallback>(relaxed = true)
-        mapboxNavigation.setAdasisMessageCallback(adasisConfig, callback)
+        val dataSendingConfig = AdasisDataSendingConfig.Builder(
+            AdasisMessageBinaryFormat.FlatBuffers,
+        ).build()
+
+        val adasisConfig = AdasisConfig.Builder(dataSendingConfig).build()
+        val callback = mockk<AdasisV2MessageObserver>(relaxed = true)
+        mapboxNavigation.setAdasisMessageObserver(adasisConfig, callback)
 
         verify(exactly = 1) {
             navigator.setAdasisMessageCallback(
@@ -2436,17 +2440,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
         verify(exactly = 1) {
-            callback.onMessage(
-                eq(testMessageBuffer),
-                eq(AdasisMessageContext.createFromNativeObject(testMessageContext))
-            )
+            callback.onMessage(eq(testMessageBuffer))
         }
     }
 
     @Test
     fun resetAdasisMessageCallback() {
         createMapboxNavigation()
-        mapboxNavigation.resetAdasisMessageCallback()
+        mapboxNavigation.resetAdasisMessageObserver()
 
         verify(exactly = 1) {
             navigator.resetAdasisMessageCallback()

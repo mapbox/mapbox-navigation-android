@@ -82,10 +82,10 @@ package com.mapbox.navigation.core {
     method public void requestRoadGraphDataUpdate(com.mapbox.navigation.core.RoadGraphDataUpdateCallback callback);
     method @Deprecated public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterCallback routesRequestCallback);
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.NavigationRouterCallback callback);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void resetAdasisMessageCallback();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void resetAdasisMessageObserver();
     method @Deprecated public void resetTripSession();
     method public void resetTripSession(com.mapbox.navigation.core.TripSessionResetCallback callback);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setAdasisMessageCallback(com.mapbox.navigation.core.adasis.AdasisConfig adasisConfig, com.mapbox.navigation.core.adasis.AdasisV2MessageCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setAdasisMessageObserver(com.mapbox.navigation.core.adas.AdasisConfig adasisConfig, com.mapbox.navigation.core.adas.AdasisV2MessageObserver observer);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
     method public void setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int initialLegIndex = 0, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
@@ -198,222 +198,40 @@ package com.mapbox.navigation.core {
 
 }
 
-package com.mapbox.navigation.core.adasis {
+package com.mapbox.navigation.core.adas {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfig {
-    method public com.mapbox.navigation.core.adasis.AdasisDataSendingConfig getDataSendingConfig();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigPathOptions getPathOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisConfig.Builder toBuilder();
-    property public final com.mapbox.navigation.core.adasis.AdasisDataSendingConfig dataSendingConfig;
-    property public final com.mapbox.navigation.core.adasis.AdasisConfigPathOptions pathOptions;
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasEdgeAttributes {
+    method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getCurvatures();
+    method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getSlopes();
+    method public java.util.List<com.mapbox.navigation.core.adas.AdasSpeedLimitInfo> getSpeedLimit();
+    property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> curvatures;
+    property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> slopes;
+    property public final java.util.List<com.mapbox.navigation.core.adas.AdasSpeedLimitInfo> speedLimit;
   }
 
-  public static final class AdasisConfig.Builder {
-    ctor public AdasisConfig.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisConfig build();
-    method public com.mapbox.navigation.core.adasis.AdasisConfig.Builder dataSendingConfig(com.mapbox.navigation.core.adasis.AdasisDataSendingConfig dataSending);
-    method public com.mapbox.navigation.core.adasis.AdasisConfig.Builder pathOptions(com.mapbox.navigation.core.adasis.AdasisConfigPathOptions pathsOptions);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigMessageOptions {
-    method public boolean getEnable();
-    method public int getRadiusMeters();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions.Builder toBuilder();
-    property public final boolean enable;
-    property public final int radiusMeters;
-  }
-
-  public static final class AdasisConfigMessageOptions.Builder {
-    ctor public AdasisConfigMessageOptions.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions build();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions.Builder enable(boolean enable);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions.Builder radiusMeters(int radiusMeters);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigPathOptions {
-    method public com.mapbox.navigation.core.adasis.AdasisProfileLongOptions getProfileLongOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisProfileShortOptions getProfileShortOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisSegmentOptions getSegmentOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisStubOptions getStubOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigPathOptions.Builder toBuilder();
-    property public final com.mapbox.navigation.core.adasis.AdasisProfileLongOptions profileLongOptions;
-    property public final com.mapbox.navigation.core.adasis.AdasisProfileShortOptions profileShortOptions;
-    property public final com.mapbox.navigation.core.adasis.AdasisSegmentOptions segmentOptions;
-    property public final com.mapbox.navigation.core.adasis.AdasisStubOptions stubOptions;
-  }
-
-  public static final class AdasisConfigPathOptions.Builder {
-    ctor public AdasisConfigPathOptions.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigPathOptions build();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigPathOptions.Builder profileLongOptions(com.mapbox.navigation.core.adasis.AdasisProfileLongOptions profileLongOptions);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigPathOptions.Builder profileShortOptions(com.mapbox.navigation.core.adasis.AdasisProfileShortOptions profileShortOptions);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigPathOptions.Builder segmentOptions(com.mapbox.navigation.core.adasis.AdasisSegmentOptions segmentOptions);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigPathOptions.Builder stubOptions(com.mapbox.navigation.core.adasis.AdasisStubOptions stubOptions);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigProfileLongTypeOptions {
-    method public boolean getLat();
-    method public boolean getLon();
-    method public boolean getTrafficSign();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions.Builder toBuilder();
-    property public final boolean lat;
-    property public final boolean lon;
-    property public final boolean trafficSign;
-  }
-
-  public static final class AdasisConfigProfileLongTypeOptions.Builder {
-    ctor public AdasisConfigProfileLongTypeOptions.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions build();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions.Builder lat(boolean lat);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions.Builder lon(boolean lon);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions.Builder trafficSign(boolean trafficSign);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigProfileShortTypeOptions {
-    method public boolean getCurvature();
-    method public boolean getHeadingChange();
-    method public boolean getRoadCondition();
-    method public boolean getSlopeStep();
-    method public boolean getVariableSpeedSign();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions.Builder toBuilder();
-    property public final boolean curvature;
-    property public final boolean headingChange;
-    property public final boolean roadCondition;
-    property public final boolean slopeStep;
-    property public final boolean variableSpeedSign;
-  }
-
-  public static final class AdasisConfigProfileShortTypeOptions.Builder {
-    ctor public AdasisConfigProfileShortTypeOptions.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions build();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions.Builder curvature(boolean curvature);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions.Builder headingChange(boolean headingChange);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions.Builder roadCondition(boolean roadCondition);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions.Builder slopeStep(boolean slopeStep);
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions.Builder variableSpeedSign(boolean variableSpeedSign);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisDataSendingConfig {
-    method public boolean getEnableRetransmission();
-    method public com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat getMessageBinaryFormat();
-    method public int getMessageIntervalMs();
-    method public int getMessagesInPackage();
-    method public int getMetadataCycleSeconds();
-    method public int getRetransmissionMeters();
-    method public com.mapbox.navigation.core.adasis.AdasisDataSendingConfig.Builder toBuilder();
-    property public final boolean enableRetransmission;
-    property public final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat messageBinaryFormat;
-    property public final int messageIntervalMs;
-    property public final int messagesInPackage;
-    property public final int metadataCycleSeconds;
-    property public final int retransmissionMeters;
-  }
-
-  public static final class AdasisDataSendingConfig.Builder {
-    ctor public AdasisDataSendingConfig.Builder(com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat messageBinaryFormat);
-    method public com.mapbox.navigation.core.adasis.AdasisDataSendingConfig build();
-    method public com.mapbox.navigation.core.adasis.AdasisDataSendingConfig.Builder enableRetransmission(boolean enableRetransmission);
-    method public com.mapbox.navigation.core.adasis.AdasisDataSendingConfig.Builder messageIntervalMs(int messageIntervalMs);
-    method public com.mapbox.navigation.core.adasis.AdasisDataSendingConfig.Builder messagesInPackage(int messagesInPackage);
-    method public com.mapbox.navigation.core.adasis.AdasisDataSendingConfig.Builder metadataCycleSeconds(int metadataCycleSeconds);
-    method public com.mapbox.navigation.core.adasis.AdasisDataSendingConfig.Builder retransmissionMeters(int retransmissionMeters);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisEdgeAttributes {
-    method public java.util.List<com.mapbox.navigation.core.adasis.AdasisValueOnEdge> getCurvatures();
-    method public java.util.List<com.mapbox.navigation.core.adasis.AdasisValueOnEdge> getSlopes();
-    method public java.util.List<com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo> getSpeedLimit();
-    property public final java.util.List<com.mapbox.navigation.core.adasis.AdasisValueOnEdge> curvatures;
-    property public final java.util.List<com.mapbox.navigation.core.adasis.AdasisValueOnEdge> slopes;
-    property public final java.util.List<com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo> speedLimit;
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class AdasisMessageBinaryFormat {
-    ctor public AdasisMessageBinaryFormat();
-  }
-
-  public static final class AdasisMessageBinaryFormat.AdasisV2BigEndian extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
-    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.AdasisV2BigEndian INSTANCE;
-  }
-
-  public static final class AdasisMessageBinaryFormat.AdasisV2LittleEndian extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
-    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.AdasisV2LittleEndian INSTANCE;
-  }
-
-  public static final class AdasisMessageBinaryFormat.FlatBuffers extends com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat {
-    field public static final com.mapbox.navigation.core.adasis.AdasisMessageBinaryFormat.FlatBuffers INSTANCE;
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisMessageContext {
-    method public Long? getPositionMonotonicTimestampNanoseconds();
-    property public final Long? positionMonotonicTimestampNanoseconds;
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisProfileLongOptions {
-    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions getProfileOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisProfileLongOptions.Builder toBuilder();
-    property public final com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options;
-    property public final com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions profileOptions;
-  }
-
-  public static final class AdasisProfileLongOptions.Builder {
-    ctor public AdasisProfileLongOptions.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisProfileLongOptions build();
-    method public com.mapbox.navigation.core.adasis.AdasisProfileLongOptions.Builder options(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options);
-    method public com.mapbox.navigation.core.adasis.AdasisProfileLongOptions.Builder profileOptions(com.mapbox.navigation.core.adasis.AdasisConfigProfileLongTypeOptions profileOptions);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisProfileShortOptions {
-    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions getProfileOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisProfileShortOptions.Builder toBuilder();
-    property public final com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options;
-    property public final com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions profileOptions;
-  }
-
-  public static final class AdasisProfileShortOptions.Builder {
-    ctor public AdasisProfileShortOptions.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisProfileShortOptions build();
-    method public com.mapbox.navigation.core.adasis.AdasisProfileShortOptions.Builder options(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options);
-    method public com.mapbox.navigation.core.adasis.AdasisProfileShortOptions.Builder profileOptions(com.mapbox.navigation.core.adasis.AdasisConfigProfileShortTypeOptions profileOptions);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisSegmentOptions {
-    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisSegmentOptions.Builder toBuilder();
-    property public final com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options;
-  }
-
-  public static final class AdasisSegmentOptions.Builder {
-    ctor public AdasisSegmentOptions.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisSegmentOptions build();
-    method public com.mapbox.navigation.core.adasis.AdasisSegmentOptions.Builder options(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisSpeedLimitInfo {
-    method public com.mapbox.navigation.core.adasis.AdasisSpeedLimitRestriction getRestriction();
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasSpeedLimitInfo {
+    method public com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction getRestriction();
     method public int getSpeedLimitType();
     method public com.mapbox.navigation.base.speed.model.SpeedUnit getSpeedUnit();
     method public int getValue();
-    property public final com.mapbox.navigation.core.adasis.AdasisSpeedLimitRestriction restriction;
+    property public final com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction restriction;
     property public final int speedLimitType;
     property public final com.mapbox.navigation.base.speed.model.SpeedUnit speedUnit;
     property public final int value;
   }
 
-  public static final class AdasisSpeedLimitInfo.SpeedLimitType {
+  public static final class AdasSpeedLimitInfo.SpeedLimitType {
     field public static final int EXPLICIT = 1; // 0x1
     field public static final int IMPLICIT = 0; // 0x0
-    field public static final com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo.SpeedLimitType INSTANCE;
+    field public static final com.mapbox.navigation.core.adas.AdasSpeedLimitInfo.SpeedLimitType INSTANCE;
     field public static final int PROLONGED = 2; // 0x2
     field public static final int UNKNOWN = 3; // 0x3
   }
 
-  @IntDef({com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo.SpeedLimitType.IMPLICIT, com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo.SpeedLimitType.EXPLICIT, com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo.SpeedLimitType.PROLONGED, com.mapbox.navigation.core.adasis.AdasisSpeedLimitInfo.SpeedLimitType.UNKNOWN}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasisSpeedLimitInfo.SpeedLimitType.Type {
+  @IntDef({com.mapbox.navigation.core.adas.AdasSpeedLimitInfo.SpeedLimitType.IMPLICIT, com.mapbox.navigation.core.adas.AdasSpeedLimitInfo.SpeedLimitType.EXPLICIT, com.mapbox.navigation.core.adas.AdasSpeedLimitInfo.SpeedLimitType.PROLONGED, com.mapbox.navigation.core.adas.AdasSpeedLimitInfo.SpeedLimitType.UNKNOWN}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasSpeedLimitInfo.SpeedLimitType.Type {
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisSpeedLimitRestriction {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasSpeedLimitRestriction {
     method public String getDateTimeCondition();
     method public java.util.List<java.lang.Byte> getLanes();
     method public java.util.List<java.lang.Integer> getVehicleTypes();
@@ -424,41 +242,217 @@ package com.mapbox.navigation.core.adasis {
     property public final java.util.List<java.lang.Integer> weatherConditionTypes;
   }
 
-  public static final class AdasisSpeedLimitRestriction.VehicleType {
+  public static final class AdasSpeedLimitRestriction.VehicleType {
     field public static final int BUS = 2; // 0x2
     field public static final int CAR = 0; // 0x0
-    field public static final com.mapbox.navigation.core.adasis.AdasisSpeedLimitRestriction.VehicleType INSTANCE;
+    field public static final com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType INSTANCE;
     field public static final int MOTORCYCLE = 4; // 0x4
     field public static final int TRAILER = 3; // 0x3
     field public static final int TRUCK = 1; // 0x1
   }
 
-  @IntDef({com.mapbox.navigation.core.adasis.AdasisSpeedLimitRestriction.VehicleType.CAR, com.mapbox.navigation.core.adasis.AdasisSpeedLimitRestriction.VehicleType.TRUCK, com.mapbox.navigation.core.adasis.AdasisSpeedLimitRestriction.VehicleType.BUS, com.mapbox.navigation.core.adasis.AdasisSpeedLimitRestriction.VehicleType.TRAILER, com.mapbox.navigation.core.adasis.AdasisSpeedLimitRestriction.VehicleType.MOTORCYCLE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasisSpeedLimitRestriction.VehicleType.Type {
+  @IntDef({com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.CAR, com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.TRUCK, com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.BUS, com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.TRAILER, com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.MOTORCYCLE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasSpeedLimitRestriction.VehicleType.Type {
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisStubOptions {
-    method public com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions getOptions();
-    method public com.mapbox.navigation.core.adasis.AdasisStubOptions.Builder toBuilder();
-    property public final com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options;
-  }
-
-  public static final class AdasisStubOptions.Builder {
-    ctor public AdasisStubOptions.Builder();
-    method public com.mapbox.navigation.core.adasis.AdasisStubOptions build();
-    method public com.mapbox.navigation.core.adasis.AdasisStubOptions.Builder options(com.mapbox.navigation.core.adasis.AdasisConfigMessageOptions options);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface AdasisV2MessageCallback {
-    method public void onMessage(java.util.List<java.lang.Byte> messageBuffer, com.mapbox.navigation.core.adasis.AdasisMessageContext context);
-  }
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisValueOnEdge {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasValueOnEdge {
     method public double getPercentAlong();
     method public float getShapeIndex();
     method public double getValue();
     property public final double percentAlong;
     property public final float shapeIndex;
     property public final double value;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfig {
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig getDataSendingConfig();
+    method public com.mapbox.navigation.core.adas.AdasisConfigPathOptions getPathOptions();
+    method public com.mapbox.navigation.core.adas.AdasisConfig.Builder toBuilder();
+    property public final com.mapbox.navigation.core.adas.AdasisDataSendingConfig dataSendingConfig;
+    property public final com.mapbox.navigation.core.adas.AdasisConfigPathOptions pathOptions;
+  }
+
+  public static final class AdasisConfig.Builder {
+    ctor public AdasisConfig.Builder(com.mapbox.navigation.core.adas.AdasisDataSendingConfig dataSendingConfig);
+    method public com.mapbox.navigation.core.adas.AdasisConfig build();
+    method public com.mapbox.navigation.core.adas.AdasisConfig.Builder pathOptions(com.mapbox.navigation.core.adas.AdasisConfigPathOptions pathsOptions);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigMessageOptions {
+    method public boolean getEnable();
+    method public int getRadiusMeters();
+    method public com.mapbox.navigation.core.adas.AdasisConfigMessageOptions.Builder toBuilder();
+    property public final boolean enable;
+    property public final int radiusMeters;
+  }
+
+  public static final class AdasisConfigMessageOptions.Builder {
+    ctor public AdasisConfigMessageOptions.Builder();
+    method public com.mapbox.navigation.core.adas.AdasisConfigMessageOptions build();
+    method public com.mapbox.navigation.core.adas.AdasisConfigMessageOptions.Builder enable(boolean enable);
+    method public com.mapbox.navigation.core.adas.AdasisConfigMessageOptions.Builder radiusMeters(int radiusMeters);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigPathOptions {
+    method public com.mapbox.navigation.core.adas.AdasisProfileLongOptions getProfileLongOptions();
+    method public com.mapbox.navigation.core.adas.AdasisProfileShortOptions getProfileShortOptions();
+    method public com.mapbox.navigation.core.adas.AdasisSegmentOptions getSegmentOptions();
+    method public com.mapbox.navigation.core.adas.AdasisStubOptions getStubOptions();
+    method public com.mapbox.navigation.core.adas.AdasisConfigPathOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.core.adas.AdasisProfileLongOptions profileLongOptions;
+    property public final com.mapbox.navigation.core.adas.AdasisProfileShortOptions profileShortOptions;
+    property public final com.mapbox.navigation.core.adas.AdasisSegmentOptions segmentOptions;
+    property public final com.mapbox.navigation.core.adas.AdasisStubOptions stubOptions;
+  }
+
+  public static final class AdasisConfigPathOptions.Builder {
+    ctor public AdasisConfigPathOptions.Builder();
+    method public com.mapbox.navigation.core.adas.AdasisConfigPathOptions build();
+    method public com.mapbox.navigation.core.adas.AdasisConfigPathOptions.Builder profileLongOptions(com.mapbox.navigation.core.adas.AdasisProfileLongOptions profileLongOptions);
+    method public com.mapbox.navigation.core.adas.AdasisConfigPathOptions.Builder profileShortOptions(com.mapbox.navigation.core.adas.AdasisProfileShortOptions profileShortOptions);
+    method public com.mapbox.navigation.core.adas.AdasisConfigPathOptions.Builder segmentOptions(com.mapbox.navigation.core.adas.AdasisSegmentOptions segmentOptions);
+    method public com.mapbox.navigation.core.adas.AdasisConfigPathOptions.Builder stubOptions(com.mapbox.navigation.core.adas.AdasisStubOptions stubOptions);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigProfileLongTypeOptions {
+    method public boolean getLat();
+    method public boolean getLon();
+    method public boolean getTrafficSign();
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileLongTypeOptions.Builder toBuilder();
+    property public final boolean lat;
+    property public final boolean lon;
+    property public final boolean trafficSign;
+  }
+
+  public static final class AdasisConfigProfileLongTypeOptions.Builder {
+    ctor public AdasisConfigProfileLongTypeOptions.Builder();
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileLongTypeOptions build();
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileLongTypeOptions.Builder lat(boolean lat);
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileLongTypeOptions.Builder lon(boolean lon);
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileLongTypeOptions.Builder trafficSign(boolean trafficSign);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigProfileShortTypeOptions {
+    method public boolean getCurvature();
+    method public boolean getHeadingChange();
+    method public boolean getRoadCondition();
+    method public boolean getSlopeStep();
+    method public boolean getVariableSpeedSign();
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder toBuilder();
+    property public final boolean curvature;
+    property public final boolean headingChange;
+    property public final boolean roadCondition;
+    property public final boolean slopeStep;
+    property public final boolean variableSpeedSign;
+  }
+
+  public static final class AdasisConfigProfileShortTypeOptions.Builder {
+    ctor public AdasisConfigProfileShortTypeOptions.Builder();
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions build();
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder curvature(boolean curvature);
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder headingChange(boolean headingChange);
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder roadCondition(boolean roadCondition);
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder slopeStep(boolean slopeStep);
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder variableSpeedSign(boolean variableSpeedSign);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisDataSendingConfig {
+    method public boolean getEnableRetransmission();
+    method public com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat getMessageBinaryFormat();
+    method public int getMessageIntervalMs();
+    method public int getMessagesInPackage();
+    method public int getMetadataCycleSeconds();
+    method public int getRetransmissionMeters();
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder toBuilder();
+    property public final boolean enableRetransmission;
+    property public final com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat messageBinaryFormat;
+    property public final int messageIntervalMs;
+    property public final int messagesInPackage;
+    property public final int metadataCycleSeconds;
+    property public final int retransmissionMeters;
+  }
+
+  public static final class AdasisDataSendingConfig.Builder {
+    ctor public AdasisDataSendingConfig.Builder(com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat messageBinaryFormat);
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig build();
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder enableRetransmission(boolean enableRetransmission);
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder messageIntervalMs(int messageIntervalMs);
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder messagesInPackage(int messagesInPackage);
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder metadataCycleSeconds(int metadataCycleSeconds);
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder retransmissionMeters(int retransmissionMeters);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class AdasisMessageBinaryFormat {
+    ctor public AdasisMessageBinaryFormat();
+  }
+
+  public static final class AdasisMessageBinaryFormat.AdasisV2BigEndian extends com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat.AdasisV2BigEndian INSTANCE;
+  }
+
+  public static final class AdasisMessageBinaryFormat.AdasisV2LittleEndian extends com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat.AdasisV2LittleEndian INSTANCE;
+  }
+
+  public static final class AdasisMessageBinaryFormat.FlatBuffers extends com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat {
+    field public static final com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat.FlatBuffers INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisProfileLongOptions {
+    method public com.mapbox.navigation.core.adas.AdasisConfigMessageOptions getOptions();
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileLongTypeOptions getProfileOptions();
+    method public com.mapbox.navigation.core.adas.AdasisProfileLongOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.core.adas.AdasisConfigMessageOptions options;
+    property public final com.mapbox.navigation.core.adas.AdasisConfigProfileLongTypeOptions profileOptions;
+  }
+
+  public static final class AdasisProfileLongOptions.Builder {
+    ctor public AdasisProfileLongOptions.Builder();
+    method public com.mapbox.navigation.core.adas.AdasisProfileLongOptions build();
+    method public com.mapbox.navigation.core.adas.AdasisProfileLongOptions.Builder options(com.mapbox.navigation.core.adas.AdasisConfigMessageOptions options);
+    method public com.mapbox.navigation.core.adas.AdasisProfileLongOptions.Builder profileOptions(com.mapbox.navigation.core.adas.AdasisConfigProfileLongTypeOptions profileOptions);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisProfileShortOptions {
+    method public com.mapbox.navigation.core.adas.AdasisConfigMessageOptions getOptions();
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions getProfileOptions();
+    method public com.mapbox.navigation.core.adas.AdasisProfileShortOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.core.adas.AdasisConfigMessageOptions options;
+    property public final com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions profileOptions;
+  }
+
+  public static final class AdasisProfileShortOptions.Builder {
+    ctor public AdasisProfileShortOptions.Builder();
+    method public com.mapbox.navigation.core.adas.AdasisProfileShortOptions build();
+    method public com.mapbox.navigation.core.adas.AdasisProfileShortOptions.Builder options(com.mapbox.navigation.core.adas.AdasisConfigMessageOptions options);
+    method public com.mapbox.navigation.core.adas.AdasisProfileShortOptions.Builder profileOptions(com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions profileOptions);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisSegmentOptions {
+    method public com.mapbox.navigation.core.adas.AdasisConfigMessageOptions getOptions();
+    method public com.mapbox.navigation.core.adas.AdasisSegmentOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.core.adas.AdasisConfigMessageOptions options;
+  }
+
+  public static final class AdasisSegmentOptions.Builder {
+    ctor public AdasisSegmentOptions.Builder();
+    method public com.mapbox.navigation.core.adas.AdasisSegmentOptions build();
+    method public com.mapbox.navigation.core.adas.AdasisSegmentOptions.Builder options(com.mapbox.navigation.core.adas.AdasisConfigMessageOptions options);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisStubOptions {
+    method public com.mapbox.navigation.core.adas.AdasisConfigMessageOptions getOptions();
+    method public com.mapbox.navigation.core.adas.AdasisStubOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.core.adas.AdasisConfigMessageOptions options;
+  }
+
+  public static final class AdasisStubOptions.Builder {
+    ctor public AdasisStubOptions.Builder();
+    method public com.mapbox.navigation.core.adas.AdasisStubOptions build();
+    method public com.mapbox.navigation.core.adas.AdasisStubOptions.Builder options(com.mapbox.navigation.core.adas.AdasisConfigMessageOptions options);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface AdasisV2MessageObserver {
+    method public void onMessage(java.util.List<java.lang.Byte> messageBuffer);
   }
 
 }
@@ -1549,7 +1543,7 @@ package com.mapbox.navigation.core.trip.session.eh {
   }
 
   public final class GraphAccessor {
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.adasis.AdasisEdgeAttributes? getAdasisEdgeAttributes(long edgeId);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.adas.AdasEdgeAttributes? getAdasisEdgeAttributes(long edgeId);
     method public com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata? getEdgeMetadata(long edgeId);
     method public java.util.List<com.mapbox.geojson.Point>? getEdgeShape(long edgeId);
     method public com.mapbox.geojson.Point? getGraphPositionCoordinate(com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition graphPosition);

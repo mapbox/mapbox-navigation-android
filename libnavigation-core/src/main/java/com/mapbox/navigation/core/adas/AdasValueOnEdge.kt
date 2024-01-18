@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.adasis
+package com.mapbox.navigation.core.adas
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
@@ -8,12 +8,12 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param shapeIndex Position on edge is represented as a shape index.
  * Integer part is an index of edge segment and fraction is a position on the segment:
  * 0 - left point, 1 - right point, 0.5 - in the middle between the segment points.
- * Ex.: 3.5 means the middle the the 3rd segment on the Edge shape, shape has more then 4 points
+ * Ex.: 3.5 means the middle of the 3rd segment on the Edge shape, shape has more than 4 points
  * @param percentAlong Position along edge shape [0-1]
  * @param value Floating point value, e.g. curvature in 1/m or slope in degrees
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisValueOnEdge private constructor(
+class AdasValueOnEdge private constructor(
     val shapeIndex: Float,
     val percentAlong: Double,
     val value: Double,
@@ -26,7 +26,7 @@ class AdasisValueOnEdge private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as AdasisValueOnEdge
+        other as AdasValueOnEdge
 
         if (shapeIndex != other.shapeIndex) return false
         if (percentAlong != other.percentAlong) return false
@@ -58,7 +58,7 @@ class AdasisValueOnEdge private constructor(
 
         @JvmSynthetic
         fun createFromNativeObject(nativeObj: com.mapbox.navigator.ValueOnEdge) =
-            AdasisValueOnEdge(
+            AdasValueOnEdge(
                 shapeIndex = nativeObj.shapeIndex,
                 percentAlong = nativeObj.percentAlong,
                 value = nativeObj.value

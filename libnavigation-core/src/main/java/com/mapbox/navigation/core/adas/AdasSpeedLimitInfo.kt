@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.adasis
+package com.mapbox.navigation.core.adas
 
 import androidx.annotation.IntDef
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -11,14 +11,14 @@ import com.mapbox.navigator.SpeedLimitUnit
  * @param value the numerical value of the limit
  * @param speedUnit the unit the value is specified in
  * @param speedLimitType speed limit type, see [SpeedLimitType]
- * @param restriction speed limit restriction, see [AdasisSpeedLimitRestriction]
+ * @param restriction speed limit restriction, see [AdasSpeedLimitRestriction]
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisSpeedLimitInfo private constructor(
+class AdasSpeedLimitInfo private constructor(
     val value: Int,
     val speedUnit: SpeedUnit,
     @SpeedLimitType.Type val speedLimitType: Int,
-    val restriction: AdasisSpeedLimitRestriction,
+    val restriction: AdasSpeedLimitRestriction,
 ) {
 
     /**
@@ -28,7 +28,7 @@ class AdasisSpeedLimitInfo private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as AdasisSpeedLimitInfo
+        other as AdasSpeedLimitInfo
 
         if (value != other.value) return false
         if (speedUnit != other.speedUnit) return false
@@ -103,16 +103,16 @@ class AdasisSpeedLimitInfo private constructor(
         @JvmSynthetic
         fun createFromNativeObject(
             nativeObj: com.mapbox.navigator.SpeedLimitInfo
-        ): AdasisSpeedLimitInfo {
+        ): AdasSpeedLimitInfo {
             val speedUnit = when (nativeObj.unit) {
                 SpeedLimitUnit.KILOMETRES_PER_HOUR -> SpeedUnit.KILOMETERS_PER_HOUR
                 SpeedLimitUnit.MILES_PER_HOUR -> SpeedUnit.MILES_PER_HOUR
             }
-            return AdasisSpeedLimitInfo(
+            return AdasSpeedLimitInfo(
                 value = nativeObj.value,
                 speedUnit = speedUnit,
                 speedLimitType = createSpeedLimitType(nativeObj.type),
-                restriction = AdasisSpeedLimitRestriction.createFromNativeObject(
+                restriction = AdasSpeedLimitRestriction.createFromNativeObject(
                     nativeObj.restriction
                 )
             )

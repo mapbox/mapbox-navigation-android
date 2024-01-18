@@ -1,14 +1,14 @@
-package com.mapbox.navigation.core.adasis
+package com.mapbox.navigation.core.adas
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
- * Segment message options
+ * Stub message options
  *
- * @param options common options for segment
+ * @param options common options for stub
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisSegmentOptions private constructor(
+class AdasisStubOptions private constructor(
     val options: AdasisConfigMessageOptions,
 ) {
 
@@ -19,8 +19,8 @@ class AdasisSegmentOptions private constructor(
         .options(options)
 
     @JvmSynthetic
-    internal fun toNativeSegment(): com.mapbox.navigator.Segment {
-        return com.mapbox.navigator.Segment(
+    internal fun toNativeStub(): com.mapbox.navigator.Stub {
+        return com.mapbox.navigator.Stub(
             options.toNativeAdasisConfigMessageOptions()
         )
     }
@@ -32,7 +32,7 @@ class AdasisSegmentOptions private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as AdasisSegmentOptions
+        other as AdasisStubOptions
 
         return options == other.options
     }
@@ -48,11 +48,11 @@ class AdasisSegmentOptions private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "Segment(options=$options)"
+        return "Stub(options=$options)"
     }
 
     /**
-     * Builder for [AdasisSegmentOptions].
+     * Builder for [AdasisStubOptions].
      */
     class Builder {
 
@@ -66,8 +66,8 @@ class AdasisSegmentOptions private constructor(
         }
 
         /**
-         * Build the [AdasisSegmentOptions]
+         * Build the [AdasisStubOptions]
          */
-        fun build() = AdasisSegmentOptions(options)
+        fun build() = AdasisStubOptions(options)
     }
 }

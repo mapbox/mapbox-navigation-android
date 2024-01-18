@@ -44,9 +44,8 @@ import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.accounts.BillingController
-import com.mapbox.navigation.core.adasis.AdasisConfig
-import com.mapbox.navigation.core.adasis.AdasisMessageContext
-import com.mapbox.navigation.core.adasis.AdasisV2MessageCallback
+import com.mapbox.navigation.core.adas.AdasisConfig
+import com.mapbox.navigation.core.adas.AdasisV2MessageObserver
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -1308,7 +1307,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
-        resetAdasisMessageCallback()
+        resetAdasisMessageObserver()
 
         isDestroyed = true
         hasInstance = false
@@ -2002,23 +2001,21 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Sets a callback for ADASIS messages
      *
      * @param adasisConfig Adasis config
-     * @param callback Message callback
+     * @param observer Adasis message observer
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun setAdasisMessageCallback(adasisConfig: AdasisConfig, callback: AdasisV2MessageCallback) {
+    fun setAdasisMessageObserver(adasisConfig: AdasisConfig, observer: AdasisV2MessageObserver) {
         navigator.setAdasisMessageCallback(
-            { message, context ->
-                callback.onMessage(message, AdasisMessageContext.createFromNativeObject(context))
-            },
+            { observer.onMessage(it) },
             adasisConfig.toNativeAdasisConfig()
         )
     }
 
     /**
-     * Resets a callback for ADASIS messages
+     * Resets observer previously set via [setAdasisMessageObserver]
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun resetAdasisMessageCallback() {
+    fun resetAdasisMessageObserver() {
         navigator.resetAdasisMessageCallback()
     }
 

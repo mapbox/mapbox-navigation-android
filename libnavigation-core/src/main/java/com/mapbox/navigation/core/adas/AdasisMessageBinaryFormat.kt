@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.adasis
+package com.mapbox.navigation.core.adas
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -7,7 +7,7 @@ import com.mapbox.navigator.MessageBinaryFormat
 /**
  * Binary format in which Adasis message will be sent.
  *
- * @see [MapboxNavigation.setAdasisMessageCallback]
+ * @see [MapboxNavigation.setAdasisMessageObserver]
  */
 @ExperimentalPreviewMapboxNavigationAPI
 abstract class AdasisMessageBinaryFormat {

@@ -29,7 +29,9 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
-import com.mapbox.navigation.core.adasis.AdasisConfig
+import com.mapbox.navigation.core.adas.AdasisConfig
+import com.mapbox.navigation.core.adas.AdasisDataSendingConfig
+import com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -121,7 +123,7 @@ class AdasisActivity : AppCompatActivity() {
                     routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
             }
-            isNavigating = true
+            isNavigating = result.navigationRoutes.isNotEmpty()
             startSimulation(result.navigationRoutes[0].directionsRoute)
         }
     }
@@ -280,16 +282,20 @@ class AdasisActivity : AppCompatActivity() {
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
 
-            mapboxNavigation.setAdasisMessageCallback(
-                AdasisConfig.Builder().build()
-            ) { messageBuffer, context ->
+            val dataSendingConfig = AdasisDataSendingConfig.Builder(
+                AdasisMessageBinaryFormat.FlatBuffers,
+            ).build()
+
+            mapboxNavigation.setAdasisMessageObserver(
+                AdasisConfig.Builder(dataSendingConfig).build()
+            ) { messageBuffer ->
                 this@AdasisActivity.runOnUiThread {
                     // TODO decode buffer and print data
                     adasisMessagesLog += "${numberOfMessages++}: ${messageBuffer.size} bytes\n"
                     binding.adasisMsgLog.text = adasisMessagesLog
                     binding.scrollContainer.fullScroll(View.FOCUS_DOWN)
 
-                    Log.d(TAG, "Adasis message: $messageBuffer, context: $context")
+                    Log.d(TAG, "Adasis message: $messageBuffer")
                 }
             }
         }
@@ -302,7 +308,7 @@ class AdasisActivity : AppCompatActivity() {
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
-        mapboxNavigation.resetAdasisMessageCallback()
+        mapboxNavigation.resetAdasisMessageObserver()
     }
 
     override fun onDestroy() {

@@ -1,15 +1,15 @@
-package com.mapbox.navigation.core.adasis
+package com.mapbox.navigation.core.adas
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class AdasisSegmentOptionsTest : BuilderTest<AdasisSegmentOptions, AdasisSegmentOptions.Builder>() {
+class AdasisStubOptionsTest : BuilderTest<AdasisStubOptions, AdasisStubOptions.Builder>() {
 
-    override fun getImplementationClass() = AdasisSegmentOptions::class
+    override fun getImplementationClass() = AdasisStubOptions::class
 
-    override fun getFilledUpBuilder(): AdasisSegmentOptions.Builder {
-        return AdasisSegmentOptions.Builder()
+    override fun getFilledUpBuilder(): AdasisStubOptions.Builder {
+        return AdasisStubOptions.Builder()
             .options(AdasisConfigMessageOptions.Builder().radiusMeters(12345).build())
     }
 

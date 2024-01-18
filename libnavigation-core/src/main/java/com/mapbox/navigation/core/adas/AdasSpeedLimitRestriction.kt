@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.adasis
+package com.mapbox.navigation.core.adas
 
 import androidx.annotation.IntDef
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -13,7 +13,7 @@ import com.mapbox.navigation.core.sensor.SensorData
  * @param lanes Lane numbers where the speed limit is valid. Empty array means all lanes
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisSpeedLimitRestriction private constructor(
+class AdasSpeedLimitRestriction private constructor(
     val weatherConditionTypes: List<Int>,
     val dateTimeCondition: String,
     val vehicleTypes: List<Int>,
@@ -27,7 +27,7 @@ class AdasisSpeedLimitRestriction private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as AdasisSpeedLimitRestriction
+        other as AdasSpeedLimitRestriction
 
         if (weatherConditionTypes != other.weatherConditionTypes) return false
         if (dateTimeCondition != other.dateTimeCondition) return false
@@ -118,7 +118,7 @@ class AdasisSpeedLimitRestriction private constructor(
 
         @JvmSynthetic
         fun createFromNativeObject(nativeObj: com.mapbox.navigator.SpeedLimitRestriction) =
-            AdasisSpeedLimitRestriction(
+            AdasSpeedLimitRestriction(
                 weatherConditionTypes = nativeObj.weather.map {
                     SensorData.Weather.ConditionType.createConditionType(it)
                 },

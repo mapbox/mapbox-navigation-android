@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.adasis
+package com.mapbox.navigation.core.adas
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
@@ -17,8 +17,7 @@ class AdasisConfig private constructor(
     /**
      * Get a builder to customize a subset of current configuration.
      */
-    fun toBuilder(): Builder = Builder()
-        .dataSendingConfig(dataSendingConfig)
+    fun toBuilder(): Builder = Builder(dataSendingConfig)
         .pathOptions(pathOptions)
 
     @JvmSynthetic
@@ -63,21 +62,12 @@ class AdasisConfig private constructor(
 
     /**
      * Builder for [AdasisConfig]
+     *
+     * @param dataSendingConfig data sending configuration
      */
-    class Builder {
-
-        private var dataSendingConfig = AdasisDataSendingConfig.Builder(
-            AdasisMessageBinaryFormat.FlatBuffers
-        ).build()
+    class Builder(private val dataSendingConfig: AdasisDataSendingConfig) {
 
         private var pathOptions = AdasisConfigPathOptions.Builder().build()
-
-        /**
-         * Data sending configuration
-         */
-        fun dataSendingConfig(dataSending: AdasisDataSendingConfig) = apply {
-            this.dataSendingConfig = dataSending
-        }
 
         /**
          * ADASISv2 path level specific configurations
