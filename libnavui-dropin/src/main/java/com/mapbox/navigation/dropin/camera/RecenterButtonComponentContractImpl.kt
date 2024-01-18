@@ -20,6 +20,10 @@ internal class RecenterButtonComponentContractImpl(
         }
 
     override fun onClick(view: View) {
-        store.dispatch(CameraAction.SetCameraMode(TargetCameraMode.Following))
+        store.recenterCamera()
     }
 }
+
+internal fun Store.recenterCamera() = dispatch(
+    CameraAction.SetCameraMode(TargetCameraMode.Following)
+)

@@ -8,6 +8,8 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.NavigationViewApiErrorTypes
 import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.ui.app.internal.Reducer
+import com.mapbox.navigation.ui.app.internal.camera.CameraAction
+import com.mapbox.navigation.ui.app.internal.camera.TargetCameraMode
 import com.mapbox.navigation.ui.app.internal.destination.Destination
 import com.mapbox.navigation.ui.app.internal.destination.DestinationAction
 import com.mapbox.navigation.ui.app.internal.navigation.NavigationState
@@ -366,6 +368,12 @@ class MapboxNavigationViewApiTest {
 
         every { audioGuidance.getCurrentVoiceInstructionsPlayer() } returns null
         assertNull(sut.getCurrentVoiceInstructionsPlayer())
+    }
+
+    @Test
+    fun `recenterCamera should dispatch store action`() {
+        sut.recenterCamera()
+        verify { testStore.dispatch(CameraAction.SetCameraMode(TargetCameraMode.Following)) }
     }
 
     private fun navigationRoute(vararg waypoints: Point): NavigationRoute {
