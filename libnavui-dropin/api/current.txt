@@ -28,6 +28,7 @@ package com.mapbox.navigation.dropin {
     ctor public NavigationViewApi();
     method public abstract com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer? getCurrentVoiceInstructionsPlayer();
     method public abstract boolean isReplayEnabled();
+    method public abstract void recenterCamera();
     method public abstract void routeReplayEnabled(boolean enabled);
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startActiveGuidance();
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startActiveGuidance(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
@@ -369,6 +370,13 @@ package com.mapbox.navigation.dropin.actionbutton {
 
   public static final class ActionButtonsBinder.Companion {
     method public com.mapbox.navigation.dropin.actionbutton.ActionButtonsBinder defaultBinder();
+  }
+
+}
+
+package com.mapbox.navigation.dropin.camera {
+
+  public final class RecenterButtonComponentContractImplKt {
   }
 
 }

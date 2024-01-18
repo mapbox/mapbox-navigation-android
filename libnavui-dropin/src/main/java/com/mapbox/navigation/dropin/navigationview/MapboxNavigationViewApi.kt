@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.NavigationViewApi
 import com.mapbox.navigation.dropin.NavigationViewApiError
 import com.mapbox.navigation.dropin.NavigationViewApiErrorTypes
+import com.mapbox.navigation.dropin.camera.recenterCamera
 import com.mapbox.navigation.ui.app.internal.Store
 import com.mapbox.navigation.ui.app.internal.endNavigation
 import com.mapbox.navigation.ui.app.internal.extension.dispatch
@@ -106,6 +107,10 @@ internal class MapboxNavigationViewApi(
 
     override fun getCurrentVoiceInstructionsPlayer(): MapboxVoiceInstructionsPlayer? {
         return MapboxAudioGuidance.getRegisteredInstance().getCurrentVoiceInstructionsPlayer()
+    }
+
+    override fun recenterCamera() {
+        store.recenterCamera()
     }
 
     @Throws(NavigationViewApiError::class)

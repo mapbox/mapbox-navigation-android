@@ -590,7 +590,7 @@ package com.mapbox.navigation.ui.maps.camera.view {
 
 package com.mapbox.navigation.ui.maps.guidance.junction.api {
 
-  public final class MapboxJunctionApi {
+  @UiThread public final class MapboxJunctionApi {
     ctor public MapboxJunctionApi(String accessToken);
     method public void cancelAll();
     method public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue>> consumer);

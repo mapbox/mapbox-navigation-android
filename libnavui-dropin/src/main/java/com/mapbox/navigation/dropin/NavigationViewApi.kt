@@ -117,4 +117,10 @@ abstract class NavigationViewApi {
      * Access the current instance of [MapboxVoiceInstructionsPlayer] created by [NavigationView].
      */
     abstract fun getCurrentVoiceInstructionsPlayer(): MapboxVoiceInstructionsPlayer?
+
+    /**
+     * If the camera is idle or in overview mode, calling this function will dispatch an action
+     * that will reposition the camera back to the user locaiton indicator (as if the recenter button was clicked).
+     */
+    abstract fun recenterCamera()
 }
