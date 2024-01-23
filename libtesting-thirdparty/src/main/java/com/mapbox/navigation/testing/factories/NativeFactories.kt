@@ -62,6 +62,7 @@ fun createNavigationStatus(
     alternativeRouteIndices: List<RouteIndices> = emptyList(),
     isSyntheticLocation: Boolean = false,
     correctedLocationData: CorrectedLocationData? = null,
+    mapMatchedSystemTime: Date = Date(),
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
@@ -93,7 +94,8 @@ fun createNavigationStatus(
         nextWaypointIndex,
         layer,
         isSyntheticLocation,
-        correctedLocationData
+        correctedLocationData,
+        mapMatchedSystemTime,
     )
 }
 

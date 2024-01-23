@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.common.LogConfiguration
 import com.mapbox.common.LoggingLevel
+import com.mapbox.navigation.examples.core.AdasisActivity
 import com.mapbox.navigation.examples.core.IndependentRouteGenerationActivity
 import com.mapbox.navigation.examples.core.MapboxBuildingHighlightActivity
 import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
@@ -143,6 +144,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.description_draw_utility),
                 RouteDrawingActivity::class.java
             ),
+            SampleItem(
+                getString(R.string.title_adasis),
+                getString(R.string.description_adasis),
+                AdasisActivity::class.java
+            )
         )
     }
 
