@@ -430,15 +430,26 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.deviceProfile,
             navigatorConfig,
         )
+
+        val tilesConfig = createTilesConfig(
+            isFallback = false,
+            tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
+        )
+
         historyRecorderHandles = createHistoryRecorderHandles(config)
+
+        val cacheHandle = NavigatorLoader.createCacheHandle(
+            config,
+            tilesConfig,
+            historyRecorderHandles.composite
+        )
+
         nativeRouter = NavigatorLoader.createNativeRouterInterface(
-            NavigatorLoader.createConfig(navigationOptions.deviceProfile, navigatorConfig),
-            createTilesConfig(
-                isFallback = false,
-                tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
-            ),
+            cacheHandle,
+            config,
             historyRecorderHandles.composite,
         )
+
         val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
             paramsProvider(
                 ModuleParams.NavigationRouter(
@@ -455,12 +466,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             else -> LegacyNavigationRouterAdapter(LegacyRouterAdapter(result))
         }
         navigator = NavigationComponentProvider.createNativeNavigator(
+            cacheHandle,
             config,
             historyRecorderHandles.composite,
-            createTilesConfig(
-                isFallback = false,
-                tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
-            ),
             navigationOptions.accessToken ?: "",
             if (moduleRouter.isInternalImplementation()) {
                 nativeRouter
@@ -2014,10 +2022,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         historyRecorderHandles = createHistoryRecorderHandles(config)
 
         mainJobController.scope.launch {
+            val cacheHandle = NavigatorLoader.createCacheHandle(
+                config,
+                createTilesConfig(isFallback, tilesVersion),
+                historyRecorderHandles.composite
+            )
+
             navigator.recreate(
+                cacheHandle,
                 config,
                 historyRecorderHandles.composite,
-                createTilesConfig(isFallback, tilesVersion),
                 navigationOptions.accessToken ?: "",
                 if (moduleRouter.isInternalImplementation()) {
                     nativeRouter
