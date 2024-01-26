@@ -6,6 +6,28 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.14.3 - 26 January, 2024
+### Changelog
+[Changes between v2.14.2 and v2.14.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.14.2...v2.14.3)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed a bug with multiple instances of cache which resulted in excessive memory consumption. [#7693](https://github.com/mapbox/mapbox-navigation-android/pull/7693)
+- Improved location accuracy for walking and cycling profiles. [#7730](https://github.com/mapbox/mapbox-navigation-android/pull/7730)
+- Added an options to `DeviceProfile#customConfig` to disable initialized state. [#7730](https://github.com/mapbox/mapbox-navigation-android/pull/7730)
+- Disabled initialized state by default for snapping profile. [#7730](https://github.com/mapbox/mapbox-navigation-android/pull/7730)
+- Prevented old predictive cache groups from staying on disk forever. [#7730](https://github.com/mapbox/mapbox-navigation-android/pull/7730)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.14.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.14.1))
+- Mapbox Navigation Native `v137.1.7`
+- Mapbox Core Common `v23.6.0`
+- Mapbox Java `v6.12.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.12.0))
+
+
 ## Mapbox Navigation SDK 2.19.0-beta.1 - 23 January, 2024
 ### Changelog
 [Changes between v2.18.0 and v2.19.0-beta.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.18.0...v2.19.0-beta.1)
