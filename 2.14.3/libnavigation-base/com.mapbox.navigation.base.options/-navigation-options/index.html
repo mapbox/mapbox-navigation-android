@@ -1,0 +1,429 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>NavigationOptions</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Base::com.mapbox.navigation.base.options/NavigationOptions///PointingToDeclaration//-1298933202">
+  <div class="breadcrumbs"><a href="../../index.html">Base</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.base.options</a><span class="delimiter">/</span><a href="index.html">NavigationOptions</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Navigation</span><wbr><span><span>Options</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">NavigationOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">This value will be used to offset the time at which the current location was calculated in such a way as to project the location forward along the current trajectory so as to appear more in sync with the users ground-truth location</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Parameters">Parameters</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>application</span><wbr><span><span>Context</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the Context of the Android Application</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>access</span><wbr><span><span>Token</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph"><a href="https://docs.mapbox.com/help/glossary/access-token/">Mapbox Access Token</a></p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>location</span><wbr><span><span>Engine</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the mechanism responsible for providing location approximations to navigation</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>location</span><wbr><span>Engine</span><wbr><span><span>Request</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">specifies the rate to request locations from the location engine.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>time</span><wbr><span>Format</span><wbr><span><span>Type</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">defines time format for calculation remaining trip time</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>navigator</span><wbr><span>Prediction</span><wbr><span><span>Millis</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">defines approximate navigator prediction in milliseconds</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>distance</span><wbr><span>Formatter</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph"><a href="../../com.mapbox.navigation.base.formatter/-distance-formatter-options/index.html">DistanceFormatterOptions</a> options to format distances showing in notification during navigation</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>routing</span><wbr><span>Tiles</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph"><a href="../-routing-tiles-options/index.html">RoutingTilesOptions</a> defines routing tiles endpoint and storage configuration.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>is</span><wbr><span>Debug</span><wbr><span>Logging</span><wbr><span><span>Enabled</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">Boolean</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>device</span><wbr><span><span>Profile</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph"><a href="../-device-profile/index.html">DeviceProfile</a> defines how navigation data should be interpreted</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>e</span><wbr><span>Horizon</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph"><a href="../-e-horizon-options/index.html">EHorizonOptions</a> defines configuration for the Electronic Horizon</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Refresh</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">defines configuration for refreshing routes</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>reroute</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">defines configuration for reroute</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Alternatives</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">defines configuration for observing alternatives while navigating</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>incidents</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">defines configuration for live incidents</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>history</span><wbr><span>Recorder</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">defines configuration for recording navigation events</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>events</span><wbr><span>App</span><wbr><span><span>Metadata</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph"><a href="../-events-app-metadata/index.html">EventsAppMetadata</a> information (optional)</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>enable</span><wbr><span><span>Sensors</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">enables sensors for current position calculation (optional)</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>copilot</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">defines options for Copilot</p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="1466441824%2FClasslikes%2F-1298933202" anchor-label="Builder" id="1466441824%2FClasslikes%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1466441824%2FClasslikes%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-builder/index.html">Builder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">applicationContext<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Build a new <a href="index.html">NavigationOptions</a></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1402734575%2FFunctions%2F-1298933202" anchor-label="equals" id="1402734575%2FFunctions%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="equals.html"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1402734575%2FFunctions%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><a href="equals.html"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Regenerate whenever a change is made</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1358583785%2FFunctions%2F-1298933202" anchor-label="hashCode" id="-1358583785%2FFunctions%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hash-code.html"><span>hash</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1358583785%2FFunctions%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="hash-code.html"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Regenerate whenever a change is made</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-389913176%2FFunctions%2F-1298933202" anchor-label="toBuilder" id="-389913176%2FFunctions%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-builder.html"><span>to</span><wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-389913176%2FFunctions%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-builder.html"><span class="token function">toBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-builder/index.html">NavigationOptions.Builder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Get a builder to customize a subset of current options.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1536749850%2FFunctions%2F-1298933202" anchor-label="toString" id="-1536749850%2FFunctions%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-string.html"><span>to</span><wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1536749850%2FFunctions%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a string representation of the object.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-1290387917%2FProperties%2F-1298933202" anchor-label="accessToken" id="-1290387917%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="access-token.html">accessToken</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1290387917%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="-1290387917%2FProperties%2F-1298933202" anchor-label="accessToken" id="-1290387917%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="access-token.html">accessToken</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1706737715%2FProperties%2F-1298933202" anchor-label="applicationContext" id="1706737715%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="application-context.html">applicationContext</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1706737715%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="1706737715%2FProperties%2F-1298933202" anchor-label="applicationContext" id="1706737715%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="application-context.html">applicationContext</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1294583072%2FProperties%2F-1298933202" anchor-label="copilotOptions" id="1294583072%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="copilot-options.html">copilotOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1294583072%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="1294583072%2FProperties%2F-1298933202" anchor-label="copilotOptions" id="1294583072%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="copilot-options.html">copilotOptions</a><span class="token operator">: </span><a href="../-copilot-options/index.html">CopilotOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1337705035%2FProperties%2F-1298933202" anchor-label="deviceProfile" id="-1337705035%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="device-profile.html">deviceProfile</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1337705035%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="-1337705035%2FProperties%2F-1298933202" anchor-label="deviceProfile" id="-1337705035%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="device-profile.html">deviceProfile</a><span class="token operator">: </span><a href="../-device-profile/index.html">DeviceProfile</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-387111575%2FProperties%2F-1298933202" anchor-label="distanceFormatterOptions" id="-387111575%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="distance-formatter-options.html">distanceFormatterOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-387111575%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="-387111575%2FProperties%2F-1298933202" anchor-label="distanceFormatterOptions" id="-387111575%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="distance-formatter-options.html">distanceFormatterOptions</a><span class="token operator">: </span><a href="../../com.mapbox.navigation.base.formatter/-distance-formatter-options/index.html">DistanceFormatterOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="773058240%2FProperties%2F-1298933202" anchor-label="eHorizonOptions" id="773058240%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="e-horizon-options.html">eHorizonOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="773058240%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="773058240%2FProperties%2F-1298933202" anchor-label="eHorizonOptions" id="773058240%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="e-horizon-options.html">eHorizonOptions</a><span class="token operator">: </span><a href="../-e-horizon-options/index.html">EHorizonOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1196290194%2FProperties%2F-1298933202" anchor-label="enableSensors" id="1196290194%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="enable-sensors.html">enableSensors</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1196290194%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="1196290194%2FProperties%2F-1298933202" anchor-label="enableSensors" id="1196290194%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="enable-sensors.html">enableSensors</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="128496017%2FProperties%2F-1298933202" anchor-label="eventsAppMetadata" id="128496017%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="events-app-metadata.html">eventsAppMetadata</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="128496017%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="128496017%2FProperties%2F-1298933202" anchor-label="eventsAppMetadata" id="128496017%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="events-app-metadata.html">eventsAppMetadata</a><span class="token operator">: </span><a href="../-events-app-metadata/index.html">EventsAppMetadata</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1691822022%2FProperties%2F-1298933202" anchor-label="historyRecorderOptions" id="1691822022%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="history-recorder-options.html">historyRecorderOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1691822022%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="1691822022%2FProperties%2F-1298933202" anchor-label="historyRecorderOptions" id="1691822022%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="history-recorder-options.html">historyRecorderOptions</a><span class="token operator">: </span><a href="../-history-recorder-options/index.html">HistoryRecorderOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="158746613%2FProperties%2F-1298933202" anchor-label="incidentsOptions" id="158746613%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="incidents-options.html">incidentsOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="158746613%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="158746613%2FProperties%2F-1298933202" anchor-label="incidentsOptions" id="158746613%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="incidents-options.html">incidentsOptions</a><span class="token operator">: </span><a href="../-incidents-options/index.html">IncidentsOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1449072227%2FProperties%2F-1298933202" anchor-label="isDebugLoggingEnabled" id="-1449072227%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="is-debug-logging-enabled.html">isDebugLoggingEnabled</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1449072227%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="-1449072227%2FProperties%2F-1298933202" anchor-label="isDebugLoggingEnabled" id="-1449072227%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="is-debug-logging-enabled.html">isDebugLoggingEnabled</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-187874917%2FProperties%2F-1298933202" anchor-label="locationEngine" id="-187874917%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="location-engine.html">locationEngine</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-187874917%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="-187874917%2FProperties%2F-1298933202" anchor-label="locationEngine" id="-187874917%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="location-engine.html">locationEngine</a><span class="token operator">: </span><span data-unresolved-link="com.mapbox.android.core.location/LocationEngine///PointingToDeclaration/">LocationEngine</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1416564880%2FProperties%2F-1298933202" anchor-label="locationEngineRequest" id="1416564880%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="location-engine-request.html">locationEngineRequest</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1416564880%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="1416564880%2FProperties%2F-1298933202" anchor-label="locationEngineRequest" id="1416564880%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="location-engine-request.html">locationEngineRequest</a><span class="token operator">: </span><span data-unresolved-link="com.mapbox.android.core.location/LocationEngineRequest///PointingToDeclaration/">LocationEngineRequest</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1458308508%2FProperties%2F-1298933202" anchor-label="navigatorPredictionMillis" id="1458308508%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="navigator-prediction-millis.html">navigatorPredictionMillis</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1458308508%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="1458308508%2FProperties%2F-1298933202" anchor-label="navigatorPredictionMillis" id="1458308508%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="navigator-prediction-millis.html">navigatorPredictionMillis</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1755141302%2FProperties%2F-1298933202" anchor-label="rerouteOptions" id="-1755141302%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="reroute-options.html">rerouteOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1755141302%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="-1755141302%2FProperties%2F-1298933202" anchor-label="rerouteOptions" id="-1755141302%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="reroute-options.html">rerouteOptions</a><span class="token operator">: </span><a href="../-reroute-options/index.html">RerouteOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-394689437%2FProperties%2F-1298933202" anchor-label="routeAlternativesOptions" id="-394689437%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-alternatives-options.html">routeAlternativesOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-394689437%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="-394689437%2FProperties%2F-1298933202" anchor-label="routeAlternativesOptions" id="-394689437%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-alternatives-options.html">routeAlternativesOptions</a><span class="token operator">: </span><a href="../../com.mapbox.navigation.base.route/-route-alternatives-options/index.html">RouteAlternativesOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1867649052%2FProperties%2F-1298933202" anchor-label="routeRefreshOptions" id="1867649052%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-refresh-options.html">routeRefreshOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1867649052%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="1867649052%2FProperties%2F-1298933202" anchor-label="routeRefreshOptions" id="1867649052%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-refresh-options.html">routeRefreshOptions</a><span class="token operator">: </span><a href="../../com.mapbox.navigation.base.route/-route-refresh-options/index.html">RouteRefreshOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-218507735%2FProperties%2F-1298933202" anchor-label="routingTilesOptions" id="-218507735%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="routing-tiles-options.html">routingTilesOptions</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-218507735%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="-218507735%2FProperties%2F-1298933202" anchor-label="routingTilesOptions" id="-218507735%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="routing-tiles-options.html">routingTilesOptions</a><span class="token operator">: </span><a href="../-routing-tiles-options/index.html">RoutingTilesOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="735714132%2FProperties%2F-1298933202" anchor-label="timeFormatType" id="735714132%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-base:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="time-format-type.html">timeFormatType</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="735714132%2FProperties%2F-1298933202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-base:dokkaHtmlPartial/release"><a data-name="735714132%2FProperties%2F-1298933202" anchor-label="timeFormatType" id="735714132%2FProperties%2F-1298933202" data-filterable-set=":libnavigation-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="time-format-type.html">timeFormatType</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
