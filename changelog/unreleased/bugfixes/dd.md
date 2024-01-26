@@ -1,0 +1,4 @@
+- Improved location accuracy for walking and cycling profiles.
+- Added an options to `DeviceProfile#customConfig` to disable initialized state.
+- Disabled initialized state by default for snapping profile.
+- Prevented old predictive cache groups from staying on disk forever.
