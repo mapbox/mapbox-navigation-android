@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>NavigationLocationProvider</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Maps::com.mapbox.navigation.ui.maps.location/NavigationLocationProvider///PointingToDeclaration//-1725360525">
+  <div class="breadcrumbs"><a href="../../index.html">UI Maps</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.ui.maps.location</a><span class="delimiter">/</span><a href="index.html">NavigationLocationProvider</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Navigation</span><wbr><span>Location</span><wbr><span><span>Provider</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">NavigationLocationProvider</a> : <span data-unresolved-link="com.mapbox.maps.plugin.locationcomponent/LocationProvider///PointingToDeclaration/">LocationProvider</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">This class provides a <span data-unresolved-link="com.mapbox.maps.plugin.locationcomponent/LocationProvider///PointingToDeclaration/">LocationProvider</span> implementation that can be used together with the <span data-unresolved-link="com.mapbox.maps.plugin.locationcomponent/LocationComponentPlugin///PointingToDeclaration/">LocationComponentPlugin</span> and provides an easy integration with the <a href="../../../libnavigation-core/com.mapbox.navigation.core.trip.session/-location-observer/index.html">LocationObserver</a> that produces enhanced location updates.</p><h4 class=""> Example usage</h4><p class="paragraph">Initialize the location plugin:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">locationComponent = mapView.location.apply {<br>    setLocationProvider(navigationLocationProvider)<br>    addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)<br>    enabled = true<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Pass location data to transition the puck:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">private val locationObserver = object : LocationObserver {<br>    override fun onNewRawLocation(rawLocation: Location) {}<br>    override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {<br>        val transitionOptions: (ValueAnimator.() -&gt; Unit)? = if (locationMatcherResult.isTeleport) {<br>            {<br>                duration = 0<br>            }<br>        } else {<br>            {<br>                duration = 1000<br>            }<br>        }<br>        navigationLocationProvider.changePosition(<br>            locationMatcherResult.enhancedLocation,<br>            locationMatcherResult.keyPoints,<br>            latLngTransitionOptions = transitionOptions,<br>            bearingTransitionOptions = transitionOptions<br>        )<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="801664291%2FConstructors%2F-1725360525" anchor-label="NavigationLocationProvider" id="801664291%2FConstructors%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-navigation-location-provider.html"><span>Navigation</span><wbr><span>Location</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="801664291%2FConstructors%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-navigation-location-provider.html"><span class="token function">NavigationLocationProvider</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1844262155%2FFunctions%2F-1725360525" anchor-label="changePosition" id="1844262155%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="change-position.html"><span>change</span><wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1844262155%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="change-position.html"><span class="token function">changePosition</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;location<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/location/Location.html">Location</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;keyPoints<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/android/location/Location.html">Location</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;latLngTransitionOptions<span class="token operator">: </span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/android/animation/ValueAnimator.html">ValueAnimator</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;bearingTransitionOptions<span class="token operator">: </span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/android/animation/ValueAnimator.html">ValueAnimator</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Provide the location update that puck should transition to.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-656584340%2FFunctions%2F-1725360525" anchor-label="registerLocationConsumer" id="-656584340%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="register-location-consumer.html"><span>register</span><wbr><span>Location</span><wbr><span><span>Consumer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-656584340%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="register-location-consumer.html"><span class="token function">registerLocationConsumer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">locationConsumer<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.locationcomponent/LocationConsumer///PointingToDeclaration/">LocationConsumer</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Register the location consumer to the Location Provider.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-565906203%2FFunctions%2F-1725360525" anchor-label="unRegisterLocationConsumer" id="-565906203%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="un-register-location-consumer.html"><span>un</span><wbr><span>Register</span><wbr><span>Location</span><wbr><span><span>Consumer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-565906203%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="un-register-location-consumer.html"><span class="token function">unRegisterLocationConsumer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">locationConsumer<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.locationcomponent/LocationConsumer///PointingToDeclaration/">LocationConsumer</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Unregister the location consumer from the Location Provider.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="1894099921%2FProperties%2F-1725360525" anchor-label="lastKeyPoints" id="1894099921%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="last-key-points.html">lastKeyPoints</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1894099921%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1894099921%2FProperties%2F-1725360525" anchor-label="lastKeyPoints" id="1894099921%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-key-points.html">lastKeyPoints</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/android/location/Location.html">Location</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1894099921%2FProperties%2F-1725360525" anchor-label="lastKeyPoints" id="1894099921%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><p class="paragraph">Returns the last cached key points value.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="904179954%2FProperties%2F-1725360525" anchor-label="lastLocation" id="904179954%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="last-location.html">lastLocation</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="904179954%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="904179954%2FProperties%2F-1725360525" anchor-label="lastLocation" id="904179954%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-location.html">lastLocation</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/location/Location.html">Location</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="904179954%2FProperties%2F-1725360525" anchor-label="lastLocation" id="904179954%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><p class="paragraph">Returns the last cached target location value.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
