@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Indicates voice instructions are muted -->
-    <string name="mapbox_muted">Muted</string>
+    <string name="mapbox_muted">Wyciszenie</string>
 
     <!-- Indicates voice instructions are unmuted -->
-    <string name="mapbox_unmuted">Unmuted</string>
+    <string name="mapbox_unmuted">Brak wyciszenia</string>
 </resources>

@@ -23,15 +23,15 @@
 
     <string name="car_feedback_title">Prześlij opinię</string>
     <string name="car_feedback_submit">Prześlij</string>
-    <string name="car_feedback_submit_toast_select_item">Proszę wybrać temat opinii</string>
+    <string name="car_feedback_submit_toast_select_item">Proszę wybrać temat</string>
     <string name="car_feedback_submit_toast_success">Dziękujemy za opinię!</string>
     <string name="car_feedback_negative_routing_error">Jakość trasy</string>
     <string name="car_feedback_negative_incorrect_visual">Wygląda niepoprawnie</string>
     <string name="car_feedback_negative_incorrect_audio">Nieprawidłowa instrukcja głosowa</string>
-    <string name="car_feedback_negative_road_issue">Trasa nieoptymalna</string>
+    <string name="car_feedback_negative_road_issue">Zdarzenie na drodze</string>
     <string name="car_feedback_negative_road_closed">Trasa zamknięta</string>
     <string name="car_feedback_negative_traffic_issue">Nieprawidłowe natężenie ruch</string>
-    <string name="car_feedback_negative_route_not_allowed">Nielegalna trasa</string>
+    <string name="car_feedback_negative_route_not_allowed">Niepoprawna trasa</string>
     <string name="car_feedback_negative_positioning_issue">Problem z lokalizacją</string>
     <string name="car_feedback_negative_other_issue">Inny problem</string>
 
@@ -41,5 +41,5 @@
     <string name="car_feedback_search_other">Inny problem</string>
 
     <string name="car_feedback_arrival_positive">Dobrze</string>
-    <string name="car_feedback_arrival_negative">Niedobrze</string>
+    <string name="car_feedback_arrival_negative">Źle</string>
 </resources>
