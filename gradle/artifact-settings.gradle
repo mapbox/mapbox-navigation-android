@@ -16,51 +16,12 @@ ext {
 }
 
 def getVersionName() {
-    if (project.hasProperty('VERSION_NAME')) {
-      return project.property('VERSION_NAME')
-    }
-    def prefix = project.ext.releaseTagPrefix
-    def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
-    def version = cmd.execute().text
-    return project.ext.snapshot ? getSnapshotVersion(version) : getReleaseVersion(version)
-}
-
-def getReleaseVersion(String version) {
-    if (version.isEmpty()) {
-        return "0.1.0"
-    } else {
-        def prefix = project.ext.releaseTagPrefix
-        return version.substring(prefix.length()).trim()
-    }
-}
-
-def getSnapshotVersion(String version) {
-    if (version.isEmpty()) {
-        return "0.1.0-SNAPSHOT"
-    } else {
-        def prefix = project.ext.releaseTagPrefix
-        def matcher = version =~ /$prefix(\d+)\.(\d+)\.(\d+.*)/
-        def major = (matcher[0][1] as Integer)
-        def isPreRelease
-        def patch = 0
-        try {
-            patch = Integer.parseInt(matcher[0][3])
-            isPreRelease = false
-        } catch (NumberFormatException ignored) {
-            isPreRelease = true
-        }
-        def minor = (matcher[0][2] as Integer)
-        if (!isPreRelease) {
-            minor += 1
-        }
-        def branch = System.getenv("CIRCLE_BRANCH")
-        def weeklyWorkflow = System.getenv("WEEKLY_SNAPSHOT_WORKFLOW")?.toBoolean() ?: false
-        if (weeklyWorkflow) {
-            return "${major}.${minor}.${patch}-WEEKLY-SNAPSHOT"
-        } else if (!branch || branch == "main" || branch ==~ /release-v.*/) {
-            return "${major}.${minor}.${patch}-SNAPSHOT"
-        } else {
-            return "${major}.${minor}.${patch}-${branch}-SNAPSHOT"
-        }
-    }
+//    if (project.hasProperty('VERSION_NAME')) {
+//      return project.property('VERSION_NAME')
+//    }
+//    def prefix = project.ext.releaseTagPrefix
+//    def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
+//    def version = cmd.execute().text
+//    return project.ext.snapshot ? getSnapshotVersion(version) : getReleaseVersion(version)
+    return "2.19.0-adas-reconstructor-1-SNAPSHOT"
 }
