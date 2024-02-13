@@ -565,7 +565,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
 
         ifNonNull(accessToken) { token ->
-            runInTelemetryContext { telemetry ->
+            runInTelemetryContext(checkInitialisation = false) { telemetry ->
                 logD(
                     "MapboxMetricsReporter.init from MapboxNavigation main",
                     telemetry.LOG_CATEGORY
@@ -2130,8 +2130,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
-    private inline fun <T> runInTelemetryContext(func: (MapboxNavigationTelemetry) -> T): T? {
-        return if (TelemetryUtilsDelegate.getEventsCollectionState()) {
+    private inline fun <T> runInTelemetryContext(
+        checkInitialisation: Boolean = true,
+        func: (MapboxNavigationTelemetry) -> T
+    ): T? {
+        return if (
+            TelemetryUtilsDelegate.getEventsCollectionState() &&
+            (!checkInitialisation || MapboxNavigationTelemetry.isInitialised)
+        ) {
             func(MapboxNavigationTelemetry)
         } else {
             null

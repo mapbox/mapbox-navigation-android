@@ -155,6 +155,9 @@ The class has two public methods, postUserFeedback() and initialize().
 internal object MapboxNavigationTelemetry {
     internal const val LOG_CATEGORY = "MapboxNavigationTelemetry"
 
+    internal var isInitialised = false
+        private set
+
     private const val ONE_SECOND = 1000
     internal const val MOCK_PROVIDER = "com.mapbox.navigation.core.replay.ReplayLocationEngine"
     private const val EVENT_VERSION = 7
@@ -339,6 +342,11 @@ internal object MapboxNavigationTelemetry {
         reporter: MetricsReporter,
         locationsCollector: LocationsCollector = LocationsCollectorImpl(),
     ) {
+        if (isInitialised) {
+            return
+        }
+        isInitialised = true
+
         resetLocalVariables()
         sessionState = Idle
         this.locationsCollector = locationsCollector
@@ -355,6 +363,11 @@ internal object MapboxNavigationTelemetry {
     }
 
     fun destroy(mapboxNavigation: MapboxNavigation) {
+        if (!isInitialised) {
+            return
+        }
+        isInitialised = false
+
         telemetryStop()
         log("MapboxMetricsReporter disable")
         MapboxMetricsReporter.disable()
@@ -410,14 +423,26 @@ internal object MapboxNavigationTelemetry {
     }
 
     fun setApplicationInstance(app: Application) {
+        if (!isInitialised) {
+            return
+        }
+
         appInstance = app
     }
 
     fun registerUserFeedbackCallback(userFeedbackCallback: UserFeedbackCallback) {
+        if (!isInitialised) {
+            return
+        }
+
         userFeedbackCallbacks.add(userFeedbackCallback)
     }
 
     fun unregisterUserFeedbackCallback(userFeedbackCallback: UserFeedbackCallback) {
+        if (!isInitialised) {
+            return
+        }
+
         userFeedbackCallbacks.remove(userFeedbackCallback)
     }
 
@@ -426,6 +451,10 @@ internal object MapboxNavigationTelemetry {
         customEventType: String,
         customEventVersion: String
     ) {
+        if (!isInitialised) {
+            return
+        }
+
         createCustomEvent(
             payload = payload,
             customEventType = customEventType,
@@ -471,6 +500,10 @@ internal object MapboxNavigationTelemetry {
         feedbackMetadata: FeedbackMetadata?,
         userFeedbackCallback: UserFeedbackCallback?,
     ) {
+        if (!isInitialised) {
+            return
+        }
+
         createUserFeedback(
             feedbackType,
             description,
