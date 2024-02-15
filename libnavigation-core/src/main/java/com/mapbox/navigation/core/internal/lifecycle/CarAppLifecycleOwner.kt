@@ -173,6 +173,11 @@ class CarAppLifecycleOwner : LifecycleOwner {
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
+    fun detachAllActivities(application: Application) {
+        logI("detachAllActivities", LOG_CATEGORY)
+        application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
+    }
+
     fun attach(lifecycleOwner: LifecycleOwner) {
         logI("attach", LOG_CATEGORY)
         lifecycleOwner.lifecycle.addObserver(startedReferenceCounter)

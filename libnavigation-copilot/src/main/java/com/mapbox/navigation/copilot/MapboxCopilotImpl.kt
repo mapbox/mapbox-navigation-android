@@ -144,12 +144,18 @@ internal class MapboxCopilotImpl(
             arrivedAtFinalDestination = true
         }
     }
+    private val appLifecycleOwnerCleanupAction: () -> Unit
     private val appLifecycleOwner = if (MapboxNavigationApp.isSetup()) {
+        appLifecycleOwnerCleanupAction = { }
         MapboxNavigationApp.lifecycleOwner
     } else {
         CarAppLifecycleOwner().apply {
             val applicationContext = mapboxNavigation.navigationOptions.applicationContext
-            attachAllActivities(applicationContext as Application)
+            val application = applicationContext as Application
+            attachAllActivities(application)
+            appLifecycleOwnerCleanupAction = {
+                detachAllActivities(application)
+            }
         }
     }
     private val historyFiles = mutableMapOf<File, CopilotMetadata>()
@@ -172,6 +178,7 @@ internal class MapboxCopilotImpl(
     fun stop() {
         unregisterUserFeedbackCallback(userFeedbackCallback)
         appLifecycleOwner.lifecycle.removeObserver(foregroundBackgroundLifecycleObserver)
+        appLifecycleOwnerCleanupAction()
         mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(
             historyRecordingStateChangeObserver
         )
