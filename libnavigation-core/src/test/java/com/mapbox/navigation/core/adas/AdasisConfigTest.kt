@@ -17,6 +17,7 @@ class AdasisConfigTest : BuilderTest<AdasisConfig, AdasisConfig.Builder>() {
             .metadataCycleSeconds(300)
             .enableRetransmission(false)
             .retransmissionMeters(400)
+            .treeTrailingLength(500)
             .build()
 
         val messageOptions = AdasisConfigMessageOptions.Builder()

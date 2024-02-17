@@ -12,6 +12,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param enableRetransmission if true, retransmission will be enabled
  * (package will be appended with retransmission data, messages from previous cycles)
  * @param retransmissionMeters after passing this distance, messages will not be retransmitted
+ * @param treeTrailingLength the trailing length of the path tree, relatively
+ * to the map-matched position, in the adasis provider
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisDataSendingConfig private constructor(
@@ -21,6 +23,7 @@ class AdasisDataSendingConfig private constructor(
     val metadataCycleSeconds: Int,
     val enableRetransmission: Boolean,
     val retransmissionMeters: Int,
+    val treeTrailingLength: Int,
 ) {
 
     /**
@@ -32,6 +35,7 @@ class AdasisDataSendingConfig private constructor(
         .metadataCycleSeconds(metadataCycleSeconds)
         .enableRetransmission(enableRetransmission)
         .retransmissionMeters(retransmissionMeters)
+        .treeTrailingLength(treeTrailingLength)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfigDataSending(): com.mapbox.navigator.AdasisConfigDataSending {
@@ -42,6 +46,7 @@ class AdasisDataSendingConfig private constructor(
             metadataCycleSeconds,
             enableRetransmission,
             retransmissionMeters,
+            treeTrailingLength,
         )
     }
 
@@ -59,7 +64,8 @@ class AdasisDataSendingConfig private constructor(
         if (messagesInPackage != other.messagesInPackage) return false
         if (metadataCycleSeconds != other.metadataCycleSeconds) return false
         if (enableRetransmission != other.enableRetransmission) return false
-        return retransmissionMeters == other.retransmissionMeters
+        if (retransmissionMeters != other.retransmissionMeters) return false
+        return treeTrailingLength == other.treeTrailingLength
     }
 
     /**
@@ -72,6 +78,7 @@ class AdasisDataSendingConfig private constructor(
         result = 31 * result + metadataCycleSeconds.hashCode()
         result = 31 * result + enableRetransmission.hashCode()
         result = 31 * result + retransmissionMeters.hashCode()
+        result = 31 * result + treeTrailingLength.hashCode()
         return result
     }
 
@@ -86,7 +93,8 @@ class AdasisDataSendingConfig private constructor(
             "messagesInPackage=$messagesInPackage, " +
             "metadataCycleSeconds=$metadataCycleSeconds, " +
             "enableRetransmission=$enableRetransmission, " +
-            "retransmissionMeters=$retransmissionMeters" +
+            "retransmissionMeters=$retransmissionMeters," +
+            "treeTrailingLength=$treeTrailingLength" +
             ")"
     }
 
@@ -102,6 +110,7 @@ class AdasisDataSendingConfig private constructor(
         private var metadataCycleSeconds: Int = 5
         private var enableRetransmission: Boolean = true
         private var retransmissionMeters: Int = 300
+        private var treeTrailingLength: Int = 100
 
         /**
          * Interval between sending messages in milliseconds
@@ -140,6 +149,14 @@ class AdasisDataSendingConfig private constructor(
         }
 
         /**
+         * The trailing length of the path tree, relatively to the map-matched position,
+         * in the adasis provider
+         */
+        fun treeTrailingLength(treeTrailingLength: Int) = apply {
+            this.treeTrailingLength = treeTrailingLength
+        }
+
+        /**
          * Build the [AdasisDataSendingConfig]
          */
         fun build() = AdasisDataSendingConfig(
@@ -149,6 +166,7 @@ class AdasisDataSendingConfig private constructor(
             metadataCycleSeconds = metadataCycleSeconds,
             enableRetransmission = enableRetransmission,
             retransmissionMeters = retransmissionMeters,
+            treeTrailingLength = treeTrailingLength,
         )
     }
 }
