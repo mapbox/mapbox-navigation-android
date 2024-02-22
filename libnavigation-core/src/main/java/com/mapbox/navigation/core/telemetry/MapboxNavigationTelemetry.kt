@@ -151,6 +151,8 @@ The class must be initialized before any telemetry events are reported.
 Attempting to use telemetry before initialization is called will throw an exception.
 Initialization may be called multiple times, the call is idempotent.
 The class has two public methods, postUserFeedback() and initialize().
+
+TODO(NAVAND-1820) refactor this class. It's hard to test because of statics.
  */
 internal object MapboxNavigationTelemetry {
     internal const val LOG_CATEGORY = "MapboxNavigationTelemetry"
@@ -356,8 +358,12 @@ internal object MapboxNavigationTelemetry {
 
     fun destroy(mapboxNavigation: MapboxNavigation) {
         telemetryStop()
+
+        // TODO(NAVAND-1820) MapboxMetricsReporter is destroyed here,
+        // but initialized separately from MapboxNavigationTelemetry
         log("MapboxMetricsReporter disable")
         MapboxMetricsReporter.disable()
+
         mapboxNavigation.run {
             unregisterLocationObserver(locationsCollector)
             unregisterRouteProgressObserver(routeProgressObserver)

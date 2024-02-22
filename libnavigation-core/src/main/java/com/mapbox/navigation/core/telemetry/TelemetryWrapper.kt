@@ -61,7 +61,7 @@ internal class TelemetryStateWatcher(
  * Class that manages [MapboxNavigationTelemetry] initialisation. Listens to telemetry state events
  * and can enable/disable telemetry in runtime.
  *
- * TODO ensure that we have 1-1 relationship between [TelemetryWrapper] and [MapboxNavigationTelemetry]
+ * TODO(NAVAND-1820) ensure that we have 1-1 relationship between [TelemetryWrapper] and [MapboxNavigationTelemetry]
  * [MapboxNavigationTelemetry] is very complex already and needs to be refactored.
  */
 @UiThread
