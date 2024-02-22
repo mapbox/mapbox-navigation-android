@@ -8,7 +8,6 @@ import com.mapbox.navigation.metrics.internal.EventsServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.utils.internal.logD
-import io.mockk.CapturingSlot
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -16,7 +15,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
-import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
@@ -34,8 +32,6 @@ class TelemetryWrapperTest {
     private val userAgent: String = "test-user-agent"
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var navigationOptions: NavigationOptions
-    private lateinit var telemetryStateWatcher: TelemetryStateWatcher
-    private lateinit var telemetryStateObserver: CapturingSlot<TelemetryStateWatcher.Observer>
 
     private lateinit var telemetryWrapper: TelemetryWrapper
 
@@ -74,12 +70,7 @@ class TelemetryWrapperTest {
             every { accessToken } returns testAccessToken
         }
 
-        telemetryStateObserver = slot<TelemetryStateWatcher.Observer>()
-        telemetryStateWatcher = mockk<TelemetryStateWatcher>(relaxed = true).apply {
-            every { registerObserver(capture(telemetryStateObserver)) } returns Unit
-        }
-
-        telemetryWrapper = TelemetryWrapper(telemetryStateWatcher)
+        telemetryWrapper = TelemetryWrapper()
     }
 
     @After
@@ -119,11 +110,13 @@ class TelemetryWrapperTest {
 
     @Test
     fun `throws exception when destroy is called without initialization`() {
-        assertThrows(
-            "Initialize object first",
-            IllegalStateException::class.java
-        ) {
-            telemetryWrapper.destroy()
+        if (BuildConfig.DEBUG) {
+            assertThrows(
+                "Initialize object first",
+                IllegalStateException::class.java
+            ) {
+                telemetryWrapper.destroy()
+            }
         }
     }
 
@@ -141,10 +134,6 @@ class TelemetryWrapperTest {
                 any()
             )
         }
-
-        verify(exactly = 1) {
-            telemetryStateWatcher.registerObserver(any())
-        }
     }
 
     @Test
@@ -161,10 +150,6 @@ class TelemetryWrapperTest {
                 any()
             )
         }
-
-        verify(exactly = 1) {
-            telemetryStateWatcher.registerObserver(any())
-        }
     }
 
     @Test
@@ -179,10 +164,6 @@ class TelemetryWrapperTest {
                 mapboxNavigation
             )
         }
-
-        verify(exactly = 1) {
-            telemetryStateWatcher.unregisterObserver(any())
-        }
     }
 
     @Test
@@ -195,121 +176,6 @@ class TelemetryWrapperTest {
         verify(exactly = 0) {
             MapboxNavigationTelemetry.destroy(
                 mapboxNavigation
-            )
-        }
-
-        verify(exactly = 1) {
-            telemetryStateWatcher.unregisterObserver(any())
-        }
-    }
-
-    @Test
-    fun `initializes MapboxNavigationTelemetry when telemetry becomes enabled`() {
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
-
-        telemetryWrapper.initialize()
-        telemetryStateObserver.captured.onStateChanged(true)
-        telemetryWrapper.destroy()
-
-        verify(exactly = 1) {
-            MapboxNavigationTelemetry.initialize(
-                mapboxNavigation,
-                navigationOptions,
-                MapboxMetricsReporter,
-                any()
-            )
-        }
-
-        verify(exactly = 1) {
-            MapboxNavigationTelemetry.destroy(
-                mapboxNavigation
-            )
-        }
-    }
-
-    @Test
-    fun `destroys MapboxNavigationTelemetry when telemetry becomes disabled`() {
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
-
-        telemetryWrapper.initialize()
-        telemetryStateObserver.captured.onStateChanged(false)
-
-        verify(exactly = 1) {
-            MapboxNavigationTelemetry.initialize(
-                mapboxNavigation,
-                navigationOptions,
-                MapboxMetricsReporter,
-                any()
-            )
-        }
-
-        verify(exactly = 1) {
-            MapboxNavigationTelemetry.destroy(
-                mapboxNavigation
-            )
-        }
-    }
-
-    @Test
-    fun `initializes and destroys MapboxNavigationTelemetry when telemetry changes its state twice`() {
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
-
-        telemetryWrapper.initialize()
-
-        telemetryStateObserver.captured.onStateChanged(false)
-        telemetryStateObserver.captured.onStateChanged(true)
-        telemetryStateObserver.captured.onStateChanged(false)
-
-        verify(exactly = 2) {
-            MapboxNavigationTelemetry.initialize(
-                mapboxNavigation,
-                navigationOptions,
-                MapboxMetricsReporter,
-                any()
-            )
-        }
-
-        verify(exactly = 2) {
-            MapboxNavigationTelemetry.destroy(
-                mapboxNavigation
-            )
-        }
-    }
-
-    @Test
-    fun `does nothing when telemetry state is disabled and doesn't change`() {
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
-
-        telemetryWrapper.initialize()
-        telemetryStateObserver.captured.onStateChanged(false)
-        telemetryStateObserver.captured.onStateChanged(false)
-        telemetryStateObserver.captured.onStateChanged(false)
-
-        verify(exactly = 0) {
-            MapboxNavigationTelemetry.initialize(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        }
-    }
-
-    @Test
-    fun `does nothing when telemetry state is enabled and doesn't change`() {
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
-
-        telemetryWrapper.initialize()
-        telemetryStateObserver.captured.onStateChanged(true)
-        telemetryStateObserver.captured.onStateChanged(true)
-        telemetryStateObserver.captured.onStateChanged(true)
-
-        verify(exactly = 1) {
-            MapboxNavigationTelemetry.initialize(
-                mapboxNavigation,
-                navigationOptions,
-                MapboxMetricsReporter,
-                any()
             )
         }
     }

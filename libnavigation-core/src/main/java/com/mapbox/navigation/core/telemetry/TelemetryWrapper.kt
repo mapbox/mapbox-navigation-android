@@ -1,9 +1,6 @@
 package com.mapbox.navigation.core.telemetry
 
 import androidx.annotation.UiThread
-import com.mapbox.common.TelemetryCollectionState
-import com.mapbox.common.TelemetryCollectionStateObserver
-import com.mapbox.common.TelemetryUtils
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -16,47 +13,6 @@ import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.utils.internal.assertDebug
 import com.mapbox.navigation.utils.internal.logD
-import java.util.concurrent.CopyOnWriteArrayList
-
-/**
- * This wrapper is needed just for unit tests in order not to deal with types from Common SDK
- */
-@UiThread
-internal class TelemetryStateWatcher(
-    private val telemetryUtils: TelemetryUtils = TelemetryUtils()
-) {
-
-    private val observers = CopyOnWriteArrayList<Observer>()
-
-    private val telemetryStateObserver = TelemetryCollectionStateObserver { state ->
-        observers.forEach {
-            it.onStateChanged(state.isEnabled)
-        }
-    }
-
-    fun registerObserver(observer: Observer) {
-        observers.add(observer)
-        if (observers.size == 1) {
-            telemetryUtils.registerTelemetryCollectionStateObserver(telemetryStateObserver)
-        }
-    }
-
-    fun unregisterObserver(observer: Observer) {
-        observers.remove(observer)
-        if (observers.isEmpty()) {
-            telemetryUtils.unregisterTelemetryCollectionStateObserver(telemetryStateObserver)
-        }
-    }
-
-    fun interface Observer {
-        fun onStateChanged(telemetryEnable: Boolean)
-    }
-
-    private companion object {
-        val TelemetryCollectionState.isEnabled: Boolean
-            get() = this == TelemetryCollectionState.ENABLED
-    }
-}
 
 /**
  * Class that manages [MapboxNavigationTelemetry] initialisation. Listens to telemetry state events
@@ -66,9 +22,7 @@ internal class TelemetryStateWatcher(
  * [MapboxNavigationTelemetry] is very complex already and needs to be refactored.
  */
 @UiThread
-internal class TelemetryWrapper(
-    private val telemetryStateWatcher: TelemetryStateWatcher = TelemetryStateWatcher()
-) {
+internal class TelemetryWrapper {
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var navigationOptions: NavigationOptions
@@ -76,14 +30,6 @@ internal class TelemetryWrapper(
 
     private var isWrapperInitialized = false
     private var isTelemetryEnabled = false
-
-    private val telemetryStateObserver = TelemetryStateWatcher.Observer { isEnabled ->
-        if (!isTelemetryEnabled && isEnabled) {
-            initializeSdkTelemetry()
-        } else if (isTelemetryEnabled && !isEnabled) {
-            unInitializeSdkTelemetry()
-        }
-    }
 
     fun initialize(
         mapboxNavigation: MapboxNavigation,
@@ -107,8 +53,6 @@ internal class TelemetryWrapper(
         if (TelemetryUtilsDelegate.getEventsCollectionState()) {
             initializeSdkTelemetry()
         }
-
-        telemetryStateWatcher.registerObserver(telemetryStateObserver)
     }
 
     fun destroy() {
@@ -122,7 +66,6 @@ internal class TelemetryWrapper(
 
         isWrapperInitialized = false
 
-        telemetryStateWatcher.unregisterObserver(telemetryStateObserver)
         if (isTelemetryEnabled) {
             unInitializeSdkTelemetry()
         }
