@@ -66,11 +66,12 @@ internal class TelemetryStateWatcher(
  */
 @UiThread
 internal class TelemetryWrapper(
-    private val mapboxNavigation: MapboxNavigation,
-    private val navigationOptions: NavigationOptions,
-    private val userAgent: String,
     private val telemetryStateWatcher: TelemetryStateWatcher = TelemetryStateWatcher()
 ) {
+
+    private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var navigationOptions: NavigationOptions
+    private lateinit var userAgent: String
 
     private var isWrapperInitialized = false
     private var isTelemetryEnabled = false
@@ -83,11 +84,19 @@ internal class TelemetryWrapper(
         }
     }
 
-    fun initialize() {
+    fun initialize(
+        mapboxNavigation: MapboxNavigation,
+        navigationOptions: NavigationOptions,
+        userAgent: String
+    ) {
         check(!isWrapperInitialized) {
             "Already initialized"
         }
         isWrapperInitialized = true
+
+        this.mapboxNavigation = mapboxNavigation
+        this.navigationOptions = navigationOptions
+        this.userAgent = userAgent
 
         if (TelemetryUtilsDelegate.getEventsCollectionState()) {
             initializeSdkTelemetry()

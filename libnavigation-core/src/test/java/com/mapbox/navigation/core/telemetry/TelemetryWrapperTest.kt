@@ -78,12 +78,7 @@ class TelemetryWrapperTest {
             every { registerObserver(capture(telemetryStateObserver)) } returns Unit
         }
 
-        telemetryWrapper = TelemetryWrapper(
-            mapboxNavigation,
-            navigationOptions,
-            userAgent,
-            telemetryStateWatcher
-        )
+        telemetryWrapper = TelemetryWrapper(telemetryStateWatcher)
     }
 
     @After
@@ -312,5 +307,13 @@ class TelemetryWrapperTest {
                 any()
             )
         }
+    }
+
+    private fun TelemetryWrapper.initialize() {
+        telemetryWrapper.initialize(
+            mapboxNavigation,
+            navigationOptions,
+            userAgent,
+        )
     }
 }

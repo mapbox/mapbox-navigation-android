@@ -253,9 +253,14 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
 class MapboxNavigation @VisibleForTesting internal constructor(
     val navigationOptions: NavigationOptions,
     private val threadController: ThreadController,
+    private val telemetryWrapper: TelemetryWrapper = TelemetryWrapper(),
 ) {
 
-    constructor(navigationOptions: NavigationOptions) : this(navigationOptions, ThreadController())
+    constructor(navigationOptions: NavigationOptions) : this(
+        navigationOptions,
+        ThreadController(),
+        TelemetryWrapper(),
+    )
 
     private val mainJobController = threadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
@@ -345,12 +350,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * [NavigationVersionSwitchObserver] is notified when navigation switches tiles version.
      */
     private val navigationVersionSwitchObservers = mutableSetOf<NavigationVersionSwitchObserver>()
-
-    private val telemetryWrapper = TelemetryWrapper(
-        mapboxNavigation = this,
-        navigationOptions = navigationOptions,
-        userAgent = obtainUserAgent(),
-    )
 
     /**
      * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata,
@@ -571,7 +570,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             arrivalProgressObserver
         )
 
-        telemetryWrapper.initialize()
+        telemetryWrapper.initialize(
+            mapboxNavigation = this,
+            navigationOptions = navigationOptions,
+            userAgent = obtainUserAgent(),
+        )
 
         val routeOptionsProvider = RouteOptionsUpdater()
 
