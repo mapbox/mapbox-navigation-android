@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
+import com.mapbox.navigation.utils.internal.assertDebug
 import com.mapbox.navigation.utils.internal.logD
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -89,9 +90,14 @@ internal class TelemetryWrapper(
         navigationOptions: NavigationOptions,
         userAgent: String
     ) {
-        check(!isWrapperInitialized) {
+        assertDebug(!isWrapperInitialized) {
             "Already initialized"
         }
+
+        if (isWrapperInitialized) {
+            return
+        }
+
         isWrapperInitialized = true
 
         this.mapboxNavigation = mapboxNavigation
@@ -106,9 +112,14 @@ internal class TelemetryWrapper(
     }
 
     fun destroy() {
-        check(isWrapperInitialized) {
+        assertDebug(isWrapperInitialized) {
             "Initialize object first"
         }
+
+        if (!isWrapperInitialized) {
+            return
+        }
+
         isWrapperInitialized = false
 
         telemetryStateWatcher.unregisterObserver(telemetryStateObserver)

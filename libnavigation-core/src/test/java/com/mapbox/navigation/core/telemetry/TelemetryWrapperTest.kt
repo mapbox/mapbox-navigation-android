@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry
 
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.EventsServiceProvider
@@ -91,24 +92,28 @@ class TelemetryWrapperTest {
 
     @Test
     fun `throws exception when initialize is called again`() {
-        assertThrows(
-            "Already initialized",
-            IllegalStateException::class.java
-        ) {
-            telemetryWrapper.initialize()
-            telemetryWrapper.initialize()
+        if (BuildConfig.DEBUG) {
+            assertThrows(
+                "Already initialized",
+                IllegalStateException::class.java
+            ) {
+                telemetryWrapper.initialize()
+                telemetryWrapper.initialize()
+            }
         }
     }
 
     @Test
     fun `throws exception when destroy is called again`() {
-        assertThrows(
-            "Initialize object first",
-            IllegalStateException::class.java
-        ) {
-            telemetryWrapper.initialize()
-            telemetryWrapper.destroy()
-            telemetryWrapper.destroy()
+        if (BuildConfig.DEBUG) {
+            assertThrows(
+                "Initialize object first",
+                IllegalStateException::class.java
+            ) {
+                telemetryWrapper.initialize()
+                telemetryWrapper.destroy()
+                telemetryWrapper.destroy()
+            }
         }
     }
 
