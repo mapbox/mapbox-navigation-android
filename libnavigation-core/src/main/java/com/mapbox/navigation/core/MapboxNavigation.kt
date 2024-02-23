@@ -16,6 +16,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.BaseMapboxInitializer
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -60,6 +61,7 @@ import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedO
 import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.internal.MapboxNavigationSDKInitializerImpl
 import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.telemetry.CustomEvent
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
@@ -433,6 +435,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         private set
 
     init {
+        BaseMapboxInitializer.init(MapboxNavigationSDKInitializerImpl::class.java)
+
         if (hasInstance) {
             throw IllegalStateException(
                 """
