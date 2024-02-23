@@ -1,7 +1,10 @@
 package com.mapbox.navigation.core
 
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.telemetry.TelemetryWrapper
+import com.mapbox.navigation.utils.internal.ThreadController
 
 /**
  * Singleton responsible for ensuring there is only one MapboxNavigation instance.
@@ -28,6 +31,22 @@ object MapboxNavigationProvider {
         mapboxNavigation?.onDestroy()
         mapboxNavigation = MapboxNavigation(
             navigationOptions
+        )
+
+        return mapboxNavigation!!
+    }
+
+    @VisibleForTesting
+    internal fun create(
+        navigationOptions: NavigationOptions,
+        threadController: ThreadController = ThreadController(),
+        telemetryWrapper: TelemetryWrapper = TelemetryWrapper()
+    ): MapboxNavigation {
+        mapboxNavigation?.onDestroy()
+        mapboxNavigation = MapboxNavigation(
+            navigationOptions,
+            threadController,
+            telemetryWrapper,
         )
 
         return mapboxNavigation!!

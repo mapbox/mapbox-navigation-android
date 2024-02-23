@@ -36,7 +36,9 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshObserver
 import com.mapbox.navigation.core.routerefresh.RouteRefresherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.routerefresh.RoutesRefresherResult
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NativeSetRouteError
@@ -47,7 +49,6 @@ import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
-import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
@@ -80,6 +81,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -229,7 +231,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         threadController.cancelAllUICoroutines()
         val navigationOptions = provideNavigationOptions().build()
 
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
 
         verify(exactly = 2) { tripSession.registerOffRouteObserver(any()) }
     }
@@ -240,7 +242,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.onDestroy()
         threadController.cancelAllUICoroutines()
         val navigationOptions = provideNavigationOptions().build()
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
 
         mapboxNavigation.onDestroy()
 
@@ -409,46 +411,78 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun telemetryIsDisabled() {
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+    fun initializeTelemetryOnSdkInitialisation() {
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
+
+        verify(exactly = 1) {
+            telemetryWrapper.initialize(
+                mapboxNavigation,
+                navigationOptions,
+                "mapbox-navigation-android/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}",
+            )
+        }
+    }
+
+    @Test
+    fun telemetryIsEnabledTryToGetFeedbackMetadataWrapper() {
+        val feedbackMetadataWrapper = mockk<FeedbackMetadataWrapper>(relaxed = true)
+        every { telemetryWrapper.provideFeedbackMetadataWrapper() } returns feedbackMetadataWrapper
 
         createMapboxNavigation()
-        mapboxNavigation.onDestroy()
-
-        verify(exactly = 0) {
-            MapboxNavigationTelemetry.initialize(any(), any(), any(), any())
-        }
-        verify(exactly = 0) { MapboxNavigationTelemetry.destroy(any()) }
+        assertSame(feedbackMetadataWrapper, mapboxNavigation.provideFeedbackMetadataWrapper())
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
     @Test(expected = IllegalStateException::class)
     fun telemetryIsDisabledTryToGetFeedbackMetadataWrapper() {
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
+        every { telemetryWrapper.provideFeedbackMetadataWrapper() } returns null
 
         createMapboxNavigation()
         mapboxNavigation.provideFeedbackMetadataWrapper()
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
-    fun telemetryIsDisabledTryToPostFeedback() {
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
-
+    @Test
+    fun forwardPostUserFeedbackCallToTelemetry() {
         createMapboxNavigation()
 
-        mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk())
-        mapboxNavigation.postUserFeedback(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+        val feedbackSubType = emptyArray<String>()
+        val feedbackMetadata = mockk<FeedbackMetadata>()
+        val feedbackType = "test-type"
+        val description = "test-description"
+        val feedbackEvent = FeedbackEvent.REROUTE
+        val screenshot = "test-screenshot"
 
-        verify(exactly = 0) {
-            MapboxNavigationTelemetry.postUserFeedback(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
+        mapboxNavigation.postUserFeedback(
+            feedbackType,
+            description,
+            feedbackEvent,
+            screenshot,
+            feedbackSubType,
+            feedbackMetadata,
+        )
+
+        verify(exactly = 1) {
+            telemetryWrapper.postUserFeedback(
+                feedbackType,
+                description,
+                feedbackEvent,
+                screenshot,
+                feedbackSubType,
+                feedbackMetadata,
+                null,
             )
+        }
+    }
+
+    @Test
+    fun forwardPostCustomEventCallToTelemetry() {
+        createMapboxNavigation()
+
+        mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
+
+        verify(exactly = 1) {
+            telemetryWrapper.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
         }
     }
 
@@ -457,7 +491,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { MapboxNavigationTelemetry.destroy(eq(mapboxNavigation)) }
+        verify(exactly = 1) { telemetryWrapper.destroy() }
     }
 
     @Test
@@ -467,7 +501,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verifyOrder {
             tripSession.stop()
-            MapboxNavigationTelemetry.destroy(mapboxNavigation)
+            telemetryWrapper.destroy()
         }
     }
 
@@ -945,7 +979,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             .routingTilesOptions(RoutingTilesOptions.Builder().build())
             .build()
 
-        mapboxNavigation = MapboxNavigation(options, threadController)
+        mapboxNavigation = MapboxNavigation(options, threadController, telemetryWrapper)
 
         assertTrue(slot.captured.tilesPath.endsWith(RoutingTilesFiles.TILES_PATH_SUB_DIR))
     }
@@ -966,7 +1000,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             )
             .build()
 
-        mapboxNavigation = MapboxNavigation(options, threadController)
+        mapboxNavigation = MapboxNavigation(options, threadController, telemetryWrapper)
 
         assertEquals(slot.captured.endpointConfig!!.dataset, "someUser.osm/truck")
     }
@@ -977,7 +1011,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val slot = slot<NavigatorConfig>()
         every { NavigatorLoader.createConfig(any(), capture(slot)) } returns mockk()
 
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        createMapboxNavigation()
 
         assertNull(slot.captured.incidentsOptions)
     }
@@ -995,7 +1029,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             )
             .build()
 
-        mapboxNavigation = MapboxNavigation(options, threadController)
+        mapboxNavigation = MapboxNavigation(options, threadController, telemetryWrapper)
 
         assertEquals(slot.captured.incidentsOptions!!.graph, "graph")
         assertEquals(slot.captured.incidentsOptions!!.apiUrl, "")
@@ -1014,7 +1048,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             )
             .build()
 
-        mapboxNavigation = MapboxNavigation(options, threadController)
+        mapboxNavigation = MapboxNavigation(options, threadController, telemetryWrapper)
 
         assertEquals(slot.captured.incidentsOptions!!.apiUrl, "apiUrl")
         assertEquals(slot.captured.incidentsOptions!!.graph, "")
@@ -1252,7 +1286,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             )
             .build()
 
-        mapboxNavigation = MapboxNavigation(options, threadController)
+        mapboxNavigation = MapboxNavigation(options, threadController, telemetryWrapper)
 
         assertEquals(tilesVersion, slot.captured.endpointConfig?.version)
         assertFalse(slot.captured.endpointConfig?.isFallback!!)
@@ -1272,7 +1306,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         )
         every { tripSession.getRouteProgress() } returns mockk()
 
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
 
         val tileConfigSlot = slot<TilesConfig>()
 
@@ -1307,7 +1341,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             } returns listOf(mockPrimaryNavigationRoute, mockAlternativeNavigationRoute)
             every { tripSession.getRouteProgress()?.currentLegProgress?.legIndex } returns index
 
-            mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+            createMapboxNavigation()
 
             val tileConfigSlot = slot<TilesConfig>()
 
@@ -1351,7 +1385,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             createSetRouteResult()
         }
 
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
 
         fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
 
@@ -1368,7 +1402,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `verify that session state callbacks are always delivered to NavigationSession`() =
         runBlocking {
-            mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+            createMapboxNavigation()
+
             every { directionsSession.initialLegIndex } returns 0
             mapboxNavigation.startTripSession()
             mapboxNavigation.onDestroy()
@@ -1386,15 +1421,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test(expected = IllegalStateException::class)
     fun `verify that only one instance of MapboxNavigation can be alive`() = runBlocking {
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
     }
 
     @Test
     fun `verify that MapboxNavigation instance can be recreated`() = runBlocking {
-        val firstInstance = MapboxNavigation(navigationOptions)
+        val firstInstance = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
         firstInstance.onDestroy()
-        val secondInstance = MapboxNavigation(navigationOptions)
+        val secondInstance = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
 
         assertNotNull(secondInstance)
         assertTrue(firstInstance.isDestroyed)
@@ -1404,9 +1439,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test(expected = IllegalStateException::class)
     fun `verify that the old instance is not accessible when a new one is created`() = runBlocking {
-        val firstInstance = MapboxNavigation(navigationOptions)
+        val firstInstance = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
         firstInstance.onDestroy()
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
         firstInstance.startTripSession()
     }
 
@@ -1417,14 +1452,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             localNavigationSession
         }
 
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
         mapboxNavigation.onDestroy()
         mapboxNavigation.startTripSession()
     }
 
     @Test(expected = IllegalStateException::class)
     fun `verify that stopTripSession is not called when destroyed`() = runBlocking {
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
         mapboxNavigation.onDestroy()
         mapboxNavigation.stopTripSession()
     }
@@ -1502,7 +1537,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
     @Test
     fun `provider - check if the instance was destroyed outside of the providers scope`() {
-        val instance = MapboxNavigationProvider.create(navigationOptions)
+        val instance = MapboxNavigationProvider.create(
+            navigationOptions = navigationOptions,
+            telemetryWrapper = telemetryWrapper,
+        )
 
         instance.onDestroy()
 
@@ -2104,30 +2142,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val actual = mapboxNavigation.getRerouteController()
         assertTrue(actual is InternalRerouteControllerAdapter)
         assertEquals(actual, mapboxNavigation.getRerouteController())
-    }
-
-    @Test
-    fun `when telemetry is enabled custom event is posted`() = coroutineRule.runBlockingTest {
-        createMapboxNavigation()
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
-        every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
-        every { MapboxNavigationTelemetry.destroy(any()) } just Runs
-
-        mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
-
-        verify(exactly = 1) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
-    }
-
-    @Test
-    fun `when telemetry is disabled custom event is not posted`() = coroutineRule.runBlockingTest {
-        createMapboxNavigation()
-        every { TelemetryUtilsDelegate.getEventsCollectionState() } returns false
-        every { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) } just Runs
-        every { MapboxNavigationTelemetry.destroy(any()) } just Runs
-
-        mapboxNavigation.postCustomEvent("", NavigationCustomEventType.ANALYTICS, "1.0")
-
-        verify(exactly = 0) { MapboxNavigationTelemetry.postCustomEvent(any(), any(), any()) }
     }
 
     @Test

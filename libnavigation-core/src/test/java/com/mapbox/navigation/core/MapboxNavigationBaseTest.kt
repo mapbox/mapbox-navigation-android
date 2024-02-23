@@ -31,6 +31,7 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerP
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.telemetry.TelemetryWrapper
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
@@ -106,6 +107,7 @@ internal open class MapboxNavigationBaseTest {
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxed = true)
     val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)
     val threadController = mockk<ThreadController>(relaxed = true)
+    val telemetryWrapper = mockk<TelemetryWrapper>(relaxed = true)
     val routeProgressDataProvider = mockk<RoutesProgressDataProvider>(relaxed = true)
     val routesPreviewController = mockk<RoutesPreviewController>(relaxed = true)
     val routesCacheClearer = mockk<RoutesCacheClearer>(relaxed = true)
@@ -262,7 +264,7 @@ internal open class MapboxNavigationBaseTest {
     }
 
     fun createMapboxNavigation() {
-        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController, telemetryWrapper)
     }
 
     private fun mockNativeNavigator() {
