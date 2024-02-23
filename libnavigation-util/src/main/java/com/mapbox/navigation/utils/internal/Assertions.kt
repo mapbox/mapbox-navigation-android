@@ -8,6 +8,6 @@ inline fun assertDebug(value: Boolean, message: () -> Any) {
     }
 
     if (!value) {
-        logD { message().toString() }
+        logW { message().toString() }
     }
 }

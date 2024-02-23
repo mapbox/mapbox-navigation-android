@@ -29,7 +29,7 @@ internal class TelemetryWrapper {
     private lateinit var userAgent: String
 
     private var isWrapperInitialized = false
-    private var isTelemetryEnabled = false
+    private var sdkTelemetry: SdkTelemetry = SdkTelemetry.EMPTY
 
     fun initialize(
         mapboxNavigation: MapboxNavigation,
@@ -66,9 +66,8 @@ internal class TelemetryWrapper {
 
         isWrapperInitialized = false
 
-        if (isTelemetryEnabled) {
-            unInitializeSdkTelemetry()
-        }
+        sdkTelemetry.destroy(mapboxNavigation)
+        sdkTelemetry = SdkTelemetry.EMPTY
     }
 
     fun postCustomEvent(
@@ -76,11 +75,7 @@ internal class TelemetryWrapper {
         @CustomEvent.Type customEventType: String,
         customEventVersion: String,
     ) {
-        if (!isTelemetryEnabled) {
-            return
-        }
-
-        MapboxNavigationTelemetry.postCustomEvent(
+        sdkTelemetry.postCustomEvent(
             payload = payload,
             customEventType = customEventType,
             customEventVersion = customEventVersion
@@ -89,11 +84,7 @@ internal class TelemetryWrapper {
 
     @ExperimentalPreviewMapboxNavigationAPI
     fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper? {
-        return if (isTelemetryEnabled) {
-            MapboxNavigationTelemetry.provideFeedbackMetadataWrapper()
-        } else {
-            null
-        }
+        return sdkTelemetry.provideFeedbackMetadataWrapper()
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
@@ -106,11 +97,7 @@ internal class TelemetryWrapper {
         feedbackMetadata: FeedbackMetadata?,
         userFeedbackCallback: UserFeedbackCallback?,
     ) {
-        if (!isTelemetryEnabled) {
-            return
-        }
-
-        MapboxNavigationTelemetry.postUserFeedback(
+        sdkTelemetry.postUserFeedback(
             feedbackType,
             description,
             feedbackSource,
@@ -139,11 +126,6 @@ internal class TelemetryWrapper {
             MapboxMetricsReporter,
         )
 
-        isTelemetryEnabled = true
-    }
-
-    private fun unInitializeSdkTelemetry() {
-        MapboxNavigationTelemetry.destroy(mapboxNavigation)
-        isTelemetryEnabled = false
+        sdkTelemetry = MapboxNavigationTelemetry
     }
 }
