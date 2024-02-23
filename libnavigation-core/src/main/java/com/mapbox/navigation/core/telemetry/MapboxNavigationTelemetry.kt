@@ -151,8 +151,10 @@ The class must be initialized before any telemetry events are reported.
 Attempting to use telemetry before initialization is called will throw an exception.
 Initialization may be called multiple times, the call is idempotent.
 The class has two public methods, postUserFeedback() and initialize().
+
+TODO(NAVAND-1820) refactor this class. It's hard to test because of statics.
  */
-internal object MapboxNavigationTelemetry {
+internal object MapboxNavigationTelemetry : SdkTelemetry {
     internal const val LOG_CATEGORY = "MapboxNavigationTelemetry"
 
     private const val ONE_SECOND = 1000
@@ -354,10 +356,14 @@ internal object MapboxNavigationTelemetry {
         log("Valid initialization")
     }
 
-    fun destroy(mapboxNavigation: MapboxNavigation) {
+    override fun destroy(mapboxNavigation: MapboxNavigation) {
         telemetryStop()
+
+        // TODO(NAVAND-1820) MapboxMetricsReporter is destroyed here,
+        // but initialized separately from MapboxNavigationTelemetry
         log("MapboxMetricsReporter disable")
         MapboxMetricsReporter.disable()
+
         mapboxNavigation.run {
             unregisterLocationObserver(locationsCollector)
             unregisterRouteProgressObserver(routeProgressObserver)
@@ -421,7 +427,7 @@ internal object MapboxNavigationTelemetry {
         userFeedbackCallbacks.remove(userFeedbackCallback)
     }
 
-    fun postCustomEvent(
+    override fun postCustomEvent(
         payload: String,
         customEventType: String,
         customEventVersion: String
@@ -437,7 +443,7 @@ internal object MapboxNavigationTelemetry {
     }
 
     @ExperimentalPreviewMapboxNavigationAPI
-    fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper {
+    override fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper {
         (telemetryState as? NavTelemetryState.Running)?.sessionMetadata?.let { sessionMetadata ->
             return FeedbackMetadataWrapper(
                 sessionMetadata.navigatorSessionIdentifier,
@@ -462,7 +468,7 @@ internal object MapboxNavigationTelemetry {
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    fun postUserFeedback(
+    override fun postUserFeedback(
         feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
