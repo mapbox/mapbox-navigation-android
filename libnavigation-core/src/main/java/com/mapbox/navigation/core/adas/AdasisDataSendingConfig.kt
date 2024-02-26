@@ -12,8 +12,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param enableRetransmission if true, retransmission will be enabled
  * (package will be appended with retransmission data, messages from previous cycles)
  * @param retransmissionMeters after passing this distance, messages will not be retransmitted
- * @param treeTrailingLength the trailing length of the path tree, relatively
- * to the map-matched position, in the adasis provider
+ * @param treeTrailingLength the trailing length of the path tree, relative to the map-matched position, in the adasis provider
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisDataSendingConfig private constructor(
