@@ -177,7 +177,7 @@ fun createNativeWaypoint(
 )
 
 // Add default parameters if you define properties
-fun createMapMatcherOutput() = MapMatcherOutput(emptyList(), false)
+fun createMapMatcherOutput() = MapMatcherOutput(emptyList(), false, 0)
 
 fun createRouteInterface(
     responseUUID: String = "testResponseUUID",

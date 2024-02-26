@@ -16,6 +16,7 @@ class AdasisDataSendingConfigTest :
             .metadataCycleSeconds(300)
             .enableRetransmission(false)
             .retransmissionMeters(400)
+            .treeTrailingLength(500)
     }
 
     override fun trigger() {

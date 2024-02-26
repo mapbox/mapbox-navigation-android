@@ -5,4 +5,11 @@
         Try removing the line after updating androidx.lifecycle libraries
         -->
     <issue id="NullSafeMutableLiveData" severity="ignore" />
+
+    <!--
+        MapboxNavigationSDKInitializerImpl is not declared in AndroidManifest.xml on purpose as
+        it is called from MapboxNavigationSDKInitializer extending BaseMapboxInitializer to
+        avoid crashing on startup if native library is not found.
+        -->
+    <issue id="EnsureInitializerMetadata" severity="ignore" />
 </lint>

@@ -198,6 +198,13 @@ package com.mapbox.navigation.core {
 
 }
 
+package com.mapbox.navigation.core.accounts {
+
+  public final class BillingControllerKt {
+  }
+
+}
+
 package com.mapbox.navigation.core.adas {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasEdgeAttributes {
@@ -362,6 +369,7 @@ package com.mapbox.navigation.core.adas {
     method public int getMessagesInPackage();
     method public int getMetadataCycleSeconds();
     method public int getRetransmissionMeters();
+    method public int getTreeTrailingLength();
     method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder toBuilder();
     property public final boolean enableRetransmission;
     property public final com.mapbox.navigation.core.adas.AdasisMessageBinaryFormat messageBinaryFormat;
@@ -369,6 +377,7 @@ package com.mapbox.navigation.core.adas {
     property public final int messagesInPackage;
     property public final int metadataCycleSeconds;
     property public final int retransmissionMeters;
+    property public final int treeTrailingLength;
   }
 
   public static final class AdasisDataSendingConfig.Builder {
@@ -379,6 +388,7 @@ package com.mapbox.navigation.core.adas {
     method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder messagesInPackage(int messagesInPackage);
     method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder metadataCycleSeconds(int metadataCycleSeconds);
     method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder retransmissionMeters(int retransmissionMeters);
+    method public com.mapbox.navigation.core.adas.AdasisDataSendingConfig.Builder treeTrailingLength(int treeTrailingLength);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class AdasisMessageBinaryFormat {
