@@ -93,7 +93,7 @@ class AdasisDataSendingConfig private constructor(
             "messagesInPackage=$messagesInPackage, " +
             "metadataCycleSeconds=$metadataCycleSeconds, " +
             "enableRetransmission=$enableRetransmission, " +
-            "retransmissionMeters=$retransmissionMeters," +
+            "retransmissionMeters=$retransmissionMeters, " +
             "treeTrailingLength=$treeTrailingLength" +
             ")"
     }
