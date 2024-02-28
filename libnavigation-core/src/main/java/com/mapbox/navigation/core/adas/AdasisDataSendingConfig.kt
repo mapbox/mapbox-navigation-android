@@ -5,15 +5,15 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 /**
  * Data sending configuration
  *
- * @param messageBinaryFormat binary format in which Adasis message will be sent
+ * @param messageBinaryFormat binary format in which ADASIS message will be sent
  * @param messageIntervalMs interval between sending messages in milliseconds
  * @param messagesInPackage number of messages in one package (one message is 8 bytes)
  * @param metadataCycleSeconds time in seconds between repetition of META-DATA message
  * @param enableRetransmission if true, retransmission will be enabled
  * (package will be appended with retransmission data, messages from previous cycles)
  * @param retransmissionMeters after passing this distance, messages will not be retransmitted
- * @param treeTrailingLength the trailing length of the path tree, relatively
- * to the map-matched position, in the adasis provider
+ * @param treeTrailingLength the trailing length of the path tree,
+ * relative to the map-matched position, in the ADASIS provider
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisDataSendingConfig private constructor(
@@ -101,7 +101,7 @@ class AdasisDataSendingConfig private constructor(
     /**
      * Builder for [AdasisDataSendingConfig].
      *
-     * @param messageBinaryFormat Binary format in which Adasis message will be sent
+     * @param messageBinaryFormat Binary format in which ADASIS message will be sent
      */
     class Builder(private val messageBinaryFormat: AdasisMessageBinaryFormat) {
 
@@ -149,8 +149,8 @@ class AdasisDataSendingConfig private constructor(
         }
 
         /**
-         * The trailing length of the path tree, relatively to the map-matched position,
-         * in the adasis provider
+         * The trailing length of the path tree, relative to the map-matched position,
+         * in the ADASIS provider
          */
         fun treeTrailingLength(treeTrailingLength: Int) = apply {
             this.treeTrailingLength = treeTrailingLength
