@@ -45,6 +45,7 @@ dependencies {
     implementation project(':libnavigation-android')
     implementation project(':libnavui-dropin')
     implementation project(":libnavui-util")
+    implementation "com.mapbox.maps:android:10.16.5"
 
     // test
     androidTestImplementation project(':libtesting-ui')
