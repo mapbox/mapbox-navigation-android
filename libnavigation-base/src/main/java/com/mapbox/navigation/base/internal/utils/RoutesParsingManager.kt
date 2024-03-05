@@ -4,7 +4,7 @@ package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
-import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.nio.ByteBuffer
@@ -59,12 +59,18 @@ private class OptimisedRoutesParsingManager(
         parsing: suspend (ParseArguments) -> T
     ): T {
         return if (routeResponseInfo.sizeBytes < options.responseToParseSizeBytes) {
-            parsing(ParseArguments(optimiseDirectionsResponseStructure = true))
+            logI(LOG_TAG) { "Starting parsing" }
+            parsing(ParseArguments(optimiseDirectionsResponseStructure = true)).also {
+                logI(LOG_TAG) { "Finished parsing" }
+            }
         } else {
-            logD(LOG_TAG) { "Enqueuing routes parsing" }
+            logI(LOG_TAG) { "Enqueuing routes parsing" }
             mutex.withLock {
                 prepareForParsing()
-                parsing(ParseArguments(optimiseDirectionsResponseStructure = true))
+                logI(LOG_TAG) { "Starting parsing" }
+                parsing(ParseArguments(optimiseDirectionsResponseStructure = true)).also {
+                    logI(LOG_TAG) { "Finished parsing" }
+                }
             }
         }
     }
@@ -74,10 +80,10 @@ private class OptimisedRoutesParsingManager(
         parsing: suspend (ParseArguments) -> T
     ): AlternativesParsingResult<T> {
         return if (arguments.userTriggeredAlternativesRefresh) {
-            logD(LOG_TAG) { "skipping parsing of immediate route alternatives response" }
+            logI(LOG_TAG) { "skipping parsing of immediate route alternatives response" }
             AlternativesParsingResult.NotActual
         } else if (mutex.isLocked) {
-            logD(LOG_TAG) {
+            logI(LOG_TAG) {
                 "skipping parsing of routes alternatives" +
                     " as a different route is being parsed already"
             }
@@ -93,11 +99,11 @@ private class OptimisedRoutesParsingManager(
     }
 
     private suspend fun prepareForParsing() {
-        logD(LOG_TAG) {
+        logI(LOG_TAG) {
             "Preparing for routes response parsing"
         }
         prepareForParsingAction()
-        logD(LOG_TAG) {
+        logI(LOG_TAG) {
             "Preparation for routes parsing completed"
         }
     }
