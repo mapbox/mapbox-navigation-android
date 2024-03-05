@@ -26,7 +26,6 @@ import com.mapbox.navigation.base.internal.utils.refreshTtl
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigator.RouteInterface
@@ -36,6 +35,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.URL
 import java.nio.ByteBuffer
+import java.util.UUID
 
 /**
  * Wraps a route object used across the Navigation SDK features.
@@ -204,34 +204,50 @@ class NavigationRoute internal constructor(
             routeParser: SDKRouteParser = SDKRouteParser.default,
             optimiseMemory: Boolean = false
         ): List<NavigationRoute> {
-            logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
+            val parsingId = UUID.randomUUID()
+            logI(LOG_CATEGORY) {
+                "NavigationRoute.createAsync is called for. Parsing id $parsingId"
+            }
 
             return coroutineScope {
                 val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
+                    logI(LOG_CATEGORY) {
+                        "started java parsing. Parsing id $parsingId"
+                    }
                     directionsResponseJson.toDirectionsResponse().also {
-                        logD(
-                            "parsed directions response to java model for ${it.uuid()}",
+                        logI(
                             LOG_CATEGORY
-                        )
+                        ) {
+                            "finished java parsing. " +
+                                "Parsing id $parsingId, response id ${it.uuid()}"
+                        }
                     }
                 }
                 val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
+                    logI(LOG_CATEGORY) {
+                        "started native parsing. Parsing id $parsingId"
+                    }
                     routeParser.parseDirectionsResponse(
                         directionsResponseJson,
                         routeRequestUrl,
                         routerOrigin,
                     ).also {
-                        logD(
-                            "parsed directions response to RouteInterface " +
-                                "for ${it.value?.firstOrNull()?.responseUuid}",
+                        logI(
                             LOG_CATEGORY
-                        )
+                        ) {
+                            "finished native parsing. Parsing id $parsingId, " +
+                                "response id ${it.value?.firstOrNull()?.responseUuid}"
+                        }
                     }
                 }
                 val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
+                    logI(LOG_CATEGORY) {
+                        "started route options parsing. Parsing id $parsingId"
+                    }
                     RouteOptions.fromUrl(URL(routeRequestUrl)).also {
-                        logD(LOG_CATEGORY) {
-                            "parsed request url to RouteOptions: ${it.toUrl("***")}"
+                        logI(LOG_CATEGORY) {
+                            "finished RouteOptions parsing. Parsing id $parsingId," +
+                                "result it ${it.toUrl("***")}"
                         }
                     }
                 }
@@ -242,11 +258,12 @@ class NavigationRoute internal constructor(
                     responseTimeElapsedSeconds,
                     optimiseMemory
                 ).also {
-                    logD(
-                        "NavigationRoute.createAsync finished " +
-                            "for ${it.firstOrNull()?.directionsResponse?.uuid()}",
+                    logI(
                         LOG_CATEGORY
-                    )
+                    ) {
+                        "NavigationRoute.createAsync finished. Parsing id $parsingId " +
+                            "for ${it.firstOrNull()?.directionsResponse?.uuid()}"
+                    }
                 }
             }
         }
