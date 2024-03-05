@@ -206,26 +206,26 @@ class NavigationRoute internal constructor(
         ): List<NavigationRoute> {
             val parsingId = UUID.randomUUID()
             logI(LOG_CATEGORY) {
-                "NavigationRoute.createAsync is called for. Parsing id $parsingId"
+                "NavigationRoute.createAsync is called. Parsing id $parsingId"
             }
 
             return coroutineScope {
                 val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
                     logI(LOG_CATEGORY) {
-                        "started java parsing. Parsing id $parsingId"
+                        "Started java parsing. Parsing id $parsingId"
                     }
                     directionsResponseJson.toDirectionsResponse().also {
                         logI(
                             LOG_CATEGORY
                         ) {
-                            "finished java parsing. " +
+                            "Finished java parsing. " +
                                 "Parsing id $parsingId, response id ${it.uuid()}"
                         }
                     }
                 }
                 val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
                     logI(LOG_CATEGORY) {
-                        "started native parsing. Parsing id $parsingId"
+                        "Started native parsing. Parsing id $parsingId"
                     }
                     routeParser.parseDirectionsResponse(
                         directionsResponseJson,
@@ -235,7 +235,7 @@ class NavigationRoute internal constructor(
                         logI(
                             LOG_CATEGORY
                         ) {
-                            "finished native parsing. Parsing id $parsingId, " +
+                            "Finished native parsing. Parsing id $parsingId, " +
                                 "response id ${it.value?.firstOrNull()?.responseUuid}"
                         }
                     }
@@ -247,7 +247,7 @@ class NavigationRoute internal constructor(
                     RouteOptions.fromUrl(URL(routeRequestUrl)).also {
                         logI(LOG_CATEGORY) {
                             "finished RouteOptions parsing. Parsing id $parsingId," +
-                                "result it ${it.toUrl("***")}"
+                                "result ${it.toUrl("***")}"
                         }
                     }
                 }
@@ -261,8 +261,8 @@ class NavigationRoute internal constructor(
                     logI(
                         LOG_CATEGORY
                     ) {
-                        "NavigationRoute.createAsync finished. Parsing id $parsingId " +
-                            "for ${it.firstOrNull()?.directionsResponse?.uuid()}"
+                        "NavigationRoute.createAsync finished. Parsing id $parsingId, " +
+                            "response id ${it.firstOrNull()?.directionsResponse?.uuid()}"
                     }
                 }
             }
