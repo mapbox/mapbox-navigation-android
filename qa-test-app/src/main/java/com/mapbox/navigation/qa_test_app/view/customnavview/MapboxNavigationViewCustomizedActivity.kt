@@ -144,6 +144,9 @@ class MapboxNavigationViewCustomizedActivity : DrawerActivity() {
 
         binding.navigationView.addListener(freeDriveInfoPanelInstaller)
         binding.navigationView.addListener(navViewListener)
+        binding.navigationView.customizeViewBinders {
+            infoPanelHeaderArrivalBinder = CustomInfoPanelHeaderArrivalBinder(binding.navigationView)
+        }
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.getDefaultNightMode())
     }

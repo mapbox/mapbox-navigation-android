@@ -22,6 +22,7 @@ class CustomInfoPanelEndNavButtonBinder(
             null,
             R.style.DropInStyleExitButton
         )
+        button.id = R.id.end_nav_button
         button.iconImage.setImageResource(R.drawable.mapbox_ic_stop_navigation)
         button.setPadding(0)
         button.setBackgroundResource(R.drawable.mapbox_bg_circle_outline)
