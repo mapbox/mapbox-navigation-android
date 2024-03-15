@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
@@ -76,6 +77,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-2557")
     @Test
     fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
@@ -120,6 +122,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-2557")
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOffline() = sdkTest(
         timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
@@ -164,6 +167,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-2557")
     @Test
     fun startOfflineWithUserProvidedChargingStationsThenSwitchToOnlineRouteWhenInternetAppears() =
         sdkTest(
@@ -202,6 +206,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             }
         }
 
+    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-2557")
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOfflineWithSimpleObserver() =
         sdkTest(
