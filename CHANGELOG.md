@@ -6,6 +6,34 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.19.0 - 15 March, 2024
+### Changelog
+[Changes between v2.18.0 and v2.19.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.18.0...v2.19.0)
+
+#### Features
+
+- Added new property `AdasisDataSendingConfig.treeTrailingLength` that allows to specify the trailing length of the path tree, relative to the map-matched position, in the ADASIS provider. [#7753](https://github.com/mapbox/mapbox-navigation-android/pull/7753)
+- Fixed an issue where `RouterFailure.code` could have been null for Directions API errors. [#7753](https://github.com/mapbox/mapbox-navigation-android/pull/7753)
+- Added billing explanation logs. Now Navigation SDK explains in the logs why certain Active Guidance or Free Drive Trip session started/stopped/paused/resumed. Billing explanations have `[BillingExplanation]` prefix in the logcat. [#7710](https://github.com/mapbox/mapbox-navigation-android/pull/7710)
+
+#### Bug fixes and improvements
+
+- Resolved an issue where a crash could occur if telemetry sending settings were changed after creating `MapboxNavigation`. [#7755](https://github.com/mapbox/mapbox-navigation-android/pull/7755)
+- Fixed ADASIS generator errors related to the split edges. [#7753](https://github.com/mapbox/mapbox-navigation-android/pull/7753)
+- Fixed ADAS cache tiles eviction mechanism. [#7753](https://github.com/mapbox/mapbox-navigation-android/pull/7753)
+- Started handling "unlilimited" speed limits in ADASIS. [#7753](https://github.com/mapbox/mapbox-navigation-android/pull/7753)
+- Fixed possible `java.lang.UnsatisfiedLinkError` crash on application startup when Mapbox native libraries could not yet be found. [#7753](https://github.com/mapbox/mapbox-navigation-android/pull/7753)
+- Fixed leak of CarAppLifecycleOwner on every Copilot start. [#7669](https://github.com/mapbox/mapbox-navigation-android/pull/7669)
+- Started sending special type POSITION messages in OFF-ROAD mode. [#7753](https://github.com/mapbox/mapbox-navigation-android/pull/7753)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.6` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.6))
+- Mapbox Navigation Native `v203.0.0`
+- Mapbox Core Common `v23.9.1`
+- Mapbox Java `v6.15.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.15.0))
+
+
 ## Mapbox Navigation SDK 2.19.0-beta.2 - 26 February, 2024
 ### Changelog
 [Changes between v2.19.0-beta.1 and v2.19.0-beta.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.19.0-beta.1...v2.19.0-beta.2)
