@@ -63,7 +63,7 @@ Examples for Mapbox Navigation Android SDK are now available on their own separa
 
 The QA application [is available here](https://github.com/mapbox/mapbox-navigation-android/tree/main/qa-test-app/README.md).
   
-General documentation for Mapbox Navigation Android SDK is [available here](https://docs.mapbox.com/android/navigation).
+General documentation for Mapbox Navigation Android SDK is [available here](https://docs.mapbox.com/android/navigation). 
 
 ## Contributing
 
