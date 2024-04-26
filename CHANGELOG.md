@@ -6,6 +6,24 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.17.13 - 26 April, 2024
+### Changelog
+[Changes between v2.17.12 and v2.17.13](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.12...v2.17.13)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where cached ADAS data was not released. [#7791](https://github.com/mapbox/mapbox-navigation-android/pull/7791)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.16.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.16.4))
+- Mapbox Navigation Native `v162.0.5`
+- Mapbox Core Common `v23.8.6`
+- Mapbox Java `v6.15.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.15.0))
+
+
 ## Mapbox Navigation SDK 2.17.12 - 04 April, 2024
 ### Changelog
 [Changes between v2.17.11 and v2.17.12](https://github.com/mapbox/mapbox-navigation-android/compare/v2.17.11...v2.17.12)
