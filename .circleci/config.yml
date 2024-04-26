@@ -621,6 +621,7 @@ commands:
     steps:
       - run:
           name: Check public documentation
+          no_output_timeout: 30m
           command: ./scripts/dokka-validate.sh
 
   generate-documentation:
