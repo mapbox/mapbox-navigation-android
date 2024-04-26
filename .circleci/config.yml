@@ -512,7 +512,6 @@ commands:
             gcloud firebase test android run --type instrumentation \
               --app << parameters.module_wrapper >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_wrapper >>-<< parameters.variant >>.apk \
               --test << parameters.module_target >>/build/outputs/apk/androidTest/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>-androidTest.apk \
-              --device model=hammerhead,version=23,locale=fr,orientation=portrait \
               --device model=q2q,version=31,locale=de,orientation=landscape \
               --device model=panther,version=33,locale=it,orientation=landscape \
               --use-orchestrator \
