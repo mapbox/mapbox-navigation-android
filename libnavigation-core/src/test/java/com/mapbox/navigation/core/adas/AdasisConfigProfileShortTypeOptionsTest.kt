@@ -17,6 +17,7 @@ class AdasisConfigProfileShortTypeOptionsTest :
             .roadCondition(false)
             .variableSpeedSign(true)
             .headingChange(false)
+            .historyAverageSpeed(true)
     }
 
     override fun trigger() {
