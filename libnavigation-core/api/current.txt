@@ -341,12 +341,14 @@ package com.mapbox.navigation.core.adas {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasisConfigProfileShortTypeOptions {
     method public boolean getCurvature();
     method public boolean getHeadingChange();
+    method public boolean getHistoryAverageSpeed();
     method public boolean getRoadCondition();
     method public boolean getSlopeStep();
     method public boolean getVariableSpeedSign();
     method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder toBuilder();
     property public final boolean curvature;
     property public final boolean headingChange;
+    property public final boolean historyAverageSpeed;
     property public final boolean roadCondition;
     property public final boolean slopeStep;
     property public final boolean variableSpeedSign;
@@ -357,6 +359,7 @@ package com.mapbox.navigation.core.adas {
     method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions build();
     method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder curvature(boolean curvature);
     method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder headingChange(boolean headingChange);
+    method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder historyAverageSpeed(boolean historyAverageSpeed);
     method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder roadCondition(boolean roadCondition);
     method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder slopeStep(boolean slopeStep);
     method public com.mapbox.navigation.core.adas.AdasisConfigProfileShortTypeOptions.Builder variableSpeedSign(boolean variableSpeedSign);
