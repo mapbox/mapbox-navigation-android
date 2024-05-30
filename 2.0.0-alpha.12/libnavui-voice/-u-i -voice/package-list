@@ -1,6 +1,0 @@
-$dokka.format:html-v1
-$dokka.linkExtension:html
-
-com.mapbox.navigation.ui.voice.api
-com.mapbox.navigation.ui.voice.options
-

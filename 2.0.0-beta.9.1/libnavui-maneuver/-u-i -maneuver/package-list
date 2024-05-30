@@ -1,7 +1,0 @@
-$dokka.format:html-v1
-$dokka.linkExtension:html
-
-com.mapbox.navigation.ui.maneuver.api
-com.mapbox.navigation.ui.maneuver.model
-com.mapbox.navigation.ui.maneuver.view
-
