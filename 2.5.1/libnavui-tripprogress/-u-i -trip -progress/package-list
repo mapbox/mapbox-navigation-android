@@ -1,7 +1,0 @@
-$dokka.format:html-v1
-$dokka.linkExtension:html
-
-com.mapbox.navigation.ui.tripprogress.api
-com.mapbox.navigation.ui.tripprogress.model
-com.mapbox.navigation.ui.tripprogress.view
-
