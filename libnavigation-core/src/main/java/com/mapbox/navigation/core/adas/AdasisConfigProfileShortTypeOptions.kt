@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param roadCondition if true, roadCondition type will be generated
  * @param variableSpeedSign if true, variableSpeedSign type will be generated
  * @param headingChange if true, headingChange type will be generated
+ * @param historyAverageSpeed if true, headingChange type will be generated
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigProfileShortTypeOptions private constructor(
@@ -18,6 +19,7 @@ class AdasisConfigProfileShortTypeOptions private constructor(
     val roadCondition: Boolean,
     val variableSpeedSign: Boolean,
     val headingChange: Boolean,
+    val historyAverageSpeed: Boolean,
 ) {
 
     /**
@@ -29,6 +31,7 @@ class AdasisConfigProfileShortTypeOptions private constructor(
         .roadCondition(roadCondition)
         .variableSpeedSign(variableSpeedSign)
         .headingChange(headingChange)
+        .historyAverageSpeed(historyAverageSpeed)
 
     @JvmSynthetic
     internal fun toNativeAdasisConfigProfileShortTypeOptions():
@@ -38,7 +41,8 @@ class AdasisConfigProfileShortTypeOptions private constructor(
             curvature,
             roadCondition,
             variableSpeedSign,
-            headingChange
+            headingChange,
+            historyAverageSpeed,
         )
     }
 
@@ -55,7 +59,8 @@ class AdasisConfigProfileShortTypeOptions private constructor(
         if (curvature != other.curvature) return false
         if (roadCondition != other.roadCondition) return false
         if (variableSpeedSign != other.variableSpeedSign) return false
-        return headingChange == other.headingChange
+        if (headingChange != other.headingChange) return false
+        return historyAverageSpeed == other.historyAverageSpeed
     }
 
     /**
@@ -67,6 +72,7 @@ class AdasisConfigProfileShortTypeOptions private constructor(
         result = 31 * result + roadCondition.hashCode()
         result = 31 * result + variableSpeedSign.hashCode()
         result = 31 * result + headingChange.hashCode()
+        result = 31 * result + historyAverageSpeed.hashCode()
         return result
     }
 
@@ -80,6 +86,7 @@ class AdasisConfigProfileShortTypeOptions private constructor(
             "roadCondition=$roadCondition, " +
             "variableSpeedSign=$variableSpeedSign, " +
             "headingChange=$headingChange" +
+            "historyAverageSpeed=$historyAverageSpeed" +
             ")"
     }
 
@@ -93,6 +100,7 @@ class AdasisConfigProfileShortTypeOptions private constructor(
         private var roadCondition: Boolean = true
         private var variableSpeedSign: Boolean = false
         private var headingChange: Boolean = true
+        private var historyAverageSpeed: Boolean = false
 
         /**
          * If true, slopeStep type will be generated
@@ -130,6 +138,13 @@ class AdasisConfigProfileShortTypeOptions private constructor(
         }
 
         /**
+         * If true, historyAverageSpeed type will be generated
+         */
+        fun historyAverageSpeed(historyAverageSpeed: Boolean) = apply {
+            this.historyAverageSpeed = historyAverageSpeed
+        }
+
+        /**
          * Build the [AdasisConfigProfileShortTypeOptions]
          */
         fun build() = AdasisConfigProfileShortTypeOptions(
@@ -138,6 +153,7 @@ class AdasisConfigProfileShortTypeOptions private constructor(
             roadCondition = roadCondition,
             variableSpeedSign = variableSpeedSign,
             headingChange = headingChange,
+            historyAverageSpeed = historyAverageSpeed,
         )
     }
 }
