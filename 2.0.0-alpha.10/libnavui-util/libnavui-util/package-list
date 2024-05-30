@@ -1,6 +1,0 @@
-$dokka.format:html-v1
-$dokka.linkExtension:html
-
-com.mapbox.navigation.ui.utils.internal
-com.mapbox.navigation.ui.utils.internal.extensions
-
