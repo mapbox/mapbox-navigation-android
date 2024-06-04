@@ -1,0 +1,1 @@
+- Fixed a crash due to incorrect OpenLR input data
