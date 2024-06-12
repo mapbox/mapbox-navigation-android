@@ -215,35 +215,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override suspend fun refreshRoute(
         route: NavigationRoute
     ): Expected<String, List<RouteAlternative>> {
-        val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
-            RouteLegRefresh.builder()
-                .annotation(routeLeg.annotation())
-                .incidents(routeLeg.incidents())
-                .build()
-        }
-        val refreshedWaypoints = route.waypoints
-        val refreshRoute = DirectionsRouteRefresh.builder()
-            .legs(refreshedLegs)
-            .unrecognizedJsonProperties(
-                refreshedWaypoints?.let { waypoints ->
-                    mapOf(
-                        Constants.RouteResponse.KEY_WAYPOINTS to JsonArray().apply {
-                            waypoints.forEach { waypoint ->
-                                add(JsonParser.parseString(waypoint.toJson()))
-                            }
-                        }
-                    )
-                }
-            )
-            .build()
-        val refreshResponse = DirectionsRefreshResponse.builder()
-            .code("200")
-            .route(refreshRoute)
-            .build()
 
-        val refreshResponseJson = withContext(ThreadController.DefaultDispatcher) {
-            refreshResponse.toJson()
-        }
+        val latestRefresh = route.latestRouteRefresh!!
 
         val callback = {
                 continuation: Continuation<Expected<String, List<RouteAlternative>>>,
@@ -276,13 +249,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         return suspendCancellableCoroutine { continuation ->
             logD(
                 "Refreshing native route ${route.nativeRoute().routeId} " +
-                    "with generated refresh response: $refreshResponseJson",
+                    "with generated refresh response: ${latestRefresh.directionsApiResponse}",
                 LOG_CATEGORY
             )
             navigator!!.refreshRoute(
-                refreshResponseJson,
-                route.nativeRoute().routeId
+                latestRefresh.directionsApiResponse,
+                route.nativeRoute().routeId,
+                latestRefresh.geometryIndex
             ) { callback(continuation, it) }
+            route.latestRouteRefresh = null
         }
     }
 
