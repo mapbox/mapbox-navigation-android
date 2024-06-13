@@ -497,15 +497,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             config,
             historyRecorderHandles.composite,
             navigationOptions.accessToken ?: "",
-            if (moduleRouter.isInternalImplementation()) {
-                // We pass null to let NN know that default router is used and it can rely
-                // on implementation details in some cases like offline-online switch.
-                // Meanwhile platform SDK uses its own instance of native router for
-                // route requests
-                null
-            } else {
-                RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
-            },
+            getRouterInterfaceForNativeNavigator()
         )
         etcGateAPI = EtcGateApi(navigator.experimental)
 
@@ -634,6 +626,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator.cache
         )
         roadObjectMatcher = RoadObjectMatcher(navigator)
+    }
+
+    private fun getRouterInterfaceForNativeNavigator(): RouterInterface? {
+        return if (moduleRouter.isInternalImplementation()) {
+            // We pass null to let NN know that default router is used and it can rely
+            // on implementation details in some cases like offline-online switch.
+            // Meanwhile platform SDK uses its own instance of native router for
+            // route requests
+            null
+        } else {
+            RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
+        }
     }
 
     /**
@@ -2121,11 +2125,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 config,
                 historyRecorderHandles.composite,
                 navigationOptions.accessToken ?: "",
-                if (moduleRouter.isInternalImplementation()) {
-                    nativeRouter
-                } else {
-                    RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
-                },
+                getRouterInterfaceForNativeNavigator()
             )
             etcGateAPI.experimental = navigator.experimental
             assignHistoryRecorders()
