@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapboxScreenManager</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Car::com.mapbox.androidauto.screenmanager/MapboxScreenManager///PointingToDeclaration//-1697183600">
+  <div class="breadcrumbs"><a href="../../index.html">UI Car</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.androidauto.screenmanager</a><span class="delimiter">/</span><a href="index.html">MapboxScreenManager</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Mapbox</span><wbr><span>Screen</span><wbr><span><span>Manager</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-androidauto:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">MapboxScreenManager</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph"><a href="index.html">MapboxScreenManager</a> allows you to prepare an experience that includes many screens with a single function. Use the <a href="../prepare-screens.html">MapboxCarContext.prepareScreens</a> to get started.</p><h3 class=""> How it works</h3><p class="paragraph">Using <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a> to <a href="../-mapbox-screen-factory/index.html">MapboxScreenFactory</a> pairing, the <a href="index.html">MapboxScreenManager</a> will create a screen based on a string provided. You can customize screens by setting the key value pair.</p><p class="paragraph"><a href="index.html">MapboxScreenManager</a> can be observed and controlled by the car or app. Observe the screen changes with <a href="-companion/screen-event.html">MapboxScreenManager.screenEvent</a>, change the screen with operations like <a href="../../../libnavui-androidauto/com.mapbox.androidauto.screenmanager/-mapbox-screen-manager/replace-top.html">MapboxScreenManager.replaceTop</a>. See the <a href="../-mapbox-screen-operation/index.html">MapboxScreenOperation</a> for all of the available operations, each operation is applied through <a href="index.html">MapboxScreenManager</a> functions.</p><h3 class=""> Set up</h3><p class="paragraph">The <a href="index.html">MapboxScreenManager</a> is provided to you through the <a href="../../com.mapbox.androidauto/-mapbox-car-context/index.html">MapboxCarContext</a>. It is important to keep the screen manager lifecycle close to <a href="https://developer.android.com/reference/kotlin/androidx/car/app/CarContext.html">CarContext</a> to avoid memory leaks. <a href="index.html">MapboxScreenManager</a> does not work without the <a href="https://developer.android.com/reference/kotlin/androidx/car/app/ScreenManager.html">ScreenManager</a> which is also bound to the <a href="https://developer.android.com/reference/kotlin/androidx/car/app/CarContext.html">CarContext</a>.</p><p class="paragraph">Example</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">class MySession : Session() {<br>  private val mapboxCarContext = MapboxCarContext(lifecycle, MapboxCarMap())<br>      .prepareScreens()<br>--snip--<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h3 class=""> Customization</h3><p class="paragraph">At any point, you can change the mapping of the <a href="index.html">MapboxScreenManager</a> with setters. The <a href="../-mapbox-screen-factory/index.html">MapboxScreenFactory</a> instances are expected to have a lifecycle as long as the <a href="https://developer.android.com/reference/kotlin/androidx/car/app/Session.html">Session</a>, so an instance of <a href="index.html">MapboxScreenManager</a> is required. You can access this class through the</p><p class="paragraph"><a href="../-mapbox-screen-factory/create.html">MapboxScreenFactory.create</a> Example</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">mapboxCarContext.screenManager["MY_SCREEN"] = MyScreenFactory()<br><br>// When your app is showing on the Android Auto head unit, the MyScreenFactory will be shown<br>// on the top of the back stack.<br>MapboxScreenManager.replaceTop("MY_SCREEN")</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="771585137%2FClasslikes%2F-1697183600" anchor-label="Companion" id="771585137%2FClasslikes%2F-1697183600" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-androidauto:dokkaHtmlPartial/release" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="771585137%2FClasslikes%2F-1697183600"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-androidauto:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-651013325%2FFunctions%2F-1697183600" anchor-label="contains" id="-651013325%2FFunctions%2F-1697183600" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-androidauto:dokkaHtmlPartial/release" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="contains.html"><span><span>contains</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-651013325%2FFunctions%2F-1697183600"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-androidauto:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">operator </span><span class="token keyword">fun </span><a href="contains.html"><span class="token function">contains</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Check if there is a factory assigned to the key. This can be used to assign a factory when there is not one set. This can also be used to verify the type of the factory.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1660442532%2FFunctions%2F-1697183600" anchor-label="createScreen" id="-1660442532%2FFunctions%2F-1697183600" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-androidauto:dokkaHtmlPartial/release" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="create-screen.html"><span>create</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1660442532%2FFunctions%2F-1697183600"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-androidauto:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-screen.html"><span class="token function">createScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">screenKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/car/app/Screen.html">Screen</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">This should be used to create a screen from <a href="https://developer.android.com/reference/kotlin/androidx/car/app/Session.html#onCreateScreen-android.content.Intent-">Session.onCreateScreen</a>. If the screen changes the <a href="-companion/screen-event.html">screenEvent</a> observers will be notified with an <a href="../-mapbox-screen-operation/-c-r-e-a-t-e-d.html">MapboxScreenOperation.CREATED</a> event.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="470715489%2FFunctions%2F-1697183600" anchor-label="goBack" id="470715489%2FFunctions%2F-1697183600" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-androidauto:dokkaHtmlPartial/release" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="go-back.html"><span>go</span><wbr><span><span>Back</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="470715489%2FFunctions%2F-1697183600"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-androidauto:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="go-back.html"><span class="token function">goBack</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Calling this function will pop the back stack of the <a href="https://developer.android.com/reference/kotlin/androidx/car/app/ScreenManager.html">ScreenManager</a>. If there are no screens on the backstack, it will safely return false. If you are using the <a href="https://developer.android.com/reference/kotlin/androidx/car/app/ScreenManager.html">ScreenManager</a> and the <a href="go-back.html">goBack</a> operation results in an unknown backstack, this will throw an <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1098803405%2FFunctions%2F-1697183600" anchor-label="putAll" id="-1098803405%2FFunctions%2F-1697183600" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-androidauto:dokkaHtmlPartial/release" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="put-all.html"><span>put</span><wbr><span><span>All</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1098803405%2FFunctions%2F-1697183600"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-androidauto:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="put-all.html"><span class="token function">putAll</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">vararg </span>pairs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-mapbox-screen-factory/index.html">MapboxScreenFactory</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">MapboxScreenManager</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Allows you to put all defined screen factories into the manager in one operation.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-303643217%2FFunctions%2F-1697183600" anchor-label="set" id="-303643217%2FFunctions%2F-1697183600" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-androidauto:dokkaHtmlPartial/release" data-filterable-set=":libnavui-androidauto:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set.html"><span><span>set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-303643217%2FFunctions%2F-1697183600"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-androidauto:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">operator </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="set.html">T</a><span class="token operator"> : </span><a href="../-mapbox-screen-factory/index.html">MapboxScreenFactory</a><span class="token operator">&gt; </span><a href="set.html"><span class="token function">set</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">factory<span class="token operator">: </span><a href="set.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-mapbox-screen-factory/index.html">MapboxScreenFactory</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns the previously set screen factory.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
