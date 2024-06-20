@@ -50,6 +50,7 @@ dependencies {
     // androidX
     implementation dependenciesList.androidXConstraintLayout
     implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXCoreKtx
 
     apply from: "../gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
