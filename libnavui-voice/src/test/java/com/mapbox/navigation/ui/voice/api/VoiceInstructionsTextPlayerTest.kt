@@ -7,15 +7,19 @@ import android.speech.tts.TextToSpeech.LANG_AVAILABLE
 import android.speech.tts.TextToSpeech.LANG_NOT_SUPPORTED
 import android.speech.tts.TextToSpeech.OnInitListener
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.job
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -26,6 +30,9 @@ import java.util.Locale
 class VoiceInstructionsTextPlayerTest {
 
     @get:Rule
+    var coroutineRule = MainCoroutineRule()
+
+    @get:Rule
     val loggerRule = LoggingFrontendTestRule()
 
     private val mockedBundle: Bundle = mockk(relaxUnitFun = true)
@@ -33,6 +40,13 @@ class VoiceInstructionsTextPlayerTest {
 
     @Before
     fun setUp() {
+        mockkObject(InternalJobControlFactory)
+        every {
+            InternalJobControlFactory.createDefaultScopeJobControl()
+        } answers {
+            val defaultScope = coroutineRule.createTestScope()
+            JobControl(defaultScope.coroutineContext.job, defaultScope)
+        }
         mockkObject(BundleProvider)
         mockkObject(TextToSpeechProvider)
         every { BundleProvider.retrieveBundle() } returns mockedBundle
@@ -41,6 +55,7 @@ class VoiceInstructionsTextPlayerTest {
 
     @After
     fun tearDown() {
+        unmockkObject(InternalJobControlFactory)
         unmockkObject(BundleProvider)
         unmockkObject(TextToSpeechProvider)
     }
