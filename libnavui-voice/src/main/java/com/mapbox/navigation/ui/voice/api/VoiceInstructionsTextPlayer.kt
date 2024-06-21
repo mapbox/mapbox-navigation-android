@@ -4,9 +4,14 @@ import android.content.Context
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.trace
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory.createDefaultScopeJobControl
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
@@ -25,18 +30,18 @@ internal class VoiceInstructionsTextPlayer(
     internal var isLanguageSupported: Boolean = false
 
     private var textToSpeechInitStatus: Int? = null
+    private val jobControl = createDefaultScopeJobControl()
 
     @VisibleForTesting
-    internal val textToSpeech =
+    internal val textToSpeech = trace(TRACE_GET_TTS) {
         TextToSpeechProvider.getTextToSpeech(context.applicationContext) { status ->
             textToSpeechInitStatus = status
             if (status == TextToSpeech.SUCCESS) {
                 initializeWithLanguage(Locale(language))
-                if (isLanguageSupported) {
-                    setUpUtteranceProgressListener()
-                }
+                setUpUtteranceProgressListener()
             }
         }
+    }
 
     @VisibleForTesting
     internal var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
@@ -69,14 +74,11 @@ internal class VoiceInstructionsTextPlayer(
             "Only one announcement can be played at a time."
         }
         currentPlay = announcement
-        val announcement = announcement.announcement
-        if (isLanguageSupported && announcement.isNotBlank()) {
-            play(announcement)
+        val text = announcement.announcement
+        if (isLanguageSupported && text.isNotBlank()) {
+            play(text)
         } else {
-            logE(
-                "$LANGUAGE_NOT_SUPPORTED or announcement from state is blank",
-                LOG_CATEGORY
-            )
+            logE { "$LANGUAGE_NOT_SUPPORTED or announcement from state is blank" }
             donePlaying()
         }
     }
@@ -108,6 +110,7 @@ internal class VoiceInstructionsTextPlayer(
      * the announcement should end immediately and any announcements queued should be cleared.
      */
     override fun shutdown() {
+        jobControl.job.cancelChildren()
         textToSpeech.setOnUtteranceProgressListener(null)
         textToSpeech.shutdown()
         currentPlay = null
@@ -116,16 +119,20 @@ internal class VoiceInstructionsTextPlayer(
 
     @VisibleForTesting
     internal fun initializeWithLanguage(language: Locale) {
-        isLanguageSupported = if (playerAttributes.options.checkIsLanguageAvailable) {
-            textToSpeech.isLanguageAvailable(language) == TextToSpeech.LANG_AVAILABLE
-        } else {
-            true
+        jobControl.scope.launch {
+            trace(TRACE_INIT_LANG) {
+                isLanguageSupported = if (playerAttributes.options.checkIsLanguageAvailable) {
+                    textToSpeech.isLanguageAvailable(language) == TextToSpeech.LANG_AVAILABLE
+                } else {
+                    true
+                }
+                if (!isLanguageSupported) {
+                    logE { LANGUAGE_NOT_SUPPORTED }
+                    return@trace
+                }
+                textToSpeech.language = language
+            }
         }
-        if (!isLanguageSupported) {
-            logE(LANGUAGE_NOT_SUPPORTED, LOG_CATEGORY)
-            return
-        }
-        textToSpeech.language = language
     }
 
     private fun setUpUtteranceProgressListener() {
@@ -136,12 +143,12 @@ internal class VoiceInstructionsTextPlayer(
 
             override fun onError(utteranceId: String?) {
                 // Deprecated, may be called due to https://issuetracker.google.com/issues/138321382
-                logE("Unexpected TextToSpeech error", LOG_CATEGORY)
+                logE { "Unexpected TextToSpeech error" }
                 donePlaying()
             }
 
             override fun onError(utteranceId: String?, errorCode: Int) {
-                logE("TextToSpeech error: $errorCode", LOG_CATEGORY)
+                logE { "TextToSpeech error: $errorCode" }
                 donePlaying()
             }
 
@@ -163,18 +170,23 @@ internal class VoiceInstructionsTextPlayer(
     }
 
     private fun play(announcement: String) {
-        val currentBundle = BundleProvider.retrieveBundle()
-        val bundle = currentBundle.apply {
-            putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
-        }
-        playerAttributes.applyOn(textToSpeech, bundle)
+        logD { "play: $announcement" }
+        jobControl.scope.launch {
+            trace(TRACE_PLAY) {
+                val currentBundle = BundleProvider.retrieveBundle()
+                val bundle = currentBundle.apply {
+                    putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
+                }
+                playerAttributes.applyOn(textToSpeech, bundle)
 
-        textToSpeech.speak(
-            announcement,
-            TextToSpeech.QUEUE_FLUSH,
-            bundle,
-            DEFAULT_UTTERANCE_ID
-        )
+                textToSpeech.speak(
+                    announcement,
+                    TextToSpeech.QUEUE_FLUSH,
+                    bundle,
+                    DEFAULT_UTTERANCE_ID
+                )
+            }
+        }
     }
 
     private companion object {
@@ -184,5 +196,12 @@ internal class VoiceInstructionsTextPlayer(
         private const val DEFAULT_UTTERANCE_ID = "default_id"
         private const val DEFAULT_VOLUME_LEVEL = 1.0f
         private const val MUTE_VOLUME_LEVEL = 0.0f
+
+        private const val TRACE_GET_TTS = "VoiceInstructionsTextPlayer.getTextToSpeech"
+        private const val TRACE_INIT_LANG = "VoiceInstructionsTextPlayer.initializeWithLanguage"
+        private const val TRACE_PLAY = "VoiceInstructionsTextPlayer.play"
+
+        private inline fun logD(msg: () -> String) = logD(LOG_CATEGORY, msg)
+        private inline fun logE(msg: () -> String) = logE(LOG_CATEGORY, msg)
     }
 }

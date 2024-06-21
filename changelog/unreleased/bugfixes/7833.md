@@ -1,0 +1,1 @@
+- Fixed UI jank caused by on-device TextToSpeech player.
