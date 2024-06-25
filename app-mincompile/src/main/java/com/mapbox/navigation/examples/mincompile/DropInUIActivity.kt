@@ -3,8 +3,6 @@ package com.mapbox.navigation.examples.mincompile
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.mapbox.navigation.examples.mincompile.databinding.LayoutActivityDropinBinding
-import com.mapbox.navigation.examples.mincompile.databinding.LayoutActivityMainBinding
-import com.mapbox.navigation.examples.mincompile.databinding.LayoutActivityNavigationBinding
 
 class DropInUIActivity : AppCompatActivity() {
     private lateinit var binding: LayoutActivityDropinBinding
