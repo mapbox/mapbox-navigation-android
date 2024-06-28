@@ -20,7 +20,8 @@ def TriggerWorkflow(token, commit, publish):
           "run_android_navigation_benchmark": True,
           "publish_android_navigation_benchmark": publish,
           "mapbox_slug": "mapbox/mapbox-navigation-android",
-          "navigation_sdk_commit_hash": commit
+          "navigation_sdk_commit_hash": commit,
+          "android_navigation_directory": "android-navigation"
         }
     }
 
