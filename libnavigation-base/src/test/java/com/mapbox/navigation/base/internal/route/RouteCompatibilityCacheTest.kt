@@ -98,4 +98,27 @@ class RouteCompatibilityCacheTest {
         assertEquals(navigationRoute1, RouteCompatibilityCache.getFor(directionsRouteMock1))
         assertEquals(navigationRoute2, RouteCompatibilityCache.getFor(directionsRouteMock2))
     }
+
+    @Test
+    fun `cache size does not exceed maximum`() {
+        val route1 = mockk<NavigationRoute> {
+            every { directionsRoute } returns mockk()
+        }
+        val route2 = mockk<NavigationRoute> {
+            every { directionsRoute } returns mockk()
+        }
+        val route3 = mockk<NavigationRoute> {
+            every { directionsRoute } returns mockk()
+        }
+        val route4 = mockk<NavigationRoute> {
+            every { directionsRoute } returns mockk()
+        }
+
+        RouteCompatibilityCache.setDirectionsSessionResult(listOf(route1, route2, route3, route4))
+
+        assertNull(RouteCompatibilityCache.getFor(route1.directionsRoute))
+        assertEquals(route2, RouteCompatibilityCache.getFor(route2.directionsRoute))
+        assertEquals(route3, RouteCompatibilityCache.getFor(route3.directionsRoute))
+        assertEquals(route4, RouteCompatibilityCache.getFor(route4.directionsRoute))
+    }
 }
