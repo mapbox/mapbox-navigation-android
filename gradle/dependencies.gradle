@@ -22,7 +22,7 @@ ext {
   println("AndroidX Lifecycle version: " + androidXLifecycleVersion)
 
   version = [
-      mapboxMapSdk              : '10.18.1',
+      mapboxMapSdk              : '10.18.3',
       mapboxSdkServices         : '7.1.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '23.10.1',
