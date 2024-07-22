@@ -6,6 +6,7 @@ import android.location.Location
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -69,6 +70,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -112,7 +114,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
      * has to be played. [MapboxVoiceInstructionsPlayer] should be instantiated in
      * `Activity#onCreate`.
      */
-    private lateinit var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer
+    private var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer? = null
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder().build()
@@ -163,7 +165,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                     logD("play(fallback): '${error.fallback.announcement}'", TAG)
                     // The data obtained in the form of an error is played using
                     // voiceInstructionsPlayer.
-                    voiceInstructionsPlayer.play(
+                    voiceInstructionsPlayer?.play(
                         error.fallback,
                         voiceInstructionsPlayerCallback
                     )
@@ -172,7 +174,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                     logD("play: '${value.announcement.announcement}'", TAG)
                     // The data obtained in the form of speech announcement is played using
                     // voiceInstructionsPlayer.
-                    voiceInstructionsPlayer.play(
+                    voiceInstructionsPlayer?.play(
                         value.announcement,
                         voiceInstructionsPlayerCallback
                     )
@@ -220,7 +222,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         RoutesObserver { result -> // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
             // clear the [MapboxVoiceInstructionsPlayer]
             speechApi.cancel()
-            voiceInstructionsPlayer.clear()
+            voiceInstructionsPlayer?.clear()
             if (result.navigationRoutes.isNotEmpty()) {
                 lifecycleScope.launch {
                     routeLineApi.setNavigationRoutes(
@@ -300,7 +302,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         }
 
         binding.addPlay.setOnClickListener {
-            voiceInstructionsPlayer.play(
+            voiceInstructionsPlayer?.play(
                 SpeechAnnouncement.Builder("Test hybrid speech player.").build(),
                 voiceInstructionsPlayerCallback
             )
@@ -323,10 +325,10 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun handleSoundState(value: Boolean) {
         if (value) {
             // This is used to set the speech volume to mute.
-            voiceInstructionsPlayer.volume(SpeechVolume(0.0f))
+            voiceInstructionsPlayer?.volume(SpeechVolume(0.0f))
         } else {
             // This is used to set the speech volume to max
-            voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
+            voiceInstructionsPlayer?.volume(SpeechVolume(1.0f))
         }
         isMuted = value
     }
@@ -387,13 +389,15 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
-        voiceInstructionsPlayer = MapboxVoiceInstructionsPlayer(
-            this,
-            Locale.US.toLanguageTag(),
-            VoiceInstructionsPlayerOptions.Builder()
-                .abandonFocusDelay(PLAYER_ABANDON_FOCUS_DELAY)
-                .build()
-        )
+        lifecycle.coroutineScope.launch(Dispatchers.Default) {
+            voiceInstructionsPlayer = MapboxVoiceInstructionsPlayer(
+                applicationContext,
+                Locale.US.toLanguageTag(),
+                VoiceInstructionsPlayerOptions.Builder()
+                    .abandonFocusDelay(PLAYER_ABANDON_FOCUS_DELAY)
+                    .build()
+            )
+        }
         init()
         voiceInstructionsPrefetcher.onAttached(mapboxNavigation)
     }
@@ -428,7 +432,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.onDestroy()
         speechApi.cancel()
         voiceInstructionsPrefetcher.onDetached(mapboxNavigation)
-        voiceInstructionsPlayer.shutdown()
+        voiceInstructionsPlayer?.shutdown()
     }
 
     override fun onMapLongClick(point: Point): Boolean {
