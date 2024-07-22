@@ -6,6 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.20.1 - 22 July, 2024
+### Changelog
+[Changes between v2.20.0 and v2.20.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.20.0...v2.20.1)
+
+#### Features
+- Optimized memory usage in Directions API model classes by interning frequently occurring strings in JSON. [#7840](https://github.com/mapbox/mapbox-navigation-android/pull/7840)
+
+#### Bug fixes and improvements
+- Fixed UI jank caused by on-device TextToSpeech player. [#7833](https://github.com/mapbox/mapbox-navigation-android/pull/7833)
+- Fixed a crash caused by cache inconsistency. [#7836](https://github.com/mapbox/mapbox-navigation-android/pull/7836)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.18.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.18.3))
+- Mapbox Navigation Native `v206.0.0`
+- Mapbox Core Common `v23.10.1`
+- Mapbox Java `v7.1.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.1.0))
+
+
 ## Mapbox Navigation SDK 2.20.0 - 14 June, 2024
 ### Changelog
 [Changes between v2.19.0 and v2.20.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.19.0...v2.20.0)
