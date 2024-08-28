@@ -34,7 +34,7 @@ class GraphAccessor internal constructor(
      * @return list of Points representing edge shape
      */
     fun getEdgeShape(edgeId: Long): List<Point>? {
-        return navigator.graphAccessor?.getEdgeShape(edgeId)
+        return navigator.graphAccessor.getEdgeShape(edgeId)
     }
 
     /**
@@ -45,7 +45,7 @@ class GraphAccessor internal constructor(
      * @return EHorizonEdgeMetadata
      */
     fun getEdgeMetadata(edgeId: Long): EHorizonEdgeMetadata? {
-        return navigator.graphAccessor?.getEdgeMetadata(edgeId)?.let {
+        return navigator.graphAccessor.getEdgeMetadata(edgeId)?.let {
             EHorizonFactory.buildEHorizonEdgeMetadata(it)
         }
     }
@@ -55,7 +55,7 @@ class GraphAccessor internal constructor(
      * If any of path edges is not accessible, returns null.
      */
     fun getPathShape(graphPath: EHorizonGraphPath): List<Point>? {
-        return navigator.graphAccessor?.getPathShape(
+        return navigator.graphAccessor.getPathShape(
             EHorizonFactory.buildNativeGraphPath(graphPath)
         )
     }
@@ -65,7 +65,7 @@ class GraphAccessor internal constructor(
      * If position's edge is not accessible, returns null.
      */
     fun getGraphPositionCoordinate(graphPosition: EHorizonGraphPosition): Point? {
-        return navigator.graphAccessor?.getPositionCoordinate(
+        return navigator.graphAccessor.getPositionCoordinate(
             EHorizonFactory.buildNativeGraphPosition(graphPosition)
         )
     }
@@ -75,7 +75,7 @@ class GraphAccessor internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun getAdasisEdgeAttributes(edgeId: Long): AdasEdgeAttributes? {
-        return navigator.graphAccessor?.getAdasAttributes(edgeId)?.let {
+        return navigator.graphAccessor.getAdasAttributes(edgeId)?.let {
             AdasEdgeAttributes.createFromNativeObject(it)
         }
     }

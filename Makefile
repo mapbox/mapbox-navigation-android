@@ -52,6 +52,13 @@ check-kotlin-lint:
 	&& $(call run-gradle-tasks,$(ANDROIDAUTO_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
+.PHONY: format-kotlin-lint
+format-kotlin-lint:
+	$(call run-gradle-tasks,$(CORE_MODULES),ktlintFormat) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),ktlintFormat) \
+	&& $(call run-gradle-tasks,$(ANDROIDAUTO_MODULES),ktlintFormat) \
+	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlintFormat)
+
 .PHONY: check-android-lint
 check-android-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),lint) \

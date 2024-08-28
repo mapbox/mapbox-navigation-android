@@ -29,7 +29,6 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoints
 import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
 import com.mapbox.navigation.utils.internal.JobControl
@@ -64,7 +63,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 internal class MapboxTripSession(
     override val tripService: TripService,
     private val tripSessionLocationEngine: TripSessionLocationEngine,
-    private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
+    private val navigator: MapboxNativeNavigator,
     private val threadController: ThreadController,
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager
 ) : TripSession {

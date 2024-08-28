@@ -28,7 +28,6 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoints
@@ -150,7 +149,6 @@ class MapboxTripSessionTest {
 
     @Before
     fun setUp() {
-        mockkObject(MapboxNativeNavigatorImpl)
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
         mockkStatic("com.mapbox.navigation.navigator.internal.utils.TripStatusEx")
@@ -1879,7 +1877,6 @@ class MapboxTripSessionTest {
 
     @After
     fun cleanUp() {
-        unmockkObject(MapboxNativeNavigatorImpl)
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
         unmockkStatic("com.mapbox.navigation.navigator.internal.utils.TripStatusEx")

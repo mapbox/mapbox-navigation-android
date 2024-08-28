@@ -24,7 +24,7 @@ class RoadObjectsStore internal constructor(
      */
     fun getRoadObjectsOnTheEdge(edgeId: Long): Map<String, RoadObjectEdgeLocation> {
         val roadObjects = mutableMapOf<String, RoadObjectEdgeLocation>()
-        navigator.roadObjectsStore?.get(edgeId)?.forEach { (objectId, objectEdgeLocation) ->
+        navigator.roadObjectsStore.get(edgeId).forEach { (objectId, objectEdgeLocation) ->
             roadObjects[objectId] =
                 EHorizonFactory.buildRoadObjectEdgeLocation(objectEdgeLocation)
         }
@@ -37,7 +37,7 @@ class RoadObjectsStore internal constructor(
      * @param roadObjectId id of the road object
      */
     fun getRoadObject(roadObjectId: String): RoadObject? {
-        return navigator.roadObjectsStore?.getRoadObject(roadObjectId)?.let {
+        return navigator.roadObjectsStore.getRoadObject(roadObjectId)?.let {
             RoadObjectFactory.buildRoadObject(it)
         }
     }
@@ -49,7 +49,7 @@ class RoadObjectsStore internal constructor(
      * @return list of road object ids
      */
     fun getRoadObjectIdsByEdgeIds(edgeIds: List<Long>): List<String> {
-        return navigator.roadObjectsStore?.getRoadObjectIdsByEdgeIds(edgeIds) ?: emptyList()
+        return navigator.roadObjectsStore.getRoadObjectIdsByEdgeIds(edgeIds)
     }
 
     /**
@@ -59,7 +59,7 @@ class RoadObjectsStore internal constructor(
      */
     fun addCustomRoadObject(roadObject: RoadObject) {
         val nativeRoadObject = RoadObjectFactory.buildNativeRoadObject(roadObject)
-        navigator.roadObjectsStore?.addCustomRoadObject(nativeRoadObject)
+        navigator.roadObjectsStore.addCustomRoadObject(nativeRoadObject)
     }
 
     /**
@@ -67,14 +67,14 @@ class RoadObjectsStore internal constructor(
      * @param roadObjectId id of the road object
      */
     fun removeCustomRoadObject(roadObjectId: String) {
-        navigator.roadObjectsStore?.removeCustomRoadObject(roadObjectId)
+        navigator.roadObjectsStore.removeCustomRoadObject(roadObjectId)
     }
 
     /**
      * Removes all custom road objects (i.e. stops tracking them in electronic horizon)
      */
     fun removeAllCustomRoadObjects() {
-        navigator.roadObjectsStore?.removeAllCustomRoadObjects()
+        navigator.roadObjectsStore.removeAllCustomRoadObjects()
     }
 
     /**

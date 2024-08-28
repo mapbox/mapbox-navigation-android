@@ -13,7 +13,6 @@ import com.mapbox.navigation.core.replay.history.mapToLocation
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
@@ -43,19 +42,20 @@ class ArtificialDriverTest {
     @Ignore("test sometimes fails because of https://mapbox.atlassian.net/browse/NN-418")
     fun nativeNavigatorFollowsArtificialDriverWithoutReroutes() =
         runBlocking<Unit>(Dispatchers.Main) {
-            withNavigators { mapboxNavigation, nativeNavigator ->
+            withNavigators { mapboxNavigation ->
                 mapboxNavigation.historyRecorder.startRecording()
                 val testRoute = getTestRoute()
                 val events = createArtificialLocationUpdates(testRoute)
-                val setRoutesResult =
-                    nativeNavigator.setRoutes(testRoute, reason = SetRoutesReason.NEW_ROUTE)
+                val setRoutesResult = mapboxNavigation.navigator
+                    .setRoutes(testRoute, reason = SetRoutesReason.NEW_ROUTE)
                 assertTrue("result is $setRoutesResult", setRoutesResult.isValue)
                 val statusesTracking = async<List<NavigationStatus>> {
-                    nativeNavigator.collectStatuses(untilRouteState = RouteState.COMPLETE)
+                    mapboxNavigation.navigator
+                        .collectStatuses(untilRouteState = RouteState.COMPLETE)
                 }
 
                 for (location in events.map { it.location.mapToLocation() }) {
-                    assertTrue(nativeNavigator.updateLocation(location.toFixLocation()))
+                    assertTrue(mapboxNavigation.navigator.updateLocation(location.toFixLocation()))
                 }
 
                 val states = statusesTracking.await()
@@ -113,7 +113,7 @@ fun MapboxNativeNavigator.statusUpdates(): Flow<OnStatusUpdateParameters> {
 }
 
 private suspend fun withNavigators(
-    block: suspend (MapboxNavigation, MapboxNativeNavigator) -> Unit
+    block: suspend (MapboxNavigation) -> Unit
 ) {
     val context = InstrumentationRegistry.getInstrumentation().targetContext
     val mapboxNavigation = MapboxNavigationProvider.create(
@@ -122,7 +122,7 @@ private suspend fun withNavigators(
             .build()
     )
     try {
-        block(mapboxNavigation, MapboxNativeNavigatorImpl)
+        block(mapboxNavigation)
     } finally {
         mapboxNavigation.onDestroy()
     }

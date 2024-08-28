@@ -16,7 +16,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.core.tests.activity.TripServiceActivity
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigator.FixLocation
@@ -72,11 +71,7 @@ internal class NativeNavigatorCallbackOrderTest :
             )
             // starts raw location updates - otherwise we don't get onStatus calls
             mapboxNavigation.startTripSession()
-            val nativeNavigatorField = mapboxNavigation.javaClass.getDeclaredField("navigator")
-            nativeNavigatorField.isAccessible = true
-            val nativeNavigatorImpl =
-                nativeNavigatorField.get(mapboxNavigation) as MapboxNativeNavigatorImpl
-            nativeNavigatorField.isAccessible = false
+            val nativeNavigatorImpl = mapboxNavigation.navigator
             val navigatorField = nativeNavigatorImpl.javaClass.getDeclaredField("navigator")
             navigatorField.isAccessible = true
             navigator = navigatorField.get(nativeNavigatorImpl) as Navigator
