@@ -266,7 +266,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private val mainJobController = threadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
-    private var navigator: MapboxNativeNavigator
     private var historyRecorderHandles: NavigatorLoader.HistoryRecorderHandles
     private val tripService: TripService
     private val tripSession: TripSession
@@ -347,6 +346,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     private var rerouteController: InternalRerouteController?
     private val defaultRerouteController: InternalRerouteController
+
+    private var _navigator: MapboxNativeNavigator?
+
+    internal val navigator: MapboxNativeNavigator
+        get() = _navigator ?: error("MapboxNavigation is destroyed")
 
     /**
      * [NavigationVersionSwitchObserver] is notified when navigation switches tiles version.
@@ -492,7 +496,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             is NavigationRouter -> LegacyNavigationRouterAdapter(result)
             else -> LegacyNavigationRouterAdapter(LegacyRouterAdapter(result))
         }
-        navigator = NavigationComponentProvider.createNativeNavigator(
+        _navigator = NavigationComponentProvider.createNativeNavigator(
             cacheHandle,
             config,
             historyRecorderHandles.composite,
@@ -1298,6 +1302,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             reachabilityObserverId = null
         }
         resetAdasisMessageObserver()
+
+        _navigator = null
 
         isDestroyed = true
         hasInstance = false

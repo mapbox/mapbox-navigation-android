@@ -36,7 +36,7 @@ class RoadObjectMatcher internal constructor(
     init {
         navigator.setNativeNavigatorRecreationObserver {
             if (roadObjectMatcherObservers.isNotEmpty()) {
-                navigator.roadObjectMatcher?.setListener(roadObjectMatcherListener)
+                navigator.roadObjectMatcher.setListener(roadObjectMatcherListener)
             }
         }
     }
@@ -47,7 +47,7 @@ class RoadObjectMatcher internal constructor(
      */
     fun registerRoadObjectMatcherObserver(roadObjectMatcherObserver: RoadObjectMatcherObserver) {
         if (roadObjectMatcherObservers.isEmpty()) {
-            navigator.roadObjectMatcher?.setListener(roadObjectMatcherListener)
+            navigator.roadObjectMatcher.setListener(roadObjectMatcherListener)
         }
         roadObjectMatcherObservers.add(roadObjectMatcherObserver)
     }
@@ -110,7 +110,7 @@ class RoadObjectMatcher internal constructor(
         openLRLocation: String,
         @OpenLRStandard.Type openLRStandard: String
     ) {
-        navigator.roadObjectMatcher?.matchOpenLRs(
+        navigator.roadObjectMatcher.matchOpenLRs(
             listOf(
                 EHorizonFactory.buildNativeMatchableOpenLr(
                     MatchableOpenLr(roadObjectId, openLRLocation, openLRStandard)
@@ -137,7 +137,7 @@ class RoadObjectMatcher internal constructor(
         matchableOpenLrs: List<MatchableOpenLr>,
         useOnlyPreloadedTiles: Boolean = false
     ) {
-        navigator.roadObjectMatcher?.matchOpenLRs(
+        navigator.roadObjectMatcher.matchOpenLRs(
             matchableOpenLrs.map {
                 EHorizonFactory.buildNativeMatchableOpenLr(it)
             },
@@ -167,7 +167,7 @@ class RoadObjectMatcher internal constructor(
         )
     )
     fun matchPolylineObject(roadObjectId: String, polyline: List<Point>) {
-        navigator.roadObjectMatcher?.matchPolylines(
+        navigator.roadObjectMatcher.matchPolylines(
             listOf(
                 EHorizonFactory.buildNativeMatchableGeometry(
                     MatchableGeometry(roadObjectId, polyline)
@@ -199,7 +199,7 @@ class RoadObjectMatcher internal constructor(
         matchableGeometries: List<MatchableGeometry>,
         useOnlyPreloadedTiles: Boolean = false
     ) {
-        navigator.roadObjectMatcher?.matchPolylines(
+        navigator.roadObjectMatcher.matchPolylines(
             matchableGeometries.map {
                 EHorizonFactory.buildNativeMatchableGeometry(it)
             },
@@ -229,7 +229,7 @@ class RoadObjectMatcher internal constructor(
         )
     )
     fun matchPolygonObject(roadObjectId: String, polygon: List<Point>) {
-        navigator.roadObjectMatcher?.matchPolygons(
+        navigator.roadObjectMatcher.matchPolygons(
             listOf(
                 EHorizonFactory.buildNativeMatchableGeometry(
                     MatchableGeometry(roadObjectId, polygon)
@@ -261,7 +261,7 @@ class RoadObjectMatcher internal constructor(
         matchableGeometries: List<MatchableGeometry>,
         useOnlyPreloadedTiles: Boolean = false
     ) {
-        navigator.roadObjectMatcher?.matchPolygons(
+        navigator.roadObjectMatcher.matchPolygons(
             matchableGeometries.map {
                 EHorizonFactory.buildNativeMatchableGeometry(it)
             },
@@ -291,7 +291,7 @@ class RoadObjectMatcher internal constructor(
         )
     )
     fun matchGantryObject(roadObjectId: String, gantry: List<Point>) {
-        navigator.roadObjectMatcher?.matchGantries(
+        navigator.roadObjectMatcher.matchGantries(
             listOf(
                 EHorizonFactory.buildNativeMatchableGeometry(
                     MatchableGeometry(roadObjectId, gantry)
@@ -323,7 +323,7 @@ class RoadObjectMatcher internal constructor(
         matchableGeometries: List<MatchableGeometry>,
         useOnlyPreloadedTiles: Boolean = false
     ) {
-        navigator.roadObjectMatcher?.matchGantries(
+        navigator.roadObjectMatcher.matchGantries(
             matchableGeometries.map {
                 EHorizonFactory.buildNativeMatchableGeometry(it)
             },
@@ -351,7 +351,7 @@ class RoadObjectMatcher internal constructor(
         )
     )
     fun matchPointObject(roadObjectId: String, point: Point) {
-        navigator.roadObjectMatcher?.matchPoints(
+        navigator.roadObjectMatcher.matchPoints(
             listOf(
                 EHorizonFactory.buildNativeMatchablePoint(
                     MatchablePoint(roadObjectId, point)
@@ -381,7 +381,7 @@ class RoadObjectMatcher internal constructor(
         matchablePoints: List<MatchablePoint>,
         useOnlyPreloadedTiles: Boolean = false
     ) {
-        navigator.roadObjectMatcher?.matchPoints(
+        navigator.roadObjectMatcher.matchPoints(
             matchablePoints.map {
                 EHorizonFactory.buildNativeMatchablePoint(it)
             },
@@ -399,13 +399,13 @@ class RoadObjectMatcher internal constructor(
      * @param roadObjectIds list of object ids to cancel matching
      */
     fun cancel(roadObjectIds: List<String>) {
-        navigator.roadObjectMatcher?.cancel(roadObjectIds)
+        navigator.roadObjectMatcher.cancel(roadObjectIds)
     }
 
     /**
      * Cancel all road objects matching
      */
     fun cancelAll() {
-        navigator.roadObjectMatcher?.cancelAll()
+        navigator.roadObjectMatcher.cancelAll()
     }
 }

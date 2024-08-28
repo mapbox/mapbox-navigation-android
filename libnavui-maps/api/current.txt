@@ -65,7 +65,8 @@ package com.mapbox.navigation.ui.maps {
   }
 
   @UiThread public final class PredictiveCacheController {
-    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheOptions predictiveCacheOptions);
+    ctor @Deprecated public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheOptions predictiveCacheOptions);
+    ctor public PredictiveCacheController(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation, com.mapbox.navigation.base.options.PredictiveCacheOptions predictiveCacheOptions);
     ctor @Deprecated public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
     ctor @Deprecated public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheGuidanceLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
     ctor @Deprecated public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheGuidanceLocationOptions = PredictiveCacheLocationOptions.<init>().build());

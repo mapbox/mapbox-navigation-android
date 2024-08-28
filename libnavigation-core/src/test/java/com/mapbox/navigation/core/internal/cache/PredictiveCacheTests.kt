@@ -3,18 +3,16 @@ package com.mapbox.navigation.core.internal.cache
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkObject
 import io.mockk.verify
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -25,37 +23,20 @@ class PredictiveCacheTests {
     private val tileStore: TileStore = mockk()
     private val navigatorRecreationCallbackSlot = slot<NativeNavigatorRecreationObserver>()
 
+    private val navigator: MapboxNativeNavigator = mockk(relaxed = true)
+    private lateinit var predictiveCache: PredictiveCache
+
     @Before
     fun setUp() {
-        mockkObject(MapboxNativeNavigatorImpl)
-
         every {
-            MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(any())
-        } returns mockk()
-
-        every {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
-                any(),
-                any(),
-                any()
-            )
-        } returns mockk()
-        every {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheController(any(), any(), any())
-        } returns mockk()
-
-        every {
-            MapboxNativeNavigatorImpl.setNativeNavigatorRecreationObserver(
-                capture(navigatorRecreationCallbackSlot)
+            navigator.setNativeNavigatorRecreationObserver(
+                capture(navigatorRecreationCallbackSlot),
             )
         } just Runs
 
-        PredictiveCache.clean()
-    }
-
-    @After
-    fun cleanUp() {
-        unmockkObject(MapboxNativeNavigatorImpl)
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        every { mapboxNavigation.navigator } returns navigator
+        predictiveCache = PredictiveCache(mapboxNavigation)
     }
 
     @Test
@@ -63,19 +44,19 @@ class PredictiveCacheTests {
         val map1 = mockk<Any>()
         val map2 = mockk<Any>()
 
-        PredictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_1, mockk())
-        PredictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_2, mockk())
-        PredictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_3, mockk())
+        predictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_1, mockk())
+        predictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_2, mockk())
+        predictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_3, mockk())
 
-        PredictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_4, mockk())
-        PredictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_5, mockk())
-        PredictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_6, mockk())
-        PredictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_7, mockk())
+        predictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_4, mockk())
+        predictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_5, mockk())
+        predictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_6, mockk())
+        predictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_7, mockk())
 
-        assertEquals(3, PredictiveCache.currentMapsPredictiveCacheControllers(map1).size)
-        assertEquals(4, PredictiveCache.currentMapsPredictiveCacheControllers(map2).size)
-        assertNull(PredictiveCache.cachedMapsPredictiveCacheControllers[map1])
-        assertNull(PredictiveCache.cachedMapsPredictiveCacheControllers[map2])
+        assertEquals(3, predictiveCache.currentMapsPredictiveCacheControllers(map1).size)
+        assertEquals(4, predictiveCache.currentMapsPredictiveCacheControllers(map2).size)
+        assertNull(predictiveCache.cachedMapsPredictiveCacheControllers[map1])
+        assertNull(predictiveCache.cachedMapsPredictiveCacheControllers[map2])
     }
 
     @Test
@@ -87,78 +68,78 @@ class PredictiveCacheTests {
         val tilesetDescriptor1 = mockk<TilesetDescriptor>()
         val tilesetDescriptor2 = mockk<TilesetDescriptor>()
 
-        PredictiveCache.createMapsControllers(
+        predictiveCache.createMapsControllers(
             map1,
             tileStore,
             listOf(tilesetDescriptor1 to options1, tilesetDescriptor2 to options2)
         )
-        PredictiveCache.createMapsControllers(
+        predictiveCache.createMapsControllers(
             map2,
             tileStore,
             listOf(tilesetDescriptor2 to options2)
         )
 
-        assertEquals(2, PredictiveCache.cachedMapsPredictiveCacheControllers[map1]!!.size)
-        assertEquals(1, PredictiveCache.cachedMapsPredictiveCacheControllers[map2]!!.size)
-        assertEquals(0, PredictiveCache.currentMapsPredictiveCacheControllers(map1).size)
-        assertEquals(0, PredictiveCache.currentMapsPredictiveCacheControllers(map2).size)
-        assertNull(PredictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map1])
-        assertNull(PredictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map2])
-        assertNull(PredictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map1])
-        assertNull(PredictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map2])
+        assertEquals(2, predictiveCache.cachedMapsPredictiveCacheControllers[map1]!!.size)
+        assertEquals(1, predictiveCache.cachedMapsPredictiveCacheControllers[map2]!!.size)
+        assertEquals(0, predictiveCache.currentMapsPredictiveCacheControllers(map1).size)
+        assertEquals(0, predictiveCache.currentMapsPredictiveCacheControllers(map2).size)
+        assertNull(predictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map1])
+        assertNull(predictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map2])
+        assertNull(predictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map1])
+        assertNull(predictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map2])
 
-        PredictiveCache.createMapsControllers(
+        predictiveCache.createMapsControllers(
             map1,
             tileStore,
             listOf(tilesetDescriptor2 to options2)
         )
-        PredictiveCache.createMapsControllers(
+        predictiveCache.createMapsControllers(
             map2,
             tileStore,
             listOf(tilesetDescriptor1 to options1, tilesetDescriptor2 to options2)
         )
 
-        assertEquals(1, PredictiveCache.cachedMapsPredictiveCacheControllers[map1]!!.size)
-        assertEquals(2, PredictiveCache.cachedMapsPredictiveCacheControllers[map2]!!.size)
-        assertEquals(0, PredictiveCache.currentMapsPredictiveCacheControllers(map1).size)
-        assertEquals(0, PredictiveCache.currentMapsPredictiveCacheControllers(map2).size)
-        assertNull(PredictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map1])
-        assertNull(PredictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map2])
-        assertNull(PredictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map1])
-        assertNull(PredictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map2])
+        assertEquals(1, predictiveCache.cachedMapsPredictiveCacheControllers[map1]!!.size)
+        assertEquals(2, predictiveCache.cachedMapsPredictiveCacheControllers[map2]!!.size)
+        assertEquals(0, predictiveCache.currentMapsPredictiveCacheControllers(map1).size)
+        assertEquals(0, predictiveCache.currentMapsPredictiveCacheControllers(map2).size)
+        assertNull(predictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map1])
+        assertNull(predictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map2])
+        assertNull(predictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map1])
+        assertNull(predictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map2])
     }
 
     @Test
     fun `size of deprecated map controllers is correct after removing`() {
         val map = mockk<Any>()
 
-        PredictiveCache.createMapsController(map, tileStore, TILE_VARIANT_1, mockk())
-        PredictiveCache.createMapsController(map, tileStore, TILE_VARIANT_2, mockk())
-        PredictiveCache.createMapsController(map, tileStore, TILE_VARIANT_3, mockk())
-        PredictiveCache.createMapsController(map, tileStore, TILE_VARIANT_4, mockk())
+        predictiveCache.createMapsController(map, tileStore, TILE_VARIANT_1, mockk())
+        predictiveCache.createMapsController(map, tileStore, TILE_VARIANT_2, mockk())
+        predictiveCache.createMapsController(map, tileStore, TILE_VARIANT_3, mockk())
+        predictiveCache.createMapsController(map, tileStore, TILE_VARIANT_4, mockk())
 
-        PredictiveCache.removeMapControllers(map, TILE_VARIANT_2)
-        PredictiveCache.removeMapControllers(map, TILE_VARIANT_1)
-        PredictiveCache.removeMapControllers(map, TILE_VARIANT_4)
+        predictiveCache.removeMapControllers(map, TILE_VARIANT_2)
+        predictiveCache.removeMapControllers(map, TILE_VARIANT_1)
+        predictiveCache.removeMapControllers(map, TILE_VARIANT_4)
 
-        assertEquals(1, PredictiveCache.currentMapsPredictiveCacheControllers(map).size)
-        assertEquals(1, PredictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map]?.size)
-        assertEquals(TILE_VARIANT_3, PredictiveCache.currentMapsPredictiveCacheControllers(map)[0])
+        assertEquals(1, predictiveCache.currentMapsPredictiveCacheControllers(map).size)
+        assertEquals(1, predictiveCache.cachedMapsPredictiveCacheControllersTileVariant[map]?.size)
+        assertEquals(TILE_VARIANT_3, predictiveCache.currentMapsPredictiveCacheControllers(map)[0])
     }
 
     @Test
     fun `deprecated map controllers are empty after removing all`() {
         val map = mockk<Any>()
 
-        PredictiveCache.createMapsController(map, tileStore, TILE_VARIANT_1, mockk())
-        PredictiveCache.createMapsController(map, tileStore, TILE_VARIANT_2, mockk())
-        PredictiveCache.createMapsController(map, tileStore, TILE_VARIANT_3, mockk())
+        predictiveCache.createMapsController(map, tileStore, TILE_VARIANT_1, mockk())
+        predictiveCache.createMapsController(map, tileStore, TILE_VARIANT_2, mockk())
+        predictiveCache.createMapsController(map, tileStore, TILE_VARIANT_3, mockk())
 
-        PredictiveCache.removeAllMapControllersFromTileVariants(map)
+        predictiveCache.removeAllMapControllersFromTileVariants(map)
 
-        assertEquals(0, PredictiveCache.currentMapsPredictiveCacheControllers(map).size)
-        assertEquals(null, PredictiveCache.mapsPredictiveCacheLocationOptions[map])
-        assertEquals(null, PredictiveCache.cachedMapsPredictiveCacheControllers[map])
+        assertEquals(0, predictiveCache.currentMapsPredictiveCacheControllers(map).size)
+        assertEquals(null, predictiveCache.mapsPredictiveCacheLocationOptions[map])
+        assertEquals(null, predictiveCache.cachedMapsPredictiveCacheControllers[map])
     }
 
     @Test
@@ -170,17 +151,17 @@ class PredictiveCacheTests {
         val tilesetDescriptor1 = mockk<TilesetDescriptor>()
         val tilesetDescriptor2 = mockk<TilesetDescriptor>()
 
-        PredictiveCache.createMapsControllers(
+        predictiveCache.createMapsControllers(
             map,
             tileStore,
             listOf(tilesetDescriptor1 to options1, tilesetDescriptor2 to options2)
         )
 
-        PredictiveCache.removeAllMapControllersFromDescriptors(map)
+        predictiveCache.removeAllMapControllersFromDescriptors(map)
 
-        assertEquals(0, PredictiveCache.currentMapsPredictiveCacheControllers(map).size)
-        assertEquals(null, PredictiveCache.mapsPredictiveCacheLocationOptions[map])
-        assertEquals(null, PredictiveCache.cachedMapsPredictiveCacheControllers[map])
+        assertEquals(0, predictiveCache.currentMapsPredictiveCacheControllers(map).size)
+        assertEquals(null, predictiveCache.mapsPredictiveCacheLocationOptions[map])
+        assertEquals(null, predictiveCache.cachedMapsPredictiveCacheControllers[map])
     }
 
     @Test
@@ -192,33 +173,19 @@ class PredictiveCacheTests {
         val tilesetDescriptor2 = mockk<TilesetDescriptor>()
         val tilesetDescriptor3 = mockk<TilesetDescriptor>()
 
-        every {
-            MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(navLocationOptions1)
-        } returns mockk()
-
-        every {
-            MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(navLocationOptions2)
-        } returns mockk()
-
-        every {
-            MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(navLocationOptions3)
-        } returns mockk()
-
         val map1 = mockk<Any>()
         val map2 = mockk<Any>()
 
-        PredictiveCache.init()
+        predictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_1, mockk())
+        predictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_2, mockk())
+        predictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_3, mockk())
 
-        PredictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_1, mockk())
-        PredictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_2, mockk())
-        PredictiveCache.createMapsController(map1, tileStore, TILE_VARIANT_3, mockk())
+        predictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_4, mockk())
+        predictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_5, mockk())
+        predictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_6, mockk())
+        predictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_7, mockk())
 
-        PredictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_4, mockk())
-        PredictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_5, mockk())
-        PredictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_6, mockk())
-        PredictiveCache.createMapsController(map2, tileStore, TILE_VARIANT_7, mockk())
-
-        PredictiveCache.createMapsControllers(
+        predictiveCache.createMapsControllers(
             map1,
             tileStore,
             listOf(
@@ -226,36 +193,36 @@ class PredictiveCacheTests {
                 tilesetDescriptor2 to navLocationOptions2
             )
         )
-        PredictiveCache.createMapsControllers(
+        predictiveCache.createMapsControllers(
             map2,
             tileStore,
             listOf(tilesetDescriptor3 to navLocationOptions3)
         )
 
-        PredictiveCache.createNavigationController(navLocationOptions1)
-        PredictiveCache.createNavigationController(navLocationOptions2)
+        predictiveCache.createNavigationController(navLocationOptions1)
+        predictiveCache.createNavigationController(navLocationOptions2)
 
         val callback = navigatorRecreationCallbackSlot.captured
         callback.onNativeNavigatorRecreated()
 
-        assertEquals(2, PredictiveCache.cachedMapsPredictiveCacheControllersTileVariant.size)
-        assertEquals(3, PredictiveCache.currentMapsPredictiveCacheControllers(map1).size)
-        assertEquals(4, PredictiveCache.currentMapsPredictiveCacheControllers(map2).size)
+        assertEquals(2, predictiveCache.cachedMapsPredictiveCacheControllersTileVariant.size)
+        assertEquals(3, predictiveCache.currentMapsPredictiveCacheControllers(map1).size)
+        assertEquals(4, predictiveCache.currentMapsPredictiveCacheControllers(map2).size)
 
-        assertEquals(2, PredictiveCache.mapsPredictiveCacheLocationOptionsTileVariant.size)
-        assertEquals(3, PredictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map1]?.size)
-        assertEquals(4, PredictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map2]?.size)
+        assertEquals(2, predictiveCache.mapsPredictiveCacheLocationOptionsTileVariant.size)
+        assertEquals(3, predictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map1]?.size)
+        assertEquals(4, predictiveCache.mapsPredictiveCacheLocationOptionsTileVariant[map2]?.size)
 
-        assertEquals(2, PredictiveCache.cachedMapsPredictiveCacheControllers.size)
-        assertEquals(2, PredictiveCache.cachedMapsPredictiveCacheControllers[map1]!!.size)
-        assertEquals(2, PredictiveCache.mapsPredictiveCacheLocationOptions.size)
-        assertEquals(1, PredictiveCache.cachedMapsPredictiveCacheControllers[map2]!!.size)
+        assertEquals(2, predictiveCache.cachedMapsPredictiveCacheControllers.size)
+        assertEquals(2, predictiveCache.cachedMapsPredictiveCacheControllers[map1]!!.size)
+        assertEquals(2, predictiveCache.mapsPredictiveCacheLocationOptions.size)
+        assertEquals(1, predictiveCache.cachedMapsPredictiveCacheControllers[map2]!!.size)
 
-        assertEquals(2, PredictiveCache.cachedNavigationPredictiveCacheControllers.size)
-        assertEquals(2, PredictiveCache.navPredictiveCacheLocationOptions.size)
+        assertEquals(2, predictiveCache.cachedNavigationPredictiveCacheControllers.size)
+        assertEquals(2, predictiveCache.navPredictiveCacheLocationOptions.size)
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
+            navigator.createMapsPredictiveCacheControllerTileVariant(
                 tileStore,
                 TILE_VARIANT_1,
                 any()
@@ -263,7 +230,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
+            navigator.createMapsPredictiveCacheControllerTileVariant(
                 tileStore,
                 TILE_VARIANT_2,
                 any()
@@ -271,7 +238,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
+            navigator.createMapsPredictiveCacheControllerTileVariant(
                 tileStore,
                 TILE_VARIANT_3,
                 any()
@@ -279,7 +246,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
+            navigator.createMapsPredictiveCacheControllerTileVariant(
                 tileStore,
                 TILE_VARIANT_4,
                 any()
@@ -287,7 +254,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
+            navigator.createMapsPredictiveCacheControllerTileVariant(
                 tileStore,
                 TILE_VARIANT_5,
                 any()
@@ -295,7 +262,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
+            navigator.createMapsPredictiveCacheControllerTileVariant(
                 tileStore,
                 TILE_VARIANT_6,
                 any()
@@ -303,7 +270,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
+            navigator.createMapsPredictiveCacheControllerTileVariant(
                 tileStore,
                 TILE_VARIANT_7,
                 any()
@@ -311,7 +278,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheController(
+            navigator.createMapsPredictiveCacheController(
                 tileStore,
                 tilesetDescriptor1,
                 navLocationOptions1
@@ -319,7 +286,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheController(
+            navigator.createMapsPredictiveCacheController(
                 tileStore,
                 tilesetDescriptor2,
                 navLocationOptions2
@@ -327,7 +294,7 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheController(
+            navigator.createMapsPredictiveCacheController(
                 tileStore,
                 tilesetDescriptor3,
                 navLocationOptions3
@@ -335,27 +302,27 @@ class PredictiveCacheTests {
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(navLocationOptions1)
+            navigator.createNavigationPredictiveCacheController(navLocationOptions1)
         }
 
         verify(exactly = 2) {
-            MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(navLocationOptions2)
+            navigator.createNavigationPredictiveCacheController(navLocationOptions2)
         }
     }
 
     @Test
     fun `caches are empty after clean`() {
-        PredictiveCache.createMapsController(mockk(), tileStore, TILE_VARIANT_1, mockk())
-        PredictiveCache.createNavigationController(mockk())
+        predictiveCache.createMapsController(mockk(), tileStore, TILE_VARIANT_1, mockk())
+        predictiveCache.createNavigationController(mockk())
 
-        PredictiveCache.clean()
+        predictiveCache.clean()
 
-        assertEquals(0, PredictiveCache.cachedNavigationPredictiveCacheControllers.size)
-        assertEquals(0, PredictiveCache.cachedMapsPredictiveCacheControllers.size)
-        assertEquals(0, PredictiveCache.cachedMapsPredictiveCacheControllersTileVariant.size)
-        assertEquals(0, PredictiveCache.navPredictiveCacheLocationOptions.size)
-        assertEquals(0, PredictiveCache.mapsPredictiveCacheLocationOptions.size)
-        assertEquals(0, PredictiveCache.mapsPredictiveCacheLocationOptionsTileVariant.size)
+        assertEquals(0, predictiveCache.cachedNavigationPredictiveCacheControllers.size)
+        assertEquals(0, predictiveCache.cachedMapsPredictiveCacheControllers.size)
+        assertEquals(0, predictiveCache.cachedMapsPredictiveCacheControllersTileVariant.size)
+        assertEquals(0, predictiveCache.navPredictiveCacheLocationOptions.size)
+        assertEquals(0, predictiveCache.mapsPredictiveCacheLocationOptions.size)
+        assertEquals(0, predictiveCache.mapsPredictiveCacheLocationOptionsTileVariant.size)
     }
 
     private companion object {

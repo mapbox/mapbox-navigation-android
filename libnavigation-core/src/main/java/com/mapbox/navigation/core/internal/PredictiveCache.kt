@@ -3,10 +3,10 @@ package com.mapbox.navigation.core.internal
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigator.PredictiveCacheController
 
-object PredictiveCache {
+class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
 
     internal val cachedNavigationPredictiveCacheControllers =
         mutableSetOf<PredictiveCacheController>()
@@ -22,9 +22,9 @@ object PredictiveCache {
     internal val mapsPredictiveCacheLocationOptionsTileVariant =
         mutableMapOf<Any, MutableMap<String, Pair<TileStore, PredictiveCacheLocationOptions>>>()
 
-    fun init() {
+    init {
         // recreate controllers with the same options but with a new navigator instance
-        MapboxNativeNavigatorImpl.setNativeNavigatorRecreationObserver {
+        mapboxNavigation.navigator.setNativeNavigatorRecreationObserver {
             val navOptions = navPredictiveCacheLocationOptions.toSet()
             val mapsOptions = mapsPredictiveCacheLocationOptions.toMap()
             val mapsOptionsTileVariant = mapsPredictiveCacheLocationOptionsTileVariant.toMap()
@@ -61,7 +61,7 @@ object PredictiveCache {
     ) {
         navPredictiveCacheLocationOptions.add(predictiveCacheLocationOptions)
         val predictiveCacheController =
-            MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(
+            mapboxNavigation.navigator.createNavigationPredictiveCacheController(
                 predictiveCacheLocationOptions
             )
         cachedNavigationPredictiveCacheControllers.add(predictiveCacheController)
@@ -77,7 +77,7 @@ object PredictiveCache {
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ) {
         val predictiveCacheController =
-            MapboxNativeNavigatorImpl.createMapsPredictiveCacheControllerTileVariant(
+            mapboxNavigation.navigator.createMapsPredictiveCacheControllerTileVariant(
                 tileStore,
                 tileVariant,
                 predictiveCacheLocationOptions
@@ -100,7 +100,7 @@ object PredictiveCache {
         descriptorsAndOptions: List<Pair<TilesetDescriptor, PredictiveCacheLocationOptions>>
     ) {
         val descriptorsToPredictiveCacheControllers = descriptorsAndOptions.map {
-            it.first to MapboxNativeNavigatorImpl.createMapsPredictiveCacheController(
+            it.first to mapboxNavigation.navigator.createMapsPredictiveCacheController(
                 tileStore,
                 it.first,
                 it.second

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps
 
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
@@ -15,6 +16,7 @@ import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.internal.PredictiveCache
 import com.mapbox.navigation.ui.maps.internal.offline.OfflineManagerProvider
 import com.mapbox.navigation.utils.internal.logE
@@ -42,6 +44,11 @@ private const val RASTER_SOURCE_TYPE = "raster"
  * whenever the [MapView] is destroyed to avoid leaking references or downloading unnecessary
  * resources. When the map instance is recreated, set it back with [createMapControllers].
  *
+ * Also, note that [MapboxNavigation] instance should be created before [PredictiveCacheController]
+ * and the lifecycle of the [MapboxNavigation] instance should be longer than that of the
+ * [PredictiveCacheController]. Specifically, [MapboxNavigation] should not be destroyed before
+ * [PredictiveCacheController.onDestroy] is called.
+ *
  * The map instance has to be configured with the same [TileStore] instance that was provided to [RoutingTilesOptions.tileStore].
  * You need to call [TileStore.create] with a path and pass it to [ResourceOptions.tileStore] or use the Maps SDK's tile store path XML attribute.
  *
@@ -59,8 +66,9 @@ private const val RASTER_SOURCE_TYPE = "raster"
  * @param predictiveCacheOptions [PredictiveCacheOptions] options to instantiate instance of [PredictiveCacheController]
  */
 @UiThread
-class PredictiveCacheController constructor(
+class PredictiveCacheController @VisibleForTesting internal constructor(
     private val predictiveCacheOptions: PredictiveCacheOptions,
+    private val predictiveCache: PredictiveCache,
 ) {
 
     /**
@@ -72,15 +80,56 @@ class PredictiveCacheController constructor(
     private var mapListeners = mutableMapOf<MapboxMap, OnStyleLoadedListener>()
 
     /**
-     * Constructor of [PredictiveCacheController]
+     * Constructs a new instance of the [PredictiveCacheController] using the provided
+     * [PredictiveCacheOptions]. Throws [IllegalStateException] if [MapboxNavigation]
+     * was not instantiated before. Use [PredictiveCacheController] constructor which explicitly
+     * accepts [MapboxNavigation] instance.
+     *
+     * @param predictiveCacheOptions [PredictiveCacheOptions] options to instantiate instance of [PredictiveCacheController]
+     * @throws IllegalStateException if [MapboxNavigation] was not instantiated before
+     */
+    @Deprecated(
+        "This constructor is deprecated",
+        ReplaceWith("PredictiveCacheController(MapboxNavigation, PredictiveCacheOptions)"),
+    )
+    constructor(
+        predictiveCacheOptions: PredictiveCacheOptions,
+    ) : this(
+        predictiveCacheOptions,
+        PredictiveCache(tryToRetrieveMapboxNavigation()),
+    )
+
+    /**
+     * Constructs a new instance of the [PredictiveCacheController] using the provided
+     * [MapboxNavigation] and [PredictiveCacheOptions].
+     *
+     * **Note:** The lifecycle of the [MapboxNavigation] instance should be longer than that of the
+     * [PredictiveCacheController]. Specifically, [MapboxNavigation] should not be destroyed before
+     * [PredictiveCacheController.onDestroy] is called.
+     *
+     * @param mapboxNavigation [MapboxNavigation] object which will be used as a source of active route
+     * @param predictiveCacheOptions [PredictiveCacheOptions] options to instantiate instance of [PredictiveCacheController]
+     */
+    constructor(
+        mapboxNavigation: MapboxNavigation,
+        predictiveCacheOptions: PredictiveCacheOptions,
+    ) : this(predictiveCacheOptions, PredictiveCache(mapboxNavigation))
+
+    /**
+     * Constructs a new instance of the [PredictiveCacheController] using the provided options.
+     * Throws [IllegalStateException] if [MapboxNavigation] was not instantiated before.
+     * Use [PredictiveCacheController] constructor which explicitly
+     * accepts [MapboxNavigation] instance and [predictiveCacheControllerErrorHandler] instead.
      *
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] location configuration for visual map predictive caching (optional)
      * @param predictiveCacheControllerErrorHandler [PredictiveCacheControllerErrorHandler] listener (optional)
      * Noting that `predictiveCacheLocationOptions` is used as `predictiveCacheGuidanceLocationOptions` when constructing `PredictiveCacheController` to retain backwards compatibility
+     *
+     * @throws IllegalStateException if [MapboxNavigation] was not instantiated before
      */
     @Deprecated(
-        "Use PredictiveCacheController(PredictiveCacheOptions) and " +
-            "PredictiveCacheController#predictiveCacheControllerErrorHandler instead"
+        "This constructor is deprecated",
+        ReplaceWith("PredictiveCacheController(MapboxNavigation, PredictiveCacheOptions)"),
     )
     constructor(
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
@@ -94,16 +143,21 @@ class PredictiveCacheController constructor(
     )
 
     /**
-     * Constructor of [PredictiveCacheController]
+     * Constructs a new instance of the [PredictiveCacheController] using the provided options.
+     * Throws [IllegalStateException] if [MapboxNavigation] was not instantiated before.
+     * Use [PredictiveCacheController] constructor which explicitly
+     * accepts [MapboxNavigation] instance and [predictiveCacheControllerErrorHandler] instead.
      *
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] location configuration for visual map predictive caching (optional)
      * @param predictiveCacheGuidanceLocationOptions [PredictiveCacheLocationOptions] location configuration for guidance predictive caching (optional)
      * @param predictiveCacheControllerErrorHandler [PredictiveCacheControllerErrorHandler] listener (optional)
+     *
+     * @throws IllegalStateException if [MapboxNavigation] was not instantiated before
      */
     @JvmOverloads
     @Deprecated(
-        "Use PredictiveCacheController(PredictiveCacheOptions) and " +
-            "PredictiveCacheController#predictiveCacheControllerErrorHandler instead"
+        "This constructor is deprecated",
+        ReplaceWith("PredictiveCacheController(MapboxNavigation, PredictiveCacheOptions)"),
     )
     constructor(
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
@@ -125,13 +179,13 @@ class PredictiveCacheController constructor(
                 }.build()
             )
         }.build(),
+        PredictiveCache(tryToRetrieveMapboxNavigation())
     ) {
         this.predictiveCacheControllerErrorHandler = predictiveCacheControllerErrorHandler
     }
 
     init {
-        PredictiveCache.init()
-        PredictiveCache.createNavigationController(
+        predictiveCache.createNavigationController(
             predictiveCacheOptions.predictiveCacheNavigationOptions.predictiveCacheLocationOptions
         )
     }
@@ -168,7 +222,7 @@ class PredictiveCacheController constructor(
         }
 
         traverseMapSources(map, sourceIdsToCache) { tileVariant ->
-            PredictiveCache.createMapsController(
+            predictiveCache.createMapsController(
                 map,
                 tileStore,
                 tileVariant,
@@ -184,7 +238,7 @@ class PredictiveCacheController constructor(
             updateMapsControllers(
                 map,
                 currentMapSources,
-                PredictiveCache.currentMapsPredictiveCacheControllers(map),
+                predictiveCache.currentMapsPredictiveCacheControllers(map),
                 tileStore
             )
         }
@@ -248,8 +302,8 @@ class PredictiveCacheController constructor(
             }
             mapListeners.remove(map)
         }
-        PredictiveCache.removeAllMapControllersFromTileVariants(map)
-        PredictiveCache.removeAllMapControllersFromDescriptors(map)
+        predictiveCache.removeAllMapControllersFromTileVariants(map)
+        predictiveCache.removeAllMapControllersFromDescriptors(map)
     }
 
     /**
@@ -264,7 +318,7 @@ class PredictiveCacheController constructor(
             }
         }
         mapListeners.clear()
-        PredictiveCache.clean()
+        predictiveCache.clean()
     }
 
     private fun handleError(error: String?) {
@@ -319,12 +373,12 @@ class PredictiveCacheController constructor(
     ) {
         attachedMapSources
             .filterNot { currentMapSources.contains(it) }
-            .forEach { PredictiveCache.removeMapControllers(map, it) }
+            .forEach { predictiveCache.removeMapControllers(map, it) }
 
         currentMapSources
             .filterNot { attachedMapSources.contains(it) }
             .forEach {
-                PredictiveCache.createMapsController(
+                predictiveCache.createMapsController(
                     map,
                     tileStore,
                     it,
@@ -362,11 +416,21 @@ class PredictiveCacheController constructor(
                     tilesetDescriptor to options.predictiveCacheLocationOptions
                 }
 
-            PredictiveCache.createMapsControllers(
+            predictiveCache.createMapsControllers(
                 map,
                 tileStore,
                 descriptorsToOptions
             )
+        }
+    }
+
+    private companion object {
+        fun tryToRetrieveMapboxNavigation(): MapboxNavigation {
+            return if (MapboxNavigationProvider.isCreated()) {
+                MapboxNavigationProvider.retrieve()
+            } else {
+                error("Instantiate MapboxNavigation first")
+            }
         }
     }
 }
