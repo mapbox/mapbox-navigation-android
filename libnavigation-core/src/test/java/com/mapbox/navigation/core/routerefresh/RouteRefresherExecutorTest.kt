@@ -42,7 +42,7 @@ class RouteRefresherExecutorTest {
         }
         assertEquals(
             routesRefresherResult,
-            (actual as RoutesRefresherExecutorResult.Finished).value
+            (actual as RoutesRefresherExecutorResult.Finished).value,
         )
     }
 
@@ -91,13 +91,13 @@ class RouteRefresherExecutorTest {
 
         assertEquals(
             routesRefresherResult,
-            (result1.await() as RoutesRefresherExecutorResult.Finished).value
+            (result1.await() as RoutesRefresherExecutorResult.Finished).value,
         )
         assertTrue(result2.await() is RoutesRefresherExecutorResult.ReplacedByNewer)
         assertTrue(result3.await() is RoutesRefresherExecutorResult.ReplacedByNewer)
         assertEquals(
             routesRefresherResult4,
-            (result4.await() as RoutesRefresherExecutorResult.Finished).value
+            (result4.await() as RoutesRefresherExecutorResult.Finished).value,
         )
     }
 
@@ -116,7 +116,7 @@ class RouteRefresherExecutorTest {
 
         assertEquals(
             routesRefresherResult,
-            (actual as RoutesRefresherExecutorResult.Finished).value
+            (actual as RoutesRefresherExecutorResult.Finished).value,
         )
     }
 }

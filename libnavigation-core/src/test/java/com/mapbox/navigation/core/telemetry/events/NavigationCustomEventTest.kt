@@ -35,7 +35,7 @@ class NavigationCustomEventTest {
             assertEquals(cancelEvent.operatingSystem, content["operatingSystem"]!!.contents)
             assertEquals(
                 cancelEvent.driverModeStartTimestamp,
-                content["driverModeStartTimestamp"]!!.contents
+                content["driverModeStartTimestamp"]!!.contents,
             )
 
             // var
@@ -44,17 +44,20 @@ class NavigationCustomEventTest {
             assertEquals(cancelEvent.customEventVersion, content["customEventVersion"]!!.contents)
             assertEquals(
                 cancelEvent.createdMonotime.toLong(),
-                content["createdMonotime"]!!.contents
+                content["createdMonotime"]!!.contents,
             )
             assertEquals(cancelEvent.driverMode, content["driverMode"]!!.contents)
             assertEquals(
                 cancelEvent.driverModeStartTimestampMonotime.toLong(),
-                content["driverModeStartTimestampMonotime"]!!.contents
+                content["driverModeStartTimestampMonotime"]!!.contents,
             )
             assertEquals(cancelEvent.sdkIdentifier, content["sdkIdentifier"]!!.contents)
             assertEquals(cancelEvent.eventVersion.toLong(), content["eventVersion"]!!.contents)
             assertEquals(cancelEvent.simulation, content["simulation"]!!.contents)
-            assertEquals(cancelEvent.locationEngine, content["locationEngine"]!!.contents)
+            assertEquals(
+                cancelEvent.locationEngine,
+                content["locationEngine"]!!.contents,
+            )
             assertEquals(cancelEvent.lat, content["lat"]!!.contents)
             assertEquals(cancelEvent.lng, content["lng"]!!.contents)
         }

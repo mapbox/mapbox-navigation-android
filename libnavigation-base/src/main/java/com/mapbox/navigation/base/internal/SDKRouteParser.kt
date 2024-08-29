@@ -11,13 +11,15 @@ interface SDKRouteParser {
     fun parseDirectionsResponse(
         response: String,
         request: String,
-        routerOrigin: RouterOrigin,
+        @RouterOrigin
+        routerOrigin: String,
     ): Expected<String, List<RouteInterface>>
 
     fun parseDirectionsResponse(
         response: DataRef,
         request: String,
-        routerOrigin: RouterOrigin,
+        @RouterOrigin
+        routerOrigin: String,
     ): Expected<String, List<RouteInterface>>
 
     companion object {
@@ -29,23 +31,24 @@ private class NativeRouteParserWrapper : SDKRouteParser {
     override fun parseDirectionsResponse(
         response: String,
         request: String,
-        routerOrigin: RouterOrigin,
+        @RouterOrigin
+        routerOrigin: String,
     ): Expected<String, List<RouteInterface>> =
         RouteParser.parseDirectionsResponse(
             response,
             request,
-            routerOrigin.mapToNativeRouteOrigin()
+            routerOrigin.mapToNativeRouteOrigin(),
         )
 
     override fun parseDirectionsResponse(
         response: DataRef,
         request: String,
-        routerOrigin: RouterOrigin
+        routerOrigin: String,
     ): Expected<String, List<RouteInterface>> {
         return RouteParser.parseDirectionsResponse(
             response,
             request,
-            routerOrigin.mapToNativeRouteOrigin()
+            routerOrigin.mapToNativeRouteOrigin(),
         )
     }
 }

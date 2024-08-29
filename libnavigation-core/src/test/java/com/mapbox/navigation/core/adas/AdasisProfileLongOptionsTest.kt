@@ -12,10 +12,10 @@ class AdasisProfileLongOptionsTest :
     override fun getFilledUpBuilder(): AdasisProfileLongOptions.Builder {
         return AdasisProfileLongOptions.Builder()
             .options(
-                AdasisConfigMessageOptions.Builder().enable(false).radiusMeters(123).build()
+                AdasisConfigMessageOptions.Builder().enable(false).radiusMeters(123).build(),
             )
             .profileOptions(
-                AdasisConfigProfileLongTypeOptions.Builder().lat(false).build()
+                AdasisConfigProfileLongTypeOptions.Builder().lat(false).build(),
             )
     }
 

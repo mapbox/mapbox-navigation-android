@@ -12,24 +12,24 @@ internal object EventsProvider {
             TelemetryLocation(
                 latitude = 1.1,
                 longitude = 2.2,
-                speed = 3.3f,
-                bearing = 4.4f,
+                speed = 3.3,
+                bearing = 4.4,
                 altitude = 5.5,
                 timestamp = "timestamp_0",
-                horizontalAccuracy = 6.6f,
-                verticalAccuracy = 7.7f,
+                horizontalAccuracy = 6.6,
+                verticalAccuracy = 7.7,
             ),
             TelemetryLocation(
                 latitude = 1.2,
                 longitude = 2.3,
-                speed = 3.4f,
-                bearing = 4.5f,
+                speed = 3.4,
+                bearing = 4.5,
                 altitude = 5.6,
                 timestamp = "timestamp_1",
-                horizontalAccuracy = 6.7f,
-                verticalAccuracy = 7.8f,
-            )
-        )
+                horizontalAccuracy = 6.7,
+                verticalAccuracy = 7.8,
+            ),
+        ),
     ): Array<TelemetryLocation> = telemetryLocations
 
     fun mockNavigationStepData(): NavigationStepData = mockk {

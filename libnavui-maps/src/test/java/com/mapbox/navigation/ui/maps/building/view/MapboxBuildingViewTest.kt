@@ -1,48 +1,71 @@
 package com.mapbox.navigation.ui.maps.building.view
 
-import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.None
-import com.mapbox.bindgen.Value
-import com.mapbox.geojson.Feature
-import com.mapbox.maps.MapboxExperimental
-import com.mapbox.maps.QueriedFeature
+import com.mapbox.maps.QueriedRenderedFeature
 import com.mapbox.maps.Style
-import com.mapbox.navigation.testing.FileUtils
-import io.mockk.CapturingSlot
+import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-@OptIn(MapboxExperimental::class)
-class MapboxBuildingViewTest {
+@RunWith(Parameterized::class)
+class MapboxBuildingViewTest(private val is3dStyle: Boolean) {
+
+    private val view2D = mockk<Mapbox2DBuildingView>(relaxed = true)
+    private val view3D = mockk<Mapbox3DBuildingView>(relaxed = true)
+
+    private val buildingView = MapboxBuildingView(view2D, view3D)
 
     @Test
-    fun `should add style layer when building is selected`() {
-        val buildings = listOf<QueriedFeature>(
-            mockk {
-                every { source } returns "composite"
-                every { sourceLayer } returns "building"
-                every { feature } returns loadFeature()
-            }
-        )
-        val expected: Expected<String, None> = mockk {
-            every { error } returns null
+    fun `check dispatches calls to correct implementation`() {
+        val (activeView, inactiveView) = if (is3dStyle) {
+            view3D to view2D
+        } else {
+            view2D to view3D
         }
-        val style: Style = mockk {
-            every { styleLayerExists(any()) } returns false
-            every { addPersistentStyleLayer(any(), any()) } returns expected
-            every { removeStyleLayer(any()) } returns mockk()
+
+        val style = mockk<Style> {
+            every { styleLayerExists("building-extrusion") } returns is3dStyle
         }
-        val propertySlot = CapturingSlot<Value>()
-        val buildingView = MapboxBuildingView()
 
-        buildingView.highlightBuilding(style, buildings)
+        val features = mockk<List<QueriedRenderedFeature>>(relaxed = true)
+        val options = mockk<MapboxBuildingHighlightOptions>(relaxed = true)
 
-        verify { style.addPersistentStyleLayer(capture(propertySlot), any()) }
+        buildingView.highlightBuilding(style, features, options)
+        buildingView.removeBuildingHighlight(style, options)
+        buildingView.clear(style)
+
+        verify(exactly = 1) {
+            activeView.highlightBuilding(style, features, options)
+        }
+
+        verify(exactly = 1) {
+            activeView.removeBuildingHighlight(style, options)
+        }
+
+        verify(exactly = 1) {
+            activeView.clear(style)
+        }
+
+        verifyOrder {
+            activeView.highlightBuilding(style, features, options)
+            activeView.removeBuildingHighlight(style, options)
+            activeView.clear(style)
+        }
+
+        verify {
+            inactiveView wasNot Called
+        }
     }
 
-    private fun loadFeature() = Feature.fromJson(
-        FileUtils.loadJsonFixture("arrival-highlight-building-feature.json")
-    )
+    companion object {
+
+        @JvmStatic
+        @Parameterized.Parameters
+        fun parameters() = listOf(true, false)
+    }
 }

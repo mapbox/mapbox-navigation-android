@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 @SuppressLint("ParcelCreator")
 internal class NavigationRerouteEvent(
     phoneState: PhoneState,
-    navigationStepData: NavigationStepData
+    navigationStepData: NavigationStepData,
 ) : NavigationEvent(phoneState) {
     /*
      * Don't remove any fields, cause they should match with

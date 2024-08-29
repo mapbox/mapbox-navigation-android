@@ -12,10 +12,10 @@ class AdasisProfileShortOptionsTest :
     override fun getFilledUpBuilder(): AdasisProfileShortOptions.Builder {
         return AdasisProfileShortOptions.Builder()
             .options(
-                AdasisConfigMessageOptions.Builder().enable(false).radiusMeters(123).build()
+                AdasisConfigMessageOptions.Builder().enable(false).radiusMeters(123).build(),
             )
             .profileOptions(
-                AdasisConfigProfileShortTypeOptions.Builder().slopeStep(true).build()
+                AdasisConfigProfileShortTypeOptions.Builder().slopeStep(true).build(),
             )
     }
 

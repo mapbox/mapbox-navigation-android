@@ -22,7 +22,7 @@ internal class MapboxDumpHandler {
     private fun handleArguments(
         fd: FileDescriptor,
         writer: PrintWriter,
-        args: Array<String>?
+        args: Array<String>?,
     ): List<MapboxDumpInterceptor> {
         val matches: List<Pair<List<MapboxDumpInterceptor>, List<String>>> = args
             ?.groupBy { it.substringBefore(":", it) }

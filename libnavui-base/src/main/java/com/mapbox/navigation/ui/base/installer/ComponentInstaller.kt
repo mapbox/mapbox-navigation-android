@@ -79,7 +79,7 @@ fun interface Installation {
 @UiThread
 fun MapboxNavigationApp.installComponents(
     lifecycleOwner: LifecycleOwner,
-    config: ComponentInstaller.() -> Unit
+    config: ComponentInstaller.() -> Unit,
 ) {
     val installer = NavigationComponents().apply(config)
     lifecycleOwner.attachCreated(installer)
@@ -119,7 +119,7 @@ fun MapboxNavigationApp.installComponents(
 @UiThread
 fun MapboxNavigation.installComponents(
     lifecycleOwner: LifecycleOwner,
-    config: ComponentInstaller.() -> Unit
+    config: ComponentInstaller.() -> Unit,
 ) {
     val components = NavigationComponents().apply(config)
     lifecycleOwner.attachCreated(this, components)
@@ -127,7 +127,7 @@ fun MapboxNavigation.installComponents(
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class NavigationComponents(
-    private val componentsChain: MapboxNavigationObserverChain = MapboxNavigationObserverChain()
+    private val componentsChain: MapboxNavigationObserverChain = MapboxNavigationObserverChain(),
 ) : ComponentInstaller, MapboxNavigationObserver by componentsChain {
 
     override fun components(vararg components: UIComponent): Installation {

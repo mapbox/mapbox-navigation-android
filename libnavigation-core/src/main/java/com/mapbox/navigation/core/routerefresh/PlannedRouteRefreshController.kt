@@ -40,13 +40,12 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         listener,
         attemptListener,
         parentScope,
-        RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT)
+        RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT),
     )
 
     // null if refreshes are paused
     private var plannedRefreshScope: CoroutineScope? = CoroutineUtils.createChildScope(parentScope)
-    var routesToRefresh: List<NavigationRoute>? = null
-        private set
+    internal var routesToRefresh: List<NavigationRoute>? = null
 
     fun startRoutesRefreshing(routes: List<NavigationRoute>) {
         if (plannedRefreshScope != null) {
@@ -74,7 +73,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                 RouteRefreshValidator.joinValidationErrorMessages(
                     routesValidationResults.mapIndexed { index, routeValidationResult ->
                         routeValidationResult to routes[index]
-                    }
+                    },
                 )
             val logMessage = "No routes which could be refreshed. $message"
             logI(logMessage, RouteRefreshLog.LOG_CATEGORY)
@@ -90,13 +89,17 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         plannedRefreshScope = null
     }
 
-    fun resume() {
+    fun resume(shouldResumeDelay: Boolean = false) {
         logI("Resuming refreshes", RouteRefreshLog.LOG_CATEGORY)
         if (plannedRefreshScope == null) {
             plannedRefreshScope = CoroutineUtils.createChildScope(parentScope)
             routesToRefresh?.let {
                 if (retryStrategy.shouldRetry()) {
-                    scheduleUpdateRetry(it, shouldNotifyOnStart = true)
+                    scheduleUpdateRetry(
+                        it,
+                        shouldNotifyOnStart = true,
+                        shouldResume = shouldResumeDelay,
+                    )
                 }
             }
         }
@@ -109,8 +112,12 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         }
     }
 
-    private fun scheduleUpdateRetry(routes: List<NavigationRoute>, shouldNotifyOnStart: Boolean) {
-        postAttempt(false) {
+    private fun scheduleUpdateRetry(
+        routes: List<NavigationRoute>,
+        shouldNotifyOnStart: Boolean,
+        shouldResume: Boolean,
+    ) {
+        postAttempt(shouldResume) {
             retryStrategy.onNextAttempt()
             executePlannedRefresh(routes, shouldNotifyOnStart = shouldNotifyOnStart)
         }
@@ -134,7 +141,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
 
     private suspend fun executePlannedRefresh(
         routes: List<NavigationRoute>,
-        shouldNotifyOnStart: Boolean
+        shouldNotifyOnStart: Boolean,
     ) {
         val routeRefresherResult = routeRefresherExecutor.executeRoutesRefresh(
             routes,
@@ -142,14 +149,14 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                 if (shouldNotifyOnStart) {
                     stateHolder.onStarted()
                 }
-            }
+            },
         )
         when (routeRefresherResult) {
             is RoutesRefresherExecutorResult.ReplacedByNewer -> {
                 logW(
                     "Planned route refresh error: " +
                         "request is skipped as a newer one is available",
-                    RouteRefreshLog.LOG_CATEGORY
+                    RouteRefreshLog.LOG_CATEGORY,
                 )
             }
             is RoutesRefresherExecutorResult.Finished -> {
@@ -158,7 +165,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                     stateHolder.onSuccess()
                     listener.onRoutesRefreshed(routeRefresherResult.value)
                     val refreshedRoutes = listOf(
-                        routeRefresherResult.value.primaryRouteRefresherResult.route
+                        routeRefresherResult.value.primaryRouteRefresherResult.route,
                     ) + routeRefresherResult.value.alternativesRouteRefresherResults.map {
                         it.route
                     }
@@ -169,7 +176,11 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                         routeRefresherResult.value.anyRequestFailed() &&
                         retryStrategy.shouldRetry()
                     ) {
-                        scheduleUpdateRetry(routes, shouldNotifyOnStart = false)
+                        scheduleUpdateRetry(
+                            routes,
+                            shouldNotifyOnStart = false,
+                            shouldResume = false,
+                        )
                     } else {
                         stateHolder.onFailure(null)
                         listener.onRoutesRefreshed(routeRefresherResult.value)

@@ -94,7 +94,7 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 id,
                 CountryBorderCrossingInfo(
                     metadata.borderCrossingInfo.from.toBorderCrossingAdminInfo(),
-                    metadata.borderCrossingInfo.to.toBorderCrossingAdminInfo()
+                    metadata.borderCrossingInfo.to.toBorderCrossingAdminInfo(),
                 ),
                 length,
                 provider,
@@ -108,7 +108,7 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
                 length,
                 provider,
                 isUrban,
-                this
+                this,
             )
         RoadObjectType.RESTRICTED_AREA -> RestrictedArea(
             id,
@@ -160,7 +160,7 @@ internal fun com.mapbox.navigator.RoadObject.mapToRoadObject(): RoadObject {
             length,
             provider,
             isUrban,
-            this
+            this,
         )
         RoadObjectType.MERGING_AREA -> MergingArea(
             id,
@@ -179,7 +179,7 @@ private fun TunnelInfo.toTunnelInfo() =
 private fun AdminInfo.toBorderCrossingAdminInfo() =
     CountryBorderCrossingAdminInfo(
         code = iso_3166_1,
-        codeAlpha3 = iso_3166_1_alpha3
+        codeAlpha3 = iso_3166_1_alpha3,
     )
 
 private fun TollCollectionInfo.toTollCollectionType() =
@@ -199,7 +199,7 @@ private fun List<com.mapbox.navigator.Amenity>.toAmenities(): List<SDKAmenity> =
         SDKAmenity(
             type = amenity.type.toAmenityType(),
             name = amenity.name,
-            brand = amenity.brand
+            brand = amenity.brand,
         )
     }
 

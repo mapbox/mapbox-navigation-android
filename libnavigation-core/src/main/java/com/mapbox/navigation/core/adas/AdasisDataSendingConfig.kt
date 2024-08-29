@@ -115,21 +115,21 @@ class AdasisDataSendingConfig private constructor(
         /**
          * Interval between sending messages in milliseconds
          */
-        fun messageIntervalMs(messageIntervalMs: Int) = apply {
+        fun messageIntervalMs(messageIntervalMs: Int): Builder = apply {
             this.messageIntervalMs = messageIntervalMs
         }
 
         /**
          * Number of messages in one package (one message is 8 bytes)
          */
-        fun messagesInPackage(messagesInPackage: Int) = apply {
+        fun messagesInPackage(messagesInPackage: Int): Builder = apply {
             this.messagesInPackage = messagesInPackage
         }
 
         /**
          * Time in seconds between repetition of META-DATA message
          */
-        fun metadataCycleSeconds(metadataCycleSeconds: Int) = apply {
+        fun metadataCycleSeconds(metadataCycleSeconds: Int): Builder = apply {
             this.metadataCycleSeconds = metadataCycleSeconds
         }
 
@@ -137,14 +137,14 @@ class AdasisDataSendingConfig private constructor(
          * If true, retransmission will be enabled.
          * (package will be appended with retransmission data, messages from previous cycles)
          */
-        fun enableRetransmission(enableRetransmission: Boolean) = apply {
+        fun enableRetransmission(enableRetransmission: Boolean): Builder = apply {
             this.enableRetransmission = enableRetransmission
         }
 
         /**
          * After passing this distance, messages will not be retransmitted
          */
-        fun retransmissionMeters(retransmissionMeters: Int) = apply {
+        fun retransmissionMeters(retransmissionMeters: Int): Builder = apply {
             this.retransmissionMeters = retransmissionMeters
         }
 
@@ -152,7 +152,7 @@ class AdasisDataSendingConfig private constructor(
          * The trailing length of the path tree, relative to the map-matched position,
          * in the ADASIS provider
          */
-        fun treeTrailingLength(treeTrailingLength: Int) = apply {
+        fun treeTrailingLength(treeTrailingLength: Int): Builder = apply {
             this.treeTrailingLength = treeTrailingLength
         }
 

@@ -11,7 +11,7 @@ import com.mapbox.geojson.Point
  */
 class HistoryWaypoint internal constructor(
     val point: Point,
-    val isSilent: Boolean
+    val isSilent: Boolean,
 ) {
     /**
      * Regenerate whenever a change is made

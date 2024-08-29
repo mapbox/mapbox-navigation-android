@@ -1,0 +1,59 @@
+// Signature format: 3.0
+package com.mapbox.navigation.testing.router {
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public interface CustomRouterRule extends org.junit.rules.TestRule {
+    method public void setRouteRefresher(com.mapbox.navigation.testing.router.MapboxNavigationTestRouteRefresher refresher);
+    method public void setRouter(com.mapbox.navigation.testing.router.MapboxNavigationTestRouter router);
+  }
+
+  public final class CustomRouterRuleKt {
+    method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public static com.mapbox.navigation.testing.router.CustomRouterRule createNavigationRouterRule();
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public interface MapboxNavigationTestRouteRefresher {
+    method public void getRouteRefresh(com.mapbox.navigation.testing.router.RefreshOptions options, com.mapbox.navigation.testing.router.RouteRefreshCallback callback);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public interface MapboxNavigationTestRouter {
+    method public void getRoute(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.testing.router.RouterCallback callback);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RefreshOptions {
+    method public String getResponseUUID();
+    method public int getRouteIndex();
+    property public final String responseUUID;
+    property public final int routeIndex;
+  }
+
+  public final class RequestProcessorKt {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public interface RouteRefreshCallback {
+    method public void onFailure(com.mapbox.navigation.testing.router.TestRefresherFailure failure);
+    method public void onRefresh(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public interface RouterCallback {
+    method public void onFailure(com.mapbox.navigation.testing.router.TestRouterFailure failure);
+    method public void onRoutesReady(com.mapbox.api.directions.v5.models.DirectionsResponse response);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class TestRefresherFailure {
+    field public static final com.mapbox.navigation.testing.router.TestRefresherFailure.Companion Companion;
+  }
+
+  public static final class TestRefresherFailure.Companion {
+    method public com.mapbox.navigation.testing.router.TestRefresherFailure serverError();
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class TestRouterFailure {
+    field public static final com.mapbox.navigation.testing.router.TestRouterFailure.Companion Companion;
+  }
+
+  public static final class TestRouterFailure.Companion {
+    method public com.mapbox.navigation.testing.router.TestRouterFailure noRoutesFound();
+    method public com.mapbox.navigation.testing.router.TestRouterFailure serverError();
+  }
+
+}
+

@@ -11,6 +11,7 @@ import com.mapbox.maps.Style
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
@@ -30,11 +31,15 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class RouteArrowUtilsTest {
 
     private val ctx: Context = mockk()
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @Before
     fun setUp() {
@@ -54,7 +59,7 @@ class RouteArrowUtilsTest {
     fun obtainArrowPointsFromWhenCurrentArrowLessThan2Points() {
         val upcomingPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
-            Point.fromLngLat(-122.4784726, 37.8587617)
+            Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val routeStepPoints = listOf(Point.fromLngLat(-122.477395, 37.859513))
         val stepProgress = mockk<RouteStepProgress> {
@@ -78,7 +83,7 @@ class RouteArrowUtilsTest {
         val upcomingPoints = listOf(Point.fromLngLat(-122.477395, 37.859513))
         val routeStepPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
-            Point.fromLngLat(-122.4784726, 37.8587617)
+            Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
@@ -101,7 +106,7 @@ class RouteArrowUtilsTest {
         val routeStepPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
             Point.fromLngLat(-122.4784726, 37.8587617),
-            Point.fromLngLat(-122.4784726, 37.8587617)
+            Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
@@ -123,11 +128,11 @@ class RouteArrowUtilsTest {
     fun obtainArrowPointsFrom() {
         val upcomingPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
-            Point.fromLngLat(-122.4784726, 37.8587617)
+            Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val routeStepPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
-            Point.fromLngLat(-122.4784726, 37.8587617)
+            Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
@@ -182,6 +187,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
             every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
+            every { styleSlots } returns listOf()
         }
 
         RouteArrowUtils.initializeLayers(style, options)
@@ -211,6 +217,7 @@ class RouteArrowUtilsTest {
             } returns options.arrowHeadCasingScaleExpression
             every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
+            every { slotName } returns options.slotName
         }
         val style = mockk<Style>(relaxed = true) {
             every { styleLayers } returns listOf()
@@ -261,6 +268,7 @@ class RouteArrowUtilsTest {
             } returns options.arrowHeadCasingScaleExpression
             every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
+            every { slotName } returns options.slotName
         }
         val style = mockk<Style>(relaxed = true) {
             every { styleLayers } returns listOf()
@@ -311,6 +319,7 @@ class RouteArrowUtilsTest {
             } returns options.arrowHeadCasingScaleExpression
             every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
+            every { slotName } returns options.slotName
         }
         val style = mockk<Style>(relaxed = true) {
             every { styleLayers } returns listOf()
@@ -361,6 +370,7 @@ class RouteArrowUtilsTest {
             } returns options.arrowHeadCasingScaleExpression
             every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
+            every { slotName } returns options.slotName
         }
         val style = mockk<Style>(relaxed = true) {
             every { styleLayers } returns listOf()

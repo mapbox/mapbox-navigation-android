@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry
 
 import androidx.annotation.UiThread
+import com.mapbox.common.SdkInformation
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -26,7 +27,7 @@ internal class TelemetryWrapper {
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var navigationOptions: NavigationOptions
-    private lateinit var userAgent: String
+    private lateinit var sdkInformation: SdkInformation
 
     private var isWrapperInitialized = false
     private var sdkTelemetry: SdkTelemetry = SdkTelemetry.EMPTY
@@ -34,7 +35,7 @@ internal class TelemetryWrapper {
     fun initialize(
         mapboxNavigation: MapboxNavigation,
         navigationOptions: NavigationOptions,
-        userAgent: String
+        sdkInformation: SdkInformation,
     ) {
         assertDebug(!isWrapperInitialized) {
             "Already initialized"
@@ -48,7 +49,7 @@ internal class TelemetryWrapper {
 
         this.mapboxNavigation = mapboxNavigation
         this.navigationOptions = navigationOptions
-        this.userAgent = userAgent
+        this.sdkInformation = sdkInformation
 
         if (TelemetryUtilsDelegate.getEventsCollectionState()) {
             initializeSdkTelemetry()
@@ -78,7 +79,7 @@ internal class TelemetryWrapper {
         sdkTelemetry.postCustomEvent(
             payload = payload,
             customEventType = customEventType,
-            customEventVersion = customEventVersion
+            customEventVersion = customEventVersion,
         )
     }
 
@@ -109,17 +110,11 @@ internal class TelemetryWrapper {
     }
 
     private fun initializeSdkTelemetry() {
-        val token = navigationOptions.accessToken ?: return
-
         logD(
             "MapboxMetricsReporter.init from MapboxNavigation main",
-            MapboxNavigationTelemetry.LOG_CATEGORY
+            MapboxNavigationTelemetry.LOG_CATEGORY,
         )
-        MapboxMetricsReporter.init(
-            navigationOptions.applicationContext,
-            token,
-            userAgent
-        )
+        MapboxMetricsReporter.init(sdkInformation)
         MapboxNavigationTelemetry.initialize(
             mapboxNavigation,
             navigationOptions,

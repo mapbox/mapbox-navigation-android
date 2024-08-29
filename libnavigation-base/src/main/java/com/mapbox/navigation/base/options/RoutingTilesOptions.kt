@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.options
 
 import com.mapbox.common.TileStore
 import com.mapbox.common.TileStoreOptions
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import java.net.URI
 
 /**
@@ -29,7 +30,10 @@ import java.net.URI
  * and latest on the server to consider using the latest version of routing tiles from the server.
  * **As updating tiles frequently consumes considerably energy and bandwidth**.
  * Note that this only works if [tilesVersion] is empty.
+ * @param fallbackOfflineTilesVersion is navigation tiles version which will be used for routing in case
+ * an offline route can't be built with [tilesVersion]. Fallback doesn't happen if no [fallbackOfflineTilesVersion] provided.
  */
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class RoutingTilesOptions private constructor(
     val tilesBaseUri: URI,
     val tilesDataset: String,
@@ -37,7 +41,9 @@ class RoutingTilesOptions private constructor(
     val tilesVersion: String,
     val filePath: String?,
     val tileStore: TileStore?,
-    val minDaysBetweenServerAndLocalTilesVersion: Int
+    val minDaysBetweenServerAndLocalTilesVersion: Int,
+    @ExperimentalMapboxNavigationAPI
+    val fallbackOfflineTilesVersion: String?,
 ) {
     /**
      * @return the builder that created the [RoutingTilesOptions]
@@ -50,6 +56,7 @@ class RoutingTilesOptions private constructor(
         filePath(filePath)
         tileStore(tileStore)
         minDaysBetweenServerAndLocalTilesVersion(minDaysBetweenServerAndLocalTilesVersion)
+        fallbackOfflineTilesVersion(fallbackOfflineTilesVersion)
     }
 
     /**
@@ -72,6 +79,7 @@ class RoutingTilesOptions private constructor(
         ) {
             return false
         }
+        if (fallbackOfflineTilesVersion != other.fallbackOfflineTilesVersion) return false
 
         return true
     }
@@ -87,6 +95,7 @@ class RoutingTilesOptions private constructor(
         result = 31 * result + filePath.hashCode()
         result = 31 * result + tileStore.hashCode()
         result = 31 * result + minDaysBetweenServerAndLocalTilesVersion
+        result = 31 * result + fallbackOfflineTilesVersion.hashCode()
         return result
     }
 
@@ -115,6 +124,7 @@ class RoutingTilesOptions private constructor(
         private var tilesDataset: String = "mapbox"
         private var tilesProfile: String = "driving-traffic"
         private var tilesVersion: String = ""
+        private var fallbackOfflineTilesVersion: String? = null
         private var filePath: String? = null
         private var tileStore: TileStore? = null
         private var minDaysBetweenServerAndLocalTilesVersion: Int = 56 // 8 weeks
@@ -135,7 +145,7 @@ class RoutingTilesOptions private constructor(
                     tilesBaseUri.query == null
                 check(validUri) {
                     throw IllegalArgumentException(
-                        "The base URI should only contain the scheme and host."
+                        "The base URI should only contain the scheme and host.",
                     )
                 }
                 this.tilesBaseUri = tilesBaseUri
@@ -173,6 +183,16 @@ class RoutingTilesOptions private constructor(
             apply { this.tilesVersion = version }
 
         /**
+         * Set navigation tiles version which will be used for routing in case
+         * an offline route can't be built with [tilesVersion].
+         * Fallback doesn't happen if no [fallbackOfflineTilesVersion] provided.
+         * Set `null` to disable fallback.
+         */
+        @ExperimentalMapboxNavigationAPI
+        fun fallbackOfflineTilesVersion(version: String?): Builder =
+            apply { this.fallbackOfflineTilesVersion = version }
+
+        /**
          * Creates a custom file path to store the road network tiles.
          * It is used for persistent configuration and history files storing.
          */
@@ -182,9 +202,7 @@ class RoutingTilesOptions private constructor(
         /**
          * Override tile store instance. It manages downloads and storage for requests to
          * tile-related API endpoints. For offline/predictive-caching use cases this instance should be
-         * the same that is passed to map resource options. When creating the [TileStore] make sure to call
-         * [TileStore.setOption] with [TileStoreOptions.MAPBOX_ACCESS_TOKEN] and your token.
-         * By default (if `null` is provided here), the [TileStore] will be created with a [filePath] and [NavigationOptions.accessToken].
+         * the same that is passed to map resource options.
          */
         fun tileStore(tileStore: TileStore?): Builder =
             apply { this.tileStore = tileStore }
@@ -202,7 +220,7 @@ class RoutingTilesOptions private constructor(
          * @see [tilesVersion]
          */
         fun minDaysBetweenServerAndLocalTilesVersion(
-            minDaysBetweenServerAndLocalTilesVersion: Int
+            minDaysBetweenServerAndLocalTilesVersion: Int,
         ): Builder =
             apply {
                 check(minDaysBetweenServerAndLocalTilesVersion >= 0) {
@@ -223,7 +241,8 @@ class RoutingTilesOptions private constructor(
                 tilesVersion = tilesVersion,
                 filePath = filePath,
                 tileStore = tileStore,
-                minDaysBetweenServerAndLocalTilesVersion = minDaysBetweenServerAndLocalTilesVersion
+                minDaysBetweenServerAndLocalTilesVersion = minDaysBetweenServerAndLocalTilesVersion,
+                fallbackOfflineTilesVersion = fallbackOfflineTilesVersion,
             )
         }
     }

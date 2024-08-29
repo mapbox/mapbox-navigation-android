@@ -17,7 +17,7 @@ package com.mapbox.navigation.base.trip.model.eh
 class EHorizonPosition internal constructor(
     val eHorizonGraphPosition: EHorizonGraphPosition,
     val eHorizon: EHorizon,
-    @EHorizonResultType.Type val eHorizonResultType: String
+    @EHorizonResultType.Type val eHorizonResultType: String,
 ) {
 
     /**

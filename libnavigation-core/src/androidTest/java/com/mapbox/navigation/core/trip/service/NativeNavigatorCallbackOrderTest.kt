@@ -7,11 +7,10 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.nativeRoute
+import com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
-import com.mapbox.navigation.base.route.toNavigationRoutes
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.test.R
@@ -66,37 +65,46 @@ internal class NativeNavigatorCallbackOrderTest :
             callbackInvocations = Collections.synchronizedList(mutableListOf<CallbackInvocation>())
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .accessToken(activity.getString(R.string.mapbox_access_token))
-                    .build()
+                    .build(),
             )
             // starts raw location updates - otherwise we don't get onStatus calls
             mapboxNavigation.startTripSession()
+
             val nativeNavigatorImpl = mapboxNavigation.navigator
             val navigatorField = nativeNavigatorImpl.javaClass.getDeclaredField("navigator")
             navigatorField.isAccessible = true
             navigator = navigatorField.get(nativeNavigatorImpl) as Navigator
             navigatorField.isAccessible = false
-            routes = DirectionsResponse.fromJson(
+            routes = createNavigationRouteForTest(
                 activity.resources.openRawResource(R.raw.route_response_route_refresh)
-                    .readBytes().decodeToString(),
+                    .readBytes().decodeToString().let { DirectionsResponse.fromJson(it) },
                 RouteOptions.builder()
                     .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                     .coordinatesList(
                         listOf(
                             startLocation,
-                            Point.fromLngLat(-121.480256, 38.576795)
-                        )
+                            Point.fromLngLat(-121.480256, 38.576795),
+                        ),
                     )
-                    .build()
-            ).routes().toNavigationRoutes(RouterOrigin.Custom())
+                    .build(),
+                RouterOrigin.ONLINE,
+            )
             route = routes.first()
             refreshedRouteResponse = activity.resources
                 .openRawResource(R.raw.route_response_route_refresh_annotations)
                 .readBytes().decodeToString()
-            multilegRoute = DirectionsRoute.fromJson(
-                activity.resources.openRawResource(R.raw.multileg_route)
-                    .readBytes().decodeToString()
-            ).toNavigationRoute(RouterOrigin.Custom())
+            val multiLegDirectionRoute = DirectionsRoute.fromJson(
+                activity.resources.openRawResource(R.raw.multileg_route).readBytes()
+                    .decodeToString(),
+            )
+            multilegRoute = createNavigationRouteForTest(
+                DirectionsResponse.builder()
+                    .code("Ok")
+                    .routes(listOf(multiLegDirectionRoute))
+                    .build(),
+                multiLegDirectionRoute.routeOptions()!!,
+                RouterOrigin.ONLINE,
+            ).first()
         }
     }
 
@@ -113,12 +121,12 @@ internal class NativeNavigatorCallbackOrderTest :
         waitForStatusUpdatesToBegin()
         navigator.setRoutes(
             SetRoutesParams(route.nativeRoute(), 0, emptyList<RouteInterface>()),
-            SetRoutesReason.NEW_ROUTE
+            SetRoutesReason.NEW_ROUTE,
         ) { callbackInvocations.add(CallbackInvocation.RoutesSet) }
         callbackInvocations.waitUntilHas(CallbackInvocation.RoutesSet, elementsAfter = 1)
 
         callbackInvocations.checkThatHas(
-            CallbackInvocation.Status(NavigationStatusOrigin.SET_ROUTE)
+            CallbackInvocation.Status(NavigationStatusOrigin.SET_ROUTE),
         ) strictlyAfter CallbackInvocation.RoutesSet
     }
 
@@ -132,11 +140,11 @@ internal class NativeNavigatorCallbackOrderTest :
             SetRoutesDataParams(
                 RouteParser.createRoutesData(
                     route.nativeRoute(),
-                    listOf(routes[1].nativeRoute())
+                    listOf(routes[1].nativeRoute()),
                 ),
-                0
+                0,
             ),
-            SetRoutesReason.NEW_ROUTE
+            SetRoutesReason.NEW_ROUTE,
         ) {
             callbackInvocations.add(CallbackInvocation.RoutesDataSet)
         }
@@ -144,7 +152,7 @@ internal class NativeNavigatorCallbackOrderTest :
         callbackInvocations.waitUntilHas(CallbackInvocation.RoutesDataSet, elementsAfter = 1)
 
         callbackInvocations.checkThatHas(
-            CallbackInvocation.Status(NavigationStatusOrigin.SET_ROUTE)
+            CallbackInvocation.Status(NavigationStatusOrigin.SET_ROUTE),
         ) strictlyAfter CallbackInvocation.RoutesDataSet
     }
 
@@ -159,7 +167,7 @@ internal class NativeNavigatorCallbackOrderTest :
         )
         // we will expect SET_ROUTE after refresh, clear the previous ones
         callbackInvocations.waitUntilHas(
-            CallbackInvocation.Status(NavigationStatusOrigin.SET_ROUTE)
+            CallbackInvocation.Status(NavigationStatusOrigin.SET_ROUTE),
         )
         callbackInvocations.clear()
 
@@ -171,7 +179,7 @@ internal class NativeNavigatorCallbackOrderTest :
         callbackInvocations.waitUntilHas(CallbackInvocation.Refresh, elementsAfter = 1)
 
         callbackInvocations.checkThatHas(
-            CallbackInvocation.Status(NavigationStatusOrigin.ROUTE_REFRESH)
+            CallbackInvocation.Status(NavigationStatusOrigin.ROUTE_REFRESH),
         ) strictlyAfter CallbackInvocation.Refresh
     }
 
@@ -192,7 +200,7 @@ internal class NativeNavigatorCallbackOrderTest :
         callbackInvocations.waitUntilHas(CallbackInvocation.LegChanged, elementsAfter = 1)
 
         callbackInvocations.checkThatHas(
-            CallbackInvocation.Status(NavigationStatusOrigin.LEG_CHANGE)
+            CallbackInvocation.Status(NavigationStatusOrigin.LEG_CHANGE),
         ) strictlyAfter CallbackInvocation.LegChanged
     }
 
@@ -211,16 +219,16 @@ internal class NativeNavigatorCallbackOrderTest :
         callbackInvocations.waitUntilHas(CallbackInvocation.LocationUpdated, elementsAfter = 1)
 
         callbackInvocations.checkThatHas(
-            CallbackInvocation.Status(NavigationStatusOrigin.LOCATION_UPDATE, location)
+            CallbackInvocation.Status(NavigationStatusOrigin.LOCATION_UPDATE, location),
         ) strictlyAfter CallbackInvocation.LocationUpdated
     }
 
     private fun List<CallbackInvocation>.checkThatHas(
-        hasWhat: CallbackInvocation
+        hasWhat: CallbackInvocation,
     ): CallbackInvocationsCheckThatHasScope = CallbackInvocationsCheckThatHasScope(this, hasWhat)
 
     private infix fun CallbackInvocationsCheckThatHasScope.strictlyAfter(
-        milestone: CallbackInvocation
+        milestone: CallbackInvocation,
     ) {
         val index = actual.indexOf(milestone)
         val beforeMilestone = actual.take(index)
@@ -228,7 +236,7 @@ internal class NativeNavigatorCallbackOrderTest :
         assertTrue(
             "Statuses before $milestone should not contain $hasWhat, " +
                 "actual: $this",
-            beforeMilestone.none { it == hasWhat }
+            beforeMilestone.none { it == hasWhat },
         )
         assertEquals(hasWhat, afterMilestone)
     }
@@ -250,7 +258,7 @@ internal class NativeNavigatorCallbackOrderTest :
             1f,
             1f,
             HashMap(),
-            false
+            false,
         )
     }
 
@@ -260,7 +268,7 @@ internal class NativeNavigatorCallbackOrderTest :
 
     private suspend fun List<CallbackInvocation>.waitUntilHas(
         hasWhat: CallbackInvocation,
-        elementsAfter: Int = 0
+        elementsAfter: Int = 0,
     ) {
         waitUntilCondition {
             val indexOf = it.indexOf(hasWhat)
@@ -283,7 +291,7 @@ internal class NativeNavigatorCallbackOrderTest :
     ) = suspendCancellableCoroutine<Unit> { cont ->
         setRoutes(
             params,
-            reason
+            reason,
         ) { cont.resume(Unit) }
     }
 
@@ -295,14 +303,14 @@ internal class NativeNavigatorCallbackOrderTest :
 
 private data class CallbackInvocationsCheckThatHasScope(
     val actual: List<CallbackInvocation>,
-    val hasWhat: CallbackInvocation
+    val hasWhat: CallbackInvocation,
 )
 
 private sealed class CallbackInvocation {
 
     data class Status(
         val origin: NavigationStatusOrigin,
-        val location: FixLocation? = null
+        val location: FixLocation? = null,
     ) : CallbackInvocation()
 
     object RoutesSet : CallbackInvocation()

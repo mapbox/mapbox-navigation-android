@@ -35,7 +35,7 @@ class ReplayProgressObserverTest {
         every { replayRouteMapper.mapRouteLegGeometry(any()) } returns mockEventsForShortRoute()
 
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(mockDistanceTraveled = 0.0f)
+            mockValidRouteProgress(mockDistanceTraveled = 0.0f),
         )
 
         verifyOrder {
@@ -51,10 +51,10 @@ class ReplayProgressObserverTest {
 
         val testRoute = createNavigationRoutes()[0]
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(testRoute, 0, mockDistanceTraveled = 10.0f)
+            mockValidRouteProgress(testRoute, 0, mockDistanceTraveled = 10.0f),
         )
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(testRoute, 0, mockDistanceTraveled = 50.0f)
+            mockValidRouteProgress(testRoute, 0, mockDistanceTraveled = 50.0f),
         )
         val refreshedRoute = testRoute.update(
             directionsRouteBlock = {
@@ -64,20 +64,20 @@ class ReplayProgressObserverTest {
                             it.toBuilder()
                                 .annotation(
                                     createRouteLegAnnotation(
-                                        congestionNumeric = listOf(25, 84)
-                                    )
+                                        congestionNumeric = listOf(25, 84),
+                                    ),
                                 )
                                 .build()
-                        }
+                        },
                     )
                     .build()
             },
-            directionsResponseBlock = {
+            waypointsBlock = {
                 this
-            }
+            },
         )
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(refreshedRoute, 0, mockDistanceTraveled = 55.0f)
+            mockValidRouteProgress(refreshedRoute, 0, mockDistanceTraveled = 55.0f),
         )
 
         verify(exactly = 1) {
@@ -94,22 +94,22 @@ class ReplayProgressObserverTest {
         val secondRouteLeg: RouteLeg = createRouteLeg()
         val testRoute = createNavigationRoute(
             directionsRoute = createDirectionsRoute(
-                legs = listOf(firstRouteLeg, secondRouteLeg)
-            )
+                legs = listOf(firstRouteLeg, secondRouteLeg),
+            ),
         )
         replayProgressObserver.onRouteProgressChanged(
             mockValidRouteProgress(
                 route = testRoute,
                 currentLegIndex = 0,
-                mockDistanceTraveled = 10.0f
-            )
+                mockDistanceTraveled = 10.0f,
+            ),
         )
         replayProgressObserver.onRouteProgressChanged(
             mockValidRouteProgress(
                 route = testRoute,
                 currentLegIndex = 1,
-                mockDistanceTraveled = 50.0f
-            )
+                mockDistanceTraveled = 50.0f,
+            ),
         )
 
         verify(exactly = 2) {
@@ -122,7 +122,7 @@ class ReplayProgressObserverTest {
     @Test
     fun `should seekTo first event when distanceTraveled is zero`() {
         every { replayRouteMapper.mapRouteLegGeometry(any()) } returns mockEvents(
-            """yg{bgA|cufhFoEiAiA[}i@oNoD_As@QqdAeX"""
+            """yg{bgA|cufhFoEiAiA[}i@oNoD_As@QqdAeX""",
         )
         val eventsSlot = slot<List<ReplayEventBase>>()
         val seekToSlot = slot<ReplayEventBase>()
@@ -130,7 +130,7 @@ class ReplayProgressObserverTest {
         every { mapboxReplayer.seekTo(capture(seekToSlot)) } just Runs
 
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(mockDistanceTraveled = 0.0f)
+            mockValidRouteProgress(mockDistanceTraveled = 0.0f),
         )
 
         // Seek to first location because 0.0 distance traveled
@@ -142,7 +142,7 @@ class ReplayProgressObserverTest {
     @Test
     fun `should seekTo mid route when distanceTraveled is mid route`() {
         every { replayRouteMapper.mapRouteLegGeometry(any()) } returns mockEvents(
-            """yg{bgA|cufhFoEiAiA[}i@oNoD_As@QqdAeX"""
+            """yg{bgA|cufhFoEiAiA[}i@oNoD_As@QqdAeX""",
         )
         val eventsSlot = slot<List<ReplayEventBase>>()
         val seekToSlot = slot<ReplayEventBase>()
@@ -150,7 +150,7 @@ class ReplayProgressObserverTest {
         every { mapboxReplayer.seekTo(capture(seekToSlot)) } just Runs
 
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(mockDistanceTraveled = 90.0f)
+            mockValidRouteProgress(mockDistanceTraveled = 90.0f),
         )
 
         // Seek to the 3rd event timestamp because 90 meters has been traveled
@@ -168,7 +168,7 @@ class ReplayProgressObserverTest {
         every { mapboxReplayer.seekTo(capture(seekToSlot)) } just Runs
 
         replayProgressObserver.onRouteProgressChanged(
-            mockValidRouteProgress(mockDistanceTraveled = 90.0f)
+            mockValidRouteProgress(mockDistanceTraveled = 90.0f),
         )
 
         assertFalse(eventsSlot.isCaptured)
@@ -181,14 +181,14 @@ class ReplayProgressObserverTest {
         val secondRouteLeg: RouteLeg = createRouteLeg()
         val testRoute = createNavigationRoute(
             directionsRoute = createDirectionsRoute(
-                legs = listOf(firstRouteLeg, secondRouteLeg)
-            )
+                legs = listOf(firstRouteLeg, secondRouteLeg),
+            ),
         )
         every { replayRouteMapper.mapRouteLegGeometry(firstRouteLeg) } returns mockEvents(
-            """yg{bgA|cufhFoEiAiA[}i@oNoD_As@QqdAeX"""
+            """yg{bgA|cufhFoEiAiA[}i@oNoD_As@QqdAeX""",
         )
         every { replayRouteMapper.mapRouteLegGeometry(secondRouteLeg) } returns mockEvents(
-            """yg{bgA|cufhFoEiAiA[}i@oNoD_As@Q"""
+            """yg{bgA|cufhFoEiAiA[}i@oNoD_As@Q""",
         )
         val eventsSlot = mutableListOf<List<ReplayEventBase>>()
         val seekToSlot = mutableListOf<ReplayEventBase>()
@@ -199,15 +199,15 @@ class ReplayProgressObserverTest {
             mockValidRouteProgress(
                 route = testRoute,
                 currentLegIndex = 0,
-                mockDistanceTraveled = 0.0f
-            )
+                mockDistanceTraveled = 0.0f,
+            ),
         )
         replayProgressObserver.onRouteProgressChanged(
             mockValidRouteProgress(
                 route = testRoute,
                 currentLegIndex = 1,
-                mockDistanceTraveled = 90.0f
-            )
+                mockDistanceTraveled = 90.0f,
+            ),
         )
 
         val alternativeRouteEvents = eventsSlot[1]
@@ -220,7 +220,7 @@ class ReplayProgressObserverTest {
     private fun mockValidRouteProgress(
         route: NavigationRoute = createNavigationRoute(),
         currentLegIndex: Int = 0,
-        mockDistanceTraveled: Float = 0.0f
+        mockDistanceTraveled: Float = 0.0f,
     ): RouteProgress = mockk {
         every { navigationRoute } returns route
         every { currentLegProgress } returns mockk {
@@ -241,7 +241,7 @@ class ReplayProgressObserverTest {
                 mockk(relaxed = true) {
                     every { lon } returns value.longitude()
                     every { lat } returns value.latitude()
-                }
+                },
             )
         }
     }

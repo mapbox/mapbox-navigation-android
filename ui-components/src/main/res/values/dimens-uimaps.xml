@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mapbox_navigationCamera_trackingInitialMoveThreshold">25dp</dimen>
+    <dimen name="mapbox_navigationCamera_trackingMultiFingerMoveThreshold">400dp</dimen>
+    <dimen name="mapbox_recenterButton_minExtendedWidth">150dp</dimen>
+    <dimen name="mapbox_routeOverviewButton_minExtendedWidth">165dp</dimen>
+</resources>

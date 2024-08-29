@@ -76,7 +76,7 @@ object RoadClass {
         TERTIARY,
         UNCLASSIFIED,
         RESIDENTIAL,
-        SERVICE_OTHER
+        SERVICE_OTHER,
     )
     annotation class Type
 }

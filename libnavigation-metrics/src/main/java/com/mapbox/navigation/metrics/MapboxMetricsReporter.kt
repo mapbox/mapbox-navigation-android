@@ -1,6 +1,5 @@
 package com.mapbox.navigation.metrics
 
-import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.bindgen.Value
 import com.mapbox.common.Event
@@ -9,6 +8,7 @@ import com.mapbox.common.EventsServerOptions
 import com.mapbox.common.EventsServiceError
 import com.mapbox.common.EventsServiceInterface
 import com.mapbox.common.EventsServiceObserver
+import com.mapbox.common.SdkInformation
 import com.mapbox.common.TelemetryService
 import com.mapbox.common.TurnstileEvent
 import com.mapbox.navigation.base.internal.metric.MetricEventInternal
@@ -66,32 +66,15 @@ object MapboxMetricsReporter : MetricsReporter {
      * Initialize [EventsServiceInterface] and [TelemetryService] that need to send event to
      * Mapbox Telemetry server.
      *
-     * @param context Android context
-     * @param accessToken Mapbox access token
-     * @param userAgent Use agent indicate source of metrics
+     * @param sdkInformation SdkInformation to be used for events service
      */
     @JvmStatic
-    fun init(
-        context: Context,
-        accessToken: String,
-        userAgent: String
-    ) {
+    fun init(sdkInformation: SdkInformation) {
         isTelemetryInitialized = true
-        val eventsServerOptions = EventsServerOptions(accessToken, userAgent, null)
+        val eventsServerOptions = EventsServerOptions(sdkInformation, null)
         eventsService = EventsServiceProvider.provideEventsService(eventsServerOptions)
-        telemetryService = TelemetryServiceProvider.provideTelemetryService(eventsServerOptions)
+        telemetryService = TelemetryServiceProvider.provideTelemetryService()
         eventsService.registerObserver(eventsServiceObserver)
-    }
-
-    /**
-     * Toggle whether or not you'd like to log [mapboxTelemetry] events.
-     *
-     * @param isDebugLoggingEnabled true to enable logging, false to disable logging
-     */
-    @Deprecated("no-ops")
-    @JvmStatic
-    fun toggleLogging(isDebugLoggingEnabled: Boolean) {
-        // do nothing
     }
 
     /**
@@ -114,14 +97,14 @@ object MapboxMetricsReporter : MetricsReporter {
             if (metricEvent !is MetricEventInternal) {
                 logW(
                     "metricEvent must inherited from MetricEventInternal to be sent",
-                    LOG_CATEGORY
+                    LOG_CATEGORY,
                 )
                 return
             }
             eventsService.sendEvent(
-                Event(EventPriority.QUEUED, metricEvent.toValue(), null)
-            ) {
-                if (it != null) {
+                Event(EventPriority.QUEUED, metricEvent.toValue(), null),
+            ) { result ->
+                result.onError {
                     logE("Failed to send event ${metricEvent.metricName}: $it", LOG_CATEGORY)
                 }
             }
@@ -137,8 +120,8 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     override fun sendTurnstileEvent(turnstileEvent: TurnstileEvent) {
         ifTelemetryIsRunning {
-            eventsService.sendTurnstileEvent(turnstileEvent) {
-                if (it != null) {
+            eventsService.sendTurnstileEvent(turnstileEvent) { result ->
+                result.onError {
                     logE("Failed to send Turnstile event: $it", LOG_CATEGORY)
                 }
             }
@@ -165,7 +148,7 @@ object MapboxMetricsReporter : MetricsReporter {
         } else {
             logD(
                 "Navigation Telemetry is disabled",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
         }
     }

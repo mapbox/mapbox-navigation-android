@@ -1,9 +1,6 @@
 package com.mapbox.navigation.base.options
 
 import android.content.Context
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -25,9 +22,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * appear more in sync with the users ground-truth location
  *
  * @param applicationContext the Context of the Android Application
- * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
- * @param locationEngine the mechanism responsible for providing location approximations to navigation
- * @param locationEngineRequest specifies the rate to request locations from the location engine.
+ * @param locationOptions [LocationOptions] that specify where to take locations from
  * @param timeFormatType defines time format for calculation remaining trip time
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
  * @param distanceFormatterOptions [DistanceFormatterOptions] options to format distances showing in notification during navigation
@@ -43,15 +38,12 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param eventsAppMetadata [EventsAppMetadata] information (optional)
  * @param enableSensors enables sensors for current position calculation (optional)
  * @param copilotOptions defines options for Copilot
- * @param longRoutesOptimisationOptions defines criteria to turn on the optimisations
+ * @param trafficOverrideOptions defines options for traffic override
  */
 class NavigationOptions
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 private constructor(
     val applicationContext: Context,
-    val accessToken: String?,
-    val locationEngine: LocationEngine,
-    val locationEngineRequest: LocationEngineRequest,
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
     val distanceFormatterOptions: DistanceFormatterOptions,
@@ -68,8 +60,9 @@ private constructor(
     val enableSensors: Boolean,
     @ExperimentalPreviewMapboxNavigationAPI
     val copilotOptions: CopilotOptions,
+    val locationOptions: LocationOptions,
     @ExperimentalPreviewMapboxNavigationAPI
-    val longRoutesOptimisationOptions: LongRoutesOptimisationOptions
+    val trafficOverrideOptions: TrafficOverrideOptions,
 ) {
 
     /**
@@ -77,9 +70,7 @@ private constructor(
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun toBuilder(): Builder = Builder(applicationContext).apply {
-        accessToken(accessToken)
-        locationEngine(locationEngine)
-        locationEngineRequest(locationEngineRequest)
+        locationOptions(locationOptions)
         timeFormatType(timeFormatType)
         navigatorPredictionMillis(navigatorPredictionMillis)
         distanceFormatterOptions(distanceFormatterOptions)
@@ -95,7 +86,7 @@ private constructor(
         eventsAppMetadata(eventsAppMetadata)
         enableSensors(enableSensors)
         copilotOptions(copilotOptions)
-        longRoutesOptimisationOptions(longRoutesOptimisationOptions)
+        trafficOverrideOptions(trafficOverrideOptions)
     }
 
     /**
@@ -109,9 +100,7 @@ private constructor(
         other as NavigationOptions
 
         if (applicationContext != other.applicationContext) return false
-        if (accessToken != other.accessToken) return false
-        if (locationEngine != other.locationEngine) return false
-        if (locationEngineRequest != other.locationEngineRequest) return false
+        if (locationOptions != other.locationOptions) return false
         if (timeFormatType != other.timeFormatType) return false
         if (navigatorPredictionMillis != other.navigatorPredictionMillis) return false
         if (distanceFormatterOptions != other.distanceFormatterOptions) return false
@@ -127,7 +116,7 @@ private constructor(
         if (eventsAppMetadata != other.eventsAppMetadata) return false
         if (enableSensors != other.enableSensors) return false
         if (copilotOptions != other.copilotOptions) return false
-        if (longRoutesOptimisationOptions != other.longRoutesOptimisationOptions) return false
+        if (trafficOverrideOptions != other.trafficOverrideOptions) return false
 
         return true
     }
@@ -138,9 +127,7 @@ private constructor(
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun hashCode(): Int {
         var result = applicationContext.hashCode()
-        result = 31 * result + accessToken.hashCode()
-        result = 31 * result + locationEngine.hashCode()
-        result = 31 * result + locationEngineRequest.hashCode()
+        result = 31 * result + locationOptions.hashCode()
         result = 31 * result + timeFormatType
         result = 31 * result + navigatorPredictionMillis.hashCode()
         result = 31 * result + distanceFormatterOptions.hashCode()
@@ -156,7 +143,7 @@ private constructor(
         result = 31 * result + eventsAppMetadata.hashCode()
         result = 31 * result + enableSensors.hashCode()
         result = 31 * result + copilotOptions.hashCode()
-        result = 31 * result + longRoutesOptimisationOptions.hashCode()
+        result = 31 * result + trafficOverrideOptions.hashCode()
         return result
     }
 
@@ -167,9 +154,7 @@ private constructor(
     override fun toString(): String {
         return "NavigationOptions(" +
             "applicationContext=$applicationContext, " +
-            "accessToken=$accessToken, " +
-            "locationEngine=$locationEngine, " +
-            "locationEngineRequest=$locationEngineRequest, " +
+            "locationOptions=$locationOptions, " +
             "timeFormatType=$timeFormatType, " +
             "navigatorPredictionMillis=$navigatorPredictionMillis, " +
             "distanceFormatterOptions=$distanceFormatterOptions, " +
@@ -184,8 +169,8 @@ private constructor(
             "historyRecorderOptions=$historyRecorderOptions, " +
             "eventsAppMetadata=$eventsAppMetadata, " +
             "enableSensors=$enableSensors, " +
-            "copilotOptions=$copilotOptions, " +
-            "longRoutesOptimisationOptions=$longRoutesOptimisationOptions" +
+            "copilotOptions=$copilotOptions" +
+            "trafficOverrideOptions=$trafficOverrideOptions" +
             ")"
     }
 
@@ -195,13 +180,6 @@ private constructor(
     class Builder(applicationContext: Context) {
 
         private val applicationContext = applicationContext.applicationContext
-        private var accessToken: String? = null
-        private var locationEngine: LocationEngine? = null // Default is created when built
-        private var locationEngineRequest = LocationEngineRequest
-            .Builder(1000L)
-            .setFastestInterval(500L)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .build()
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatterOptions: DistanceFormatterOptions =
@@ -220,31 +198,23 @@ private constructor(
             HistoryRecorderOptions.Builder().build()
         private var eventsAppMetadata: EventsAppMetadata? = null
         private var enableSensors: Boolean = false
-
-        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-        private var longRoutesOptimisationOptions: LongRoutesOptimisationOptions =
-            LongRoutesOptimisationOptions.NoOptimisations
+        private var locationOptions: LocationOptions = LocationOptions.Builder().build()
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         private var copilotOptions: CopilotOptions = CopilotOptions.Builder().build()
 
-        /**
-         * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
-         */
-        fun accessToken(accessToken: String?): Builder =
-            apply { this.accessToken = accessToken }
+        @ExperimentalPreviewMapboxNavigationAPI
+        private var trafficOverrideOptions: TrafficOverrideOptions =
+            TrafficOverrideOptions.Builder().build()
 
         /**
-         * Override the mechanism responsible for providing location approximations to navigation
+         * Sets location options. See [LocationOptions] for details.
+         * By default real location with default location provider will be used.
+         * @param locationOptions location options
+         * @return the same builder
          */
-        fun locationEngine(locationEngine: LocationEngine): Builder =
-            apply { this.locationEngine = locationEngine }
-
-        /**
-         * Override the rate to request locations from the location engine.
-         */
-        fun locationEngineRequest(locationEngineRequest: LocationEngineRequest): Builder =
-            apply { this.locationEngineRequest = locationEngineRequest }
+        fun locationOptions(locationOptions: LocationOptions): Builder =
+            apply { this.locationOptions = locationOptions }
 
         /**
          * Defines the type of device creating localization data
@@ -341,14 +311,11 @@ private constructor(
             apply { this.copilotOptions = copilotOptions }
 
         /**
-         * Defines configuration which triggers optimised behaviour which is different from regular.
-         * See [LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes] for more details.
+         * Defines configuration for traffic override
          */
         @ExperimentalPreviewMapboxNavigationAPI
-        fun longRoutesOptimisationOptions(
-            longRoutesOptimisationOptions: LongRoutesOptimisationOptions
-        ): Builder =
-            apply { this.longRoutesOptimisationOptions = longRoutesOptimisationOptions }
+        fun trafficOverrideOptions(trafficOverrideOptions: TrafficOverrideOptions): Builder =
+            apply { this.trafficOverrideOptions = trafficOverrideOptions }
 
         /**
          * Build a new instance of [NavigationOptions]
@@ -358,10 +325,6 @@ private constructor(
         fun build(): NavigationOptions {
             return NavigationOptions(
                 applicationContext = applicationContext,
-                accessToken = accessToken,
-                locationEngine = locationEngine
-                    ?: LocationEngineProvider.getBestLocationEngine(applicationContext),
-                locationEngineRequest = locationEngineRequest,
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatterOptions = distanceFormatterOptions,
@@ -377,7 +340,8 @@ private constructor(
                 eventsAppMetadata = eventsAppMetadata,
                 enableSensors = enableSensors,
                 copilotOptions = copilotOptions,
-                longRoutesOptimisationOptions = longRoutesOptimisationOptions
+                locationOptions = locationOptions,
+                trafficOverrideOptions = trafficOverrideOptions,
             )
         }
     }

@@ -4,7 +4,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.RoutesInvalidatedParams
 
 internal class RoutesRefreshAttemptProcessor(
-    private val observersManager: RefreshObserversManager
+    private val observersManager: RefreshObserversManager,
 ) : RoutesRefreshAttemptListener {
 
     private val invalidatedRouteIds = mutableSetOf<String>()

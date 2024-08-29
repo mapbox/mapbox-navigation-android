@@ -7,5 +7,5 @@ package com.mapbox.navigation.ui.maps.guidance.junction.model
  */
 class JunctionError internal constructor(
     val errorMessage: String?,
-    val throwable: Throwable?
+    val throwable: Throwable?,
 )

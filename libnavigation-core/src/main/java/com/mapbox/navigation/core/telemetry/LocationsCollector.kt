@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.telemetry
 
-import android.location.Location
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.core.trip.session.LocationObserver
 
 internal interface LocationsCollector : LocationObserver {

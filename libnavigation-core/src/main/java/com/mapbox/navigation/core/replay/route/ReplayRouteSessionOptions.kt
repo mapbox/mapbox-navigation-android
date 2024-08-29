@@ -14,7 +14,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 class ReplayRouteSessionOptions private constructor(
     val replayRouteOptions: ReplayRouteOptions,
     val locationResetEnabled: Boolean,
-    val decodeMinDistance: Double
+    val decodeMinDistance: Double,
 ) {
     /**
      * @return the builder that created the [ReplayRouteSessionOptions]

@@ -21,7 +21,7 @@ class AdasisSegmentOptions private constructor(
     @JvmSynthetic
     internal fun toNativeSegment(): com.mapbox.navigator.Segment {
         return com.mapbox.navigator.Segment(
-            options.toNativeAdasisConfigMessageOptions()
+            options.toNativeAdasisConfigMessageOptions(),
         )
     }
 
@@ -61,7 +61,7 @@ class AdasisSegmentOptions private constructor(
         /**
          * Common options for segment
          */
-        fun options(options: AdasisConfigMessageOptions) = apply {
+        fun options(options: AdasisConfigMessageOptions): Builder = apply {
             this.options = options
         }
 

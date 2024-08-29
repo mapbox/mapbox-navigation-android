@@ -23,7 +23,7 @@ class UnitsExTest {
             TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 input,
-                context.resources.displayMetrics
+                context.resources.displayMetrics,
             )
         } returns expected
 
@@ -42,7 +42,7 @@ class UnitsExTest {
             TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_SP,
                 input,
-                context.resources.displayMetrics
+                context.resources.displayMetrics,
             )
         } returns expected
 

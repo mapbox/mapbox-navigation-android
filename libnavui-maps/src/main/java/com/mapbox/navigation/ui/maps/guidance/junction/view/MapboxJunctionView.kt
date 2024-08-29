@@ -39,7 +39,7 @@ class MapboxJunctionView : AppCompatImageView {
     constructor(
         context: Context,
         attrs: AttributeSet?,
-        defStyleAttr: Int
+        defStyleAttr: Int,
     ) : super(context, attrs, defStyleAttr)
 
     /**
@@ -54,7 +54,7 @@ class MapboxJunctionView : AppCompatImageView {
             },
             { value ->
                 setImageBitmap(value.bitmap)
-            }
+            },
         )
     }
 }

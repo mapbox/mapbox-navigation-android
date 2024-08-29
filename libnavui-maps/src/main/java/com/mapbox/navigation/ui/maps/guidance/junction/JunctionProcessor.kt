@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.guidance.junction
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
@@ -10,6 +11,7 @@ import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxRasterToBitmapP
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.utils.internal.isNotEmpty
 
 internal object JunctionProcessor {
 
@@ -42,7 +44,7 @@ internal object JunctionProcessor {
     }
 
     private fun getJunctionUrl(
-        bannerInstructions: BannerInstructions
+        bannerInstructions: BannerInstructions,
     ): String? = bannerInstructions.getBannerComponents()?.findJunctionUrl()
 
     private fun List<BannerComponents>.findJunctionUrl(): String? {
@@ -67,7 +69,7 @@ internal object JunctionProcessor {
     }
 
     private fun processResponse(
-        response: Expected<ResourceLoadError, ResourceLoadResult>
+        response: Expected<ResourceLoadError, ResourceLoadResult>,
     ): JunctionResult {
         return response.fold(
             { error ->
@@ -76,17 +78,17 @@ internal object JunctionProcessor {
             { responseData ->
                 when (responseData.status) {
                     ResourceLoadStatus.AVAILABLE -> {
-                        val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
-                        if (blob.isEmpty()) {
-                            JunctionResult.JunctionRaster.Empty
+                        val dataRef = responseData.data?.data
+                        if (dataRef?.isNotEmpty() == true) {
+                            JunctionResult.JunctionRaster.Success(dataRef)
                         } else {
-                            JunctionResult.JunctionRaster.Success(blob)
+                            JunctionResult.JunctionRaster.Empty
                         }
                     }
                     ResourceLoadStatus.UNAUTHORIZED -> {
                         JunctionResult.JunctionRaster.Failure(
                             "Your token cannot access this " +
-                                "resource, contact support"
+                                "resource, contact support",
                         )
                     }
                     ResourceLoadStatus.NOT_FOUND -> {
@@ -96,12 +98,12 @@ internal object JunctionProcessor {
                         JunctionResult.JunctionRaster.Failure("Unknown error")
                     }
                 }
-            }
+            },
         )
     }
 
     private fun processRaster(
-        raster: ByteArray
+        raster: DataRef,
     ): JunctionResult {
         return MapboxRasterToBitmapParser.parse(raster).fold(
             { error ->
@@ -109,7 +111,7 @@ internal object JunctionProcessor {
             },
             { value ->
                 JunctionResult.JunctionBitmap.Success(value)
-            }
+            },
         )
     }
 }

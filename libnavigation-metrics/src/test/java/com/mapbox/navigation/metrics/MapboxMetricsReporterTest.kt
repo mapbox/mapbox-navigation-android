@@ -5,6 +5,7 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.Event
 import com.mapbox.common.EventPriority
 import com.mapbox.common.EventsServiceInterface
+import com.mapbox.common.SdkInformation
 import com.mapbox.navigation.base.internal.metric.MetricEventInternal
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
@@ -77,7 +78,7 @@ class MapboxMetricsReporterTest {
         verify(exactly = 2) {
             logger.logD(
                 "Navigation Telemetry is disabled",
-                "MapboxMetricsReporter"
+                "MapboxMetricsReporter",
             )
         }
     }
@@ -138,14 +139,14 @@ class MapboxMetricsReporterTest {
         val eventsService: EventsServiceInterface = mockk(relaxUnitFun = true)
         every { EventsServiceProvider.provideEventsService(any()) } returns eventsService
         every {
-            TelemetryServiceProvider.provideTelemetryService(any())
+            TelemetryServiceProvider.provideTelemetryService()
         } returns mockk(relaxUnitFun = true)
-        MapboxMetricsReporter.init(mockk(), "access_token", "user_agent")
+        MapboxMetricsReporter.init(SdkInformation("name", "2.16.0", null))
         return eventsService
     }
 
     private class StubNavigationEvent(
-        override val metricName: String
+        override val metricName: String,
     ) : Event(Value.nullValue(), null), MetricEventInternal {
 
         override fun toJson(gson: Gson): String = gson.toJson(this)

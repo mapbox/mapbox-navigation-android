@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.telemetry
 
-import android.location.Location
+import com.mapbox.common.location.Location
 
 internal class EventLocations(
     private val preEventLocations: List<Location>,

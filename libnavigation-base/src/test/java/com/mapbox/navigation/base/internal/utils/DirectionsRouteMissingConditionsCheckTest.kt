@@ -37,39 +37,39 @@ class DirectionsRouteMissingConditionsCheckTest {
             CasesWrapper(
                 "Not restricted key-value pair",
                 "https://test.com/?key0=value0",
-                CasesWrapper.Result.Success
+                CasesWrapper.Result.Success,
             ),
             CasesWrapper(
                 "Restricted key-value pair: key1=value1",
                 "https://test.com/?key1=value1",
-                CasesWrapper.Result.Error("[(key1=value1)]")
+                CasesWrapper.Result.Error("[(key1=value1)]"),
             ),
             CasesWrapper(
                 "Restricted key-value pair with other valid queries: engine=electric",
                 "https://test.com/?key0=value0&engine=electric&key2=value2",
-                CasesWrapper.Result.Error("[(engine=electric)]")
+                CasesWrapper.Result.Error("[(engine=electric)]"),
             ),
             CasesWrapper(
                 "Restricted key and valid value: engine=nonelectric",
                 "https://test.com/?engine=nonelectric",
-                CasesWrapper.Result.Success
+                CasesWrapper.Result.Success,
             ),
             CasesWrapper(
                 "Valid key and restricted value: machine=electric",
                 "https://test.com/?key0=value0&machine=electric",
-                CasesWrapper.Result.Success
+                CasesWrapper.Result.Success,
             ),
             CasesWrapper(
                 "Valid key and restricted value and restricted key and valid value: " +
                     "machine=electric & engine=nonelectric",
                 "https://test.com/?machine=electric&engine=nonelectric",
-                CasesWrapper.Result.Success
+                CasesWrapper.Result.Success,
             ),
             CasesWrapper(
                 "A few restricted key and valid values: engine=electric " +
                     "and key1=value1",
                 "https://test.com/?key0=value0&engine=electric&key1=value1",
-                CasesWrapper.Result.Error("[(engine=electric);(key1=value1)]")
+                CasesWrapper.Result.Error("[(engine=electric);(key1=value1)]"),
             ),
         ).forEach { (description, url, result) ->
             val directionRoute = mockk<DirectionsRoute> {
@@ -83,18 +83,18 @@ class DirectionsRouteMissingConditionsCheckTest {
                     val exception =
                         assertThrows(description, IllegalStateException::class.java) {
                             DirectionsRouteMissingConditionsCheck.checkDirectionsRoute(
-                                directionRoute
+                                directionRoute,
                             )
                         }
                     assertTrue(
                         description,
                         exception.message!!.startsWith(
-                            DirectionsRouteMissingConditionsCheck.ERROR_MESSAGE_TEMPLATE
-                        )
+                            DirectionsRouteMissingConditionsCheck.ERROR_MESSAGE_TEMPLATE,
+                        ),
                     )
                     assertTrue(
                         description,
-                        exception.message!!.contains(result.errorKeyValuePairs)
+                        exception.message!!.contains(result.errorKeyValuePairs),
                     )
                 }
                 CasesWrapper.Result.Success -> {

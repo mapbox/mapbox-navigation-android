@@ -17,7 +17,7 @@ class InterchangeTest {
             1.0,
             RoadObjectProvider.MAPBOX,
             true,
-            mockk()
+            mockk(),
         )
 
         assertEquals(RoadObjectType.IC, actual.objectType)

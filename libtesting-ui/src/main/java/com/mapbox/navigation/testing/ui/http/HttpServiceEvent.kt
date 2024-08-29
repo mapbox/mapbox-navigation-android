@@ -6,8 +6,14 @@ import com.mapbox.common.HttpResponse
 import com.mapbox.navigation.testing.ui.utils.parameters
 import java.net.URL
 
-private const val ACTIVE_GUIDANCE_SKU_PREFIX = "10a"
-private const val FREE_DRIVE_SKU_PREFIX = "10b"
+/**
+ * SKU id prefixes
+ *
+ * @see https://github.com/mapbox/mapbox-sdk-common/blob/adfdc9e46f3f34984dd7a6329789aeeb09563d12/components/billing/src/mapbox/common/accounts_manager.cpp#L43..L77
+ * @see https://github.com/mapbox/pricebook/blob/master/docs/skus.md
+ */
+private const val ACTIVE_GUIDANCE_SKU_PREFIX = "10j"
+private const val FREE_DRIVE_SKU_PREFIX = "10k"
 private const val SESSIONS_ENDPOINT_PATH = "/sdk-sessions"
 
 val HttpServiceEvent.skuParameter: String?

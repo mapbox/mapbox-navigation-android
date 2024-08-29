@@ -9,8 +9,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -30,12 +28,6 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.assertions.compareIdWithIncidentId
-import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -45,7 +37,15 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.testing.utils.assertions.compareIdWithIncidentId
+import com.mapbox.navigation.testing.utils.http.FailByRequestMockRequestHandler
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.readRawFileText
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
@@ -111,7 +111,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 "Object along the route #$index",
                 upcomingRoadObjectsOnStart[index + 1].distanceToStart!! - distanceDiff,
                 objectAlongTheRoute.distanceToStart!!,
-                tolerance
+                tolerance,
             )
         }
     }
@@ -134,7 +134,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         assertEquals(1, upcomingInterchanges.size)
         assertEquals(
             "Wangannarashino IC",
-            (upcomingInterchanges[0].roadObject as Interchange).name[0].value
+            (upcomingInterchanges[0].roadObject as Interchange).name[0].value,
         )
     }
 
@@ -162,7 +162,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         stayOnPosition(origin)
         setUpRoutes(
             R.raw.route_with_jartic_codes,
-            "137.5281542766699,34.83741480073306;137.53072840419628,34.83636637489471"
+            "137.5281542766699,34.83741480073306;137.53072840419628,34.83636637489471",
         )
 
         val upcomingIncidents = mapboxNavigation.routeProgressUpdates()
@@ -176,11 +176,11 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         val incident = upcomingIncidents[0].roadObject as Incident
         assertEquals(
             31,
-            incident.info.trafficCodes["jartic_regulation_code"]
+            incident.info.trafficCodes["jartic_regulation_code"],
         )
         assertEquals(
             449,
-            incident.info.trafficCodes["jartic_cause_code"]
+            incident.info.trafficCodes["jartic_cause_code"],
         )
     }
 
@@ -192,7 +192,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         stayOnPosition(origin)
         setUpRoutes(
             R.raw.route_with_length,
-            "137.5281542766699,34.83741480073306;137.53072840419628,34.83636637489471"
+            "137.5281542766699,34.83741480073306;137.53072840419628,34.83636637489471",
         )
 
         val upcomingIncidents = mapboxNavigation.routeProgressUpdates()
@@ -203,36 +203,46 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         val incident = upcomingIncidents[0].roadObject as Incident
         assertEquals(
             1784,
-            incident.info.length
+            incident.info.length,
         )
     }
 
     @Test
     fun distanceToIncidentDoesNotChangeAfterAddingNewWaypointOnTheRouteGeometry() = sdkTest {
         mapboxNavigation = createMapboxNavigation()
-        val (oneLegRoute, twoLegsRoute, incidentId) =
-            getRoutesFromTheSameOriginButDifferentWaypointsCount()
 
-        setRoutesOriginAsCurrentLocation(oneLegRoute, twoLegsRoute)
+        val (oneLegMockRoute, twoLegsMockRoute, incidentId) =
+            RoutesProvider.two_routes_different_legs_count_the_same_incident(context)
 
-        mapboxNavigation.startTripSession()
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(oneLegRoute)
-        val upcomingIncidentForOneLeg = mapboxNavigation.routeProgressUpdates()
-            .first { it.currentState == RouteProgressState.TRACKING }
-            .upcomingRoadObjects
-            .first { it.roadObject.compareIdWithIncidentId(incidentId) }
-
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(twoLegsRoute)
-        val upcomingIncidentForTwoLegsRoute = mapboxNavigation.routeProgressUpdates()
-            .first { it.currentState == RouteProgressState.TRACKING }
-            .upcomingRoadObjects
-            .first { it.roadObject.compareIdWithIncidentId(incidentId) }
-
-        assertEquals(
-            upcomingIncidentForOneLeg.distanceToStart!!,
-            upcomingIncidentForTwoLegsRoute.distanceToStart!!,
-            0.1
+        val oneLegRoute = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            oneLegMockRoute,
         )
+
+        stayOnPosition(oneLegRoute.first().waypoints!!.first().location(), 0.0f) {
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(oneLegRoute)
+            val upcomingIncidentForOneLeg = mapboxNavigation.routeProgressUpdates()
+                .first { it.currentState == RouteProgressState.TRACKING }
+                .upcomingRoadObjects
+                .first { it.roadObject.compareIdWithIncidentId(incidentId) }
+
+            val twoLegsRoute = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                twoLegsMockRoute,
+            )
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(twoLegsRoute)
+            val upcomingIncidentForTwoLegsRoute = mapboxNavigation.routeProgressUpdates()
+                .first { it.currentState == RouteProgressState.TRACKING }
+                .upcomingRoadObjects
+                .first { it.roadObject.compareIdWithIncidentId(incidentId) }
+
+            assertEquals(
+                upcomingIncidentForOneLeg.distanceToStart!!,
+                upcomingIncidentForTwoLegsRoute.distanceToStart!!,
+                0.1,
+            )
+        }
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -241,14 +251,14 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         mapboxNavigation = createMapboxNavigation()
         val coordinates = listOf(
             Point.fromLngLat(14.238166, 50.32172),
-            Point.fromLngLat(13.234976, 51.551251)
+            Point.fromLngLat(13.234976, 51.551251),
         )
         mockWebServerRule.requestHandlers.clear()
         val routeHandler = MockDirectionsRequestHandler(
             "driving-traffic",
             readRawFileText(context, R.raw.route_with_road_objects_europe),
             coordinates,
-            relaxedExpectedCoordinates = true
+            relaxedExpectedCoordinates = true,
         )
         mockWebServerRule.requestHandlers.add(routeHandler)
         mockWebServerRule.requestHandlers.add(
@@ -256,9 +266,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 MockDirectionsRefreshHandler(
                     "route_with_road_objects_europe",
                     readRawFileText(context, R.raw.route_with_road_objects_europe_refresh1),
-                    acceptedGeometryIndex = 61
-                )
-            )
+                    acceptedGeometryIndex = 61,
+                ),
+            ),
         )
 
         val routes = mapboxNavigation.requestRoutes(
@@ -268,7 +278,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 .enableRefresh(true)
                 .coordinatesList(coordinates)
                 .baseUrl(mockWebServerRule.baseUrl)
-                .build()
+                .build(),
         ).getSuccessfulResultOrThrowException().routes
         val originalRoadObjects = routes.first().upcomingRoadObjects
         val expectedOriginalRoadObjectClasses = listOf(
@@ -313,7 +323,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         assertEquals(
             expectedOriginalRoadObjectClasses,
-            originalRoadObjects.map { it.roadObject::class.java }
+            originalRoadObjects.map { it.roadObject::class.java },
         )
 
         stayOnPosition(coordinates[0])
@@ -337,7 +347,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         checkRoadObjects(
             expectedRoadObjectsAfterMovedAlongTheRoute,
-            updateAfterMovedAlongTheRoute.upcomingRoadObjects
+            updateAfterMovedAlongTheRoute.upcomingRoadObjects,
         )
 
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
@@ -368,7 +378,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 add(
                     newIncidentIndex,
                     Incident::class.java
-                        to newIncidentDistanceToStart - distanceDiffAfterFirstRefresh
+                        to newIncidentDistanceToStart - distanceDiffAfterFirstRefresh,
                 )
             }.drop(3)
 
@@ -380,9 +390,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 MockDirectionsRefreshHandler(
                     "route_with_road_objects_europe",
                     readRawFileText(context, R.raw.route_with_road_objects_europe_refresh2),
-                    acceptedGeometryIndex = 249
-                )
-            )
+                    acceptedGeometryIndex = 249,
+                ),
+            ),
         )
 
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
@@ -406,14 +416,14 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 add(
                     newIncidentIndex,
                     Incident::class.java
-                        to newIncidentDistanceToStart - distanceDiffAfterSecondRefresh
+                        to newIncidentDistanceToStart - distanceDiffAfterSecondRefresh,
                 )
                 removeAt(newIncidentIndex - 1) // first incident removed
             }.drop(10)
 
         checkRoadObjects(
             expectedObjectsAfterSecondRefresh,
-            updateAfterSecondRefresh.upcomingRoadObjects
+            updateAfterSecondRefresh.upcomingRoadObjects,
         )
     }
 
@@ -432,7 +442,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             "driving-traffic",
             readRawFileText(context, R.raw.route_with_road_objects_japan),
             coordinates,
-            relaxedExpectedCoordinates = true
+            relaxedExpectedCoordinates = true,
         )
         mockWebServerRule.requestHandlers.add(routeHandler)
         mockWebServerRule.requestHandlers.add(
@@ -440,9 +450,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 MockDirectionsRefreshHandler(
                     "route_with_road_objects_japan",
                     readRawFileText(context, R.raw.route_with_road_objects_japan_refresh1),
-                    acceptedGeometryIndex = 60
-                )
-            )
+                    acceptedGeometryIndex = 60,
+                ),
+            ),
         )
 
         val routes = mapboxNavigation.requestRoutes(
@@ -452,7 +462,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 .enableRefresh(true)
                 .coordinatesList(coordinates)
                 .baseUrl(mockWebServerRule.baseUrl)
-                .build()
+                .build(),
         ).getSuccessfulResultOrThrowException().routes
         val originalRoadObjects = routes.first().upcomingRoadObjects
         val expectedOriginalRoadObjectClasses = listOf(
@@ -498,7 +508,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         assertEquals(
             expectedOriginalRoadObjectClasses,
-            originalRoadObjects.map { it.roadObject::class.java }
+            originalRoadObjects.map { it.roadObject::class.java },
         )
 
         mapboxNavigation.startTripSession()
@@ -535,7 +545,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         checkRoadObjects(
             expectedRoadObjectsAfterMovedAlongTheRoute,
-            updateAfterMovedAlongTheRoute.upcomingRoadObjects
+            updateAfterMovedAlongTheRoute.upcomingRoadObjects,
         )
 
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
@@ -570,7 +580,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         mapboxNavigation.startTripSession()
         setUpRoutes(
             R.raw.route_with_duplicate_incidents,
-            "139.696561,35.655992;139.87476,35.017036;139.581421,35.543326"
+            "139.696561,35.655992;139.87476,35.017036;139.581421,35.543326",
         )
 
         val upcomingIncidentsOnStart = mapboxNavigation.routeProgressUpdates()
@@ -606,12 +616,12 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         assertEquals(
             updatedIncident1.distanceToStart!!,
             incident1.distanceToStart!! - distanceDiff,
-            tolerance
+            tolerance,
         )
         assertEquals(
             updatedIncident2.distanceToStart!!,
             incident2.distanceToStart!! - distanceDiff,
-            tolerance
+            tolerance,
         )
     }
 
@@ -623,7 +633,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         mapboxNavigation.startTripSession()
         setUpRoutes(
             R.raw.route_with_multilingual_affected_road_names,
-            "140.025878,35.660315;140.1611265965725,35.6873837089764"
+            "140.025878,35.660315;140.1611265965725,35.6873837089764",
         )
 
         val incident = mapboxNavigation.getNavigationRoutes().first().upcomingRoadObjects
@@ -632,14 +642,14 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         assertEquals(
             listOf("Higashikanto Expwy(Koya To Itako)"),
-            (incident.roadObject as Incident).info.affectedRoadNames
+            (incident.roadObject as Incident).info.affectedRoadNames,
         )
         assertEquals(
             mapOf(
                 "en" to listOf("Higashikanto Expwy(Koya To Itako)"),
                 "ja" to listOf("E51/東関東自動車道（高谷～潮来）"),
             ),
-            (incident.roadObject as Incident).info.multilingualAffectedRoadNames
+            (incident.roadObject as Incident).info.multilingualAffectedRoadNames,
         )
     }
 
@@ -650,17 +660,8 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 longitude = position.longitude()
                 this.bearing = bearing
             },
-            times = 120
+            times = 120,
         )
-    }
-
-    private fun setRoutesOriginAsCurrentLocation(
-        oneLegRoute: List<NavigationRoute>,
-        twoLegsRoute: List<NavigationRoute>
-    ) {
-        val origin = oneLegRoute.first().waypoints!!.first().location()
-        assertEquals(origin, twoLegsRoute.first().waypoints!!.first().location())
-        stayOnPosition(origin)
     }
 
     private suspend fun setUpRoutes(file: Int, coordinates: String) {
@@ -670,8 +671,8 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                 profile = "driving-traffic",
                 jsonResponse = readRawFileText(context, file),
                 expectedCoordinates = null,
-                relaxedExpectedCoordinates = true
-            )
+                relaxedExpectedCoordinates = true,
+            ),
         )
         val routeOptions = RouteOptions.builder()
             .profile("driving-traffic")
@@ -688,44 +689,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes.routes)
     }
 
-    private fun getRoutesFromTheSameOriginButDifferentWaypointsCount():
-        Triple<List<NavigationRoute>, List<NavigationRoute>, String> {
-        val origin = "11.428011943347627,48.143406486859135"
-        val destination = "11.443258702449555,48.14554279886465"
-        val routeWithIncident = NavigationRoute.create(
-            directionsResponseJson = readRawFileText(
-                context,
-                R.raw.route_through_incident_6058002857835914_one_leg
-            ),
-            routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
-                "$origin;$destination" +
-                "?access_token=**&alternatives=true" +
-                "&annotations=closure,congestion_numeric,congestion,speed,duration,distance" +
-                "&geometries=polyline6&language=en&overview=full&steps=true",
-            routerOrigin = RouterOrigin.Offboard
-        )
-        val routeWithIncidentTwoLegs = NavigationRoute.create(
-            directionsResponseJson = readRawFileText(
-                context,
-                R.raw.route_through_incident_6058002857835914_two_legs
-            ),
-            routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
-                "$origin;11.42945687746061,48.1436160028498" +
-                ";$destination" +
-                "?access_token=**&alternatives=true" +
-                "&annotations=closure,congestion_numeric,congestion,speed,duration,distance" +
-                "&geometries=polyline6&language=en&overview=full&steps=true",
-            routerOrigin = RouterOrigin.Offboard
-        )
-        val incident = routeWithIncident.first()
-            .directionsRoute.legs()!!.first()
-            .incidents()!!.first()
-        return Triple(routeWithIncident, routeWithIncidentTwoLegs, incident.id())
-    }
-
     private fun checkRoadObjects(
         expectedInput: List<Pair<Class<*>, Double>>,
-        actualInput: List<UpcomingRoadObject>
+        actualInput: List<UpcomingRoadObject>,
     ) {
         val expected = expectedInput.map { it.first to ApproxMeters(it.second) }
         val actual = actualInput.map {
@@ -736,7 +702,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         } catch (ex: Throwable) {
             Log.e(
                 "[UpcomingRouteObjectsTest]",
-                "Expected: ${expected.joinToString("\n")}, \nactual: ${actual.joinToString("\n")}"
+                "Expected: ${expected.joinToString("\n")}, \nactual: ${actual.joinToString("\n")}",
             )
             throw ex
         }
@@ -744,13 +710,12 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
     private fun createMapboxNavigation(): MapboxNavigation = MapboxNavigationProvider.create(
         NavigationOptions.Builder(context)
-            .accessToken(getMapboxAccessTokenFromResources(context))
             .routingTilesOptions(
                 RoutingTilesOptions.Builder()
                     .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                    .build()
+                    .build(),
             )
-            .build()
+            .build(),
     )
 
     private class ApproxMeters(val value: Double) {

@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.telemetry.events
 
-import android.location.Location
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocations
@@ -33,24 +33,12 @@ class FeedbackMetadataWrapperTest {
         const val REROUTE_COUNT = 1
 
         private val locationsBefore = listOf(
-            Location("").apply {
-                latitude = 0.1
-                longitude = 0.2
-            },
-            Location("").apply {
-                latitude = 1.1
-                longitude = 1.2
-            }
+            Location.Builder().latitude(0.1).longitude(0.2).build(),
+            Location.Builder().latitude(1.1).longitude(1.2).build(),
         )
         private val locationsAfter = listOf(
-            Location("").apply {
-                latitude = 3.1
-                longitude = 3.2
-            },
-            Location("").apply {
-                latitude = 4.1
-                longitude = 4.2
-            }
+            Location.Builder().latitude(3.1).longitude(3.2).build(),
+            Location.Builder().latitude(4.1).longitude(4.2).build(),
         )
     }
 
@@ -70,7 +58,7 @@ class FeedbackMetadataWrapperTest {
             applicationState = "APP_STATE",
             created = "CREATED_DATA",
             feedbackId = "FEEDBACK_ID",
-            userId = "USER_ID"
+            userId = "USER_ID",
         )
 
         wrapper = FeedbackMetadataWrapper(
@@ -80,6 +68,7 @@ class FeedbackMetadataWrapperTest {
             driverMode = DRIVER_MODE,
             rerouteCount = REROUTE_COUNT,
             locationEngineNameExternal = "LOCATION_ENGINE_NAME_EXTERNAL",
+            simulation = true,
             percentTimeInPortrait = 50,
             percentTimeInForeground = 20,
             eventVersion = 100,
@@ -116,7 +105,7 @@ class FeedbackMetadataWrapperTest {
         checkMetadataFields(
             metadata,
             locationsBefore.toTelemetryLocations(),
-            locationsAfter.toTelemetryLocations()
+            locationsAfter.toTelemetryLocations(),
         )
         verify(exactly = 0) {
             locationsCollector.flushBufferFor(any())
@@ -136,7 +125,7 @@ class FeedbackMetadataWrapperTest {
         checkMetadataFields(
             metadata,
             locationsBefore.toTelemetryLocations(),
-            locationsAfter.toTelemetryLocations()
+            locationsAfter.toTelemetryLocations(),
         )
         verify(exactly = 1) {
             locationsCollector.flushBufferFor(locationsCollectorListenerSlot.captured)

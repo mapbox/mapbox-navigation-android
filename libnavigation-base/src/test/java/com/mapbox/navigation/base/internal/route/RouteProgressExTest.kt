@@ -8,32 +8,37 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
-import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils
-import com.mapbox.navigation.testing.factories.TestSDKRouteParser
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigation.testing.factories.createIncident
-import com.mapbox.navigation.testing.factories.createManeuver
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.testing.factories.createRouteLegAnnotation
 import com.mapbox.navigation.testing.factories.createRouteOptions
+import com.mapbox.navigation.testing.factories.createRouteStep
 import com.mapbox.navigation.testing.factories.createWaypoint
-import com.mapbox.navigator.RouterOrigin
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import junit.framework.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.net.URL
 
 class RouteProgressExTest {
+
+    @get:Rule
+    val loggingFrontendTestRule = LoggingFrontendTestRule()
 
     @Test
     fun `update Navigation route`() {
@@ -44,18 +49,18 @@ class RouteProgressExTest {
                 toBuilder().distance(73483.0).build()
             },
             {
-                message("new message")
-            }
+                listOf(createWaypoint(name = "test4"))
+            },
         )
         assertEquals(73483.0, updated.directionsRoute.distance())
-        assertEquals("new message", updated.directionsResponse.message())
+        assertEquals("test4", updated.waypoints?.first()?.name())
     }
 
     @Test
     fun `route refresh updates route durations`() {
         val sourceRoute = createNavigationRouteFromResource(
             "3-steps-route-directions-response.json",
-            "3-steps-route-directions-request-url.txt"
+            "3-steps-route-directions-request-url.txt",
         )
 
         val refreshedRoute = sourceRoute.refreshRoute(
@@ -70,9 +75,9 @@ class RouteProgressExTest {
                         3.841,
                         15.415,
                         1.507,
-                        6.359
-                    )
-                )
+                        6.359,
+                    ),
+                ),
             ),
             incidents = null,
             closures = null,
@@ -84,29 +89,29 @@ class RouteProgressExTest {
         assertEquals(
             40.736999999999995,
             refreshedRoute.directionsRoute.duration(),
-            0.00001
+            0.00001,
         )
         val firstLeg = refreshedRoute.directionsRoute.legs()!!.first()!!
         assertEquals(
             40.736999999999995,
             firstLeg.duration() ?: -1.0,
-            0.00001
+            0.00001,
         )
         val steps = firstLeg.steps()!!
         assertEquals(
             34.37799999999999,
             steps[0].duration(),
-            0.00001
+            0.00001,
         )
         assertEquals(
             6.359,
             steps[1].duration(),
-            0.00001
+            0.00001,
         )
         assertEquals(
             0.0,
             steps[2].duration(),
-            0.00001
+            0.00001,
         )
     }
 
@@ -114,7 +119,7 @@ class RouteProgressExTest {
     fun `route refresh without duration annotation doesn't affect durations`() {
         val sourceRoute = createNavigationRouteFromResource(
             "3-steps-route-directions-response.json",
-            "3-steps-route-directions-request-url.txt"
+            "3-steps-route-directions-request-url.txt",
         )
             .update({
                 toBuilder()
@@ -126,26 +131,26 @@ class RouteProgressExTest {
                                         ?.toBuilder()
                                         ?.duration(null)
                                         ?.congestionNumeric(MutableList(7) { 1 })
-                                        ?.build()
+                                        ?.build(),
                                 )
                                 .build()
-                        }
+                        },
                     )
                     .routeOptions(
                         routeOptions()?.toBuilder()
                             ?.annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
-                            ?.build()
+                            ?.build(),
                     )
                     .build()
-            }, { this }, null)
+            }, { this }, null,)
 
         val refreshedRoute = sourceRoute.refreshRoute(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = listOf(
                 createRouteLegAnnotation(
-                    congestionNumeric = MutableList(7) { 2 }
-                )
+                    congestionNumeric = MutableList(7) { 2 },
+                ),
             ),
             incidents = null,
             closures = null,
@@ -158,29 +163,29 @@ class RouteProgressExTest {
         assertEquals(
             41.882,
             refreshedRoute.directionsRoute.duration(),
-            0.00001
+            0.00001,
         )
         val firstLeg = refreshedRoute.directionsRoute.legs()!!.first()!!
         assertEquals(
             41.882,
             firstLeg.duration()!!,
-            0.00001
+            0.00001,
         )
         val steps = firstLeg.steps()!!
         assertEquals(
             34.341,
             steps[0].duration(),
-            0.00001
+            0.00001,
         )
         assertEquals(
             7.541,
             steps[1].duration(),
-            0.00001
+            0.00001,
         )
         assertEquals(
             0.0,
             steps[2].duration(),
-            0.00001
+            0.00001,
         )
     }
 
@@ -189,7 +194,7 @@ class RouteProgressExTest {
         // uses polyline instead of polyline6
         val sourceRoute = createNavigationRouteFromResource(
             "6-steps-3-waypoints-directions-response.json",
-            "6-steps-3-waypoints-directions-request-url.txt"
+            "6-steps-3-waypoints-directions-request-url.txt",
         )
 
         val refreshedRoute = sourceRoute.refreshRoute(
@@ -198,8 +203,8 @@ class RouteProgressExTest {
             legAnnotations = listOf(
                 LegAnnotation.builder().build(),
                 createRouteLegAnnotation(
-                    duration = MutableList(4) { 1.0 }
-                )
+                    duration = MutableList(4) { 1.0 },
+                ),
             ),
             incidents = null,
             closures = null,
@@ -211,29 +216,29 @@ class RouteProgressExTest {
         assertEquals(
             45.882,
             refreshedRoute.directionsRoute.duration(),
-            0.00001
+            0.00001,
         )
         val secondLeg = refreshedRoute.directionsRoute.legs()!![1]
         assertEquals(
             4.0,
             secondLeg.duration()!!,
-            0.00001
+            0.00001,
         )
         val steps = secondLeg.steps()!!
         assertEquals(
             1.0,
             steps[0].duration(),
-            0.00001
+            0.00001,
         )
         assertEquals(
             3.0,
             steps[1].duration(),
-            0.00001
+            0.00001,
         )
         assertEquals(
             0.0,
             steps[2].duration(),
-            0.00001
+            0.00001,
         )
     }
 
@@ -246,12 +251,12 @@ class RouteProgressExTest {
                 RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 0, null, null),
                 LegItemsResult(
                     listOf(null),
-                    listOf(null),
-                    listOf(null),
+                    listOf(emptyList()),
+                    listOf(emptyList()),
                     null,
                     null,
                     0,
-                )
+                ),
             ),
             TestData(
                 "update to null items multi-leg route",
@@ -264,16 +269,16 @@ class RouteProgressExTest {
                     null,
                     0,
                     null,
-                    null
+                    null,
                 ),
                 LegItemsResult(
                     listOf(null, null),
-                    listOf(null, null),
-                    listOf(null, null),
+                    listOf(emptyList(), emptyList()),
+                    listOf(emptyList(), emptyList()),
                     null,
                     null,
-                    0
-                )
+                    0,
+                ),
             ),
             TestData(
                 "update to null items multi-leg route starting with second leg",
@@ -290,11 +295,11 @@ class RouteProgressExTest {
                 ),
                 LegItemsResult(
                     listOf(provideDefaultLegAnnotation(), null),
-                    listOf(provideDefaultIncidents(), null),
-                    listOf(provideDefaultClosures(), null),
+                    listOf(provideDefaultIncidents(), emptyList()),
+                    listOf(provideDefaultClosures(), emptyList()),
                     null,
                     null,
-                    0
+                    0,
                 ),
             ),
             TestData(
@@ -303,12 +308,12 @@ class RouteProgressExTest {
                 RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 0, null, null),
                 LegItemsResult(
                     listOf(null),
-                    listOf(null),
-                    listOf(null),
+                    listOf(emptyList()),
+                    listOf(emptyList()),
                     null,
                     5,
                     0,
-                )
+                ),
             ),
             TestData(
                 "update expiration time from null with null refresh ttl",
@@ -316,12 +321,12 @@ class RouteProgressExTest {
                 RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 0, null, null),
                 LegItemsResult(
                     listOf(null),
-                    listOf(null),
-                    listOf(null),
+                    listOf(emptyList()),
+                    listOf(emptyList()),
                     null,
                     null,
                     0,
-                )
+                ),
             ),
             TestData(
                 "update expiration time from null to non-null",
@@ -329,12 +334,12 @@ class RouteProgressExTest {
                 RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 5, 10, null),
                 LegItemsResult(
                     listOf(null),
-                    listOf(null),
-                    listOf(null),
+                    listOf(emptyList()),
+                    listOf(emptyList()),
                     null,
                     15,
                     0,
-                )
+                ),
             ),
             TestData(
                 "update expiration time from non-null with non-null refresh ttl",
@@ -342,23 +347,23 @@ class RouteProgressExTest {
                 RefreshLegItemsWrapper(0, listOf(null), listOf(null), null, null, 3, 9, null),
                 LegItemsResult(
                     listOf(null),
-                    listOf(null),
-                    listOf(null),
+                    listOf(emptyList()),
+                    listOf(emptyList()),
                     null,
                     12,
                     0,
-                )
+                ),
             ),
             run {
                 val refreshedMetadata1 = mapOf("key1" to JsonPrimitive("value1"))
                 val refreshedMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                 val refreshedWaypoints = listOf(
                     createWaypoint("name11", unrecognizedProperties = refreshedMetadata1),
-                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2)
+                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2),
                 )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newIncidents = listOf(
-                    createIncident(startGeometryIndex = 0, endGeometryIndex = 1)
+                    createIncident(startGeometryIndex = 0, endGeometryIndex = 1),
                 )
                 val newClosures = listOf(createClosure(10, 15))
                 val expectedWaypoints = listOf(
@@ -385,7 +390,7 @@ class RouteProgressExTest {
                         expectedWaypoints,
                         null,
                         0,
-                    )
+                    ),
                 )
             },
             run {
@@ -393,18 +398,18 @@ class RouteProgressExTest {
                 val refreshedMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                 val refreshedWaypoints = listOf(
                     createWaypoint("name11", unrecognizedProperties = refreshedMetadata1),
-                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2)
+                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2),
                 )
 
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = listOf(
                     createIncident(startGeometryIndex = 0, endGeometryIndex = 1),
-                    createIncident(startGeometryIndex = 10, endGeometryIndex = 15)
+                    createIncident(startGeometryIndex = 10, endGeometryIndex = 15),
                 )
                 val newIncidents2 = listOf(
                     createIncident(startGeometryIndex = 0, endGeometryIndex = 1),
-                    createIncident(startGeometryIndex = 5, endGeometryIndex = 7)
+                    createIncident(startGeometryIndex = 5, endGeometryIndex = 7),
                 )
                 val newClosures = listOf(createClosure(0, 3), createClosure(6, 7))
                 val newClosures2 = listOf(createClosure(4, 7), createClosure(14, 17))
@@ -432,7 +437,7 @@ class RouteProgressExTest {
                         expectedWaypoints,
                         null,
                         0,
-                    )
+                    ),
                 )
             },
             run {
@@ -440,21 +445,21 @@ class RouteProgressExTest {
                 val refreshedMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                 val refreshedWaypoints = listOf(
                     createWaypoint("name11", unrecognizedProperties = refreshedMetadata1),
-                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2)
+                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2),
                 )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
                 val newInputIncidents = listOf(
-                    createIncident(startGeometryIndex = 2, endGeometryIndex = 4)
+                    createIncident(startGeometryIndex = 2, endGeometryIndex = 4),
                 )
                 val newOutputIncidents = listOf(
-                    createIncident(startGeometryIndex = 4, endGeometryIndex = 6)
+                    createIncident(startGeometryIndex = 4, endGeometryIndex = 6),
                 )
                 val newInputIncidents2 = listOf(
-                    createIncident(startGeometryIndex = 6, endGeometryIndex = 9)
+                    createIncident(startGeometryIndex = 6, endGeometryIndex = 9),
                 )
                 val newOutputIncidents2 = listOf(
-                    createIncident(startGeometryIndex = 6, endGeometryIndex = 9)
+                    createIncident(startGeometryIndex = 6, endGeometryIndex = 9),
                 )
                 val newInputClosures = listOf(createClosure(3, 4))
                 val newOutputClosures = listOf(createClosure(5, 6))
@@ -484,7 +489,7 @@ class RouteProgressExTest {
                         expectedWaypoints,
                         null,
                         2,
-                    )
+                    ),
                 )
             },
             run {
@@ -492,15 +497,15 @@ class RouteProgressExTest {
                 val refreshedMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                 val refreshedWaypoints = listOf(
                     createWaypoint("name11", unrecognizedProperties = refreshedMetadata1),
-                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2)
+                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2),
                 )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = listOf(
-                    createIncident(startGeometryIndex = 10, endGeometryIndex = 12)
+                    createIncident(startGeometryIndex = 10, endGeometryIndex = 12),
                 )
                 val newIncidents2 = listOf(
-                    createIncident(startGeometryIndex = 40, endGeometryIndex = 50)
+                    createIncident(startGeometryIndex = 40, endGeometryIndex = 50),
                 )
                 val newClosures = listOf(createClosure(13, 17))
                 val newClosures2 = listOf(createClosure(2, 6))
@@ -527,8 +532,8 @@ class RouteProgressExTest {
                         listOf(provideDefaultClosures(), newClosures2),
                         expectedWaypoints,
                         null,
-                        0
-                    )
+                        0,
+                    ),
                 )
             },
             run {
@@ -536,18 +541,18 @@ class RouteProgressExTest {
                 val refreshedMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                 val refreshedWaypoints = listOf(
                     createWaypoint("name11", unrecognizedProperties = refreshedMetadata1),
-                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2)
+                    createWaypoint("name33", unrecognizedProperties = refreshedMetadata2),
                 )
                 val newLegAnnotations = createRouteLegAnnotation()
                 val newLegAnnotations2 = createRouteLegAnnotation()
                 val newIncidents = listOf(
-                    createIncident(startGeometryIndex = 10, endGeometryIndex = 12)
+                    createIncident(startGeometryIndex = 10, endGeometryIndex = 12),
                 )
                 val newInputIncidents2 = listOf(
-                    createIncident(startGeometryIndex = 40, endGeometryIndex = 50)
+                    createIncident(startGeometryIndex = 40, endGeometryIndex = 50),
                 )
                 val newOutputIncidents2 = listOf(
-                    createIncident(startGeometryIndex = 44, endGeometryIndex = 54)
+                    createIncident(startGeometryIndex = 44, endGeometryIndex = 54),
                 )
                 val newClosures = listOf(createClosure(13, 17))
                 val newInputClosures2 = listOf(createClosure(2, 6))
@@ -577,15 +582,39 @@ class RouteProgressExTest {
                         expectedWaypoints,
                         null,
                         4,
-                    )
+                    ),
                 )
             },
         ).forEach { (description, navRoute, refreshItems, result) ->
             mockkObject(AnnotationsRefresher) {
+                val incidentsRefresher = mockk<IncidentsRefresher>(relaxed = true)
+                val closuresRefresher = mockk<ClosuresRefresher>(relaxed = true)
                 every {
-                    AnnotationsRefresher.getRefreshedAnnotations(any(), any(), any())
+                    AnnotationsRefresher.getRefreshedAnnotations(any(), any(), any(), any(), any())
                 } returnsMany
                     (result.newLegAnnotation?.drop(refreshItems.startWithIndex) ?: emptyList())
+                navRoute.directionsRoute.legs()?.forEachIndexed { index, leg ->
+                    every {
+                        incidentsRefresher.getRefreshedRoadObjects(
+                            leg.incidents(),
+                            refreshItems.incidents?.get(index),
+                            any(),
+                            any(),
+                        )
+                    } answers {
+                        result.newIncidents!![index]!!
+                    }
+                    every {
+                        closuresRefresher.getRefreshedRoadObjects(
+                            leg.closures(),
+                            refreshItems.closures?.get(index),
+                            any(),
+                            any(),
+                        )
+                    } answers {
+                        result.newClosures!![index]!!
+                    }
+                }
                 val updatedNavRoute = try {
                     navRoute.refreshRoute(
                         refreshItems.startWithIndex,
@@ -596,6 +625,8 @@ class RouteProgressExTest {
                         refreshItems.waypoints,
                         refreshItems.responseTime,
                         refreshItems.refreshTtl,
+                        incidentsRefresher,
+                        closuresRefresher,
                     )
                 } catch (t: Throwable) {
                     throw Throwable("unhandled exception in $description", t)
@@ -625,17 +656,17 @@ class RouteProgressExTest {
                 assertEquals(
                     description,
                     result.newWaypoints,
-                    updatedNavRoute.directionsResponse.waypoints()
+                    updatedNavRoute.waypoints,
                 )
                 assertEquals(
                     description,
-                    navRoute.directionsResponse.waypoints()?.size,
-                    updatedNavRoute.directionsResponse.waypoints()?.size
+                    navRoute.waypoints?.size,
+                    updatedNavRoute.waypoints?.size,
                 )
                 assertEquals(
                     description,
                     navRoute.unavoidableClosures,
-                    updatedNavRoute.unavoidableClosures
+                    updatedNavRoute.unavoidableClosures,
                 )
 
                 val capturedOldAnnotations = mutableListOf<LegAnnotation?>()
@@ -645,7 +676,9 @@ class RouteProgressExTest {
                     AnnotationsRefresher.getRefreshedAnnotations(
                         captureNullable(capturedOldAnnotations),
                         captureNullable(capturedNewAnnotations),
-                        capture(capturedLegGeometryIndices)
+                        capture(capturedLegGeometryIndices),
+                        any(),
+                        any(),
                     )
                 }
                 assertEquals(
@@ -653,18 +686,18 @@ class RouteProgressExTest {
                     navRoute.directionsRoute.legs()
                         ?.drop(refreshItems.startWithIndex)
                         ?.map { it.annotation() },
-                    capturedOldAnnotations
+                    capturedOldAnnotations,
                 )
                 assertEquals(
                     description,
                     refreshItems.legAnnotation?.drop(refreshItems.startWithIndex),
-                    capturedNewAnnotations
+                    capturedNewAnnotations,
                 )
                 assertEquals(
                     description,
                     listOf(result.expectedLegGeometryIndex) +
                         List(capturedLegGeometryIndices.size - 1) { 0 },
-                    capturedLegGeometryIndices
+                    capturedLegGeometryIndices,
                 )
             }
         }
@@ -679,22 +712,8 @@ class RouteProgressExTest {
         distance: Double = 10.0,
         expirationTime: Long? = null,
     ): NavigationRoute {
-        val twoPointGeometry = PolylineUtils.encode(
-            listOf(
-                Point.fromLngLat(1.2, 3.4),
-                Point.fromLngLat(3.3, 6.7)
-            ),
-            5
-        )
-        val validStep = LegStep.builder()
-            .geometry(twoPointGeometry)
-            .distance(1.0)
-            .duration(2.0)
-            .weight(3.0)
-            .mode("mode")
-            .maneuver(createManeuver())
-            .build()
-        return com.mapbox.navigation.testing.factories.createNavigationRoutes(
+        val validStep = createRouteStep()
+        return createNavigationRoutes(
             DirectionsResponse.builder()
                 .waypoints(dirWaypoints)
                 .routes(
@@ -709,7 +728,7 @@ class RouteProgressExTest {
                                         .incidents(incidents)
                                         .closures(closures)
                                         .steps(List(2) { validStep })
-                                        .build()
+                                        .build(),
                                 ).apply {
                                     if (addLeg) {
                                         add(
@@ -718,30 +737,30 @@ class RouteProgressExTest {
                                                 .incidents(incidents)
                                                 .closures(closures)
                                                 .steps(List(2) { validStep })
-                                                .build()
+                                                .build(),
                                         )
                                     }
-                                }
+                                },
                             )
                             .geometry(
                                 PolylineUtils.encode(
                                     listOf(
                                         Point.fromLngLat(11.22, 33.44),
-                                        Point.fromLngLat(23.34, 34.45)
+                                        Point.fromLngLat(23.34, 34.45),
                                     ),
-                                    5
-                                )
+                                    5,
+                                ),
                             )
-                            .build()
-                    )
+                            .build(),
+                    ),
                 )
                 .code("Ok")
                 .build(),
             createRouteOptions(
                 waypointsPerRoute = false,
-                geometries = DirectionsCriteria.GEOMETRY_POLYLINE6
+                geometries = DirectionsCriteria.GEOMETRY_POLYLINE6,
             ),
-            com.mapbox.navigation.base.route.RouterOrigin.Offboard,
+            RouterOrigin.ONLINE,
             expirationTime,
         ).first()
     }
@@ -751,8 +770,14 @@ class RouteProgressExTest {
         private val description: String,
         private val inputWaypoints: List<DirectionsWaypoint>?,
         private val refreshedWaypoints: List<DirectionsWaypoint>?,
-        private val expectedWaypoints: List<DirectionsWaypoint>?
+        private val expectedWaypoints: List<DirectionsWaypoint>?,
     ) {
+
+        @get:Rule
+        val nativeRouteParserRule = NativeRouteParserRule()
+
+        @get:Rule
+        val loggerRule = LoggingFrontendTestRule()
 
         companion object {
 
@@ -765,7 +790,7 @@ class RouteProgressExTest {
                         val inputMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                         val waypoints = listOf(
                             createWaypoint("name11", unrecognizedProperties = inputMetadata1),
-                            createWaypoint("name22", unrecognizedProperties = inputMetadata2)
+                            createWaypoint("name22", unrecognizedProperties = inputMetadata2),
                         )
                         arrayOf(
                             "update waypoints from null to non-null",
@@ -777,13 +802,13 @@ class RouteProgressExTest {
                     run {
                         val waypoints = listOf(
                             createWaypoint("name11"),
-                            createWaypoint("name22")
+                            createWaypoint("name22"),
                         )
                         arrayOf(
                             "update waypoints from empty to non-empty",
                             emptyList<DirectionsWaypoint>(),
                             waypoints,
-                            emptyList<DirectionsWaypoint>()
+                            emptyList<DirectionsWaypoint>(),
                         )
                     },
                     run {
@@ -791,7 +816,7 @@ class RouteProgressExTest {
                         val inputMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                         val waypoints = listOf(
                             createWaypoint("name1", unrecognizedProperties = inputMetadata1),
-                            createWaypoint("name2", unrecognizedProperties = inputMetadata2)
+                            createWaypoint("name2", unrecognizedProperties = inputMetadata2),
                         )
                         arrayOf(
                             "update waypoints from non-empty to null",
@@ -805,7 +830,7 @@ class RouteProgressExTest {
                         val inputMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                         val waypoints = listOf(
                             createWaypoint("name1", unrecognizedProperties = inputMetadata1),
-                            createWaypoint("name2", unrecognizedProperties = inputMetadata2)
+                            createWaypoint("name2", unrecognizedProperties = inputMetadata2),
                         )
                         arrayOf(
                             "update waypoints from non-empty to empty",
@@ -819,12 +844,12 @@ class RouteProgressExTest {
                         val inputMetadata2 = mapOf("key2" to JsonPrimitive("value2"))
                         val refreshedMetadata1 = mapOf("key3" to JsonPrimitive("value3"))
                         val refreshedWaypoints = listOf(
-                            createWaypoint("name3", unrecognizedProperties = refreshedMetadata1)
+                            createWaypoint("name3", unrecognizedProperties = refreshedMetadata1),
                         )
 
                         val inputWaypoints = listOf(
                             createWaypoint("name1", unrecognizedProperties = inputMetadata1),
-                            createWaypoint("name2", unrecognizedProperties = inputMetadata2)
+                            createWaypoint("name2", unrecognizedProperties = inputMetadata2),
                         )
                         arrayOf(
                             "update waypoints from 2 to 1",
@@ -833,9 +858,9 @@ class RouteProgressExTest {
                             listOf(
                                 createWaypoint(
                                     "name3",
-                                    unrecognizedProperties = refreshedMetadata1
+                                    unrecognizedProperties = refreshedMetadata1,
                                 ),
-                                createWaypoint("name2", unrecognizedProperties = inputMetadata2)
+                                createWaypoint("name2", unrecognizedProperties = inputMetadata2),
                             ),
                         )
                     },
@@ -848,23 +873,23 @@ class RouteProgressExTest {
                         val refreshedWaypoints = listOf(
                             createWaypoint(
                                 "name3",
-                                unrecognizedProperties = refreshedMetadata1
+                                unrecognizedProperties = refreshedMetadata1,
                             ),
                             createWaypoint(
                                 "name4",
-                                unrecognizedProperties = refreshedMetadata2
-                            )
+                                unrecognizedProperties = refreshedMetadata2,
+                            ),
                         )
 
                         val inputWaypoints = listOf(
                             createWaypoint(
                                 "name1",
-                                unrecognizedProperties = inputMetadata1
+                                unrecognizedProperties = inputMetadata1,
                             ),
                             createWaypoint(
                                 "name2",
-                                unrecognizedProperties = inputMetadata2
-                            )
+                                unrecognizedProperties = inputMetadata2,
+                            ),
                         )
                         arrayOf(
                             "update waypoints from 2 to 2",
@@ -873,12 +898,12 @@ class RouteProgressExTest {
                             listOf(
                                 createWaypoint(
                                     "name3",
-                                    unrecognizedProperties = refreshedMetadata1
+                                    unrecognizedProperties = refreshedMetadata1,
                                 ),
                                 createWaypoint(
                                     "name4",
-                                    unrecognizedProperties = refreshedMetadata2
-                                )
+                                    unrecognizedProperties = refreshedMetadata2,
+                                ),
                             ),
                         )
                     },
@@ -897,7 +922,7 @@ class RouteProgressExTest {
 
                         val inputWaypoints = listOf(
                             createWaypoint("name1", unrecognizedProperties = inputMetadata1),
-                            createWaypoint("name2", unrecognizedProperties = inputMetadata2)
+                            createWaypoint("name2", unrecognizedProperties = inputMetadata2),
                         )
                         arrayOf(
                             "update waypoints from 2 to 3",
@@ -906,12 +931,12 @@ class RouteProgressExTest {
                             listOf(
                                 createWaypoint(
                                     "name3",
-                                    unrecognizedProperties = refreshedMetadata1
+                                    unrecognizedProperties = refreshedMetadata1,
                                 ),
                                 createWaypoint(
                                     "name4",
-                                    unrecognizedProperties = refreshedMetadata2
-                                )
+                                    unrecognizedProperties = refreshedMetadata2,
+                                ),
                             ),
                         )
                     },
@@ -922,20 +947,26 @@ class RouteProgressExTest {
 
                         val refreshedWaypoints = listOf(
                             null,
-                            createWaypoint("name3", unrecognizedProperties = refreshedMetadata2)
+                            createWaypoint("name3", unrecognizedProperties = refreshedMetadata2),
                         )
 
                         val inputWaypoints = listOf(
                             createWaypoint("name1", unrecognizedProperties = inputMetadata1),
-                            createWaypoint("name2", unrecognizedProperties = inputMetadata2)
+                            createWaypoint("name2", unrecognizedProperties = inputMetadata2),
                         )
                         arrayOf(
                             "update waypoints from 2 to null + 1",
                             inputWaypoints,
                             refreshedWaypoints,
                             listOf(
-                                createWaypoint("name1", unrecognizedProperties = inputMetadata1),
-                                createWaypoint("name3", unrecognizedProperties = refreshedMetadata2)
+                                createWaypoint(
+                                    "name1",
+                                    unrecognizedProperties = inputMetadata1,
+                                ),
+                                createWaypoint(
+                                    "name3",
+                                    unrecognizedProperties = refreshedMetadata2,
+                                ),
                             ),
                         )
                     },
@@ -946,12 +977,12 @@ class RouteProgressExTest {
 
                         val refreshedWaypoints = listOf(
                             createWaypoint("name3", unrecognizedProperties = null),
-                            createWaypoint("name4", unrecognizedProperties = refreshedMetadata2)
+                            createWaypoint("name4", unrecognizedProperties = refreshedMetadata2),
                         )
 
                         val inputWaypoints = listOf(
                             createWaypoint("name1", unrecognizedProperties = inputMetadata1),
-                            createWaypoint("name2", unrecognizedProperties = inputMetadata2)
+                            createWaypoint("name2", unrecognizedProperties = inputMetadata2),
                         )
                         arrayOf(
                             "update waypoints from 2 to null metadata + 1",
@@ -959,7 +990,10 @@ class RouteProgressExTest {
                             refreshedWaypoints,
                             listOf(
                                 createWaypoint("name3", unrecognizedProperties = null),
-                                createWaypoint("name4", unrecognizedProperties = refreshedMetadata2)
+                                createWaypoint(
+                                    "name4",
+                                    unrecognizedProperties = refreshedMetadata2,
+                                ),
                             ),
                         )
                     },
@@ -982,9 +1016,11 @@ class RouteProgressExTest {
                 null,
                 refreshedWaypoints,
                 0,
-                null
+                null,
+                mockk(relaxed = true),
+                mockk(relaxed = true),
             )
-            assertEquals(expectedWaypoints, updatedRoute.directionsResponse.waypoints())
+            assertEquals(expectedWaypoints, updatedRoute.waypoints)
         }
 
         @Test
@@ -1002,7 +1038,7 @@ class RouteProgressExTest {
                 null,
                 refreshedWaypoints,
                 0,
-                null
+                null,
             )
             assertEquals(expectedWaypoints, updatedRoute.directionsRoute.waypoints())
         }
@@ -1022,72 +1058,61 @@ class RouteProgressExTest {
             val twoPointGeometry = PolylineUtils.encode(
                 listOf(
                     Point.fromLngLat(1.2, 3.4),
-                    Point.fromLngLat(3.3, 6.7)
+                    Point.fromLngLat(3.3, 6.7),
                 ),
-                5
+                5,
             )
-            val validStep = LegStep.builder()
-                .geometry(twoPointGeometry)
-                .distance(1.0)
-                .duration(2.0)
-                .weight(3.0)
-                .mode("mode")
-                .maneuver(mockk())
-                .build()
-            return NavigationRoute(
-                DirectionsResponse.builder()
-                    .routes(emptyList())
-                    .waypoints(dirWaypoints)
-                    .code("Ok")
-                    .build(),
-                0,
-                mockk {
-                    every { geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
-                    every { waypointsPerRoute() } returns waypointsPerRoute
-                },
-                DirectionsRoute.builder()
-                    .duration(10.0)
-                    .distance(distance)
-                    .waypoints(routeWaypoints)
-                    .legs(
-                        mutableListOf(
-                            RouteLeg.builder()
-                                .annotation(annotations)
-                                .incidents(incidents)
-                                .closures(closures)
-                                .steps(List(2) { validStep })
-                                .build()
-                        ).apply {
-                            if (addLeg) {
-                                add(
-                                    RouteLeg.builder()
-                                        .annotation(annotations)
-                                        .incidents(incidents)
-                                        .closures(closures)
-                                        .steps(List(2) { validStep })
-                                        .build()
+            val validStep = createRouteStep()
+            return createNavigationRoutes(
+                response = DirectionsResponse.builder()
+                    .routes(
+                        listOf(
+                            DirectionsRoute.builder()
+                                .duration(10.0)
+                                .distance(distance)
+                                .waypoints(routeWaypoints)
+                                .legs(
+                                    mutableListOf(
+                                        RouteLeg.builder()
+                                            .annotation(annotations)
+                                            .incidents(incidents)
+                                            .closures(closures)
+                                            .steps(List(2) { validStep })
+                                            .build(),
+                                    ).apply {
+                                        if (addLeg) {
+                                            add(
+                                                RouteLeg.builder()
+                                                    .annotation(annotations)
+                                                    .incidents(incidents)
+                                                    .closures(closures)
+                                                    .steps(List(2) { validStep })
+                                                    .build(),
+                                            )
+                                        }
+                                    },
                                 )
-                            }
-                        }
+                                .geometry(
+                                    PolylineUtils.encode(
+                                        listOf(
+                                            Point.fromLngLat(11.22, 33.44),
+                                            Point.fromLngLat(23.34, 34.45),
+                                        ),
+                                        5,
+                                    ),
+                                )
+                                .build(),
+                        ),
                     )
-                    .geometry(
-                        PolylineUtils.encode(
-                            listOf(
-                                Point.fromLngLat(11.22, 33.44),
-                                Point.fromLngLat(23.34, 34.45)
-                            ),
-                            5
-                        )
-                    )
+                    .waypoints(dirWaypoints)
+                    .code("200")
                     .build(),
-                mockk {
-                    every { routeInfo } returns mockk(relaxed = true)
-                    every { routeId } returns ""
-                    every { routerOrigin } returns RouterOrigin.ONLINE
-                    every { waypoints } returns emptyList()
-                },
-                expirationTimeElapsedSeconds = null
-            )
+                options = createRouteOptions(
+                    geometries = DirectionsCriteria.GEOMETRY_POLYLINE,
+                    waypointsPerRoute = waypointsPerRoute,
+                ),
+                routerOrigin = RouterOrigin.OFFLINE,
+            ).first()
         }
 
         private fun provideDefaultLegAnnotation(): LegAnnotation = LegAnnotation.builder()
@@ -1120,12 +1145,12 @@ class RouteProgressExTest {
         private fun provideWaypoints(): List<DirectionsWaypoint> = listOf(
             createWaypoint(
                 "name1",
-                unrecognizedProperties = mapOf("some key 1" to JsonPrimitive("some value 1"))
+                unrecognizedProperties = mapOf("some key 1" to JsonPrimitive("some value 1")),
             ),
             createWaypoint(
                 "name2",
-                unrecognizedProperties = mapOf("some key 2" to JsonPrimitive("some value 2"))
-            )
+                unrecognizedProperties = mapOf("some key 2" to JsonPrimitive("some value 2")),
+            ),
         )
     }
 
@@ -1163,7 +1188,7 @@ class RouteProgressExTest {
      */
     private data class LegItemsResult(
         val newLegAnnotation: List<LegAnnotation?>?,
-        val newIncidents: List<List<Incident>?>?,
+        val newIncidents: List<List<Incident>?>,
         val newClosures: List<List<Closure>?>?,
         val newWaypoints: List<DirectionsWaypoint>?,
         val expectedExpirationTime: Long?,
@@ -1173,17 +1198,16 @@ class RouteProgressExTest {
 
 private fun createNavigationRouteFromResource(
     responseFileName: String,
-    requestFileName: String
+    requestFileName: String,
 ) = createNavigationRoutes(
-    DirectionsResponse.fromJson(
-        FileUtils.loadJsonFixture(responseFileName)
+    response = DirectionsResponse.fromJson(
+        FileUtils.loadJsonFixture(responseFileName),
     ),
-    RouteOptions.fromUrl(
+    options = RouteOptions.fromUrl(
         URL(
-            FileUtils.loadJsonFixture(requestFileName)
-        )
+            FileUtils.loadJsonFixture(requestFileName),
+        ),
     ),
-    TestSDKRouteParser(),
-    com.mapbox.navigation.base.route.RouterOrigin.Offboard,
-    null
+    routerOrigin = RouterOrigin.ONLINE,
+    responseTimeElapsedSeconds = null,
 ).first()

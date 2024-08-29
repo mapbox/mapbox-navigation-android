@@ -1,21 +1,28 @@
 package com.mapbox.navigation.core.internal
 
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.startup.Initializer
 import com.mapbox.common.MapboxSDKCommonInitializerImpl
 import com.mapbox.common.SdkInfoRegistryFactory
-import com.mapbox.common.SdkInformation
-import com.mapbox.navigation.core.BuildConfig
 
 class MapboxNavigationSDKInitializerImpl : Initializer<MapboxNavigationSDK> {
 
     override fun create(context: Context): MapboxNavigationSDK {
+        val appInfo = context.packageManager.getApplicationInfo(
+            context.packageName,
+            PackageManager.GET_META_DATA,
+        )
+
+        val uxfKey = appInfo.metaData?.getString("com.mapbox.navigation.UxFramework")
+        sdkVariant = if (uxfKey?.equals("true", ignoreCase = true) == true) {
+            SdkVariant.UX_FRAMEWORK
+        } else {
+            SdkVariant.CORE_FRAMEWORK
+        }
+
         SdkInfoRegistryFactory.getInstance().registerSdkInformation(
-            SdkInformation(
-                "mapbox-navigation-android",
-                BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
-                "com.mapbox.navigation"
-            )
+            SdkInfoProvider.sdkInformation(),
         )
 
         return MapboxNavigationSDK

@@ -37,7 +37,7 @@ class RouteRefreshControllerTest {
         immediateRouteRefreshController,
         stateHolder,
         refreshObserversManager,
-        resultProcessor
+        resultProcessor,
     )
 
     @Test
@@ -110,7 +110,7 @@ class RouteRefreshControllerTest {
         val routes = listOf<NavigationRoute>(mockk())
 
         sut.onRoutesChanged(
-            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
 
         verify(exactly = 1) {
@@ -125,7 +125,7 @@ class RouteRefreshControllerTest {
         val routes = listOf<NavigationRoute>(mockk())
 
         sut.onRoutesChanged(
-            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_REFRESH),
         )
 
         verify(exactly = 0) {
@@ -140,7 +140,7 @@ class RouteRefreshControllerTest {
         val routes = emptyList<NavigationRoute>()
 
         sut.onRoutesChanged(
-            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP),
         )
 
         verify(exactly = 1) {
@@ -182,8 +182,8 @@ class RouteRefreshControllerTest {
         }
         callback.captured(
             RoutesRefresherExecutorResult.Finished(
-                mockk { every { anySuccess() } returns true }
-            )
+                mockk { every { anySuccess() } returns true },
+            ),
         )
         verify(exactly = 1) {
             plannedRouteRefreshController.resume()
@@ -205,8 +205,8 @@ class RouteRefreshControllerTest {
             RoutesRefresherExecutorResult.Finished(
                 mockk {
                     every { anySuccess() } returns false
-                }
-            )
+                },
+            ),
         )
         verify(exactly = 1) {
             plannedRouteRefreshController.resume()

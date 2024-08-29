@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.telemetry
 
-import android.location.Location
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.LOG_CATEGORY
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.utils.internal.logD
@@ -40,14 +40,14 @@ internal class LocationsCollectorImpl : LocationsCollector {
     }
 
     override fun collectLocations(
-        locationsCollectorListener: LocationsCollector.LocationsCollectorListener
+        locationsCollectorListener: LocationsCollector.LocationsCollectorListener,
     ) {
         eventsLocationsBuffer.add(
             EventLocations(
                 locationsBuffer.getCopy(),
                 mutableListOf(),
-                locationsCollectorListener
-            )
+                locationsCollectorListener,
+            ),
         )
     }
 
@@ -58,7 +58,7 @@ internal class LocationsCollectorImpl : LocationsCollector {
     }
 
     override fun flushBufferFor(
-        locationsCollectorListener: LocationsCollector.LocationsCollectorListener
+        locationsCollectorListener: LocationsCollector.LocationsCollectorListener,
     ) {
         logD("flush buffer for only one observer", LOG_CATEGORY)
         eventsLocationsBuffer.find {

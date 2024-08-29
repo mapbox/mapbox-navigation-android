@@ -41,21 +41,17 @@ dependencies {
     api dependenciesList.mapboxAndroidCommon
 
     api project(':libnavigation-base')
-    implementation project(':libnavigation-util')
+    api project(':libnavigation-util')
     implementation project(':libnavigator')
-    implementation dependenciesList.mapboxCommonOkHttp
-    runtimeOnly project(':libnavigation-router')
     runtimeOnly project(':libtrip-notification')
     runtimeOnly dependenciesList.mapboxLogger
     implementation project(':libnavigation-metrics')
     implementation dependenciesList.mapboxSdkTurf
+    implementation dependenciesList.mapboxSdkRefreshModels
 
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidStartup
-
-    // TODO: get rid of dependency removing workaround https://github.com/mapbox/mapbox-navigation-android/pull/7245
-    implementation dependenciesList.mapboxSdkServices
 
     api dependenciesList.androidXLifecycleRuntime
     implementation dependenciesList.androidXFragment
@@ -67,7 +63,6 @@ dependencies {
     apply from: "../gradle/unit-testing-dependencies.gradle"
     testImplementation dependenciesList.commonsIO
 
-    testImplementation project(':libnavigation-router')
     testImplementation project(':libtrip-notification')
 
     androidTestImplementation project(':libtesting-ui')

@@ -2,13 +2,9 @@ package com.mapbox.navigation.core.replay
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.content.Context
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventSimulator
@@ -147,22 +143,15 @@ class MapboxReplayer {
      * This helper function can be used to push the actual location into the replayer.
      */
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
-    fun pushRealLocation(context: Context, eventTimestamp: Double) {
-        LocationEngineProvider.getBestLocationEngine(context.applicationContext)
-            .getLastLocation(
-                object : LocationEngineCallback<LocationEngineResult> {
-                    override fun onSuccess(result: LocationEngineResult?) {
-                        result?.lastLocation?.let {
-                            val event = ReplayRouteMapper.mapToUpdateLocation(eventTimestamp, it)
-                            pushEvents(singletonList(event))
-                        }
-                    }
-
-                    override fun onFailure(exception: Exception) {
-                        // Intentionally empty
-                    }
+    fun pushRealLocation(eventTimestamp: Double) {
+        LocationServiceFactory.getOrCreate().getDeviceLocationProvider(null).onValue { provider ->
+            provider.getLastLocation {
+                if (it != null) {
+                    val event = ReplayRouteMapper.mapToUpdateLocation(eventTimestamp, it)
+                    pushEvents(singletonList(event))
                 }
-            )
+            }
+        }
     }
 
     /**

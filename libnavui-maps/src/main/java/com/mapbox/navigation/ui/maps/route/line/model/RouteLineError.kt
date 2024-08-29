@@ -8,7 +8,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
  */
 class RouteLineError internal constructor(
     val errorMessage: String,
-    val throwable: Throwable?
+    val throwable: Throwable?,
 ) {
 
     /**
@@ -16,7 +16,7 @@ class RouteLineError internal constructor(
      */
     fun toMutableValue() = MutableRouteLineError(
         errorMessage,
-        throwable
+        throwable,
     )
 
     /**
@@ -27,7 +27,7 @@ class RouteLineError internal constructor(
      */
     class MutableRouteLineError internal constructor(
         var errorMessage: String,
-        var throwable: Throwable?
+        var throwable: Throwable?,
     ) {
 
         /**
@@ -35,7 +35,7 @@ class RouteLineError internal constructor(
          */
         fun toImmutableValue() = RouteLineError(
             errorMessage,
-            throwable
+            throwable,
         )
     }
 }

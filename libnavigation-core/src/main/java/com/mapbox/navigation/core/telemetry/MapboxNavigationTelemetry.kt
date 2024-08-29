@@ -2,20 +2,19 @@ package com.mapbox.navigation.core.telemetry
 
 import android.app.Application
 import android.content.Context
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.common.TelemetrySystemUtils.generateCreateDateFormatted
 import com.mapbox.common.TurnstileEvent
-import com.mapbox.common.UserSKUIdentifier
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsReporter
+import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -31,6 +30,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
+import com.mapbox.navigation.core.telemetry.events.LifecycleStateProvider
 import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationAppUserTurnstileEvent
@@ -88,7 +88,7 @@ private data class SessionMetadata(
     var driverModeId: String,
     val driverModeStartTime: Date = Date(),
     val telemetryNavSessionState: TelemetryNavSessionState,
-    val dynamicValues: DynamicSessionValues = DynamicSessionValues()
+    val dynamicValues: DynamicSessionValues = DynamicSessionValues(),
 )
 
 /**
@@ -136,7 +136,8 @@ private enum class TelemetryNavSessionState {
 
 private const val LOG_TELEMETRY_IS_NOT_RUNNING = "Telemetry is not running"
 private const val LOG_TELEMETRY_NO_ROUTE_OR_ROUTE_PROGRESS = "no route or route progress"
-private const val SDK_IDENTIFIER = "mapbox-navigation-android"
+
+private const val SDK_IDENTIFIER = "mapbox-navigation-android-core"
 
 /**
  * The one and only Telemetry class. This class handles all telemetry events.
@@ -156,9 +157,10 @@ TODO(NAVAND-1820) refactor this class. It's hard to test because of statics.
  */
 internal object MapboxNavigationTelemetry : SdkTelemetry {
     internal const val LOG_CATEGORY = "MapboxNavigationTelemetry"
+    private const val DEFAULT_REPLAY_PROVIDER_NAME =
+        "com.mapbox.navigation.core.replay.ReplayLocationProvider"
 
     private const val ONE_SECOND = 1000
-    internal const val MOCK_PROVIDER = "com.mapbox.navigation.core.replay.ReplayLocationEngine"
     private const val EVENT_VERSION = 7
 
     private lateinit var applicationContext: Context
@@ -178,7 +180,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
             }
         }
 
-    private var locationEngineNameExternal: String = LocationEngine::javaClass.name
+    private var isSimulation = false
+    private var locationProvider: String = "unknown"
     private lateinit var locationsCollector: LocationsCollector
     private lateinit var sdkIdentifier: String
     private val feedbackEventCacheMap = LinkedHashMap<String, NavigationFeedbackEvent>()
@@ -232,7 +235,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                 resetLocalVariables()
                 resetDynamicValues()
                 routeData.originalRouteMetrics = MetricsDirectionsRoute(
-                    routes.first().directionsRoute
+                    routes.first().directionsRoute,
                 )
                 routeData.needHandleDeparture = true
             }
@@ -244,12 +247,12 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
             }
             reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
                 routeData.originalRouteMetrics = MetricsDirectionsRoute(
-                    routes.first().directionsRoute
+                    routes.first().directionsRoute,
                 )
             }
             else -> logW(
                 "Unknown route update reason: [$reason]",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
         }
     }
@@ -310,7 +313,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
         val dynamicValues = getSessionMetadataIfTelemetryRunning()?.dynamicValues
         if (routeProgress.currentState == RouteProgressState.OFF_ROUTE) {
             dynamicValues?.accumulateDistanceTraveled(
-                routeProgress.distanceTraveled.toInt()
+                routeProgress.distanceTraveled.toInt(),
             )
             dynamicValues?.resetCurrentDistanceTraveled()
         } else {
@@ -331,6 +334,12 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
     }
 
     private val userFeedbackCallbacks = CopyOnWriteArraySet<UserFeedbackCallback>()
+    private val mockedLocationProviderTypes = setOf(
+        LocationOptions.LocationProviderType.MOCKED,
+        LocationOptions.LocationProviderType.MIXED,
+    )
+
+    private lateinit var skuIdProvider: SkuIdProvider
 
     /**
      * This method must be called before using the Telemetry object
@@ -341,14 +350,22 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
         reporter: MetricsReporter,
         locationsCollector: LocationsCollector = LocationsCollectorImpl(),
     ) {
+        LifecycleStateProvider.instance.init()
         resetLocalVariables()
         sessionState = Idle
         this.locationsCollector = locationsCollector
         navigationOptions = options
         applicationContext = options.applicationContext
-        locationEngineNameExternal = options.locationEngine.javaClass.name
+        isSimulation = options.locationOptions.locationProviderType in mockedLocationProviderTypes
+        locationProvider = if (options.locationOptions.locationProviderFactory == null) {
+            "default"
+        } else {
+            "custom"
+        }
         sdkIdentifier = SDK_IDENTIFIER
         metricsReporter = reporter
+        skuIdProvider = mapboxNavigation.skuIdProvider
+
         feedbackEventCacheMap.clear()
         postTurnstileEvent()
         telemetryStart()
@@ -357,6 +374,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
     }
 
     override fun destroy(mapboxNavigation: MapboxNavigation) {
+        LifecycleStateProvider.instance.destroy()
         telemetryStop()
 
         // TODO(NAVAND-1820) MapboxMetricsReporter is destroyed here,
@@ -382,7 +400,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                     SessionMetadataOnPause(
                         navigatorSessionIdentifier =
                         navObtainUniversalTelemetryNavigationSessionId(),
-                    )
+                    ),
                 )
             }
             is FreeDrive -> {
@@ -391,8 +409,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                         navigatorSessionIdentifier =
                         navObtainUniversalTelemetryNavigationSessionId(),
                         driverModeId = navObtainUniversalTelemetryNavigationModeId(),
-                        telemetryNavSessionState = TelemetryNavSessionState.FREE_DRIVE
-                    )
+                        telemetryNavSessionState = TelemetryNavSessionState.FREE_DRIVE,
+                    ),
                 )
             }
             is ActiveGuidance -> {
@@ -401,8 +419,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                         navigatorSessionIdentifier =
                         navObtainUniversalTelemetryNavigationSessionId(),
                         driverModeId = navObtainUniversalTelemetryNavigationModeId(),
-                        telemetryNavSessionState = TelemetryNavSessionState.TRIP
-                    )
+                        telemetryNavSessionState = TelemetryNavSessionState.TRIP,
+                    ),
                 )
             }
         }
@@ -430,13 +448,13 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
     override fun postCustomEvent(
         payload: String,
         customEventType: String,
-        customEventVersion: String
+        customEventVersion: String,
     ) {
         createCustomEvent(
             payload = payload,
             customEventType = customEventType,
             customEventVersion = customEventVersion,
-            phoneState = PhoneState.newInstance(applicationContext)
+            phoneState = PhoneState.newInstance(applicationContext),
         ) {
             sendMetricEvent(it)
         }
@@ -452,7 +470,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                 generateCreateDateFormatted(sessionMetadata.driverModeStartTime),
                 sessionMetadata.dynamicValues.rerouteCount,
                 locationsCollector.lastLocation?.toPoint(),
-                locationEngineNameExternal,
+                locationProvider,
+                isSimulation,
                 lifecycleMonitor?.obtainPortraitPercentage(),
                 lifecycleMonitor?.obtainForegroundPercentage(),
                 EVENT_VERSION,
@@ -460,10 +479,10 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                 routeData.originalRouteMetrics ?: MetricsDirectionsRoute(null),
                 MetricsRouteProgress(routeData.routeProgress),
                 createAppMetadata(),
-                locationsCollector
+                locationsCollector,
             )
         } ?: throw IllegalStateException(
-            "Feedback Metadata might be provided when trip session is started only"
+            "Feedback Metadata might be provided when trip session is started only",
         )
     }
 
@@ -518,11 +537,11 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
         }
         if (feedbackMetadata == null) {
             ifTelemetryRunning(
-                "User Feedback event creation failed: $LOG_TELEMETRY_IS_NOT_RUNNING"
+                "User Feedback event creation failed: $LOG_TELEMETRY_IS_NOT_RUNNING",
             ) {
                 val feedbackEvent = NavigationFeedbackEvent(
                     PhoneState.newInstance(applicationContext),
-                    NavigationStepData(MetricsRouteProgress(routeData.routeProgress))
+                    NavigationStepData(MetricsRouteProgress(routeData.routeProgress)),
                 ).apply {
                     this.feedbackType = feedbackType
                     this.source = feedbackSource
@@ -564,6 +583,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                     feedbackMetadata.metricsRouteProgress,
                     feedbackMetadata.lastLocation,
                     feedbackMetadata.locationEngineNameExternal,
+                    feedbackMetadata.simulation,
                     feedbackMetadata.percentTimeInPortrait,
                     feedbackMetadata.percentTimeInForeground,
                     feedbackMetadata.sessionIdentifier,
@@ -585,13 +605,13 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
         sendMetricEvent(
             NavigationDepartEvent(PhoneState.newInstance(applicationContext)).apply {
                 populateWithLocalVars(getSessionMetadataIfTelemetryRunning())
-            }
+            },
         )
     }
 
     private fun getFreeDriveEvent(
         oldState: NavigationSessionState,
-        newState: NavigationSessionState
+        newState: NavigationSessionState,
     ): FreeDriveEventType? {
         return when {
             oldState is FreeDrive && newState !is FreeDrive -> STOP
@@ -609,7 +629,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                         SessionMetadataOnPause(
                             navigatorSessionIdentifier =
                             localTelemetryState.sessionMetadata.navigatorSessionIdentifier,
-                        )
+                        ),
                     )
                 }
             }
@@ -621,8 +641,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                                 navigatorSessionIdentifier = localTelemetryState
                                     .sessionMetadataOnPaused.navigatorSessionIdentifier,
                                 driverModeId = navObtainUniversalTelemetryNavigationModeId(),
-                                telemetryNavSessionState = TelemetryNavSessionState.FREE_DRIVE
-                            )
+                                telemetryNavSessionState = TelemetryNavSessionState.FREE_DRIVE,
+                            ),
                         )
                     }
                     is NavTelemetryState.Running -> {
@@ -632,8 +652,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                                 localTelemetryState.sessionMetadata.navigatorSessionIdentifier,
                                 driverModeId = navObtainUniversalTelemetryNavigationModeId(),
                                 driverModeStartTime = Date(),
-                                telemetryNavSessionState = TelemetryNavSessionState.FREE_DRIVE
-                            )
+                                telemetryNavSessionState = TelemetryNavSessionState.FREE_DRIVE,
+                            ),
                         )
                     }
                     NavTelemetryState.Stopped -> Unit // do nothing
@@ -647,8 +667,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                                 navigatorSessionIdentifier = localTelemetryState
                                     .sessionMetadataOnPaused.navigatorSessionIdentifier,
                                 driverModeId = navObtainUniversalTelemetryNavigationModeId(),
-                                telemetryNavSessionState = TelemetryNavSessionState.TRIP
-                            )
+                                telemetryNavSessionState = TelemetryNavSessionState.TRIP,
+                            ),
                         )
                     }
                     is NavTelemetryState.Running -> {
@@ -658,8 +678,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                                 localTelemetryState.sessionMetadata.navigatorSessionIdentifier,
                                 driverModeId = navObtainUniversalTelemetryNavigationModeId(),
                                 driverModeStartTime = Date(),
-                                telemetryNavSessionState = TelemetryNavSessionState.TRIP
-                            )
+                                telemetryNavSessionState = TelemetryNavSessionState.TRIP,
+                            ),
                         )
                     }
                     NavTelemetryState.Stopped -> Unit // do nothing
@@ -671,11 +691,11 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
     private fun trackFreeDrive(type: FreeDriveEventType) {
         log("trackFreeDrive $type")
         ifTelemetryRunning(
-            "cannot handle free drive change: $LOG_TELEMETRY_IS_NOT_RUNNING"
+            "cannot handle free drive change: $LOG_TELEMETRY_IS_NOT_RUNNING",
         ) { sessionMetadata ->
             createFreeDriveEvent(
                 type,
-                sessionMetadata
+                sessionMetadata,
             )
         }
     }
@@ -691,7 +711,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                     type,
                     sessionMetadata.navigatorSessionIdentifier,
                     sessionMetadata.driverModeId,
-                    sessionMetadata.driverModeStartTime
+                    sessionMetadata.driverModeStartTime,
                 )
             }
         sendEvent(freeDriveEvent)
@@ -702,7 +722,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
         customEventType: String,
         customEventVersion: String,
         phoneState: PhoneState,
-        onEventUpdated: ((NavigationCustomEvent) -> Unit)?
+        onEventUpdated: ((NavigationCustomEvent) -> Unit)?,
     ) {
         log("customEventType: $customEventType")
         val customEvent =
@@ -715,7 +735,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
                 lat = locationsCollector.lastLocation?.latitude ?: 0.0
                 lng = locationsCollector.lastLocation?.longitude ?: 0.0
                 sdkIdentifier = this@MapboxNavigationTelemetry.sdkIdentifier
-                locationEngine = this@MapboxNavigationTelemetry.locationEngineNameExternal
+                locationEngine = this@MapboxNavigationTelemetry.locationProvider
             }
         onEventUpdated?.invoke(customEvent)
     }
@@ -741,7 +761,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
         } else {
             log(
                 "${event::class.java} is not sent. Caused by: " +
-                    "Telemetry Session started: $isTelemetryRunning."
+                    "Telemetry Session started: $isTelemetryRunning.",
             )
         }
     }
@@ -752,7 +772,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
             return
         }
         ifTelemetryRunning(
-            "cannot handle reroute: $LOG_TELEMETRY_IS_NOT_RUNNING"
+            "cannot handle reroute: $LOG_TELEMETRY_IS_NOT_RUNNING",
         ) { sessionMetadata ->
             log("handleReroute")
 
@@ -802,11 +822,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
     }
 
     private fun postTurnstileEvent() {
-        val turnstileEvent = TurnstileEvent(
-            UserSKUIdentifier.NAV2_SES_MAU,
-            sdkIdentifier,
-            BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
-        )
+        val turnstileEvent = TurnstileEvent(skuIdProvider.getUserSkuId())
         val event = NavigationAppUserTurnstileEvent(turnstileEvent)
         log("TurnstileEvent sent")
         metricsReporter.sendTurnstileEvent(event.event)
@@ -818,7 +834,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
             return
         }
         ifTelemetryRunning(
-            "cannot handle process arrival: $LOG_TELEMETRY_IS_NOT_RUNNING"
+            "cannot handle process arrival: $LOG_TELEMETRY_IS_NOT_RUNNING",
         ) { sessionMetadata ->
             log("you have arrived")
             sessionMetadata.dynamicValues.driverModeArrivalTime = Date()
@@ -838,7 +854,8 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
             routeData.originalRouteMetrics ?: MetricsDirectionsRoute(null),
             MetricsRouteProgress(routeData.routeProgress),
             locationsCollector.lastLocation?.toPoint(),
-            locationEngineNameExternal,
+            locationProvider,
+            isSimulation,
             lifecycleMonitor?.obtainPortraitPercentage(),
             lifecycleMonitor?.obtainForegroundPercentage(),
             sessionMetadata?.navigatorSessionIdentifier,
@@ -848,7 +865,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
             sessionMetadata?.dynamicValues?.rerouteCount,
             distanceTraveled,
             EVENT_VERSION,
-            createAppMetadata()
+            createAppMetadata(),
         )
     }
 
@@ -862,7 +879,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
         type: FreeDriveEventType,
         navSessionIdentifier: String,
         modeId: String,
-        modeStartTime: Date
+        modeStartTime: Date,
     ) {
         log("populateFreeDriveEvent")
 
@@ -870,10 +887,10 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
             eventType = type.type
             location = locationsCollector.lastLocation?.toTelemetryLocation()
             eventVersion = EVENT_VERSION
-            locationEngine = locationEngineNameExternal
+            locationEngine = this@MapboxNavigationTelemetry.locationProvider
             percentTimeInPortrait = lifecycleMonitor?.obtainPortraitPercentage() ?: 100
             percentTimeInForeground = lifecycleMonitor?.obtainForegroundPercentage() ?: 100
-            simulation = locationEngineNameExternal == MOCK_PROVIDER
+            simulation = isSimulation
             navigatorSessionIdentifier = navSessionIdentifier
             sessionIdentifier = modeId
             startTimestamp = generateCreateDateFormatted(modeStartTime)
@@ -912,7 +929,7 @@ internal object MapboxNavigationTelemetry : SdkTelemetry {
 
     private fun ifTelemetryRunning(
         elseLog: String? = null,
-        func: ((SessionMetadata) -> Unit)
+        func: ((SessionMetadata) -> Unit),
     ) {
         when (val telemetryState = telemetryState) {
             is NavTelemetryState.Running -> {

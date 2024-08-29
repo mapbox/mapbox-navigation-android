@@ -1,0 +1,63 @@
+{
+  "code":"Ok",
+  "route": {
+    "legs": [
+      {
+        "annotation": {
+          "maxspeed": [
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            }
+          ],
+          "congestion": [
+            "low",
+            "low",
+            "low",
+            "low",
+            "unknown",
+            "high"
+          ],
+          "speed": [
+            11.9,
+            8.3,
+            12.2,
+            12.2,
+            12.2,
+            12.2
+          ],
+          "distance": [
+            74.4,
+            46,
+            48.6,
+            31.5,
+            9.7,
+            30.5
+          ],
+          "duration": [
+            5.52,
+            3.976,
+            2.58,
+            1.78,
+            0.79,
+            52.499
+          ]
+        }
+      }
+    ]
+  }
+}

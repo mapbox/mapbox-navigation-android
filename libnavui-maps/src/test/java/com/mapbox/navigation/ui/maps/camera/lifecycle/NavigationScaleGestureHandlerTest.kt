@@ -3,12 +3,14 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle
 import android.content.Context
 import com.mapbox.android.gestures.AndroidGesturesManager
 import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.android.gestures.RotateGestureDetector
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraChangedCallback
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.plugin.animation.CameraAnimatorType
 import com.mapbox.maps.plugin.animation.MapAnimationOwnerRegistry
-import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
@@ -31,6 +33,7 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -50,21 +53,25 @@ class NavigationScaleGestureHandlerTest {
     private val navigationCamera: NavigationCamera = mockk(relaxUnitFun = true)
     private val mapboxMap: MapboxMap = mockk(relaxUnitFun = true)
     private val initialGesturesManager: AndroidGesturesManager = mockk(relaxUnitFun = true)
+    private val initialRotateGestureDetector: RotateGestureDetector = mockk(relaxUnitFun = true)
     private val customGesturesManager: AndroidGesturesManager = mockk(relaxUnitFun = true)
     private val customMoveGestureDetector: MoveGestureDetector = mockk(relaxUnitFun = true)
+    private val customRotateGestureDetector: RotateGestureDetector = mockk(relaxUnitFun = true)
     private val gesturesPlugin: GesturesPlugin = mockk(relaxUnitFun = true)
     private val locationPlugin: LocationComponentPlugin = mockk(relaxUnitFun = true)
     private val scaleActionListener: NavigationScaleGestureActionListener =
         mockk(relaxUnitFun = true)
     private val options = NavigationScaleGestureHandlerOptions.Builder(context)
         .followingMultiFingerProtectedMoveArea(mockk())
+        .followingRotationAngleThreshold(10f)
         .build()
 
     private lateinit var controller: NavigationScaleGestureHandler
     private val customGesturesInteractorSlot = slot<(AndroidGesturesManager) -> Unit>()
     private val onMoveListenerSlot = slot<OnMoveListener>()
     private val onIndicatorPositionChangedListenerSlot = slot<OnIndicatorPositionChangedListener>()
-    private val onCameraChangeListenerSlot = slot<OnCameraChangeListener>()
+    private val cameraChangedCallbackSlot = slot<CameraChangedCallback>()
+    private val cameraChangedTask = mockk<Cancelable>(relaxed = true)
     private val navigationCameraStateChangedObserverSlot =
         slot<NavigationCameraStateChangedObserver>()
 
@@ -74,17 +81,21 @@ class NavigationScaleGestureHandlerTest {
         every {
             NavigationCameraLifecycleProvider.getCustomGesturesManager(
                 context,
-                capture(customGesturesInteractorSlot)
+                capture(customGesturesInteractorSlot),
             )
         } returns customGesturesManager
         every { customGesturesManager.moveGestureDetector } returns customMoveGestureDetector
+        every { customGesturesManager.rotateGestureDetector } returns customRotateGestureDetector
+        every { customRotateGestureDetector.angleThreshold } returns 3.0f
         every { gesturesPlugin.getGesturesManager() } returns initialGesturesManager
+        every { initialGesturesManager.rotateGestureDetector } returns initialRotateGestureDetector
+        every { initialRotateGestureDetector.angleThreshold } returns 3.0f
         val customManagerSlot = slot<AndroidGesturesManager>()
         every {
             gesturesPlugin.setGesturesManager(
                 capture(customManagerSlot),
                 attachDefaultListeners = true,
-                setDefaultMutuallyExclusives = true
+                setDefaultMutuallyExclusives = true,
             )
         } answers {
             every { gesturesPlugin.getGesturesManager() } returns customGesturesManager
@@ -92,13 +103,15 @@ class NavigationScaleGestureHandlerTest {
         every { gesturesPlugin.addOnMoveListener(capture(onMoveListenerSlot)) } just Runs
         every {
             locationPlugin.addOnIndicatorPositionChangedListener(
-                capture(onIndicatorPositionChangedListenerSlot)
+                capture(onIndicatorPositionChangedListenerSlot),
             )
         } just Runs
-        every { mapboxMap.addOnCameraChangeListener(capture(onCameraChangeListenerSlot)) } just Runs
+        every {
+            mapboxMap.subscribeCameraChanged(capture(cameraChangedCallbackSlot))
+        } returns cameraChangedTask
         every {
             navigationCamera.registerNavigationCameraStateChangeObserver(
-                capture(navigationCameraStateChangedObserverSlot)
+                capture(navigationCameraStateChangedObserverSlot),
             )
         } just Runs
 
@@ -109,7 +122,7 @@ class NavigationScaleGestureHandlerTest {
             gesturesPlugin,
             locationPlugin,
             scaleActionListener,
-            options
+            options,
         )
     }
 
@@ -140,7 +153,7 @@ class NavigationScaleGestureHandlerTest {
         controller.onAnimatorStarting(
             mockk(),
             mockk(),
-            NAVIGATION_CAMERA_OWNER
+            NAVIGATION_CAMERA_OWNER,
         )
 
         verify(exactly = 0) { navigationCamera.requestNavigationCameraToIdle() }
@@ -154,10 +167,39 @@ class NavigationScaleGestureHandlerTest {
             controller.onAnimatorStarting(
                 type,
                 mockk(),
-                MapAnimationOwnerRegistry.GESTURES
+                MapAnimationOwnerRegistry.GESTURES,
             )
 
             verify(exactly = 0) { navigationCamera.requestNavigationCameraToIdle() }
+        }
+    }
+
+    @Test
+    fun `when camera state changed to following state`() {
+        controller.initialize()
+        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+
+        navigationCameraStateChangedObserverSlot.captured
+            .onNavigationCameraStateChanged(NavigationCameraState.FOLLOWING)
+
+        verify(exactly = 1) {
+            customMoveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
+            customRotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
+        }
+    }
+
+    @Test
+    fun `when camera state changed NOT to following state`() {
+        controller.initialize()
+        every { navigationCamera.state } returns NavigationCameraState.IDLE
+
+        navigationCameraStateChangedObserverSlot.captured
+            .onNavigationCameraStateChanged(NavigationCameraState.FOLLOWING)
+
+        verify(exactly = 1) {
+            customMoveGestureDetector.moveThreshold = 0f
+            customMoveGestureDetector.moveThresholdRect = null
+            customRotateGestureDetector.angleThreshold = 3.0f
         }
     }
 
@@ -175,7 +217,7 @@ class NavigationScaleGestureHandlerTest {
             controller.onAnimatorStarting(
                 type,
                 mockk(),
-                MapAnimationOwnerRegistry.GESTURES
+                MapAnimationOwnerRegistry.GESTURES,
             )
 
             verify(exactly = 1) { navigationCamera.requestNavigationCameraToIdle() }
@@ -188,7 +230,7 @@ class NavigationScaleGestureHandlerTest {
         controller.onAnimatorStarting(
             CameraAnimatorType.ZOOM,
             mockk(),
-            MapAnimationOwnerRegistry.GESTURES
+            MapAnimationOwnerRegistry.GESTURES,
         )
 
         verify(exactly = 1) { scaleActionListener.onNavigationScaleGestureAction() }
@@ -251,7 +293,7 @@ class NavigationScaleGestureHandlerTest {
 
         verify(exactly = 1) {
             gesturesPlugin.addProtectedAnimationOwner(
-                NAVIGATION_CAMERA_OWNER
+                NAVIGATION_CAMERA_OWNER,
             )
         }
     }
@@ -411,15 +453,15 @@ class NavigationScaleGestureHandlerTest {
         val point = Point.fromLngLat(10.0, 20.0)
         val pixel = ScreenCoordinate(123.0, 456.0)
         every { mapboxMap.pixelForCoordinate(point) } returns pixel
-        val gesturesSettings: GesturesSettings = mockk(relaxUnitFun = true)
+        val gesturesSettings: GesturesSettings.Builder = GesturesSettings.Builder()
         every { gesturesPlugin.updateSettings(captureLambda()) } answers {
-            lambda<GesturesSettings.() -> Unit>().invoke(gesturesSettings)
+            lambda<GesturesSettings.Builder.() -> Unit>().invoke(gesturesSettings)
         }
 
         controller.initialize()
         onIndicatorPositionChangedListenerSlot.captured.onIndicatorPositionChanged(point)
 
-        verify { gesturesSettings.focalPoint = pixel }
+        assertEquals(pixel, gesturesSettings.focalPoint)
     }
 
     @Test
@@ -436,14 +478,15 @@ class NavigationScaleGestureHandlerTest {
             val point = Point.fromLngLat(10.0, 20.0)
             val pixel = ScreenCoordinate(123.0, 456.0)
             every { mapboxMap.pixelForCoordinate(point) } returns pixel
-            val gesturesSettings: GesturesSettings = mockk(relaxUnitFun = true)
+            val gesturesSettings: GesturesSettings.Builder =
+                GesturesSettings.Builder().setFocalPoint(mockk())
             every { gesturesPlugin.updateSettings(captureLambda()) } answers {
-                lambda<GesturesSettings.() -> Unit>().invoke(gesturesSettings)
+                lambda<GesturesSettings.Builder.() -> Unit>().invoke(gesturesSettings)
             }
 
             onIndicatorPositionChangedListenerSlot.captured.onIndicatorPositionChanged(point)
 
-            verify { gesturesSettings.focalPoint = null }
+            assertNull(gesturesSettings.focalPoint)
         }
     }
 
@@ -459,7 +502,7 @@ class NavigationScaleGestureHandlerTest {
             gesturesPlugin.setGesturesManager(
                 initialGesturesManager,
                 attachDefaultListeners = true,
-                setDefaultMutuallyExclusives = true
+                setDefaultMutuallyExclusives = true,
             )
         }
         verify(exactly = 1) { gesturesPlugin.removeOnMoveListener(onMoveListenerSlot.captured) }
@@ -468,15 +511,15 @@ class NavigationScaleGestureHandlerTest {
         }
         verify(exactly = 1) {
             locationPlugin.removeOnIndicatorPositionChangedListener(
-                onIndicatorPositionChangedListenerSlot.captured
+                onIndicatorPositionChangedListenerSlot.captured,
             )
         }
         verify(exactly = 1) {
-            mapboxMap.removeOnCameraChangeListener(onCameraChangeListenerSlot.captured)
+            cameraChangedTask.cancel()
         }
         verify(exactly = 1) {
             navigationCamera.unregisterNavigationCameraStateChangeObserver(
-                navigationCameraStateChangedObserverSlot.captured
+                navigationCameraStateChangedObserverSlot.captured,
             )
         }
         assertFalse(controller.isInitialized)

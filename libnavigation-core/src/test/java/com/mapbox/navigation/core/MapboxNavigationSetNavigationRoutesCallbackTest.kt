@@ -49,14 +49,14 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    SetRoutes.NewRoutes(initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex),
                 )
             } returns NativeSetRouteValue(
                 routes,
                 listOf(
                     routeAlternativeWithId(alternativeId1),
                     routeAlternativeWithId(alternativeId2),
-                )
+                ),
             )
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
@@ -76,7 +76,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    SetRoutes.NewRoutes(initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex),
                 )
             } returns NativeSetRouteValue(routes, emptyList())
 
@@ -97,7 +97,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    SetRoutes.NewRoutes(initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex),
                 )
             } returns NativeSetRouteError(errorMessage)
 
@@ -140,7 +140,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    SetRoutes.NewRoutes(initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex),
                 )
             } returns NativeSetRouteValue(routes, emptyList())
 
@@ -152,9 +152,9 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                 assertEquals(
                     mapOf(
                         alternativeId1 to RoutesSetError(invalidAlternativeError),
-                        alternativeId2 to RoutesSetError(invalidAlternativeError)
+                        alternativeId2 to RoutesSetError(invalidAlternativeError),
                     ),
-                    this.value!!.ignoredAlternatives
+                    this.value!!.ignoredAlternatives,
                 )
             }
         }
@@ -167,11 +167,11 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    SetRoutes.NewRoutes(initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex),
                 )
             } returns NativeSetRouteValue(
                 routes,
-                listOf(routeAlternativeWithId("bad id 1"), routeAlternativeWithId("bad id 2"))
+                listOf(routeAlternativeWithId("bad id 1"), routeAlternativeWithId("bad id 2")),
             )
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
@@ -182,9 +182,9 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                 assertEquals(
                     mapOf(
                         alternativeId1 to RoutesSetError(invalidAlternativeError),
-                        alternativeId2 to RoutesSetError(invalidAlternativeError)
+                        alternativeId2 to RoutesSetError(invalidAlternativeError),
                     ),
-                    this.value!!.ignoredAlternatives
+                    this.value!!.ignoredAlternatives,
                 )
             }
         }
@@ -197,11 +197,11 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
             coEvery {
                 tripSession.setRoutes(
                     routes,
-                    SetRoutes.NewRoutes(initialLegIndex)
+                    SetRoutes.NewRoutes(initialLegIndex),
                 )
             } returns NativeSetRouteValue(
                 routes,
-                listOf(routeAlternativeWithId(alternativeId2))
+                listOf(routeAlternativeWithId(alternativeId2)),
             )
 
             mapboxNavigation.setNavigationRoutes(routes, initialLegIndex, callback)
@@ -211,7 +211,7 @@ internal class MapboxNavigationSetNavigationRoutesCallbackTest : MapboxNavigatio
                 assertTrue(this.isValue)
                 assertEquals(
                     mapOf(alternativeId1 to RoutesSetError(invalidAlternativeError)),
-                    this.value!!.ignoredAlternatives
+                    this.value!!.ignoredAlternatives,
                 )
             }
         }

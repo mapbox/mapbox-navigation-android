@@ -30,7 +30,7 @@ class RouteStepProgress internal constructor(
     val distanceRemaining: Float,
     val distanceTraveled: Float,
     val fractionTraveled: Float,
-    val durationRemaining: Double
+    val durationRemaining: Double,
 ) {
 
     /**

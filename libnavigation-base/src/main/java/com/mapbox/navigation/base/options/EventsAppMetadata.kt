@@ -82,7 +82,7 @@ class EventsAppMetadata private constructor(
         /**
          * Version of the application. Value should be non-empty.
          */
-        private val version: String // min length 1
+        private val version: String, // min length 1
     ) {
 
         private var userId: String? = null
@@ -91,14 +91,14 @@ class EventsAppMetadata private constructor(
         /**
          * User ID relevant for the application context.
          */
-        fun userId(userId: String?) = apply {
+        fun userId(userId: String?): Builder = apply {
             this.userId = userId
         }
 
         /**
          * Session ID relevant for the application context.
          */
-        fun sessionId(sessionId: String?) = apply {
+        fun sessionId(sessionId: String?): Builder = apply {
             this.sessionId = sessionId
         }
 

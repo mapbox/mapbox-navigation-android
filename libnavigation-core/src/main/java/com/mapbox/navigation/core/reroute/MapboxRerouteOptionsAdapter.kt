@@ -6,18 +6,31 @@ import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.ev.EVRerouteOptionsAdapter
 
 internal class MapboxRerouteOptionsAdapter @VisibleForTesting constructor(
-    private val internalOptionsAdapters: List<RerouteOptionsAdapter>
-) : RerouteOptionsAdapter {
+    private val internalOptionsAdapters: List<InternalRerouteOptionsAdapter>,
+) : InternalRerouteOptionsAdapter {
 
     var externalOptionsAdapter: RerouteOptionsAdapter? = null
 
-    constructor(evDynamicDataHolder: EVDynamicDataHolder) : this(
-        listOf(EVRerouteOptionsAdapter(evDynamicDataHolder))
+    constructor(
+        evDynamicDataHolder: EVDynamicDataHolder,
+        routeHistoryOptionsAdapter: RouteHistoryOptionsAdapter,
+        reasonOptionsAdapter: RerouteContextReasonOptionsAdapter,
+        cleanupCARelatedParamsAdapter: CleanupCARelatedParamsAdapter,
+    ) : this(
+        listOf(
+            EVRerouteOptionsAdapter(evDynamicDataHolder),
+            routeHistoryOptionsAdapter,
+            reasonOptionsAdapter,
+            cleanupCARelatedParamsAdapter,
+        ),
     )
 
-    override fun onRouteOptions(routeOptions: RouteOptions): RouteOptions {
+    override fun onRouteOptions(
+        routeOptions: RouteOptions,
+        params: RouteOptionsAdapterParams,
+    ): RouteOptions {
         val internalOptions = internalOptionsAdapters.fold(routeOptions) { value, modifier ->
-            modifier.onRouteOptions(value)
+            modifier.onRouteOptions(value, params)
         }
         return externalOptionsAdapter?.onRouteOptions(internalOptions) ?: internalOptions
     }

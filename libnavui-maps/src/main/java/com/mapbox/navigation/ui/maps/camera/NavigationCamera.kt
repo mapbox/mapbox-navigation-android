@@ -105,7 +105,7 @@ class NavigationCamera(
     private val cameraPlugin: CameraAnimationsPlugin,
     private val viewportDataSource: ViewportDataSource,
     private val stateTransition: NavigationCameraStateTransition =
-        MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin)
+        MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin),
 ) {
 
     companion object {
@@ -219,14 +219,14 @@ class NavigationCamera(
                 startAnimation(
                     stateTransition.transitionToFollowing(
                         data.cameraForFollowing,
-                        stateTransitionOptions
+                        stateTransitionOptions,
                     ).apply {
                         addListener(
                             createTransitionListener(
                                 TRANSITION_TO_FOLLOWING,
                                 FOLLOWING,
                                 frameTransitionOptions,
-                            )
+                            ),
                         )
                     },
                     instant = false,
@@ -295,14 +295,14 @@ class NavigationCamera(
                 startAnimation(
                     stateTransition.transitionToOverview(
                         data.cameraForOverview,
-                        stateTransitionOptions
+                        stateTransitionOptions,
                     ).apply {
                         addListener(
                             createTransitionListener(
                                 TRANSITION_TO_OVERVIEW,
                                 OVERVIEW,
                                 frameTransitionOptions,
-                            )
+                            ),
                         )
                     },
                     instant = false,
@@ -338,22 +338,22 @@ class NavigationCamera(
                 startAnimation(
                     stateTransition.updateFrameForFollowing(
                         viewportData.cameraForFollowing,
-                        frameTransitionOptions
+                        frameTransitionOptions,
                     ).apply {
                         addListener(createFrameListener())
                     },
-                    instant
+                    instant,
                 )
             }
             OVERVIEW -> {
                 startAnimation(
                     stateTransition.updateFrameForOverview(
                         viewportData.cameraForOverview,
-                        frameTransitionOptions
+                        frameTransitionOptions,
                     ).apply {
                         addListener(createFrameListener())
                     },
-                    instant
+                    instant,
                 )
             }
             IDLE, TRANSITION_TO_FOLLOWING, TRANSITION_TO_OVERVIEW -> {
@@ -366,7 +366,7 @@ class NavigationCamera(
      * Registers [NavigationCameraStateChangedObserver].
      */
     fun registerNavigationCameraStateChangeObserver(
-        navigationCameraStateChangedObserver: NavigationCameraStateChangedObserver
+        navigationCameraStateChangedObserver: NavigationCameraStateChangedObserver,
     ) {
         navigationCameraStateChangedObservers.add(navigationCameraStateChangedObserver)
         navigationCameraStateChangedObserver.onNavigationCameraStateChanged(state)
@@ -376,7 +376,7 @@ class NavigationCamera(
      * Unregisters [NavigationCameraStateChangedObserver].
      */
     fun unregisterNavigationCameraStateChangeObserver(
-        navigationCameraStateChangedObserver: NavigationCameraStateChangedObserver
+        navigationCameraStateChangedObserver: NavigationCameraStateChangedObserver,
     ) {
         navigationCameraStateChangedObservers.remove(navigationCameraStateChangedObserver)
     }

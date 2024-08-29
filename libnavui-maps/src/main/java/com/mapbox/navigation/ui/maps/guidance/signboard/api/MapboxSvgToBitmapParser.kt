@@ -6,14 +6,15 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
-import java.io.ByteArrayInputStream
+import com.mapbox.navigation.utils.internal.ByteBufferBackedInputStream
+import java.nio.ByteBuffer
 
 /**
  * Implementation of [SvgToBitmapParser] that provides a method allowing to convert SVG
  * [ByteArray] to [Bitmap]
  */
 class MapboxSvgToBitmapParser(
-    private val externalFileResolver: SVGExternalFileResolver
+    private val externalFileResolver: SVGExternalFileResolver,
 ) : SvgToBitmapParser {
 
     /**
@@ -25,18 +26,20 @@ class MapboxSvgToBitmapParser(
      * @return [Expected] contains [Bitmap] if successful or error otherwise.
      */
     override fun parse(
-        svg: ByteArray,
-        options: MapboxSignboardOptions
+        svg: ByteBuffer,
+        options: MapboxSignboardOptions,
     ): Expected<String, Bitmap> {
         return try {
-            val stream = ByteArrayInputStream(svg)
+            val stream = ByteBufferBackedInputStream(svg)
             ExpectedFactory.createValue(
-                SvgUtil.renderAsBitmapWithWidth(
-                    stream,
-                    options.desiredSignboardWidth,
-                    options.cssStyles,
-                    externalFileResolver
-                )
+                stream.use {
+                    SvgUtil.renderAsBitmapWithWidth(
+                        it,
+                        options.desiredSignboardWidth,
+                        options.cssStyles,
+                        externalFileResolver,
+                    )
+                },
             )
         } catch (ex: Exception) {
             ExpectedFactory.createError(ex.message ?: "")

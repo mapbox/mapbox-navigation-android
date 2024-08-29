@@ -42,14 +42,17 @@ android {
 
 dependencies {
     // Mapbox Navigation SDK
-    implementation project(':libnavigation-android')
-    implementation project(':libnavui-dropin')
-    implementation project(":libnavui-util")
+    api project(':libnavigation-android')
+    api project(":libnavui-util")
+    api project(":ui-components")
 
     // test
     androidTestImplementation project(':libtesting-ui')
+    androidTestImplementation project(":libtesting-navigation-core-utils")
+    androidTestImplementation project(':libtesting-router')
     androidTestImplementation dependenciesList.testRunner
     androidTestUtil dependenciesList.testOrchestrator
+    implementation project(":libtesting-resources")
 
     // Kotlin support
     implementation dependenciesList.kotlinStdLib
@@ -70,4 +73,10 @@ dependencies {
     implementation dependenciesList.gmsLocation
 
     implementation dependenciesList.multidex
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        freeCompilerArgs += '-opt-in=com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI'
+    }
 }

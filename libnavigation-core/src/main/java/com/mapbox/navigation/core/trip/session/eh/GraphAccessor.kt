@@ -56,7 +56,7 @@ class GraphAccessor internal constructor(
      */
     fun getPathShape(graphPath: EHorizonGraphPath): List<Point>? {
         return navigator.graphAccessor.getPathShape(
-            EHorizonFactory.buildNativeGraphPath(graphPath)
+            EHorizonFactory.buildNativeGraphPath(graphPath),
         )
     }
 
@@ -66,7 +66,7 @@ class GraphAccessor internal constructor(
      */
     fun getGraphPositionCoordinate(graphPosition: EHorizonGraphPosition): Point? {
         return navigator.graphAccessor.getPositionCoordinate(
-            EHorizonFactory.buildNativeGraphPosition(graphPosition)
+            EHorizonFactory.buildNativeGraphPosition(graphPosition),
         )
     }
 

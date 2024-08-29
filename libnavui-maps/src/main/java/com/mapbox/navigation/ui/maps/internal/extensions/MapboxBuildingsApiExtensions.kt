@@ -10,12 +10,12 @@ import kotlin.coroutines.resumeWithException
 
 @Throws(BuildingError::class)
 internal suspend fun MapboxBuildingsApi.queryBuildingToHighlight(
-    point: Point
+    point: Point,
 ): BuildingValue = suspendCancellableCoroutine { cont ->
     queryBuildingToHighlight(point) { expected ->
         expected.fold(
             { cont.resumeWithException(it) },
-            { cont.resume(it) }
+            { cont.resume(it) },
         )
     }
     cont.invokeOnCancellation { cancel() }

@@ -22,7 +22,7 @@ internal class RoutingTilesFiles(
         } else {
             logE(
                 "Unable to create a file, check the RoutingTilesOptions ${tileDir.absolutePath}",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             ""
         }

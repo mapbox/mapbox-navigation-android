@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
 internal class NavigationArriveEvent(
-    phoneState: PhoneState
+    phoneState: PhoneState,
 ) : NavigationEvent(phoneState) {
 
     override fun getEventName(): String = NavigationMetrics.ARRIVE

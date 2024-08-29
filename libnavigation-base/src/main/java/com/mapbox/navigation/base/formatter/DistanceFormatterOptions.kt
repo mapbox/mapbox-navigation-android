@@ -19,13 +19,13 @@ class DistanceFormatterOptions private constructor(
     val applicationContext: Context,
     val locale: Locale,
     val unitType: UnitType,
-    @Rounding.Increment val roundingIncrement: Int
+    @Rounding.Increment val roundingIncrement: Int,
 ) {
 
     /**
      * @return the [Builder] that created the [DistanceFormatterOptions]
      */
-    fun toBuilder() = Builder(applicationContext)
+    fun toBuilder(): Builder = Builder(applicationContext)
         .locale(locale)
         .unitType(unitType)
         .roundingIncrement(roundingIncrement)
@@ -87,7 +87,7 @@ class DistanceFormatterOptions private constructor(
          * @param unitType UnitType
          * @return Builder
          */
-        fun unitType(unitType: UnitType?) =
+        fun unitType(unitType: UnitType?): Builder =
             apply { this.unitType = unitType }
 
         /**
@@ -96,7 +96,7 @@ class DistanceFormatterOptions private constructor(
          * @param roundingIncrement [Rounding.Increment]
          * @return Builder
          */
-        fun roundingIncrement(@Rounding.Increment roundingIncrement: Int) =
+        fun roundingIncrement(@Rounding.Increment roundingIncrement: Int): Builder =
             apply { this.roundingIncrement = roundingIncrement }
 
         /**
@@ -105,7 +105,7 @@ class DistanceFormatterOptions private constructor(
          * @param locale [Locale]
          * @return Builder
          */
-        fun locale(locale: Locale) =
+        fun locale(locale: Locale): Builder =
             apply { this.locale = locale }
 
         /**
@@ -117,7 +117,7 @@ class DistanceFormatterOptions private constructor(
             applicationContext = applicationContext,
             locale = locale,
             unitType = unitType ?: locale.getUnitTypeForLocale(),
-            roundingIncrement = roundingIncrement
+            roundingIncrement = roundingIncrement,
         )
     }
 }

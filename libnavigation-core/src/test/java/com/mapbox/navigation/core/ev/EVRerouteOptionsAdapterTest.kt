@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.ev
 
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.core.reroute.defaultRouteOptionsAdapterParams
 import com.mapbox.navigation.core.routeoptions.isEVRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import io.mockk.every
@@ -20,7 +21,7 @@ class EVRerouteOptionsAdapterTest {
     fun `non EV route`() {
         val options = createRouteOptions(unrecognizedProperties = null)
 
-        assertTrue(options === sut.onRouteOptions(options))
+        assertTrue(options === sut.onRouteOptions(options, defaultRouteOptionsAdapterParams))
     }
 
     @Test
@@ -29,7 +30,7 @@ class EVRerouteOptionsAdapterTest {
         every { evDynamicDataHolder.currentData(unrecognizedProperties) } returns emptyMap()
         val options = createRouteOptions(unrecognizedProperties = unrecognizedProperties)
 
-        assertEquals(options, sut.onRouteOptions(options))
+        assertEquals(options, sut.onRouteOptions(options, defaultRouteOptionsAdapterParams))
     }
 
     @Test
@@ -43,30 +44,30 @@ class EVRerouteOptionsAdapterTest {
             unrecognizedProperties = mapOf(
                 "engine" to JsonPrimitive("electric"),
                 "aaa" to JsonPrimitive("bbb"),
-                "cc" to JsonPrimitive("dd")
-            )
+                "cc" to JsonPrimitive("dd"),
+            ),
         )
 
-        assertEquals(expectedOptions, sut.onRouteOptions(options))
+        assertEquals(expectedOptions, sut.onRouteOptions(options, defaultRouteOptionsAdapterParams))
     }
 
     @Test
     fun `EV route with non empty unrecognized properties and empty EV data`() {
         val unrecognizedProperties = mapOf(
             "engine" to JsonPrimitive("electric"),
-            "aaa" to JsonPrimitive("bbb")
+            "aaa" to JsonPrimitive("bbb"),
         )
         every { evDynamicDataHolder.currentData(unrecognizedProperties) } returns emptyMap()
         val options = createRouteOptions(unrecognizedProperties = unrecognizedProperties)
 
-        assertEquals(options, sut.onRouteOptions(options))
+        assertEquals(options, sut.onRouteOptions(options, defaultRouteOptionsAdapterParams))
     }
 
     @Test
     fun `EV route with non empty unrecognized properties and non empty EV data`() {
         val unrecognizedProperties = mapOf(
             "engine" to JsonPrimitive("electric"),
-            "eee" to JsonPrimitive("fff")
+            "eee" to JsonPrimitive("fff"),
         )
         every {
             evDynamicDataHolder.currentData(unrecognizedProperties)
@@ -77,11 +78,11 @@ class EVRerouteOptionsAdapterTest {
                 "engine" to JsonPrimitive("electric"),
                 "eee" to JsonPrimitive("fff"),
                 "aaa" to JsonPrimitive("bbb"),
-                "cc" to JsonPrimitive("dd")
-            )
+                "cc" to JsonPrimitive("dd"),
+            ),
         )
 
-        assertEquals(expectedOptions, sut.onRouteOptions(options))
+        assertEquals(expectedOptions, sut.onRouteOptions(options, defaultRouteOptionsAdapterParams))
     }
 
     @Test
@@ -95,11 +96,14 @@ class EVRerouteOptionsAdapterTest {
             val expectedOptions = createRouteOptions(
                 unrecognizedProperties = mapOf(
                     "aaa" to JsonPrimitive("bbb"),
-                    "cc" to JsonPrimitive("dd")
-                )
+                    "cc" to JsonPrimitive("dd"),
+                ),
             )
 
-            assertEquals(expectedOptions, sut.onRouteOptions(options))
+            assertEquals(
+                expectedOptions,
+                sut.onRouteOptions(options, defaultRouteOptionsAdapterParams),
+            )
         }
     }
 }

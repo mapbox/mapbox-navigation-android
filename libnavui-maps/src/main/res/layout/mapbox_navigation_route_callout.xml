@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content">
+
+    <TextView
+        android:id="@+id/shape"
+        style="@style/MapboxStyleRouteCalloutDuration"
+        android:layout_height="wrap_content"
+        android:background="@drawable/mapbox_ic_route_callout_bottom_left_shadow"
+        tools:text="4 days 12 hours 46 min and very long"
+        android:textColor="@android:color/transparent"
+        android:layout_width="wrap_content" />
+    <TextView
+        android:id="@+id/eta"
+        style="@style/MapboxStyleRouteCalloutDuration"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:background="@drawable/mapbox_ic_route_callout_bottom_left"
+        tools:backgroundTint="#3072F5"
+        tools:ignore="HardcodedText,SmallSp"
+        tools:text="4 days 12 hours 46 min and very long"
+        tools:textColor="#FFFFFF" />
+</merge>

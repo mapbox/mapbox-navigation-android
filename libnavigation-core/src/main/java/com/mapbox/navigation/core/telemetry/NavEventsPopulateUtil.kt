@@ -16,6 +16,7 @@ import com.mapbox.navigation.utils.internal.logD
  * @param routeProgress route progress (optional)
  * @param lastLocation last location
  * @param locationEngineNameExternal location engine name
+ * @param isSimulation whether the location is being simulated
  * @param percentTimeInPortrait [ApplicationLifecycleMonitor.obtainPortraitPercentage]
  * @param percentTimeInForeground [ApplicationLifecycleMonitor.obtainForegroundPercentage]
  * @param navigatorSessionIdentifier nav session id (identifier of instance of MapboxNavigation)
@@ -34,6 +35,7 @@ internal fun NavigationEvent.populate(
     routeProgress: MetricsRouteProgress,
     lastLocation: Point?,
     locationEngineNameExternal: String?,
+    isSimulation: Boolean,
     percentTimeInPortrait: Int?,
     percentTimeInForeground: Int?,
     navigatorSessionIdentifier: String?,
@@ -78,7 +80,7 @@ internal fun NavigationEvent.populate(
     tripIdentifier = navObtainUniversalTelemetryTripId()
     lat = lastLocation?.latitude() ?: 0.0
     lng = lastLocation?.longitude() ?: 0.0
-    this.simulation = locationEngineNameExternal == MapboxNavigationTelemetry.MOCK_PROVIDER
+    this.simulation = isSimulation
     this.percentTimeInPortrait = percentTimeInPortrait ?: 100
     this.percentTimeInForeground = percentTimeInForeground ?: 100
 

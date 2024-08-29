@@ -8,7 +8,7 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 class GeoDeeplinkParserTest(
-    data: Pair<String, GeoDeeplink?>
+    data: Pair<String, GeoDeeplink?>,
 ) {
     private val input: String = data.first
     private val expected: GeoDeeplink? = data.second

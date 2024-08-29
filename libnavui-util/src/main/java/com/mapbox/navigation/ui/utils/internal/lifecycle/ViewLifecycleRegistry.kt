@@ -28,7 +28,7 @@ import java.util.concurrent.Flow
 @UiThread
 class ViewLifecycleRegistry(
     view: View,
-    localLifecycleOwner: LifecycleOwner
+    localLifecycleOwner: LifecycleOwner,
 ) : LifecycleRegistry(localLifecycleOwner) {
 
     private var isAttached = false
@@ -65,7 +65,7 @@ class ViewLifecycleRegistry(
 
         val hostingLifecycleOwner = ViewTreeLifecycleOwner.get(view)
             ?: throw IllegalStateException(
-                "Please ensure that the hosting activity/fragment is a valid LifecycleOwner"
+                "Please ensure that the hosting activity/fragment is a valid LifecycleOwner",
             )
         currentState = hostingLifecycleOwner.lifecycle.currentState
         hostingLifecycleOwner.lifecycle.addObserver(hostingLifecycleObserver)

@@ -30,7 +30,7 @@ class MapboxRouteArrowApiTest {
             "{\"mapbox-navigation-arrow-bearing\":228.55380580181654}}"
         val upcomingPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
-            Point.fromLngLat(-122.4784726, 37.8587617)
+            Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val route = getRoute()
         val routeProgress = mockk<RouteProgress> {
@@ -39,7 +39,7 @@ class MapboxRouteArrowApiTest {
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
                         route.legs()!![0].steps()!![2].geometry()!!,
-                        6
+                        6,
                     )
                     every { distanceTraveled } returns 0f
                     every { step } returns mockk {
@@ -65,7 +65,7 @@ class MapboxRouteArrowApiTest {
         val upcomingPoints = listOf(Point.fromLngLat(-122.477395, 37.859513))
         val routeStepPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
-            Point.fromLngLat(-122.4784726, 37.8587617)
+            Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
@@ -91,22 +91,22 @@ class MapboxRouteArrowApiTest {
         assertEquals(4, result.layerVisibilityModifications.size)
         assertEquals(
             RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-            result.layerVisibilityModifications[0].first
+            result.layerVisibilityModifications[0].first,
         )
         assertEquals(Visibility.NONE, result.layerVisibilityModifications[0].second)
         assertEquals(
             RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
-            result.layerVisibilityModifications[1].first
+            result.layerVisibilityModifications[1].first,
         )
         assertEquals(Visibility.NONE, result.layerVisibilityModifications[1].second)
         assertEquals(
             RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID,
-            result.layerVisibilityModifications[2].first
+            result.layerVisibilityModifications[2].first,
         )
         assertEquals(Visibility.NONE, result.layerVisibilityModifications[2].second)
         assertEquals(
             RouteLayerConstants.ARROW_HEAD_LAYER_ID,
-            result.layerVisibilityModifications[3].first
+            result.layerVisibilityModifications[3].first,
         )
         assertEquals(Visibility.NONE, result.layerVisibilityModifications[3].second)
     }
@@ -118,22 +118,22 @@ class MapboxRouteArrowApiTest {
         assertEquals(4, result.layerVisibilityModifications.size)
         assertEquals(
             RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-            result.layerVisibilityModifications[0].first
+            result.layerVisibilityModifications[0].first,
         )
         assertEquals(Visibility.VISIBLE, result.layerVisibilityModifications[0].second)
         assertEquals(
             RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
-            result.layerVisibilityModifications[1].first
+            result.layerVisibilityModifications[1].first,
         )
         assertEquals(Visibility.VISIBLE, result.layerVisibilityModifications[1].second)
         assertEquals(
             RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID,
-            result.layerVisibilityModifications[2].first
+            result.layerVisibilityModifications[2].first,
         )
         assertEquals(Visibility.VISIBLE, result.layerVisibilityModifications[2].second)
         assertEquals(
             RouteLayerConstants.ARROW_HEAD_LAYER_ID,
-            result.layerVisibilityModifications[3].first
+            result.layerVisibilityModifications[3].first,
         )
         assertEquals(Visibility.VISIBLE, result.layerVisibilityModifications[3].second)
     }
@@ -143,14 +143,14 @@ class MapboxRouteArrowApiTest {
         val firstPoints = listOf(
             Point.fromLngLat(-122.528540, 37.971168),
             Point.fromLngLat(-122.528637, 37.970187),
-            Point.fromLngLat(-122.528076, 37.969760)
+            Point.fromLngLat(-122.528076, 37.969760),
         )
         val firstManeuverArrow = ManeuverArrow(firstPoints)
 
         val secondPoints = listOf(
             Point.fromLngLat(-122.528076, 37.969760),
             Point.fromLngLat(-122.527418, 37.969325),
-            Point.fromLngLat(-122.526409, 37.968767)
+            Point.fromLngLat(-122.526409, 37.968767),
         )
         val secondManeuverArrow = ManeuverArrow(secondPoints)
 
@@ -171,7 +171,7 @@ class MapboxRouteArrowApiTest {
         val firstPoints = listOf(
             Point.fromLngLat(-122.528540, 37.971168),
             Point.fromLngLat(-122.528637, 37.970187),
-            Point.fromLngLat(-122.528076, 37.969760)
+            Point.fromLngLat(-122.528076, 37.969760),
         )
         val firstManeuverArrow = ManeuverArrow(firstPoints)
 
@@ -186,12 +186,12 @@ class MapboxRouteArrowApiTest {
         val firstPoints = listOf(
             Point.fromLngLat(-122.528540, 37.971168),
             Point.fromLngLat(-122.528637, 37.970187),
-            Point.fromLngLat(-122.528076, 37.969760)
+            Point.fromLngLat(-122.528076, 37.969760),
         )
         val firstManeuverArrow = ManeuverArrow(firstPoints)
         val secondPoints = listOf(
             Point.fromLngLat(-122.527418, 37.969325),
-            Point.fromLngLat(-122.526409, 37.968767)
+            Point.fromLngLat(-122.526409, 37.968767),
         )
         val secondManeuverArrow = ManeuverArrow(secondPoints)
 
@@ -213,12 +213,12 @@ class MapboxRouteArrowApiTest {
         val firstPoints = listOf(
             Point.fromLngLat(-122.528540, 37.971168),
             Point.fromLngLat(-122.528637, 37.970187),
-            Point.fromLngLat(-122.528076, 37.969760)
+            Point.fromLngLat(-122.528076, 37.969760),
         )
         val firstManeuverArrow = ManeuverArrow(firstPoints)
         val secondPoints = listOf(
             Point.fromLngLat(-122.527418, 37.969325),
-            Point.fromLngLat(-122.526409, 37.968767)
+            Point.fromLngLat(-122.526409, 37.968767),
         )
         val secondManeuverArrow = ManeuverArrow(secondPoints)
         val arrows = MapboxRouteArrowApi().also {
@@ -239,7 +239,7 @@ class MapboxRouteArrowApiTest {
         val points = listOf(
             Point.fromLngLat(-122.528540, 37.971168),
             Point.fromLngLat(-122.528637, 37.970187),
-            Point.fromLngLat(-122.528076, 37.969760)
+            Point.fromLngLat(-122.528076, 37.969760),
         )
         val firstManeuverArrow = ManeuverArrow(points)
 
@@ -255,7 +255,7 @@ class MapboxRouteArrowApiTest {
         val points = listOf(
             Point.fromLngLat(-122.528540, 37.971168),
             Point.fromLngLat(-122.528637, 37.970187),
-            Point.fromLngLat(-122.528076, 37.969760)
+            Point.fromLngLat(-122.528076, 37.969760),
         )
         val firstManeuverArrow = ManeuverArrow(points)
         val route = getDirectionsRoute()
@@ -265,7 +265,7 @@ class MapboxRouteArrowApiTest {
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
                         route.legs()!![0].steps()!![2].geometry()!!,
-                        6
+                        6,
                     )
                     every { distanceTraveled } returns 0f
                     every { step } returns mockk {
@@ -276,7 +276,7 @@ class MapboxRouteArrowApiTest {
             }
             every { upcomingStepPoints } returns PolylineUtils.decode(
                 route.legs()!![0].steps()!![2].geometry()!!,
-                6
+                6,
             )
         }
 
@@ -293,12 +293,12 @@ class MapboxRouteArrowApiTest {
         val firstPoints = listOf(
             Point.fromLngLat(-122.528540, 37.971168),
             Point.fromLngLat(-122.528637, 37.970187),
-            Point.fromLngLat(-122.528076, 37.969760)
+            Point.fromLngLat(-122.528076, 37.969760),
         )
         val firstManeuverArrow = ManeuverArrow(firstPoints)
         val secondPoints = listOf(
             Point.fromLngLat(-122.527418, 37.969325),
-            Point.fromLngLat(-122.526409, 37.968767)
+            Point.fromLngLat(-122.526409, 37.968767),
         )
         val secondManeuverArrow = ManeuverArrow(secondPoints)
         val arrows = MapboxRouteArrowApi().also {
@@ -340,7 +340,7 @@ class MapboxRouteArrowApiTest {
             "228.55380580181654}}]}"
         val upcomingPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
-            Point.fromLngLat(-122.4784726, 37.8587617)
+            Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val route = getRoute()
         val routeProgress = mockk<RouteProgress> {
@@ -349,7 +349,7 @@ class MapboxRouteArrowApiTest {
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
                         route.legs()!![0].steps()!![2].geometry()!!,
-                        6
+                        6,
                     )
                     every { distanceTraveled } returns 0f
                     every { step } returns mockk {

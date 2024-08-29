@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
-import android.location.Location
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.SetRoutes
@@ -51,16 +51,6 @@ internal interface TripSession {
     fun unregisterAllVoiceInstructionsObservers()
 
     fun updateLegIndex(legIndex: Int, callback: LegIndexUpdatedCallback)
-
-    fun registerRoadObjectsOnRouteObserver(
-        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
-    )
-
-    fun unregisterRoadObjectsOnRouteObserver(
-        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
-    )
-
-    fun unregisterAllRoadObjectsOnRouteObservers()
 
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver)

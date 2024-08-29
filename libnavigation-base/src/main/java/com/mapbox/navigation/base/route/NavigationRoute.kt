@@ -1,7 +1,12 @@
 @file:JvmName("NavigationRouteEx")
+@file:OptIn(ExperimentalMapboxNavigationAPI::class)
 
 package com.mapbox.navigation.base.route
 
+import androidx.annotation.Keep
+import androidx.annotation.WorkerThread
+import com.google.gson.GsonBuilder
+import com.mapbox.api.directions.v5.DirectionsAdapterFactory
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -11,96 +16,182 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
-import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
+import com.mapbox.navigation.base.internal.route.RoutesResponse
 import com.mapbox.navigation.base.internal.route.Waypoint
-import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
+import com.mapbox.navigation.base.internal.route.routerOrigin
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.refreshTtl
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.toReader
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import java.io.InputStream
-import java.io.InputStreamReader
 import java.net.URL
-import java.nio.ByteBuffer
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Wraps a route object used across the Navigation SDK features.
- * @param directionsResponse the original response that returned this route object.
- * @param routeIndex the index of the route that this wrapper tracks
- * from the collection of routes returned in the original response.
- * @param routeOptions options used to generate the [directionsResponse]
  * @param directionsRoute [DirectionsRoute] that this [NavigationRoute] represents
+ * @param waypoints waypoints associated with the route.
+ * Nav SDK retrieves [waypoints] from various sources depending on the situation,
+ * such as [DirectionsRoute], [DirectionsResponse], or [MapMatchingResponse].
+ * Prefer using [waypoints] instead of [DirectionsRoute.waypoints] from [directionsRoute].
+ * @param responseOriginAPI describes API which generated data for [NavigationRoute].
+ * @param overriddenTraffic describes a segment of [NavigationRoute] with overridden
+ * congestion_numeric.
  */
-class NavigationRoute internal constructor(
-    val directionsResponse: DirectionsResponse,
-    val routeIndex: Int,
-    val routeOptions: RouteOptions,
+class NavigationRoute private constructor(
     val directionsRoute: DirectionsRoute,
+    val waypoints: List<DirectionsWaypoint>?,
+    internal val routeOptions: RouteOptions,
     internal val nativeRoute: RouteInterface,
     internal val unavoidableClosures: List<List<Closure>>,
     internal var expirationTimeElapsedSeconds: Long?,
+    internal val overriddenTraffic: CongestionNumericOverride? = null,
+    @ExperimentalMapboxNavigationAPI
+    @ResponseOriginAPI
+    val responseOriginAPI: String,
 ) {
 
     internal constructor(
-        directionsResponse: DirectionsResponse,
-        routeIndex: Int,
-        routeOptions: RouteOptions,
         directionsRoute: DirectionsRoute,
+        waypoints: List<DirectionsWaypoint>?,
+        routeOptions: RouteOptions,
         nativeRoute: RouteInterface,
         expirationTimeElapsedSeconds: Long?,
+        @ResponseOriginAPI
+        responseOriginAPI: String,
+        overriddenTraffic: CongestionNumericOverride? = null,
     ) : this(
-        directionsResponse,
-        routeIndex,
-        routeOptions,
         directionsRoute,
+        waypoints,
+        routeOptions,
         nativeRoute,
         directionsRoute.legs()
             ?.map { leg -> leg.closures().orEmpty() }
             .orEmpty(),
         expirationTimeElapsedSeconds,
+        overriddenTraffic,
+        responseOriginAPI,
     )
+
+    /**
+     * The index of the route that this wrapper tracks from the collection of routes returned
+     * in the original response.
+     */
+    val routeIndex: Int get() = nativeRoute.routeIndex
+
+    /**
+     * Id of the response from which this [NavigationRoute] is created
+     */
+    val responseUUID: String get() = nativeRoute.responseUuid
+
+    // [routeOptions] are hidden because they can't represent request to
+    // Mapbox Map Matching API.
+    // Users in general don't need route options, but max charge value is important
+    // for one customer.
+    // This property is experimental because of assumption that we will create a
+    // route request structure which can represent requests to both Mapbox Directions
+    // API and Mapbox Map Matching API.
+    // See follow up work in https://mapbox.atlassian.net/browse/NAVAND-1729
+    /**
+     * Maximum possible charge of vehicle this route was requested for.
+     * It's null for non ev routes.
+     */
+    @ExperimentalMapboxNavigationAPI
+    val evMaxCharge: Int?
+        get() {
+            return try {
+                routeOptions
+                    .getUnrecognizedProperty("ev_max_charge")
+                    ?.asInt
+            } catch (t: Throwable) {
+                null
+            }
+        }
+
+    /**
+     * Serialises instance of [NavigationRoute] into string. Use [deserializeFrom] to deserialize
+     * string into [NavigationRoute] back.
+     * Warning: compatibility is guaranteed only between the same versions of Core Framework
+     * @return string representation of navigation route
+     */
+    @WorkerThread
+    internal fun serialize(): String {
+        val gson = GsonBuilder()
+            .registerTypeAdapterFactory(DirectionsAdapterFactory.create())
+            .registerTypeAdapter(Point::class.java, PointAsCoordinatesTypeAdapter())
+            .create()
+
+        val state = SerialisationState(
+            directionsRoute,
+            routeOptions,
+            waypoints,
+            routeIndex,
+            routerOrigin,
+            unavoidableClosures,
+            responseOriginAPI,
+            responseUUID,
+            expirationTimeElapsedSeconds,
+        )
+        return gson.toJson(state)
+    }
 
     companion object {
 
         private const val LOG_CATEGORY = "NavigationRoute"
 
         /**
-         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponse].
-         *
-         * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
-         *
-         * @param directionsResponse response to be parsed into [NavigationRoute]s
-         * @param routeOptions options used to generate the [directionsResponse]
+         * Deserializes instance of [NavigationRoute] from string so that it could be passed to a
+         * different application which uses the same version of Navigation Core Framework.
+         * Warning: compatibility is guaranteed only between the same versions of Core Framework
+         * @return string representation of navigation route
          */
-        @Deprecated(
-            "Navigation route requires RouterOrigin. " +
-                "If RouterOrigin is not set uses RouterOrigin.Custom()",
-            ReplaceWith("create(directionsResponse, routeOptions, routerOrigin)")
-        )
-        @JvmStatic
-        fun create(
-            directionsResponse: DirectionsResponse,
-            routeOptions: RouteOptions,
-        ): List<NavigationRoute> {
-            return create(
-                directionsResponse,
-                routeOptions,
-                RouterOrigin.Custom()
-            )
+        @WorkerThread
+        internal fun deserializeFrom(value: String): Expected<Throwable, NavigationRoute> {
+            return try {
+                val gson = GsonBuilder()
+                    .registerTypeAdapterFactory(DirectionsAdapterFactory.create())
+                    .registerTypeAdapter(Point::class.java, PointAsCoordinatesTypeAdapter())
+                    .create()
+
+                val state = gson.fromJson(value, SerialisationState::class.java)
+
+                val nativeRoute = restoreNativeRoute(state)
+
+                val route = NavigationRoute(
+                    state.directionRoute,
+                    state.waypoints,
+                    state.routeOptions,
+                    nativeRoute,
+                    state.unavoidableClosures,
+                    state.expirationTimeElapsedSeconds,
+                    responseOriginAPI = state.responseOriginAPI,
+                    overriddenTraffic = null,
+                )
+                ExpectedFactory.createValue(route)
+            } catch (t: Throwable) {
+                ExpectedFactory.createError(t)
+            }
         }
 
         /**
@@ -113,10 +204,11 @@ class NavigationRoute internal constructor(
          * @param routerOrigin origin where route was fetched from
          */
         @JvmStatic
-        fun create(
+        internal fun create(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
-            routerOrigin: RouterOrigin,
+            @RouterOrigin
+            routerOrigin: String,
         ): List<NavigationRoute> {
             return create(
                 directionsResponse,
@@ -125,34 +217,78 @@ class NavigationRoute internal constructor(
                 routeOptionsUrlString = routeOptions.toUrl("").toString(),
                 routerOrigin,
                 null,
+                ResponseOriginAPI.DIRECTIONS_API,
             )
         }
 
         /**
-         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponseJson].
+         * Creates new instances of [NavigationRoute] based on the routes found in the [mapMatchingResponse].
          *
          * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
          *
-         * @param directionsResponseJson response to be parsed into [NavigationRoute]s
-         * @param routeRequestUrl URL used to generate the [directionsResponse]
-         *
-         * @throws DirectionsResponseParsingException if `directionsResponseJson` is invalid
+         * @param mapMatchingResponse response to be parsed into [NavigationRoute]s
+         * @param requestUrl url which were used to request [mapMatchingResponse]
          */
-        @Deprecated(
-            "Navigation route requires RouterOrigin. " +
-                "If RouterOrigin is not set uses RouterOrigin.Custom()",
-            ReplaceWith("create(directionsResponseJson, routeRequestUrl, routerOrigin)")
-        )
-        @JvmStatic
-        fun create(
-            directionsResponseJson: String,
-            routeRequestUrl: String,
-        ): List<NavigationRoute> {
-            return create(
-                directionsResponseJson,
-                routeRequestUrl,
-                RouterOrigin.Custom()
-            )
+        @ExperimentalPreviewMapboxNavigationAPI
+        @WorkerThread
+        internal fun createMatchedRoutes(
+            mapMatchingResponse: String,
+            requestUrl: String,
+        ): Expected<Throwable, List<MapMatchingMatch>> {
+            return try {
+                val model = MapMatchingResponse.fromJson(mapMatchingResponse)
+                val routeOptions = RouteOptions.fromUrl(URL(requestUrl))
+                val directionRoutes = model.matchings()?.mapIndexed { index, matching ->
+                    matching.toDirectionRoute()
+                        .toBuilder()
+                        .routeIndex("$index")
+                        .routeOptions(routeOptions)
+                        .build()
+                }?.toMutableList()
+                val directionsResponse = DirectionsResponse.builder()
+                    .routes(directionRoutes ?: emptyList())
+                    // TODO: NAVAND-1737 introduce uuid in map matching response model
+                    // .uuid(model.uuid())
+                    .code(model.code())
+                    .message(model.message())
+                    .waypoints(
+                        model.tracepoints()
+                            ?.filterNotNull()
+                            ?.filter { it.waypointIndex() != null }
+                            ?.map {
+                                DirectionsWaypoint.builder()
+                                    .rawLocation(
+                                        it.location()!!.coordinates().toDoubleArray(),
+                                    )
+                                    .name(it.name() ?: "")
+                                    // TODO: NAVAND-1737 introduce distance in trace point
+                                    // .distance(it.distance)
+                                    .build()
+                            },
+                    )
+                    .build()
+                // TODO: NAVAND-1732 parse map matching response in NN without converting it
+                // to directions response
+                val routesResult = create(
+                    directionsResponse,
+                    directionsResponse.toJson(),
+                    routeOptions,
+                    requestUrl,
+                    RouterOrigin.ONLINE,
+                    // map matched routes don't expire
+                    responseTimeElapsedSeconds = Long.MAX_VALUE,
+                    ResponseOriginAPI.MAP_MATCHING_API,
+                )
+                val matchesResult = routesResult.mapIndexed { index, navigationRoute ->
+                    MapMatchingMatch(
+                        navigationRoute,
+                        model.matchings()!![index].confidence(),
+                    )
+                }
+                ExpectedFactory.createValue(matchesResult)
+            } catch (t: Throwable) {
+                ExpectedFactory.createError(t)
+            }
         }
 
         /**
@@ -161,16 +297,17 @@ class NavigationRoute internal constructor(
          * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
          *
          * @param directionsResponseJson response to be parsed into [NavigationRoute]s
-         * @param routeRequestUrl URL used to generate the [directionsResponse]
+         * @param routeRequestUrl URL used to generate the [directionsResponseJson]
          * @param routerOrigin origin where route was fetched from
          *
          * @throws DirectionsResponseParsingException if `directionsResponseJson` is invalid
          */
         @JvmStatic
-        fun create(
+        internal fun create(
             directionsResponseJson: String,
             routeRequestUrl: String,
-            routerOrigin: RouterOrigin,
+            @RouterOrigin
+            routerOrigin: String,
         ): List<NavigationRoute> {
             val directionsResponse = try {
                 DirectionsResponse.fromJson(directionsResponseJson)
@@ -185,6 +322,7 @@ class NavigationRoute internal constructor(
                 routeOptionsUrlString = routeRequestUrl,
                 routerOrigin = routerOrigin,
                 responseTimeElapsedSeconds = null,
+                ResponseOriginAPI.DIRECTIONS_API,
             )
         }
 
@@ -194,58 +332,108 @@ class NavigationRoute internal constructor(
          * This function parallelizes response parsing and native navigator parsing.
          *
          * @param directionsResponseJson response to be parsed into [NavigationRoute]s
-         * @param routeRequestUrl URL used to generate the [directionsResponse]
+         * @param routeRequestUrl URL used to generate the [directionsResponseJson]
          */
         internal suspend fun createAsync(
             directionsResponseJson: DataRef,
             routeRequestUrl: String,
-            routerOrigin: RouterOrigin,
-            responseTimeElapsedSeconds: Long?,
+            @RouterOrigin routerOrigin: String,
+            responseTimeElapsedMillis: Long,
             routeParser: SDKRouteParser = SDKRouteParser.default,
-            optimiseMemory: Boolean = false
-        ): List<NavigationRoute> {
+        ): RoutesResponse {
             logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
 
             return coroutineScope {
+                data class ParseResult<T>(
+                    val value: T,
+                    val waitMillis: Long,
+                    val parseMillis: Long,
+                    val threadName: String = "",
+                )
+
+                fun currentElapsedMillis() = Time.SystemClockImpl.millis()
+
                 val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
-                    directionsResponseJson.toDirectionsResponse().also {
+                    val startElapsedMillis = currentElapsedMillis()
+                    val waitMillis = startElapsedMillis - responseTimeElapsedMillis
+
+                    directionsResponseJson.toDirectionsResponse().let {
+                        val parseMillis = currentElapsedMillis() - startElapsedMillis
+                        val parseThread = Thread.currentThread().name
                         logD(
-                            "parsed directions response to java model for ${it.uuid()}",
-                            LOG_CATEGORY
+                            "parsed directions response to java model for ${it.uuid()}, " +
+                                "parse time ${parseMillis}ms",
+                            LOG_CATEGORY,
                         )
+                        ParseResult(it, waitMillis, parseMillis, parseThread)
                     }
                 }
                 val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
+                    val startElapsedMillis = currentElapsedMillis()
+                    val waitMillis = startElapsedMillis - responseTimeElapsedMillis
+
                     routeParser.parseDirectionsResponse(
                         directionsResponseJson,
                         routeRequestUrl,
                         routerOrigin,
-                    ).also {
+                    ).let {
+                        val parseMillis = currentElapsedMillis() - startElapsedMillis
                         logD(
                             "parsed directions response to RouteInterface " +
-                                "for ${it.value?.firstOrNull()?.responseUuid}",
-                            LOG_CATEGORY
+                                "for ${it.value?.firstOrNull()?.responseUuid}, " +
+                                "parse time ${parseMillis}ms",
+                            LOG_CATEGORY,
                         )
+                        ParseResult(it, waitMillis, parseMillis)
                     }
                 }
                 val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
-                    RouteOptions.fromUrl(URL(routeRequestUrl)).also {
+                    val startElapsedMillis = currentElapsedMillis()
+                    val waitMillis = startElapsedMillis - responseTimeElapsedMillis
+
+                    RouteOptions.fromUrl(URL(routeRequestUrl)).let {
+                        val parseMillis = currentElapsedMillis() - startElapsedMillis
                         logD(LOG_CATEGORY) {
-                            "parsed request url to RouteOptions: ${it.toUrl("***")}"
+                            "parsed request url to RouteOptions: ${it.toUrl("***")}, " +
+                                "parse time ${parseMillis}ms"
                         }
+                        ParseResult(it, waitMillis, parseMillis)
                     }
                 }
+
+                val nativeParseResult = deferredNativeParsing.await()
+                val responseParseResult = deferredResponseParsing.await()
+                val routeOptionsResult = deferredRouteOptionsParsing.await()
+
                 create(
-                    deferredNativeParsing.await(),
-                    deferredResponseParsing.await(),
-                    deferredRouteOptionsParsing.await(),
-                    responseTimeElapsedSeconds,
-                    optimiseMemory
-                ).also {
+                    nativeParseResult.value,
+                    responseParseResult.value,
+                    routeOptionsResult.value,
+                    responseTimeElapsedMillis.milliseconds.inWholeSeconds,
+                    ResponseOriginAPI.DIRECTIONS_API,
+                ).let { routes ->
+                    val totalParseMillis = responseParseResult.parseMillis +
+                        nativeParseResult.parseMillis + routeOptionsResult.parseMillis
+
                     logD(
                         "NavigationRoute.createAsync finished " +
-                            "for ${it.firstOrNull()?.directionsResponse?.uuid()}",
-                        LOG_CATEGORY
+                            "for ${routes.firstOrNull()?.responseUUID}," +
+                            "total parse time ${totalParseMillis}ms",
+                        LOG_CATEGORY,
+                    )
+
+                    RoutesResponse(
+                        routes = routes,
+                        meta = RoutesResponse.Metadata(
+                            createdAtElapsedMillis = currentElapsedMillis(),
+                            responseWaitMillis = responseParseResult.waitMillis,
+                            responseParseMillis = responseParseResult.parseMillis,
+                            responseParseThread = responseParseResult.threadName,
+                            nativeWaitMillis = nativeParseResult.waitMillis,
+                            nativeParseMillis = nativeParseResult.parseMillis,
+                            routeOptionsWaitMillis = routeOptionsResult.waitMillis,
+                            routeOptionsParseMillis = routeOptionsResult.parseMillis,
+                        ),
                     )
                 }
             }
@@ -255,8 +443,9 @@ class NavigationRoute internal constructor(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
             routeParser: SDKRouteParser,
-            routerOrigin: RouterOrigin,
-            responseTimeElapsedSeconds: Long?
+            @RouterOrigin routerOrigin: String,
+            responseTimeElapsedSeconds: Long?,
+            @ResponseOriginAPI responseOriginAPI: String = ResponseOriginAPI.DIRECTIONS_API,
         ): List<NavigationRoute> {
             return create(
                 directionsResponse,
@@ -265,6 +454,7 @@ class NavigationRoute internal constructor(
                 routeOptionsUrlString = routeOptions.toUrl("").toString(),
                 routerOrigin,
                 responseTimeElapsedSeconds,
+                responseOriginAPI,
                 routeParser,
             )
         }
@@ -274,21 +464,24 @@ class NavigationRoute internal constructor(
             directionsResponseJson: String,
             routeOptions: RouteOptions,
             routeOptionsUrlString: String,
-            routerOrigin: RouterOrigin,
+            @RouterOrigin
+            routerOrigin: String,
             responseTimeElapsedSeconds: Long?,
-            routeParser: SDKRouteParser = SDKRouteParser.default
+            @ResponseOriginAPI
+            responseOriginAPI: String,
+            routeParser: SDKRouteParser = SDKRouteParser.default,
         ): List<NavigationRoute> {
             return routeParser.parseDirectionsResponse(
                 directionsResponseJson,
                 routeOptionsUrlString,
-                routerOrigin
+                routerOrigin,
             ).run {
                 create(
                     this,
                     directionsResponse,
                     routeOptions,
                     responseTimeElapsedSeconds,
-                    optimiseMemory = false
+                    responseOriginAPI = responseOriginAPI,
                 )
             }
         }
@@ -298,35 +491,61 @@ class NavigationRoute internal constructor(
             directionsResponse: DirectionsResponse,
             routeOptions: RouteOptions,
             responseTimeElapsedSeconds: Long?,
-            optimiseMemory: Boolean
+            @ResponseOriginAPI
+            responseOriginAPI: String,
         ): List<NavigationRoute> {
             return expected.fold({ error ->
                 logE("NavigationRoute", "Failed to parse a route. Reason: $error")
                 listOf()
             }, { value ->
                 value
-            }).mapIndexed { index, routeInterface ->
-                val responseToSaveInRoute = if (optimiseMemory) {
-                    directionsResponse.toBuilder().routes(
-                        emptyList()
-                    ).build()
-                } else {
-                    directionsResponse
-                }
+            },).mapIndexed { index, routeInterface ->
                 NavigationRoute(
-                    responseToSaveInRoute,
-                    index,
-                    routeOptions,
                     getDirectionsRoute(directionsResponse, index, routeOptions),
+                    getDirectionsWaypoint(directionsResponse, index, routeOptions),
+                    routeOptions,
                     routeInterface,
                     ifNonNull(
                         directionsResponse.routes().getOrNull(index)?.refreshTtl(),
-                        responseTimeElapsedSeconds
+                        responseTimeElapsedSeconds,
                     ) { refreshTtl, responseTimeElapsedSeconds ->
                         refreshTtl + responseTimeElapsedSeconds
-                    }
+                    },
+                    responseOriginAPI = responseOriginAPI,
+                    overriddenTraffic = null,
                 )
-            }.cache()
+            }
+        }
+
+        // TODO: adopt native serialization/deserialization NAVAND-1764
+        private fun restoreNativeRoute(state: SerialisationState): RouteInterface {
+            val directionsResponse = DirectionsResponse.builder()
+                .routes(
+                    MutableList(state.routeIndex + 1) {
+                        if (it == state.routeIndex) {
+                            state.directionRoute
+                        } else {
+                            fakeDirectionsRoute
+                        }
+                    },
+                )
+                .waypoints(
+                    if (state.routeOptions.waypointsPerRoute() != true) {
+                        state.waypoints
+                    } else {
+                        null
+                    },
+                )
+                .code("Ok")
+                .uuid(state.responseUUID)
+                .build()
+
+            val nativeRoute = SDKRouteParser.default.parseDirectionsResponse(
+                directionsResponse.toJson(),
+                state.routeOptions.toUrl("***").toString(),
+                state.routerOrigin.mapToSdkRouteOrigin(),
+            ).value!![state.routeIndex]
+            return nativeRoute
         }
     }
 
@@ -350,30 +569,13 @@ class NavigationRoute internal constructor(
     /**
      * Describes which router type generated the route.
      */
-    val origin: RouterOrigin = nativeRoute.routerOrigin.mapToSdkRouteOrigin()
+    @RouterOrigin
+    val origin: String = nativeRoute.routerOrigin.mapToSdkRouteOrigin()
 
     /**
      * Returns a list of [UpcomingRoadObject] present in a route.
      */
     val upcomingRoadObjects = nativeRoute.routeInfo.alerts.toUpcomingRoadObjects()
-
-    /**
-     * Compatibility function to always access the valid [DirectionsWaypoint]s collection.
-     *
-     * Returns [DirectionsResponse.waypoints] or [DirectionsRoute.waypoints]
-     * depending on whether [RouteOptions.waypointsPerRoute] was set.
-     */
-    val waypoints: List<DirectionsWaypoint>? by lazy {
-        if (routeOptions.waypointsPerRoute() == true) {
-            if (directionsRoute.waypoints() != null) {
-                directionsRoute.waypoints()
-            } else { // TODO: remove this fallback when NN-731 is fixed
-                directionsResponse.waypoints()
-            }
-        } else {
-            directionsResponse.waypoints()
-        }
-    }
 
     internal val nativeWaypoints: List<Waypoint> = nativeRoute.waypoints.mapToSdk()
 
@@ -417,278 +619,54 @@ class NavigationRoute internal constructor(
     }
 
     internal fun copy(
-        directionsResponse: DirectionsResponse = this.directionsResponse,
         directionsRoute: DirectionsRoute = this.directionsRoute,
-        routeIndex: Int = this.routeIndex,
+        waypoints: List<DirectionsWaypoint>? = this.waypoints,
         routeOptions: RouteOptions = this.routeOptions,
         nativeRoute: RouteInterface = this.nativeRoute,
+        overriddenTraffic: CongestionNumericOverride? = this.overriddenTraffic,
         expirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
     ): NavigationRoute = NavigationRoute(
-        directionsResponse,
-        routeIndex,
-        routeOptions,
         directionsRoute,
+        waypoints,
+        routeOptions,
         nativeRoute,
         this.unavoidableClosures,
         expirationTimeElapsedSeconds,
-    ).cache()
-}
+        overriddenTraffic,
+        this.responseOriginAPI,
+    )
 
-/**
- * Returns all [NavigationRoute.directionsRoute]s.
- *
- * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
- *
- * @throws IllegalStateException when [DirectionsRoute] and [RouteOptions] don't contain enough
- * data to create a new instance of [NavigationRoute] (required for forward compatibility). For
- * instance, EV routing adds additional waypoints and metadata, to handle a route it requires original
- * [DirectionsResponse].
- */
-fun List<NavigationRoute>.toDirectionsRoutes(): List<DirectionsRoute> = map {
-    it.directionsRoute.also { route ->
-        DirectionsRouteMissingConditionsCheck.checkDirectionsRoute(route)
-    }
-}
-
-/**
- * Maps [DirectionsRoute]s to [NavigationRoute]s.
- *
- * This mapping tries to fulfill some of the required [NavigationRoute] data points from the nested features of the [DirectionsRoute],
- * or supplies them with fake supplements to the best of its ability.
- *
- * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
- *
- * This compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes).
- * To avoid potential slowdowns, try not using the compatibility layer and work with [NavigationRoute] and [NavigationRouterCallback] were possible (look for deprecation warnings and refactor).
- * There's a cache layer baked in that avoids the blocking operations if the route was generated by the Navigation SDK itself which could avoid majority of blocking operations, but it's not guaranteed.
- *
- * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
- *
- * @throws IllegalStateException when [DirectionsRoute] and [RouteOptions] don't contain enough
- * data to create a new instance of [NavigationRoute]. For instance, EV routing adds additional waypoints
- * and metadata, to handle a route it requires original [DirectionsResponse].
- */
-@Deprecated(
-    "NavigationRoute requires routerOrigin. If RouterOrigin is not set uses RouterOrigin.Custom()",
-    ReplaceWith("toNavigationRoutes(routerOrigin)")
-)
-fun List<DirectionsRoute>.toNavigationRoutes(): List<NavigationRoute> =
-    map { it.toNavigationRoute(RouterOrigin.Custom()) }
-
-/**
- * Maps [DirectionsRoute]s to [NavigationRoute]s.
- *
- * This mapping tries to fulfill some of the required [NavigationRoute] data points from the nested features of the [DirectionsRoute],
- * or supplies them with fake supplements to the best of its ability.
- *
- * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
- *
- * This compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes).
- * To avoid potential slowdowns, try not using the compatibility layer and work with [NavigationRoute] and [NavigationRouterCallback] were possible (look for deprecation warnings and refactor).
- * There's a cache layer baked in that avoids the blocking operations if the route was generated by the Navigation SDK itself which could avoid majority of blocking operations, but it's not guaranteed.
- *
- * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
- *
- * @param routerOrigin origin where route was fetched from
- *
- * @throws IllegalStateException when [DirectionsRoute] and [RouteOptions] don't contain enough
- * data to create a new instance of [NavigationRoute]. For instance, EV routing adds additional waypoints
- * and metadata, to handle a route it requires original [DirectionsResponse].
- */
-fun List<DirectionsRoute>.toNavigationRoutes(
-    routerOrigin: RouterOrigin,
-): List<NavigationRoute> = map { it.toNavigationRoute(routerOrigin) }
-
-/**
- * Maps [DirectionsRoute] to [NavigationRoute].
- *
- * This mapping tries to fulfill some of the required [NavigationRoute] data points from the nested features of the [DirectionsRoute],
- * or supplies them with fake supplements to the best of its ability.
- *
- * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
- *
- * This compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes).
- * To avoid potential slowdowns, try not using the compatibility layer and work with [NavigationRoute] and [NavigationRouterCallback] were possible (look for deprecation warnings and refactor).
- * There's a cache layer baked in that avoids the blocking operations if the route was generated by the Navigation SDK itself which could avoid majority of blocking operations, but it's not guaranteed.
- *
- * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
- *
- * @throws IllegalStateException when [DirectionsRoute] and [RouteOptions] don't contain enough
- * data to create a new instance of [NavigationRoute]. For instance, EV routing adds additional waypoints
- * and metadata, to handle a route it requires original [DirectionsResponse].
- */
-@Deprecated(
-    "NavigationRoute requires routerOrigin. If RouterOrigin is not set uses RouterOrigin.Custom()",
-    ReplaceWith("toNavigationRoute(routerOrigin)")
-)
-fun DirectionsRoute.toNavigationRoute(): NavigationRoute = this.toNavigationRoute(
-    SDKRouteParser.default,
-    RouterOrigin.Custom(),
-    true,
-)
-
-/**
- * Maps [DirectionsRoute] to [NavigationRoute].
- *
- * This mapping tries to fulfill some of the required [NavigationRoute] data points from the nested features of the [DirectionsRoute],
- * or supplies them with fake supplements to the best of its ability.
- *
- * This is a lossy mapping since the [DirectionsRoute] cannot carry the same amount of information as [NavigationRoute].
- *
- * This compatibility extension is blocking and can now take a significant amount of time to return (in order of hundreds of milliseconds for long routes).
- * To avoid potential slowdowns, try not using the compatibility layer and work with [NavigationRoute] and [NavigationRouterCallback] were possible (look for deprecation warnings and refactor).
- * There's a cache layer baked in that avoids the blocking operations if the route was generated by the Navigation SDK itself which could avoid majority of blocking operations, but it's not guaranteed.
- *
- * **Avoid using this mapper and instead try using APIs that accept [NavigationRoute] type where possible.**
- *
- * @throws IllegalStateException when [DirectionsRoute] and [RouteOptions] don't contain enough
- * data to create a new instance of [NavigationRoute]. For instance, EV routing adds additional waypoints
- * and metadata, to handle a route it requires original [DirectionsResponse].
- */
-fun DirectionsRoute.toNavigationRoute(
-    routerOrigin: RouterOrigin,
-): NavigationRoute = this.toNavigationRoute(SDKRouteParser.default, routerOrigin, true)
-
-internal fun DirectionsRoute.toNavigationRoute(
-    sdkRouteParser: SDKRouteParser,
-    routerOrigin: RouterOrigin,
-    useCache: Boolean,
-): NavigationRoute {
-    DirectionsRouteMissingConditionsCheck.checkDirectionsRoute(this)
-
-    if (useCache) {
-        RouteCompatibilityCache.getFor(this)?.let {
-            return it
-        }
-    }
-
-    val options = requireNotNull(routeOptions()) {
-        """
-            Provided DirectionsRoute has to have #routeOptions property set.
-            If the route was generated independently of Nav SDK,
-            rebuild the object and assign the options based on the used request URL.
-        """.trimIndent()
-    }
-
-    val routeIndex = requireNotNull(routeIndex()?.toInt()) {
-        """
-            Provided DirectionsRoute has to have #routeIndex property set.
-            If the route was generated independently of Nav SDK,
-            rebuild the object and assign the index based on the position in the response collection.
-        """.trimIndent()
-    }
-
-    val routes = Array(routeIndex + 1) { arrIndex ->
-        if (arrIndex != routeIndex) {
-            /**
-             *  build a fake route to fill up the index gap in the response
-             *  This is needed, so that calling NavigationRoute#directionsResponse#routes().get(routeIndex) always returns a correct value.
-             *  Without padding the response with fake routes, the DirectionsRoute that we're wrapping would be at a wrong index in the response.
-             */
-            fakeDirectionsRoute
-                .toBuilder()
-                .routeIndex(arrIndex.toString())
-                .build()
-        } else {
-            this
-        }
-    }
-
-    val waypoints = buildWaypointsFromLegs(legs()) ?: buildWaypointsFromOptions(options)
-
-    val response = DirectionsResponse.builder()
-        .routes(routes.toList())
-        .code("Ok")
-        .waypoints(waypoints)
-        .uuid(requestUuid())
-        .build()
-    return NavigationRoute.create(response, options, sdkRouteParser, routerOrigin, null)[routeIndex]
+    @Keep
+    private data class SerialisationState(
+        val directionRoute: DirectionsRoute,
+        val routeOptions: RouteOptions,
+        val waypoints: List<DirectionsWaypoint>?,
+        val routeIndex: Int,
+        val routerOrigin: com.mapbox.navigator.RouterOrigin,
+        val unavoidableClosures: List<List<Closure>>,
+        @ResponseOriginAPI
+        val responseOriginAPI: String,
+        val responseUUID: String,
+        val expirationTimeElapsedSeconds: Long?,
+    )
 }
 
 internal fun RouteInterface.toNavigationRoute(
     responseTimeElapsedSeconds: Long,
     directionsResponse: DirectionsResponse,
-    optimiseDirectionsResponse: Boolean
 ): NavigationRoute {
     val refreshTtl = directionsResponse.routes().getOrNull(routeIndex)?.refreshTtl()
     val routeOptions = RouteOptions.fromUrl(URL(requestUri))
-    val response = if (optimiseDirectionsResponse) {
-        directionsResponse.toBuilder().routes(emptyList())
-            .build()
-    } else {
-        directionsResponse
-    }
     return NavigationRoute(
-        directionsResponse = response,
         routeOptions = routeOptions,
-        routeIndex = routeIndex,
         directionsRoute = getDirectionsRoute(directionsResponse, routeIndex, routeOptions),
+        waypoints = getDirectionsWaypoint(directionsResponse, routeIndex, routeOptions),
         nativeRoute = this,
-        expirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds)
-    ).cache()
-}
-
-private fun List<NavigationRoute>.cache(): List<NavigationRoute> {
-    RouteCompatibilityCache.cacheCreationResult(this)
-    return this
-}
-
-private fun NavigationRoute.cache(): NavigationRoute {
-    RouteCompatibilityCache.cacheCreationResult(listOf(this))
-    return this
-}
-
-/**
- * This function tries to recreate the [DirectionsWaypoint] structure when the full [DirectionsResponse] is not available.
- *
- * It looks at the list of maneuvers for a leg and return either the location of first maneuver
- * to find the origin of the route, or the last maneuver point of each leg to find destinations.
- *
- * The points in the [RouteLeg] are matched to the road graph so this method is preferable to the last resort [buildWaypointsFromOptions].
- */
-private fun buildWaypointsFromLegs(
-    routeLegs: List<RouteLeg>?
-): List<DirectionsWaypoint>? {
-    return routeLegs?.mapIndexed { legIndex, routeLeg ->
-        val steps = routeLeg.steps() ?: return null
-        val getWaypointForStepIndex: (Int) -> DirectionsWaypoint? = { stepIndex ->
-            steps.getOrNull(stepIndex)
-                ?.maneuver()
-                ?.location()
-                ?.let {
-                    DirectionsWaypoint.builder()
-                        .name("")
-                        .rawLocation(doubleArrayOf(it.longitude(), it.latitude()))
-                        .build()
-                }
-        }
-        val waypoints = mutableListOf<DirectionsWaypoint>()
-        if (legIndex == 0) {
-            // adds origin of the route
-            waypoints.add(getWaypointForStepIndex(0) ?: return null)
-        }
-        waypoints.add(getWaypointForStepIndex(steps.lastIndex) ?: return null)
-        return@mapIndexed waypoints
-    }?.flatten()
-}
-
-/**
- * This function tries to recreate the [DirectionsWaypoint] structure when the full [DirectionsResponse] is not available.
- *
- * It will return all non-silent waypoints on the route as [DirectionsWaypoint].
- */
-private fun buildWaypointsFromOptions(
-    routeOptions: RouteOptions
-): List<DirectionsWaypoint> {
-    val waypointIndices = routeOptions.waypointIndicesList()
-    return routeOptions.coordinatesList().filterIndexed { index, _ ->
-        waypointIndices?.contains(index) ?: true
-    }.map {
-        DirectionsWaypoint.builder()
-            .name("")
-            .rawLocation(doubleArrayOf(it.longitude(), it.latitude()))
-            .build()
-    }
+        expirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds),
+        // Continuous alternatives are always from Directions API
+        responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
+        overriddenTraffic = null,
+    )
 }
 
 private val fakeDirectionsRoute: DirectionsRoute by lazy {
@@ -697,30 +675,30 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
         .build()
     val fakeManeuver = StepManeuver.builder()
         .rawLocation(doubleArrayOf(0.0, 0.0))
-        .type(StepManeuver.END_OF_ROAD)
+        .type(StepManeuver.ARRIVE)
         .build()
     val fakeSteps = listOf(
         LegStep.builder()
             .distance(0.0)
             .duration(0.0)
-            .mode("fake")
+            .mode("driving")
             .maneuver(fakeManeuver)
             .weight(0.0)
             .geometry(
                 LineString.fromLngLats(
                     listOf(
                         Point.fromLngLat(0.0, 0.0),
-                        Point.fromLngLat(0.0, 0.0)
-                    )
-                ).toPolyline(6)
+                        Point.fromLngLat(0.0, 0.0),
+                    ),
+                ).toPolyline(6),
             )
             .intersections(listOf(fakeIntersection))
-            .build()
+            .build(),
     )
     val fakeLegs = listOf(
         RouteLeg.builder()
             .steps(fakeSteps)
-            .build()
+            .build(),
     )
     DirectionsRoute.builder()
         .distance(0.0)
@@ -730,50 +708,30 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
 }
 
 internal fun DataRef.toDirectionsResponse(): DirectionsResponse {
-    val stream = ByteBufferBackedInputStream(buffer)
-    val reader = InputStreamReader(stream)
-    return reader.use { reader ->
+    return this.toReader().use { reader ->
         DirectionsResponse.fromJson(reader)
-    }
-}
-
-private class ByteBufferBackedInputStream(
-    private val buffer: ByteBuffer
-) : InputStream() {
-
-    init {
-        buffer.position(0)
-    }
-
-    override fun read(): Int {
-        return if (!buffer.hasRemaining()) {
-            -1
-        } else {
-            buffer.get().toInt()
-        }
-    }
-
-    override fun available(): Int {
-        return buffer.remaining()
-    }
-
-    override fun read(bytes: ByteArray, off: Int, len: Int): Int {
-        if (!buffer.hasRemaining()) {
-            return -1
-        }
-        val bytesToRead = len.coerceAtMost(buffer.remaining())
-        buffer.get(bytes, off, bytesToRead)
-        return bytesToRead
     }
 }
 
 private fun getDirectionsRoute(
     response: DirectionsResponse,
     routeIndex: Int,
-    routeOptions: RouteOptions
+    routeOptions: RouteOptions,
 ): DirectionsRoute =
     response.routes()[routeIndex].toBuilder()
         .requestUuid(response.uuid())
         .routeIndex(routeIndex.toString())
         .routeOptions(routeOptions)
         .build()
+
+private fun getDirectionsWaypoint(
+    directionsResponse: DirectionsResponse,
+    routeIndex: Int,
+    routeOptions: RouteOptions,
+): List<DirectionsWaypoint>? {
+    return if (routeOptions.waypointsPerRoute() == true) {
+        directionsResponse.routes()[routeIndex].waypoints()
+    } else {
+        directionsResponse.waypoints()
+    }
+}

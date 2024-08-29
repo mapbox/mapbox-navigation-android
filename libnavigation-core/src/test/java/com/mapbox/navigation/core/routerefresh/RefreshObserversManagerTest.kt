@@ -104,7 +104,7 @@ class RefreshObserversManagerTest {
     fun receiveMultipleUpdates() {
         val result2 = RoutesRefresherResult(
             mockk(),
-            listOf(mockk(), mockk())
+            listOf(mockk(), mockk()),
         )
 
         sut.registerRefreshObserver(observer)

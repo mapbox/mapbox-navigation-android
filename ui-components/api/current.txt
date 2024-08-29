@@ -1,0 +1,718 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.components {
+
+  @UiThread public final class MapboxExtendableButton extends android.widget.FrameLayout {
+    ctor public MapboxExtendableButton(android.content.Context context);
+    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public androidx.appcompat.widget.AppCompatTextView getTextView();
+    method public void setState(com.mapbox.navigation.ui.components.MapboxExtendableButton.State state);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final androidx.appcompat.widget.AppCompatTextView textView;
+  }
+
+  public static final class MapboxExtendableButton.State {
+    ctor public MapboxExtendableButton.State(@DrawableRes int icon, String? text = null, long duration = 0);
+    method public long getDuration();
+    method public int getIcon();
+    method public String? getText();
+    property public final long duration;
+    property public final int icon;
+    property public final String? text;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.maneuver {
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation maneuver(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.components.maneuver.view.MapboxManeuverView maneuverView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.components.maneuver.ManeuverConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ManeuverConfig {
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions getOptions();
+    method public String? getStyleId();
+    method public String? getUserId();
+    method public void setDistanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions);
+    method public void setOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions);
+    method public void setStyleId(String?);
+    method public void setUserId(String?);
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions;
+    property public final com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions options;
+    property public final String? styleId;
+    property public final String? userId;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.maneuver.model {
+
+  public final class ManeuverExitOptions {
+    method public com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties.PropertiesMutcd getMutcdExitProperties();
+    method public int getTextAppearance();
+    method public com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties.PropertiesVienna getViennaExitProperties();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties;
+    property public final int textAppearance;
+    property public final com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties;
+  }
+
+  public static final class ManeuverExitOptions.Builder {
+    ctor public ManeuverExitOptions.Builder();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions build();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions.Builder mutcdExitProperties(com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions.Builder textAppearance(@StyleRes int textAppearance);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions.Builder viennaExitProperties(com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties);
+  }
+
+  public final class ManeuverPrimaryOptions {
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions getExitOptions();
+    method public int getTextAppearance();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions exitOptions;
+    property public final int textAppearance;
+  }
+
+  public static final class ManeuverPrimaryOptions.Builder {
+    ctor public ManeuverPrimaryOptions.Builder();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions build();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions.Builder exitOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions exitOptions);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions.Builder textAppearance(@StyleRes int textAppearance);
+  }
+
+  public final class ManeuverSecondaryOptions {
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions getExitOptions();
+    method public int getTextAppearance();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions exitOptions;
+    property public final int textAppearance;
+  }
+
+  public static final class ManeuverSecondaryOptions.Builder {
+    ctor public ManeuverSecondaryOptions.Builder();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions build();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions.Builder exitOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions exitOptions);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions.Builder textAppearance(@StyleRes int textAppearance);
+  }
+
+  public final class ManeuverSubOptions {
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions getExitOptions();
+    method public int getTextAppearance();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions exitOptions;
+    property public final int textAppearance;
+  }
+
+  public static final class ManeuverSubOptions.Builder {
+    ctor public ManeuverSubOptions.Builder();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions build();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions.Builder exitOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverExitOptions exitOptions);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions.Builder textAppearance(@StyleRes int textAppearance);
+  }
+
+  public final class ManeuverViewOptions {
+    method public int getLaneGuidanceTurnIconManeuver();
+    method public int getManeuverBackgroundColor();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions getPrimaryManeuverOptions();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions getSecondaryManeuverOptions();
+    method public int getStepDistanceTextAppearance();
+    method public int getSubManeuverBackgroundColor();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions getSubManeuverOptions();
+    method public int getTurnIconManeuver();
+    method public int getUpcomingManeuverBackgroundColor();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder toBuilder();
+    property public final int laneGuidanceTurnIconManeuver;
+    property public final int maneuverBackgroundColor;
+    property public final com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions primaryManeuverOptions;
+    property public final com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions secondaryManeuverOptions;
+    property public final int stepDistanceTextAppearance;
+    property public final int subManeuverBackgroundColor;
+    property public final com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions subManeuverOptions;
+    property public final int turnIconManeuver;
+    property public final int upcomingManeuverBackgroundColor;
+  }
+
+  public static final class ManeuverViewOptions.Builder {
+    ctor public ManeuverViewOptions.Builder();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions build();
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder laneGuidanceTurnIconManeuver(@StyleRes int laneGuidanceTurnIconManeuver);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder maneuverBackgroundColor(@ColorRes int maneuverBackgroundColor);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder primaryManeuverOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions primaryManeuverOptions);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder secondaryManeuverOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions secondaryManeuverOptions);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder stepDistanceTextAppearance(@StyleRes int stepDistanceTextAppearance);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder subManeuverBackgroundColor(@ColorRes int subManeuverBackgroundColor);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder subManeuverOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions subManeuverOptions);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder turnIconManeuver(@StyleRes int turnIconManeuver);
+    method public com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions.Builder upcomingManeuverBackgroundColor(@ColorRes int upcomingManeuverBackgroundColor);
+  }
+
+  public abstract sealed class MapboxExitProperties {
+    method public final int getExitBackground();
+    method public final int getExitLeftDrawable();
+    method public final int getExitRightDrawable();
+    method public final int getFallbackDrawable();
+    method public final boolean getShouldFallbackWithDrawable();
+    method public final boolean getShouldFallbackWithText();
+    property public final int exitBackground;
+    property public final int exitLeftDrawable;
+    property public final int exitRightDrawable;
+    property public final int fallbackDrawable;
+    property public final boolean shouldFallbackWithDrawable;
+    property public final boolean shouldFallbackWithText;
+  }
+
+  public static final class MapboxExitProperties.PropertiesMutcd extends com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties {
+    ctor public MapboxExitProperties.PropertiesMutcd(boolean shouldFallbackWithText = false, boolean shouldFallbackWithDrawable = true, @DrawableRes int exitBackground = com.mapbox.navigation.ui.components.R.drawable.mapbox_exit_board_background, @DrawableRes int fallbackDrawable = com.mapbox.navigation.ui.components.R.drawable.mapbox_ic_exit_arrow_right_mutcd, @DrawableRes int exitLeftDrawable = com.mapbox.navigation.ui.components.R.drawable.mapbox_ic_exit_arrow_left_mutcd, @DrawableRes int exitRightDrawable = com.mapbox.navigation.ui.components.R.drawable.mapbox_ic_exit_arrow_right_mutcd);
+  }
+
+  public static final class MapboxExitProperties.PropertiesVienna extends com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties {
+    ctor public MapboxExitProperties.PropertiesVienna(boolean shouldFallbackWithText = false, boolean shouldFallbackWithDrawable = true, @DrawableRes int exitBackground = com.mapbox.navigation.ui.components.R.drawable.mapbox_exit_board_background, @DrawableRes int fallbackDrawable = com.mapbox.navigation.ui.components.R.drawable.mapbox_ic_exit_arrow_left_vienna, @DrawableRes int exitLeftDrawable = com.mapbox.navigation.ui.components.R.drawable.mapbox_ic_exit_arrow_left_vienna, @DrawableRes int exitRightDrawable = com.mapbox.navigation.ui.components.R.drawable.mapbox_ic_exit_arrow_right_vienna);
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.maneuver.view {
+
+  @UiThread public final class MapboxExitText extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxExitText(android.content.Context context);
+    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public android.graphics.Bitmap getViewAsBitmap();
+    method public void setExit(String? modifier, com.mapbox.navigation.tripdata.maneuver.model.ExitNumberComponentNode exit);
+    method public android.graphics.drawable.Drawable styleExitWith(android.graphics.Bitmap bitmap, int drawableHeight);
+    method public void updateExitProperties(com.mapbox.navigation.ui.components.maneuver.model.MapboxExitProperties? properties);
+    method public void updateTextAppearance(@StyleRes int style);
+  }
+
+  @UiThread public final class MapboxLaneGuidance extends androidx.appcompat.widget.AppCompatImageView {
+    ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs = null);
+    ctor public MapboxLaneGuidance(android.content.Context context);
+    method public void renderLane(com.mapbox.navigation.tripdata.maneuver.model.LaneIcon laneIcon, androidx.appcompat.view.ContextThemeWrapper wrapper);
+  }
+
+  @UiThread public final class MapboxLaneGuidanceAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.components.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder> {
+    ctor public MapboxLaneGuidanceAdapter(android.content.Context context);
+    method public void addLanes(java.util.List<com.mapbox.navigation.tripdata.maneuver.model.LaneIndicator> laneIndicatorList);
+    method public int getItemCount();
+    method public void onBindViewHolder(com.mapbox.navigation.ui.components.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder holder, int position);
+    method public com.mapbox.navigation.ui.components.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
+    method public void removeLanes();
+    method public void updateStyle(@StyleRes int style);
+  }
+
+  public final class MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+    ctor public MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder(error.NonExistentClass viewBinding);
+    method @UiThread public void bindLaneIndicator(com.mapbox.navigation.tripdata.maneuver.model.LaneIndicator laneIndicator);
+  }
+
+  @UiThread public final class MapboxManeuverView extends androidx.constraintlayout.widget.ConstraintLayout {
+    ctor public MapboxManeuverView(android.content.Context context);
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions options = ManeuverViewOptions.<init>().build());
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.components.maneuver.view.MapboxManeuverViewState> getManeuverViewState();
+    method public boolean getUpcomingManeuverRenderingEnabled();
+    method public void renderAddLanes(com.mapbox.navigation.tripdata.maneuver.model.Lane lane);
+    method public void renderDistanceRemaining(com.mapbox.navigation.tripdata.maneuver.model.StepDistance stepDistance);
+    method public void renderManeuverWith(java.util.List<? extends com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.shield.model.RouteShieldError,com.mapbox.navigation.tripdata.shield.model.RouteShieldResult>> shields);
+    method public void renderManeuvers(com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>> maneuvers);
+    method public void renderPrimary(com.mapbox.navigation.tripdata.maneuver.model.PrimaryManeuver primary, java.util.Set<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield>? routeShields);
+    method public void renderRemoveLanes();
+    method public void renderSecondary(com.mapbox.navigation.tripdata.maneuver.model.SecondaryManeuver? secondary, java.util.Set<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield>? routeShields);
+    method public void renderSub(com.mapbox.navigation.tripdata.maneuver.model.SubManeuver? sub, java.util.Set<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield>? routeShields);
+    method public void setUpcomingManeuverRenderingEnabled(boolean);
+    method public void updateManeuverViewOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions options);
+    method public void updatePrimaryManeuverTextVisibility(int visibility);
+    method public void updateSecondaryManeuverVisibility(int visibility);
+    method public void updateSubManeuverViewVisibility(int visibility);
+    method public void updateTurnIconResources(com.mapbox.navigation.tripdata.maneuver.model.TurnIconResources turnIconResources);
+    method public void updateUpcomingManeuversVisibility(int visibility);
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.components.maneuver.view.MapboxManeuverViewState> maneuverViewState;
+    property public final boolean upcomingManeuverRenderingEnabled;
+  }
+
+  public abstract sealed class MapboxManeuverViewState {
+  }
+
+  public static final class MapboxManeuverViewState.COLLAPSED extends com.mapbox.navigation.ui.components.maneuver.view.MapboxManeuverViewState {
+    field public static final com.mapbox.navigation.ui.components.maneuver.view.MapboxManeuverViewState.COLLAPSED INSTANCE;
+  }
+
+  public static final class MapboxManeuverViewState.EXPANDED extends com.mapbox.navigation.ui.components.maneuver.view.MapboxManeuverViewState {
+    field public static final com.mapbox.navigation.ui.components.maneuver.view.MapboxManeuverViewState.EXPANDED INSTANCE;
+  }
+
+  @UiThread public final class MapboxPrimaryManeuver extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxPrimaryManeuver(android.content.Context context);
+    ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions options = ManeuverPrimaryOptions.<init>().build());
+    method public void renderManeuver(com.mapbox.navigation.tripdata.maneuver.model.PrimaryManeuver maneuver, java.util.Set<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield>? routeShields);
+    method public void updateOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverPrimaryOptions options);
+  }
+
+  @UiThread public final class MapboxSecondaryManeuver extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxSecondaryManeuver(android.content.Context context);
+    ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions options = ManeuverSecondaryOptions.<init>().build());
+    method public void renderManeuver(com.mapbox.navigation.tripdata.maneuver.model.SecondaryManeuver? maneuver, java.util.Set<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield>? routeShields);
+    method public void updateOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverSecondaryOptions options);
+  }
+
+  @UiThread public final class MapboxStepDistance extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxStepDistance(android.content.Context context);
+    ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void renderDistanceRemaining(com.mapbox.navigation.tripdata.maneuver.model.StepDistance stepDistance);
+    method public void renderTotalStepDistance(com.mapbox.navigation.tripdata.maneuver.model.StepDistance stepDistance);
+  }
+
+  @UiThread public final class MapboxSubManeuver extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxSubManeuver(android.content.Context context);
+    ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions options = ManeuverSubOptions.<init>().build());
+    method public void renderManeuver(com.mapbox.navigation.tripdata.maneuver.model.SubManeuver? maneuver, java.util.Set<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield>? routeShields);
+    method public void updateOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverSubOptions options);
+  }
+
+  @UiThread public final class MapboxTurnIconManeuver extends androidx.appcompat.widget.AppCompatImageView {
+    ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
+    ctor public MapboxTurnIconManeuver(android.content.Context context);
+    method public void renderPrimaryTurnIcon(com.mapbox.navigation.tripdata.maneuver.model.PrimaryManeuver maneuver);
+    method public void renderSubTurnIcon(com.mapbox.navigation.tripdata.maneuver.model.SubManeuver? maneuver);
+    method public void updateTurnIconResources(com.mapbox.navigation.tripdata.maneuver.model.TurnIconResources turnIcon);
+    method public void updateTurnIconStyle(androidx.appcompat.view.ContextThemeWrapper wrapper);
+  }
+
+  @UiThread public final class MapboxUpcomingManeuverAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.components.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder> {
+    ctor public MapboxUpcomingManeuverAdapter(android.content.Context context);
+    method public void addUpcomingManeuvers(java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver> upcomingManeuvers);
+    method public int getItemCount();
+    method public void onBindViewHolder(com.mapbox.navigation.ui.components.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder holder, int position);
+    method public com.mapbox.navigation.ui.components.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
+    method public void updateManeuverViewOptions(com.mapbox.navigation.ui.components.maneuver.model.ManeuverViewOptions maneuverViewOptions);
+    method public void updateShields(java.util.Set<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield> shields);
+    method public void updateUpcomingManeuverIconStyle(androidx.appcompat.view.ContextThemeWrapper contextThemeWrapper);
+  }
+
+  @UiThread public final class MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+    ctor public MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder(error.NonExistentClass viewBinding);
+    method public void bindUpcomingManeuver(com.mapbox.navigation.tripdata.maneuver.model.Maneuver maneuver);
+    method public error.NonExistentClass! getViewBinding();
+    property public final error.NonExistentClass! viewBinding;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.maps {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CameraModeConfig {
+    method public com.mapbox.navigation.ui.maps.camera.NavigationCamera? getNavigationCamera();
+    method public void setNavigationCamera(com.mapbox.navigation.ui.maps.camera.NavigationCamera?);
+    property public final com.mapbox.navigation.ui.maps.camera.NavigationCamera? navigationCamera;
+  }
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation cameraModeButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.components.maps.view.MapboxCameraModeButton button, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.components.maps.CameraModeConfig,kotlin.Unit> config = {});
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation recenterButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, com.mapbox.navigation.ui.components.MapboxExtendableButton button, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.components.maps.RecenterButtonConfig,kotlin.Unit> config = {});
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation roadName(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.maps.MapView mapView, com.mapbox.navigation.ui.components.maps.roadname.view.MapboxRoadNameView roadNameView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.components.maps.RoadNameConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RecenterButtonConfig {
+    method public com.mapbox.maps.plugin.animation.MapAnimationOptions? getAnimationOptions();
+    method public com.mapbox.maps.CameraOptions getCameraOptions();
+    method public void setAnimationOptions(com.mapbox.maps.plugin.animation.MapAnimationOptions?);
+    method public void setCameraOptions(com.mapbox.maps.CameraOptions);
+    property public final com.mapbox.maps.plugin.animation.MapAnimationOptions? animationOptions;
+    property public final com.mapbox.maps.CameraOptions cameraOptions;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoadNameConfig {
+    method public com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi? getRouteShieldApi();
+    method public void setRouteShieldApi(com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi?);
+    property public final com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi? routeShieldApi;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.maps.camera.view {
+
+  @UiThread public final class MapboxRecenterButton extends androidx.constraintlayout.widget.ConstraintLayout {
+    ctor public MapboxRecenterButton(android.content.Context context);
+    ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void showTextAndExtend(long duration, String text = context.getString(R.string.mapbox_recenter));
+    method public void showTextAndExtend(long duration);
+    method public void updateStyle(@StyleRes int style);
+  }
+
+  @UiThread public final class MapboxRouteOverviewButton extends androidx.constraintlayout.widget.ConstraintLayout {
+    ctor public MapboxRouteOverviewButton(android.content.Context context);
+    ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void showTextAndExtend(long duration, String text = context.getString(R.string.mapbox_route_overview));
+    method public void showTextAndExtend(long duration);
+    method public void updateStyle(@StyleRes int style);
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.maps.roadname.view {
+
+  @UiThread public final class MapboxRoadNameView extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxRoadNameView(android.content.Context context);
+    ctor public MapboxRoadNameView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRoadNameView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void renderRoadName(com.mapbox.navigation.base.road.model.Road road);
+    method public void renderRoadNameWith(java.util.List<? extends com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.shield.model.RouteShieldError,com.mapbox.navigation.tripdata.shield.model.RouteShieldResult>> expectedShields);
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.maps.view {
+
+  @UiThread public final class MapboxCameraModeButton extends android.widget.FrameLayout {
+    ctor public MapboxCameraModeButton(android.content.Context context);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxCameraModeButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public int getFollowingIconResId();
+    method public String? getFollowingText();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public int getOverviewIconResId();
+    method public String? getOverviewText();
+    method public androidx.appcompat.widget.AppCompatTextView getTextView();
+    method public void setFollowingIconResId(int);
+    method public void setFollowingText(String?);
+    method public void setOverviewIconResId(int);
+    method public void setOverviewText(String?);
+    method public void setState(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    method public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state, long duration = 2000L);
+    method public void setStateAndExtend(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state);
+    method public void updateStyle(@StyleRes int style);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final int followingIconResId;
+    property public final String? followingText;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final int overviewIconResId;
+    property public final String? overviewText;
+    property public final androidx.appcompat.widget.AppCompatTextView textView;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.speedlimit {
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation speedInfo(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.components.speedlimit.view.MapboxSpeedInfoView speedInfoView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.components.speedlimit.SpeedInfoConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SpeedInfoConfig {
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
+    method public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions getSpeedInfoOptions();
+    method public void setDistanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions);
+    method public void setSpeedInfoOptions(com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions);
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions;
+    property public final com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions speedInfoOptions;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.speedlimit.model {
+
+  public enum CurrentSpeedDirection {
+    enum_constant public static final com.mapbox.navigation.ui.components.speedlimit.model.CurrentSpeedDirection BOTTOM;
+    enum_constant public static final com.mapbox.navigation.ui.components.speedlimit.model.CurrentSpeedDirection END;
+    enum_constant public static final com.mapbox.navigation.ui.components.speedlimit.model.CurrentSpeedDirection START;
+    enum_constant public static final com.mapbox.navigation.ui.components.speedlimit.model.CurrentSpeedDirection TOP;
+  }
+
+  public final class MapboxSpeedInfoOptions {
+    method public com.mapbox.navigation.ui.components.speedlimit.model.CurrentSpeedDirection getCurrentSpeedDirection();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign? getRenderWithSpeedSign();
+    method public boolean getShowLegend();
+    method public boolean getShowSpeedWhenUnavailable();
+    method public boolean getShowUnit();
+    method public com.mapbox.navigation.ui.components.speedlimit.model.SpeedInfoStyle getSpeedInfoStyle();
+    method public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.components.speedlimit.model.CurrentSpeedDirection currentSpeedDirection;
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign? renderWithSpeedSign;
+    property public final boolean showLegend;
+    property public final boolean showSpeedWhenUnavailable;
+    property public final boolean showUnit;
+    property public final com.mapbox.navigation.ui.components.speedlimit.model.SpeedInfoStyle speedInfoStyle;
+  }
+
+  public static final class MapboxSpeedInfoOptions.Builder {
+    ctor public MapboxSpeedInfoOptions.Builder();
+    method public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions build();
+    method public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions.Builder currentSpeedDirection(com.mapbox.navigation.ui.components.speedlimit.model.CurrentSpeedDirection currentSpeedDirection);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions.Builder renderWithSpeedSign(com.mapbox.navigation.base.speed.model.SpeedLimitSign? renderWithSpeedSign);
+    method public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions.Builder showLegend(boolean showLegend);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions.Builder showSpeedWhenUnavailable(boolean showSpeedWhenUnavailable);
+    method public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions.Builder showUnit(boolean showUnit);
+    method public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions.Builder speedInfoStyle(com.mapbox.navigation.ui.components.speedlimit.model.SpeedInfoStyle speedInfoStyle);
+  }
+
+  public final class SpeedInfoStyle {
+    ctor public SpeedInfoStyle();
+    method public int getCurrentSpeedMutcdTextAppearance();
+    method public int getCurrentSpeedViennaTextAppearance();
+    method public int getMutcdLayoutBackground();
+    method public int getPostedSpeedLegendTextAppearance();
+    method public int getPostedSpeedMutcdLayoutBackground();
+    method public int getPostedSpeedMutcdTextAppearance();
+    method public int getPostedSpeedUnitTextAppearance();
+    method public int getPostedSpeedViennaLayoutBackground();
+    method public int getPostedSpeedViennaTextAppearance();
+    method public int getViennaLayoutBackground();
+    method public void setCurrentSpeedMutcdTextAppearance(int);
+    method public void setCurrentSpeedViennaTextAppearance(int);
+    method public void setMutcdLayoutBackground(int);
+    method public void setPostedSpeedLegendTextAppearance(int);
+    method public void setPostedSpeedMutcdLayoutBackground(int);
+    method public void setPostedSpeedMutcdTextAppearance(int);
+    method public void setPostedSpeedUnitTextAppearance(int);
+    method public void setPostedSpeedViennaLayoutBackground(int);
+    method public void setPostedSpeedViennaTextAppearance(int);
+    method public void setViennaLayoutBackground(int);
+    property public final int currentSpeedMutcdTextAppearance;
+    property public final int currentSpeedViennaTextAppearance;
+    property public final int mutcdLayoutBackground;
+    property public final int postedSpeedLegendTextAppearance;
+    property public final int postedSpeedMutcdLayoutBackground;
+    property public final int postedSpeedMutcdTextAppearance;
+    property public final int postedSpeedUnitTextAppearance;
+    property public final int postedSpeedViennaLayoutBackground;
+    property public final int postedSpeedViennaTextAppearance;
+    property public final int viennaLayoutBackground;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.speedlimit.view {
+
+  @UiThread public final class MapboxSpeedInfoView extends android.widget.FrameLayout {
+    ctor public MapboxSpeedInfoView(android.content.Context context);
+    ctor public MapboxSpeedInfoView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSpeedInfoView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void applyOptions(com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions speedInfoOptions);
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoCurrentSpeedMutcd();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoCurrentSpeedVienna();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoLegendTextMutcd();
+    method public androidx.constraintlayout.widget.ConstraintLayout getSpeedInfoMutcdLayout();
+    method public com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions getSpeedInfoOptions();
+    method public androidx.constraintlayout.widget.ConstraintLayout getSpeedInfoPostedSpeedLayoutMutcd();
+    method public androidx.constraintlayout.widget.ConstraintLayout getSpeedInfoPostedSpeedLayoutVienna();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoPostedSpeedMutcd();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoPostedSpeedVienna();
+    method public androidx.appcompat.widget.AppCompatTextView getSpeedInfoUnitTextMutcd();
+    method public androidx.constraintlayout.widget.ConstraintLayout getSpeedInfoViennaLayout();
+    method public void render(com.mapbox.navigation.tripdata.speedlimit.model.SpeedInfoValue speedInfo);
+    method public void setSpeedInfoOptions(com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions);
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoCurrentSpeedMutcd;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoCurrentSpeedVienna;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoLegendTextMutcd;
+    property public final androidx.constraintlayout.widget.ConstraintLayout speedInfoMutcdLayout;
+    property public final com.mapbox.navigation.ui.components.speedlimit.model.MapboxSpeedInfoOptions speedInfoOptions;
+    property public final androidx.constraintlayout.widget.ConstraintLayout speedInfoPostedSpeedLayoutMutcd;
+    property public final androidx.constraintlayout.widget.ConstraintLayout speedInfoPostedSpeedLayoutVienna;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoPostedSpeedMutcd;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoPostedSpeedVienna;
+    property public final androidx.appcompat.widget.AppCompatTextView speedInfoUnitTextMutcd;
+    property public final androidx.constraintlayout.widget.ConstraintLayout speedInfoViennaLayout;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.status.model {
+
+  public final class Status {
+    method public boolean getAnimated();
+    method public long getDuration();
+    method public int getIcon();
+    method public String getMessage();
+    method public boolean getSpinner();
+    property public final boolean animated;
+    property public final long duration;
+    property public final int icon;
+    property public final String message;
+    property public final boolean spinner;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class StatusFactory {
+    method public static com.mapbox.navigation.ui.components.status.model.Status buildStatus(String message, long duration = 0, boolean animated = true, boolean spinner = false, @DrawableRes int icon = 0);
+    method public static com.mapbox.navigation.ui.components.status.model.Status buildStatus(String message, long duration = 0, boolean animated = true, boolean spinner = false);
+    method public static com.mapbox.navigation.ui.components.status.model.Status buildStatus(String message, long duration = 0, boolean animated = true);
+    method public static com.mapbox.navigation.ui.components.status.model.Status buildStatus(String message, long duration = 0);
+    method public static com.mapbox.navigation.ui.components.status.model.Status buildStatus(String message);
+    field public static final com.mapbox.navigation.ui.components.status.model.StatusFactory INSTANCE;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.status.view {
+
+  @UiThread public final class MapboxStatusView extends android.widget.FrameLayout {
+    ctor public MapboxStatusView(android.content.Context context);
+    ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxStatusView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method public void cancel(Boolean? animated = null);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public com.mapbox.navigation.ui.components.status.model.Status? getCurrentStatus();
+    method public int getHideAnimRes();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public androidx.appcompat.widget.AppCompatTextView getMessageTextView();
+    method public int getShowAnimRes();
+    method public android.widget.ProgressBar getSpinnerProgressBar();
+    method public boolean isRendered();
+    method public void render(com.mapbox.navigation.ui.components.status.model.Status? status);
+    method public void setHideAnimRes(int);
+    method public void setShowAnimRes(int);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final com.mapbox.navigation.ui.components.status.model.Status? currentStatus;
+    property public final int hideAnimRes;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final boolean isRendered;
+    property public final androidx.appcompat.widget.AppCompatTextView messageTextView;
+    property public final int showAnimRes;
+    property public final android.widget.ProgressBar spinnerProgressBar;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.tripprogress {
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation tripProgress(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.components.tripprogress.view.MapboxTripProgressView tripProgressView, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.components.tripprogress.TripProgressConfig,kotlin.Unit> config = {});
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class TripProgressConfig {
+    method public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getTripOverviewRoutes();
+    method public com.mapbox.navigation.tripdata.progress.model.TripProgressUpdateFormatter getTripProgressFormatter();
+    method public void setTripOverviewRoutes(kotlinx.coroutines.flow.Flow<? extends java.util.List<com.mapbox.navigation.base.route.NavigationRoute>>);
+    method public void setTripProgressFormatter(com.mapbox.navigation.tripdata.progress.model.TripProgressUpdateFormatter);
+    property public final kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> tripOverviewRoutes;
+    property public final com.mapbox.navigation.tripdata.progress.model.TripProgressUpdateFormatter tripProgressFormatter;
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.tripprogress.model {
+
+  public final class TripProgressViewOptions {
+    method public int getBackgroundColor();
+    method public int getDistanceRemainingIcon();
+    method public android.content.res.ColorStateList? getDistanceRemainingIconTint();
+    method public int getDistanceRemainingTextAppearance();
+    method public int getEstimatedArrivalTimeIcon();
+    method public android.content.res.ColorStateList? getEstimatedArrivalTimeIconTint();
+    method public int getEstimatedArrivalTimeTextAppearance();
+    method public int getTimeRemainingTextAppearance();
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder toBuilder();
+    property public final int backgroundColor;
+    property public final int distanceRemainingIcon;
+    property public final android.content.res.ColorStateList? distanceRemainingIconTint;
+    property public final int distanceRemainingTextAppearance;
+    property public final int estimatedArrivalTimeIcon;
+    property public final android.content.res.ColorStateList? estimatedArrivalTimeIconTint;
+    property public final int estimatedArrivalTimeTextAppearance;
+    property public final int timeRemainingTextAppearance;
+  }
+
+  public static final class TripProgressViewOptions.Builder {
+    ctor public TripProgressViewOptions.Builder();
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder backgroundColor(@ColorRes int backgroundColor);
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions build();
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder distanceRemainingIcon(@DrawableRes int distanceRemainingIcon);
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder distanceRemainingIconTint(android.content.res.ColorStateList? distanceRemainingIconTint);
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder distanceRemainingTextAppearance(@StyleRes int distanceRemainingTextAppearance);
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder estimatedArrivalTimeIcon(@DrawableRes int estimatedArrivalTimeIcon);
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder estimatedArrivalTimeIconTint(android.content.res.ColorStateList? estimatedArrivalTimeIconTint);
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder estimatedArrivalTimeTextAppearance(@StyleRes int estimatedArrivalTimeTextAppearance);
+    method public com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions.Builder timeRemainingTextAppearance(@StyleRes int timeRemainingTextAppearance);
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.tripprogress.view {
+
+  @UiThread public final class MapboxTripProgressView extends android.widget.FrameLayout {
+    ctor public MapboxTripProgressView(android.content.Context context, com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions options = TripProgressViewOptions.<init>().build());
+    ctor public MapboxTripProgressView(android.content.Context context);
+    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void render(com.mapbox.navigation.tripdata.progress.model.TripProgressUpdateValue result);
+    method public void renderLegOverview(int legIndex, com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.progress.model.TripOverviewError,com.mapbox.navigation.tripdata.progress.model.TripOverviewValue> result);
+    method public void renderTripOverview(com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.progress.model.TripOverviewError,com.mapbox.navigation.tripdata.progress.model.TripOverviewValue> result);
+    method public void updateOptions(com.mapbox.navigation.ui.components.tripprogress.model.TripProgressViewOptions options);
+    method public void updateStyle(@StyleRes int style);
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.voice {
+
+  public final class ComponentInstallerKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.base.installer.Installation audioGuidanceButton(com.mapbox.navigation.ui.base.installer.ComponentInstaller, com.mapbox.navigation.ui.components.voice.view.MapboxAudioGuidanceButton button);
+  }
+
+}
+
+package com.mapbox.navigation.ui.components.voice.view {
+
+  public final class MapboxAudioGuidanceButton extends android.widget.FrameLayout {
+    ctor public MapboxAudioGuidanceButton(android.content.Context context);
+    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxAudioGuidanceButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
+    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
+    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
+    method public int getMuteIconResId();
+    method public String? getMuteText();
+    method public androidx.appcompat.widget.AppCompatTextView getTextView();
+    method public int getUnmuteIconResId();
+    method public String? getUnmuteText();
+    method @UiThread public void mute();
+    method @UiThread public void muteAndExtend(long duration = 2000L);
+    method @UiThread public void muteAndExtend();
+    method public void setMuteIconResId(int);
+    method public void setMuteText(String?);
+    method public void setUnmuteIconResId(int);
+    method public void setUnmuteText(String?);
+    method @UiThread public void unmute();
+    method @UiThread public void unmuteAndExtend(long duration = 2000L);
+    method @UiThread public void unmuteAndExtend();
+    method public void updateStyle(@StyleRes int style);
+    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
+    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
+    property public final int muteIconResId;
+    property public final String? muteText;
+    property public final androidx.appcompat.widget.AppCompatTextView textView;
+    property public final int unmuteIconResId;
+    property public final String? unmuteText;
+  }
+
+  @UiThread public final class MapboxSoundButton extends androidx.constraintlayout.widget.ConstraintLayout {
+    ctor public MapboxSoundButton(android.content.Context context);
+    ctor public MapboxSoundButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSoundButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public boolean mute();
+    method public boolean muteAndExtend(long duration, String text = context.getString(R.string.mapbox_muted));
+    method public boolean muteAndExtend(long duration);
+    method public boolean unmute();
+    method public boolean unmuteAndExtend(long duration, String text = context.getString(R.string.mapbox_unmuted));
+    method public boolean unmuteAndExtend(long duration);
+    method public void updateStyle(@StyleRes int style);
+  }
+
+}
+

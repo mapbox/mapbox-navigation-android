@@ -72,7 +72,7 @@ class MapboxTripNotification constructor(
     private enum class State {
         NOT_STARTED, // before session is started or after session is stopped
         STARTED, // after session is started before notification is dismissed
-        DISMISSED // after notification is dismissed before session is stopped
+        DISMISSED, // after notification is dismissed before session is stopped
     }
 
     private val applicationContext = navigationOptions.applicationContext
@@ -212,21 +212,21 @@ class MapboxTripNotification constructor(
             applicationContext.registerReceiver(
                 notificationEndReceiver,
                 IntentFilter(END_NAVIGATION_ACTION),
-                Context.RECEIVER_NOT_EXPORTED
+                Context.RECEIVER_NOT_EXPORTED,
             )
             applicationContext.registerReceiver(
                 notificationDismissedReceiver,
                 IntentFilter(DISMISS_NOTIFICATION_ACTION),
-                Context.RECEIVER_NOT_EXPORTED
+                Context.RECEIVER_NOT_EXPORTED,
             )
         } else {
             applicationContext.registerReceiver(
                 notificationEndReceiver,
-                IntentFilter(END_NAVIGATION_ACTION)
+                IntentFilter(END_NAVIGATION_ACTION),
             )
             applicationContext.registerReceiver(
                 notificationDismissedReceiver,
-                IntentFilter(DISMISS_NOTIFICATION_ACTION)
+                IntentFilter(DISMISS_NOTIFICATION_ACTION),
             )
         }
     }
@@ -301,7 +301,7 @@ class MapboxTripNotification constructor(
             val notificationChannel = NotificationChannel(
                 NAVIGATION_NOTIFICATION_CHANNEL,
                 NOTIFICATION_CHANNEL,
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             )
             notificationManager.createNotificationChannel(notificationChannel)
         }
@@ -349,7 +349,7 @@ class MapboxTripNotification constructor(
 
     private fun generateArrivalTime(
         durationRemaining: Double?,
-        time: Calendar = Calendar.getInstance()
+        time: Calendar = Calendar.getInstance(),
     ): String? {
         return durationRemaining?.let {
             val timeFormatType = timeFormatType
@@ -357,7 +357,7 @@ class MapboxTripNotification constructor(
                 time,
                 durationRemaining,
                 timeFormatType,
-                DateFormat.is24HourFormat(applicationContext)
+                DateFormat.is24HourFormat(applicationContext),
             )
             String.format(etaFormat, arrivalTime)
         }
@@ -414,7 +414,7 @@ class MapboxTripNotification constructor(
         val maneuverImageBitmap = Bitmap.createBitmap(
             drawable.intrinsicWidth,
             drawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
+            Bitmap.Config.ARGB_8888,
         )
         val maneuverCanvas = Canvas(maneuverImageBitmap)
         drawable.setBounds(0, 0, maneuverCanvas.width, maneuverCanvas.height)
@@ -428,7 +428,7 @@ class MapboxTripNotification constructor(
                 drawable.intrinsicWidth,
                 drawable.intrinsicHeight,
                 Matrix().apply { preScale(-1f, 1f) },
-                false
+                false,
             )
         } else {
             maneuverImageBitmap
@@ -441,7 +441,8 @@ class MapboxTripNotification constructor(
         } catch (e: Exception) {
             when (e) {
                 is ClosedReceiveChannelException,
-                is ClosedSendChannelException -> {
+                is ClosedSendChannelException,
+                -> {
                 }
                 else -> {
                     throw e

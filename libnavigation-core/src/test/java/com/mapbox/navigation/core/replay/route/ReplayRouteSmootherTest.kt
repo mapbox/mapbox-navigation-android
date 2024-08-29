@@ -19,7 +19,7 @@ class ReplayRouteSmootherTest {
             Point.fromLngLat(-122.393181, 37.758201),
             Point.fromLngLat(-122.393364, 37.760116),
             Point.fromLngLat(-122.393364, 37.760135),
-            Point.fromLngLat(-122.39338, 37.760208)
+            Point.fromLngLat(-122.39338, 37.760208),
         )
 
         val smoothedRoutes = routeSmoother.smoothRoute(coordinates, recommendedThresholdMeters)
@@ -53,7 +53,7 @@ class ReplayRouteSmootherTest {
             Point.fromLngLat(-122.391182, 37.757881),
             Point.fromLngLat(-122.391221, 37.758235),
             Point.fromLngLat(-122.391243, 37.758468),
-            Point.fromLngLat(-122.39135, 37.759613)
+            Point.fromLngLat(-122.39135, 37.759613),
         )
 
         val smoothedRoutes = routeSmoother.smoothRoute(coordinates, recommendedThresholdMeters)
@@ -89,7 +89,7 @@ class ReplayRouteSmootherTest {
             Point.fromLngLat(-122.390381, 37.760425),
             Point.fromLngLat(-122.390458, 37.760425),
             Point.fromLngLat(-122.390465, 37.760498),
-            Point.fromLngLat(-122.390511, 37.760978)
+            Point.fromLngLat(-122.390511, 37.760978),
         )
 
         val smoothedRoutes = routeSmoother.smoothRoute(coordinates, recommendedThresholdMeters)
@@ -106,7 +106,7 @@ class ReplayRouteSmootherTest {
             Point.fromLngLat(-121.469887, 38.551753),
             Point.fromLngLat(-121.470002, 38.551483),
             Point.fromLngLat(-121.470231, 38.550964),
-            Point.fromLngLat(-121.470978, 38.551158)
+            Point.fromLngLat(-121.470978, 38.551158),
         )
 
         val smoothedRoutes = routeSmoother.smoothRoute(coordinates, recommendedThresholdMeters)
@@ -152,7 +152,7 @@ class ReplayRouteSmootherTest {
             Point.fromLngLat(-121.46991, 38.550876),
             Point.fromLngLat(-121.470231, 38.550964),
             Point.fromLngLat(-121.470002, 38.551483),
-            Point.fromLngLat(-121.469918, 38.551677)
+            Point.fromLngLat(-121.469918, 38.551677),
         )
 
         val segment = routeSmoother.segmentRoute(coordinates, startIndex = 0, endIndex = 1)

@@ -1,23 +1,34 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.common.Cancelable
+import com.mapbox.maps.EventTimeInterval
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.extension.observable.eventdata.SourceDataLoadedEventData
-import com.mapbox.maps.extension.observable.model.SourceDataType
-import com.mapbox.maps.plugin.delegates.listeners.OnSourceDataLoadedListener
+import com.mapbox.maps.SourceDataLoaded
+import com.mapbox.maps.SourceDataLoadedCallback
+import com.mapbox.maps.SourceDataLoadedType
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import io.mockk.clearAllMocks
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.Before
 import org.junit.Test
+import java.util.Date
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RoutesExpectorTest {
 
     private val expector = RoutesExpector()
     private val map = mockk<MapboxMap>(relaxed = true)
-    private val callback = mockk<RoutesRenderedCallback>(relaxed = true)
+    private val callback = mockk<DelayedRoutesRenderedCallback>(relaxed = true)
     private val callbackWrapper = RoutesRenderedCallbackWrapper(map, callback)
+    private val sourceDataLoadedTask = mockk<Cancelable>(relaxed = true)
+
+    @Before
+    fun setUp() {
+        every { map.subscribeSourceDataLoaded(any()) } returns sourceDataLoadedTask
+    }
 
     @Test
     fun expectRoutes_everythingIsEmpty() {
@@ -25,10 +36,10 @@ class RoutesExpectorTest {
 
         verify(exactly = 1) {
             callback.onRoutesRendered(
-                RoutesRenderedResult(emptySet(), emptySet(), emptySet(), emptySet())
+                RoutesRenderedResult(emptySet(), emptySet(), emptySet(), emptySet()),
             )
         }
-        verify(exactly = 0) { map.addOnSourceDataLoadedListener(any()) }
+        verify(exactly = 0) { map.subscribeSourceDataLoaded(any()) }
     }
 
     @Test
@@ -39,7 +50,7 @@ class RoutesExpectorTest {
             renderedRoutesToNotify,
             clearedRoutesToNotify,
             ExpectedRoutesToRenderData(),
-            callbackWrapper
+            callbackWrapper,
         )
 
         verify(exactly = 1) {
@@ -48,11 +59,11 @@ class RoutesExpectorTest {
                     renderedRoutesToNotify,
                     emptySet(),
                     clearedRoutesToNotify,
-                    emptySet()
-                )
+                    emptySet(),
+                ),
             )
         }
-        verify(exactly = 0) { map.addOnSourceDataLoadedListener(any()) }
+        verify(exactly = 0) { map.subscribeSourceDataLoaded(any()) }
     }
 
     @Test
@@ -65,46 +76,46 @@ class RoutesExpectorTest {
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        val listener = captureMapListener()
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.TILE, "2")
+        val listener = captureMapCallback()
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.TILE, "2"),
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "1")
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "1"),
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "2")
+        listener.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "2"),
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "2")
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "2"),
         )
 
         verify(exactly = 1) {
             callback.onRoutesRendered(
-                RoutesRenderedResult(setOf("id#0"), emptySet(), emptySet(), emptySet())
+                RoutesRenderedResult(setOf("id#0"), emptySet(), emptySet(), emptySet()),
             )
-            map.removeOnSourceDataLoadedListener(listener)
+            sourceDataLoadedTask.cancel()
         }
     }
 
@@ -118,46 +129,46 @@ class RoutesExpectorTest {
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        val listener = captureMapListener()
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.TILE, "2")
+        val listener = captureMapCallback()
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.TILE, "2"),
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "1")
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "1"),
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "2")
+        listener.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "2"),
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "2")
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "2"),
         )
 
         verify(exactly = 1) {
             callback.onRoutesRendered(
-                RoutesRenderedResult(emptySet(), emptySet(), setOf("id#0"), emptySet())
+                RoutesRenderedResult(emptySet(), emptySet(), setOf("id#0"), emptySet()),
             )
-            map.removeOnSourceDataLoadedListener(listener)
+            sourceDataLoadedTask.cancel()
         }
     }
 
@@ -169,16 +180,16 @@ class RoutesExpectorTest {
         }
         expector.expectRoutes(routesToNotify, emptySet(), expectedRoutesToRender, callbackWrapper)
 
-        val listener = captureMapListener()
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "3")
+        val listener = captureMapCallback()
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "3"),
         )
 
         verify(exactly = 1) {
             callback.onRoutesRendered(
-                RoutesRenderedResult(emptySet(), setOf("id#0"), emptySet(), emptySet())
+                RoutesRenderedResult(emptySet(), setOf("id#0"), emptySet(), emptySet()),
             )
-            map.removeOnSourceDataLoadedListener(listener)
+            sourceDataLoadedTask.cancel()
         }
     }
 
@@ -190,16 +201,16 @@ class RoutesExpectorTest {
         }
         expector.expectRoutes(emptySet(), routesToNotify, expectedRoutesToRender, callbackWrapper)
 
-        val listener = captureMapListener()
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "3")
+        val listener = captureMapCallback()
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "3"),
         )
 
         verify(exactly = 1) {
             callback.onRoutesRendered(
-                RoutesRenderedResult(emptySet(), emptySet(), emptySet(), setOf("id#0"))
+                RoutesRenderedResult(emptySet(), emptySet(), emptySet(), setOf("id#0")),
             )
-            map.removeOnSourceDataLoadedListener(listener)
+            sourceDataLoadedTask.cancel()
         }
     }
 
@@ -219,36 +230,36 @@ class RoutesExpectorTest {
             renderedRoutesToNotify,
             clearedRoutesToNotify,
             expectedRoutesToRender,
-            callbackWrapper
+            callbackWrapper,
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        val listener = captureMapListener()
+        val listener = captureMapCallback()
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "1")
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "1"),
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "2")
+        listener.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "2"),
         )
 
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
-            map.removeOnSourceDataLoadedListener(any())
+            sourceDataLoadedTask.cancel()
         }
 
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "1")
+        listener.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "1"),
         )
 
         verify(exactly = 1) {
@@ -257,10 +268,10 @@ class RoutesExpectorTest {
                     setOf("id#0", "id#1", "id#2", "id#3"),
                     emptySet(),
                     setOf("id#4", "id#5", "id#6", "id#7"),
-                    emptySet()
-                )
+                    emptySet(),
+                ),
             )
-            map.removeOnSourceDataLoadedListener(listener)
+            sourceDataLoadedTask.cancel()
         }
     }
 
@@ -280,18 +291,18 @@ class RoutesExpectorTest {
             renderedRoutesToNotify,
             clearedRoutesToNotify,
             expectedRoutesToRender,
-            callbackWrapper
+            callbackWrapper,
         )
 
-        val listener = captureMapListener()
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "2")
+        val listener = captureMapCallback()
+        listener.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "2"),
         )
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "4")
+        listener.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "4"),
         )
-        listener.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "7")
+        listener.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "7"),
         )
 
         verify(exactly = 1) {
@@ -300,16 +311,16 @@ class RoutesExpectorTest {
                     setOf("id#0"),
                     setOf("id#1", "id#2"),
                     setOf("id#4"),
-                    setOf("id#5", "id#6")
-                )
+                    setOf("id#5", "id#6"),
+                ),
             )
-            map.removeOnSourceDataLoadedListener(listener)
+            sourceDataLoadedTask.cancel()
         }
     }
 
     @Test
     fun expectRoutes_multipleTimes() {
-        val callback2 = mockk<RoutesRenderedCallback>(relaxed = true)
+        val callback2 = mockk<DelayedRoutesRenderedCallback>(relaxed = true)
         val callbackWrapper2 = RoutesRenderedCallbackWrapper(map, callback2)
         val renderedRoutesToNotify1 = setOf("id#0", "id#1", "id#2")
         val clearedRoutesToNotify1 = setOf("id#4", "id#5", "id#6")
@@ -335,34 +346,36 @@ class RoutesExpectorTest {
             renderedRoutesToNotify1,
             clearedRoutesToNotify1,
             expectedRoutesToRender1,
-            callbackWrapper
+            callbackWrapper,
         )
-        val listener1 = captureMapListener()
+        val listener1 = captureMapCallback()
         clearAllMocks(answers = false)
 
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "3")
+        listener1.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "3"),
         )
 
+        val sourceDataLoadedTask2 = mockk<Cancelable>(relaxed = true)
+        every { map.subscribeSourceDataLoaded(any()) } returns sourceDataLoadedTask2
         expector.expectRoutes(
             renderedRoutesToNotify2,
             clearedRoutesToNotify2,
             expectedRoutesToRender2,
-            callbackWrapper2
+            callbackWrapper2,
         )
-        val listener2 = captureMapListener()
+        val listener2 = captureMapCallback()
 
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "4")
+        listener1.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "4"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "4")
+        listener2.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "4"),
         )
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "4")
+        listener1.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "4"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "4")
+        listener2.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "4"),
         )
 
         verify(exactly = 0) {
@@ -370,11 +383,11 @@ class RoutesExpectorTest {
             callback2.onRoutesRendered(any())
         }
 
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "3")
+        listener1.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "3"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "3")
+        listener2.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "3"),
         )
 
         verify(exactly = 1) {
@@ -383,27 +396,27 @@ class RoutesExpectorTest {
                     emptySet(),
                     setOf("id#0", "id#1", "id#2"),
                     emptySet(),
-                    setOf("id#4", "id#5", "id#6")
-                )
+                    setOf("id#4", "id#5", "id#6"),
+                ),
             )
             callback2.onRoutesRendered(
                 RoutesRenderedResult(
                     setOf("id#0", "id#5", "id#7"),
                     emptySet(),
                     setOf("id#1", "id#8", "id#6"),
-                    emptySet()
-                )
+                    emptySet(),
+                ),
             )
-            map.removeOnSourceDataLoadedListener(listener1)
-            map.removeOnSourceDataLoadedListener(listener2)
+            sourceDataLoadedTask.cancel()
+            sourceDataLoadedTask2.cancel()
         }
         clearAllMocks(answers = false)
 
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "3")
+        listener1.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "3"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "3")
+        listener2.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "3"),
         )
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
@@ -413,7 +426,7 @@ class RoutesExpectorTest {
 
     @Test
     fun expectRoutes_multipleTimes_differentSources() {
-        val callback2 = mockk<RoutesRenderedCallback>(relaxed = true)
+        val callback2 = mockk<DelayedRoutesRenderedCallback>(relaxed = true)
         val callbackWrapper2 = RoutesRenderedCallbackWrapper(map, callback2)
         val renderedRoutesToNotify1 = setOf("id#0", "id#1", "id#2")
         val clearedRoutesToNotify1 = setOf("id#3", "id#4", "id#5")
@@ -439,37 +452,39 @@ class RoutesExpectorTest {
             renderedRoutesToNotify1,
             clearedRoutesToNotify1,
             expectedRoutesToRender1,
-            callbackWrapper
+            callbackWrapper,
         )
-        val listener1 = captureMapListener()
+        val listener1 = captureMapCallback()
         clearAllMocks(answers = false)
 
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source1", SourceDataType.METADATA, "3")
+        listener1.run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "3"),
         )
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "3")
+        listener1.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "3"),
         )
 
+        val sourceDataLoadedTask2 = mockk<Cancelable>(relaxed = true)
+        every { map.subscribeSourceDataLoaded(any()) } returns sourceDataLoadedTask2
         expector.expectRoutes(
             renderedRoutesToNotify2,
             clearedRoutesToNotify2,
             expectedRoutesToRender2,
-            callbackWrapper2
+            callbackWrapper2,
         )
-        val listener2 = captureMapListener()
+        val listener2 = captureMapCallback()
 
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "4")
+        listener1.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "4"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source2", SourceDataType.METADATA, "4")
+        listener2.run(
+            sourceDataLoadedEventData("source2", SourceDataLoadedType.METADATA, "4"),
         )
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source4", SourceDataType.METADATA, "2")
+        listener1.run(
+            sourceDataLoadedEventData("source4", SourceDataLoadedType.METADATA, "2"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source4", SourceDataType.METADATA, "2")
+        listener2.run(
+            sourceDataLoadedEventData("source4", SourceDataLoadedType.METADATA, "2"),
         )
 
         verify(exactly = 0) {
@@ -477,17 +492,17 @@ class RoutesExpectorTest {
             callback2.onRoutesRendered(any())
         }
 
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "3")
+        listener1.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "3"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "3")
+        listener2.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "3"),
         )
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source6", SourceDataType.METADATA, "2")
+        listener1.run(
+            sourceDataLoadedEventData("source6", SourceDataLoadedType.METADATA, "2"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source6", SourceDataType.METADATA, "2")
+        listener2.run(
+            sourceDataLoadedEventData("source6", SourceDataLoadedType.METADATA, "2"),
         )
 
         verify(exactly = 1) {
@@ -496,33 +511,33 @@ class RoutesExpectorTest {
                     setOf("id#2"),
                     setOf("id#0", "id#1"),
                     setOf("id#5"),
-                    setOf("id#3", "id#4")
-                )
+                    setOf("id#3", "id#4"),
+                ),
             )
             callback2.onRoutesRendered(
                 RoutesRenderedResult(
                     setOf("id#3", "id#7"),
                     setOf("id#0"),
                     setOf("id#5", "id#8"),
-                    setOf("id#1")
-                )
+                    setOf("id#1"),
+                ),
             )
-            map.removeOnSourceDataLoadedListener(listener1)
-            map.removeOnSourceDataLoadedListener(listener2)
+            sourceDataLoadedTask.cancel()
+            sourceDataLoadedTask2.cancel()
         }
         clearAllMocks(answers = false)
 
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "3")
+        listener1.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "3"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source3", SourceDataType.METADATA, "3")
+        listener2.run(
+            sourceDataLoadedEventData("source3", SourceDataLoadedType.METADATA, "3"),
         )
-        listener1.onSourceDataLoaded(
-            sourceDataLoadedEventData("source6", SourceDataType.METADATA, "2")
+        listener1.run(
+            sourceDataLoadedEventData("source6", SourceDataLoadedType.METADATA, "2"),
         )
-        listener2.onSourceDataLoaded(
-            sourceDataLoadedEventData("source6", SourceDataType.METADATA, "2")
+        listener2.run(
+            sourceDataLoadedEventData("source6", SourceDataLoadedType.METADATA, "2"),
         )
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
@@ -530,17 +545,24 @@ class RoutesExpectorTest {
         }
     }
 
-    private fun captureMapListener(): OnSourceDataLoadedListener {
-        val slot = slot<OnSourceDataLoadedListener>()
-        verify(exactly = 1) { map.addOnSourceDataLoadedListener(capture(slot)) }
+    private fun captureMapCallback(): SourceDataLoadedCallback {
+        val slot = slot<SourceDataLoadedCallback>()
+        verify(exactly = 1) { map.subscribeSourceDataLoaded(capture(slot)) }
         return slot.captured
     }
 
     private fun sourceDataLoadedEventData(
         sourceId: String,
-        type: SourceDataType,
-        dataId: String?
-    ): SourceDataLoadedEventData {
-        return SourceDataLoadedEventData(0, 0, sourceId, type, null, null, dataId)
+        type: SourceDataLoadedType,
+        dataId: String?,
+    ): SourceDataLoaded {
+        return SourceDataLoaded(
+            sourceId,
+            type,
+            null,
+            null,
+            dataId,
+            EventTimeInterval(Date(), Date()),
+        )
     }
 }

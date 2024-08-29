@@ -31,46 +31,46 @@ internal class RoutesRefresherResultAnyRequestFailedTest(
                 arrayOf(
                     RouteRefresherStatus.FAILURE,
                     listOf(RouteRefresherStatus.INVALIDATED),
-                    true
+                    true,
                 ),
                 arrayOf(RouteRefresherStatus.SUCCESS, listOf(RouteRefresherStatus.FAILURE), true),
                 arrayOf(RouteRefresherStatus.FAILURE, listOf(RouteRefresherStatus.FAILURE), true),
                 arrayOf(
                     RouteRefresherStatus.SUCCESS,
                     listOf(RouteRefresherStatus.INVALIDATED, RouteRefresherStatus.INVALID),
-                    false
+                    false,
                 ),
                 arrayOf(
                     RouteRefresherStatus.FAILURE,
                     listOf(RouteRefresherStatus.SUCCESS, RouteRefresherStatus.INVALIDATED),
-                    true
+                    true,
                 ),
 
                 // #10
                 arrayOf(
                     RouteRefresherStatus.INVALIDATED,
                     listOf(RouteRefresherStatus.FAILURE, RouteRefresherStatus.SUCCESS),
-                    true
+                    true,
                 ),
                 arrayOf(
                     RouteRefresherStatus.SUCCESS,
                     listOf(RouteRefresherStatus.INVALID, RouteRefresherStatus.FAILURE),
-                    true
+                    true,
                 ),
                 arrayOf(
                     RouteRefresherStatus.FAILURE,
                     listOf(RouteRefresherStatus.FAILURE, RouteRefresherStatus.INVALIDATED),
-                    true
+                    true,
                 ),
                 arrayOf(
                     RouteRefresherStatus.FAILURE,
                     listOf(RouteRefresherStatus.SUCCESS, RouteRefresherStatus.FAILURE),
-                    true
+                    true,
                 ),
                 arrayOf(
                     RouteRefresherStatus.FAILURE,
                     listOf(RouteRefresherStatus.FAILURE, RouteRefresherStatus.FAILURE),
-                    true
+                    true,
                 ),
             )
         }
@@ -80,7 +80,7 @@ internal class RoutesRefresherResultAnyRequestFailedTest(
     fun anyRequestFailed() {
         val result = RoutesRefresherResult(
             mockk { every { status } returns primaryStatus },
-            alternativesStatus.map { mockk { every { status } returns it } }
+            alternativesStatus.map { mockk { every { status } returns it } },
         )
 
         assertEquals(expected, result.anyRequestFailed())

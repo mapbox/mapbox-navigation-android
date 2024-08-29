@@ -11,6 +11,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.currentTime
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -49,10 +50,10 @@ class MapboxReplayerTest {
                         altitude = 212.4732666015625,
                         accuracyHorizontal = 4.288000106811523,
                         bearing = 243.31265258789063,
-                        speed = 0.5585000514984131
-                    )
-                )
-            )
+                        speed = 0.5585000514984131,
+                    ),
+                ),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
@@ -82,8 +83,8 @@ class MapboxReplayerTest {
                         bearing = 108.00135040283203,
                         altitude = 222.47210693359376,
                         accuracyHorizontal = 3.9000000953674318,
-                        provider = "fused"
-                    )
+                        provider = "fused",
+                    ),
                 ),
                 ReplayEventUpdateLocation(
                     1580777822.959,
@@ -95,8 +96,8 @@ class MapboxReplayerTest {
                         bearing = 106.001953125,
                         altitude = 221.9241943359375,
                         accuracyHorizontal = 3.9000000953674318,
-                        provider = "fused"
-                    )
+                        provider = "fused",
+                    ),
                 ),
                 ReplayEventUpdateLocation(
                     1580777824.953,
@@ -108,10 +109,10 @@ class MapboxReplayerTest {
                         bearing = 106.00138092041016,
                         altitude = 221.253662109375,
                         accuracyHorizontal = 3.9000000953674318,
-                        provider = "fused"
-                    )
-                )
-            )
+                        provider = "fused",
+                    ),
+                ),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
@@ -157,8 +158,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1000.000),
                 ReplayEventGetStatus(1001.000),
-                ReplayEventGetStatus(1003.000)
-            )
+                ReplayEventGetStatus(1003.000),
+            ),
         )
         val timeCapture = mutableListOf<Long>()
         mapboxReplayer.registerObserver { events ->
@@ -184,7 +185,7 @@ class MapboxReplayerTest {
     fun `should allow custom events`() = coroutineRule.runBlockingTest {
         data class CustomReplayEvent(
             override val eventTimestamp: Double,
-            val customValue: String
+            val customValue: String,
         ) : ReplayEventBase
         mapboxReplayer.pushEvents(
             listOf(
@@ -199,10 +200,10 @@ class MapboxReplayerTest {
                         altitude = null,
                         accuracyHorizontal = null,
                         bearing = null,
-                        speed = null
-                    )
-                )
-            )
+                        speed = null,
+                    ),
+                ),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
@@ -240,10 +241,10 @@ class MapboxReplayerTest {
                         altitude = 212.4732666015625,
                         accuracyHorizontal = 4.288000106811523,
                         bearing = 243.31265258789063,
-                        speed = 0.5585000514984131
-                    )
-                )
-            )
+                        speed = 0.5585000514984131,
+                    ),
+                ),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
@@ -262,8 +263,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1580777612.853),
                 ReplayEventGetStatus(1580777613.452),
-                ReplayEventGetStatus(1580777614.085)
-            )
+                ReplayEventGetStatus(1580777614.085),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
@@ -279,8 +280,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.853),
                 seekToEvent,
-                ReplayEventGetStatus(3.085)
-            )
+                ReplayEventGetStatus(3.085),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxReplayer.seekTo(seekToEvent)
@@ -303,8 +304,8 @@ class MapboxReplayerTest {
         mapboxReplayer.pushEvents(
             listOf(
                 ReplayEventGetStatus(1.853),
-                ReplayEventGetStatus(3.085)
-            )
+                ReplayEventGetStatus(3.085),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxReplayer.seekTo(seekToEvent)
@@ -316,8 +317,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(0.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(4.0)
-            )
+                ReplayEventGetStatus(4.0),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxReplayer.seekTo(1.0)
@@ -340,8 +341,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1580777611.853),
                 ReplayEventGetStatus(1580777613.452),
-                ReplayEventGetStatus(1580777614.085)
-            )
+                ReplayEventGetStatus(1580777614.085),
+            ),
         )
         mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxReplayer.seekTo(1.0)
@@ -461,8 +462,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
         val firstObserver: ReplayEventsObserver = mockk(relaxed = true)
         val secondObserver: ReplayEventsObserver = mockk(relaxed = true)
@@ -489,8 +490,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
         val firstObserver: ReplayEventsObserver = mockk(relaxed = true)
         val secondObserver: ReplayEventsObserver = mockk(relaxed = true)
@@ -549,8 +550,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1000.000),
                 ReplayEventGetStatus(1001.000),
-                ReplayEventGetStatus(1003.000)
-            )
+                ReplayEventGetStatus(1003.000),
+            ),
         )
         val timeCapture = mutableListOf<Long>()
         mapboxReplayer.registerObserver { events ->
@@ -593,8 +594,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
         mapboxReplayer.play()
         advanceTimeMillis(1000)
@@ -612,8 +613,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
 
         advanceTimeMillis(3000)
@@ -639,8 +640,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
         advanceTimeMillis(3000)
         mapboxReplayer.stop()
@@ -657,8 +658,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
         mapboxReplayer.clearEvents()
 
@@ -674,8 +675,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
         mapboxReplayer.finish()
 
@@ -689,8 +690,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
         mapboxReplayer.stop()
 
@@ -706,8 +707,8 @@ class MapboxReplayerTest {
             listOf(
                 ReplayEventGetStatus(1.0),
                 ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            )
+                ReplayEventGetStatus(3.0),
+            ),
         )
         mapboxReplayer.stop()
         mapboxReplayer.play()

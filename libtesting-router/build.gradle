@@ -1,0 +1,55 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.dokka'
+apply from: "../gradle/ktlint.gradle"
+apply plugin: 'com.jaredsburrows.license'
+apply from: file("../gradle/testing-module-settings.gradle")
+
+group = project.ext.mapboxArtifactGroupId
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+    }
+}
+
+dependencies {
+    api project(':libnavigation-android')
+
+    implementation dependenciesList.multidex
+    api dependenciesList.androidxTestJunit
+    api dependenciesList.junit
+    api dependenciesList.androidXConstraintLayout
+    api dependenciesList.mapboxCommonNative
+    api dependenciesList.coroutinesAndroid
+    testImplementation project(':libtesting-navigation-base')
+    testImplementation project(':libtesting-utils')
+}
+
+apply from: "../gradle/track-public-apis.gradle"
+apply from: "../gradle/publish.gradle"
+apply from: "../gradle/jacoco.gradle"
+
+dokkaHtmlPartial {
+    outputDirectory.set(kdocPath)
+    moduleName.set("Test Router")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.testing.router.internal.*")
+                suppress.set(true)
+            }
+        }
+    }
+}

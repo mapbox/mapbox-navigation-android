@@ -20,7 +20,7 @@ interface NavigationCameraTransition {
      */
     fun transitionFromLowZoomToHighZoom(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet
 
     /**
@@ -34,7 +34,7 @@ interface NavigationCameraTransition {
      */
     fun transitionFromHighZoomToLowZoom(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet
 
     /**
@@ -48,6 +48,6 @@ interface NavigationCameraTransition {
      */
     fun transitionLinear(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet
 }

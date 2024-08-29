@@ -2,27 +2,26 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
 import androidx.test.espresso.Espresso
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
-import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
-import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
-import com.mapbox.navigation.instrumentation_tests.utils.idling.ArrivalIdlingResource
-import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.assertions.RouteProgressStateTransitionAssertion
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.testing.utils.idling.ArrivalIdlingResource
+import com.mapbox.navigation.testing.utils.idling.RouteProgressStateIdlingResource
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -56,14 +55,13 @@ class SanityCoreRouteTest : BaseCoreNoCleanUpTest() {
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(context)
-                    .accessToken(getMapboxAccessTokenFromResources(context))
-                    .build()
+                    .build(),
             )
             mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
         }
         routeCompleteIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
-            RouteProgressState.COMPLETE
+            RouteProgressState.COMPLETE,
         )
     }
 
@@ -91,29 +89,29 @@ class SanityCoreRouteTest : BaseCoreNoCleanUpTest() {
                     .applyLanguageAndVoiceUnitOptions(context)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .coordinatesList(mockRoute.routeWaypoints).build(),
-                object : RouterCallback {
+                object : NavigationRouterCallback {
                     override fun onRoutesReady(
-                        routes: List<DirectionsRoute>,
-                        routerOrigin: RouterOrigin
+                        routes: List<NavigationRoute>,
+                        @RouterOrigin routerOrigin: String,
                     ) {
-                        mapboxNavigation.setRoutes(routes)
-                        mockLocationReplayerRule.playRoute(routes[0])
+                        mapboxNavigation.setNavigationRoutes(routes)
+                        mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
                     }
 
                     override fun onFailure(
                         reasons: List<RouterFailure>,
-                        routeOptions: RouteOptions
+                        routeOptions: RouteOptions,
                     ) {
                         // no impl
                     }
 
                     override fun onCanceled(
                         routeOptions: RouteOptions,
-                        routerOrigin: RouterOrigin
+                        @RouterOrigin routerOrigin: String,
                     ) {
                         // no impl
                     }
-                }
+                },
             )
         }
 
@@ -152,29 +150,29 @@ class SanityCoreRouteTest : BaseCoreNoCleanUpTest() {
                     .applyLanguageAndVoiceUnitOptions(context)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .coordinatesList(mockRoute.routeWaypoints).build(),
-                object : RouterCallback {
+                object : NavigationRouterCallback {
                     override fun onRoutesReady(
-                        routes: List<DirectionsRoute>,
-                        routerOrigin: RouterOrigin
+                        routes: List<NavigationRoute>,
+                        @RouterOrigin routerOrigin: String,
                     ) {
-                        mapboxNavigation.setRoutes(routes)
-                        mockLocationReplayerRule.playRoute(routes.first())
+                        mapboxNavigation.setNavigationRoutes(routes)
+                        mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
                     }
 
                     override fun onFailure(
                         reasons: List<RouterFailure>,
-                        routeOptions: RouteOptions
+                        routeOptions: RouteOptions,
                     ) {
                         // no impl
                     }
 
                     override fun onCanceled(
                         routeOptions: RouteOptions,
-                        routerOrigin: RouterOrigin
+                        @RouterOrigin routerOrigin: String,
                     ) {
                         // no impl
                     }
-                }
+                },
             )
         }
 

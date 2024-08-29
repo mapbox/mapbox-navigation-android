@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.telemetry.events
 
 import android.content.Context
 import com.mapbox.common.TelemetrySystemUtils.isPluggedIn
-import com.mapbox.common.TelemetrySystemUtils.obtainApplicationState
 import com.mapbox.common.TelemetrySystemUtils.obtainBatteryLevel
 import com.mapbox.common.TelemetrySystemUtils.obtainCellularNetworkType
 import com.mapbox.common.TelemetrySystemUtils.obtainCurrentDate
@@ -35,7 +34,7 @@ internal data class PhoneState(
                 isBatteryPluggedIn = isPluggedIn(context),
                 connectivity = obtainCellularNetworkType(context),
                 audioType = obtainAudioType(context),
-                applicationState = obtainApplicationState(context),
+                applicationState = LifecycleStateProvider.instance.currentState.name,
                 created = obtainCurrentDate(),
                 feedbackId = obtainUniversalUniqueIdentifier(),
                 // Hardcoded to '-' for privacy concerns

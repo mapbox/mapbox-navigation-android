@@ -8,5 +8,5 @@ package com.mapbox.navigation.ui.maps.route.line.model
  */
 class RouteNotFound internal constructor(
     val errorMessage: String,
-    val throwable: Throwable?
+    val throwable: Throwable?,
 )

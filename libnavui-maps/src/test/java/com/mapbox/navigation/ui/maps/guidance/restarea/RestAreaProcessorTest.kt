@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.guidance.restarea
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory.createValue
 import com.mapbox.common.ResourceData
@@ -14,11 +15,13 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.buildRoadObject
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.buildUpcomingRoadObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
+import com.mapbox.navigation.base.internal.utils.toByteArray
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.ui.maps.guidance.restarea.model.MapboxRestAreaOptions
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
 import com.mapbox.navigator.Amenity
@@ -123,7 +126,7 @@ class RestAreaProcessorTest {
         val bannerView: BannerView = mockk()
         val bannerComponentsList: MutableList<BannerComponents> = mutableListOf()
         bannerComponentsList.add(
-            getComponentGuidanceViewTypeSapaSubTypeImageUrl("https://abc.mapbox.com&")
+            getComponentGuidanceViewTypeSapaSubTypeImageUrl("https://abc.mapbox.com&"),
         )
         every { bannerInstructions.view() } returns bannerView
         every { bannerView.components() } returns bannerComponentsList
@@ -153,7 +156,7 @@ class RestAreaProcessorTest {
         val response: Expected<ResourceLoadError, ResourceLoadResult> = createValue(loadResult)
         val action = RestAreaAction.ProcessRestAreaMapResponse(response)
         val expected = RestAreaResult.RestAreaMapSvg.Failure(
-            "Your token cannot access this resource, contact support"
+            "Your token cannot access this resource, contact support",
         )
 
         val result = RestAreaProcessor.process(action) as RestAreaResult.RestAreaMapSvg.Failure
@@ -199,18 +202,20 @@ class RestAreaProcessorTest {
             status = ResourceLoadStatus.AVAILABLE,
         )
         val response: Expected<ResourceLoadError, ResourceLoadResult> = createValue(loadResult)
-        val expected = RestAreaResult.RestAreaMapSvg.Success(blob)
+        val expected = RestAreaResult.RestAreaMapSvg.Success(blob.toDataRef())
         val action = RestAreaAction.ProcessRestAreaMapResponse(response)
 
         val result = RestAreaProcessor.process(action) as RestAreaResult.RestAreaMapSvg.Success
 
-        assertEquals(expected.data, result.data)
+        val expectedBytes = expected.data.toByteArray()
+        val actualBytes = result.data.toByteArray()
+        assertTrue(expectedBytes.contentEquals(actualBytes))
     }
 
     @Test
     fun `process action sapa map process bytearray to bitmap failure`() {
         mockkObject(SvgUtil)
-        val mockData = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11)
+        val mockData = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11).toDataRef()
         val mockOptions = mockk<MapboxRestAreaOptions> {
             every { desiredGuideMapWidth } returns 1000
         }
@@ -241,7 +246,7 @@ class RestAreaProcessorTest {
         val nativeRestAreaObject = nativeRestAreaObjectWith(
             name = "rest-area-1",
             location = restAreaLocation,
-            mapUri = restAreaMapUri
+            mapUri = restAreaMapUri,
         )
 
         val routeProgress = routeProgressWith(
@@ -250,13 +255,13 @@ class RestAreaProcessorTest {
                 buildUpcomingRoadObject(
                     roadObject = buildRoadObject(nativeRestAreaObject),
                     distanceToStart = 1000.0,
-                    distanceInfo = null
-                )
-            )
+                    distanceInfo = null,
+                ),
+            ),
         )
 
         val result = RestAreaProcessor.process(
-            RestAreaAction.CheckUpcomingRestStop(routeProgress)
+            RestAreaAction.CheckUpcomingRestStop(routeProgress),
         ) as? RestAreaResult.RestAreaMapAvailable
 
         assertNotNull("expected RestAreaResult.RestAreaMapAvailable", result)
@@ -279,7 +284,7 @@ class RestAreaProcessorTest {
         val nativeRestAreaObject = nativeRestAreaObjectWith(
             name = "rest-area-1",
             location = restAreaLocation,
-            mapUri = restAreaMapUri
+            mapUri = restAreaMapUri,
         )
 
         val routeProgress = routeProgressWith(
@@ -288,25 +293,25 @@ class RestAreaProcessorTest {
                 buildUpcomingRoadObject(
                     roadObject = buildRoadObject(nativeRestAreaObject),
                     distanceToStart = 1200.0,
-                    distanceInfo = null
-                )
-            )
+                    distanceInfo = null,
+                ),
+            ),
         )
 
         val result = RestAreaProcessor.process(
-            RestAreaAction.CheckUpcomingRestStop(routeProgress)
+            RestAreaAction.CheckUpcomingRestStop(routeProgress),
         )
 
         assertTrue(
             "expected RestAreaResult.RestAreaMapUnavailable",
-            result is RestAreaResult.RestAreaMapUnavailable
+            result is RestAreaResult.RestAreaMapUnavailable,
         )
     }
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun routeProgressWith(
         currentStepDistanceRemaining: Float,
-        upcomingRoadObjects: List<UpcomingRoadObject>
+        upcomingRoadObjects: List<UpcomingRoadObject>,
     ): RouteProgress = buildRouteProgressObject(
         route = mockk(),
         bannerInstructions = null,
@@ -349,9 +354,9 @@ class RestAreaProcessorTest {
                 NativeStub.MatchedPointLocation(
                     Position(
                         GraphPosition(1, 0.0),
-                        location
-                    )
-                )
+                        location,
+                    ),
+                ),
             ),
             RoadObjectType.SERVICE_AREA,
             RoadObjectProvider.MAPBOX,
@@ -361,12 +366,12 @@ class RestAreaProcessorTest {
                     ServiceAreaType.REST_AREA,
                     name,
                     listOf(
-                        Amenity(AmenityType.GAS_STATION, "Get GAS", "FuelItUp")
+                        Amenity(AmenityType.GAS_STATION, "Get GAS", "FuelItUp"),
                     ),
-                    mapUri
-                )
+                    mapUri,
+                ),
             ),
-            true
+            true,
         )
 
     private fun getComponentGuidanceViewType(): BannerComponents {
@@ -396,7 +401,7 @@ class RestAreaProcessorTest {
     }
 
     private fun resourceData(blob: ByteArray) = object : ResourceData(0) {
-        override fun getData(): ByteArray = blob
+        override fun getData(): DataRef = blob.toDataRef()
     }
 
     private fun resourceLoadResult(
@@ -407,7 +412,9 @@ class RestAreaProcessorTest {
         expires: Date = Date(),
         totalBytes: Long = 0,
         transferredBytes: Long = 0,
-        contentType: String = "image/png"
+        contentType: String = "image/png",
+        etag: String = "",
+        belongsToGroup: Boolean = false,
     ): ResourceLoadResult {
         return ResourceLoadResult(
             data,
@@ -417,13 +424,15 @@ class RestAreaProcessorTest {
             expires,
             totalBytes,
             transferredBytes,
-            contentType
+            contentType,
+            etag,
+            belongsToGroup,
         )
     }
 
     object NativeStub {
         class MatchedPointLocation(
-            private val pos: Position
+            private val pos: Position,
         ) : com.mapbox.navigator.MatchedPointLocation(0) {
             override fun getPosition(): Position = pos
         }

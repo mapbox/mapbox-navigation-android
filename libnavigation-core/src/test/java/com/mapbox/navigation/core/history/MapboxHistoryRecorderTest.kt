@@ -2,19 +2,16 @@ package com.mapbox.navigation.core.history
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
-import io.mockk.every
+import com.mapbox.navigator.HistoryRecorderHandleInterface
+import io.mockk.clearAllMocks
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import org.junit.After
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,12 +28,8 @@ class MapboxHistoryRecorderTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val navigationOptionsBuilder = NavigationOptions.Builder(context)
-
-    @Before
-    fun setup() {
-        mockkStatic(LocationEngineProvider::class)
-        every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
-    }
+    private val observer = mockk<HistoryRecordingEnabledObserver>(relaxed = true)
+    private val handle = mockk<HistoryRecorderHandleInterface>(relaxed = true)
 
     @Test
     fun `historyRecorder fileDirectory is default when no options provided`() {
@@ -55,7 +48,7 @@ class MapboxHistoryRecorderTest {
             .historyRecorderOptions(
                 HistoryRecorderOptions.Builder()
                     .fileDirectory(filePath)
-                    .build()
+                    .build(),
             )
             .build()
         val historyRecorder = MapboxHistoryRecorder(navigationOptions)
@@ -71,7 +64,7 @@ class MapboxHistoryRecorderTest {
             .historyRecorderOptions(
                 HistoryRecorderOptions.Builder()
                     .fileDirectory("historyRecorder/test")
-                    .build()
+                    .build(),
             )
             .build()
         val historyRecorder = MapboxHistoryRecorder(navigationOptions)
@@ -96,8 +89,129 @@ class MapboxHistoryRecorderTest {
         verify { logger.logW(any(), any()) }
     }
 
-    @After
-    fun tearDown() {
-        unmockkStatic(LocationEngineProvider::class)
+    @Test
+    fun registerObserverStickyNoRecorder() {
+        val navigationOptions = navigationOptionsBuilder
+            .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
+            .build()
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions)
+
+        historyRecorder.registerHistoryRecordingEnabledObserver(observer)
+
+        verify(exactly = 1) {
+            observer.onDisabled(historyRecorder)
+        }
+    }
+
+    @Test
+    fun registerObserverStickyTrue() {
+        val navigationOptions = navigationOptionsBuilder
+            .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
+            .build()
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions, handle)
+        historyRecorder.startRecording()
+
+        historyRecorder.registerHistoryRecordingEnabledObserver(observer)
+
+        verify(exactly = 1) {
+            observer.onEnabled(historyRecorder)
+        }
+    }
+
+    @Test
+    fun registerObserverStickyFalse() {
+        val navigationOptions = navigationOptionsBuilder
+            .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
+            .build()
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions, handle)
+
+        historyRecorder.registerHistoryRecordingEnabledObserver(observer)
+
+        verify(exactly = 1) {
+            observer.onDisabled(historyRecorder)
+        }
+    }
+
+    @Test
+    fun observerGetsNotifiedAboutChanges() {
+        val navigationOptions = navigationOptionsBuilder
+            .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
+            .build()
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions, handle)
+
+        historyRecorder.registerHistoryRecordingEnabledObserver(observer)
+        clearAllMocks(answers = false)
+
+        historyRecorder.startRecording()
+
+        verify(exactly = 1) {
+            observer.onEnabled(historyRecorder)
+        }
+
+        historyRecorder.stopRecording({})
+
+        verify(exactly = 1) {
+            observer.onDisabled(historyRecorder)
+        }
+    }
+
+    @Test
+    fun observerDoesNotGetNotifiedAfterUnregister() {
+        val navigationOptions = navigationOptionsBuilder
+            .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
+            .build()
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions, handle)
+
+        historyRecorder.registerHistoryRecordingEnabledObserver(observer)
+        clearAllMocks(answers = false)
+
+        historyRecorder.unregisterHistoryRecordingEnabledObserver(observer)
+
+        historyRecorder.startRecording()
+
+        verify(exactly = 0) {
+            observer.onEnabled(any())
+            observer.onDisabled(any())
+        }
+    }
+
+    @Test
+    fun unregisterAllObservers() {
+        val navigationOptions = navigationOptionsBuilder
+            .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
+            .build()
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions, handle)
+
+        historyRecorder.registerHistoryRecordingEnabledObserver(observer)
+        clearAllMocks(answers = false)
+
+        historyRecorder.unregisterAllHistoryRecordingEnabledObservers()
+
+        historyRecorder.startRecording()
+
+        verify(exactly = 0) {
+            observer.onEnabled(any())
+            observer.onDisabled(any())
+        }
+    }
+
+    @Test
+    fun unregisterObserverInObserverDoesNotCrash() {
+        val navigationOptions = navigationOptionsBuilder
+            .historyRecorderOptions(HistoryRecorderOptions.Builder().build())
+            .build()
+        val historyRecorder = MapboxHistoryRecorder(navigationOptions, handle)
+
+        val observer = object : HistoryRecordingEnabledObserver {
+            override fun onEnabled(historyRecorderHandle: MapboxHistoryRecorder) {
+                historyRecorder.unregisterHistoryRecordingEnabledObserver(this)
+            }
+
+            override fun onDisabled(historyRecorderHandle: MapboxHistoryRecorder) {
+            }
+        }
+        historyRecorder.registerHistoryRecordingEnabledObserver(observer)
+
+        historyRecorder.startRecording()
     }
 }

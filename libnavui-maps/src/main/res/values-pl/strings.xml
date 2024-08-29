@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="mapbox_recenter">Wyśrodkuj</string>
-    <string name="mapbox_route_overview">Przegląd trasy</string>
-    <string name="mapbox_route_follow">Śledzenie trasy</string>
-</resources>

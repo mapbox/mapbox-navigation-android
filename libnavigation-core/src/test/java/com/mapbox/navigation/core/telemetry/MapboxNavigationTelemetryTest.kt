@@ -3,21 +3,22 @@ package com.mapbox.navigation.core.telemetry
 import android.app.ActivityManager
 import android.app.AlarmManager
 import android.content.Context
-import android.location.Location
 import android.media.AudioManager
 import android.telephony.TelephonyManager
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directions.v5.models.StepManeuver
-import com.mapbox.common.BillingServiceInterface
+import com.mapbox.common.SdkInformation
 import com.mapbox.common.TelemetrySystemUtils
 import com.mapbox.common.TurnstileEvent
 import com.mapbox.common.UserSKUIdentifier
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.accounts.SkuIdProviderImpl
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -27,6 +28,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState.TRACKING
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.accounts.BillingServiceProvider
+import com.mapbox.navigation.core.accounts.BillingServiceProxy
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -40,6 +42,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
+import com.mapbox.navigation.core.telemetry.events.LifecycleStateProvider
 import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
@@ -66,6 +69,9 @@ import com.mapbox.navigation.metrics.internal.TelemetryServiceProvider
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createRouteOptions
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -99,12 +105,12 @@ class MapboxNavigationTelemetryTest {
     private companion object {
         private const val LAST_LOCATION_LAT = 55.5
         private const val LAST_LOCATION_LON = 88.8
-        private const val LAST_LOCATION_SPEED = 10.0f
-        private const val LAST_LOCATION_BEARING = 90.0f
+        private const val LAST_LOCATION_SPEED = 10.0
+        private const val LAST_LOCATION_BEARING = 90.0
         private const val LAST_LOCATION_ALTITUDE = 15.0
         private const val LAST_LOCATION_TIME = 1000L
-        private const val LAST_LOCATION_ACCURACY = 222.0f
-        private const val LAST_LOCATION_VERTICAL_ACCURACY = 111.0f
+        private const val LAST_LOCATION_ACCURACY = 222.0
+        private const val LAST_LOCATION_VERTICAL_ACCURACY = 111.0
 
         private const val ANOTHER_LAST_LOCATION_LAT = 66.6
         private const val ANOTHER_LAST_LOCATION_LON = 77.7
@@ -129,13 +135,8 @@ class MapboxNavigationTelemetryTest {
         private const val ROUTE_PROGRESS_DURATION_REMAINING = 22.22
         private const val ROUTE_PROGRESS_DISTANCE_TRAVELED = 15f
 
-        private const val ORIGINAL_STEP_MANEUVER_LOCATION_LATITUDE = 135.21
-        private const val ORIGINAL_STEP_MANEUVER_LOCATION_LONGITUDE = 436.5
-        private const val ANOTHER_STEP_MANEUVER_LOCATION_LATITUDE = 42.2
-        private const val ANOTHER_STEP_MANEUVER_LOCATION_LONGITUDE = 12.4
-
         private const val STEP_INDEX = 5
-        private const val SDK_IDENTIFIER = "mapbox-navigation-android"
+        private const val SDK_IDENTIFIER = "mapbox-navigation-android-core"
         private const val ACTIVE_GUIDANCE_SESSION_ID = "active-guidance-session-id"
         private const val FREE_DRIVE_SESSION_ID = "free-drive-session-id"
 
@@ -157,7 +158,7 @@ class MapboxNavigationTelemetryTest {
          *
          * To ensure that there's only one mock, we're storing it in a companion object.
          */
-        private val billingService = mockk<BillingServiceInterface>(relaxed = true)
+        private val billingService = mockk<BillingServiceProxy>(relaxed = true)
     }
 
     @get:Rule
@@ -167,25 +168,15 @@ class MapboxNavigationTelemetryTest {
     private val applicationContext: Context = mockk(relaxed = true)
     private val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
     private val navigationOptions: NavigationOptions = mockk(relaxed = true)
-    private val locationsCollector: LocationsCollector = mockk()
+    private val locationsCollector: LocationsCollector = mockk(relaxed = true)
     private val routeProgress = mockk<RouteProgress>()
-    private val originalRoute = mockk<NavigationRoute>()
-    private val anotherRoute = mockk<NavigationRoute>()
+    private lateinit var originalRoute: NavigationRoute
+    private lateinit var anotherRoute: NavigationRoute
     private val lastLocation = mockk<Location>()
-    private val originalRouteOptions = mockk<RouteOptions>()
-    private val anotherRouteOptions = mockk<RouteOptions>()
     private val originalRouteLeg = mockk<RouteLeg>()
     private val anotherRouteLeg = mockk<RouteLeg>()
     private val originalRouteStep = mockk<LegStep>()
     private val anotherRouteStep = mockk<LegStep>()
-    private val originalRouteSteps = listOf(originalRouteStep)
-    private val progressRouteSteps = listOf(anotherRouteStep)
-    private val originalRouteLegs = listOf(originalRouteLeg)
-    private val anotherRouteLegs = listOf(anotherRouteLeg)
-    private val originalStepManeuver = mockk<StepManeuver>()
-    private val anotherStepManeuver = mockk<StepManeuver>()
-    private val originalStepManeuverLocation = mockk<Point>()
-    private val anotherStepManeuverLocation = mockk<Point>()
     private val legProgress = mockk<RouteLegProgress>()
     private val stepProgress = mockk<RouteStepProgress>()
     private val nextRouteLegProgress = mockk<RouteLegProgress>()
@@ -198,6 +189,7 @@ class MapboxNavigationTelemetryTest {
     private val routesObserverSlot = slot<RoutesObserver>()
     private val globalUserFeedbackSlot = slot<UserFeedback>()
     private val localUserFeedbackSlot = slot<UserFeedback>()
+    private val lifecycleStateProvider = mockk<LifecycleStateProvider>(relaxed = true)
 
     @Before
     fun setup() {
@@ -206,6 +198,8 @@ class MapboxNavigationTelemetryTest {
         mockkObject(EventsServiceProvider)
         mockkObject(TelemetryServiceProvider)
         mockkObject(TelemetryUtilsDelegate)
+        mockkObject(LifecycleStateProvider)
+        every { LifecycleStateProvider.instance } returns lifecycleStateProvider
         every { BillingServiceProvider.getInstance() } returns billingService
         every {
             mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
@@ -213,7 +207,7 @@ class MapboxNavigationTelemetryTest {
 
         every {
             mapboxNavigation.registerNavigationSessionStateObserver(
-                capture(sessionStateObserverSlot)
+                capture(sessionStateObserverSlot),
             )
         } just runs
 
@@ -245,11 +239,13 @@ class MapboxNavigationTelemetryTest {
         unmockkObject(EventsServiceProvider)
         unmockkObject(TelemetryServiceProvider)
         unmockkObject(TelemetryUtilsDelegate)
+        unmockkObject(LifecycleStateProvider)
     }
 
     @Test
     fun `telemetry idle before call initialize`() {
         baseMock()
+        mockAnotherRoute()
 
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
         updateRouteProgress()
@@ -343,9 +339,7 @@ class MapboxNavigationTelemetryTest {
     fun turnstileEvent_populated_correctly() {
         baseMock()
         val expectedTurnstileEvent = TurnstileEvent(
-            UserSKUIdentifier.NAV2_SES_MAU,
-            "mock",
-            "mock"
+            UserSKUIdentifier.NAV3_CORE_MAU,
         )
         val turnstileEvents = captureTurnstileEvents()
 
@@ -687,7 +681,7 @@ class MapboxNavigationTelemetryTest {
             applicationState = "APP_STATE",
             created = "CREATED_DATA",
             feedbackId = "FEEDBACK_ID",
-            userId = "USER_ID"
+            userId = "USER_ID",
         )
         val appMetadata = AppMetadata(
             name = "APP_METADATA_NAME",
@@ -704,6 +698,7 @@ class MapboxNavigationTelemetryTest {
             locationsBeforeEvent = mockLocationsBefore,
             locationsAfterEvent = mockLocationsAfter,
             locationEngineNameExternal = locationEngine,
+            simulation = true,
             percentTimeInPortrait = percentTimeInPortrait,
             percentTimeInForeground = percentTimeInForeground,
             eventVersion = eventVersion,
@@ -730,6 +725,7 @@ class MapboxNavigationTelemetryTest {
         assertEquals(mockLocationsBefore, feedbackEvent.locationsBefore)
         assertEquals(mockLocationsAfter, feedbackEvent.locationsAfter)
         assertEquals(locationEngine, feedbackEvent.locationEngine)
+        assertEquals(true, feedbackEvent.simulation)
         assertEquals(percentTimeInPortrait, feedbackEvent.percentTimeInPortrait)
         assertEquals(percentTimeInForeground, feedbackEvent.percentTimeInForeground)
         assertEquals(eventVersion, feedbackEvent.eventVersion)
@@ -781,7 +777,7 @@ class MapboxNavigationTelemetryTest {
         assertTrue(events[2] is NavigationRerouteEvent)
         assertEquals(
             (ROUTE_PROGRESS_DISTANCE_TRAVELED * 2).toInt(),
-            (events[2] as NavigationRerouteEvent).distanceCompleted
+            (events[2] as NavigationRerouteEvent).distanceCompleted,
         )
     }
 
@@ -1159,6 +1155,7 @@ class MapboxNavigationTelemetryTest {
         verify(exactly = 2) { mapboxNavigation.registerRoutesObserver(any()) }
         verify(exactly = 0) { mapboxNavigation.registerOffRouteObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerNavigationSessionStateObserver(any()) }
+        verify(exactly = 2) { mapboxNavigation.skuIdProvider }
 
         resetTelemetry()
     }
@@ -1237,6 +1234,89 @@ class MapboxNavigationTelemetryTest {
         )
     }
 
+    @Test
+    fun isSimulationReal() {
+        every { navigationOptions.locationOptions } returns LocationOptions.Builder().build()
+        baseMock()
+        initTelemetry()
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
+
+        val metadata = MapboxNavigationTelemetry.provideFeedbackMetadataWrapper().get()
+
+        assertEquals(false, metadata.simulation)
+    }
+
+    @Test
+    fun isSimulationMocked() {
+        every { navigationOptions.locationOptions } returns LocationOptions.Builder()
+            .locationProviderFactory(mockk(), LocationOptions.LocationProviderType.MOCKED)
+            .build()
+        baseMock()
+        initTelemetry()
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
+
+        val metadata = MapboxNavigationTelemetry.provideFeedbackMetadataWrapper().get()
+
+        assertEquals(true, metadata.simulation)
+    }
+
+    @Test
+    fun isSimulationMixed() {
+        every { navigationOptions.locationOptions } returns LocationOptions.Builder()
+            .locationProviderFactory(mockk(), LocationOptions.LocationProviderType.MIXED)
+            .build()
+        baseMock()
+        initTelemetry()
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
+
+        val metadata = MapboxNavigationTelemetry.provideFeedbackMetadataWrapper().get()
+
+        assertEquals(true, metadata.simulation)
+    }
+
+    @Test
+    fun locationProviderDefault() {
+        every { navigationOptions.locationOptions } returns LocationOptions.Builder().build()
+        baseMock()
+        initTelemetry()
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
+
+        val metadata = MapboxNavigationTelemetry.provideFeedbackMetadataWrapper().get()
+
+        assertEquals("default", metadata.locationEngineNameExternal)
+    }
+
+    @Test
+    fun locationProviderCustom() {
+        every { navigationOptions.locationOptions } returns LocationOptions.Builder()
+            .locationProviderFactory(mockk(), LocationOptions.LocationProviderType.MIXED)
+            .build()
+        baseMock()
+        initTelemetry()
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
+
+        val metadata = MapboxNavigationTelemetry.provideFeedbackMetadataWrapper().get()
+
+        assertEquals("custom", metadata.locationEngineNameExternal)
+    }
+
+    @Test
+    fun telemetryInitializationInitsLifecycleStateProvider() {
+        baseMock()
+        initTelemetry()
+
+        verify { lifecycleStateProvider.init() }
+    }
+
+    @Test
+    fun telemetryDestructionDestroysLifecycleStateProvider() {
+        baseMock()
+        initTelemetry()
+        MapboxNavigationTelemetry.destroy(mapboxNavigation)
+
+        verify { lifecycleStateProvider.destroy() }
+    }
+
     private fun baseInitialization() {
         initTelemetry()
         updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
@@ -1302,6 +1382,8 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun baseMock() {
+        every { mapboxNavigation.skuIdProvider } returns SkuIdProviderImpl()
+
         mockMetricsReporter()
         mockContext()
         mockTelemetryUtils()
@@ -1312,48 +1394,30 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun mockOriginalRoute() {
-        every { originalRoute.directionsRoute.geometry() } returns ORIGINAL_ROUTE_GEOMETRY
-        every { originalRoute.directionsRoute.legs() } returns originalRouteLegs
-        every { originalRoute.directionsRoute.distance() } returns ORIGINAL_ROUTE_DISTANCE
-        every { originalRoute.directionsRoute.duration() } returns ORIGINAL_ROUTE_DURATION
-        every { originalRoute.directionsRoute.routeOptions() } returns originalRouteOptions
-        every { originalRoute.routeOptions } returns originalRouteOptions
-        every { originalRoute.routeIndex } returns ORIGINAL_ROUTE_ROUTE_INDEX
-        every { originalRouteOptions.profile() } returns ORIGINAL_ROUTE_OPTIONS_PROFILE
-        every { originalRouteOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
-        every { originalRouteLeg.steps() } returns originalRouteSteps
-        every { originalRouteStep.maneuver() } returns originalStepManeuver
-        every { originalStepManeuver.location() } returns originalStepManeuverLocation
-        every { originalStepManeuverLocation.latitude() } returns
-            ORIGINAL_STEP_MANEUVER_LOCATION_LATITUDE
-        every { originalStepManeuverLocation.longitude() } returns
-            ORIGINAL_STEP_MANEUVER_LOCATION_LONGITUDE
-        every { originalRoute.directionsResponse.uuid() } returns
-            ORIGINAL_ROUTE_OPTIONS_REQUEST_UUID
-        every { originalRoute.directionsRoute.requestUuid() } returns
-            ORIGINAL_ROUTE_OPTIONS_REQUEST_UUID
+        originalRoute = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                routeOptions = createRouteOptions(
+                    profile = ORIGINAL_ROUTE_OPTIONS_PROFILE,
+                    geometries = DirectionsCriteria.GEOMETRY_POLYLINE6,
+                ),
+                requestUuid = ORIGINAL_ROUTE_OPTIONS_REQUEST_UUID,
+            ),
+        )
     }
 
     private fun mockAnotherRoute() {
-        every { anotherRoute.directionsRoute.geometry() } returns ANOTHER_ROUTE_GEOMETRY
-        every { anotherRoute.directionsRoute.distance() } returns ANOTHER_ROUTE_DISTANCE
-        every { anotherRoute.directionsRoute.duration() } returns ANOTHER_ROUTE_DURATION
-        every { anotherRoute.directionsRoute.legs() } returns anotherRouteLegs
-        every { anotherRoute.directionsRoute.routeOptions() } returns anotherRouteOptions
-        every { anotherRoute.routeIndex } returns ANOTHER_ROUTE_ROUTE_INDEX
-        every { anotherRoute.routeOptions } returns anotherRouteOptions
-        every { anotherRouteOptions.profile() } returns ANOTHER_ROUTE_OPTIONS_PROFILE
-        every { anotherRouteOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
-        every { anotherRoute.directionsResponse.uuid() } returns ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
-        every { anotherRoute.directionsRoute.requestUuid() } returns
-            ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
-        every { anotherRouteLeg.steps() } returns progressRouteSteps
-        every { anotherRouteStep.maneuver() } returns anotherStepManeuver
-        every { anotherStepManeuver.location() } returns anotherStepManeuverLocation
-        every { anotherStepManeuverLocation.latitude() } returns
-            ANOTHER_STEP_MANEUVER_LOCATION_LATITUDE
-        every { anotherStepManeuverLocation.longitude() } returns
-            ANOTHER_STEP_MANEUVER_LOCATION_LONGITUDE
+        anotherRoute = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                routeOptions = createRouteOptions(
+                    profile = ANOTHER_ROUTE_OPTIONS_PROFILE,
+                    geometries = DirectionsCriteria.GEOMETRY_POLYLINE6,
+                ),
+                requestUuid = ANOTHER_ROUTE_OPTIONS_REQUEST_UUID,
+                duration = ANOTHER_ROUTE_DURATION,
+                distance = ANOTHER_ROUTE_DISTANCE,
+                geometry = ANOTHER_ROUTE_GEOMETRY,
+            ),
+        )
     }
 
     private fun mockRouteProgress() {
@@ -1391,9 +1455,9 @@ class MapboxNavigationTelemetryTest {
         every { lastLocation.speed } returns LAST_LOCATION_SPEED
         every { lastLocation.bearing } returns LAST_LOCATION_BEARING
         every { lastLocation.altitude } returns LAST_LOCATION_ALTITUDE
-        every { lastLocation.time } returns LAST_LOCATION_TIME
-        every { lastLocation.accuracy } returns LAST_LOCATION_ACCURACY
-        every { lastLocation.verticalAccuracyMeters } returns LAST_LOCATION_VERTICAL_ACCURACY
+        every { lastLocation.timestamp } returns LAST_LOCATION_TIME
+        every { lastLocation.horizontalAccuracy } returns LAST_LOCATION_ACCURACY
+        every { lastLocation.verticalAccuracy } returns LAST_LOCATION_VERTICAL_ACCURACY
 
         mockFlushBuffers()
     }
@@ -1462,7 +1526,7 @@ class MapboxNavigationTelemetryTest {
         MapboxNavigationTelemetry.postCustomEvent(
             "testPayload",
             NavigationCustomEventType.ANALYTICS,
-            "1.2.3"
+            "1.2.3",
         )
     }
 
@@ -1489,7 +1553,7 @@ class MapboxNavigationTelemetryTest {
             metricsDirectionsRoute = MetricsDirectionsRoute(route = null),
             metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
             lastLocation = Point.fromLngLat(ANOTHER_LAST_LOCATION_LON, ANOTHER_LAST_LOCATION_LAT),
-        )
+        ),
     ) {
         MapboxNavigationTelemetry.postUserFeedback(
             FEEDBACK_TYPE,
@@ -1514,7 +1578,7 @@ class MapboxNavigationTelemetryTest {
             EventsServiceProvider.provideEventsService(any())
         } returns mockk(relaxUnitFun = true)
         every {
-            TelemetryServiceProvider.provideTelemetryService(any())
+            TelemetryServiceProvider.provideTelemetryService()
         } returns mockk(relaxUnitFun = true)
         val alarmManager = mockk<AlarmManager>()
         every {
@@ -1522,7 +1586,7 @@ class MapboxNavigationTelemetryTest {
         } returns alarmManager
         every { context.applicationContext } returns applicationContext
 
-        MapboxMetricsReporter.init(context, "pk.token", "userAgent")
+        MapboxMetricsReporter.init(SdkInformation("name", "2.16.0", null))
     }
 
     /**
@@ -1531,16 +1595,16 @@ class MapboxNavigationTelemetryTest {
      */
     private fun List<MetricEvent>.checkSequence(
         vararg kClass: Any,
-        skipTail: Boolean = false
+        skipTail: Boolean = false,
     ) {
         if (kClass.size > this.size) {
             throw IllegalStateException(
-                "clazzes.size(=${kClass.size}) > this.size(=${this.size})"
+                "clazzes.size(=${kClass.size}) > this.size(=${this.size})",
             )
         }
         if (!skipTail && this.size != kClass.size) {
             throw IllegalStateException(
-                "this.size(=${this.size}) must be equal to clazzes.size(=${kClass.size})"
+                "this.size(=${this.size}) must be equal to clazzes.size(=${kClass.size})",
             )
         }
         this.forEachIndexed { index, metricEvent ->
@@ -1557,13 +1621,13 @@ class MapboxNavigationTelemetryTest {
         assertEquals(obtainStepCount(originalRoute.directionsRoute), event.originalStepCount)
         assertEquals(
             originalRoute.directionsRoute.distance().toInt(),
-            event.originalEstimatedDistance
+            event.originalEstimatedDistance,
         )
         assertEquals(
             originalRoute.directionsRoute.duration().toInt(),
-            event.originalEstimatedDuration
+            event.originalEstimatedDuration,
         )
-        assertEquals(originalRoute.directionsResponse.uuid(), event.originalRequestIdentifier)
+        assertEquals(originalRoute.responseUUID, event.originalRequestIdentifier)
         assertEquals(originalRoute.directionsRoute.geometry(), event.originalGeometry)
         assertEquals(locationsCollector.lastLocation?.latitude, event.lat)
         assertEquals(locationsCollector.lastLocation?.longitude, event.lng)
@@ -1572,7 +1636,7 @@ class MapboxNavigationTelemetryTest {
 
         assertEquals(
             routeProgress.currentLegProgress?.currentStepProgress?.stepIndex,
-            event.stepIndex
+            event.stepIndex,
         )
         assertEquals(routeProgress.distanceRemaining.toInt(), event.distanceRemaining)
         assertEquals(routeProgress.durationRemaining.toInt(), event.durationRemaining)
@@ -1585,11 +1649,11 @@ class MapboxNavigationTelemetryTest {
         if (event is NavigationRerouteEvent) {
             assertEquals(
                 anotherRoute.directionsRoute.distance().toInt(),
-                event.newDistanceRemaining
+                event.newDistanceRemaining,
             )
             assertEquals(
                 anotherRoute.directionsRoute.duration().toInt(),
-                event.newDurationRemaining
+                event.newDurationRemaining,
             )
             assertEquals(anotherRoute.directionsRoute.geometry(), event.newGeometry)
             assertEquals(1, event.rerouteCount)
@@ -1600,9 +1664,9 @@ class MapboxNavigationTelemetryTest {
         assertEquals(
             obtainAbsoluteDistance(
                 lastLocation,
-                obtainRouteDestination(currentRoute.directionsRoute)
+                obtainRouteDestination(currentRoute.directionsRoute),
             ),
-            event.absoluteDistanceToDestination
+            event.absoluteDistanceToDestination,
         )
         assertEquals(currentRoute.directionsRoute.distance().toInt(), event.estimatedDistance)
         assertEquals(currentRoute.directionsRoute.duration().toInt(), event.estimatedDuration)
@@ -1615,7 +1679,7 @@ class MapboxNavigationTelemetryTest {
      */
     private fun checkIdentifiersDifferentNavSessions(
         firstSessionEvents: List<MetricEvent>,
-        secondSessionEvents: List<MetricEvent>
+        secondSessionEvents: List<MetricEvent>,
     ) {
         fun List<MetricEvent>.toPair(): List<Pair<String, String>> {
             return this.mapNotNull { event ->
@@ -1623,6 +1687,7 @@ class MapboxNavigationTelemetryTest {
                     is NavigationEvent -> event.navigatorSessionIdentifier!! to event.toString()
                     is NavigationFreeDriveEvent ->
                         event.navigatorSessionIdentifier!! to event.toString()
+
                     else ->
                         throw IllegalArgumentException("Unknown event: ${event.javaClass.name}")
                 }
@@ -1639,7 +1704,7 @@ class MapboxNavigationTelemetryTest {
                 assertEquals(
                     "navSessionIdentifier equals for all events under this session",
                     acc.first,
-                    pair.first
+                    pair.first,
                 )
                 return@reduce pair
             }.also { (navSessionId, _) ->
@@ -1650,7 +1715,7 @@ class MapboxNavigationTelemetryTest {
         if (sessionsIds.size > 1) {
             assertNotSame(
                 sessionsIds[0],
-                sessionsIds[1]
+                sessionsIds[1],
             )
         }
     }
@@ -1661,7 +1726,7 @@ class MapboxNavigationTelemetryTest {
         reducedSessionEvents.reduce { acc, sessionEventCompareData ->
             assertSame(
                 acc.navigatorSessionIdentifier,
-                sessionEventCompareData.navigatorSessionIdentifier
+                sessionEventCompareData.navigatorSessionIdentifier,
             )
             return@reduce sessionEventCompareData
         }
@@ -1673,15 +1738,15 @@ class MapboxNavigationTelemetryTest {
         return compareData.reduce { acc, sessionEventCompareData ->
             assertEquals(
                 acc.navigatorSessionIdentifier,
-                sessionEventCompareData.navigatorSessionIdentifier
+                sessionEventCompareData.navigatorSessionIdentifier,
             )
             assertEquals(
                 acc.sessionIdentifier,
-                sessionEventCompareData.sessionIdentifier
+                sessionEventCompareData.sessionIdentifier,
             )
             assertEquals(
                 acc.startTimestamp,
-                sessionEventCompareData.startTimestamp
+                sessionEventCompareData.startTimestamp,
             )
             if (
                 sessionEventCompareData.driverModeName != SessionEventCompareData.NO_DRIVER_MODE &&
@@ -1701,15 +1766,17 @@ class MapboxNavigationTelemetryTest {
                     event.sessionIdentifier!!,
                     event.driverMode!!,
                     event.startTimestamp!!,
-                    event.toString()
+                    event.toString(),
                 )
+
                 is NavigationFreeDriveEvent -> SessionEventCompareData(
                     event.navigatorSessionIdentifier!!,
                     event.sessionIdentifier!!,
                     SessionEventCompareData.NO_DRIVER_MODE,
                     event.startTimestamp!!,
-                    event.toString()
+                    event.toString(),
                 )
+
                 else -> throw IllegalArgumentException("Unknown event: ${event.javaClass.name}")
             }
         }

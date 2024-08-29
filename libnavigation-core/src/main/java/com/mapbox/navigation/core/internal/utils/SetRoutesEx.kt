@@ -10,7 +10,8 @@ internal fun SetRoutes.mapToReason(): String =
         is SetRoutes.Alternatives -> RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
         SetRoutes.CleanUp -> RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         is SetRoutes.NewRoutes,
-        is SetRoutes.Reorder -> RoutesExtra.ROUTES_UPDATE_REASON_NEW
+        is SetRoutes.Reorder,
+        -> RoutesExtra.ROUTES_UPDATE_REASON_NEW
         is SetRoutes.RefreshRoutes -> RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
         is SetRoutes.Reroute -> RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
     }

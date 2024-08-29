@@ -49,7 +49,7 @@ class RemoveAccelerationTest {
         val result = speedUpdates.removeAccelerationAndBrakingSpeedUpdates()
         assertEquals(
             listOf(3.0, 3.0, 3.0, 3.0),
-            result
+            result,
         )
     }
 
@@ -59,7 +59,7 @@ class RemoveAccelerationTest {
         val result = speedUpdates.removeAccelerationAndBrakingSpeedUpdates()
         assertEquals(
             speedUpdates,
-            result
+            result,
         )
     }
 
@@ -69,7 +69,7 @@ class RemoveAccelerationTest {
         val result = speedUpdates.removeAccelerationAndBrakingSpeedUpdates()
         assertEquals(
             speedUpdates,
-            result
+            result,
         )
     }
 
@@ -79,7 +79,7 @@ class RemoveAccelerationTest {
         val result = speedUpdates.removeAccelerationAndBrakingSpeedUpdates()
         assertEquals(
             listOf(5.0, 5.0, 5.0, 2.0, 0.0, 2.0, 5.0, 5.0),
-            result
+            result,
         )
     }
 
@@ -89,7 +89,7 @@ class RemoveAccelerationTest {
         val result = speedUpdates.removeAccelerationAndBrakingSpeedUpdates()
         assertEquals(
             listOf(5.0, 4.0, 5.0, 5.0, 5.0),
-            result
+            result,
         )
     }
 
@@ -99,7 +99,7 @@ class RemoveAccelerationTest {
         val result = speedUpdates.removeAccelerationAndBrakingSpeedUpdates()
         assertEquals(
             listOf(5.0, 5.0, 5.0, 4.0, 5.0),
-            result
+            result,
         )
     }
 }

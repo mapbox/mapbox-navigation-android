@@ -32,7 +32,7 @@ internal class ReplayRouteTraffic {
     fun trafficLocations(
         distinctRoutePoints: List<Point>,
         distances: List<Double>,
-        speeds: List<Double>
+        speeds: List<Double>,
     ): List<ReplayRouteLocation> {
         return findTrafficLocations(distinctRoutePoints, distances, speeds)
     }
@@ -40,7 +40,7 @@ internal class ReplayRouteTraffic {
     private fun findTrafficLocations(
         points: List<Point>,
         distances: List<Double>,
-        speeds: List<Double>
+        speeds: List<Double>,
     ): List<ReplayRouteLocation> {
         val trafficLocations = mutableListOf<ReplayRouteLocation>()
         var annotationIndex = 0
@@ -53,7 +53,7 @@ internal class ReplayRouteTraffic {
                 val trafficSpeed = speeds[annotationIndex]
                 val trafficLocation = ReplayRouteLocation(
                     routeIndex = routeIndex,
-                    point = points[routeIndex]
+                    point = points[routeIndex],
                 )
                 trafficLocation.speedMps = trafficSpeed
                 trafficLocation.distance = trafficDistance

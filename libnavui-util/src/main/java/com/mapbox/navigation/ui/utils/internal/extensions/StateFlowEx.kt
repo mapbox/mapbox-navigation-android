@@ -9,5 +9,5 @@ import kotlinx.coroutines.flow.stateIn
 inline fun <T, R> StateFlow<T>.slice(
     scope: CoroutineScope,
     started: SharingStarted = SharingStarted.WhileSubscribed(),
-    crossinline selector: (T) -> R
+    crossinline selector: (T) -> R,
 ): StateFlow<R> = map { selector(it) }.stateIn(scope, started, selector(value))

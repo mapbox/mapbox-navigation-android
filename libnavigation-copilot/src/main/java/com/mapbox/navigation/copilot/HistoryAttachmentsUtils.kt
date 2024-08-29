@@ -52,8 +52,6 @@ internal object HistoryAttachmentsUtils {
     fun retrieveNavNativeSdkVersion(): String =
         BuildConfig.NAV_NATIVE_SDK_VERSION
 
-    fun retrieveIsDebug(): Boolean = BuildConfig.DEBUG
-
     fun utcTimeNow(format: String, locale: Locale): String {
         val formatter = SimpleDateFormat(format, locale)
         formatter.timeZone = TimeZone.getTimeZone("UTC")
@@ -75,9 +73,9 @@ internal object HistoryAttachmentsUtils {
             String(
                 Base64.decode(
                     str.padEnd(requiredLength, '='),
-                    Base64.DEFAULT
-                )
-            )
+                    Base64.DEFAULT,
+                ),
+            ),
         )
     }
 }

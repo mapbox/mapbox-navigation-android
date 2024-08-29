@@ -23,7 +23,7 @@ class NavigationFeedbackEventTest {
         APP_METADATA_NAME,
         APP_METADATA_VERSION,
         APP_METADATA_USER_ID,
-        APP_METADATA_SESSION_ID
+        APP_METADATA_SESSION_ID,
     )
 
     private val locationBefore = TelemetryLocation(
@@ -34,7 +34,7 @@ class NavigationFeedbackEventTest {
         LOCATION_BEFORE_ALTITUDE,
         LOCATION_BEFORE_TIMESTAMP,
         LOCATION_BEFORE_HORIZONTAL_ACCURACY,
-        LOCATION_BEFORE_VERTICAL_ACCURACY
+        LOCATION_BEFORE_VERTICAL_ACCURACY,
     )
     private val locationAfter = TelemetryLocation(
         LOCATION_AFTER_LATITUDE,
@@ -44,7 +44,7 @@ class NavigationFeedbackEventTest {
         LOCATION_AFTER_ALTITUDE,
         LOCATION_AFTER_TIMESTAMP,
         LOCATION_AFTER_HORIZONTAL_ACCURACY,
-        LOCATION_AFTER_VERTICAL_ACCURACY
+        LOCATION_AFTER_VERTICAL_ACCURACY,
     )
 
     @Before
@@ -188,21 +188,21 @@ class NavigationFeedbackEventTest {
         // FeedbackLocation before
         private const val LOCATION_BEFORE_LATITUDE = 1.1
         private const val LOCATION_BEFORE_LONGITUDE = 2.2
-        private const val LOCATION_BEFORE_SPEED = 30f
-        private const val LOCATION_BEFORE_BEARING = 200f
+        private const val LOCATION_BEFORE_SPEED = 30.0
+        private const val LOCATION_BEFORE_BEARING = 200.0
         private const val LOCATION_BEFORE_ALTITUDE = 10.0
         private const val LOCATION_BEFORE_TIMESTAMP = "999999"
-        private const val LOCATION_BEFORE_HORIZONTAL_ACCURACY = 1f
-        private const val LOCATION_BEFORE_VERTICAL_ACCURACY = 2f
+        private const val LOCATION_BEFORE_HORIZONTAL_ACCURACY = 1.0
+        private const val LOCATION_BEFORE_VERTICAL_ACCURACY = 2.0
 
         // FeedbackLocation after
         private const val LOCATION_AFTER_LATITUDE = 22.1
         private const val LOCATION_AFTER_LONGITUDE = 33.2
-        private const val LOCATION_AFTER_SPEED = 50f
-        private const val LOCATION_AFTER_BEARING = 330f
+        private const val LOCATION_AFTER_SPEED = 50.0
+        private const val LOCATION_AFTER_BEARING = 330.0
         private const val LOCATION_AFTER_ALTITUDE = 17.0
         private const val LOCATION_AFTER_TIMESTAMP = "55555555"
-        private const val LOCATION_AFTER_HORIZONTAL_ACCURACY = 55f
-        private const val LOCATION_AFTER_VERTICAL_ACCURACY = 44f
+        private const val LOCATION_AFTER_HORIZONTAL_ACCURACY = 55.0
+        private const val LOCATION_AFTER_VERTICAL_ACCURACY = 44.0
     }
 }

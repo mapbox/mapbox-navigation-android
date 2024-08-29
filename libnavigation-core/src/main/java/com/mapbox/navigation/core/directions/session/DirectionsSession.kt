@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.internal.router.GetRouteSignature
 import com.mapbox.navigation.core.internal.utils.mapToReason
 
 internal interface DirectionsSession : RouteRefresh {
@@ -25,13 +26,15 @@ internal interface DirectionsSession : RouteRefresh {
      * Fetch route based on [RouteOptions]
      *
      * @param routeOptions RouteOptions
+     * @param signature information about what triggered this route request
      * @param routerCallback Callback that gets notified with the results of the request
      *
      * @return requestID, see [cancelRouteRequest]
      */
     fun requestRoutes(
         routeOptions: RouteOptions,
-        routerCallback: NavigationRouterCallback
+        signature: GetRouteSignature,
+        routerCallback: NavigationRouterCallback,
     ): Long
 
     /**
@@ -78,6 +81,6 @@ internal data class DirectionsSessionRoutes(
     fun toRoutesUpdatedResult(): RoutesUpdatedResult = RoutesUpdatedResult(
         acceptedRoutes,
         ignoredRoutes,
-        setRoutesInfo.mapToReason()
+        setRoutesInfo.mapToReason(),
     )
 }

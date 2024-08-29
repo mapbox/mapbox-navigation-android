@@ -21,7 +21,6 @@ interface MetricEvent {
         NavigationMetrics.FEEDBACK,
         NavigationMetrics.INITIAL_GPS,
         NavigationMetrics.FASTER_ROUTE,
-        NavigationMetrics.APP_USER_TURNSTILE,
         NavigationMetrics.FREE_DRIVE,
         NavigationMetrics.CUSTOM_EVENT,
     )
@@ -81,14 +80,6 @@ object NavigationMetrics {
      * Navigation Event "On Faster Route" name
      */
     const val FASTER_ROUTE = "navigation.fasterRoute"
-
-    /**
-     * Navigation Event "App User turnstile" name
-     */
-    @Deprecated(
-        "APP_USER_TURNSTILE event is handled under and not available on the client-side"
-    )
-    const val APP_USER_TURNSTILE = "appUserTurnstile"
 
     /**
      * Navigation Event "FreeDrive" name

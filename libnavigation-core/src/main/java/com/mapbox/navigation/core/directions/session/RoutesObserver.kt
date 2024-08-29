@@ -1,8 +1,6 @@
 package com.mapbox.navigation.core.directions.session
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.toDirectionsRoutes
 import com.mapbox.navigation.core.MapboxNavigation
 
 /**
@@ -17,7 +15,7 @@ fun interface RoutesObserver {
      * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance'.
      *
      * A list of routes can be modified internally and externally at any time with
-     * [MapboxNavigation.setRoutes], or during automatic reroutes, faster route and route refresh operations.
+     * [MapboxNavigation.setNavigationRoutes], or during automatic reroutes, faster route and route refresh operations.
      */
     fun onRoutesChanged(result: RoutesUpdatedResult)
 }
@@ -37,19 +35,6 @@ class RoutesUpdatedResult internal constructor(
     val ignoredRoutes: List<IgnoredRoute>,
     @RoutesExtra.RoutesUpdateReason val reason: String,
 ) {
-    /**
-     * List of currently maintained routes.
-     *
-     * @throws IllegalStateException see [toDirectionsRoutes]
-     */
-    @Deprecated(
-        "use #navigationRoutes instead",
-        ReplaceWith(
-            "navigationRoutes.toDirectionsRoutes()",
-            "com.mapbox.navigation.base.route.toDirectionsRoutes"
-        )
-    )
-    val routes: List<DirectionsRoute> by lazy { navigationRoutes.toDirectionsRoutes() }
 
     /**
      * Indicates whether some other object is "equal to" this one.

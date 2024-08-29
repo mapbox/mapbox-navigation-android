@@ -22,5 +22,5 @@ internal data class AppMetadata(
     /**
      * Session ID relevant for the application context.
      */
-    val sessionId: String?
+    val sessionId: String?,
 )

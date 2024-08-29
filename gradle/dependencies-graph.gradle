@@ -20,5 +20,7 @@ def mapboxGenerator = new Generator(
 )
 
 dependencyGraphGenerator {
-    generators = [mapboxGenerator]
+    generators {
+        add(mapboxGenerator)
+    }
 }

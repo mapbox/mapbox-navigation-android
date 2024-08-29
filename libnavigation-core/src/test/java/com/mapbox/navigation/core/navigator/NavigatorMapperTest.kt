@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.navigator
 
-import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
@@ -13,7 +13,6 @@ import com.mapbox.navigation.base.internal.factory.SpeedLimitInfoFactory
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.speed.model.SpeedUnit
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -47,7 +46,7 @@ class NavigatorMapperTest {
     private val keyPoints: List<Location> = mockk(relaxed = true)
 
     private val directionsRoute = DirectionsRoute.fromJson(
-        FileUtils.loadJsonFixture("multileg_route.json")
+        FileUtils.loadJsonFixture("multileg_route.json"),
     )
 
     private val route: NavigationRoute = mockk(relaxed = true) {
@@ -81,15 +80,15 @@ class NavigatorMapperTest {
                     step = directionsRoute.legs()!!.first().steps()!![1],
                     stepPoints = PolylineUtils.decode(
                         directionsRoute.legs()!!.first().steps()!![1].geometry()!!,
-                        6
+                        6,
                     ),
                     distanceRemaining = 35f,
                     distanceTraveled = 30f,
                     fractionTraveled = 50f,
-                    durationRemaining = 3.0
+                    durationRemaining = 3.0,
                 ),
                 geometryIndex = legGeometryIndex,
-                legDestination = legDestination
+                legDestination = legDestination,
             ),
             distanceRemaining = 80f,
             durationRemaining = 1.0,
@@ -97,7 +96,7 @@ class NavigatorMapperTest {
             fractionTraveled = 1f,
             upcomingStepPoints = PolylineUtils.decode(
                 directionsRoute.legs()!!.first().steps()!![2].geometry()!!,
-                6
+                6,
             ),
             inTunnel = true,
             stale = true,
@@ -109,7 +108,7 @@ class NavigatorMapperTest {
             alternativeRoutesIndices = mapOf(
                 "id#2" to RouteIndicesFactory.buildRouteIndices(2, 4, 6, 8, 10),
                 "id#3" to RouteIndicesFactory.buildRouteIndices(3, 7, 5, 11, 9),
-            )
+            ),
         )
 
         val result = getRouteProgressFrom(
@@ -120,7 +119,7 @@ class NavigatorMapperTest {
             instructionIndex = 1,
             lastVoiceInstruction = null,
             upcomingRoadObjects,
-            legDestination
+            legDestination,
         )
 
         assertEquals(expected, result)
@@ -140,14 +139,14 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
-                        }
+                        },
                     )
                 }
                 every { layer } returns null
                 every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns false
-            }
+            },
         )
         val expected = LocationMatcherResult(
             enhancedLocation,
@@ -155,11 +154,6 @@ class NavigatorMapperTest {
             isOffRoad = false,
             offRoadProbability = 0f,
             isTeleport = false,
-            speedLimit = SpeedLimit(
-                10,
-                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
-                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
-            ),
             speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
                 10,
                 SpeedUnit.KILOMETERS_PER_HOUR,
@@ -191,14 +185,14 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
-                        }
+                        },
                     )
                 }
                 every { layer } returns null
                 every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns false
-            }
+            },
         )
         val expected = LocationMatcherResult(
             enhancedLocation,
@@ -206,11 +200,6 @@ class NavigatorMapperTest {
             isOffRoad = false,
             offRoadProbability = 0.5f,
             isTeleport = false,
-            speedLimit = SpeedLimit(
-                10,
-                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
-                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
-            ),
             speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
                 10,
                 SpeedUnit.KILOMETERS_PER_HOUR,
@@ -242,14 +231,14 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
-                        }
+                        },
                     )
                 }
                 every { layer } returns null
                 every { roads } returns listOf(roadName)
                 every { isFallback } returns true
                 every { inTunnel } returns false
-            }
+            },
         )
         val expected = LocationMatcherResult(
             enhancedLocation,
@@ -257,11 +246,6 @@ class NavigatorMapperTest {
             isOffRoad = true,
             offRoadProbability = 0.500009f,
             isTeleport = false,
-            speedLimit = SpeedLimit(
-                10,
-                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
-                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
-            ),
             speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
                 10,
                 SpeedUnit.KILOMETERS_PER_HOUR,
@@ -293,14 +277,14 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
-                        }
+                        },
                     )
                 }
                 every { layer } returns null
                 every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns false
-            }
+            },
         )
         val expected = LocationMatcherResult(
             enhancedLocation,
@@ -308,11 +292,6 @@ class NavigatorMapperTest {
             isOffRoad = false,
             offRoadProbability = 0f,
             isTeleport = true,
-            speedLimit = SpeedLimit(
-                10,
-                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
-                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
-            ),
             speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
                 10,
                 SpeedUnit.KILOMETERS_PER_HOUR,
@@ -348,7 +327,7 @@ class NavigatorMapperTest {
         val road: Road = RoadFactory.buildRoadObject(navigationStatus)
         val tripStatus = TripStatus(
             route,
-            navigationStatus
+            navigationStatus,
         )
         val expected = LocationMatcherResult(
             enhancedLocation,
@@ -356,11 +335,6 @@ class NavigatorMapperTest {
             isOffRoad = true,
             offRoadProbability = 1f,
             isTeleport = false,
-            speedLimit = SpeedLimit(
-                10,
-                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
-                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
-            ),
             speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
                 10,
                 SpeedUnit.KILOMETERS_PER_HOUR,
@@ -392,14 +366,14 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
-                        }
+                        },
                     )
                 }
                 every { layer } returns 2
                 every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns false
-            }
+            },
         )
         val expected = LocationMatcherResult(
             enhancedLocation,
@@ -407,11 +381,6 @@ class NavigatorMapperTest {
             isOffRoad = true,
             offRoadProbability = 1f,
             isTeleport = false,
-            speedLimit = SpeedLimit(
-                10,
-                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
-                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
-            ),
             speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
                 10,
                 SpeedUnit.KILOMETERS_PER_HOUR,
@@ -443,14 +412,14 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
-                        }
+                        },
                     )
                 }
                 every { layer } returns null
                 every { roads } returns listOf(roadName)
                 every { isFallback } returns false
                 every { inTunnel } returns true
-            }
+            },
         )
         val expected = LocationMatcherResult(
             enhancedLocation,
@@ -458,11 +427,6 @@ class NavigatorMapperTest {
             isOffRoad = false,
             offRoadProbability = 0f,
             isTeleport = false,
-            speedLimit = SpeedLimit(
-                10,
-                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
-                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
-            ),
             speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
                 10,
                 SpeedUnit.KILOMETERS_PER_HOUR,
@@ -569,12 +533,12 @@ class NavigatorMapperTest {
         assertEquals(
             firstEntrance.distanceToStart,
             upcomingRouteAlerts[0].distanceToStart!!,
-            .0001
+            .0001,
         )
         assertEquals(
             secondEntrance.distanceToStart,
             upcomingRouteAlerts[1].distanceToStart!!,
-            .0001
+            .0001,
         )
     }
 
@@ -584,18 +548,8 @@ class NavigatorMapperTest {
 
         assertEquals(
             111f.toDouble(),
-            result?.distanceAlongGeometry()
+            result?.distanceAlongGeometry(),
         )
-    }
-
-    @Test
-    fun `prepareSpeedLimit kmph non null`() {
-        every {
-            navigationStatus.speedLimit
-        } returns createSpeedLimit(speed = 80, unit = SpeedLimitUnit.KILOMETRES_PER_HOUR)
-        val actual = navigationStatus.prepareSpeedLimit()!!
-
-        assertEquals(80, actual.speedKmph)
     }
 
     @Test
@@ -605,7 +559,7 @@ class NavigatorMapperTest {
         } returns createSpeedLimit(
             speed = 80,
             unit = SpeedLimitUnit.KILOMETRES_PER_HOUR,
-            sign = SpeedLimitSign.VIENNA
+            sign = SpeedLimitSign.VIENNA,
         )
         val actual = navigationStatus.prepareSpeedLimitInfo()
 
@@ -615,18 +569,8 @@ class NavigatorMapperTest {
                 SpeedUnit.KILOMETERS_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.VIENNA,
             ),
-            actual
+            actual,
         )
-    }
-
-    @Test
-    fun `prepareSpeedLimit kmph null`() {
-        every {
-            navigationStatus.speedLimit
-        } returns createSpeedLimit(speed = null, unit = SpeedLimitUnit.KILOMETRES_PER_HOUR)
-        val actual = navigationStatus.prepareSpeedLimit()!!
-
-        assertNull(actual.speedKmph)
     }
 
     @Test
@@ -636,7 +580,7 @@ class NavigatorMapperTest {
         } returns createSpeedLimit(
             speed = null,
             unit = SpeedLimitUnit.KILOMETRES_PER_HOUR,
-            sign = SpeedLimitSign.MUTCD
+            sign = SpeedLimitSign.MUTCD,
         )
         val actual = navigationStatus.prepareSpeedLimitInfo()
 
@@ -646,18 +590,8 @@ class NavigatorMapperTest {
                 SpeedUnit.KILOMETERS_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
-            actual
+            actual,
         )
-    }
-
-    @Test
-    fun `prepareSpeedLimit mph non null`() {
-        every {
-            navigationStatus.speedLimit
-        } returns createSpeedLimit(speed = 60, unit = SpeedLimitUnit.MILES_PER_HOUR)
-        val actual = navigationStatus.prepareSpeedLimit()!!
-
-        assertEquals(97, actual.speedKmph)
     }
 
     @Test
@@ -667,7 +601,7 @@ class NavigatorMapperTest {
         } returns createSpeedLimit(
             speed = 60,
             unit = SpeedLimitUnit.MILES_PER_HOUR,
-            sign = SpeedLimitSign.MUTCD
+            sign = SpeedLimitSign.MUTCD,
         )
         val actual = navigationStatus.prepareSpeedLimitInfo()
 
@@ -677,18 +611,8 @@ class NavigatorMapperTest {
                 SpeedUnit.MILES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
-            actual
+            actual,
         )
-    }
-
-    @Test
-    fun `prepareSpeedLimit mph null`() {
-        every {
-            navigationStatus.speedLimit
-        } returns createSpeedLimit(speed = null, unit = SpeedLimitUnit.MILES_PER_HOUR)
-        val actual = navigationStatus.prepareSpeedLimit()!!
-
-        assertNull(actual.speedKmph)
     }
 
     @Test
@@ -698,7 +622,7 @@ class NavigatorMapperTest {
         } returns createSpeedLimit(
             speed = null,
             unit = SpeedLimitUnit.MILES_PER_HOUR,
-            sign = SpeedLimitSign.VIENNA
+            sign = SpeedLimitSign.VIENNA,
         )
         val actual = navigationStatus.prepareSpeedLimitInfo()
 
@@ -708,7 +632,7 @@ class NavigatorMapperTest {
                 SpeedUnit.MILES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.VIENNA,
             ),
-            actual
+            actual,
         )
     }
 
@@ -729,7 +653,7 @@ class NavigatorMapperTest {
                     every { shield } returns mockk(relaxed = true) {
                         every { baseUrl } returns "designBaseUrl"
                     }
-                }
+                },
             )
             every { degrees } returns 45
             every { drivingSide } returns "drivingSide"
@@ -794,7 +718,7 @@ class NavigatorMapperTest {
     )
 
     private fun RoadObject.toUpcomingRouteAlert(
-        distanceToStart: Double = DISTANCE_TO_START
+        distanceToStart: Double = DISTANCE_TO_START,
     ) = UpcomingRouteAlert(this, distanceToStart)
 
     companion object {

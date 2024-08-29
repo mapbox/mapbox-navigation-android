@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -23,17 +24,21 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 class ReplayHistorySessionTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     private val replayer: MapboxReplayer = mockk(relaxed = true)
     private val historyReader: MapboxHistoryReader = mockk(relaxed = true)
@@ -183,7 +188,7 @@ class ReplayHistorySessionTest {
             mockk<HistoryEventSetRoute> {
                 every { eventTimestamp } returns 11.0
                 every { navigationRoute } returns mockk()
-            }
+            },
         )
         val eventObserver = slot<ReplayEventsObserver>()
         every { replayer.registerObserver(capture(eventObserver)) } just runs
@@ -209,7 +214,7 @@ class ReplayHistorySessionTest {
             mockk<HistoryEventSetRoute> {
                 every { eventTimestamp } returns 11.0
                 every { navigationRoute } returns mockk()
-            }
+            },
         )
         val eventObserver = slot<ReplayEventsObserver>()
         every { replayer.registerObserver(capture(eventObserver)) } just runs

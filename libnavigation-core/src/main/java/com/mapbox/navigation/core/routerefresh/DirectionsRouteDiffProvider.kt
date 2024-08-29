@@ -24,7 +24,7 @@ internal class DirectionsRouteDiffProvider {
                 if (updatedAnnotations.isNotEmpty()) {
                     routeDiffs.add(
                         "Updated ${updatedAnnotations.joinToString()} at " +
-                            "route ${newRoute.id} leg $legIndex"
+                            "route ${newRoute.id} leg $legIndex",
                     )
                 }
             }
@@ -40,8 +40,8 @@ internal class DirectionsRouteDiffProvider {
         result.addAll(
             getUpdatedAnnotations(
                 oldRouteLeg.annotation(),
-                newRouteLeg.annotation()
-            )
+                newRouteLeg.annotation(),
+            ),
         )
         if (oldRouteLeg.incidents() != newRouteLeg.incidents()) {
             result.add("incidents")

@@ -12,10 +12,10 @@ internal sealed class BuildingAction {
     ) : BuildingAction()
 
     data class QueryBuildingOnWaypoint(
-        val progress: RouteProgress
+        val progress: RouteProgress,
     ) : BuildingAction()
 
     data class QueryBuildingOnFinalDestination(
-        val progress: RouteProgress
+        val progress: RouteProgress,
     ) : BuildingAction()
 }

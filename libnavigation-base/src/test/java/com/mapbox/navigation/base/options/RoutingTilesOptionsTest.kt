@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
 import org.junit.Assert
@@ -13,12 +14,14 @@ class RoutingTilesOptionsTest : BuilderTest<RoutingTilesOptions, RoutingTilesOpt
     override fun getImplementationClass(): KClass<RoutingTilesOptions> =
         RoutingTilesOptions::class
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun getFilledUpBuilder(): RoutingTilesOptions.Builder {
         return RoutingTilesOptions.Builder()
             .tilesBaseUri(URI("https://my.api.com"))
             .tilesDataset("my_username.osm")
             .tilesProfile("driving")
             .tilesVersion("456")
+            .fallbackOfflineTilesVersion("789")
             .filePath("123")
             .tileStore(mockk())
             .minDaysBetweenServerAndLocalTilesVersion(0)

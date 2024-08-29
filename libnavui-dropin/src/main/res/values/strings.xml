@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="mapbox_drop_in_arrived" tools:ignore="MissingTranslation">Arrived</string>
-    <string name="mapbox_drop_in_dropped_pin" tools:ignore="MissingTranslation">Dropped pin</string>
-</resources>

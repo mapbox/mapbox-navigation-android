@@ -36,7 +36,7 @@ internal class HistoryFiles(
             logE(
                 "Unable to create a file, " +
                     "it may be the HistoryRecorderOptions ${historyFile.absolutePath}",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             null
         }

@@ -14,7 +14,7 @@ class NavigationFeedbackEventTest {
     fun testValue() {
         val feedbackEvent = NavigationFeedbackEvent(
             EventsTestHelper.mockPhoneState(),
-            NavigationStepData(MetricsRouteProgress(null))
+            NavigationStepData(MetricsRouteProgress(null)),
         ).apply {
             fillValues()
             feedbackType = "feedbackType_0"
@@ -24,25 +24,25 @@ class NavigationFeedbackEventTest {
                 TelemetryLocation(
                     2.2,
                     3.3,
-                    10.0f,
-                    11.0f,
+                    10.0,
+                    11.0,
                     12.0,
                     "timestamp_0",
-                    13.0f,
-                    15.0f
-                )
+                    13.0,
+                    15.0,
+                ),
             )
             locationsAfter = arrayOf(
                 TelemetryLocation(
                     12.2,
                     13.3,
-                    110.0f,
-                    111.0f,
+                    110.0,
+                    111.0,
                     112.0,
                     "timestamp_1",
-                    113.0f,
-                    115.0f
-                )
+                    113.0,
+                    115.0,
+                ),
             )
             screenshot = "screenshot_0"
             feedbackSubType = arrayOf("feedbackSubType_0", "feedbackSubType_1")

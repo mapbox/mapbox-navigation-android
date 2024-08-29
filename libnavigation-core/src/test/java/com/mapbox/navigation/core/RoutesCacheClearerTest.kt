@@ -55,20 +55,20 @@ class RoutesCacheClearerTest {
 
         verify(exactly = 0) { DecodeUtils.clearCache() }
         verify(exactly = 1) {
-            DecodeUtils.clearCacheExceptFor(testRoutes.first().directionsResponse.routes())
+            DecodeUtils.clearCacheExceptFor(testRoutes.map { it.directionsRoute })
         }
     }
 
     @Test
     fun onRoutesChanged_emptyHasPreviewedRoutes() {
         val testPreviewRoutes = createNavigationRoutes(
-            createDirectionsResponse(uuid = "preview")
+            createDirectionsResponse(uuid = "preview"),
         )
         sut.routesPreviewUpdated(
             RoutesPreviewUpdate(
                 "",
-                RoutesPreview(testPreviewRoutes, emptyList(), testPreviewRoutes, 0)
-            )
+                RoutesPreview(testPreviewRoutes, emptyList(), testPreviewRoutes, 0),
+            ),
         )
         clearStaticMockk(DecodeUtils::class)
 
@@ -79,9 +79,9 @@ class RoutesCacheClearerTest {
             DecodeUtils.clearCacheExceptFor(
                 match {
                     it.map { it.requestUuid() } == listOf(
-                        "preview"
+                        "preview",
                     )
-                }
+                },
             )
         }
     }
@@ -89,10 +89,13 @@ class RoutesCacheClearerTest {
     @Test
     fun onRoutesChanged_emptyClearedPreviewedRoutes() {
         sut.routesPreviewUpdated(
-            RoutesPreviewUpdate("", RoutesPreview(listOf(mockk()), emptyList(), listOf(mockk()), 0))
+            RoutesPreviewUpdate(
+                "",
+                RoutesPreview(listOf(mockk()), emptyList(), listOf(mockk()), 0),
+            ),
         )
         sut.routesPreviewUpdated(
-            RoutesPreviewUpdate("", mockk { every { routesList } returns emptyList() })
+            RoutesPreviewUpdate("", mockk { every { routesList } returns emptyList() }),
         )
         clearStaticMockk(DecodeUtils::class)
 
@@ -113,7 +116,7 @@ class RoutesCacheClearerTest {
     @Test
     fun routesPreviewUpdated_emptyRoutesAndNoActiveRoutes() {
         sut.routesPreviewUpdated(
-            RoutesPreviewUpdate("", mockk { every { routesList } returns emptyList() })
+            RoutesPreviewUpdate("", mockk { every { routesList } returns emptyList() }),
         )
 
         verify(exactly = 1) { DecodeUtils.clearCache() }
@@ -123,7 +126,10 @@ class RoutesCacheClearerTest {
     @Test
     fun routesPreviewUpdated_nonEmptyRoutesAndNoActiveRoutes() {
         sut.routesPreviewUpdated(
-            RoutesPreviewUpdate("", RoutesPreview(listOf(mockk()), emptyList(), listOf(mockk()), 0))
+            RoutesPreviewUpdate(
+                "",
+                RoutesPreview(listOf(mockk()), emptyList(), listOf(mockk()), 0),
+            ),
         )
 
         verify(exactly = 0) { DecodeUtils.clearCache() }
@@ -146,13 +152,13 @@ class RoutesCacheClearerTest {
         sut.onRoutesChanged(
             createRoutesUpdatedResult(
                 createNavigationRoutes(),
-                RoutesExtra.ROUTES_UPDATE_REASON_NEW
-            )
+                RoutesExtra.ROUTES_UPDATE_REASON_NEW,
+            ),
         )
         clearStaticMockk(DecodeUtils::class)
 
         sut.routesPreviewUpdated(
-            RoutesPreviewUpdate("", mockk { every { routesList } returns emptyList() })
+            RoutesPreviewUpdate("", mockk { every { routesList } returns emptyList() }),
         )
 
         verify(exactly = 0) { DecodeUtils.clearCache() }
@@ -178,7 +184,7 @@ class RoutesCacheClearerTest {
         clearStaticMockk(DecodeUtils::class)
 
         sut.routesPreviewUpdated(
-            RoutesPreviewUpdate("", mockk { every { routesList } returns emptyList() })
+            RoutesPreviewUpdate("", mockk { every { routesList } returns emptyList() }),
         )
 
         verify(exactly = 1) { DecodeUtils.clearCache() }
@@ -188,16 +194,16 @@ class RoutesCacheClearerTest {
     @Test
     fun onRoutesChanged_routesPreviewNotEmpty() {
         val testPreviewRoutes = createNavigationRoutes(
-            response = createDirectionsResponse(uuid = "preview")
+            response = createDirectionsResponse(uuid = "preview"),
         )
         val testActiveRoutes = createNavigationRoutes(
-            response = createDirectionsResponse(uuid = "active")
+            response = createDirectionsResponse(uuid = "active"),
         )
         sut.routesPreviewUpdated(
             RoutesPreviewUpdate(
                 "",
-                RoutesPreview(testPreviewRoutes, emptyList(), testPreviewRoutes, 0)
-            )
+                RoutesPreview(testPreviewRoutes, emptyList(), testPreviewRoutes, 0),
+            ),
         )
         clearStaticMockk(DecodeUtils::class)
 
@@ -208,7 +214,7 @@ class RoutesCacheClearerTest {
             DecodeUtils.clearCacheExceptFor(
                 match {
                     it.map { it.requestUuid() }.sortedBy { it } == listOf("active", "preview")
-                }
+                },
             )
         }
     }

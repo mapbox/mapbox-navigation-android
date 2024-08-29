@@ -3,12 +3,17 @@ package com.mapbox.navigation.ui.maps.route
 import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
-import com.mapbox.navigation.ui.base.R
+import com.mapbox.navigation.ui.maps.R
 
 /**
  * Constants related to route and arrow layer APIs
  */
 object RouteLayerConstants {
+
+    /**
+     * Default slot to which route line layers are added.
+     */
+    const val DEFAULT_ROUTE_LINE_SLOT = "middle"
 
     /**
      * Layer ID for the top most route line related layer. Use this to position any other layer on top of the route line.
@@ -69,9 +74,9 @@ object RouteLayerConstants {
     internal const val MAX_ZOOM_ARROW_HEAD_SCALE = 0.8
     internal const val MIN_ZOOM_ARROW_HEAD_CASING_SCALE = 0.2
     internal const val MAX_ZOOM_ARROW_HEAD_CASING_SCALE = 0.8
-    internal const val OPAQUE = 0.0
+    internal const val OPAQUE = 1.0
     internal const val ARROW_HIDDEN_ZOOM_LEVEL = 14.0
-    internal const val TRANSPARENT = 1.0
+    internal const val TRANSPARENT = 0.0
     internal const val WAYPOINT_PROPERTY_KEY = "wayPoint"
     internal const val WAYPOINT_ORIGIN_VALUE = "origin"
     internal const val WAYPOINT_DESTINATION_VALUE = "destination"
@@ -95,14 +100,6 @@ object RouteLayerConstants {
     internal const val RESTRICTED_ROAD_LINE_WIDTH = 7.0
     internal val RESTRICTED_ROAD_DASH_ARRAY = listOf(.5, 2.0)
     internal const val DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO = 62_500_000L
-
-    internal val LOW_CONGESTION_RANGE = 0..39
-
-    internal val MODERATE_CONGESTION_RANGE = 40..59
-
-    internal val HEAVY_CONGESTION_RANGE = 60..79
-
-    internal val SEVERE_CONGESTION_RANGE = 80..100
 
     @ColorInt
     internal val ROUTE_LINE_TRAVELED_COLOR = Color.TRANSPARENT

@@ -21,7 +21,7 @@ class CoalescingBlockingQueue(
 ) {
 
     data class Item(
-        val block: () -> Unit,
+        val block: suspend () -> Unit,
         val cancellation: () -> Unit,
     )
 

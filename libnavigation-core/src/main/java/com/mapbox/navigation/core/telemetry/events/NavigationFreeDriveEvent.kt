@@ -18,7 +18,7 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
  */
 @SuppressLint("ParcelCreator")
 internal class NavigationFreeDriveEvent(
-    phoneState: PhoneState
+    phoneState: PhoneState,
 ) : MetricEventInternal {
 
     /*
@@ -85,5 +85,5 @@ internal class NavigationFreeDriveEvent(
 
 internal enum class FreeDriveEventType(val type: String) {
     START("start"),
-    STOP("stop")
+    STOP("stop"),
 }

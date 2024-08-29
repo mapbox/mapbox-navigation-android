@@ -105,7 +105,7 @@ class EHorizonOptions private constructor(
             apply {
                 if (length < 0) {
                     throw IllegalArgumentException(
-                        "EHorizonOptions.length can't be negative."
+                        "EHorizonOptions.length can't be negative.",
                     )
                 }
                 this.length = length
@@ -119,7 +119,7 @@ class EHorizonOptions private constructor(
             apply {
                 if (expansion < 0) {
                     throw IllegalArgumentException(
-                        "EHorizonOptions.expansion can't be negative."
+                        "EHorizonOptions.expansion can't be negative.",
                     )
                 }
                 this.expansion = expansion
@@ -133,7 +133,7 @@ class EHorizonOptions private constructor(
             apply {
                 if (branchLength < 0) {
                     throw IllegalArgumentException(
-                        "EHorizonOptions.branchLength can't be negative."
+                        "EHorizonOptions.branchLength can't be negative.",
                     )
                 }
                 this.branchLength = branchLength
@@ -148,7 +148,7 @@ class EHorizonOptions private constructor(
                 minTimeDeltaBetweenUpdates?.let {
                     if (it < 0) {
                         throw IllegalArgumentException(
-                            "EHorizonOptions.minTimeDeltaBetweenUpdates can't be negative."
+                            "EHorizonOptions.minTimeDeltaBetweenUpdates can't be negative.",
                         )
                     }
                 }

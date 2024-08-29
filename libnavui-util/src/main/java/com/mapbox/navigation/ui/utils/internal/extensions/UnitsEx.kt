@@ -7,7 +7,7 @@ fun Context.dipToPixel(dip: Float): Float {
     return TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP,
         dip,
-        this.resources.displayMetrics
+        this.resources.displayMetrics,
     )
 }
 
@@ -15,6 +15,6 @@ fun Context.spToPixel(sp: Float): Float {
     return TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_SP,
         sp,
-        this.resources.displayMetrics
+        this.resources.displayMetrics,
     )
 }

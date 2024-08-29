@@ -9,8 +9,8 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.mapbox.common.TransferState
 import com.mapbox.common.UploadOptions
-import com.mapbox.common.UploadState
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.copilot.MapboxCopilot.pushStatusObservers
 import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.GZ
@@ -62,6 +62,7 @@ internal class HistoryUploadWorker(
             HashMap(),
             gson.toJson(metadataList),
             MEDIA_TYPE_ZIP,
+            MapboxCopilot.sdkInformation,
         )
         if (uploadHistoryFile(drive, uploadOptions)) {
             logD("Result.success()", LOG_CATEGORY)
@@ -109,29 +110,29 @@ internal class HistoryUploadWorker(
         uploadOptions: UploadOptions,
     ): Boolean =
         suspendCancellableCoroutine { cont ->
-            val uploadService = UploadServiceInterfaceFactory.retrieveUploadServiceInterface()
+            val uploadService = HttpServiceProvider.getInstance()
             val uploadId = uploadService.upload(uploadOptions) { uploadStatus ->
                 when (uploadStatus.state) {
-                    UploadState.PENDING -> logD("uploadStatus state = PENDING", LOG_CATEGORY)
-                    UploadState.UPLOADING -> {
+                    TransferState.PENDING -> logD("uploadStatus state = PENDING", LOG_CATEGORY)
+                    TransferState.IN_PROGRESS -> {
                         logD("uploadStatus state = UPLOADING", LOG_CATEGORY)
                         logD("${uploadStatus.totalSentBytes} total sent bytes", LOG_CATEGORY)
                         logD("${uploadStatus.totalBytes} total bytes", LOG_CATEGORY)
                     }
-                    UploadState.FAILED -> {
+                    TransferState.FAILED -> {
                         logD(
                             "uploadStatus state = FAILED error = ${uploadStatus.error} " +
                                 "HttpResponseData = ${uploadStatus.httpResult?.value}",
-                            LOG_CATEGORY
+                            LOG_CATEGORY,
                         )
                         failure(drive)
                         cont.resume(false)
                     }
-                    UploadState.FINISHED -> {
+                    TransferState.FINISHED -> {
                         val httpResultCode = uploadStatus.httpResult?.value?.code
                         logD(
                             "uploadStatus state = FINISHED httpResultCode = $httpResultCode",
-                            LOG_CATEGORY
+                            LOG_CATEGORY,
                         )
                         if (httpResultCode.isSuccessful()) {
                             success(drive)
@@ -157,7 +158,7 @@ internal class HistoryUploadWorker(
         }
     }
 
-    private fun Long?.isSuccessful(): Boolean = this in 200L..299L
+    private fun Int?.isSuccessful(): Boolean = this in 200..299
 
     private fun success(drive: CopilotMetadata) {
         val successStatus = PushStatus.Success(drive)
@@ -198,7 +199,7 @@ internal class HistoryUploadWorker(
             val inputData = buildInputData(drive, uploadOptions, sessionId)
             val uploadServiceRequest = OneTimeWorkRequestBuilder<HistoryUploadWorker>()
                 .setConstraints(
-                    Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+                    Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build(),
                 )
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, DELAY_IN_SECONDS, TimeUnit.SECONDS)
                 .setInputData(inputData)

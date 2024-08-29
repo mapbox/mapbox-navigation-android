@@ -56,14 +56,14 @@ class PredictiveCacheNavigationOptions private constructor(
          * Location configuration for guidance predictive caching
          */
         fun predictiveCacheLocationOptions(
-            predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+            predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
         ): Builder = apply { this.predictiveCacheLocationOptions = predictiveCacheLocationOptions }
 
         /**
          * Build [PredictiveCacheNavigationOptions].
          */
         fun build(): PredictiveCacheNavigationOptions = PredictiveCacheNavigationOptions(
-            predictiveCacheLocationOptions ?: PredictiveCacheLocationOptions.Builder().build()
+            predictiveCacheLocationOptions ?: PredictiveCacheLocationOptions.Builder().build(),
         )
     }
 }

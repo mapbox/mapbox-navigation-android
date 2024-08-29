@@ -10,5 +10,5 @@ import com.mapbox.geojson.FeatureCollection
  */
 class ArrowAddedValue internal constructor(
     val arrowShaftFeatureCollection: FeatureCollection,
-    val arrowHeadFeatureCollection: FeatureCollection
+    val arrowHeadFeatureCollection: FeatureCollection,
 )

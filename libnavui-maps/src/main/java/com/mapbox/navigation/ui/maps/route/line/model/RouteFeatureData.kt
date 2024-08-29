@@ -15,5 +15,5 @@ import com.mapbox.navigation.base.route.NavigationRoute
 internal data class RouteFeatureData constructor(
     val route: NavigationRoute,
     val featureCollection: FeatureCollection,
-    val lineString: LineString
+    val lineString: LineString,
 )

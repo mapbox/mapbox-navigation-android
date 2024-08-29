@@ -26,7 +26,7 @@ fun interface RoutesPreviewObserver {
 @ExperimentalPreviewMapboxNavigationAPI
 class RoutesPreviewUpdate internal constructor(
     @RoutesPreviewExtra.RoutePreviewUpdateReason val reason: String,
-    val routesPreview: RoutesPreview?
+    val routesPreview: RoutesPreview?,
 ) {
 
     /**

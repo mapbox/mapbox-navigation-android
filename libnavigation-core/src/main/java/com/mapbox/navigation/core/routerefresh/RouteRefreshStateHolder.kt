@@ -43,7 +43,7 @@ internal class RouteRefreshStateHolder : RouteRefreshProgressObserver {
     }
 
     fun unregisterRouteRefreshStateObserver(
-        observer: RouteRefreshStatesObserver
+        observer: RouteRefreshStatesObserver,
     ) {
         observers.remove(observer)
     }
@@ -54,7 +54,7 @@ internal class RouteRefreshStateHolder : RouteRefreshProgressObserver {
 
     private fun onNewState(
         @RouteRefreshExtra.RouteRefreshState state: String?,
-        message: String? = null
+        message: String? = null,
     ) {
         val oldState = this.state?.state
         if (oldState != state) {

@@ -31,7 +31,7 @@ object RestStopType {
     @IntDef(
         UNKNOWN,
         REST_AREA,
-        SERVICE_AREA
+        SERVICE_AREA,
     )
     annotation class Type
 }

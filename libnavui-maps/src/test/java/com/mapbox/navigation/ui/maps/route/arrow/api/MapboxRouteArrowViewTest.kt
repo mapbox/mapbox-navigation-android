@@ -7,12 +7,14 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Image
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
@@ -41,9 +43,14 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(MapboxExperimental::class)
 class MapboxRouteArrowViewTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val ctx: Context = mockk()
 
@@ -71,11 +78,12 @@ class MapboxRouteArrowViewTest {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
             every { getLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
         val state = ArrowVisibilityChangeValue(
-            listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE))
+            listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE)),
         )
 
         MapboxRouteArrowView(options).render(style, state)
@@ -100,11 +108,12 @@ class MapboxRouteArrowViewTest {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
             every { getLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
         val state = ArrowVisibilityChangeValue(
-            listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE))
+            listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE)),
         )
         val view = MapboxRouteArrowView(options)
 
@@ -135,19 +144,20 @@ class MapboxRouteArrowViewTest {
         val state = UpdateManeuverArrowValue(
             listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE)),
             arrowShaftFeature,
-            arrowHeadFeature
+            arrowHeadFeature,
         )
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
             every { getLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
 
         MapboxRouteArrowView(options).renderManeuverUpdate(
             style,
-            ExpectedFactory.createValue(state)
+            ExpectedFactory.createValue(state),
         )
 
         verify { arrowShaftSource.feature(state.arrowShaftFeature!!) }
@@ -177,12 +187,13 @@ class MapboxRouteArrowViewTest {
         val state = UpdateManeuverArrowValue(
             listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE)),
             arrowShaftFeature,
-            arrowHeadFeature
+            arrowHeadFeature,
         )
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
             every { getLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -190,11 +201,11 @@ class MapboxRouteArrowViewTest {
 
         arrowView.renderManeuverUpdate(
             style,
-            ExpectedFactory.createValue(state)
+            ExpectedFactory.createValue(state),
         )
         arrowView.renderManeuverUpdate(
             style,
-            ExpectedFactory.createValue(state)
+            ExpectedFactory.createValue(state),
         )
 
         verify { arrowShaftSource.feature(state.arrowShaftFeature!!) }
@@ -216,12 +227,13 @@ class MapboxRouteArrowViewTest {
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
         val state = ArrowAddedValue(
             FeatureCollection.fromFeatures(listOf()),
-            FeatureCollection.fromFeatures(listOf())
+            FeatureCollection.fromFeatures(listOf()),
         )
 
         MapboxRouteArrowView(options).render(style, state)
@@ -243,6 +255,7 @@ class MapboxRouteArrowViewTest {
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -254,7 +267,7 @@ class MapboxRouteArrowViewTest {
         val arrowHeadFeatureCollection = FeatureCollection.fromFeatures(listOf(arrowHeadFeature))
         val state = ArrowAddedValue(
             arrowShaftFeatureCollection,
-            arrowHeadFeatureCollection
+            arrowHeadFeatureCollection,
         )
 
         MapboxRouteArrowView(options).render(style, state)
@@ -276,6 +289,7 @@ class MapboxRouteArrowViewTest {
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -288,8 +302,8 @@ class MapboxRouteArrowViewTest {
         val state: Expected<InvalidPointError, ArrowAddedValue> = ExpectedFactory.createValue(
             ArrowAddedValue(
                 arrowShaftFeatureCollection,
-                arrowHeadFeatureCollection
-            )
+                arrowHeadFeatureCollection,
+            ),
         )
 
         MapboxRouteArrowView(options).render(style, state)
@@ -311,6 +325,7 @@ class MapboxRouteArrowViewTest {
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -322,7 +337,7 @@ class MapboxRouteArrowViewTest {
         val arrowHeadFeatureCollection = FeatureCollection.fromFeatures(listOf(arrowHeadFeature))
         val state = RemoveArrowValue(
             arrowShaftFeatureCollection,
-            arrowHeadFeatureCollection
+            arrowHeadFeatureCollection,
         )
 
         MapboxRouteArrowView(options).render(style, state)
@@ -344,6 +359,7 @@ class MapboxRouteArrowViewTest {
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -355,7 +371,7 @@ class MapboxRouteArrowViewTest {
         val arrowHeadFeatureCollection = FeatureCollection.fromFeatures(listOf(arrowHeadFeature))
         val state = RemoveArrowValue(
             arrowShaftFeatureCollection,
-            arrowHeadFeatureCollection
+            arrowHeadFeatureCollection,
         )
         val view = MapboxRouteArrowView(options)
 
@@ -379,6 +395,7 @@ class MapboxRouteArrowViewTest {
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -390,7 +407,7 @@ class MapboxRouteArrowViewTest {
         val arrowHeadFeatureCollection = FeatureCollection.fromFeatures(listOf(arrowHeadFeature))
         val state = ClearArrowsValue(
             arrowShaftFeatureCollection,
-            arrowHeadFeatureCollection
+            arrowHeadFeatureCollection,
         )
 
         MapboxRouteArrowView(options).render(style, state)
@@ -412,6 +429,7 @@ class MapboxRouteArrowViewTest {
         val style = mockk<Style> {
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -423,7 +441,7 @@ class MapboxRouteArrowViewTest {
         val arrowHeadFeatureCollection = FeatureCollection.fromFeatures(listOf(arrowHeadFeature))
         val state = ClearArrowsValue(
             arrowShaftFeatureCollection,
-            arrowHeadFeatureCollection
+            arrowHeadFeatureCollection,
         )
         val view = MapboxRouteArrowView(options)
 
@@ -445,7 +463,7 @@ class MapboxRouteArrowViewTest {
         every {
             MapboxRouteLineUtils.getLayerVisibility(
                 style,
-                ARROW_SHAFT_LINE_LAYER_ID
+                ARROW_SHAFT_LINE_LAYER_ID,
             )
         } returns Visibility.VISIBLE
 

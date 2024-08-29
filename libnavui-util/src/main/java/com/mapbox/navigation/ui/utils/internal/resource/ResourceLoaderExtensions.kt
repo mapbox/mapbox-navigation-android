@@ -18,7 +18,7 @@ import kotlin.coroutines.resume
  */
 fun ResourceLoader.load(
     request: ResourceLoadRequest,
-    onFinished: (Expected<ResourceLoadError, ResourceLoadResult>) -> Unit
+    onFinished: (Expected<ResourceLoadError, ResourceLoadResult>) -> Unit,
 ): Long = load(
     request,
     object : ResourceLoadCallback {
@@ -26,9 +26,9 @@ fun ResourceLoader.load(
         override fun onProgress(request: ResourceLoadRequest, progress: ResourceLoadProgress) = Unit
         override fun onFinish(
             request: ResourceLoadRequest,
-            result: Expected<ResourceLoadError, ResourceLoadResult>
+            result: Expected<ResourceLoadError, ResourceLoadResult>,
         ) = onFinished(result)
-    }
+    },
 )
 
 /**
@@ -41,7 +41,7 @@ fun ResourceLoader.load(
  * @return Expected value with [ResourceLoadResult] on success or [ResourceLoadError] on error
  */
 suspend fun ResourceLoader.load(
-    request: ResourceLoadRequest
+    request: ResourceLoadRequest,
 ): Expected<ResourceLoadError, ResourceLoadResult> =
     suspendCancellableCoroutine { cont ->
         val requestId = load(request, cont::resume)

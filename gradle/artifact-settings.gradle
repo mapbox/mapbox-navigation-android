@@ -1,5 +1,5 @@
 ext {
-    mapboxArtifactGroupId = 'com.mapbox.navigation'
+    mapboxArtifactGroupId = 'com.mapbox.navigationcore'
     mapboxArtifactId = project.property('POM_ARTIFACT_ID')
     mapboxArtifactTitle = project.property('POM_ARTIFACT_TITLE')
     mapboxArtifactDescription = project.property('POM_DESCRIPTION')
@@ -11,7 +11,7 @@ ext {
     mapboxArtifactLicenseName = 'Mapbox Terms of Service'
     mapboxArtifactLicenseUrl = 'https://www.mapbox.com/legal/tos/'
     snapshot = project.hasProperty("snapshot") ? project.property("snapshot").toBoolean() : false
-    releaseTagPrefix = project.hasProperty('RELEASE_TAG_PREFIX') ? project.property('RELEASE_TAG_PREFIX') : 'v'
+    releaseTagPrefix = project.hasProperty('RELEASE_TAG_PREFIX') ? project.property('RELEASE_TAG_PREFIX') : 'mapbox-navigation-android_dash-core_'
     versionName = getVersionName()
 }
 
@@ -20,26 +20,33 @@ def getVersionName() {
       return project.property('VERSION_NAME')
     }
     def prefix = project.ext.releaseTagPrefix
-    def cmd = ["git", "describe", "--tag", "--match", "$prefix*", "--abbrev=0"]
-    def version = cmd.execute().text
+
+    def process = new ProcessBuilder("git", "tag", "-l", "${prefix}*", "--sort=-creatordate")
+            .redirectErrorStream(true)
+            .start()
+
+    def reader = new BufferedReader(new InputStreamReader(process.inputStream))
+    def version = reader.lines().toArray().first()
+
+    if (!version.isEmpty()) {
+        version = version.substring(prefix.length())
+    }
     return project.ext.snapshot ? getSnapshotVersion(version) : getReleaseVersion(version)
 }
 
-def getReleaseVersion(String version) {
+static def getReleaseVersion(String version) {
     if (version.isEmpty()) {
-        return "0.1.0"
+        return "1.0.0"
     } else {
-        def prefix = project.ext.releaseTagPrefix
-        return version.substring(prefix.length()).trim()
+        return version
     }
 }
 
 def getSnapshotVersion(String version) {
     if (version.isEmpty()) {
-        return "0.1.0-SNAPSHOT"
+        return "1.0.0-SNAPSHOT"
     } else {
-        def prefix = project.ext.releaseTagPrefix
-        def matcher = version =~ /$prefix(\d+)\.(\d+)\.(\d+.*)/
+        def matcher = version =~ /(\d+)\.(\d+)\.(\d+.*)/
         def major = (matcher[0][1] as Integer)
         def isPreRelease
         def patch = 0
@@ -54,10 +61,7 @@ def getSnapshotVersion(String version) {
             minor += 1
         }
         def branch = System.getenv("CIRCLE_BRANCH")
-        def weeklyWorkflow = System.getenv("WEEKLY_SNAPSHOT_WORKFLOW")?.toBoolean() ?: false
-        if (weeklyWorkflow) {
-            return "${major}.${minor}.${patch}-WEEKLY-SNAPSHOT"
-        } else if (!branch || branch == "main" || branch ==~ /release-v.*/) {
+        if (!branch || branch == "main" || branch ==~ /release_mapbox-navigation-android_.*/) {
             return "${major}.${minor}.${patch}-SNAPSHOT"
         } else {
             return "${major}.${minor}.${patch}-${branch}-SNAPSHOT"

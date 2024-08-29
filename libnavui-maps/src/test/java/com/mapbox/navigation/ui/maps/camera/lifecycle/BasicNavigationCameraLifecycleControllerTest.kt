@@ -23,12 +23,12 @@ class BasicNavigationCameraLifecycleControllerTest {
         controller.onAnimatorStarting(
             mockk(),
             mockk(),
-            "some_owner"
+            "some_owner",
         )
         controller.onAnimatorStarting(
             mockk(),
             mockk(),
-            null
+            null,
         )
 
         verify(exactly = 2) { navigationCamera.requestNavigationCameraToIdle() }
@@ -39,7 +39,7 @@ class BasicNavigationCameraLifecycleControllerTest {
         controller.onAnimatorStarting(
             mockk(),
             mockk(),
-            NAVIGATION_CAMERA_OWNER
+            NAVIGATION_CAMERA_OWNER,
         )
 
         verify(exactly = 0) { navigationCamera.requestNavigationCameraToIdle() }

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.testing.factories
 
 import com.mapbox.api.directions.v5.models.Bearing
@@ -8,9 +10,12 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.ResponseOriginAPI
+import com.mapbox.navigation.base.route.ResponseOriginAPI.Companion.DIRECTIONS_API
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
@@ -19,16 +24,19 @@ import com.mapbox.navigator.WaypointType
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 
+@JvmOverloads
 fun createNavigationRoute(
     directionsRoute: DirectionsRoute = createDirectionsRoute(),
     routeInfo: RouteInfo = RouteInfo(emptyList()),
     nativeWaypoints: List<Waypoint>? = null,
-    routerOrigin: RouterOrigin = RouterOrigin.Offboard
+    @RouterOrigin routerOrigin: String = RouterOrigin.ONLINE,
+    responseWaypoints: List<DirectionsWaypoint> = listOf(createWaypoint(), createWaypoint())
 ): NavigationRoute {
     val response = createDirectionsResponse(
         routes = listOf(directionsRoute),
         uuid = directionsRoute.requestUuid(),
-        routeOptions = directionsRoute.routeOptions()
+        routeOptions = directionsRoute.routeOptions(),
+        responseWaypoints = responseWaypoints
     )
     return createNavigationRoutes(
         response = response,
@@ -43,21 +51,23 @@ fun createNavigationRoute(
 fun createNavigationRoutes(
     response: DirectionsResponse = createDirectionsResponse(),
     options: RouteOptions = response.routes().first().routeOptions()!!,
-    routerOrigin: RouterOrigin = RouterOrigin.Offboard,
+    @RouterOrigin routerOrigin: String = RouterOrigin.ONLINE,
     responseTimeElapsedSeconds: Long? = null,
     routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
-    waypointsMapper: (List<DirectionsWaypoint>, RouteOptions?) -> List<Waypoint> = ::mapToNativeWaypoints
-): List<NavigationRoute> {
+    waypointsMapper: (List<DirectionsWaypoint>, RouteOptions?) -> List<Waypoint> = ::mapToNativeWaypoints,
+    @ResponseOriginAPI responseOriginAPI: String = DIRECTIONS_API,
+    ): List<NavigationRoute> {
     val parser = TestSDKRouteParser(
         routesInfoMapper = routesInfoMapper,
         waypointsMapper = waypointsMapper
     )
-    return com.mapbox.navigation.base.internal.route.createNavigationRoutes(
+    return com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest(
         response,
         options,
         parser,
         routerOrigin,
-        responseTimeElapsedSeconds
+        responseTimeElapsedSeconds,
+        responseOriginAPI,
     )
 }
 
@@ -68,7 +78,7 @@ class TestSDKRouteParser(
     override fun parseDirectionsResponse(
         response: String,
         request: String,
-        routerOrigin: RouterOrigin
+        @RouterOrigin routerOrigin: String
     ): Expected<String, List<RouteInterface>> {
         val result = createRouteInterfacesFromDirectionRequestResponse(
             requestUri = request,
@@ -83,7 +93,7 @@ class TestSDKRouteParser(
     override fun parseDirectionsResponse(
         response: DataRef,
         request: String,
-        routerOrigin: RouterOrigin
+        @RouterOrigin routerOrigin: String
     ): Expected<String, List<RouteInterface>> {
         val buffer = response.buffer.asReadOnlyBuffer()
         buffer.position(0)
@@ -102,7 +112,7 @@ class TestSDKRouteParser(
 fun createRouteInterfacesFromDirectionRequestResponse(
     requestUri: String,
     response: String,
-    routerOrigin: RouterOrigin = RouterOrigin.Offboard,
+    @RouterOrigin routerOrigin: String = RouterOrigin.ONLINE,
     routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
     nativeWaypointsMapper: (List<DirectionsWaypoint>, RouteOptions?) -> List<Waypoint> =
         ::mapToNativeWaypoints

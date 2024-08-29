@@ -8,7 +8,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.border
  */
 class CountryBorderCrossingInfo internal constructor(
     val from: CountryBorderCrossingAdminInfo,
-    val to: CountryBorderCrossingAdminInfo
+    val to: CountryBorderCrossingAdminInfo,
 ) {
 
     /**

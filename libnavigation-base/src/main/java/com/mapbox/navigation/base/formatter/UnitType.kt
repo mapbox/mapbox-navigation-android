@@ -16,5 +16,5 @@ enum class UnitType(val value: String) {
     /**
      * Metric unit type.
      */
-    METRIC("metric")
+    METRIC("metric"),
 }

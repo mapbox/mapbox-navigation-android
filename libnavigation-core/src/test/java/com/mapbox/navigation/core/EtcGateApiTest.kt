@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.datainputs.EtcGateInfo
 import com.mapbox.navigator.ETCGateInfo
 import io.mockk.mockk
 import io.mockk.verify

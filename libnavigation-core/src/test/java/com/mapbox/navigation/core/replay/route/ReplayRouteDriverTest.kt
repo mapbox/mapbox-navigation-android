@@ -173,7 +173,7 @@ class ReplayRouteDriverTest {
 
     private fun resourceAsString(
         name: String,
-        packageName: String = "com.mapbox.navigation.core.replay.route"
+        packageName: String = "com.mapbox.navigation.core.replay.route",
     ): String {
         val inputStream = javaClass.classLoader?.getResourceAsStream("$packageName/$name")
         return IOUtils.toString(inputStream, "UTF-8")

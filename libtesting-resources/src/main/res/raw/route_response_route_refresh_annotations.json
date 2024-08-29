@@ -1,0 +1,448 @@
+{
+  "code":"Ok",
+  "route": {
+    "legs": [
+      {
+        "closures": [
+          {
+            "geometry_index_start": 1,
+            "geometry_index_end": 3
+          }
+        ],
+        "incidents": [
+          {
+            "length": 20,
+            "affected_road_names": [
+              "9th Street"
+            ],
+            "id": "14158569638505033",
+            "type": "lane_restriction",
+            "congestion": {
+              "value": 101
+            },
+            "description": "Möllendorffstrasse: Bauarbeiten zwischen Storkower Strasse und Scheffelstrasse",
+            "long_description": "Fahrbahnverengung von auf eine Fahrspur wegen Bauarbeiten auf der Möllendorffstrasse in Richtung Süden zwischen Storkower Strasse und Scheffelstrasse.",
+            "impact": "low",
+            "alertc_codes": [
+              743
+            ],
+            "geometry_index_start": 10,
+            "geometry_index_end": 15,
+            "creation_time": "2022-05-11T14:10:36Z",
+            "start_time": "2022-04-19T05:00:00Z",
+            "end_time": "2035-06-30T21:59:00Z",
+            "iso_3166_1_alpha2": "DE",
+            "iso_3166_1_alpha3": "DEU",
+            "lanes_blocked": []
+          },
+          {
+            "length": 30,
+            "affected_road_names": [
+              "9th Street"
+            ],
+            "id": "11589180127444257",
+            "type": "lane_restriction",
+            "congestion": {
+              "value": 101
+            },
+            "description": "Rummelsburger Landstrasse: Bauarbeiten um Fritz-König-Weg",
+            "long_description": "Fahrbahnverengung von auf eine Fahrspur wegen Bauarbeiten auf der Rummelsburger Landstrasse in Richtung Süden zwischen Rummelsburger Landstrasse und Fritz-König-Weg.",
+            "impact": "low",
+            "alertc_codes": [
+              743
+            ],
+            "geometry_index_start": 30,
+            "geometry_index_end": 38,
+            "creation_time": "2022-05-11T14:10:36Z",
+            "start_time": "2022-04-29T13:08:25Z",
+            "end_time": "2035-05-30T21:59:00Z",
+            "iso_3166_1_alpha2": "DE",
+            "iso_3166_1_alpha3": "DEU",
+            "lanes_blocked": []
+          }
+        ],
+        "annotation": {
+          "maxspeed": [
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            }
+          ],
+          "congestion": [
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "unknown",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "unknown",
+            "unknown",
+            "unknown",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "low",
+            "unknown",
+            "high"
+          ],
+          "speed": [
+            5,
+            5,
+            12.2,
+            12.2,
+            6.1,
+            6.1,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            5.8,
+            1.7,
+            13.3,
+            9.2,
+            9.4,
+            11.1,
+            11.1,
+            5.6,
+            5.6,
+            8.3,
+            8.3,
+            2.5,
+            12.2,
+            12.2,
+            9.7,
+            9.7,
+            9.7,
+            9.7,
+            9.7,
+            11.7,
+            8.6,
+            9.4,
+            11.9,
+            8.3,
+            12.2,
+            12.2,
+            12.2,
+            12.2
+          ],
+          "distance": [
+            26.6,
+            8.9,
+            13.3,
+            11.4,
+            11.7,
+            24.5,
+            4,
+            4.6,
+            4.9,
+            4.9,
+            4.8,
+            4.8,
+            4.7,
+            4,
+            5.7,
+            4.7,
+            4.7,
+            4.8,
+            4.7,
+            4.9,
+            4.7,
+            4.8,
+            34.7,
+            11.4,
+            126.6,
+            30,
+            10.4,
+            23.4,
+            62,
+            2.1,
+            2.1,
+            62,
+            65.2,
+            4.9,
+            116.3,
+            35.9,
+            83.8,
+            3.4,
+            3.7,
+            41.6,
+            101,
+            122.1,
+            123.4,
+            74.4,
+            46,
+            48.6,
+            31.5,
+            9.7,
+            30.5
+          ],
+          "duration": [
+            5.323,
+            10.787,
+            1.087,
+            0.93,
+            1.918,
+            4.003,
+            0.687,
+            0.787,
+            0.837,
+            0.832,
+            0.83,
+            0.816,
+            0.813,
+            0.689,
+            0.972,
+            0.808,
+            0.811,
+            0.823,
+            0.808,
+            0.835,
+            0.806,
+            0.828,
+            20.809,
+            0.855,
+            13.816,
+            3.175,
+            0.94,
+            2.107,
+            11.166,
+            0.382,
+            0.255,
+            7.436,
+            26.078,
+            0.398,
+            9.519,
+            3.688,
+            8.62,
+            0.351,
+            0.376,
+            4.278,
+            8.661,
+            14.175,
+            13.062,
+            6.225,
+            5.52,
+            3.976,
+            2.58,
+            0.79,
+            52.499
+          ]
+        }
+      }
+    ]
+  }
+}

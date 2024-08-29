@@ -16,7 +16,7 @@ class PredictiveCacheNavigationOptionsTest :
                     currentLocationRadiusInMeters(200)
                     routeBufferRadiusInMeters(10)
                     destinationLocationRadiusInMeters(1000)
-                }.build()
+                }.build(),
             )
         }
 

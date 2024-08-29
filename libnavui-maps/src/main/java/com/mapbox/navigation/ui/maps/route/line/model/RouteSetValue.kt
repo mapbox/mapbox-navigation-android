@@ -1,80 +1,42 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.maps.extension.style.expressions.generated.Expression
 
 /**
  * Represents the side effects for drawing routes on a map.
- *
- * @param primaryRouteLineData the data of the primary route line
- * @param alternativeRouteLinesData the data of the alternative route lines
- * @param waypointsSource the feature collection for the origin and destination icons
- * @param routeLineMaskingLayerDynamicData the data of the masking line
  */
 class RouteSetValue internal constructor(
-    val primaryRouteLineData: RouteLineData,
-    val alternativeRouteLinesData: List<RouteLineData>,
-    val waypointsSource: FeatureCollection,
-    val routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null
+    internal val primaryRouteLineData: RouteLineData,
+    internal val alternativeRouteLinesData: List<RouteLineData>,
+    internal val waypointsSource: FeatureCollection,
+    internal val routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null,
 ) {
 
     /**
-     * @return a class with mutable values for replacing.
+     * Indicates whether some other object is "equal to" this one.
      */
-    fun toMutableValue() = MutableRouteSetValue(
-        primaryRouteLineData,
-        alternativeRouteLinesData,
-        waypointsSource,
-        routeLineMaskingLayerDynamicData
-    )
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteSetValue
+
+        if (primaryRouteLineData != other.primaryRouteLineData) return false
+        if (alternativeRouteLinesData != other.alternativeRouteLinesData) return false
+        if (waypointsSource != other.waypointsSource) return false
+        if (routeLineMaskingLayerDynamicData != other.routeLineMaskingLayerDynamicData) return false
+
+        return true
+    }
 
     /**
-     * Represents the mutable side effects for drawing routes on a map.
-     *
-     * @param primaryRouteLineData the data of the primary route line
-     * @param alternativeRouteLinesData the data of the alternative route lines
-     * @param waypointsSource the feature collection for the origin and destination icons
-     * @param routeLineMaskingLayerDynamicData the data of the masking line
+     * Returns a hash code value for the object.
      */
-    class MutableRouteSetValue internal constructor(
-        var primaryRouteLineData: RouteLineData,
-        var alternativeRouteLinesData: List<RouteLineData>,
-        var waypointsSource: FeatureCollection,
-        var routeLineMaskingLayerDynamicData: RouteLineDynamicData?
-    ) {
-
-        /**
-         * @return a RouteSetValue
-         */
-        fun toImmutableValue() = RouteSetValue(
-            primaryRouteLineData,
-            alternativeRouteLinesData,
-            waypointsSource,
-            routeLineMaskingLayerDynamicData
-        )
+    override fun hashCode(): Int {
+        var result = primaryRouteLineData.hashCode()
+        result = 31 * result + alternativeRouteLinesData.hashCode()
+        result = 31 * result + waypointsSource.hashCode()
+        result = 31 * result + (routeLineMaskingLayerDynamicData?.hashCode() ?: 0)
+        return result
     }
 }
-
-/**
- * Represents a function that returns an [Expression]
- */
-fun interface RouteLineExpressionProvider {
-    /**
-     * Generates an expression.
-     */
-    fun generateExpression(): Expression
-}
-
-/**
- * Represents a function that returns an [Expression]. The expression this provider is expected
- * to produce is a lineTrimOffset expression. This is a specific type of expression that will
- * make a line transparent between two values representing sections of a line.
- *
- * For example a call like literal(listOf(0.0, 0.5)) would produce a trim offset expression
- * that made a line transparent from the beginning of the line to the midpoint of the line. In other
- * words the first 50% of the line would be transparent.  A call like literal(listOf(0.25, 0.5))
- * would make the line transparent starting at 25% of the line's length to 50% of the line's length.
- * The line's color would be represented in the other sections of the line.  See the Map API documentation
- * regarding lineTrimOffset for more information.
- */
-fun interface RouteLineTrimExpressionProvider : RouteLineExpressionProvider

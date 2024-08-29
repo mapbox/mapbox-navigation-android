@@ -4,10 +4,13 @@ import android.net.Uri
 import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.MapboxServices
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
+import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionAction
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
@@ -22,12 +25,9 @@ import kotlinx.coroutines.launch
 
 /**
  * Mapbox Junction Api allows you to generate junction for select maneuvers.
- * @property accessToken String
  */
 @UiThread
-class MapboxJunctionApi(
-    private val accessToken: String
-) {
+class MapboxJunctionApi() {
 
     private companion object {
         private const val ACCESS_TOKEN = "access_token"
@@ -53,7 +53,7 @@ class MapboxJunctionApi(
      */
     fun generateJunction(
         instructions: BannerInstructions,
-        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
+        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>,
     ) {
         val action = JunctionAction.CheckJunctionAvailability(instructions)
         when (val result = JunctionProcessor.process(action)) {
@@ -63,15 +63,15 @@ class MapboxJunctionApi(
             is JunctionResult.JunctionUnavailable -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        JunctionError("No junction available for current maneuver.", null)
-                    )
+                        JunctionError("No junction available for current maneuver.", null),
+                    ),
                 )
             }
             else -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        JunctionError("Inappropriate $result emitted for $action.", null)
-                    )
+                        JunctionError("Inappropriate $result emitted for $action.", null),
+                    ),
                 )
             }
         }
@@ -86,11 +86,12 @@ class MapboxJunctionApi(
 
     private fun makeJunctionRequest(
         result: JunctionResult.JunctionAvailable,
-        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
+        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>,
     ) {
-        val url = Uri.parse(result.junctionUrl).buildUpon().apply {
-            appendQueryParameter(ACCESS_TOKEN, accessToken)
-        }.build().toString()
+        val accessToken = MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
+        val url = Uri.parse(result.junctionUrl).buildUpon()
+            .appendQueryParameter(ACCESS_TOKEN, accessToken)
+            .build().toString()
         val requestAction = JunctionAction.PrepareJunctionRequest(url)
         val junctionRequest = JunctionProcessor.process(requestAction)
         val loadRequest = (junctionRequest as JunctionResult.JunctionRequest).request
@@ -102,38 +103,38 @@ class MapboxJunctionApi(
 
     private fun onJunctionResponse(
         loadResult: Expected<ResourceLoadError, ResourceLoadResult>,
-        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
+        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>,
     ) {
         val action = JunctionAction.ProcessJunctionResponse(loadResult)
         when (val result = JunctionProcessor.process(action)) {
             is JunctionResult.JunctionRaster.Success -> {
-                onJunctionAvailable(result.data, consumer)
+                onJunctionAvailable(result.dataRef, consumer)
             }
             is JunctionResult.JunctionRaster.Failure -> {
                 consumer.accept(
-                    ExpectedFactory.createError(JunctionError(result.error, null))
+                    ExpectedFactory.createError(JunctionError(result.error, null)),
                 )
             }
             is JunctionResult.JunctionRaster.Empty -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        JunctionError("No junction available for current maneuver.", null)
-                    )
+                        JunctionError("No junction available for current maneuver.", null),
+                    ),
                 )
             }
             else -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        JunctionError("Inappropriate $result emitted for $action.", null)
-                    )
+                        JunctionError("Inappropriate $result emitted for $action.", null),
+                    ),
                 )
             }
         }
     }
 
     private fun onJunctionAvailable(
-        data: ByteArray,
-        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
+        data: DataRef,
+        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>,
     ) {
         val action = JunctionAction.ParseRasterToBitmap(data)
         when (val result = JunctionProcessor.process(action)) {
@@ -146,8 +147,8 @@ class MapboxJunctionApi(
             else -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        JunctionError("Inappropriate $result emitted for $action.", null)
-                    )
+                        JunctionError("Inappropriate $result emitted for $action.", null),
+                    ),
                 )
             }
         }

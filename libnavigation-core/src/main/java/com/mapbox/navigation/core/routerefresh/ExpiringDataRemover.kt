@@ -16,22 +16,22 @@ internal class ExpiringDataRemover(
     ): RoutesRefresherResult {
         val primaryRoute = removeExpiringDataFromRoute(
             routesRefresherResult.primaryRouteRefresherResult.route,
-            routesRefresherResult.primaryRouteRefresherResult.routeProgressData.legIndex
+            routesRefresherResult.primaryRouteRefresherResult.routeProgressData.legIndex,
         )
         val alternativeRoutesData = routesRefresherResult.alternativesRouteRefresherResults.map {
             RouteRefresherResult(
                 removeExpiringDataFromRoute(it.route, it.routeProgressData?.legIndex ?: 0),
                 it.routeProgressData,
-                it.status
+                it.status,
             )
         }
         return RoutesRefresherResult(
             RouteRefresherResult(
                 primaryRoute,
                 routesRefresherResult.primaryRouteRefresherResult.routeProgressData,
-                routesRefresherResult.primaryRouteRefresherResult.status
+                routesRefresherResult.primaryRouteRefresherResult.status,
             ),
-            alternativeRoutesData
+            alternativeRoutesData,
         )
     }
 
@@ -49,12 +49,12 @@ internal class ExpiringDataRemover(
                     } else {
                         removeExpiredDataFromLeg(leg)
                     }
-                }
+                },
             ).build()
         }
         return route.update(
             directionsRouteBlock = directionsRouteBlock,
-            directionsResponseBlock = { this }
+            waypointsBlock = { this },
         )
     }
 
@@ -67,7 +67,7 @@ internal class ExpiringDataRemover(
                         .congestion(nonNullOldAnnotation.congestion()?.map { "unknown" })
                         .congestionNumeric(nonNullOldAnnotation.congestionNumeric()?.map { null })
                         .build()
-                }
+                },
             )
             .incidents(
                 leg.incidents()?.filter {
@@ -75,7 +75,7 @@ internal class ExpiringDataRemover(
                         ?: return@filter true
                     val currentDate = localDateProvider()
                     parsed > currentDate
-                }
+                },
             )
             .build()
     }

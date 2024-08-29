@@ -16,7 +16,10 @@ class MapboxRerouteOptionsAdapterTest {
     fun noInternalAdaptersNorExternal() {
         val sut = MapboxRerouteOptionsAdapter(emptyList())
 
-        assertEquals(inputOptions, sut.onRouteOptions(inputOptions))
+        assertEquals(
+            inputOptions,
+            sut.onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams),
+        )
     }
 
     @Test
@@ -27,7 +30,10 @@ class MapboxRerouteOptionsAdapterTest {
         val sut = MapboxRerouteOptionsAdapter(emptyList())
         sut.externalOptionsAdapter = externalAdapter
 
-        assertEquals(outputOptions, sut.onRouteOptions(inputOptions))
+        assertEquals(
+            outputOptions,
+            sut.onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams),
+        )
     }
 
     @Test
@@ -39,18 +45,26 @@ class MapboxRerouteOptionsAdapterTest {
         sut.externalOptionsAdapter = externalAdapter
         sut.externalOptionsAdapter = null
 
-        assertEquals(inputOptions, sut.onRouteOptions(inputOptions))
+        assertEquals(
+            inputOptions,
+            sut.onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams),
+        )
     }
 
     @Test
     fun singleInternalAdapterNoExternal() {
         val outputOptions = createRouteOptions(profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-        val adapter = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(inputOptions) } returns outputOptions
+        val adapter = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams)
+            } returns outputOptions
         }
         val sut = MapboxRerouteOptionsAdapter(listOf(adapter))
 
-        assertEquals(outputOptions, sut.onRouteOptions(inputOptions))
+        assertEquals(
+            outputOptions,
+            sut.onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams),
+        )
     }
 
     @Test
@@ -60,21 +74,30 @@ class MapboxRerouteOptionsAdapterTest {
         val outputOptions3 = createRouteOptions(profile = DirectionsCriteria.PROFILE_CYCLING)
         val outputOptionsExternal =
             createRouteOptions(profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-        val adapter1 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(inputOptions) } returns outputOptions1
+        val adapter1 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams)
+            } returns outputOptions1
         }
-        val adapter2 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(outputOptions1) } returns outputOptions2
+        val adapter2 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(outputOptions1, defaultRouteOptionsAdapterParams)
+            } returns outputOptions2
         }
-        val adapter3 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(outputOptions2) } returns outputOptions3
+        val adapter3 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(outputOptions2, defaultRouteOptionsAdapterParams)
+            } returns outputOptions3
         }
         every { externalAdapter.onRouteOptions(outputOptions3) } returns outputOptionsExternal
 
         val sut = MapboxRerouteOptionsAdapter(listOf(adapter1, adapter2, adapter3))
         sut.externalOptionsAdapter = externalAdapter
 
-        assertEquals(outputOptionsExternal, sut.onRouteOptions(inputOptions))
+        assertEquals(
+            outputOptionsExternal,
+            sut.onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams),
+        )
     }
 
     @Test
@@ -84,14 +107,23 @@ class MapboxRerouteOptionsAdapterTest {
         val outputOptions3 = createRouteOptions(profile = DirectionsCriteria.PROFILE_CYCLING)
         val outputOptionsExternal =
             createRouteOptions(profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-        val adapter1 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(inputOptions) } returns outputOptions1
+        val adapter1 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams)
+            } returns outputOptions1
         }
-        val adapter2 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(outputOptions1) } returns outputOptions2
+        val adapter2 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(outputOptions1, defaultRouteOptionsAdapterParams)
+            } returns outputOptions2
         }
-        val adapter3 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(outputOptions2) } returns outputOptions3
+        val adapter3 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(
+                    outputOptions2,
+                    defaultRouteOptionsAdapterParams,
+                )
+            } returns outputOptions3
         }
         every { externalAdapter.onRouteOptions(outputOptions3) } returns outputOptionsExternal
 
@@ -99,7 +131,10 @@ class MapboxRerouteOptionsAdapterTest {
         sut.externalOptionsAdapter = externalAdapter
         sut.externalOptionsAdapter = null
 
-        assertEquals(outputOptions3, sut.onRouteOptions(inputOptions))
+        assertEquals(
+            outputOptions3,
+            sut.onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams),
+        )
     }
 
     @Test
@@ -107,17 +142,26 @@ class MapboxRerouteOptionsAdapterTest {
         val outputOptions1 = createRouteOptions(profile = DirectionsCriteria.PROFILE_DRIVING)
         val outputOptions2 = createRouteOptions(profile = DirectionsCriteria.PROFILE_WALKING)
         val outputOptions3 = createRouteOptions(profile = DirectionsCriteria.PROFILE_CYCLING)
-        val adapter1 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(inputOptions) } returns outputOptions1
+        val adapter1 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams)
+            } returns outputOptions1
         }
-        val adapter2 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(outputOptions1) } returns outputOptions2
+        val adapter2 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(outputOptions1, defaultRouteOptionsAdapterParams)
+            } returns outputOptions2
         }
-        val adapter3 = mockk<RerouteOptionsAdapter> {
-            every { onRouteOptions(outputOptions2) } returns outputOptions3
+        val adapter3 = mockk<InternalRerouteOptionsAdapter> {
+            every {
+                onRouteOptions(outputOptions2, defaultRouteOptionsAdapterParams)
+            } returns outputOptions3
         }
         val sut = MapboxRerouteOptionsAdapter(listOf(adapter1, adapter2, adapter3))
 
-        assertEquals(outputOptions3, sut.onRouteOptions(inputOptions))
+        assertEquals(
+            outputOptions3,
+            sut.onRouteOptions(inputOptions, defaultRouteOptionsAdapterParams),
+        )
     }
 }

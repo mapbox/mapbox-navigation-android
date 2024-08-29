@@ -37,14 +37,14 @@ import kotlinx.coroutines.flow.onEach
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class MapboxTripStarter internal constructor(
-    private val services: MapboxTripStarterServices = MapboxTripStarterServices()
+    private val services: MapboxTripStarterServices = MapboxTripStarterServices(),
 ) : MapboxNavigationObserver {
 
     private val tripType = MutableStateFlow<MapboxTripStarterType>(
-        MapboxTripStarterType.MapMatching
+        MapboxTripStarterType.MapMatching,
     )
     private val replayRouteSessionOptions = MutableStateFlow(
-        ReplayRouteSessionOptions.Builder().build()
+        ReplayRouteSessionOptions.Builder().build(),
     )
     private val isLocationPermissionGranted = MutableStateFlow(false)
     private var replayRouteSession: ReplayRouteSession? = null
@@ -86,7 +86,7 @@ class MapboxTripStarter internal constructor(
      * [enableMapMatching] will not work unless location permissions have been granted. Refresh
      * the location permissions after they are granted to ensure the trip session will start.
      */
-    fun refreshLocationPermissions() = apply {
+    fun refreshLocationPermissions(): MapboxTripStarter = apply {
         mapboxNavigation?.navigationOptions?.applicationContext?.let { context ->
             val granted = PermissionsManager.areLocationPermissionsGranted(context)
             isLocationPermissionGranted.value = granted
@@ -98,7 +98,7 @@ class MapboxTripStarter internal constructor(
      * [enableReplayRoute]. Make sure location permissions have been accepted or this will have no
      * effect on the experience.
      */
-    fun enableMapMatching() = apply {
+    fun enableMapMatching(): MapboxTripStarter = apply {
         if (!isLocationPermissionGranted.value) {
             refreshLocationPermissions()
         }
@@ -119,8 +119,8 @@ class MapboxTripStarter internal constructor(
      * @param options optional options to use for route replay.
      */
     fun enableReplayRoute(
-        options: ReplayRouteSessionOptions? = null
-    ) = apply {
+        options: ReplayRouteSessionOptions? = null,
+    ): MapboxTripStarter = apply {
         options?.let { options -> replayRouteSessionOptions.value = options }
         tripType.value = MapboxTripStarterType.ReplayRoute
     }
@@ -140,8 +140,8 @@ class MapboxTripStarter internal constructor(
      * @param options used for the history session.
      */
     fun enableReplayHistory(
-        options: ReplayHistorySessionOptions? = null
-    ) = apply {
+        options: ReplayHistorySessionOptions? = null,
+    ): MapboxTripStarter = apply {
         options?.let { options -> replayHistorySession.setOptions(options) }
         tripType.value = MapboxTripStarterType.ReplayHistory
     }
@@ -197,7 +197,7 @@ class MapboxTripStarter internal constructor(
      */
     private fun onReplayRouteEnabled(
         mapboxNavigation: MapboxNavigation,
-        options: ReplayRouteSessionOptions
+        options: ReplayRouteSessionOptions,
     ) {
         replayHistorySession.onDetached(mapboxNavigation)
         replayRouteSession?.onDetached(mapboxNavigation)
@@ -215,7 +215,7 @@ class MapboxTripStarter internal constructor(
      */
     private fun onReplayHistoryEnabled(
         mapboxNavigation: MapboxNavigation,
-        options: ReplayHistorySessionOptions
+        options: ReplayHistorySessionOptions,
     ) {
         replayRouteSession?.onDetached(mapboxNavigation)
         replayRouteSession = null

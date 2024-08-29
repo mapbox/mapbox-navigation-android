@@ -66,9 +66,9 @@ class PredictiveCacheLocationOptions private constructor(
      */
     class Builder {
 
-        private var currentLocationRadiusInMeters: Int = 20000
-        private var routeBufferRadiusInMeters: Int = 50000
-        private var destinationLocationRadiusInMeters: Int = 50000
+        private var currentLocationRadiusInMeters: Int = 20_000
+        private var routeBufferRadiusInMeters: Int = 5_000
+        private var destinationLocationRadiusInMeters: Int = 50_000
 
         /**
          * How far around the user's location we're going to cache, in meters. Defaults to 20000 (20 km)

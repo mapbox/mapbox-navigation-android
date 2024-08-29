@@ -21,7 +21,7 @@ class AdasisStubOptions private constructor(
     @JvmSynthetic
     internal fun toNativeStub(): com.mapbox.navigator.Stub {
         return com.mapbox.navigator.Stub(
-            options.toNativeAdasisConfigMessageOptions()
+            options.toNativeAdasisConfigMessageOptions(),
         )
     }
 
@@ -61,7 +61,7 @@ class AdasisStubOptions private constructor(
         /**
          * Common options for segment
          */
-        fun options(options: AdasisConfigMessageOptions) = apply {
+        fun options(options: AdasisConfigMessageOptions): Builder = apply {
             this.options = options
         }
 

@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 fun <T> CoroutineScope.monitorChannelWithException(
     channel: ReceiveChannel<T>,
     predicate: suspend (T) -> Unit,
-    onCancellation: (() -> Unit) = {}
+    onCancellation: (() -> Unit) = {},
 ): Job {
     var isChannelValid = true
     return launch {
@@ -37,7 +37,8 @@ fun Exception.ifChannelException(action: () -> Unit) {
     when (this) {
         is CancellationException,
         is ClosedSendChannelException,
-        is ClosedReceiveChannelException -> action()
+        is ClosedReceiveChannelException,
+        -> action()
         else -> throw this
     }
 }

@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import android.location.Location
 import android.location.LocationManager
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -61,10 +61,9 @@ internal class LocationComponentTest {
         }
     }
 
-    private fun location(latitude: Double, longitude: Double) = Location(
-        LocationManager.PASSIVE_PROVIDER
-    ).apply {
-        this.latitude = latitude
-        this.longitude = longitude
-    }
+    private fun location(latitude: Double, longitude: Double) = Location.Builder()
+        .source(LocationManager.PASSIVE_PROVIDER)
+        .latitude(latitude)
+        .longitude(longitude)
+        .build()
 }

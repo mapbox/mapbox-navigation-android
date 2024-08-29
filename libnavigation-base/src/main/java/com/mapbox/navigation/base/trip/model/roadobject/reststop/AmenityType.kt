@@ -124,7 +124,7 @@ object AmenityType {
         SHOWER,
         PICNIC_SHELTER,
         POST,
-        FAX
+        FAX,
     )
     annotation class Type
 }

@@ -5,10 +5,10 @@ import androidx.work.ListenableWorker.Result.Failure
 import androidx.work.ListenableWorker.Result.Retry
 import androidx.work.ListenableWorker.Result.Success
 import androidx.work.WorkerParameters
-import com.mapbox.common.UploadError
+import com.mapbox.common.HttpServiceInterface
+import com.mapbox.common.TransferError
+import com.mapbox.common.TransferState
 import com.mapbox.common.UploadOptions
-import com.mapbox.common.UploadServiceInterface
-import com.mapbox.common.UploadState
 import com.mapbox.common.UploadStatus
 import com.mapbox.common.UploadStatusCallback
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -52,8 +52,8 @@ class HistoryUploadWorkerTest {
         val mockedUploadOptions = slot<UploadOptions>()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FAILED
-        val mockedUploadError = mockk<UploadError>(relaxed = true)
+        every { mockedUploadStatus.state } returns TransferState.FAILED
+        val mockedUploadError = mockk<TransferError>(relaxed = true)
         every { mockedUploadError.code } returns mockk()
         every { mockedUploadStatus.error } returns mockedUploadError
         every { mockedUploadStatus.httpResult?.value } returns mockk()
@@ -91,8 +91,8 @@ class HistoryUploadWorkerTest {
         val mockedUploadOptions = slot<UploadOptions>()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FINISHED
-        every { mockedUploadStatus.httpResult?.value?.code } returns 204L
+        every { mockedUploadStatus.state } returns TransferState.FINISHED
+        every { mockedUploadStatus.httpResult?.value?.code } returns 204
         val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
         MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
         every {
@@ -123,8 +123,8 @@ class HistoryUploadWorkerTest {
         val mockedUploadOptions = slot<UploadOptions>()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FINISHED
-        every { mockedUploadStatus.httpResult?.value?.code } returns 204L
+        every { mockedUploadStatus.state } returns TransferState.FINISHED
+        every { mockedUploadStatus.httpResult?.value?.code } returns 204
         val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
         MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
         every {
@@ -155,7 +155,7 @@ class HistoryUploadWorkerTest {
         val mockedUploadOptions = slot<UploadOptions>()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FINISHED
+        every { mockedUploadStatus.state } returns TransferState.FINISHED
         every { mockedUploadStatus.httpResult?.value?.code } returns 401
         val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
         MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
@@ -187,8 +187,8 @@ class HistoryUploadWorkerTest {
         val mockedUploadOptions = slot<UploadOptions>()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FAILED
-        val mockedUploadError = mockk<UploadError>(relaxed = true)
+        every { mockedUploadStatus.state } returns TransferState.FAILED
+        val mockedUploadError = mockk<TransferError>(relaxed = true)
         every { mockedUploadError.code } returns mockk()
         every { mockedUploadStatus.error } returns mockedUploadError
         every { mockedUploadStatus.httpResult?.value } returns mockk()
@@ -222,8 +222,8 @@ class HistoryUploadWorkerTest {
         val mockedUploadOptions = slot<UploadOptions>()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FAILED
-        val mockedUploadError = mockk<UploadError>(relaxed = true)
+        every { mockedUploadStatus.state } returns TransferState.FAILED
+        val mockedUploadError = mockk<TransferError>(relaxed = true)
         every { mockedUploadError.code } returns mockk()
         every { mockedUploadStatus.error } returns mockedUploadError
         every { mockedUploadStatus.httpResult?.value } returns mockk()
@@ -258,8 +258,8 @@ class HistoryUploadWorkerTest {
         val mockedUploadServiceInterface = prepareUploadMockks()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FINISHED
-        every { mockedUploadStatus.httpResult?.value?.code } returns 204L
+        every { mockedUploadStatus.state } returns TransferState.FINISHED
+        every { mockedUploadStatus.httpResult?.value?.code } returns 204
         val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
         MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
         every {
@@ -295,8 +295,8 @@ class HistoryUploadWorkerTest {
         val mockedUploadServiceInterface = prepareUploadMockks()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FINISHED
-        every { mockedUploadStatus.httpResult?.value?.code } returns 204L
+        every { mockedUploadStatus.state } returns TransferState.FINISHED
+        every { mockedUploadStatus.httpResult?.value?.code } returns 204
         val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
         MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
         every {
@@ -325,7 +325,7 @@ class HistoryUploadWorkerTest {
         val mockedUploadOptions = slot<UploadOptions>()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FINISHED
+        every { mockedUploadStatus.state } returns TransferState.FINISHED
         every { mockedUploadStatus.httpResult?.value?.code } returns 401
         val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
         MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
@@ -357,7 +357,7 @@ class HistoryUploadWorkerTest {
         val mockedUploadOptions = slot<UploadOptions>()
         val mockedUploadStatusCallback = slot<UploadStatusCallback>()
         val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-        every { mockedUploadStatus.state } returns UploadState.FINISHED
+        every { mockedUploadStatus.state } returns TransferState.FINISHED
         every { mockedUploadStatus.httpResult?.value?.code } returns 401
         val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
         MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
@@ -389,7 +389,7 @@ class HistoryUploadWorkerTest {
             val mockedUploadOptions = slot<UploadOptions>()
             val mockedUploadStatusCallback = slot<UploadStatusCallback>()
             val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-            every { mockedUploadStatus.state } returns UploadState.FINISHED
+            every { mockedUploadStatus.state } returns TransferState.FINISHED
             every { mockedUploadStatus.httpResult?.value?.code } returns 401
             val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
             MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
@@ -423,7 +423,7 @@ class HistoryUploadWorkerTest {
             val mockedUploadOptions = slot<UploadOptions>()
             val mockedUploadStatusCallback = slot<UploadStatusCallback>()
             val mockedUploadStatus = mockk<UploadStatus>(relaxed = true)
-            every { mockedUploadStatus.state } returns UploadState.FINISHED
+            every { mockedUploadStatus.state } returns TransferState.FINISHED
             every { mockedUploadStatus.httpResult?.value?.code } returns 401
             val mockedPushStatusObserver = mockk<PushStatusObserver>(relaxUnitFun = true)
             MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
@@ -443,7 +443,7 @@ class HistoryUploadWorkerTest {
             assertTrue(result is Failure)
         }
 
-    private fun prepareUploadMockks(): UploadServiceInterface {
+    private fun prepareUploadMockks(): HttpServiceInterface {
         mockkObject(HistoryAttachmentsUtils)
         val fileSlot = slot<File>()
         val mockedFile = mockk<File>(relaxed = true)
@@ -451,10 +451,10 @@ class HistoryUploadWorkerTest {
             every { mockedFile.absolutePath } returns fileSlot.captured.toString()
             mockedFile
         }
-        val mockedUploadServiceInterface = mockk<UploadServiceInterface>(relaxed = true)
-        mockkObject(UploadServiceInterfaceFactory)
+        val mockedUploadServiceInterface = mockk<HttpServiceInterface>(relaxed = true)
+        mockkObject(HttpServiceProvider)
         every {
-            UploadServiceInterfaceFactory.retrieveUploadServiceInterface()
+            HttpServiceProvider.getInstance()
         } returns mockedUploadServiceInterface
         return mockedUploadServiceInterface
     }

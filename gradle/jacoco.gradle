@@ -1,18 +1,18 @@
-apply plugin: 'com.hiya.jacoco-android'
+// Need for the build form the Dash app with Gradle 8.1
+if (VersionNumber.parse(project.getGradle().getGradleVersion()) < VersionNumber.parse("8.0")) {
+  apply plugin: 'com.hiya.jacoco-android'
 
-jacoco {
+  jacoco {
     toolVersion = "0.8.7"
-}
+  }
 
-tasks.withType(Test) {
-  // needed to capture coverage from Robolectric tests
-  jacoco.includeNoLocationClasses = true
+  tasks.withType(Test) {
 
-  // required to run on Java 9+
-  // refs https://github.com/gradle/gradle/issues/5184#issuecomment-457865951
-  jacoco.excludes = ['jdk.internal.*']
-}
+    // needed to capture coverage from Robolectric tests
+    jacoco.includeNoLocationClasses = true
 
-jacocoAndroidUnitTestReport {
-    excludes += ['com/mapbox/navigation/utils/internal/android/**']
+    // required to run on Java 9+
+    // refs https://github.com/gradle/gradle/issues/5184#issuecomment-457865951
+    jacoco.excludes = ['jdk.internal.*']
+  }
 }

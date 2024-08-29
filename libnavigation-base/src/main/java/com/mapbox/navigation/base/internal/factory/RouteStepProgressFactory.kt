@@ -35,7 +35,7 @@ object RouteStepProgressFactory {
         distanceRemaining: Float,
         distanceTraveled: Float,
         fractionTraveled: Float,
-        durationRemaining: Double
+        durationRemaining: Double,
     ): RouteStepProgress {
         return RouteStepProgress(
             stepIndex = stepIndex,
@@ -46,7 +46,7 @@ object RouteStepProgressFactory {
             distanceRemaining = distanceRemaining,
             distanceTraveled = distanceTraveled,
             fractionTraveled = fractionTraveled,
-            durationRemaining = durationRemaining
+            durationRemaining = durationRemaining,
         )
     }
 }

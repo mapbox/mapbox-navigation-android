@@ -14,7 +14,7 @@ import com.mapbox.geojson.Point
  * next ValueAnimator.
  */
 internal class PuckAnimationEvaluator(
-    private val keyPoints: Array<Point>
+    private val keyPoints: Array<Point>,
 ) : TimeInterpolator, TypeEvaluator<Point> {
 
     private var interpolator: TimeInterpolator? = null
@@ -50,7 +50,7 @@ internal class PuckAnimationEvaluator(
         private val POINT = TypeEvaluator<Point> { fraction, startValue, endValue ->
             Point.fromLngLat(
                 startValue.longitude() + fraction * (endValue.longitude() - startValue.longitude()),
-                startValue.latitude() + fraction * (endValue.latitude() - startValue.latitude())
+                startValue.latitude() + fraction * (endValue.latitude() - startValue.latitude()),
             )
         }
     }

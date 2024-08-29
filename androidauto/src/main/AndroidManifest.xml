@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="androidx.car.app.NAVIGATION_TEMPLATES"/>
+
+    <application>
+
+        <meta-data
+            android:name="androidx.car.app.theme"
+            android:resource="@style/CarAppTheme"/>
+
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="3" />
+
+    </application>
+
+</manifest>

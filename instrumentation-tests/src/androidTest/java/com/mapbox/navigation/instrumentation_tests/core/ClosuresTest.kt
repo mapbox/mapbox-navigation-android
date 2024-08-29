@@ -4,8 +4,11 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.route.deserializeNavigationRouteFrom
+import com.mapbox.navigation.base.internal.route.serialize
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -17,10 +20,6 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -29,12 +28,21 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.readRawFileText
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withContext
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -67,13 +75,12 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(context)
-                    .accessToken(getMapboxAccessTokenFromResources(context))
                     .routingTilesOptions(
                         RoutingTilesOptions.Builder()
                             .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                            .build()
+                            .build(),
                     )
-                    .build()
+                    .build(),
             )
         }
     }
@@ -87,8 +94,8 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
                 "route_response_route_refresh",
                 // [1, 3] closure on leg#0
                 readRawFileText(context, R.raw.route_response_route_refresh_annotations),
-                acceptedGeometryIndex = 0
-            )
+                acceptedGeometryIndex = 0,
+            ),
         )
 
         mapboxNavigation.startTripSession()
@@ -137,8 +144,8 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
                 "route_response_route_refresh",
                 // [1, 3] closure on leg#0
                 readRawFileText(context, R.raw.route_response_route_refresh_no_closures),
-                acceptedGeometryIndex = 0
-            )
+                acceptedGeometryIndex = 0,
+            ),
         )
 
         mapboxNavigation.startTripSession()
@@ -175,8 +182,8 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
                 "route_response_route_refresh",
                 // [1, 3] closure on leg#0 - closure moved
                 readRawFileText(context, R.raw.route_response_route_refresh_annotations),
-                acceptedGeometryIndex = 0
-            )
+                acceptedGeometryIndex = 0,
+            ),
         )
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         mapboxNavigation.routesUpdates()
@@ -190,6 +197,38 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
         assertTrue(routeProgressAfterRefreshWithClosure.hasUnexpectedUpcomingClosures())
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun closures_detection_works_after_deserialization() = sdkTest {
+        withMapboxNavigation { navigation ->
+            val mockRoute = RoutesProvider.route_alternative_with_closure(context)
+            val routes = navigation.requestMockRoutes(
+                mockWebServerRule,
+                mockRoute,
+            )
+
+            val deserializedRouteWithClosure = withContext(Dispatchers.Default) {
+                deserializeNavigationRouteFrom(
+                    routes[1].serialize(),
+                ).value
+            }
+            assertTrue(
+                "Test route should have closures",
+                deserializedRouteWithClosure!!.directionsRoute.legs()!![0]
+                    .closures()!!.isNotEmpty(),
+            )
+            stayOnPosition(mockRoute.routeWaypoints.first(), 0.0f) {
+                navigation.startTripSession()
+                navigation.setNavigationRoutes(listOf(deserializedRouteWithClosure))
+                val routeProgress = navigation.routeProgressUpdates().first()
+                assertFalse(
+                    "all closures should be expected",
+                    routeProgress.hasUnexpectedUpcomingClosures(),
+                )
+            }
+        }
+    }
+
     private fun setUpRequestHandler(file: Int) {
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(
@@ -197,8 +236,8 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
                 profile = "driving-traffic",
                 jsonResponse = readRawFileText(context, file),
                 expectedCoordinates = null,
-                relaxedExpectedCoordinates = true
-            )
+                relaxedExpectedCoordinates = true,
+            ),
         )
     }
 
@@ -210,13 +249,13 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
                 .enableRefresh(true)
                 .coordinatesList(coordinates)
                 .baseUrl(mockWebServerRule.baseUrl)
-                .build()
+                .build(),
         ).getSuccessfulResultOrThrowException().routes
     }
 
     private fun stayOnPosition(
         point: Point,
-        bearing: Float = 0f
+        bearing: Float = 0f,
     ) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
@@ -224,7 +263,7 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
                 this.longitude = point.longitude()
                 this.bearing = bearing
             },
-            times = 120
+            times = 120,
         )
     }
 }

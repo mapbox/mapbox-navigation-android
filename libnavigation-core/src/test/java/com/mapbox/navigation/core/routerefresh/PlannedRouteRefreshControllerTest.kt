@@ -70,7 +70,7 @@ class PlannedRouteRefreshControllerTest {
             listener,
             attemptListener,
             parentScope,
-            retryStrategy
+            retryStrategy,
         )
     }
 
@@ -182,7 +182,7 @@ class PlannedRouteRefreshControllerTest {
         } returns validation2
         every {
             RouteRefreshValidator.joinValidationErrorMessages(
-                listOf(validation1 to route1, validation2 to route2)
+                listOf(validation1 to route1, validation2 to route2),
             )
         } returns message
 
@@ -319,7 +319,7 @@ class PlannedRouteRefreshControllerTest {
             mockk<RoutesRefresherResult> {
                 every { anySuccess() } returns false
                 every { anyRequestFailed() } returns true
-            }
+            },
         )
 
         startRequest()
@@ -346,7 +346,7 @@ class PlannedRouteRefreshControllerTest {
             every { alternativesRouteRefresherResults } returns listOf(
                 mockk {
                     every { route } returns refreshedRoute2
-                }
+                },
             )
         }
         finishRequest(result)
@@ -544,7 +544,7 @@ class PlannedRouteRefreshControllerTest {
         verify(exactly = 1) {
             logger.logW(
                 "Planned route refresh error: request is skipped as a newer one is available",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
         }
     }
@@ -759,7 +759,7 @@ class PlannedRouteRefreshControllerTest {
         } returns validation2
         every {
             RouteRefreshValidator.joinValidationErrorMessages(
-                listOf(validation1 to route1, validation2 to route2)
+                listOf(validation1 to route1, validation2 to route2),
             )
         } returns message
         sut.startRoutesRefreshing(listOf(route1, route2))

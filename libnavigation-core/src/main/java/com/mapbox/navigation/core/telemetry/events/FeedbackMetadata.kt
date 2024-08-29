@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
-import android.location.Location
 import com.google.gson.Gson
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -27,6 +27,7 @@ class FeedbackMetadataWrapper internal constructor(
     private val rerouteCount: Int,
     private val lastLocation: Point?,
     private val locationEngineNameExternal: String,
+    private val simulation: Boolean,
     private val percentTimeInPortrait: Int?,
     private val percentTimeInForeground: Int?,
     private val eventVersion: Int,
@@ -70,6 +71,7 @@ class FeedbackMetadataWrapper internal constructor(
             locationsAfter.toTelemetryLocations(),
             lastLocation,
             locationEngineNameExternal,
+            simulation,
             percentTimeInPortrait,
             percentTimeInForeground,
             eventVersion,
@@ -100,6 +102,7 @@ class FeedbackMetadata internal constructor(
     internal val locationsAfterEvent: Array<TelemetryLocation>? = null,
     internal val lastLocation: Point? = null,
     internal val locationEngineNameExternal: String? = null,
+    internal val simulation: Boolean = false,
     internal val percentTimeInPortrait: Int? = null,
     internal val percentTimeInForeground: Int? = null,
     internal val eventVersion: Int,

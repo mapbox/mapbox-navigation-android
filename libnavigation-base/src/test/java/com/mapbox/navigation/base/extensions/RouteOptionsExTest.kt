@@ -40,7 +40,7 @@ class RouteOptionsExTest {
                                 DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
                                 DirectionsCriteria.ANNOTATION_MAXSPEED,
                                 DirectionsCriteria.ANNOTATION_CLOSURE,
-                            )
+                            ),
                         ),
                     ),
                     arrayOf(
@@ -48,7 +48,7 @@ class RouteOptionsExTest {
                         true,
                         false,
                         defaultAnnotations.plus(
-                            listOf(DirectionsCriteria.ANNOTATION_MAXSPEED)
+                            listOf(DirectionsCriteria.ANNOTATION_MAXSPEED),
                         ),
                     ),
                     arrayOf(
@@ -92,14 +92,14 @@ class RouteOptionsExTest {
         }
 
         private fun provideRouteOptions(
-            @DirectionsCriteria.ProfileCriteria profile: String
+            @DirectionsCriteria.ProfileCriteria profile: String,
         ): RouteOptions.Builder =
             RouteOptions.builder()
                 .coordinatesList(
                     listOf(
                         Point.fromLngLat(0.0, 0.0),
                         Point.fromLngLat(1.1, 1.1),
-                    )
+                    ),
                 )
                 .applyDefaultNavigationOptions(profile)
     }

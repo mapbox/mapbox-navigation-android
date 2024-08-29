@@ -1,23 +1,33 @@
 package com.mapbox.navigation.core.trip.session
 
-import android.content.Context
-import android.location.Location
 import android.os.Looper
-import androidx.test.core.app.ApplicationProvider
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.Cancelable
+import com.mapbox.common.location.DeviceLocationProvider
+import com.mapbox.common.location.DeviceLocationProviderFactory
+import com.mapbox.common.location.Location
+import com.mapbox.common.location.LocationError
+import com.mapbox.common.location.LocationErrorCode
+import com.mapbox.common.location.LocationProvider
+import com.mapbox.common.location.LocationProviderRequest
+import com.mapbox.common.location.LocationService
+import com.mapbox.common.location.LocationServiceFactory
+import com.mapbox.navigation.base.options.LocationOptions
+import com.mapbox.navigation.core.replay.ReplayLocationProvider
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,150 +38,325 @@ import org.robolectric.annotation.Config
 @Config(manifest = Config.NONE)
 class TripSessionLocationEngineTest {
 
+    private val logger = mockk<LoggerFrontend>(relaxed = true)
+
     @get:Rule
-    val loggerRule = LoggingFrontendTestRule()
+    val loggerRule = LoggingFrontendTestRule(logger)
 
-    private val context: Context = ApplicationProvider.getApplicationContext()
-    private val deviceLocationEngine = mockk<LocationEngine>(relaxUnitFun = true).also {
-        mockLocationEngine(it)
+    private val defaultDeviceLocationProvider = mockk<DeviceLocationProvider>(relaxed = true).also {
+        mockLocationProvider(it)
     }
-    private val replayLocationEngine = mockk<ReplayLocationEngine>(relaxUnitFun = true).also {
-        mockLocationEngine(it)
+    private val replayLocationProvider = mockk<ReplayLocationProvider>(relaxed = true).also {
+        mockLocationProvider(it)
     }
-    private val navigationOptions = NavigationOptions.Builder(context)
-        .locationEngine(deviceLocationEngine)
-        .build()
+    private val locationOptions = LocationOptions.Builder().build()
+    private val locationService = mockk<LocationService>(relaxUnitFun = true) {
+        every {
+            getDeviceLocationProvider(any<LocationProviderRequest>())
+        } returns ExpectedFactory.createValue(defaultDeviceLocationProvider)
+    }
 
-    private val sut = TripSessionLocationEngine(navigationOptions) {
-        replayLocationEngine
+    private lateinit var sut: TripSessionLocationEngine
+
+    @Before
+    fun setUp() {
+        mockkStatic(LocationServiceFactory::class)
+        every { LocationServiceFactory.getOrCreate() } returns locationService
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(LocationServiceFactory::class)
     }
 
     @Test
     fun `should request location updates from navigation options when replay is disabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(false, onRawLocationUpdate)
 
         verify(exactly = 1) {
-            navigationOptions.locationEngine.requestLocationUpdates(
-                any(),
-                any(),
-                Looper.getMainLooper()
+            defaultDeviceLocationProvider.addLocationObserver(any(), any())
+        }
+        verify(exactly = 0) {
+            locationService.setUserDefinedDeviceLocationProviderFactory(any())
+        }
+    }
+
+    @Test
+    fun `should not request location updates from navigation options when error is returned`() {
+        every { LocationServiceFactory.getOrCreate() } returns mockk {
+            every {
+                getDeviceLocationProvider(any<LocationProviderRequest>())
+            } returns ExpectedFactory.createError(
+                LocationError(LocationErrorCode.FAILED_TO_DETECT_LOCATION, "Some error"),
             )
+        }
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(false, onRawLocationUpdate)
+
+        verify(exactly = 0) {
+            defaultDeviceLocationProvider.addLocationObserver(any(), any())
+        }
+        verify(exactly = 1) {
+            logger.logW(
+                "TripSessionLocationEngine",
+                "Location updates are not possible: " +
+                    "could not find suitable location provider. " +
+                    "Error code: FailedToDetectLocation, " +
+                    "message: Some error.",
+            )
+        }
+        verify(exactly = 0) {
+            locationService.setUserDefinedDeviceLocationProviderFactory(any())
+        }
+    }
+
+    @Test
+    fun `should request location updates from custom real provider when replay is disabled`() {
+        val customLocationProvider = mockk<DeviceLocationProvider>(relaxed = true)
+        val customLocationProviderFactory = DeviceLocationProviderFactory {
+            ExpectedFactory.createValue(customLocationProvider)
+        }
+        every {
+            locationService.getDeviceLocationProvider(any<LocationProviderRequest>())
+        } returns ExpectedFactory.createValue(customLocationProvider)
+        val locationOptions = LocationOptions.Builder()
+            .locationProviderFactory(
+                customLocationProviderFactory,
+                LocationOptions.LocationProviderType.REAL,
+            )
+            .build()
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(false, onRawLocationUpdate)
+
+        verifyOrder {
+            locationService.setUserDefinedDeviceLocationProviderFactory(
+                customLocationProviderFactory,
+            )
+            locationService.getDeviceLocationProvider(any<LocationProviderRequest>())
+        }
+        verify(exactly = 1) {
+            customLocationProvider.addLocationObserver(any(), not(Looper.getMainLooper()))
+        }
+    }
+
+    @Test
+    fun `should request location updates from custom mocked provider when replay is disabled`() {
+        val customLocationProvider = mockk<DeviceLocationProvider>(relaxed = true)
+        val customLocationProviderFactory = DeviceLocationProviderFactory {
+            ExpectedFactory.createValue(customLocationProvider)
+        }
+        val locationOptions = LocationOptions.Builder()
+            .locationProviderFactory(
+                customLocationProviderFactory,
+                LocationOptions.LocationProviderType.MOCKED,
+            )
+            .build()
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(false, onRawLocationUpdate)
+
+        verify(exactly = 0) {
+            locationService.setUserDefinedDeviceLocationProviderFactory(any())
+            locationService.getDeviceLocationProvider(any<LocationProviderRequest>())
+        }
+        verify(exactly = 1) {
+            customLocationProvider.addLocationObserver(any(), not(Looper.getMainLooper()))
+        }
+    }
+
+    @Test
+    fun `should request location updates from custom mixed provider when replay is disabled`() {
+        val customLocationProvider = mockk<DeviceLocationProvider>(relaxed = true)
+        val customLocationProviderFactory = DeviceLocationProviderFactory {
+            ExpectedFactory.createValue(customLocationProvider)
+        }
+        val locationOptions = LocationOptions.Builder()
+            .locationProviderFactory(
+                customLocationProviderFactory,
+                LocationOptions.LocationProviderType.MIXED,
+            )
+            .build()
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
+        val onRawLocationUpdate: (Location) -> Unit = mockk()
+        sut.startLocationUpdates(false, onRawLocationUpdate)
+
+        verify(exactly = 0) {
+            locationService.setUserDefinedDeviceLocationProviderFactory(any())
+            locationService.getDeviceLocationProvider(any<LocationProviderRequest>())
+        }
+        verify(exactly = 1) {
+            customLocationProvider.addLocationObserver(any(), not(Looper.getMainLooper()))
         }
     }
 
     @Test
     fun `should stop location updates from navigation options when replay is disabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(false, onRawLocationUpdate)
         sut.stopLocationUpdates()
 
         verifyOrder {
-            navigationOptions.locationEngine.requestLocationUpdates(any(), any(), any())
-            navigationOptions.locationEngine.removeLocationUpdates(
-                any<LocationEngineCallback<LocationEngineResult>>()
-            )
+            defaultDeviceLocationProvider.addLocationObserver(any(), any())
+            defaultDeviceLocationProvider.removeLocationObserver(any())
         }
     }
 
     @Test
     fun `should not request location updates from replay engine when replay is disabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(false, onRawLocationUpdate)
 
         verify(exactly = 0) {
-            replayLocationEngine.requestLocationUpdates(any(), any(), any())
+            replayLocationProvider.addLocationObserver(any(), any())
+        }
+        verify(exactly = 0) {
+            locationService.setUserDefinedDeviceLocationProviderFactory(any())
         }
     }
 
     @Test
-    fun `should request location updates from replay engine when replay is enable`() {
+    fun `should request location updates from replay engine when replay is enabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(true, onRawLocationUpdate)
 
         verify(exactly = 1) {
-            replayLocationEngine.requestLocationUpdates(
-                any(),
-                any(),
-                Looper.getMainLooper()
-            )
+            replayLocationProvider.addLocationObserver(any(), not(Looper.getMainLooper()))
+        }
+        verify(exactly = 0) {
+            locationService.setUserDefinedDeviceLocationProviderFactory(any())
         }
     }
 
     @Test
     fun `should stop location updates from replay engine when replay is enabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(true, onRawLocationUpdate)
         sut.stopLocationUpdates()
 
         verifyOrder {
-            replayLocationEngine.requestLocationUpdates(any(), any(), any())
-            replayLocationEngine.removeLocationUpdates(
-                any<LocationEngineCallback<LocationEngineResult>>()
-            )
+            replayLocationProvider.addLocationObserver(any(), any())
+            replayLocationProvider.removeLocationObserver(any())
         }
     }
 
     @Test
     fun `should clean up last location from replay engine when replay is enabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(true, onRawLocationUpdate)
         sut.stopLocationUpdates()
 
-        verify { replayLocationEngine.cleanUpLastLocation() }
+        verify { replayLocationProvider.cleanUpLastLocation() }
     }
 
     @Test
     fun `should not clean up last location from replay engine when replay is disabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(false, onRawLocationUpdate)
         sut.stopLocationUpdates()
 
-        verify(exactly = 0) { replayLocationEngine.cleanUpLastLocation() }
+        verify(exactly = 0) { replayLocationProvider.cleanUpLastLocation() }
     }
 
     @Test
     fun `should not request location updates from navigation options when replay is enabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(true, onRawLocationUpdate)
 
         verify(exactly = 0) {
-            navigationOptions.locationEngine.requestLocationUpdates(any(), any(), any())
+            defaultDeviceLocationProvider.addLocationObserver(any(), any())
+        }
+        verify(exactly = 0) {
+            locationService.setUserDefinedDeviceLocationProviderFactory(any())
         }
     }
 
     @Test
     fun `should remove location updates from previous location engine`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(true, onRawLocationUpdate)
 
         verify(exactly = 0) {
-            navigationOptions.locationEngine.requestLocationUpdates(any(), any(), any())
+            defaultDeviceLocationProvider.addLocationObserver(any(), any())
         }
     }
 
     @Test
     fun `startLocationUpdates should remove updates from previous location engine`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val onRawLocationUpdate: (Location) -> Unit = mockk()
         sut.startLocationUpdates(true, onRawLocationUpdate)
         sut.startLocationUpdates(false, onRawLocationUpdate)
         sut.startLocationUpdates(true, onRawLocationUpdate)
 
         verifyOrder {
-            replayLocationEngine.requestLocationUpdates(any(), any(), any())
-            replayLocationEngine.removeLocationUpdates(
-                any<LocationEngineCallback<LocationEngineResult>>()
-            )
-            navigationOptions.locationEngine.requestLocationUpdates(any(), any(), any())
-            navigationOptions.locationEngine.removeLocationUpdates(
-                any<LocationEngineCallback<LocationEngineResult>>()
-            )
-            replayLocationEngine.requestLocationUpdates(any(), any(), any())
+            replayLocationProvider.addLocationObserver(any(), any())
+            replayLocationProvider.removeLocationObserver(any())
+            defaultDeviceLocationProvider.addLocationObserver(any(), any())
+            defaultDeviceLocationProvider.removeLocationObserver(any())
+            replayLocationProvider.addLocationObserver(any(), any())
         }
     }
 
     @Test
     fun `isReplayEnabled is true after replay is enabled`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         sut.startLocationUpdates(true, mockk())
 
         assertTrue(sut.isReplayEnabled)
@@ -179,6 +364,10 @@ class TripSessionLocationEngineTest {
 
     @Test
     fun `isReplayEnabled is false when replay is disabled for location updates`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         sut.startLocationUpdates(false, mockk())
 
         assertFalse(sut.isReplayEnabled)
@@ -186,6 +375,10 @@ class TripSessionLocationEngineTest {
 
     @Test
     fun `isReplayEnabled is false after stopLocationUpdates`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         sut.startLocationUpdates(true, mockk())
         sut.stopLocationUpdates()
 
@@ -193,53 +386,43 @@ class TripSessionLocationEngineTest {
     }
 
     @Test
-    fun `should filter out locations from previous session`() {
+    fun `should cancel last location task when updates are stopped`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
+
         val firstCallback = mockk<(Location) -> Unit>(relaxed = true)
-        val secondCallback = mockk<(Location) -> Unit>(relaxed = true)
-        val firstEngineCallback = slot<LocationEngineCallback<LocationEngineResult>>()
-        val secondEngineCallback = slot<LocationEngineCallback<LocationEngineResult>>()
-        val location1 = mockk<Location>(relaxed = true)
-        val locationResult1 = mockk<LocationEngineResult>(relaxed = true) {
-            every { locations } returns listOf(location1)
-        }
-        val location2 = mockk<Location>(relaxed = true)
-        val locationResult2 = mockk<LocationEngineResult>(relaxed = true) {
-            every { locations } returns listOf(location2)
-        }
+        val locationTask = mockk<Cancelable>(relaxed = true)
+        every { replayLocationProvider.getLastLocation(any()) } returns locationTask
         sut.startLocationUpdates(true, firstCallback)
         verify {
-            replayLocationEngine.getLastLocation(capture(firstEngineCallback))
+            replayLocationProvider.getLastLocation(any())
         }
         sut.stopLocationUpdates()
+        verify { locationTask.cancel() }
+    }
+
+    @Test
+    fun `should unsets custom location provider factory`() {
+        sut = TripSessionLocationEngine(locationOptions) {
+            replayLocationProvider
+        }
         clearAllMocks(answers = false)
-        sut.startLocationUpdates(true, secondCallback)
-        verify {
-            replayLocationEngine.getLastLocation(capture(secondEngineCallback))
-        }
 
-        firstEngineCallback.captured.onSuccess(locationResult1)
-        secondEngineCallback.captured.onSuccess(locationResult2)
+        sut.destroy()
 
-        verify(exactly = 0) {
-            firstCallback(any())
-            secondCallback(location1)
-        }
         verify(exactly = 1) {
-            secondCallback(location2)
+            locationService.setUserDefinedDeviceLocationProviderFactory(null)
         }
     }
 
-    private fun mockLocationEngine(locationEngine: LocationEngine) {
-        val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
-        val locationEngineResult: LocationEngineResult = mockk(relaxUnitFun = true)
-        val location: Location = mockk(relaxed = true)
+    private fun mockLocationProvider(locationProvider: LocationProvider) {
+        val locationObserverSlot = slot<com.mapbox.common.location.LocationObserver>()
         every {
-            locationEngine.requestLocationUpdates(
+            locationProvider.addLocationObserver(
+                capture(locationObserverSlot),
                 any(),
-                capture(locationCallbackSlot),
-                any()
             )
         } answers {}
-        every { locationEngineResult.locations } returns listOf(location)
     }
 }

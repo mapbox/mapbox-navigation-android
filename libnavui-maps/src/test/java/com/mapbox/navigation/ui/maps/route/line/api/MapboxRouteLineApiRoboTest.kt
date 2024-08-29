@@ -3,16 +3,18 @@ package com.mapbox.navigation.ui.maps.route.line.api
 import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
+import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
@@ -20,24 +22,30 @@ import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
+import com.mapbox.navigation.testing.factories.createWaypoint
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.internal.route.line.toData
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.getRouteDrawData
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRouteLines
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.showRouteWithLegIndexHighlighted
+import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingApiSender
 import com.mapbox.navigation.ui.maps.route.line.model.InactiveRouteColors
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
+import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.ui.maps.route.line.model.SegmentColorType
+import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
+import com.mapbox.navigation.ui.maps.testing.TestResponse
 import com.mapbox.navigation.ui.maps.testing.TestRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
-import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerFrontend
@@ -50,6 +58,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.job
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.pauseDispatcher
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -92,6 +102,24 @@ class MapboxRouteLineApiRoboTest {
     private val multilegRouteWithOverlapAndAllCongestionLevels by lazy {
         TestRoute(fileName = "multileg_route_with_overlap_all_congestion.json")
     }
+    private val threeLegRoute by lazy {
+        TestResponse(
+            fileName = "three_leg_route_response.json",
+            routeOptions = RouteOptions.builder()
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .coordinates(
+                    "11.56731,48.19105;" +
+                        "11.5713133,48.1935488;11.5736816,48.1922755;" +
+                        "11.5725295,48.1938032",
+                )
+                .steps(true)
+                .overview("full")
+                .geometries("polyline6")
+                .enableRefresh(true)
+                .annotations("distance,duration,congestion_numeric")
+                .build(),
+        )
+    }
 
     @Before
     fun setUp() {
@@ -115,6 +143,36 @@ class MapboxRouteLineApiRoboTest {
     fun cleanUp() {
         unmockkObject(InternalJobControlFactory)
     }
+
+    @Test
+    fun `set empty routes`() =
+        coroutineRule.runBlockingTest {
+            mockkObject(MapboxRouteLineUtils)
+            var callbackCalled = false
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
+            api.setNavigationRoutes(
+                emptyList(),
+            ) {
+                runBlocking {
+                    val result = it.value!!
+                    val emptyGeoJsonSource = FeatureCollection.fromFeatures(emptyList())
+                    assertEquals(emptyGeoJsonSource, result.primaryRouteLineData.featureCollection)
+                    assertNull(result.primaryRouteLineData.dynamicData)
+                    result.alternativeRouteLinesData.forEach {
+                        assertEquals(emptyGeoJsonSource, it.featureCollection)
+                    }
+                    assertEquals(emptyGeoJsonSource, result.waypointsSource)
+                    assertNull(result.routeLineMaskingLayerDynamicData)
+
+                    callbackCalled = true
+                }
+            }
+
+            assertTrue(callbackCalled)
+            unmockkObject(MapboxRouteLineUtils)
+        }
 
     @Test
     fun `setNewRoutes when styleInactiveRouteLegsIndependently true and vanishing route line enabled for leg 0`() =
@@ -173,6 +231,8 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
@@ -180,6 +240,8 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
@@ -208,7 +270,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -217,7 +279,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -258,55 +320,150 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
                 .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
-            val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withRouteLineResources(resources)
-                .withVanishingRouteLineEnabled(true)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             api.setNavigationRoutes(
-                listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute)
+                listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),
             ) {
-                val result = it.value!!
-                val trafficMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .baseExpressionProvider.generateExpression()
-                val casingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .casingExpressionProvider.generateExpression()
-                val trailMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailCasingExpressionProvider!!.generateExpression()
+                runBlocking {
+                    val result = it.value!!
+                    val trafficMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData.baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData.casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData.trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                val trafficExpression = result.primaryRouteLineData.dynamicData
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseExpression = result.primaryRouteLineData.dynamicData
-                    .baseExpressionProvider.generateExpression()
-                val casingExpression = result.primaryRouteLineData.dynamicData
-                    .casingExpressionProvider.generateExpression()
-                val trailExpression = result.primaryRouteLineData.dynamicData
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingExpression = result.primaryRouteLineData.dynamicData
-                    .trailCasingExpressionProvider!!.generateExpression()
+                    val trafficExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData.baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData.casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData.trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                checkExpression(expectedMaskingTrafficExpressionContents, trafficMaskingExpression)
-                checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
-                checkExpression(expectedCasingMaskingExpressionContents, casingMaskingExpression)
-                checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
-                checkExpression(
-                    expectedTrailCasingMaskingExpressionContents,
-                    trailCasingMaskingExpression
-                )
+                    checkExpression(
+                        expectedMaskingTrafficExpressionContents,
+                        trafficMaskingExpression,
+                    )
+                    checkExpression(
+                        expectedMaskingBaseExpressionContents,
+                        baseMaskingExpression,
+                    )
+                    checkExpression(
+                        expectedCasingMaskingExpressionContents,
+                        casingMaskingExpression,
+                    )
+                    checkExpression(
+                        expectedTrailMaskingExpressionContents,
+                        trailMaskingExpression,
+                    )
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
 
-                checkExpression(expectedTrafficExpressionContents, trafficExpression)
-                checkExpression(expectedBaseExpressionContents, baseExpression)
-                checkExpression(expectedCasingExpressionContents, casingExpression)
-                checkExpression(expectedTrailExpressionContents, trailExpression)
-                checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+                    checkExpression(expectedTrafficExpressionContents, trafficExpression)
+                    checkExpression(expectedBaseExpressionContents, baseExpression)
+                    checkExpression(expectedCasingExpressionContents, casingExpression)
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(
+                        expectedTrailCasingExpressionContents,
+                        trailCasingExpression,
+                    )
 
-                callbackCalled = true
+                    val primaryLineData = result.primaryRouteLineData.dynamicData!!
+                    assertTrue(
+                        primaryLineData.trafficExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trafficExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
             }
 
             assertTrue(callbackCalled)
@@ -370,6 +527,8 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
@@ -377,6 +536,8 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
@@ -405,7 +566,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -414,7 +575,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -455,63 +616,157 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
                 .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
-            val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withRouteLineResources(resources)
-                .withVanishingRouteLineEnabled(true)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             api.setNavigationRoutes(
                 listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),
-                -1
+                -1,
             )
 
             val routeProgress = mockRouteProgress(
-                multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute
+                multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute,
             )
             every { routeProgress.currentLegProgress!!.legIndex } returns 0
             every { routeProgress.currentRouteGeometryIndex } returns 0
             api.updateWithRouteProgress(routeProgress) {
-                val result = it.value!!
-                val trafficMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .baseExpressionProvider.generateExpression()
-                val casingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .casingExpressionProvider.generateExpression()
-                val trailMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailCasingExpressionProvider!!.generateExpression()
+                runBlocking {
+                    val result = it.value!!
+                    val trafficExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData.baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData.casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData.trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trafficMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData.baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData.casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData.trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                val trafficExpression = result.primaryRouteLineDynamicData
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseExpression = result.primaryRouteLineDynamicData
-                    .baseExpressionProvider.generateExpression()
-                val casingExpression = result.primaryRouteLineDynamicData
-                    .casingExpressionProvider.generateExpression()
-                val trailExpression = result.primaryRouteLineDynamicData
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingExpression = result.primaryRouteLineDynamicData
-                    .trailCasingExpressionProvider!!.generateExpression()
+                    checkExpression(
+                        expectedTrafficExpressionContents,
+                        trafficExpression,
+                    )
+                    checkExpression(expectedBaseExpressionContents, baseExpression)
+                    checkExpression(
+                        expectedCasingExpressionContents,
+                        casingExpression,
+                    )
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(
+                        expectedTrailCasingExpressionContents,
+                        trailCasingExpression,
+                    )
 
-                checkExpression(expectedMaskingTrafficExpressionContents, trafficMaskingExpression)
-                checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
-                checkExpression(expectedCasingMaskingExpressionContents, casingMaskingExpression)
-                checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
-                checkExpression(
-                    expectedTrailCasingMaskingExpressionContents,
-                    trailCasingMaskingExpression
-                )
+                    checkExpression(
+                        expectedMaskingTrafficExpressionContents,
+                        trafficMaskingExpression,
+                    )
+                    checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
+                    checkExpression(
+                        expectedCasingMaskingExpressionContents,
+                        casingMaskingExpression,
+                    )
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
 
-                checkExpression(expectedTrafficExpressionContents, trafficExpression)
-                checkExpression(expectedBaseExpressionContents, baseExpression)
-                checkExpression(expectedCasingExpressionContents, casingExpression)
-                checkExpression(expectedTrailExpressionContents, trailExpression)
-                checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+                    val routeData = result.primaryRouteLineDynamicData
+                    assertTrue(
+                        routeData.trafficExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        routeData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        routeData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        routeData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        routeData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
 
-                callbackCalled = true
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trafficExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
             }
 
             assertTrue(callbackCalled)
@@ -575,14 +830,14 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
@@ -610,7 +865,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -619,7 +874,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -660,56 +915,150 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
                 .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
-            val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withRouteLineResources(resources)
-                .withVanishingRouteLineEnabled(true)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             api.setNavigationRoutes(
                 listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),
-                1
+                1,
             ) {
-                val result = it.value!!
-                val trafficMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .baseExpressionProvider.generateExpression()
-                val casingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .casingExpressionProvider.generateExpression()
-                val trailMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailCasingExpressionProvider!!.generateExpression()
+                runBlocking {
+                    val result = it.value!!
+                    val trafficMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                val trafficExpression = result.primaryRouteLineData.dynamicData
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseExpression = result.primaryRouteLineData.dynamicData
-                    .baseExpressionProvider.generateExpression()
-                val casingExpression = result.primaryRouteLineData.dynamicData
-                    .casingExpressionProvider.generateExpression()
-                val trailExpression = result.primaryRouteLineData.dynamicData
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingExpression = result.primaryRouteLineData.dynamicData
-                    .trailCasingExpressionProvider!!.generateExpression()
+                    val trafficExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                checkExpression(expectedMaskingTrafficExpressionContents, trafficMaskingExpression)
-                checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
-                checkExpression(expectedCasingMaskingExpressionContents, casingMaskingExpression)
-                checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
-                checkExpression(
-                    expectedTrailCasingMaskingExpressionContents,
-                    trailCasingMaskingExpression
-                )
+                    checkExpression(
+                        expectedMaskingTrafficExpressionContents,
+                        trafficMaskingExpression,
+                    )
+                    checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
+                    checkExpression(
+                        expectedCasingMaskingExpressionContents,
+                        casingMaskingExpression,
+                    )
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
 
-                checkExpression(expectedTrafficExpressionContents, trafficExpression)
-                checkExpression(expectedBaseExpressionContents, baseExpression)
-                checkExpression(expectedCasingExpressionContents, casingExpression)
-                checkExpression(expectedTrailExpressionContents, trailExpression)
-                checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+                    checkExpression(expectedTrafficExpressionContents, trafficExpression)
+                    checkExpression(expectedBaseExpressionContents, baseExpression)
+                    checkExpression(expectedCasingExpressionContents, casingExpression)
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
 
-                callbackCalled = true
+                    val primaryLineData = result.primaryRouteLineData.dynamicData
+                    assertTrue(
+                        primaryLineData.trafficExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trafficExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
             }
 
             assertTrue(callbackCalled)
@@ -773,14 +1122,14 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
@@ -808,7 +1157,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -817,7 +1166,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -858,62 +1207,157 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
                 .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
-            val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withRouteLineResources(resources)
-                .withVanishingRouteLineEnabled(true)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             val routeProgress = mockRouteProgress(
-                multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute
+                multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute,
             )
             every { routeProgress.currentLegProgress!!.legIndex } returns 1
             every { routeProgress.currentRouteGeometryIndex } returns 43
             api.setNavigationRoutes(
-                listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute)
+                listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),
             )
 
             api.updateWithRouteProgress(routeProgress) {
-                val result = it.value!!
-                val trafficMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .baseExpressionProvider.generateExpression()
-                val casingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .casingExpressionProvider.generateExpression()
-                val trailMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailCasingExpressionProvider!!.generateExpression()
+                runBlocking {
+                    val result = it.value!!
 
-                val trafficExpression = result.primaryRouteLineDynamicData
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseExpression = result.primaryRouteLineDynamicData
-                    .baseExpressionProvider.generateExpression()
-                val casingExpression = result.primaryRouteLineDynamicData
-                    .casingExpressionProvider.generateExpression()
-                val trailExpression = result.primaryRouteLineDynamicData
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingExpression = result.primaryRouteLineDynamicData
-                    .trailCasingExpressionProvider!!.generateExpression()
+                    val trafficExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                checkExpression(expectedMaskingTrafficExpressionContents, trafficMaskingExpression)
-                checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
-                checkExpression(expectedCasingMaskingExpressionContents, casingMaskingExpression)
-                checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
-                checkExpression(
-                    expectedTrailCasingMaskingExpressionContents,
-                    trailCasingMaskingExpression
-                )
+                    val trafficMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                checkExpression(expectedTrafficExpressionContents, trafficExpression)
-                checkExpression(expectedBaseExpressionContents, baseExpression)
-                checkExpression(expectedCasingExpressionContents, casingExpression)
-                checkExpression(expectedTrailExpressionContents, trailExpression)
-                checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+                    checkExpression(expectedTrafficExpressionContents, trafficExpression)
+                    checkExpression(expectedBaseExpressionContents, baseExpression)
+                    checkExpression(expectedCasingExpressionContents, casingExpression)
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
 
-                callbackCalled = true
+                    checkExpression(
+                        expectedMaskingTrafficExpressionContents,
+                        trafficMaskingExpression,
+                    )
+                    checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
+                    checkExpression(
+                        expectedCasingMaskingExpressionContents,
+                        casingMaskingExpression,
+                    )
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
+
+                    val primaryLineData = result.primaryRouteLineDynamicData!!
+                    assertTrue(
+                        primaryLineData.trafficExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trafficExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
             }
 
             assertTrue(callbackCalled)
@@ -977,14 +1421,18 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.4978029),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.4978029),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
@@ -1012,7 +1460,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -1021,7 +1469,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -1062,65 +1510,148 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
                 .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
-            val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withRouteLineResources(resources)
-                .withVanishingRouteLineEnabled(false)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(false)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             api.setNavigationRoutes(
-                listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute)
+                listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),
             ) {
-                val result = it.value!!
-                val trafficExpression = result.primaryRouteLineData.dynamicData
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseExpression = result.primaryRouteLineData.dynamicData
-                    .baseExpressionProvider.generateExpression()
-                val casingExpression = result.primaryRouteLineData.dynamicData
-                    .casingExpressionProvider.generateExpression()
-                val trailExpression = result.primaryRouteLineData.dynamicData
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingExpression = result.primaryRouteLineData.dynamicData
-                    .trailCasingExpressionProvider!!.generateExpression()
+                runBlocking {
+                    val result = it.value!!
+                    val trafficExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                checkExpression(
-                    expectedMaskingTrafficExpressionContents,
-                    result.routeLineMaskingLayerDynamicData!!
-                        .trafficExpressionProvider!!
-                        .generateExpression()
-                )
-                checkExpression(
-                    expectedMaskingBaseExpressionContents,
-                    result.routeLineMaskingLayerDynamicData!!
-                        .baseExpressionProvider
-                        .generateExpression()
-                )
-                checkExpression(
-                    expectedCasingMaskingExpressionContents,
-                    result.routeLineMaskingLayerDynamicData!!
-                        .casingExpressionProvider
-                        .generateExpression()
-                )
-                checkExpression(
-                    expectedTrailMaskingExpressionContents,
-                    result.routeLineMaskingLayerDynamicData!!
-                        .trailExpressionProvider!!
-                        .generateExpression()
-                )
-                checkExpression(
-                    expectedTrailCasingMaskingExpressionContents,
-                    result.routeLineMaskingLayerDynamicData!!
-                        .trailCasingExpressionProvider!!
-                        .generateExpression()
-                )
-                checkExpression(expectedTrafficExpressionContents, trafficExpression)
-                checkExpression(expectedBaseExpressionContents, baseExpression)
-                checkExpression(expectedCasingExpressionContents, casingExpression)
-                checkExpression(expectedTrailExpressionContents, trailExpression)
-                checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+                    checkExpression(
+                        expectedMaskingTrafficExpressionContents,
+                        getAppliedExpression(
+                            result.routeLineMaskingLayerDynamicData!!
+                                .trafficExpressionCommandHolder!!,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    checkExpression(
+                        expectedMaskingBaseExpressionContents,
+                        getAppliedExpression(
+                            result.routeLineMaskingLayerDynamicData!!
+                                .baseExpressionCommandHolder,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    checkExpression(
+                        expectedCasingMaskingExpressionContents,
+                        getAppliedExpression(
+                            result.routeLineMaskingLayerDynamicData!!
+                                .casingExpressionCommandHolder,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    checkExpression(
+                        expectedTrailMaskingExpressionContents,
+                        getAppliedExpression(
+                            result.routeLineMaskingLayerDynamicData!!
+                                .trailExpressionCommandHolder!!,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        getAppliedExpression(
+                            result.routeLineMaskingLayerDynamicData!!
+                                .trailCasingExpressionCommandHolder!!,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    checkExpression(expectedTrafficExpressionContents, trafficExpression)
+                    checkExpression(expectedBaseExpressionContents, baseExpression)
+                    checkExpression(expectedCasingExpressionContents, casingExpression)
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
 
-                callbackCalled = true
+                    val primaryLineData = result.primaryRouteLineData.dynamicData
+                    assertTrue(
+                        primaryLineData.trafficExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trafficExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
             }
 
             assertTrue(callbackCalled)
@@ -1184,14 +1715,18 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.4978029),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.4978029),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
 
             val expectedMaskingTrafficExpressionContents = listOf(
@@ -1220,7 +1755,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -1229,7 +1764,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -1270,56 +1805,150 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
                 .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
-            val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withRouteLineResources(resources)
-                .withVanishingRouteLineEnabled(false)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(false)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             api.setNavigationRoutes(
                 listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),
-                1
+                1,
             ) {
-                val result = it.value!!
-                val trafficMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .baseExpressionProvider.generateExpression()
-                val casingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .casingExpressionProvider.generateExpression()
-                val trailMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailCasingExpressionProvider!!.generateExpression()
+                runBlocking {
+                    val result = it.value!!
+                    val trafficMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                val trafficExpression = result.primaryRouteLineData.dynamicData
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseExpression = result.primaryRouteLineData.dynamicData
-                    .baseExpressionProvider.generateExpression()
-                val casingExpression = result.primaryRouteLineData.dynamicData
-                    .casingExpressionProvider.generateExpression()
-                val trailExpression = result.primaryRouteLineData.dynamicData
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingExpression = result.primaryRouteLineData.dynamicData
-                    .trailCasingExpressionProvider!!.generateExpression()
+                    val trafficExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                checkExpression(expectedMaskingTrafficExpressionContents, trafficMaskingExpression)
-                checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
-                checkExpression(expectedCasingMaskingExpressionContents, casingMaskingExpression)
-                checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
-                checkExpression(
-                    expectedTrailCasingMaskingExpressionContents,
-                    trailCasingMaskingExpression
-                )
+                    checkExpression(
+                        expectedMaskingTrafficExpressionContents,
+                        trafficMaskingExpression,
+                    )
+                    checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
+                    checkExpression(
+                        expectedCasingMaskingExpressionContents,
+                        casingMaskingExpression,
+                    )
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
 
-                checkExpression(expectedTrafficExpressionContents, trafficExpression)
-                checkExpression(expectedBaseExpressionContents, baseExpression)
-                checkExpression(expectedCasingExpressionContents, casingExpression)
-                checkExpression(expectedTrailExpressionContents, trailExpression)
-                checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+                    checkExpression(expectedTrafficExpressionContents, trafficExpression)
+                    checkExpression(expectedBaseExpressionContents, baseExpression)
+                    checkExpression(expectedCasingExpressionContents, casingExpression)
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
 
-                callbackCalled = true
+                    val primaryLineData = result.primaryRouteLineData.dynamicData
+                    assertTrue(
+                        primaryLineData.trafficExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trafficExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
             }
 
             assertTrue(callbackCalled)
@@ -1334,7 +1963,7 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.060643157771688605),
@@ -1363,7 +1992,7 @@ class MapboxRouteLineApiRoboTest {
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
                 DoubleChecker(0.4978029),
@@ -1372,11 +2001,29 @@ class MapboxRouteLineApiRoboTest {
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+            )
+            val expectedTrailExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.4978029),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+            )
+            val expectedTrailCasingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.4978029),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
@@ -1404,7 +2051,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -1413,7 +2060,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.4978029),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]")
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -1454,58 +2101,156 @@ class MapboxRouteLineApiRoboTest {
                 .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
                 .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
                 .build()
-            val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withRouteLineResources(resources)
-                .withVanishingRouteLineEnabled(false)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(false)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             val routeProgress = mockRouteProgress(
-                multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute
+                multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute,
             )
             every { routeProgress.currentLegProgress!!.legIndex } returns 1
             every { routeProgress.currentRouteGeometryIndex } returns 43
             api.setNavigationRoutes(
-                listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute)
+                listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),
             )
 
             api.updateWithRouteProgress(routeProgress) {
-                val result = it.value!!
-                val trafficMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .baseExpressionProvider.generateExpression()
-                val casingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .casingExpressionProvider.generateExpression()
-                val trailMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailExpressionProvider!!.generateExpression()
-                val trailCasingMaskingExpression = result.routeLineMaskingLayerDynamicData!!
-                    .trailCasingExpressionProvider!!.generateExpression()
+                runBlocking {
+                    val result = it.value!!
+                    val trafficMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                val trafficExpression = result.primaryRouteLineDynamicData
-                    .trafficExpressionProvider!!.generateExpression()
-                val baseExpression = result.primaryRouteLineDynamicData
-                    .baseExpressionProvider.generateExpression()
-                val casingExpression = result.primaryRouteLineDynamicData
-                    .casingExpressionProvider.generateExpression()
+                    val trafficExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val baseExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .baseExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val casingExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .casingExpressionCommandHolder,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
 
-                checkExpression(expectedMaskingTrafficExpressionContents, trafficMaskingExpression)
-                checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
-                checkExpression(expectedCasingMaskingExpressionContents, casingMaskingExpression)
-                checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
-                checkExpression(
-                    expectedTrailCasingMaskingExpressionContents,
-                    trailCasingMaskingExpression
-                )
+                    checkExpression(
+                        expectedMaskingTrafficExpressionContents,
+                        trafficMaskingExpression,
+                    )
+                    checkExpression(expectedMaskingBaseExpressionContents, baseMaskingExpression)
+                    checkExpression(
+                        expectedCasingMaskingExpressionContents,
+                        casingMaskingExpression,
+                    )
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
 
-                checkExpression(expectedTrafficExpressionContents, trafficExpression)
-                checkExpression(expectedBaseExpressionContents, baseExpression)
-                checkExpression(expectedCasingExpressionContents, casingExpression)
-                assertNull(result.primaryRouteLineDynamicData.trailExpressionProvider)
-                assertNull(result.primaryRouteLineDynamicData.trailCasingExpressionProvider)
+                    checkExpression(expectedTrafficExpressionContents, trafficExpression)
+                    checkExpression(expectedBaseExpressionContents, baseExpression)
+                    checkExpression(expectedCasingExpressionContents, casingExpression)
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
 
-                callbackCalled = true
+                    val primaryLineData = result.primaryRouteLineDynamicData
+                    assertTrue(
+                        primaryLineData.trafficExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trafficExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.baseExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.casingExpressionCommandHolder.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
             }
 
             assertTrue(callbackCalled)
@@ -1513,22 +2258,591 @@ class MapboxRouteLineApiRoboTest {
         }
 
     @Test
+    fun `updateWithRouteProgress multileg route when styleInactiveRouteLegsIndependently true and vanishing route line disabled route leg 3 - trails are hidden from all inactive legs`() =
+        coroutineRule.runBlockingTest {
+            mockkObject(MapboxRouteLineUtils)
+            var callbackCalled = false
+            val expectedTrailExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+            val expectedTrailCasingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+            val expectedTrailMaskingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+            val expectedTrailCasingMaskingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+
+            val colors = RouteLineColorResources.Builder()
+                .routeDefaultColor(Color.argb(255, 0, 0, 1))
+                .routeCasingColor(Color.argb(255, 0, 0, 2))
+                .routeLineTraveledColor(Color.argb(255, 0, 0, 3))
+                .routeLineTraveledCasingColor(Color.argb(255, 0, 0, 4))
+                .inActiveRouteLegsColor(Color.argb(255, 0, 0, 5))
+                .routeLowCongestionColor(Color.argb(255, 0, 1, 0))
+                .routeModerateCongestionColor(Color.argb(255, 0, 2, 0))
+                .routeHeavyCongestionColor(Color.argb(255, 0, 3, 0))
+                .routeSevereCongestionColor(Color.argb(255, 0, 4, 0))
+                .routeUnknownCongestionColor(Color.argb(255, 0, 5, 0))
+                .routeClosureColor(Color.argb(255, 0, 6, 0))
+                .inactiveRouteLegLowCongestionColor(Color.argb(255, 1, 0, 0))
+                .inactiveRouteLegModerateCongestionColor(Color.argb(255, 2, 0, 0))
+                .inactiveRouteLegHeavyCongestionColor(Color.argb(255, 3, 0, 0))
+                .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
+                .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
+                .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
+                .build()
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(false)
+                .styleInactiveRouteLegsIndependently(true)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
+            val routeProgress = mockRouteProgress(
+                threeLegRoute.navigationRoutes.first(),
+            )
+            every { routeProgress.currentLegProgress!!.legIndex } returns 1
+            every { routeProgress.currentRouteGeometryIndex } returns 36
+            api.setNavigationRoutes(
+                listOf(threeLegRoute.navigationRoutes.first()),
+            )
+
+            api.updateWithRouteProgress(routeProgress) {
+                runBlocking {
+                    val result = it.value!!
+
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
+
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+
+                    val primaryLineData = result.primaryRouteLineDynamicData
+                    assertTrue(
+                        primaryLineData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
+            }
+
+            assertTrue(callbackCalled)
+
+            unmockkObject(MapboxRouteLineUtils)
+        }
+
+    @Test
+    fun `updateWithRouteProgress multileg route when styleInactiveRouteLegsIndependently true and vanishing route line enabled route leg 3 - trails are hidden from upcoming inactive legs only`() =
+        coroutineRule.runBlockingTest {
+            mockkObject(MapboxRouteLineUtils)
+            var callbackCalled = false
+            val expectedTrailExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+            val expectedTrailCasingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+            val expectedTrailMaskingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+            val expectedTrailCasingMaskingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+
+            val colors = RouteLineColorResources.Builder()
+                .routeDefaultColor(Color.argb(255, 0, 0, 1))
+                .routeCasingColor(Color.argb(255, 0, 0, 2))
+                .routeLineTraveledColor(Color.argb(255, 0, 0, 3))
+                .routeLineTraveledCasingColor(Color.argb(255, 0, 0, 4))
+                .inActiveRouteLegsColor(Color.argb(255, 0, 0, 5))
+                .routeLowCongestionColor(Color.argb(255, 0, 1, 0))
+                .routeModerateCongestionColor(Color.argb(255, 0, 2, 0))
+                .routeHeavyCongestionColor(Color.argb(255, 0, 3, 0))
+                .routeSevereCongestionColor(Color.argb(255, 0, 4, 0))
+                .routeUnknownCongestionColor(Color.argb(255, 0, 5, 0))
+                .routeClosureColor(Color.argb(255, 0, 6, 0))
+                .inactiveRouteLegLowCongestionColor(Color.argb(255, 1, 0, 0))
+                .inactiveRouteLegModerateCongestionColor(Color.argb(255, 2, 0, 0))
+                .inactiveRouteLegHeavyCongestionColor(Color.argb(255, 3, 0, 0))
+                .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
+                .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
+                .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
+                .build()
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
+                .styleInactiveRouteLegsIndependently(true)
+                .vanishingRouteLineUpdateIntervalNano(0)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
+            val routeProgress = mockRouteProgress(
+                threeLegRoute.navigationRoutes.first(),
+            )
+            every { routeProgress.currentLegProgress!!.legIndex } returns 1
+            every { routeProgress.currentRouteGeometryIndex } returns 36
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setNavigationRoutes(
+                listOf(threeLegRoute.navigationRoutes.first()),
+            )
+            api.updateUpcomingRoutePointIndex(routeProgress)
+
+            api.updateWithRouteProgress(routeProgress) {
+                runBlocking {
+                    val result = it.value!!
+
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
+
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+
+                    val primaryLineData = result.primaryRouteLineDynamicData
+                    assertTrue(
+                        primaryLineData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
+            }
+
+            assertTrue(callbackCalled)
+
+            unmockkObject(MapboxRouteLineUtils)
+        }
+
+    @Test
+    fun `setNewRoutesData multileg route when styleInactiveRouteLegsIndependently false and vanishing route line enabled route leg 3 - all primary trails are rendered`() =
+        coroutineRule.runBlockingTest {
+            mockkObject(MapboxRouteLineUtils)
+            var callbackCalled = false
+            val expectedTrailExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+            )
+            val expectedTrailCasingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+            )
+            val expectedTrailMaskingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+            val expectedTrailCasingMaskingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+
+            val colors = RouteLineColorResources.Builder()
+                .routeDefaultColor(Color.argb(255, 0, 0, 1))
+                .routeCasingColor(Color.argb(255, 0, 0, 2))
+                .routeLineTraveledColor(Color.argb(255, 0, 0, 3))
+                .routeLineTraveledCasingColor(Color.argb(255, 0, 0, 4))
+                .inActiveRouteLegsColor(Color.argb(255, 0, 0, 5))
+                .routeLowCongestionColor(Color.argb(255, 0, 1, 0))
+                .routeModerateCongestionColor(Color.argb(255, 0, 2, 0))
+                .routeHeavyCongestionColor(Color.argb(255, 0, 3, 0))
+                .routeSevereCongestionColor(Color.argb(255, 0, 4, 0))
+                .routeUnknownCongestionColor(Color.argb(255, 0, 5, 0))
+                .routeClosureColor(Color.argb(255, 0, 6, 0))
+                .inactiveRouteLegLowCongestionColor(Color.argb(255, 1, 0, 0))
+                .inactiveRouteLegModerateCongestionColor(Color.argb(255, 2, 0, 0))
+                .inactiveRouteLegHeavyCongestionColor(Color.argb(255, 3, 0, 0))
+                .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
+                .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
+                .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
+                .build()
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
+                .styleInactiveRouteLegsIndependently(false)
+                .vanishingRouteLineUpdateIntervalNano(0)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setNavigationRoutes(
+                listOf(threeLegRoute.navigationRoutes.first()),
+                activeLegIndex = 1,
+            ) {
+                runBlocking {
+                    val result = it.value!!
+
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+
+                    val trailExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingExpression = getAppliedExpression(
+                        result.primaryRouteLineData.dynamicData
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
+
+                    checkExpression(expectedTrailExpressionContents, trailExpression)
+                    checkExpression(expectedTrailCasingExpressionContents, trailCasingExpression)
+
+                    val primaryLineData = result.primaryRouteLineData
+                    assertTrue(
+                        primaryLineData.dynamicData!!.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        primaryLineData.dynamicData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
+            }
+
+            assertTrue(callbackCalled)
+
+            unmockkObject(MapboxRouteLineUtils)
+        }
+
+    @Test
+    fun `updateWithRouteProgress multileg route when styleInactiveRouteLegsIndependently false and vanishing route line enabled route leg 3 - only masking data is updated`() =
+        coroutineRule.runBlockingTest {
+            mockkObject(MapboxRouteLineUtils)
+            var callbackCalled = false
+            val expectedTrailMaskingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+            val expectedTrailCasingMaskingExpressionContents = listOf(
+                StringChecker("step"),
+                StringChecker("[line-progress]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5374685049002759),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.7768750509557707),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            )
+
+            val colors = RouteLineColorResources.Builder()
+                .routeDefaultColor(Color.argb(255, 0, 0, 1))
+                .routeCasingColor(Color.argb(255, 0, 0, 2))
+                .routeLineTraveledColor(Color.argb(255, 0, 0, 3))
+                .routeLineTraveledCasingColor(Color.argb(255, 0, 0, 4))
+                .inActiveRouteLegsColor(Color.argb(255, 0, 0, 5))
+                .routeLowCongestionColor(Color.argb(255, 0, 1, 0))
+                .routeModerateCongestionColor(Color.argb(255, 0, 2, 0))
+                .routeHeavyCongestionColor(Color.argb(255, 0, 3, 0))
+                .routeSevereCongestionColor(Color.argb(255, 0, 4, 0))
+                .routeUnknownCongestionColor(Color.argb(255, 0, 5, 0))
+                .routeClosureColor(Color.argb(255, 0, 6, 0))
+                .inactiveRouteLegLowCongestionColor(Color.argb(255, 1, 0, 0))
+                .inactiveRouteLegModerateCongestionColor(Color.argb(255, 2, 0, 0))
+                .inactiveRouteLegHeavyCongestionColor(Color.argb(255, 3, 0, 0))
+                .inactiveRouteLegSevereCongestionColor(Color.argb(255, 4, 0, 0))
+                .inactiveRouteLegUnknownCongestionColor(Color.argb(255, 5, 0, 0))
+                .inactiveRouteLegClosureColor(Color.argb(255, 6, 0, 0))
+                .inactiveRouteLegCasingColor(Color.argb(255, 7, 0, 0))
+                .build()
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .routeLineColorResources(colors)
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
+                .styleInactiveRouteLegsIndependently(false)
+                .vanishingRouteLineUpdateIntervalNano(0)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
+            val routeProgress = mockRouteProgress(
+                threeLegRoute.navigationRoutes.first(),
+            )
+            every { routeProgress.currentLegProgress!!.legIndex } returns 1
+            every { routeProgress.currentRouteGeometryIndex } returns 36
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setNavigationRoutes(
+                listOf(threeLegRoute.navigationRoutes.first()),
+            )
+            api.updateUpcomingRoutePointIndex(routeProgress)
+
+            api.updateWithRouteProgress(routeProgress) {
+                runBlocking {
+                    val result = it.value!!
+
+                    val trailMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+                    val trailCasingMaskingExpression = getAppliedExpression(
+                        result.routeLineMaskingLayerDynamicData!!
+                            .trailCasingExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    )
+
+                    assertNull(result.primaryRouteLineDynamicData)
+
+                    checkExpression(expectedTrailMaskingExpressionContents, trailMaskingExpression)
+                    checkExpression(
+                        expectedTrailCasingMaskingExpressionContents,
+                        trailCasingMaskingExpression,
+                    )
+
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.trailExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        maskingData.trailCasingExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+
+                    callbackCalled = true
+                }
+            }
+
+            assertTrue(callbackCalled)
+
+            unmockkObject(MapboxRouteLineUtils)
+        }
+
+    @Test
     fun setRoutes() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
+        val apiOptions = MapboxRouteLineApiOptions.Builder().build()
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
+        val api = MapboxRouteLineApi(apiOptions)
         val expectedCasingExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]")
+            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
         )
         val expectedRouteLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
@@ -1539,7 +2853,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.942549),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
             DoubleChecker(1.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
             "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
@@ -1559,69 +2873,133 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
 
-        val route = loadRoute("short_route.json")
-        val routes = listOf(RouteLine(route, null))
+        val route = loadNavigationRoute(
+            "short_route.json",
+            waypoints = listOf(
+                createWaypoint(location = doubleArrayOf(-122.523671, 37.975379)),
+                createWaypoint(location = doubleArrayOf(-122.523131, 37.975067)),
+            ),
+        )
+        val routes = listOf(NavigationRouteLine(route, null))
 
-        val result = api.setRoutes(routes)
+        val result = api.setNavigationRouteLines(routes)
 
         checkExpression(
             expectedCasingExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.casingExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.casingExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedRouteLineExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.baseExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.baseExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedTrafficLineExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
             result.value!!.primaryRouteLineData.featureCollection.features()!![0].geometry()
-                .toString()
+                .toString(),
         )
         assertTrue(
-            result.value!!.alternativeRouteLinesData[0].featureCollection.features()!!.isEmpty()
+            result.value!!.alternativeRouteLinesData[0].featureCollection.features()!!.isEmpty(),
         )
         assertTrue(
-            result.value!!.alternativeRouteLinesData[1].featureCollection.features()!!.isEmpty()
+            result.value!!.alternativeRouteLinesData[1].featureCollection.features()!!.isEmpty(),
         )
         assertEquals(
             expectedWaypointFeature0,
-            result.value!!.waypointsSource.features()!![0].geometry().toString()
+            result.value!!.waypointsSource.features()!![0].geometry().toString(),
         )
         assertEquals(
             expectedWaypointFeature1,
-            result.value!!.waypointsSource.features()!![1].geometry().toString()
+            result.value!!.waypointsSource.features()!![1].geometry().toString(),
         )
         checkExpression(
             expectedMaskingExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.baseExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.baseExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.casingExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.casingExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!
+                    .trailCasingExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
+        )
+
+        val primaryLineData = result.value!!.primaryRouteLineData.dynamicData!!
+        assertTrue(
+            primaryLineData.trafficExpressionCommandHolder!!.provider
+            is HeavyRouteLineExpressionProvider,
+        )
+        assertTrue(
+            primaryLineData.baseExpressionCommandHolder.provider
+            is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            primaryLineData.casingExpressionCommandHolder.provider
+            is LightRouteLineExpressionProvider,
+        )
+
+        val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
+        assertTrue(
+            maskingData.trafficExpressionCommandHolder!!.provider
+            is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.baseExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.casingExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.trailCasingExpressionCommandHolder!!.provider
+            is LightRouteLineExpressionProvider,
         )
     }
 
@@ -1636,13 +3014,15 @@ class MapboxRouteLineApiRoboTest {
             .inActiveRouteLegsColor(Color.YELLOW)
             .inactiveRouteLegCasingColor(Color.BLACK)
             .build()
-        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withRouteLineResources(resources)
-            .withVanishingRouteLineEnabled(true)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+            .routeLineColorResources(colors)
+            .build()
+            .toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
             .styleInactiveRouteLegsIndependently(true)
             .build()
-        val api = MapboxRouteLineApi(options)
+        val api = MapboxRouteLineApi(apiOptions)
 
         val expectedMaskingTrafficExpressionContents = listOf(
             StringChecker("step"),
@@ -1659,7 +3039,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.4922238),
             StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
             DoubleChecker(0.4978029),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val expectedMaskingBaseExpressionContents = listOf(
             StringChecker("step"),
@@ -1668,7 +3048,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 255.0, 1.0]"),
             DoubleChecker(0.4978029),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val expectedMaskingCasingExpressionContents = listOf(
             StringChecker("step"),
@@ -1677,7 +3057,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.0),
             StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
             DoubleChecker(0.4978029),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val expectedMaskingTrailExpressionContents = listOf(
             StringChecker("step"),
@@ -1686,7 +3066,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.0),
             StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
             DoubleChecker(0.4978029),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val expectedMaskingTrailCasingExpressionContents = listOf(
             StringChecker("step"),
@@ -1695,35 +3075,70 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.0),
             StringChecker("[rgba, 255.0, 0.0, 255.0, 1.0]"),
             DoubleChecker(0.4978029),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
 
         val result = api.setNavigationRoutes(listOf(multiLegRouteWithOverlap.navigationRoute))
 
         checkExpression(
             expectedMaskingTrafficExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingBaseExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.baseExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.baseExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingCasingExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.casingExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.casingExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingTrailExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingTrailCasingExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!
+                    .trailCasingExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
+        )
+
+        val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
+        assertTrue(
+            maskingData.trafficExpressionCommandHolder!!.provider
+            is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.baseExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.casingExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.trailCasingExpressionCommandHolder!!.provider
+            is LightRouteLineExpressionProvider,
         )
     }
 
@@ -1742,15 +3157,17 @@ class MapboxRouteLineApiRoboTest {
             .inactiveRouteLegHeavyCongestionColor(Color.rgb(44, 99, 66))
             .inactiveRouteLegSevereCongestionColor(Color.rgb(55, 99, 66))
             .build()
-        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withRouteLineResources(resources)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+            .routeLineColorResources(colors)
             .displaySoftGradientForTraffic(true)
-            .softGradientTransition(30)
-            .styleInactiveRouteLegsIndependently(true)
-            .withVanishingRouteLineEnabled(true)
+            .softGradientTransition(30.0)
             .build()
-        val api = MapboxRouteLineApi(options)
+            .toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .styleInactiveRouteLegsIndependently(true)
+            .vanishingRouteLineEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(apiOptions)
 
         val expectedTrafficExpressionContents = listOf(
             StringChecker("interpolate"),
@@ -1800,6 +3217,8 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
             DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+            DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val expectedMaskingTrafficExpressionContents = listOf(
@@ -1828,22 +3247,6 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
             DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.4978029744948492),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.503940915637458),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.503940915637458),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5055971863970301),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5055971863970301),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5131917124217056),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5131917124217056),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5147467093417488),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val expectedMaskingTrailExpressionContents = listOf(
             StringChecker("step"),
@@ -1859,43 +3262,73 @@ class MapboxRouteLineApiRoboTest {
 
         checkExpression(
             expectedTrafficExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingTrafficExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedTrailExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.trailExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.trailExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedMaskingTrailExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
+        )
+
+        val primaryLineData = result.value!!.primaryRouteLineData.dynamicData!!
+        assertTrue(
+            primaryLineData.trafficExpressionCommandHolder!!.provider
+            is HeavyRouteLineExpressionProvider,
+        )
+        assertTrue(
+            primaryLineData.trailExpressionCommandHolder!!.provider
+            is LightRouteLineExpressionProvider,
+        )
+
+        val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
+        assertTrue(
+            maskingData.trafficExpressionCommandHolder!!.provider
+            is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineExpressionProvider,
         )
     }
 
     @Test
     fun setRoutesWithCallback() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
+        val api = MapboxRouteLineApi(MapboxRouteLineApiOptions.Builder().build())
         val expectedCasingExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]")
+            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
         )
         val expectedRouteLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
@@ -1906,7 +3339,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.942549),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
             DoubleChecker(1.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
             "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
@@ -1918,66 +3351,100 @@ class MapboxRouteLineApiRoboTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
         val expectedWaypointFeature1 =
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
-        val route = loadRoute("short_route.json")
-        val routes = listOf(RouteLine(route, null))
+        val route = loadNavigationRoute(
+            "short_route.json",
+            waypoints = listOf(
+                createWaypoint(
+                    location = doubleArrayOf(-122.523671, 37.975379),
+                ),
+                createWaypoint(
+                    location = doubleArrayOf(-122.523131, 37.975067),
+                ),
+            ),
+        )
+        val routes = listOf(route)
 
         var result: RouteSetValue? = null
         val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> {
             result = it.value
         }
-        api.setRoutes(routes, consumer)
+        api.setNavigationRoutes(routes, consumer)
 
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
         checkExpression(
             expectedCasingExpressionContents,
-            result!!.primaryRouteLineData.dynamicData.casingExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result!!.primaryRouteLineData.dynamicData!!.casingExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedRouteLineExpressionContents,
-            result!!.primaryRouteLineData.dynamicData.baseExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result!!.primaryRouteLineData.dynamicData!!.baseExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedTrafficLineExpressionContents,
-            result!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result!!.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
+
+        val primaryLineData = result!!.primaryRouteLineData.dynamicData!!
+        assertTrue(
+            primaryLineData.trafficExpressionCommandHolder!!.provider
+            is HeavyRouteLineExpressionProvider,
+        )
+        assertTrue(
+            primaryLineData.baseExpressionCommandHolder!!.provider
+            is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            primaryLineData.casingExpressionCommandHolder!!.provider
+            is LightRouteLineExpressionProvider,
+        )
+
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
             result!!.primaryRouteLineData.featureCollection.features()!![0].geometry()
-                .toString()
+                .toString(),
         )
         assertTrue(
-            result!!.alternativeRouteLinesData[0].featureCollection.features()!!.isEmpty()
+            result!!.alternativeRouteLinesData[0].featureCollection.features()!!.isEmpty(),
         )
         assertTrue(
-            result!!.alternativeRouteLinesData[1].featureCollection.features()!!.isEmpty()
+            result!!.alternativeRouteLinesData[1].featureCollection.features()!!.isEmpty(),
         )
         assertEquals(
             expectedWaypointFeature0,
-            result!!.waypointsSource.features()!![0].geometry().toString()
+            result!!.waypointsSource.features()!![0].geometry().toString(),
         )
         assertEquals(
             expectedWaypointFeature1,
-            result!!.waypointsSource.features()!![1].geometry().toString()
+            result!!.waypointsSource.features()!![1].geometry().toString(),
         )
     }
 
     @Test
     fun `setRoutes with restrictions across legs`() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
             .displayRestrictedRoadSections(true)
-            .withRouteLineResources(
-                RouteLineResources.Builder()
-                    .routeLineColorResources(
-                        RouteLineColorResources.Builder()
-                            .restrictedRoadColor(Color.RED)
-                            .build()
-                    )
-                    .build()
+            .routeLineColorResources(
+                RouteLineColorResources.Builder()
+                    .restrictedRoadColor(Color.RED)
+                    .build(),
             )
             .build()
-        val api = MapboxRouteLineApi(options)
+            .toData()
+        val apiOptions =
+            MapboxRouteLineApiOptions.Builder().calculateRestrictedRoadSections(true).build()
+        val api = MapboxRouteLineApi(apiOptions)
         val expectedRestrictedExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
@@ -1987,7 +3454,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.39564579),
             StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
             DoubleChecker(0.5540039481345271),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val expectedMaskingRestrictedExpressionContents = listOf(
             StringChecker("step"),
@@ -1998,43 +3465,60 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.39564579),
             StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
             DoubleChecker(0.4897719974699625),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
-        val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
-            .toTestNavigationRoute(RouterOrigin.Offboard)
+        val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
         val result = api.setNavigationRoutes(listOf(route))
 
         checkExpression(
             expectedRestrictedExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.restrictedSectionExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!
+                    .restrictedSectionExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineData.dynamicData!!
+                .restrictedSectionExpressionCommandHolder?.provider
+            is HeavyRouteLineExpressionProvider,
         )
         checkExpression(
             expectedMaskingRestrictedExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.restrictedSectionExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!
+                    .restrictedSectionExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
+        )
+        assertTrue(
+            result.value!!.routeLineMaskingLayerDynamicData!!
+                .restrictedSectionExpressionCommandHolder?.provider
+            is LightRouteLineExpressionProvider,
         )
     }
 
     @Test
     fun `setRoutes with restrictions across legs when inactiveLegStyling and leg 0`() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
-                .withRouteLineResources(
-                    RouteLineResources.Builder()
-                        .routeLineColorResources(
-                            RouteLineColorResources.Builder()
-                                .restrictedRoadColor(Color.RED)
-                                .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
-                                .build()
-                        )
-                        .build()
+                .routeLineColorResources(
+                    RouteLineColorResources.Builder()
+                        .restrictedRoadColor(Color.RED)
+                        .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
+                        .build(),
                 )
+                .build()
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .calculateRestrictedRoadSections(true)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             val expectedRestrictedExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
@@ -2046,7 +3530,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.4897719974699625),
                 StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
                 DoubleChecker(0.5540039481345271),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingRestrictedExpressionContents = listOf(
                 StringChecker("step"),
@@ -2057,43 +3541,59 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.39564579),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.4897719974699625),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
-            val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
-                .toTestNavigationRoute(RouterOrigin.Offboard)
+            val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             val result = api.setNavigationRoutes(listOf(route), activeLegIndex = 0).value!!
 
             checkExpression(
                 expectedRestrictedExpressionContents,
-                result.primaryRouteLineData.dynamicData.restrictedSectionExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result.primaryRouteLineData.dynamicData!!
+                        .restrictedSectionExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                ),
             )
             checkExpression(
                 expectedMaskingRestrictedExpressionContents,
-                result.routeLineMaskingLayerDynamicData!!.restrictedSectionExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result.routeLineMaskingLayerDynamicData!!
+                        .restrictedSectionExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                ),
+            )
+
+            assertTrue(
+                result.primaryRouteLineData.dynamicData!!.restrictedSectionExpressionCommandHolder!!
+                    .provider is HeavyRouteLineExpressionProvider,
+            )
+            assertTrue(
+                result.routeLineMaskingLayerDynamicData.restrictedSectionExpressionCommandHolder!!
+                    .provider is LightRouteLineExpressionProvider,
             )
         }
 
     @Test
     fun `setRoutes with restrictions across legs when inactiveLegStyling and leg 1`() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
-                .withRouteLineResources(
-                    RouteLineResources.Builder()
-                        .routeLineColorResources(
-                            RouteLineColorResources.Builder()
-                                .restrictedRoadColor(Color.RED)
-                                .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
-                                .build()
-                        )
-                        .build()
+                .routeLineColorResources(
+                    RouteLineColorResources.Builder()
+                        .restrictedRoadColor(Color.RED)
+                        .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
+                        .build(),
                 )
-                .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .styleInactiveRouteLegsIndependently(true)
+                .calculateRestrictedRoadSections(true)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
             val expectedRestrictedExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
@@ -2105,7 +3605,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.4897719974699625),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.5540039481345271),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingRestrictedExpressionContents = listOf(
                 StringChecker("step"),
@@ -2116,22 +3616,38 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.4897719974699625),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.5540039481345271),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
-            val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
-                .toTestNavigationRoute(RouterOrigin.Offboard)
+            val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             val result = api.setNavigationRoutes(listOf(route), activeLegIndex = 1).value!!
 
             checkExpression(
                 expectedRestrictedExpressionContents,
-                result.primaryRouteLineData.dynamicData.restrictedSectionExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result.primaryRouteLineData.dynamicData!!
+                        .restrictedSectionExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                ),
             )
             checkExpression(
                 expectedMaskingRestrictedExpressionContents,
-                result.routeLineMaskingLayerDynamicData!!.restrictedSectionExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result.routeLineMaskingLayerDynamicData!!
+                        .restrictedSectionExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                ),
+            )
+
+            assertTrue(
+                result.primaryRouteLineData.dynamicData.restrictedSectionExpressionCommandHolder!!
+                    .provider is HeavyRouteLineExpressionProvider,
+            )
+            assertTrue(
+                result.routeLineMaskingLayerDynamicData.restrictedSectionExpressionCommandHolder!!
+                    .provider is LightRouteLineExpressionProvider,
             )
         }
 
@@ -2150,15 +3666,18 @@ class MapboxRouteLineApiRoboTest {
             .inactiveRouteLegHeavyCongestionColor(Color.rgb(44, 99, 66))
             .inactiveRouteLegSevereCongestionColor(Color.rgb(55, 99, 66))
             .build()
-        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withRouteLineResources(resources)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+            .routeLineColorResources(colors)
             .displaySoftGradientForTraffic(true)
-            .softGradientTransition(30)
-            .styleInactiveRouteLegsIndependently(true)
-            .withVanishingRouteLineEnabled(true)
+            .softGradientTransition(30.0)
             .build()
-        val api = MapboxRouteLineApi(options)
+            .toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .styleInactiveRouteLegsIndependently(true)
+            .vanishingRouteLineEnabled(true)
+            .build()
+
+        val api = MapboxRouteLineApi(apiOptions)
         api.setNavigationRoutes(listOf(multiLegRouteWithOverlap.navigationRoute), -1)
         val routeProgress = mockRouteProgress(multiLegRouteWithOverlap.navigationRoute)
         every { routeProgress.currentRouteGeometryIndex } returns 15
@@ -2206,6 +3725,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.5147467093417488),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
         )
+
         val expectedMaskingTrafficExpressionContents = listOf(
             StringChecker("interpolate"),
             StringChecker("[linear]"),
@@ -2232,37 +3752,42 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
             DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.4978029744948492),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.503940915637458),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.503940915637458),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5055971863970301),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5055971863970301),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5131917124217056),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5131917124217056),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5147467093417488),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
 
         var callbackCalled = false
         api.updateWithRouteProgress(routeProgress) { result ->
-            checkExpression(
-                expectedTrafficExpressionContents,
-                result.value!!.primaryRouteLineDynamicData.trafficExpressionProvider!!
-                    .generateExpression()
-            )
-            checkExpression(
-                expectedMaskingTrafficExpressionContents,
-                result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
-                    .generateExpression()
-            )
-            callbackCalled = true
+            runBlocking {
+                checkExpression(
+                    expectedTrafficExpressionContents,
+                    getAppliedExpression(
+                        result.value!!.primaryRouteLineDynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    ),
+                )
+                assertTrue(
+                    result.value!!.primaryRouteLineDynamicData!!
+                        .trafficExpressionCommandHolder!!.provider
+                    is HeavyRouteLineExpressionProvider,
+                )
+                checkExpression(
+                    expectedMaskingTrafficExpressionContents,
+                    getAppliedExpression(
+                        result.value!!.routeLineMaskingLayerDynamicData!!
+                            .trafficExpressionCommandHolder!!,
+                        viewOptions,
+                        "line-gradient",
+                    ),
+                )
+                assertTrue(
+                    result.value!!.routeLineMaskingLayerDynamicData!!
+                        .trafficExpressionCommandHolder!!.provider
+                    is LightRouteLineExpressionProvider,
+                )
+
+                callbackCalled = true
+            }
         }
         assertTrue(callbackCalled)
     }
@@ -2270,21 +3795,21 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun `updateWithRouteProgress with restrictions across legs when inactiveLegStyling and leg 0`() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
-                .withRouteLineResources(
-                    RouteLineResources.Builder()
-                        .routeLineColorResources(
-                            RouteLineColorResources.Builder()
-                                .restrictedRoadColor(Color.RED)
-                                .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
-                                .build()
-                        )
-                        .build()
+                .routeLineColorResources(
+                    RouteLineColorResources.Builder()
+                        .restrictedRoadColor(Color.RED)
+                        .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
+                        .build(),
                 )
-                .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .styleInactiveRouteLegsIndependently(true)
+                .calculateRestrictedRoadSections(true)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
             val expectedRestrictedExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
@@ -2296,7 +3821,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.4897719974699625),
                 StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
                 DoubleChecker(0.5540039481345271),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingRestrictedExpressionContents = listOf(
                 StringChecker("step"),
@@ -2307,10 +3832,9 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.39564579),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.4897719974699625),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
-            val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
-                .toTestNavigationRoute(RouterOrigin.Offboard)
+            val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             api.setNavigationRoutes(listOf(route), activeLegIndex = -1)
             val routeProgress = mockRouteProgress(route)
@@ -2318,18 +3842,38 @@ class MapboxRouteLineApiRoboTest {
 
             var callbackCalled = false
             api.updateWithRouteProgress(routeProgress) {
-                val result = it.value!!
-                checkExpression(
-                    expectedRestrictedExpressionContents,
-                    result.primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
-                        .generateExpression()
-                )
-                checkExpression(
-                    expectedMaskingRestrictedExpressionContents,
-                    result.routeLineMaskingLayerDynamicData!!.restrictedSectionExpressionProvider!!
-                        .generateExpression()
-                )
-                callbackCalled = true
+                runBlocking {
+                    val result = it.value!!
+                    checkExpression(
+                        expectedRestrictedExpressionContents,
+                        getAppliedExpression(
+                            result.primaryRouteLineDynamicData!!
+                                .restrictedSectionExpressionCommandHolder!!,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    checkExpression(
+                        expectedMaskingRestrictedExpressionContents,
+                        getAppliedExpression(
+                            result.routeLineMaskingLayerDynamicData!!
+                                .restrictedSectionExpressionCommandHolder!!,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    assertTrue(
+                        result.primaryRouteLineDynamicData
+                            .restrictedSectionExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    assertTrue(
+                        result.routeLineMaskingLayerDynamicData
+                            .restrictedSectionExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    callbackCalled = true
+                }
             }
             assertTrue(callbackCalled)
         }
@@ -2337,21 +3881,21 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun `updateWithRouteProgress with restrictions across legs when inactiveLegStyling and leg 1`() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
-                .withRouteLineResources(
-                    RouteLineResources.Builder()
-                        .routeLineColorResources(
-                            RouteLineColorResources.Builder()
-                                .restrictedRoadColor(Color.RED)
-                                .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
-                                .build()
-                        )
-                        .build()
+                .routeLineColorResources(
+                    RouteLineColorResources.Builder()
+                        .restrictedRoadColor(Color.RED)
+                        .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
+                        .build(),
                 )
-                .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .styleInactiveRouteLegsIndependently(true)
+                .calculateRestrictedRoadSections(true)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
             val expectedRestrictedExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
@@ -2363,7 +3907,7 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.4897719974699625),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.5540039481345271),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingRestrictedExpressionContents = listOf(
                 StringChecker("step"),
@@ -2374,10 +3918,9 @@ class MapboxRouteLineApiRoboTest {
                 DoubleChecker(0.4897719974699625),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
                 DoubleChecker(0.5540039481345271),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
-            val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
-                .toTestNavigationRoute(RouterOrigin.Offboard)
+            val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             api.setNavigationRoutes(listOf(route))
 
@@ -2385,18 +3928,38 @@ class MapboxRouteLineApiRoboTest {
             every { routeProgress.currentLegProgress!!.legIndex } returns 1
             var callbackCalled = false
             api.updateWithRouteProgress(routeProgress) {
-                val result = it.value!!
-                checkExpression(
-                    expectedRestrictedExpressionContents,
-                    result.primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
-                        .generateExpression()
-                )
-                checkExpression(
-                    expectedMaskingRestrictedExpressionContents,
-                    result.routeLineMaskingLayerDynamicData!!.restrictedSectionExpressionProvider!!
-                        .generateExpression()
-                )
-                callbackCalled = true
+                runBlocking {
+                    val result = it.value!!
+                    checkExpression(
+                        expectedRestrictedExpressionContents,
+                        getAppliedExpression(
+                            result.primaryRouteLineDynamicData!!
+                                .restrictedSectionExpressionCommandHolder!!,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    checkExpression(
+                        expectedMaskingRestrictedExpressionContents,
+                        getAppliedExpression(
+                            result.routeLineMaskingLayerDynamicData!!
+                                .restrictedSectionExpressionCommandHolder!!,
+                            viewOptions,
+                            "line-gradient",
+                        ),
+                    )
+                    val dynamicData = result.primaryRouteLineDynamicData
+                    assertTrue(
+                        dynamicData.restrictedSectionExpressionCommandHolder!!.provider
+                        is HeavyRouteLineExpressionProvider,
+                    )
+                    val maskingData = result.routeLineMaskingLayerDynamicData
+                    assertTrue(
+                        maskingData.restrictedSectionExpressionCommandHolder!!.provider
+                        is LightRouteLineExpressionProvider,
+                    )
+                    callbackCalled = true
+                }
             }
             assertTrue(callbackCalled)
         }
@@ -2404,92 +3967,96 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun `setVanishingOffset with restrictions across legs when inactiveLegStyling and leg 0`() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
-                .withRouteLineResources(
-                    RouteLineResources.Builder()
-                        .routeLineColorResources(
-                            RouteLineColorResources.Builder()
-                                .restrictedRoadColor(Color.RED)
-                                .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
-                                .build()
-                        )
-                        .build()
+                .routeLineColorResources(
+                    RouteLineColorResources.Builder()
+                        .restrictedRoadColor(Color.RED)
+                        .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
+                        .build(),
                 )
-                .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .styleInactiveRouteLegsIndependently(true)
+                .calculateRestrictedRoadSections(true)
+                .vanishingRouteLineEnabled(true)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
             val expectedRestrictedExpressionContents = listOf(
-                StringChecker("step"),
-                StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.39564579),
-                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4897719974699625),
-                StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
-                DoubleChecker(0.5540039481345271),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("literal"),
+                ListChecker(
+                    DoubleChecker(0.0),
+                    DoubleChecker(0.0),
+                ),
             )
-            val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
-                .toTestNavigationRoute(RouterOrigin.Offboard)
+            val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             api.setNavigationRoutes(listOf(route), activeLegIndex = 0)
             val result = api.setVanishingOffset(0.0).value!!
-                .primaryRouteLineDynamicData
-                .restrictedSectionExpressionProvider!!
-                .generateExpression()
+            val actual = getAppliedExpression(
+                result
+                    .primaryRouteLineDynamicData!!
+                    .restrictedSectionExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            )
 
             checkExpression(
                 expectedRestrictedExpressionContents,
-                result
+                actual,
+            )
+            assertTrue(
+                result.primaryRouteLineDynamicData.restrictedSectionExpressionCommandHolder!!
+                    .provider is LightRouteLineExpressionProvider,
             )
         }
 
     @Test
     fun `setVanishingOffset with restrictions across legs when inactiveLegStyling and leg 1`() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
-                .withRouteLineResources(
-                    RouteLineResources.Builder()
-                        .routeLineColorResources(
-                            RouteLineColorResources.Builder()
-                                .restrictedRoadColor(Color.RED)
-                                .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
-                                .build()
-                        )
-                        .build()
+                .routeLineColorResources(
+                    RouteLineColorResources.Builder()
+                        .restrictedRoadColor(Color.RED)
+                        .inactiveRouteLegRestrictedRoadColor(Color.GREEN)
+                        .build(),
                 )
-                .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val api = MapboxRouteLineApi(options)
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .styleInactiveRouteLegsIndependently(true)
+                .calculateRestrictedRoadSections(true)
+                .vanishingRouteLineEnabled(true)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
             val expectedRestrictedExpressionContents = listOf(
-                StringChecker("step"),
-                StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.39564579),
-                StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
-                DoubleChecker(0.4897719974699625),
-                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.5540039481345271),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("literal"),
+                ListChecker(
+                    DoubleChecker(0.0),
+                    DoubleChecker(0.0),
+                ),
             )
-            val route = loadRoute("multileg_route_two_legs_with_restrictions.json")
-                .toTestNavigationRoute(RouterOrigin.Offboard)
+            val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             api.setNavigationRoutes(listOf(route), activeLegIndex = 1)
             val result = api.setVanishingOffset(0.0).value!!
-                .primaryRouteLineDynamicData
-                .restrictedSectionExpressionProvider!!
-                .generateExpression()
+            val actual = getAppliedExpression(
+                result
+                    .primaryRouteLineDynamicData!!
+                    .restrictedSectionExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            )
 
             checkExpression(
                 expectedRestrictedExpressionContents,
-                result
+                actual,
+            )
+            assertTrue(
+                result.primaryRouteLineDynamicData.restrictedSectionExpressionCommandHolder!!
+                    .provider is LightRouteLineExpressionProvider,
             )
         }
 
@@ -2504,7 +4071,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.94254989),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
             DoubleChecker(1.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedAlternative1TrafficLineExpressionContents = listOf(
             StringChecker("step"),
@@ -2515,7 +4082,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.42786239),
             StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
             DoubleChecker(0.4958641),
-            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]")
+            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
         )
         val expectedAlternative2TrafficLineExpressionContents = listOf(
             StringChecker("step"),
@@ -2542,54 +4109,73 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.8880790),
             StringChecker("[rgba, 181.0, 130.0, 129.0, 1.0]"),
             DoubleChecker(0.92755122),
-            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]")
+            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
         )
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
-        val route = loadRoute("short_route.json")
-        val altRoute1 = loadRoute("route-with-road-classes.txt")
-        val altRoute2 = loadRoute("multileg_route.json")
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder().build()
+        val api = MapboxRouteLineApi(apiOptions)
+        val route = loadNavigationRoute("short_route.json")
+        val altRoute1 = loadNavigationRoute("route-with-road-classes.txt")
+        val altRoute2 = loadNavigationRoute("multileg_route.json")
         val routes = listOf(
-            RouteLine(route, null),
-            RouteLine(altRoute1, null),
-            RouteLine(altRoute2, null)
+            NavigationRouteLine(route, null),
+            NavigationRouteLine(altRoute1, null),
+            NavigationRouteLine(altRoute2, null),
         )
 
-        val result = api.setRoutes(routes)
+        val result = api.setNavigationRouteLines(routes)
 
         checkExpression(
             expectedPrimaryTrafficLineExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedAlternative1TrafficLineExpressionContents,
-            result.value!!.alternativeRouteLinesData[0].dynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.alternativeRouteLinesData[0].dynamicData!!
+                    .trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
+        )
+        assertTrue(
+            result.value!!.alternativeRouteLinesData[0].dynamicData!!.trafficExpressionCommandHolder
+                ?.provider is HeavyRouteLineExpressionProvider,
         )
         checkExpression(
             expectedAlternative2TrafficLineExpressionContents,
-            result.value!!.alternativeRouteLinesData[1].dynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.alternativeRouteLinesData[1].dynamicData!!
+                    .trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
+        )
+        assertTrue(
+            result.value!!.alternativeRouteLinesData[1].dynamicData!!
+                .trafficExpressionCommandHolder?.provider is HeavyRouteLineExpressionProvider,
         )
     }
 
     @Test
     fun `setNavigationRoutes takes into account inactiveLegStyling and legIndex`() =
         coroutineRule.runBlockingTest {
-            val route = loadRoute("multileg_route.json").toNavigationRoute(RouterOrigin.Custom())
-            val altRoute = loadRoute("multileg_route_with_overlap.json")
-                .toNavigationRoute(RouterOrigin.Custom())
+            val route = loadNavigationRoute("multileg_route.json")
+            val altRoute = loadNavigationRoute("multileg_route_with_overlap.json")
 
             val apiWithIndependentInactiveStylingEnabled = MapboxRouteLineApi(
-                MapboxRouteLineOptions.Builder(ctx)
+                MapboxRouteLineApiOptions.Builder()
                     .styleInactiveRouteLegsIndependently(true)
-                    .build()
+                    .build(),
             )
             val apiWithIndependentInactiveStylingDisabled = MapboxRouteLineApi(
-                MapboxRouteLineOptions.Builder(ctx)
-                    .build()
+                MapboxRouteLineApiOptions.Builder().build(),
             )
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
 
             val independentStylingEnabledLegZeroResult = apiWithIndependentInactiveStylingEnabled
                 .setNavigationRoutes(listOf(route, altRoute))
@@ -2611,56 +4197,106 @@ class MapboxRouteLineApiRoboTest {
             )
             val allValuesToCheck = (differentValuesToCheck + equalValuesToCheck).toSet()
             checkNotEquals(differentValuesToCheck) {
-                it.primaryRouteLineData.dynamicData.trafficExpressionProvider!!.generateExpression()
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(equalValuesToCheck) {
-                it.primaryRouteLineData.dynamicData.trafficExpressionProvider!!.generateExpression()
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkNotEquals(differentValuesToCheck) {
-                it.primaryRouteLineData.dynamicData.baseExpressionProvider.generateExpression()
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.baseExpressionCommandHolder,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(equalValuesToCheck) {
-                it.primaryRouteLineData.dynamicData.baseExpressionProvider.generateExpression()
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.baseExpressionCommandHolder,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkNotEquals(differentValuesToCheck) {
-                it.primaryRouteLineData.dynamicData.casingExpressionProvider.generateExpression()
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.casingExpressionCommandHolder,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(equalValuesToCheck) {
-                it.primaryRouteLineData.dynamicData.casingExpressionProvider.generateExpression()
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.casingExpressionCommandHolder,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(allValuesToCheck) {
-                it.primaryRouteLineData.dynamicData.trailExpressionProvider!!.generateExpression()
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trailExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(allValuesToCheck) {
-                it.primaryRouteLineData.dynamicData.trailCasingExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trailCasingExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
 
             checkEquals(allValuesToCheck) {
-                it.alternativeRouteLinesData.first().dynamicData.trafficExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    it.alternativeRouteLinesData.first().dynamicData!!
+                        .trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(allValuesToCheck) {
-                it.alternativeRouteLinesData.first().dynamicData.baseExpressionProvider
-                    .generateExpression()
+                getAppliedExpression(
+                    it.alternativeRouteLinesData.first().dynamicData!!.baseExpressionCommandHolder,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(allValuesToCheck) {
-                it.alternativeRouteLinesData.first().dynamicData.casingExpressionProvider
-                    .generateExpression()
+                getAppliedExpression(
+                    it.alternativeRouteLinesData.first().dynamicData!!
+                        .casingExpressionCommandHolder,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(allValuesToCheck) {
-                it.alternativeRouteLinesData.first().dynamicData.trailExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    it.alternativeRouteLinesData.first().dynamicData!!
+                        .trailExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
             checkEquals(allValuesToCheck) {
-                it.alternativeRouteLinesData.first().dynamicData.trailCasingExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    it.alternativeRouteLinesData.first().dynamicData!!
+                        .trailCasingExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
             }
         }
 
-    private fun checkNotEquals(
+    private suspend fun checkNotEquals(
         values: Iterable<Expected<RouteLineError, RouteSetValue>>,
-        expressionExtractor: (RouteSetValue) -> Expression
+        expressionExtractor: suspend (RouteSetValue) -> Expression,
     ) {
         val expressions = values.map { expressionExtractor(it.value!!) }
         for (i in 0 until expressions.size) {
@@ -2670,9 +4306,9 @@ class MapboxRouteLineApiRoboTest {
         }
     }
 
-    private fun checkEquals(
+    private suspend fun checkEquals(
         values: Iterable<Expected<RouteLineError, RouteSetValue>>,
-        expressionExtractor: (RouteSetValue) -> Expression
+        expressionExtractor: suspend (RouteSetValue) -> Expression,
     ) {
         val expressions = values.map { expressionExtractor(it.value!!) }
         if (expressions.isNotEmpty()) {
@@ -2685,21 +4321,22 @@ class MapboxRouteLineApiRoboTest {
 
     @Test
     fun getRouteDrawData() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder().build()
+        val api = MapboxRouteLineApi(apiOptions)
         val expectedCasingExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]")
+            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
         )
         val expectedRouteLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
@@ -2710,7 +4347,7 @@ class MapboxRouteLineApiRoboTest {
             DoubleChecker(0.9425498),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
             DoubleChecker(1.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
             "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
@@ -2722,76 +4359,109 @@ class MapboxRouteLineApiRoboTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
         val expectedWaypointFeature1 =
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
-        val route = loadRoute("short_route.json")
-        val routes = listOf(RouteLine(route, null))
-        api.setRoutes(routes)
+        val route = loadNavigationRoute(
+            "short_route.json",
+            waypoints = listOf(
+                createWaypoint(location = doubleArrayOf(-122.523671, 37.975379)),
+                createWaypoint(location = doubleArrayOf(-122.523131, 37.975067)),
+            ),
+        )
+        val routes = listOf(route)
+        api.setNavigationRoutes(routes)
 
         val result = api.getRouteDrawData()
 
         checkExpression(
             expectedCasingExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.casingExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.casingExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedRouteLineExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.baseExpressionProvider
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.baseExpressionCommandHolder,
+                viewOptions,
+                "line-gradient",
+            ),
         )
         checkExpression(
             expectedTrafficLineExpressionContents,
-            result.value!!.primaryRouteLineData.dynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-gradient",
+            ),
         )
+
+        assertTrue(
+            result.value!!.primaryRouteLineData.dynamicData!!.casingExpressionCommandHolder
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineData.dynamicData!!.baseExpressionCommandHolder
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!
+                .provider is HeavyRouteLineExpressionProvider,
+        )
+
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
             result.value!!.primaryRouteLineData.featureCollection.features()!![0].geometry()
-                .toString()
+                .toString(),
         )
         assertTrue(
-            result.value!!.alternativeRouteLinesData[0].featureCollection.features()!!.isEmpty()
+            result.value!!.alternativeRouteLinesData[0].featureCollection.features()!!.isEmpty(),
         )
         assertTrue(
-            result.value!!.alternativeRouteLinesData[1].featureCollection.features()!!.isEmpty()
+            result.value!!.alternativeRouteLinesData[1].featureCollection.features()!!.isEmpty(),
         )
         assertEquals(
             expectedWaypointFeature0,
-            result.value!!.waypointsSource.features()!![0].geometry().toString()
+            result.value!!.waypointsSource.features()!![0].geometry().toString(),
         )
         assertEquals(
             expectedWaypointFeature1,
-            result.value!!.waypointsSource.features()!![1].geometry().toString()
+            result.value!!.waypointsSource.features()!![1].geometry().toString(),
         )
     }
 
     @Test
     fun updateTraveledRouteLine() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withVanishingRouteLineEnabled(true)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
             .displayRestrictedRoadSections(false)
-            .vanishingRouteLineUpdateInterval(0)
             .build()
-        val api = MapboxRouteLineApi(options)
+            .toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
+            .calculateRestrictedRoadSections(false)
+            .vanishingRouteLineUpdateIntervalNano(0)
+            .build()
+        val api = MapboxRouteLineApi(apiOptions)
         val expectedCasingExpressionContents = listOf(
             StringChecker("literal"),
-            ListChecker(DoubleChecker(0.0), DoubleChecker(0.3240769))
+            ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
         )
         val expectedRouteExpressionContents = listOf(
             StringChecker("literal"),
-            ListChecker(DoubleChecker(0.0), DoubleChecker(0.32407694))
+            ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
         )
         val expectedTrafficExpressionContents = listOf(
             StringChecker("literal"),
-            ListChecker(DoubleChecker(0.0), DoubleChecker(0.324076944))
+            ListChecker(DoubleChecker(0.0), DoubleChecker(0.26384370723041864)),
         )
         val expectedRestrictedExpressionContents = listOf(
             StringChecker("literal"),
-            ListChecker(DoubleChecker(0.0), DoubleChecker(0.32407694))
+            ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
         )
         val route = shortRoute.navigationRoute
         val lineString = LineString.fromPolyline(
             route.directionsRoute.geometry() ?: "",
-            Constants.PRECISION_6
+            Constants.PRECISION_6,
         )
         val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
@@ -2803,25 +4473,56 @@ class MapboxRouteLineApiRoboTest {
 
         checkExpression(
             expectedCasingExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .casingExpressionProvider.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .casingExpressionCommandHolder,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             expectedRouteExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .baseExpressionProvider.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .baseExpressionCommandHolder,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             expectedTrafficExpressionContents,
-            result.value!!
-                .primaryRouteLineDynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!
+                    .primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             expectedRestrictedExpressionContents,
-            result.value!!
-                .primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!
+                    .primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
+        )
+
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
         )
     }
 
@@ -2840,19 +4541,21 @@ class MapboxRouteLineApiRoboTest {
             .inactiveRouteLegHeavyCongestionColor(Color.rgb(44, 99, 66))
             .inactiveRouteLegSevereCongestionColor(Color.rgb(55, 99, 66))
             .build()
-        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withRouteLineResources(resources)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+            .routeLineColorResources(colors)
             .displaySoftGradientForTraffic(true)
-            .softGradientTransition(30)
-            .styleInactiveRouteLegsIndependently(true)
-            .withVanishingRouteLineEnabled(true)
+            .softGradientTransition(30.0)
             .build()
-        val api = MapboxRouteLineApi(options)
+            .toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .styleInactiveRouteLegsIndependently(true)
+            .vanishingRouteLineEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(apiOptions)
         val route = multiLegRouteWithOverlap.navigationRoute
         val lineString = LineString.fromPolyline(
             route.directionsRoute.geometry() ?: "",
-            Constants.PRECISION_6
+            Constants.PRECISION_6,
         )
         api.setNavigationRoutes(listOf(route))
         val routeProgress = mockRouteProgress(route)
@@ -2862,87 +4565,64 @@ class MapboxRouteLineApiRoboTest {
         val result = api.updateTraveledRouteLine(lineString.coordinates()[16])
 
         val expectedTrafficExpressionContents = listOf(
-            StringChecker("interpolate"),
-            StringChecker("[linear]"),
-            StringChecker("[line-progress]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.3775848671450963),
-            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.3775848671450963),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.46930494817835106),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48220037017458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48220037018458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.503940915637458),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.503940915637458),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5055971863970301),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.5055971863970301),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.5131917124217056),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5131917124217056),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5147467093417488),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.3775848671550963),
+            ),
         )
         val expectedMaskingTrafficExpressionContents = listOf(
             StringChecker("literal"),
             ListChecker(
                 DoubleChecker(0.0),
                 DoubleChecker(0.3775848671550963),
-            )
+            ),
         )
 
         checkExpression(
             expectedTrafficExpressionContents,
-            result.value!!.primaryRouteLineDynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             expectedMaskingTrafficExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
-        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider)
-        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionProvider)
+        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionCommandHolder)
+        assertNull(
+            result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionCommandHolder,
+        )
+
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
     }
 
     @Test
     fun updateTraveledRouteLine_pointUpdateIntervalRespected() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withVanishingRouteLineEnabled(true)
-                .displayRestrictedRoadSections(false)
-                .vanishingRouteLineUpdateInterval(TimeUnit.MILLISECONDS.toNanos(1200))
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
+                .calculateRestrictedRoadSections(false)
+                .vanishingRouteLineUpdateIntervalNano(TimeUnit.MILLISECONDS.toNanos(1200))
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val api = MapboxRouteLineApi(apiOptions)
             val route = shortRoute.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
-                Constants.PRECISION_6
+                Constants.PRECISION_6,
             )
             val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
@@ -2969,16 +4649,17 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun updateTraveledRouteLine_noUpdateWhenPointDistanceTooSmall() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withVanishingRouteLineEnabled(true)
-                .displayRestrictedRoadSections(false)
-                .vanishingRouteLineUpdateInterval(TimeUnit.MILLISECONDS.toNanos(1200))
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
+                .vanishingRouteLineUpdateIntervalNano(TimeUnit.MILLISECONDS.toNanos(1200))
+                .calculateRestrictedRoadSections(false)
                 .build()
-            val api = MapboxRouteLineApi(options)
+
+            val api = MapboxRouteLineApi(apiOptions)
             val route = shortRoute.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
-                Constants.PRECISION_6
+                Constants.PRECISION_6,
             )
             val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
@@ -3001,20 +4682,24 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun `updateTraveledRouteLine when route has restrictions and legs not styled independently`() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withVanishingRouteLineEnabled(true)
-                .displayRestrictedRoadSections(true)
-                .vanishingRouteLineUpdateInterval(0)
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineEnabled(true)
+                .calculateRestrictedRoadSections(true)
+                .vanishingRouteLineUpdateIntervalNano(0)
                 .build()
-            val api = MapboxRouteLineApi(options)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .displayRestrictedRoadSections(true)
+                .build()
+                .toData()
+            val api = MapboxRouteLineApi(apiOptions)
             val expectedRestrictedExpressionContents = listOf(
                 StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.04111412))
+                ListChecker(DoubleChecker(0.0), DoubleChecker(0.017526274708172696)),
             )
             val route = routeWithRestrictions.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
-                Constants.PRECISION_6
+                Constants.PRECISION_6,
             )
             val routeProgress = routeWithRestrictions.mockRouteProgress(stepIndexValue = 2)
 
@@ -3027,8 +4712,18 @@ class MapboxRouteLineApiRoboTest {
 
             checkExpression(
                 expectedRestrictedExpressionContents,
-                result.value!!.primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result.value!!.primaryRouteLineDynamicData!!
+                        .restrictedSectionExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-trim-offset",
+                ),
+            )
+
+            assertTrue(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .restrictedSectionExpressionCommandHolder!!.provider
+                is LightRouteLineExpressionProvider,
             )
 
             verify(exactly = 0) {
@@ -3044,30 +4739,34 @@ class MapboxRouteLineApiRoboTest {
         coroutineRule.runBlockingTest {
             val expectedCasingExpressionContents = listOf(
                 StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.3240769))
+                ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
             )
             val expectedRouteExpressionContents = listOf(
                 StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.3240769))
+                ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
             )
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.3240769))
+                ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
             )
             val restrictedTrafficExpressionContents = listOf(
                 StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.3240769))
+                ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
             )
-            val options = MapboxRouteLineOptions.Builder(ctx)
-                .withVanishingRouteLineEnabled(true)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
-                .vanishingRouteLineUpdateInterval(0)
                 .build()
-            val api = MapboxRouteLineApi(options)
+                .toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .vanishingRouteLineUpdateIntervalNano(0)
+                .vanishingRouteLineEnabled(true)
+                .calculateRestrictedRoadSections(true)
+                .build()
+            val api = MapboxRouteLineApi(apiOptions)
             val route = shortRoute.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
-                Constants.PRECISION_6
+                Constants.PRECISION_6,
             )
             val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
@@ -3079,25 +4778,57 @@ class MapboxRouteLineApiRoboTest {
 
             checkExpression(
                 expectedCasingExpressionContents,
-                result.value!!.primaryRouteLineDynamicData
-                    .casingExpressionProvider.generateExpression()
+                getAppliedExpression(
+                    result.value!!.primaryRouteLineDynamicData!!
+                        .casingExpressionCommandHolder,
+                    viewOptions,
+                    "line-trim-offset",
+                ),
             )
             checkExpression(
                 expectedRouteExpressionContents,
-                result.value!!.primaryRouteLineDynamicData
-                    .baseExpressionProvider.generateExpression()
+                getAppliedExpression(
+                    result.value!!.primaryRouteLineDynamicData!!
+                        .baseExpressionCommandHolder,
+                    viewOptions,
+                    "line-trim-offset",
+                ),
             )
             checkExpression(
                 expectedTrafficExpressionContents,
-                result.value!!
-                    .primaryRouteLineDynamicData.trafficExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result.value!!
+                        .primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-trim-offset",
+                ),
             )
             checkExpression(
                 restrictedTrafficExpressionContents,
-                result.value!!
-                    .primaryRouteLineDynamicData.restrictedSectionExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result.value!!
+                        .primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-trim-offset",
+                ),
+            )
+
+            assertTrue(
+                result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
+                    .provider is LightRouteLineExpressionProvider,
+            )
+            assertTrue(
+                result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder!!
+                    .provider is LightRouteLineExpressionProvider,
+            )
+            assertTrue(
+                result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder!!
+                    .provider is LightRouteLineExpressionProvider,
+            )
+            assertTrue(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .restrictedSectionExpressionCommandHolder!!.provider
+                is LightRouteLineExpressionProvider,
             )
         }
 
@@ -3105,41 +4836,25 @@ class MapboxRouteLineApiRoboTest {
     fun updateWithRouteProgress_whenDeEmphasizeInactiveLegSegments() =
         coroutineRule.runBlockingTest {
             val expectedTrafficExpContents = listOf(
-                StringChecker("step"),
-                StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-                DoubleChecker(0.1037382),
-                StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-                DoubleChecker(0.124012),
-                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-                DoubleChecker(0.2718982),
-                StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-                DoubleChecker(0.3226409),
-                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-                DoubleChecker(0.4897719),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]")
+                StringChecker("literal"),
+                ListChecker(
+                    DoubleChecker(0.0),
+                    DoubleChecker(0.0),
+                ),
             )
-            val realOptions = MapboxRouteLineOptions.Builder(ctx)
-                .styleInactiveRouteLegsIndependently(true)
-                .build()
             val route = multiLegRouteTwoLegs.navigationRoute
-            val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
-                every { vanishPointOffset } returns 0.0
-            }
-            val options = mockk<MapboxRouteLineOptions> {
-                every { vanishingRouteLine } returns mockVanishingRouteLine
-                every { resourceProvider } returns realOptions.resourceProvider
-                every {
-                    styleInactiveRouteLegsIndependently
-                } returns realOptions.styleInactiveRouteLegsIndependently
-                every { displayRestrictedRoadSections } returns false
-                every { displaySoftGradientForTraffic } returns false
-                every { softGradientTransition } returns 30.0
-                every { routeStyleDescriptors } returns listOf()
-            }
-            val api = MapboxRouteLineApi(options)
+            val apiOptions = MapboxRouteLineApiOptions.Builder()
+                .styleInactiveRouteLegsIndependently(true)
+                .calculateRestrictedRoadSections(true)
+                .vanishingRouteLineEnabled(true)
+                .build()
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+                .displaySoftGradientForTraffic(false)
+                .displayRestrictedRoadSections(false)
+                .softGradientTransition(30.0)
+                .build()
+                .toData()
+            val api = MapboxRouteLineApi(apiOptions)
             val routeProgress = multiLegRouteTwoLegs.mockRouteProgress()
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
@@ -3149,192 +4864,90 @@ class MapboxRouteLineApiRoboTest {
 
             checkExpression(
                 expectedTrafficExpContents,
-                result.primaryRouteLineDynamicData
-                    .trafficExpressionProvider!!.generateExpression()
+                getAppliedExpression(
+                    result.primaryRouteLineDynamicData!!
+                        .trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-trim-offset",
+                ),
+            )
+            assertTrue(
+                result.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
+                    .provider is LightRouteLineExpressionProvider,
             )
         }
 
     @Test
-    fun highlightActiveLeg() = coroutineRule.runBlockingTest {
-        var callbackCalled = false
-        val expectedTrafficExpContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.48977199),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.54213882),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.5710651),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5916095),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8867442),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.94230022),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
-        )
-        val expectedRouteLineExpContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.48977199),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-        )
-        val expectedCasingExpContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.48977199),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
-        )
-        val route = multiLegRouteTwoLegs.navigationRoute
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .styleInactiveRouteLegsIndependently(true)
+    fun setVanishingOffset() = runBlocking {
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
             .build()
-        val api = MapboxRouteLineApi(options)
-        val routeProgress = multiLegRouteTwoLegs.mockRouteProgress(legIndexValue = 1)
-        api.setNavigationRoutes(listOf(route))
-
-        api.updateWithRouteProgress(routeProgress) { result ->
-            checkExpression(
-                expectedTrafficExpContents,
-                result.value!!.primaryRouteLineDynamicData
-                    .trafficExpressionProvider!!.generateExpression()
-            )
-            checkExpression(
-                expectedRouteLineExpContents,
-                result.value!!
-                    .primaryRouteLineDynamicData.baseExpressionProvider
-                    .generateExpression()
-            )
-            checkExpression(
-                expectedCasingExpContents,
-                result.value!!.primaryRouteLineDynamicData
-                    .casingExpressionProvider.generateExpression()
-            )
-            callbackCalled = true
-        }
-        assertTrue(callbackCalled)
-    }
-
-    @Test
-    fun showRouteWithLegIndexHighlighted() = coroutineRule.runBlockingTest {
-        val expectedTrafficExpContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.48977199),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.54213882),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.5710651),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5916095),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8867442),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.94230022),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
-        )
-        val expectedRouteLineExpContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.48977199),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-        )
-        val expectedCasingExpContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.48977199),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
-        )
-        val route = loadRoute("multileg-route-two-legs.json")
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .styleInactiveRouteLegsIndependently(true)
-            .build()
-        val api = MapboxRouteLineApi(options)
-        api.setRoutes(listOf(RouteLine(route, null)))
-
-        val result = api.showRouteWithLegIndexHighlighted(1).value!!
-
-        checkExpression(
-            expectedTrafficExpContents,
-            result.primaryRouteLineDynamicData
-                .trafficExpressionProvider!!.generateExpression()
-        )
-        checkExpression(
-            expectedRouteLineExpContents,
-            result.primaryRouteLineDynamicData
-                .baseExpressionProvider.generateExpression()
-        )
-        checkExpression(
-            expectedCasingExpContents,
-            result.primaryRouteLineDynamicData.casingExpressionProvider
-                .generateExpression()
-        )
-    }
-
-    @Test
-    fun setVanishingOffset() {
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withVanishingRouteLineEnabled(true)
-            .build()
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
         val trafficExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
         val routeLineExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
         val casingExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]")
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
-        val api = MapboxRouteLineApi(
-            options
-        )
+        val api = MapboxRouteLineApi(apiOptions)
+
+        api.setNavigationRoutes(listOf(shortRoute.navigationRoute))
 
         val result = api.setVanishingOffset(.5)
 
         checkExpression(
             trafficExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .trafficExpressionProvider!!.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             routeLineExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .baseExpressionProvider.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .baseExpressionCommandHolder,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             casingExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .casingExpressionProvider.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .casingExpressionCommandHolder,
+                viewOptions,
+                "line-trim-offset",
+            ),
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
         )
     }
 
@@ -3353,308 +4966,300 @@ class MapboxRouteLineApiRoboTest {
             .inactiveRouteLegHeavyCongestionColor(Color.rgb(44, 99, 66))
             .inactiveRouteLegSevereCongestionColor(Color.rgb(55, 99, 66))
             .build()
-        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withRouteLineResources(resources)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
+            .routeLineColorResources(colors)
             .displaySoftGradientForTraffic(true)
-            .softGradientTransition(30)
-            .styleInactiveRouteLegsIndependently(true)
-            .withVanishingRouteLineEnabled(true)
+            .softGradientTransition(30.0)
             .build()
-        val api = MapboxRouteLineApi(options)
+            .toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .styleInactiveRouteLegsIndependently(true)
+            .vanishingRouteLineEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(apiOptions)
         val route = multiLegRouteWithOverlap.navigationRoute
         api.setNavigationRoutes(listOf(route))
         val result = api.setVanishingOffset(.4)
 
         val expectedTrafficExpressionContents = listOf(
-            StringChecker("interpolate"),
-            StringChecker("[linear]"),
-            StringChecker("[line-progress]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.4),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.4),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48220037017458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48220037018458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.503940915637458),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.503940915637458),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5055971863970301),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.5055971863970301),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.5131917124217056),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5131917124217056),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5147467093417488),
-            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.4),
+            ),
         )
         val expectedMaskingTrafficExpressionContents = listOf(
             StringChecker("literal"),
             ListChecker(
                 DoubleChecker(0.0),
                 DoubleChecker(0.4),
-            )
+            ),
         )
 
         checkExpression(
             expectedTrafficExpressionContents,
-            result.value!!.primaryRouteLineDynamicData.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             expectedMaskingTrafficExpressionContents,
-            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionProvider!!
-                .generateExpression()
+            getAppliedExpression(
+                result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
-        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionProvider)
-        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionProvider)
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionCommandHolder)
+        assertNull(
+            result.value!!.routeLineMaskingLayerDynamicData!!.trailCasingExpressionCommandHolder,
+        )
     }
 
     @Test
-    fun setVanishingOffset_withRestrictionsEnabledPrimaryRouteNull() {
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withVanishingRouteLineEnabled(true)
-            .displayRestrictedRoadSections(true)
+    fun setVanishingOffset_withRestrictionsEnabledPrimaryRouteNull() = runBlocking {
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
+            .calculateRestrictedRoadSections(true)
             .build()
-        val trafficExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
-        )
-        val routeLineExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]")
-        )
-        val casingExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]")
-        )
-
-        val api = MapboxRouteLineApi(
-            options
-        )
+        val api = MapboxRouteLineApi(apiOptions)
 
         val result = api.setVanishingOffset(.5)
 
-        checkExpression(
-            trafficExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .trafficExpressionProvider!!.generateExpression()
-        )
-        checkExpression(
-            routeLineExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .baseExpressionProvider.generateExpression()
-        )
-        checkExpression(
-            casingExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .casingExpressionProvider.generateExpression()
-        )
-        assertNull(result.value!!.primaryRouteLineDynamicData.restrictedSectionExpressionProvider)
+        assertTrue(result.isError)
     }
 
     @Test
     fun setVanishingOffset_withRestrictionsEnabled() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withVanishingRouteLineEnabled(true)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
             .displayRestrictedRoadSections(true)
             .build()
+            .toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
+            .calculateRestrictedRoadSections(true)
+            .build()
         val trafficExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.502164),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8591201),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8902258),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
         val routeLineExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
         val casingExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
         val restrictedExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.50216434),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.51964451),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
-        val route = loadRoute("route-with-restrictions.json")
+        val route = loadNavigationRoute("route-with-restrictions.json")
 
-        val api = MapboxRouteLineApi(
-            options
-        )
-        api.setRoutes(listOf(RouteLine(route, null)))
+        val api = MapboxRouteLineApi(apiOptions)
+        api.setNavigationRouteLines(listOf(NavigationRouteLine(route, null)))
 
         val result = api.setVanishingOffset(.5)
 
-        println(
-            result.value!!.primaryRouteLineDynamicData
-                .trafficExpressionProvider!!.generateExpression().toString()
-        )
         checkExpression(
             trafficExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .trafficExpressionProvider!!.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             routeLineExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .baseExpressionProvider.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .baseExpressionCommandHolder,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             casingExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .casingExpressionProvider.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .casingExpressionCommandHolder,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             restrictedExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .restrictedSectionExpressionProvider!!.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .restrictedSectionExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
+        )
+
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
+        )
+        assertTrue(
+            result.value!!.primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!
+                .provider is LightRouteLineExpressionProvider,
         )
     }
 
     @Test
     fun setVanishingOffset_whenHasRestrictionsButDisabled() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
-            .withVanishingRouteLineEnabled(true)
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
             .displayRestrictedRoadSections(false)
             .build()
+            .toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
+            .calculateRestrictedRoadSections(false)
+            .build()
         val trafficExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.502164),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8591201),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8902258),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
         val routeLineExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
         val casingExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
         )
-        val route = loadRoute("route-with-restrictions.json")
+        val restrictedExpressionContents = listOf(
+            StringChecker("literal"),
+            ListChecker(
+                DoubleChecker(0.0),
+                DoubleChecker(0.5),
+            ),
+        )
+        val route = loadNavigationRoute("route-with-restrictions.json")
 
-        val api = MapboxRouteLineApi(
-            options
-        )
-        api.setRoutes(listOf(RouteLine(route, null)))
+        val api = MapboxRouteLineApi(apiOptions)
+        api.setNavigationRouteLines(listOf(NavigationRouteLine(route, null)))
 
         val result = api.setVanishingOffset(.5)
 
         checkExpression(
             trafficExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .trafficExpressionProvider!!.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .trafficExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             routeLineExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .baseExpressionProvider.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .baseExpressionCommandHolder,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
         checkExpression(
             casingExpressionContents,
-            result.value!!.primaryRouteLineDynamicData
-                .casingExpressionProvider.generateExpression()
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .casingExpressionCommandHolder,
+                viewOptions,
+                "line-trim-offset",
+            ),
         )
-        assertNull(result.value!!.primaryRouteLineDynamicData.restrictedSectionExpressionProvider)
+        checkExpression(
+            restrictedExpressionContents,
+            getAppliedExpression(
+                result.value!!.primaryRouteLineDynamicData!!
+                    .restrictedSectionExpressionCommandHolder!!,
+                viewOptions,
+                "line-trim-offset",
+            ),
+        )
     }
 
     @Test
     fun setRouteAsyncCallsReturnsCorrectRouteSuspend() = coroutineRule.runBlockingTest {
-        val shortRoute = listOf(RouteLine(loadRoute("short_route.json"), null))
-        val longRoute = listOf(RouteLine(loadRoute("cross-country-route.json"), null))
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
+        val shortRoute = listOf(NavigationRouteLine(loadNavigationRoute("short_route.json"), null))
+        val longRoute = listOf(
+            NavigationRouteLine(loadNavigationRoute("cross-country-route.json"), null),
+        )
+        val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
+        val apiOptions = MapboxRouteLineApiOptions.Builder().build()
+        val api = MapboxRouteLineApi(apiOptions)
 
         val longRouteDef = async {
-            val result = api.setRoutes(longRoute)
+            val result = api.setNavigationRouteLines(longRoute)
             (
-                result
-                    .value!!
-                    .primaryRouteLineData
-                    .dynamicData
-                    .trafficExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result
+                        .value!!
+                        .primaryRouteLineData
+                        .dynamicData!!
+                        .trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
                     .contents as ArrayList<*>
                 ).size
         }
         delay(40)
         val shortRouteDef = async {
-            val result = api.setRoutes(shortRoute)
+            val result = api.setNavigationRouteLines(shortRoute)
             (
-                result
-                    .value!!
-                    .primaryRouteLineData
-                    .dynamicData
-                    .trafficExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result
+                        .value!!
+                        .primaryRouteLineData
+                        .dynamicData!!
+                        .trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
                     .contents as ArrayList<*>
                 ).size
         }
@@ -3665,58 +5270,55 @@ class MapboxRouteLineApiRoboTest {
 
     @Test
     fun alternativelyStyleSegmentsNotInLeg() = coroutineRule.runBlockingTest {
-        val colorOptions = RouteLineColorResources.Builder()
-            .inActiveRouteLegsColor(Color.YELLOW)
-            .inactiveRouteLegCasingColor(Color.BLACK)
-            .build()
-        val resources = RouteLineResources.Builder().routeLineColorResources(colorOptions).build()
-        val options = MapboxRouteLineOptions.Builder(ctx).withRouteLineResources(resources).build()
+        val apiOptions = MapboxRouteLineApiOptions.Builder().build()
         val route = loadNavigationRoute("multileg-route-two-legs.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
             true,
-            options.resourceProvider.routeLineColorResources
+            apiOptions,
         )
-        val api = MapboxRouteLineApi(options)
+        val api = MapboxRouteLineApi(apiOptions)
 
         val result = api.alternativelyStyleSegmentsNotInLeg(
             1,
             segments,
-            InactiveRouteColors(Color.YELLOW)
+            InactiveRouteColors(),
         )
 
-        assertEquals(12, result.size)
-        assertEquals(-256, result.first().segmentColor)
+        assertEquals(19, result.size)
+        assertEquals(SegmentColorType.INACTIVE_LOW_CONGESTION, result.first().segmentColorType)
         assertEquals(0, result.first().legIndex)
-        assertEquals(-256, result[4].segmentColor)
-        assertEquals(0, result[4].legIndex)
+        assertEquals(SegmentColorType.INACTIVE_MODERATE_CONGESTION, result[4].segmentColorType)
+        assertEquals(0, result[6].legIndex)
         // this will be ignored, it's only here because the test route has an incorrect geometry
         // with a duplicate point
-        assertEquals(0.4897719974699625, result[5].offset, 0.0)
-        assertEquals(-27392, result[6].segmentColor)
-        assertEquals(1, result[6].legIndex)
-        assertEquals(0.4897719974699625, result[6].offset, 0.0)
+        assertEquals(0.4897719974699625, result[7].offset, 0.01)
+        assertEquals(SegmentColorType.INACTIVE_UNKNOWN_CONGESTION, result[6].segmentColorType)
+        assertEquals(1, result[8].legIndex)
+        assertEquals(0.4897719974699625, result[8].offset, 0.01)
     }
 
     @Test
     fun `set routes - with alternative metadata - vanished until deviation point`() =
         coroutineRule.runBlockingTest {
-            val options = MapboxRouteLineOptions.Builder(ctx).build()
-            val api = MapboxRouteLineApi(options)
+            val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
+            val apiOptions = MapboxRouteLineApiOptions.Builder().build()
+            val api = MapboxRouteLineApi(apiOptions)
             val response = DirectionsResponse.fromJson(
                 FileUtils.loadJsonFixture(
-                    "route_response_alternative_start.json"
-                )
+                    "route_response_alternative_start.json",
+                ),
             )
             val routeOptions = response.routes().first().routeOptions()!!
-            val routes = NavigationRoute.create(
-                directionsResponse = DirectionsResponse.fromJson(
+            val routes = createNavigationRoutes(
+                response = DirectionsResponse.fromJson(
                     FileUtils.loadJsonFixture(
-                        "route_response_alternative_start.json"
-                    )
+                        "route_response_alternative_start.json",
+                    ),
                 ),
-                routeOptions = routeOptions
+                options = routeOptions,
+                routerOrigin = RouterOrigin.ONLINE,
             )
             val alternativeRouteMetadata = mockk<AlternativeRouteMetadata> {
                 every { navigationRoute } returns routes[1]
@@ -3778,35 +5380,63 @@ class MapboxRouteLineApiRoboTest {
 
             checkExpression(
                 expectedPrimaryTrafficExpressionContents,
-                result
-                    .primaryRouteLineData
-                    .dynamicData
-                    .trafficExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result
+                        .primaryRouteLineData
+                        .dynamicData!!
+                        .trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                ),
+            )
+            assertTrue(
+                result.primaryRouteLineData.dynamicData.trafficExpressionCommandHolder!!
+                    .provider is HeavyRouteLineExpressionProvider,
             )
             checkExpression(
                 expectedBaseExpressionContents,
-                result
-                    .alternativeRouteLinesData[0]
-                    .dynamicData
-                    .baseExpressionProvider
-                    .generateExpression()
+                getAppliedExpression(
+                    result
+                        .alternativeRouteLinesData[0]
+                        .dynamicData!!
+                        .baseExpressionCommandHolder,
+                    viewOptions,
+                    "line-gradient",
+                ),
+            )
+            assertTrue(
+                result.alternativeRouteLinesData[0].dynamicData!!.baseExpressionCommandHolder
+                    .provider is LightRouteLineExpressionProvider,
             )
             checkExpression(
                 expectedCasingExpressionContents,
-                result
-                    .alternativeRouteLinesData[0]
-                    .dynamicData
-                    .casingExpressionProvider
-                    .generateExpression()
+                getAppliedExpression(
+                    result
+                        .alternativeRouteLinesData[0]
+                        .dynamicData!!
+                        .casingExpressionCommandHolder,
+                    viewOptions,
+                    "line-gradient",
+                ),
+            )
+            assertTrue(
+                result.alternativeRouteLinesData[0].dynamicData!!.casingExpressionCommandHolder
+                    .provider is LightRouteLineExpressionProvider,
             )
             checkExpression(
                 expectedAlternativeTrafficExpressionContents,
-                result
-                    .alternativeRouteLinesData[0]
-                    .dynamicData
-                    .trafficExpressionProvider!!
-                    .generateExpression()
+                getAppliedExpression(
+                    result
+                        .alternativeRouteLinesData[0]
+                        .dynamicData!!
+                        .trafficExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                ),
+            )
+            assertTrue(
+                result.alternativeRouteLinesData[0].dynamicData!!.trafficExpressionCommandHolder!!
+                    .provider is HeavyRouteLineExpressionProvider,
             )
         }
 
@@ -3815,12 +5445,12 @@ class MapboxRouteLineApiRoboTest {
         val routeData = FileUtils.loadJsonFixture("route_response_alternative_start.json")
         val response = DirectionsResponse.fromJson(routeData)
         val routeOptions = response.routes().first().routeOptions()!!
-        val routes = NavigationRoute.create(
-            directionsResponse = DirectionsResponse.fromJson(
-                routeData
+        val routes = createNavigationRoutes(
+            response = DirectionsResponse.fromJson(
+                routeData,
             ),
-            routeOptions = routeOptions,
-            routerOrigin = RouterOrigin.Offboard
+            options = routeOptions,
+            routerOrigin = RouterOrigin.ONLINE,
         )
         val alternativeRouteMetadata = mockk<AlternativeRouteMetadata> {
             every { navigationRoute } returns routes[1]
@@ -3847,7 +5477,7 @@ class MapboxRouteLineApiRoboTest {
         }
 
         val result = MapboxRouteLineUtils.getAlternativeRouteDeviationOffsets(
-            alternativeRouteMetadata
+            alternativeRouteMetadata,
         )
 
         assertEquals(0.03856129838762756, result, 0.000000001)
@@ -3871,7 +5501,7 @@ class MapboxRouteLineApiRoboTest {
                     emptyArray(),
                     emptyArray(),
                 )
-            }
+            },
         )
 
         assertEquals(0.0, result, 0.000000001)
@@ -3882,7 +5512,7 @@ class MapboxRouteLineApiRoboTest {
                     "unable to calculate the deviation point of the alternative with ID " +
                     "'abc#0' to hide the portion that overlaps " +
                     "with the primary route.",
-                "MapboxRouteLineUtils"
+                "MapboxRouteLineUtils",
             )
         }
     }
@@ -3905,7 +5535,7 @@ class MapboxRouteLineApiRoboTest {
                     arrayOf(arrayOf(mockk(relaxed = true), mockk(relaxed = true))),
                     arrayOf(arrayOf(arrayOf(mockk(relaxed = true), mockk(relaxed = true)))),
                 )
-            }
+            },
         )
 
         assertEquals(0.0, result, 0.000000001)
@@ -3916,7 +5546,7 @@ class MapboxRouteLineApiRoboTest {
                     "unable to calculate the deviation point of the alternative with ID " +
                     "'abc#0' to hide the portion that overlaps " +
                     "with the primary route.",
-                "MapboxRouteLineUtils"
+                "MapboxRouteLineUtils",
             )
         }
     }
@@ -3943,21 +5573,21 @@ class MapboxRouteLineApiRoboTest {
                     routeDistances = arrayOf(
                         RouteLineDistancesIndex(
                             point = mockk(),
-                            distanceRemaining = 40.0
+                            distanceRemaining = 40.0,
                         ),
                         RouteLineDistancesIndex(
                             point = mockk(),
-                            distanceRemaining = 30.0
+                            distanceRemaining = 30.0,
                         ),
                         RouteLineDistancesIndex(
                             point = mockk(),
-                            distanceRemaining = 20.0
-                        )
+                            distanceRemaining = 20.0,
+                        ),
                     ),
                     legsDistances = emptyArray(),
                     stepsDistances = emptyArray(),
                 )
-            }
+            },
         )
 
         assertEquals(0.0, result, 0.000000001)
@@ -3967,7 +5597,7 @@ class MapboxRouteLineApiRoboTest {
                     "unable to calculate the deviation point of the alternative with ID " +
                     "'abc#0' to hide the portion that overlaps " +
                     "with the primary route.",
-                "MapboxRouteLineUtils"
+                "MapboxRouteLineUtils",
             )
         }
     }
@@ -3992,21 +5622,21 @@ class MapboxRouteLineApiRoboTest {
                     routeDistances = arrayOf(
                         RouteLineDistancesIndex(
                             point = mockk(),
-                            distanceRemaining = 40.0
+                            distanceRemaining = 40.0,
                         ),
                         RouteLineDistancesIndex(
                             point = mockk(),
-                            distanceRemaining = 30.0
+                            distanceRemaining = 30.0,
                         ),
                         RouteLineDistancesIndex(
                             point = mockk(),
-                            distanceRemaining = 20.0
-                        )
+                            distanceRemaining = 20.0,
+                        ),
                     ),
                     legsDistances = emptyArray(),
                     stepsDistances = emptyArray(),
                 )
-            }
+            },
         )
 
         assertEquals(0.0, result, 0.000000001)
@@ -4017,9 +5647,117 @@ class MapboxRouteLineApiRoboTest {
                     "unable to calculate the deviation point of the alternative with ID " +
                     "'abc#0' to hide the portion that overlaps " +
                     "with the primary route.",
-                "MapboxRouteLineUtils"
+                "MapboxRouteLineUtils",
             )
         }
+    }
+
+    @Test
+    fun updateTraveledRouteLinePushesEvent() = coroutineRule.runBlockingTest {
+        val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true) {
+            every { vanishingPointState } returns VanishingPointState.ENABLED
+        }
+        val route = shortRoute.navigationRoute
+        val sender = mockk<RouteLineHistoryRecordingApiSender>(relaxed = true)
+        val point = Point.fromLngLat(3.0, 6.0)
+        val options = MapboxRouteLineApiOptions.Builder().build()
+        val api = MapboxRouteLineApi(
+            options,
+            coroutineRule.createTestScope(),
+            vanishingRouteLine,
+            sender,
+        )
+        val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
+
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
+        api.setNavigationRoutes(listOf(route))
+        api.updateUpcomingRoutePointIndex(routeProgress)
+        api.updateTraveledRouteLine(point)
+
+        verify { sender.sendUpdateTraveledRouteLineEvent(point) }
+    }
+
+    @Test
+    fun updateTraveledRouteLineDoesNotPushEventIfSkipped() = coroutineRule.runBlockingTest {
+        val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true) {
+            every { vanishingPointState } returns VanishingPointState.DISABLED
+        }
+        val route = shortRoute.navigationRoute
+        val sender = mockk<RouteLineHistoryRecordingApiSender>(relaxed = true)
+        val point = Point.fromLngLat(3.0, 6.0)
+        val options = MapboxRouteLineApiOptions.Builder().build()
+        val api = MapboxRouteLineApi(
+            options,
+            coroutineRule.createTestScope(),
+            vanishingRouteLine,
+            sender,
+        )
+        val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
+
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
+        api.setNavigationRoutes(listOf(route))
+        api.updateUpcomingRoutePointIndex(routeProgress)
+        api.updateTraveledRouteLine(point)
+
+        verify(exactly = 0) { sender.sendUpdateTraveledRouteLineEvent(any()) }
+    }
+
+    @Test
+    fun clearRouteLineSendsEvent() = coroutineRule.runBlockingTest {
+        val sender = mockk<RouteLineHistoryRecordingApiSender>(relaxed = true)
+
+        val options = MapboxRouteLineApiOptions.Builder().build()
+        val api = MapboxRouteLineApi(
+            options,
+            coroutineRule.createTestScope(),
+            mockk(relaxed = true),
+            sender,
+        )
+        api.clearRouteLine()
+
+        verify { sender.sendClearRouteLineEvent() }
+        api.cancel()
+    }
+
+    @Test
+    fun setVanishingOffsetSendsEvent() = coroutineRule.runBlockingTest {
+        val sender = mockk<RouteLineHistoryRecordingApiSender>(relaxed = true)
+
+        val options = MapboxRouteLineApiOptions.Builder().build()
+        val api = MapboxRouteLineApi(
+            options,
+            coroutineRule.createTestScope(),
+            mockk(relaxed = true),
+            sender,
+        )
+        api.setVanishingOffset(0.2)
+
+        verify { sender.sendSetVanishingOffsetEvent(0.2) }
+        api.cancel()
+    }
+
+    @Test
+    fun updateWithRouteProgressSendsEvent() = coroutineRule.runBlockingTest {
+        val sender = mockk<RouteLineHistoryRecordingApiSender>(relaxed = true)
+        val apiOptions = MapboxRouteLineApiOptions.Builder().build()
+        val api = MapboxRouteLineApi(
+            apiOptions,
+            coroutineRule.createTestScope(),
+            null,
+            sender,
+        )
+        api.setNavigationRoutes(
+            listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),
+        )
+
+        val routeProgress = mockRouteProgress(
+            multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute,
+        )
+        every { routeProgress.currentLegProgress!!.legIndex } returns 0
+        every { routeProgress.currentRouteGeometryIndex } returns 0
+        api.updateWithRouteProgress(routeProgress) {}
+
+        verify { sender.sendUpdateWithRouteProgressEvent(routeProgress) }
     }
 
     private fun mockRouteProgress(route: NavigationRoute, stepIndexValue: Int = 0): RouteProgress =
@@ -4029,7 +5767,7 @@ class MapboxRouteLineApiRoboTest {
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
                         route.directionsRoute.legs()!![0].steps()!![stepIndexValue].geometry()!!,
-                        6
+                        6,
                     )
                     every { distanceTraveled } returns 0f
                     every { step } returns mockk {
