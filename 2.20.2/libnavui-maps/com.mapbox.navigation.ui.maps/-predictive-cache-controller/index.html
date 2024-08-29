@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>PredictiveCacheController</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Maps::com.mapbox.navigation.ui.maps/PredictiveCacheController///PointingToDeclaration//-1725360525">
+  <div class="breadcrumbs"><a href="../../index.html">UI Maps</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.ui.maps</a><span class="delimiter">/</span><a href="index.html">PredictiveCacheController</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Predictive</span><wbr><span>Cache</span><wbr><span><span>Controller</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div></div><span class="token keyword">class </span><a href="index.html">PredictiveCacheController</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Predictive caching is a system that downloads necessary visual map and guidance data resources along the route upfront, before they are needed, in an attempt to provide a smooth experience even when connectivity is lost while using the app.</p><p class="paragraph">Once instantiated, the controller will immediately start caching guidance data.</p><p class="paragraph">In order to start caching map data, provide an instance via <a href="create-map-controllers.html">createMapControllers</a>. To specify sources to cache, pass a list of id's via <a href="create-map-controllers.html">createMapControllers</a>. Source id's should look like "mapbox://mapbox.satellite", "mapbox://mapbox.mapbox-terrain-v2". The system only supports source hosted on Mapbox Services which URL starts with "mapbox://". If no ids are passed all available style sources will be cached.</p><p class="paragraph">The controller as well as <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance it's holding can have a different lifecycle than the <span data-unresolved-link="com.mapbox.maps/MapboxMap///PointingToDeclaration/">MapboxMap</span> instance, so make sure to call <a href="remove-map-controllers.html">removeMapControllers</a> whenever the <span data-unresolved-link="com.mapbox.maps/MapView///PointingToDeclaration/">MapView</span> is destroyed to avoid leaking references or downloading unnecessary resources. When the map instance is recreated, set it back with <a href="create-map-controllers.html">createMapControllers</a>.</p><p class="paragraph">Also, note that <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance should be created before <a href="index.html">PredictiveCacheController</a> and the lifecycle of the <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance should be longer than that of the <a href="index.html">PredictiveCacheController</a>. Specifically, <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> should not be destroyed before <a href="on-destroy.html">PredictiveCacheController.onDestroy</a> is called.</p><p class="paragraph">The map instance has to be configured with the same <span data-unresolved-link="com.mapbox.common/TileStore///PointingToDeclaration/">TileStore</span> instance that was provided to <a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-routing-tiles-options/tile-store.html">RoutingTilesOptions.tileStore</a>. You need to call <span data-unresolved-link="com.mapbox.common/TileStore/create/#kotlin.String/PointingToDeclaration/">TileStore.create</span> with a path and pass it to <span data-unresolved-link="com.mapbox.maps/ResourceOptions/tileStore/#/PointingToDeclaration/">ResourceOptions.tileStore</span> or use the Maps SDK's tile store path XML attribute.</p><p class="paragraph">Call <a href="on-destroy.html">onDestroy</a> to cleanup all map and navigation state related references. This can be called when navigation session finishes and predictive caching is not needed anymore.</p><ul><li><p class="paragraph">When migrating please ensure you have cleaned up old navigation tiles cache folder to reclaim disk space. Navigation SDK 2.0 caches navigation tiles in a default folder under <code class="lang-kotlin">APP_FOLDER/mbx_nav/tiles/api.mapbox.com</code>. Previous versions of Nav SDK used to cache tiles under a default folder <code class="lang-kotlin">APP_FOLDER/Offline/api.mapbox.com/$tilesVersion/tiles</code>. Old cache is not compatible with a new version of SDK 2.0. It makes sense to delete any folders used previously for caching including a default one.</p></li><li><p class="paragraph"><code class="lang-kotlin">OnboardRouterOptions</code> enabled you to specify a path where nav-tiles will be saved and if a custom directory was used, it should be cleared as well.</p></li></ul></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Parameters">Parameters</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>predictive</span><wbr><span>Cache</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph"><a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-predictive-cache-options/index.html">PredictiveCacheOptions</a> options to instantiate instance of <a href="index.html">PredictiveCacheController</a></p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-963030834%2FConstructors%2F-1725360525" anchor-label="PredictiveCacheController" id="-963030834%2FConstructors%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-predictive-cache-controller.html"><span>Predictive</span><wbr><span>Cache</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-963030834%2FConstructors%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace strikethrough"><strike><span class="token keyword"></span></strike><strike><span class="token keyword">fun </span></strike><a href="-predictive-cache-controller.html"><strike><span class="token function">PredictiveCacheController</span></strike></a><strike><span class="token punctuation">(</span></strike><span class="parameters "><span class="parameter ">predictiveCacheOptions<span class="token operator">: </span><a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-predictive-cache-options/index.html">PredictiveCacheOptions</a></span></span><strike><span class="token punctuation">)</span></strike><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Constructs a new instance of the <a href="index.html">PredictiveCacheController</a> using the provided <a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-predictive-cache-options/index.html">PredictiveCacheOptions</a>. Throws <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a> if <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> was not instantiated before. Use <a href="index.html">PredictiveCacheController</a> constructor which explicitly accepts <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="992494695%2FConstructors%2F-1725360525" anchor-label="PredictiveCacheController" id="992494695%2FConstructors%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-predictive-cache-controller.html"><span>Predictive</span><wbr><span>Cache</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="992494695%2FConstructors%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-predictive-cache-controller.html"><span class="token function">PredictiveCacheController</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigation<span class="token operator">: </span><a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a><span class="token punctuation">, </span></span><span class="parameter ">predictiveCacheOptions<span class="token operator">: </span><a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-predictive-cache-options/index.html">PredictiveCacheOptions</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Constructs a new instance of the <a href="index.html">PredictiveCacheController</a> using the provided <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> and <a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-predictive-cache-options/index.html">PredictiveCacheOptions</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="546069305%2FConstructors%2F-1725360525" anchor-label="PredictiveCacheController" id="546069305%2FConstructors%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-predictive-cache-controller.html"><span>Predictive</span><wbr><span>Cache</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="546069305%2FConstructors%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace strikethrough"><strike><span class="token keyword"></span></strike><strike><span class="token keyword">fun </span></strike><a href="-predictive-cache-controller.html"><strike><span class="token function">PredictiveCacheController</span></strike></a><strike><span class="token punctuation">(</span></strike><span class="parameters "><span class="parameter ">predictiveCacheLocationOptions<span class="token operator">: </span><a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-predictive-cache-location-options/index.html">PredictiveCacheLocationOptions</a><span class="token operator"> = </span>PredictiveCacheLocationOptions.Builder().build()<span class="token punctuation">, </span></span><span class="parameter ">predictiveCacheControllerErrorHandler<span class="token operator">: </span><a href="../-predictive-cache-controller-error-handler/index.html">PredictiveCacheControllerErrorHandler</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><strike><span class="token punctuation">)</span></strike><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Constructs a new instance of the <a href="index.html">PredictiveCacheController</a> using the provided options. Throws <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a> if <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> was not instantiated before. Use <a href="index.html">PredictiveCacheController</a> constructor which explicitly accepts <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance and <a href="../../../libnavui-maps/com.mapbox.navigation.ui.maps/-predictive-cache-controller/[60]init[62].html">predictiveCacheControllerErrorHandler</a> instead.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1625846335%2FConstructors%2F-1725360525" anchor-label="PredictiveCacheController" id="-1625846335%2FConstructors%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-predictive-cache-controller.html"><span>Predictive</span><wbr><span>Cache</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1625846335%2FConstructors%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace strikethrough"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a></div></div><strike><span class="token keyword"></span></strike><strike><span class="token keyword">fun </span></strike><a href="-predictive-cache-controller.html"><strike><span class="token function">PredictiveCacheController</span></strike></a><strike><span class="token punctuation">(</span></strike><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;predictiveCacheLocationOptions<span class="token operator">: </span><a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-predictive-cache-location-options/index.html">PredictiveCacheLocationOptions</a><span class="token operator"> = </span>PredictiveCacheLocationOptions.Builder().build()<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;predictiveCacheGuidanceLocationOptions<span class="token operator">: </span><a href="../../../libnavigation-base/com.mapbox.navigation.base.options/-predictive-cache-location-options/index.html">PredictiveCacheLocationOptions</a><span class="token operator"> = </span>PredictiveCacheLocationOptions.Builder().build()<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;predictiveCacheControllerErrorHandler<span class="token operator">: </span><a href="../-predictive-cache-controller-error-handler/index.html">PredictiveCacheControllerErrorHandler</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><strike><span class="token punctuation">)</span></strike><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Constructs a new instance of the <a href="index.html">PredictiveCacheController</a> using the provided options. Throws <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a> if <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> was not instantiated before. Use <a href="index.html">PredictiveCacheController</a> constructor which explicitly accepts <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> instance and <a href="../../../libnavui-maps/com.mapbox.navigation.ui.maps/-predictive-cache-controller/[60]init[62].html">predictiveCacheControllerErrorHandler</a> instead.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="365955455%2FFunctions%2F-1725360525" anchor-label="createMapControllers" id="365955455%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="create-map-controllers.html"><span>create</span><wbr><span>Map</span><wbr><span><span>Controllers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="365955455%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace strikethrough"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a></div></div><strike><span class="token keyword"></span></strike><strike><span class="token keyword">fun </span></strike><a href="create-map-controllers.html"><strike><span class="token function">createMapControllers</span></strike></a><strike><span class="token punctuation">(</span></strike><span class="parameters "><span class="parameter ">map<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/MapboxMap///PointingToDeclaration/">MapboxMap</span><span class="token punctuation">, </span></span><span class="parameter ">sourceIdsToCache<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><strike><span class="token punctuation">)</span></strike><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Create cache controllers for a map instance. Call when a new map instance is available.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-930524484%2FFunctions%2F-1725360525" anchor-label="createStyleMapControllers" id="-930524484%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="create-style-map-controllers.html"><span>create</span><wbr><span>Style</span><wbr><span>Map</span><wbr><span><span>Controllers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-930524484%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-style-map-controllers.html"><span class="token function">createStyleMapControllers</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;map<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/MapboxMap///PointingToDeclaration/">MapboxMap</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;cacheCurrentMapStyle<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;styles<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Create cache controllers for a map instance. Call when a new map instance is available.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1616930584%2FFunctions%2F-1725360525" anchor-label="onDestroy" id="1616930584%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-destroy.html"><span>on</span><wbr><span><span>Destroy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1616930584%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-destroy.html"><span class="token function">onDestroy</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Cleans up all map and navigation state related references. This can be called when navigation session finishes and predictive caching is not needed anymore.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1753200174%2FFunctions%2F-1725360525" anchor-label="removeMapControllers" id="-1753200174%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="remove-map-controllers.html"><span>remove</span><wbr><span>Map</span><wbr><span><span>Controllers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1753200174%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="remove-map-controllers.html"><span class="token function">removeMapControllers</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">map<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/MapboxMap///PointingToDeclaration/">MapboxMap</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Remove the map instance. Call this whenever the <span data-unresolved-link="com.mapbox.maps/MapView///PointingToDeclaration/">MapView</span> is destroyed to avoid leaking references or downloading unnecessary resources.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-1459584302%2FProperties%2F-1725360525" anchor-label="predictiveCacheControllerErrorHandler" id="-1459584302%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="predictive-cache-controller-error-handler.html">predictiveCacheControllerErrorHandler</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1459584302%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-1459584302%2FProperties%2F-1725360525" anchor-label="predictiveCacheControllerErrorHandler" id="-1459584302%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-volatile/index.html"><span class="token annotation">Volatile</span></a></div></div><span class="token keyword"></span><span class="token keyword">var </span><a href="predictive-cache-controller-error-handler.html">predictiveCacheControllerErrorHandler</a><span class="token operator">: </span><a href="../-predictive-cache-controller-error-handler/index.html">PredictiveCacheControllerErrorHandler</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1459584302%2FProperties%2F-1725360525" anchor-label="predictiveCacheControllerErrorHandler" id="-1459584302%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><p class="paragraph">Predictive Cache Controller errors listener</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
