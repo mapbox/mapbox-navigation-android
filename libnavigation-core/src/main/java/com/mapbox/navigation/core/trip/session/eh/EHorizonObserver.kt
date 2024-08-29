@@ -27,7 +27,7 @@ interface EHorizonObserver {
      */
     fun onPositionUpdated(
         position: EHorizonPosition,
-        distances: List<RoadObjectDistanceInfo>
+        distances: List<RoadObjectDistanceInfo>,
     )
 
     /**

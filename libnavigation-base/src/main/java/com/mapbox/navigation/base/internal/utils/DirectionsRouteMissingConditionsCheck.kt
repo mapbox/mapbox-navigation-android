@@ -50,7 +50,7 @@ internal object DirectionsRouteMissingConditionsCheck {
             separator = ";",
             prefix = "[",
             postfix = "]",
-            transform = { str -> "($str)" }
+            transform = { str -> "($str)" },
         )
         }
         """.trimIndent()

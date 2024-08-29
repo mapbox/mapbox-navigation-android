@@ -92,7 +92,7 @@ class TimeFormatterTest {
 
         assertEquals(
             Typeface.BOLD,
-            (result.getSpans(0, result.count(), Object::class.java)[0] as StyleSpan).style
+            (result.getSpans(0, result.count(), Object::class.java)[0] as StyleSpan).style,
         )
     }
 
@@ -107,9 +107,9 @@ class TimeFormatterTest {
                 result.getSpans(
                     0,
                     result.count(),
-                    Object::class.java
+                    Object::class.java,
                 )[1] as RelativeSizeSpan
-                ).sizeChange
+                ).sizeChange,
         )
     }
 
@@ -123,7 +123,7 @@ class TimeFormatterTest {
             cal,
             434.0,
             NONE_SPECIFIED,
-            true
+            true,
         )
 
         assertEquals("16:38", result)
@@ -139,7 +139,7 @@ class TimeFormatterTest {
             cal,
             434.0,
             NONE_SPECIFIED,
-            false
+            false,
         )
 
         assertEquals("4:38 pm", result)
@@ -155,7 +155,7 @@ class TimeFormatterTest {
             cal,
             434.0,
             TWELVE_HOURS,
-            false
+            false,
         )
 
         assertEquals("4:38 pm", result)
@@ -171,7 +171,7 @@ class TimeFormatterTest {
             cal,
             434.0,
             TWENTY_FOUR_HOURS,
-            false
+            false,
         )
 
         assertEquals("16:38", result)

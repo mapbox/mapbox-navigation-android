@@ -27,10 +27,8 @@ ext {
     gitVersionCodeTime = -1
     try {
         git = Grgit.open(currentDir: projectDir)
-        gitVersionName = git.describe()
-        gitVersionCode = git.tag.list().count {
-            it.getName().contains("testapp")
-        }
+        gitVersionName = git.describe(tags: true)
+        gitVersionCode = git.log().size()
         gitVersionCodeTime = git.head().time
     } catch (Exception exception) {
         println("Does your build of mapbox-navigation-android have a Git directory?" +

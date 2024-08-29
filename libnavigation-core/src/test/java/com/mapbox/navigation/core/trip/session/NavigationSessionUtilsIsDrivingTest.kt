@@ -8,7 +8,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class NavigationSessionUtilsIsDrivingTest(
     private val state: TripSessionState,
-    private val expected: Boolean
+    private val expected: Boolean,
 ) {
 
     companion object {

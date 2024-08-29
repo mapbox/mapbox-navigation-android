@@ -25,7 +25,8 @@ object LocaleEx {
         when (this.country.uppercase(this)) {
             "US", // US
             "LR", // Liberia
-            "MM" -> // Burma
+            "MM",
+            -> // Burma
                 UnitType.IMPERIAL
             else ->
                 UnitType.METRIC

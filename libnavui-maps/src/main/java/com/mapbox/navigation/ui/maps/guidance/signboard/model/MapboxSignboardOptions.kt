@@ -8,12 +8,12 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.api.MapboxSignboardApi
  * @property cssStyles String used to specify styling rules for the signboard svg. If not specified
  * it uses a default style.
  * @property desiredSignboardWidth Int used to calculate the height to maintain the aspect ratio.
- * If not specified it defaults to 400px.
+ * If not specified it defaults to 600px.
  * @constructor
  */
 class MapboxSignboardOptions private constructor(
     val cssStyles: String,
-    val desiredSignboardWidth: Int
+    val desiredSignboardWidth: Int,
 ) {
 
     /**
@@ -91,7 +91,7 @@ class MapboxSignboardOptions private constructor(
         fun build(): MapboxSignboardOptions {
             return MapboxSignboardOptions(
                 cssStyles = cssStyles,
-                desiredSignboardWidth = desiredSignboardWidth
+                desiredSignboardWidth = desiredSignboardWidth,
             )
         }
     }

@@ -9,10 +9,10 @@ import kotlinx.coroutines.test.TestCoroutineScope
 @ExperimentalPreviewMapboxNavigationAPI
 internal fun createRoutePreviewController(
     parentScope: CoroutineScope = TestCoroutineScope(SupervisorJob() + TestCoroutineDispatcher()),
-    routesDataParser: RoutesDataParser = RouteDataParserStub()
+    routesDataParser: RoutesDataParser = RouteDataParserStub(),
 ): RoutesPreviewController {
     return RoutesPreviewController(
         routesDataParser = routesDataParser,
-        scope = parentScope
+        scope = parentScope,
     )
 }

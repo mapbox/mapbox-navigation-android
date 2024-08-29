@@ -5,7 +5,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
+import com.mapbox.maps.QueriedRenderedFeature
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.building.BuildingAction
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
  */
 class MapboxBuildingsApi internal constructor(
     private val mapboxMap: MapboxMap,
-    private val processor: BuildingProcessor
+    private val processor: BuildingProcessor,
 ) {
 
     constructor(mapboxMap: MapboxMap) : this(mapboxMap, BuildingProcessor)
@@ -35,7 +35,7 @@ class MapboxBuildingsApi internal constructor(
     /**
      * The API can be invoked to query a building on [MapboxMap] using the [point] provided as
      * an input. The API returns a [BuildingError] if there is an internal issue fetching the buildings.
-     * Otherwise, it returns buildings wrapped inside [BuildingValue] in a form of list of [QueriedFeature].
+     * Otherwise, it returns buildings wrapped inside [BuildingValue] in a form of list of [QueriedRenderedFeature].
      * This list is empty if the building is not found on the [MapboxMap]
      *
      * Note:
@@ -49,7 +49,7 @@ class MapboxBuildingsApi internal constructor(
      */
     fun queryBuildingToHighlight(
         point: Point,
-        callback: MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>
+        callback: MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>,
     ) {
         val action = BuildingAction.QueryBuilding(point, mapboxMap)
         mainJobController.scope.launch {
@@ -62,7 +62,7 @@ class MapboxBuildingsApi internal constructor(
      * The API can be invoked to query a building on [MapboxMap] using the [RouteProgress] provided as
      * an input. Use this function to query a building when you reach a waypoint in a multi-leg trip.
      * The API returns a [BuildingError] if there is an internal issue fetching the buildings.
-     * Otherwise, it returns buildings wrapped inside [BuildingValue] in a form of list of [QueriedFeature].
+     * Otherwise, it returns buildings wrapped inside [BuildingValue] in a form of list of [QueriedRenderedFeature].
      * This list is empty if the building is not found on the [MapboxMap]
      *
      * Note:
@@ -110,7 +110,7 @@ class MapboxBuildingsApi internal constructor(
      */
     fun queryBuildingOnWaypoint(
         progress: RouteProgress,
-        callback: MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>
+        callback: MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>,
     ) {
         val action = BuildingAction.QueryBuildingOnWaypoint(progress)
         val destination = processor.queryBuildingOnWaypoint(action)
@@ -122,8 +122,8 @@ class MapboxBuildingsApi internal constructor(
             }
         } ?: callback.accept(
             ExpectedFactory.createError(
-                BuildingError("waypoint inside $progress is null")
-            )
+                BuildingError("waypoint inside $progress is null"),
+            ),
         )
     }
 
@@ -131,7 +131,7 @@ class MapboxBuildingsApi internal constructor(
      * The API can be invoked to query a building on [MapboxMap] using the [RouteProgress] provided as
      * an input. Use this function to query a building when you reach your destination.
      * The API returns a [BuildingError] if there is an internal issue fetching the buildings.
-     * Otherwise, it returns buildings wrapped inside [BuildingValue] in a form of list of [QueriedFeature].
+     * Otherwise, it returns buildings wrapped inside [BuildingValue] in a form of list of [QueriedRenderedFeature].
      * This list is empty if the building is not found on the [MapboxMap]
      *
      * Note:
@@ -176,7 +176,7 @@ class MapboxBuildingsApi internal constructor(
      */
     fun queryBuildingOnFinalDestination(
         progress: RouteProgress,
-        callback: MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>
+        callback: MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>,
     ) {
         val action = BuildingAction.QueryBuildingOnFinalDestination(progress)
         val destination = processor.queryBuildingOnFinalDestination(action)
@@ -188,8 +188,8 @@ class MapboxBuildingsApi internal constructor(
             }
         } ?: callback.accept(
             ExpectedFactory.createError(
-                BuildingError("final destination point inside $progress is null")
-            )
+                BuildingError("final destination point inside $progress is null"),
+            ),
         )
     }
 

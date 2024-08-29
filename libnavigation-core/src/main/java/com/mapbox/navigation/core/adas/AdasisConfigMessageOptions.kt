@@ -72,14 +72,14 @@ class AdasisConfigMessageOptions private constructor(
         /**
          * If true, message of that type will be generated
          */
-        fun enable(enable: Boolean) = apply {
+        fun enable(enable: Boolean): Builder = apply {
             this.enable = enable
         }
 
         /**
          * Distance along EH path in meters, for which message will be generated
          */
-        fun radiusMeters(radiusMeters: Int) = apply {
+        fun radiusMeters(radiusMeters: Int): Builder = apply {
             this.radiusMeters = radiusMeters
         }
 

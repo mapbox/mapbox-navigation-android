@@ -3,23 +3,26 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.core.directions.session.RoutesExtra
-import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.routes.EvRoutesProvider
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class EvAlternativesTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
@@ -39,33 +42,30 @@ class EvAlternativesTest : BaseCoreNoCleanUpTest() {
     fun passForkPointAndReceiveContinuousEvAlternative() = sdkTest {
         val originalTestRoute = EvRoutesProvider.getBerlinEvRoute(
             context,
-            mockWebServerRule.baseUrl
+            mockWebServerRule.baseUrl,
         )
         val continuousAlternative = EvRoutesProvider.getContinuousAlternativeBerlinEvRoute(
             context,
-            mockWebServerRule.baseUrl
+            mockWebServerRule.baseUrl,
         )
         mockWebServerRule.requestHandlers.add(originalTestRoute.mockWebServerHandler)
         mockWebServerRule.requestHandlers.add(continuousAlternative.mockWebServerHandler)
 
         withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule
+            historyRecorderRule = mapboxHistoryTestRule,
         ) { navigation ->
             val routes = navigation.requestRoutes(originalTestRoute.routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
             navigation.startTripSession()
             mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
-            navigation.registerRouteAlternativesObserver(
-                AdvancedAlternativesObserverFromDocumentation(navigation)
-            )
             navigation.setNavigationRoutesAsync(routes)
 
             val newChargeLevel = "957"
             navigation.onEVDataUpdated(
                 mapOf(
-                    "ev_initial_charge" to newChargeLevel
-                )
+                    "ev_initial_charge" to newChargeLevel,
+                ),
             )
             val newAlternative = navigation.routesUpdates()
                 .first {

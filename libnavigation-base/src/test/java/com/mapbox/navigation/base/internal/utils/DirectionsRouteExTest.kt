@@ -28,63 +28,63 @@ class DirectionsRouteExTest {
     fun isRouteTheSame() {
         val mockkRoute = mockk<DirectionsRoute> {
             every { geometry() } throws AssertionError(
-                "we should check reference first"
+                "we should check reference first",
             )
             every { legs() } throws AssertionError(
-                "we should check reference first"
+                "we should check reference first",
             )
         }
         val comparing = listOf<Triple<DirectionsRoute, DirectionsRoute?, Boolean>>(
             Triple(
                 getDirectionRouteBuilder().geometry("geomery").build(),
                 getDirectionRouteBuilder().geometry("geomery").build(),
-                true
+                true,
             ),
             Triple(
                 getDirectionRouteBuilder().geometry("geomery_1").build(),
                 getDirectionRouteBuilder().geometry("geomery").build(),
-                false
+                false,
             ),
             Triple(
                 getDirectionRouteBuilder().geometry("geomery").build(),
                 null,
-                false
+                false,
             ),
             Triple(
                 getDirectionRouteBuilder().legs(
                     listOf(
                         getListOfRouteLegs("one, two"),
                         getListOfRouteLegs("three, four"),
-                    )
+                    ),
                 ).build(),
                 getDirectionRouteBuilder().legs(
                     listOf(
                         getListOfRouteLegs("one, two"),
                         getListOfRouteLegs("three, four"),
-                    )
+                    ),
                 ).build(),
-                true
+                true,
             ),
             Triple(
                 getDirectionRouteBuilder().legs(
                     listOf(
                         getListOfRouteLegs("one, two"),
                         getListOfRouteLegs("three, four"),
-                    )
+                    ),
                 ).build(),
                 getDirectionRouteBuilder().legs(
                     listOf(
                         getListOfRouteLegs("one, two"),
                         getListOfRouteLegs("three, four_NOT"),
-                    )
+                    ),
                 ).build(),
-                false
+                false,
             ),
             Triple(
                 mockkRoute,
                 mockkRoute,
-                true
-            )
+                true,
+            ),
         )
 
         comparing.forEach { (route1, route2, compareResult) ->
@@ -121,7 +121,7 @@ class DirectionsRouteExTest {
                 com.mapbox.navigation.base.internal.route.Waypoint.EV_CHARGING_SERVER,
                 com.mapbox.navigation.base.internal.route.Waypoint.REGULAR,
             ),
-            nativeWaypoints.mapToSdk().map { it.type }
+            nativeWaypoints.mapToSdk().map { it.type },
         )
     }
 
@@ -166,10 +166,10 @@ class DirectionsRouteExTest {
                     },
                     "json key" to JsonObject().apply {
                         add("inner key", JsonPrimitive(10))
-                    }
-                )
+                    },
+                ),
             ),
-            nativeWaypoints.mapToSdk().map { it.metadata }
+            nativeWaypoints.mapToSdk().map { it.metadata },
         )
     }
 
@@ -221,7 +221,7 @@ class DirectionsRouteExTest {
                             .maneuver(mockk(relaxUnitFun = true))
                             .weight(5.0)
                             .build()
-                    }
+                    },
                 )
             }
             .build()

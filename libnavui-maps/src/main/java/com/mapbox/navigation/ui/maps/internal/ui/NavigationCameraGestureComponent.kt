@@ -9,7 +9,7 @@ import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHan
 
 internal class NavigationCameraGestureComponent(
     private val mapView: MapView,
-    navigationCamera: NavigationCamera
+    navigationCamera: NavigationCamera,
 ) : UIComponent() {
 
     private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)

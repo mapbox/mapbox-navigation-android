@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <declare-styleable name="NavigationView">
-        <!-- Defines the mapbox access token. -->
-        <attr name="accessToken" format="string"/>
-    </declare-styleable>
-
-</resources>

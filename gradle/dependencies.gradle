@@ -1,5 +1,5 @@
 ext {
-  def kotlinVersion = "1.5.31"
+  def kotlinVersion = "1.7.20"
 
   androidVersions = [
       minSdkVersion           : 21,
@@ -13,36 +13,32 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '206.0.0'
+      mapboxNavigatorVersion = '317.0.0-SNAPSHOT.0822T1243Z.6d8435e'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
-  def androidXWorkManagerVersion = project.hasProperty('WORK_MANAGER_VERSION') ? project.property('WORK_MANAGER_VERSION') : '2.7.0'
-  println("AndroidX Work Manager version: " + androidXWorkManagerVersion)
-  def androidXLifecycleVersion = project.hasProperty('ANDROIDX_LIFECYCLE_VERSION') ? project.property('ANDROIDX_LIFECYCLE_VERSION') : '2.4.0'
-  println("AndroidX Lifecycle version: " + androidXLifecycleVersion)
 
   version = [
-      mapboxMapSdk              : '10.18.3',
+      mapboxMapSdk              : '11.6.0',
       mapboxSdkServices         : '7.1.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '23.10.1',
-      mapboxCrashMonitor        : '2.0.0',
-      mapboxAnnotationPlugin    : '0.8.0',
-      mapboxBaseAndroid         : '0.8.0',
-      mapboxMapsAndroidAuto     : '0.5.0',
-      mapboxSearchAndroidAuto   : '1.0.0-rc.1',
-      androidXLifecycle         : "${androidXLifecycleVersion}",
+      mapboxCommonNative        : '24.6.0',
+      mapboxSearch              : '2.4.0',
+      mapboxBaseAndroid         : '0.11.0',
+      androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',
       androidXArchCoreVersion   : '2.1.0',
       androidXAppCompatVersion  : '1.3.1',
       androidXPreferenceVersion : '1.1.0',
       androidXAnnotationVersion : '1.2.0',
-      androidXFragmentVersion   : '1.3.0',
+      androidXFragmentVersion   : '1.4.0',
       androidXDataStore         : '1.0.0',
-      androidXWorkManager       : "${androidXWorkManagerVersion}",
+      androidXWorkManager       : '2.7.1',
+      androidXAsyncInflater     : '1.0.0',
       cardViewVersion           : '1.0.0',
       recyclerViewVersion       : '1.1.0',
       materialDesignVersion     : '1.1.0',
+      compose                   : '1.4.2',
+      composeCompiler           : '1.3.2',
       autoValue                 : '1.5.4',
       autoValueParcel           : '0.2.5',
       junit                     : '4.12',
@@ -59,39 +55,37 @@ ext {
       firebaseCrashlytics       : '17.3.1',
       multidex                  : '2.0.1',
       json                      : '20180813',
-      coroutinesAndroid         : '1.5.1',
+      coroutinesAndroid         : '1.6.4',
       okhttp                    : '4.9.0',
       okio                      : '2.10.0',
-      androidxTestJunit         : '1.1.3',
-      androidxTest              : '1.4.0',
-      androidxTestOrchestrator  : '1.4.1',
+      androidxTestJunit         : '1.1.5',
+      androidxTest              : '1.5.2',
+      androidxTestCore          : '1.5.0',
+      androidxTestRules         : '1.5.0',
+      androidxTestOrchestrator  : '1.4.2',
       barista                   : '4.2.0',
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
       viewBinding               : '7.2.1',
       glide                     : '4.13.2',
+      kaspresso                 : '1.5.3',
+      equalsVerifier            : '3.15.8',
+      toStringVerifier          : '1.4.8',
   ]
   dependenciesList = [
       // mapbox
       mapboxMapSdk              : "com.mapbox.maps:android:${version.mapboxMapSdk}",
+      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto:${version.mapboxMapSdk}",
       mapboxSdkServices         : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
       mapboxSdkServicesCore     : "com.mapbox.mapboxsdk:mapbox-sdk-core:${version.mapboxSdkServices}",
       mapboxSdkGeoJSON          : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:${version.mapboxSdkServices}",
       mapboxSdkTurf             : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
       mapboxSdkDirectionsModels : "com.mapbox.mapboxsdk:mapbox-sdk-directions-models:${version.mapboxSdkServices}",
       mapboxSdkRefreshModels    : "com.mapbox.mapboxsdk:mapbox-sdk-directions-refresh-models:${version.mapboxSdkServices}",
-      mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
+      mapboxNavigator           : "com.mapbox.navigator:dash-native:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
-      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto:${version.mapboxMapsAndroidAuto}",
-      mapboxSearchAndroidAuto   : "com.mapbox.search:mapbox-search-android:${version.mapboxSearchAndroidAuto}",
+      mapboxSearch              : "com.mapbox.search:mapbox-search-android:${version.mapboxSearch}",
 
-      /**
-       * explicitly define Mapbox OkHttp dependency so that we are sure it's in sync with the Common SDK version we define
-       * and we're not relying on Mapbox OKHttp coming in transitively
-       */
-      mapboxCommonOkHttp        : "com.mapbox.common:okhttp:${version.mapboxCommonNative}",
-      mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:${version.mapboxAnnotationPlugin}",
-      mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxBaseAndroid}",
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxBaseAndroid}",
       mapboxAndroidCommon       : "com.mapbox.base:common:${version.mapboxBaseAndroid}",
@@ -136,6 +130,14 @@ ext {
       androidXArchCoreTesting   : "androidx.arch.core:core-testing:${version.androidXArchCoreVersion}",
       androidXDataStore         : "androidx.datastore:datastore-preferences:${version.androidXDataStore}",
       androidXWorkManager       : "androidx.work:work-runtime-ktx:${version.androidXWorkManager}",
+      androidXAsyncInflater     : "androidx.asynclayoutinflater:asynclayoutinflater:${version.androidXAsyncInflater}",
+
+      // compose
+     composeUi                  : "androidx.compose.ui:ui:${version.compose}",
+     composeUiTooling           : "androidx.compose.ui:ui-tooling:${version.compose}",
+     composeUiToolingPreview    : "androidx.compose.ui:ui-tooling-preview:${version.compose}",
+     composeFoundation          : "androidx.compose.foundation:foundation:${version.compose}",
+     composeMaterial            : "androidx.compose.material:material:${version.compose}",
 
       // lifecycle
       androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",
@@ -149,9 +151,12 @@ ext {
       // instrumentation test
       testRunner                : "androidx.test:runner:${version.androidxTest}",
       testOrchestrator          : "androidx.test:orchestrator:${version.androidxTestOrchestrator}",
-      testRules                 : "androidx.test:rules:${version.androidxTest}",
+      testRules                 : "androidx.test:rules:${version.androidxTestRules}",
       androidxTestJunit         : "androidx.test.ext:junit:${version.androidxTestJunit}",
       barista                   : "com.adevinta.android:barista:${version.barista}",
+
+      // screenshot tests
+      kaspresso                 : "com.kaspersky.android-components:kaspresso:${version.kaspresso}",
 
       // unit test
       junit                     : "junit:junit:${version.junit}",
@@ -162,7 +167,9 @@ ext {
       robolectric               : "org.robolectric:robolectric:${version.robolectric}",
       mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
       json                      : "org.json:json:${version.json}",
-      androidxTestCore          : "androidx.test:core:${version.androidxTest}",
+      androidxTestCore          : "androidx.test:core:${version.androidxTestCore}",
+      equalsVerifier            : "nl.jqno.equalsverifier:equalsverifier:${version.equalsVerifier}",
+      toStringVerifier          : "com.jparams:to-string-verifier:${version.toStringVerifier}",
 
       // play services
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",
@@ -182,8 +189,8 @@ ext {
   pluginVersion = [
       checkstyle           : '8.2',
       pmd                  : '5.8.1',
-      gradle               : '7.2.2',
-      dependencyGraph      : '0.5.0',
+      gradle               : '7.4.2',
+      dependencyGraph      : '0.8.0',
       dependencyUpdates    : '0.29.0',
       kotlin               : kotlinVersion,
       license              : '0.8.80',

@@ -12,19 +12,19 @@ object MapboxRouteOptionsUpdateCommonTest {
         assertEquals(
             "Check Alternatives",
             routeOptions.alternatives(),
-            updated.alternatives()
+            updated.alternatives(),
         )
         assertEquals("Check Steps", routeOptions.steps(), updated.steps())
         assertEquals(
             "Check BannerInstructions",
             routeOptions.bannerInstructions(),
-            updated.bannerInstructions()
+            updated.bannerInstructions(),
         )
         assertEquals("Check Base URL", routeOptions.baseUrl(), updated.baseUrl())
         assertEquals(
             "Check Continue Straight",
             routeOptions.continueStraight(),
-            updated.continueStraight()
+            updated.continueStraight(),
         )
         assertEquals("Check Exclude", routeOptions.exclude(), updated.exclude())
         assertEquals("Check Language", routeOptions.language(), updated.language())
@@ -33,27 +33,27 @@ object MapboxRouteOptionsUpdateCommonTest {
         assertEquals(
             "Check Roundabout Exits",
             routeOptions.roundaboutExits(),
-            updated.roundaboutExits()
+            updated.roundaboutExits(),
         )
         assertEquals(
             "Check alleyBias",
             routeOptions.alleyBias(),
-            updated.alleyBias()
+            updated.alleyBias(),
         )
         assertEquals(
             "Check walkingSpeed",
             routeOptions.walkingSpeed(),
-            updated.walkingSpeed()
+            updated.walkingSpeed(),
         )
         assertEquals(
             "Check walkwayBias",
             routeOptions.walkwayBias(),
-            updated.walkwayBias()
+            updated.walkwayBias(),
         )
         assertEquals(
             "Check Voice Instructions",
             routeOptions.voiceInstructions(),
-            updated.voiceInstructions()
+            updated.voiceInstructions(),
         )
     }
 }

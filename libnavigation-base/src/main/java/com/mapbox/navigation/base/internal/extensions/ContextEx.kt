@@ -29,3 +29,16 @@ fun Context.inferDeviceLocale(): Locale =
     } else {
         this.resources.configuration.locale
     }
+
+/**
+ * Returns an ordered list of user preferences for locales.
+ *
+ * @return user preferences for locales
+ */
+fun Context.inferDeviceLocales(): List<Locale> =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        val locales = this.resources.configuration.locales
+        (0 until locales.size()).map { locales[it] }
+    } else {
+        listOf(this.resources.configuration.locale)
+    }

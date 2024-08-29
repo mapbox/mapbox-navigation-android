@@ -6,15 +6,14 @@ import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.bannerInstructions
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.voiceInstructions
 import com.mapbox.navigation.testing.ui.utils.coroutines.withLogOnTimeout
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -36,18 +35,21 @@ class BannerAndVoiceInstructionsTest : BaseTest<EmptyTestActivity>(EmptyTestActi
 
     @Test
     fun departure_banner_and_voice_instructions() = sdkTest {
-        val testRoutes = testRoute().toNavigationRoutes()
         val mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
                 .historyRecorderOptions(
                     HistoryRecorderOptions.Builder()
-                        .build()
+                        .build(),
                 )
-                .build()
+                .build(),
         )
         mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
         mapboxNavigation.historyRecorder.startRecording()
+
+        val testRoutes = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            testRoute(),
+        )
 
         val bannerInstructionDeferred = async { mapboxNavigation.bannerInstructions().first() }
         val voiceInstructionDeferred = async { mapboxNavigation.voiceInstructions().first() }
@@ -65,7 +67,7 @@ class BannerAndVoiceInstructionsTest : BaseTest<EmptyTestActivity>(EmptyTestActi
         assertEquals(
             "Drive north on 14th Street Northwest. " +
                 "Then Turn right onto Pennsylvania Avenue Northwest.",
-            voiceInstruction.announcement()
+            voiceInstruction.announcement(),
         )
     }
 

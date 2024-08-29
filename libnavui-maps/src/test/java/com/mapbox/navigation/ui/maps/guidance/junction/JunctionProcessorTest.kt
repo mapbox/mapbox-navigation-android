@@ -3,17 +3,21 @@ package com.mapbox.navigation.ui.maps.guidance.junction
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
+import com.mapbox.navigation.base.internal.utils.toByteArray
+import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxRasterToBitmapParser
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Date
 
@@ -240,7 +244,7 @@ class JunctionProcessorTest {
         val action = JunctionAction.ProcessJunctionResponse(response)
         val expected = JunctionResult.JunctionRaster.Failure(
             "Your token cannot access this " +
-                "resource, contact support"
+                "resource, contact support",
         )
 
         val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Failure
@@ -289,22 +293,24 @@ class JunctionProcessorTest {
         )
         val response: Expected<ResourceLoadError, ResourceLoadResult> =
             ExpectedFactory.createValue(loadResult)
-        val expected = JunctionResult.JunctionRaster.Success(blob)
+        val expected = JunctionResult.JunctionRaster.Success(blob.toDataRef())
         val action = JunctionAction.ProcessJunctionResponse(response)
 
         val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Success
 
-        assertEquals(expected.data, result.data)
+        val actualBytes = result.dataRef.toByteArray()
+        val expectedBytes = expected.dataRef.toByteArray()
+        assertTrue(expectedBytes.contentEquals(actualBytes))
     }
 
     @Test
     fun `process action junction process raster to bitmap failure`() {
         mockkStatic(MapboxRasterToBitmapParser::class) {
-            val mockData = byteArrayOf()
+            val mockData = byteArrayOf().toDataRef()
             val action = JunctionAction.ParseRasterToBitmap(mockData)
-            every { MapboxRasterToBitmapParser.parse(any()) } returns
+            every { MapboxRasterToBitmapParser.parse(mockData) } returns
                 ExpectedFactory.createError(
-                    "Error parsing raster to bitmap as raster is empty"
+                    "Error parsing raster to bitmap as raster is empty",
                 )
 
             val result = JunctionProcessor.process(action) as JunctionResult.JunctionBitmap.Failure
@@ -340,7 +346,7 @@ class JunctionProcessorTest {
     }
 
     private fun resourceData(blob: ByteArray) = object : ResourceData(0) {
-        override fun getData(): ByteArray = blob
+        override fun getData(): DataRef = blob.toDataRef()
     }
 
     private fun resourceLoadResult(
@@ -351,7 +357,9 @@ class JunctionProcessorTest {
         expires: Date = Date(),
         totalBytes: Long = 0,
         transferredBytes: Long = 0,
-        contentType: String = "image/png"
+        contentType: String = "image/png",
+        etag: String = "",
+        belongsToGroup: Boolean = false,
     ): ResourceLoadResult {
         return ResourceLoadResult(
             data,
@@ -361,7 +369,9 @@ class JunctionProcessorTest {
             expires,
             totalBytes,
             transferredBytes,
-            contentType
+            contentType,
+            etag,
+            belongsToGroup,
         )
     }
 }

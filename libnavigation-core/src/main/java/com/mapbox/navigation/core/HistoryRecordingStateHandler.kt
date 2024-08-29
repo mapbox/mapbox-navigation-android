@@ -101,12 +101,12 @@ internal class HistoryRecordingStateHandler : TripSessionStateObserver {
     private fun updateStateAndNotifyObservers(
         finishRecordingBlock: (
             HistoryRecordingStateChangeObserver,
-            HistoryRecordingSessionState
-        ) -> Unit
+            HistoryRecordingSessionState,
+        ) -> Unit,
     ) {
         val newState = NavigationSessionUtils.getNewHistoryRecordingSessionState(
             isDriving,
-            hasRoutes
+            hasRoutes,
         )
         if (newState::class != currentState::class) {
             val oldState = currentState

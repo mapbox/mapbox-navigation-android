@@ -78,7 +78,7 @@ abstract class SensorData internal constructor() {
                 RAIN,
                 SNOW,
                 FOG,
-                WET_ROAD
+                WET_ROAD,
             )
             annotation class Type
 

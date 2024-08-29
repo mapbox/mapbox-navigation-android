@@ -2,12 +2,14 @@ package com.mapbox.navigation.ui.maps.puck
 
 import android.content.Context
 import androidx.core.content.ContextCompat
+import com.mapbox.maps.ImageHolder
 import com.mapbox.maps.plugin.LocationPuck
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.puck.LocationPuckOptions.Builder
+import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.ui.utils.internal.extensions.withBlurEffect
 
 /**
@@ -32,7 +34,7 @@ class LocationPuckOptions private constructor(
     val routePreviewPuck: LocationPuck,
     val activeNavigationPuck: LocationPuck,
     val arrivalPuck: LocationPuck,
-    val idlePuck: LocationPuck
+    val idlePuck: LocationPuck,
 ) {
 
     /**
@@ -110,7 +112,7 @@ class LocationPuckOptions private constructor(
 
         init {
             val navigationPuck = navigationPuck(context)
-            val regularPuck = regularPuck(context)
+            val regularPuck = regularPuck()
 
             freeDrivePuck = navigationPuck
             destinationPreviewPuck = navigationPuck
@@ -202,7 +204,7 @@ class LocationPuckOptions private constructor(
                 routePreviewPuck,
                 activeNavigationPuck,
                 arrivalPuck,
-                idlePuck
+                idlePuck,
             )
         }
 
@@ -211,33 +213,30 @@ class LocationPuckOptions private constructor(
              * Provides access to [LocationPuck2D] more suited for the [NavigationCameraState.FOLLOWING].
              */
             fun navigationPuck(context: Context): LocationPuck = LocationPuck2D(
-                bearingImage = ContextCompat.getDrawable(
-                    context,
-                    R.drawable.mapbox_navigation_puck_icon2,
-                ),
+                bearingImage = ImageHolder.from(R.drawable.mapbox_navigation_puck_icon2),
                 shadowImage = ContextCompat.getDrawable(
                     context,
                     R.drawable.mapbox_navigation_puck_icon2_shadow,
-                )?.withBlurEffect(context, 7.5f)
+                )
+                    ?.withBlurEffect(context, 7.5f)
+                    ?.getBitmap()
+                    ?.let { ImageHolder.from(it) },
             )
 
             /**
              * Provides access to [LocationPuck2D] more suited for the [NavigationCameraState.IDLE]
              * and [NavigationCameraState.OVERVIEW].
              */
-            fun regularPuck(context: Context): LocationPuck = LocationPuck2D(
-                topImage = ContextCompat.getDrawable(
-                    context,
-                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_icon
+            fun regularPuck(): LocationPuck = LocationPuck2D(
+                topImage = ImageHolder.from(
+                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_icon,
                 ),
-                bearingImage = ContextCompat.getDrawable(
-                    context,
-                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_bearing_icon
+                bearingImage = ImageHolder.from(
+                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_bearing_icon,
                 ),
-                shadowImage = ContextCompat.getDrawable(
-                    context,
-                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_stroke_icon
-                )
+                shadowImage = ImageHolder.from(
+                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_stroke_icon,
+                ),
             )
         }
     }

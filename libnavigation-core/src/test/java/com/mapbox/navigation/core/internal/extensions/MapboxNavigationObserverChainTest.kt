@@ -24,7 +24,7 @@ class MapboxNavigationObserverChainTest {
         val observers = arrayOf(
             TestMapboxNavigationObserver(),
             TestMapboxNavigationObserver(),
-            TestMapboxNavigationObserver()
+            TestMapboxNavigationObserver(),
         )
         sut.addAll(*observers)
 
@@ -41,7 +41,7 @@ class MapboxNavigationObserverChainTest {
         val observers = arrayOf(
             TestMapboxNavigationObserver(),
             TestMapboxNavigationObserver(),
-            TestMapboxNavigationObserver()
+            TestMapboxNavigationObserver(),
         )
         sut.addAll(*observers)
         sut.onAttached(mapboxNavigation)
@@ -60,7 +60,7 @@ class MapboxNavigationObserverChainTest {
         val observers = arrayOf(
             firstObserver,
             TestMapboxNavigationObserver(),
-            TestMapboxNavigationObserver()
+            TestMapboxNavigationObserver(),
         )
         sut.addAll(*observers)
         sut.onAttached(mapboxNavigation)
@@ -85,7 +85,7 @@ class MapboxNavigationObserverChainTest {
         val observers = arrayOf(
             TestMapboxNavigationObserver(),
             selfRemovingObserver,
-            TestMapboxNavigationObserver()
+            TestMapboxNavigationObserver(),
         )
         sut.addAll(*observers)
         sut.onAttached(mapboxNavigation)

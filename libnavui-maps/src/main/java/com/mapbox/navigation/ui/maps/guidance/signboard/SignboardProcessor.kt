@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
@@ -11,6 +12,7 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOpt
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.utils.internal.isNotEmpty
 
 internal object SignboardProcessor {
 
@@ -43,7 +45,7 @@ internal object SignboardProcessor {
     }
 
     private fun getSignboardUrl(
-        bannerInstructions: BannerInstructions
+        bannerInstructions: BannerInstructions,
     ): String? {
         val bannerComponents = bannerInstructions.getBannerComponents()
         return when {
@@ -57,7 +59,7 @@ internal object SignboardProcessor {
     }
 
     private fun findSignboardComponent(
-        componentList: MutableList<BannerComponents>
+        componentList: MutableList<BannerComponents>,
     ): String? {
         val component = componentList.find {
             it.type() == BannerComponents.GUIDANCE_VIEW &&
@@ -72,7 +74,7 @@ internal object SignboardProcessor {
     }
 
     private fun processResponse(
-        response: Expected<ResourceLoadError, ResourceLoadResult>
+        response: Expected<ResourceLoadError, ResourceLoadResult>,
     ): SignboardResult {
         return response.fold(
             { error ->
@@ -81,17 +83,17 @@ internal object SignboardProcessor {
             { responseData ->
                 when (responseData.status) {
                     ResourceLoadStatus.AVAILABLE -> {
-                        val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
-                        if (blob.isEmpty()) {
-                            SignboardResult.SignboardSvg.Empty
+                        val dataRef = responseData.data?.data
+                        if (dataRef?.isNotEmpty() == true) {
+                            SignboardResult.SignboardSvg.Success(dataRef)
                         } else {
-                            SignboardResult.SignboardSvg.Success(blob)
+                            SignboardResult.SignboardSvg.Empty
                         }
                     }
                     ResourceLoadStatus.UNAUTHORIZED -> {
                         SignboardResult.SignboardSvg.Failure(
                             "Your token cannot access this " +
-                                "resource, contact support"
+                                "resource, contact support",
                         )
                     }
                     ResourceLoadStatus.NOT_FOUND -> {
@@ -101,22 +103,22 @@ internal object SignboardProcessor {
                         SignboardResult.SignboardSvg.Failure("Unknown error")
                     }
                 }
-            }
+            },
         )
     }
 
     private fun processSvg(
-        svg: ByteArray,
+        svg: DataRef,
         parser: SvgToBitmapParser,
-        options: MapboxSignboardOptions
+        options: MapboxSignboardOptions,
     ): SignboardResult {
-        return parser.parse(svg, options).fold(
+        return parser.parse(svg.buffer, options).fold(
             { error ->
                 SignboardResult.SignboardBitmap.Failure(error)
             },
             { value ->
                 SignboardResult.SignboardBitmap.Success(value)
-            }
+            },
         )
     }
 }

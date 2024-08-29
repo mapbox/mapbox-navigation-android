@@ -1,0 +1,75 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="CarAppTheme">
+        <item name="carColorPrimary">#56a8fb</item>
+        <item name="carColorPrimaryDark">#0077c2</item>
+        <item name="carColorSecondary">#ef5350</item>
+        <item name="carColorSecondaryDark">#b61827</item>
+    </style>
+
+    <style name="CarManeuverTheme" parent="CarAppTheme">
+        <item name="maneuverTurnIconColor">@android:color/white</item>
+        <item name="maneuverTurnIconShadowColor">#FF9E9E9E</item>
+    </style>
+
+    <style name="CarLaneActiveTheme" parent="CarAppTheme">
+        <item name="maneuverTurnIconColor">@android:color/white</item>
+        <item name="maneuverTurnIconShadowColor">#FF9E9E9E</item>
+    </style>
+
+    <style name="CarLaneNotActiveTheme" parent="CarAppTheme">
+<!--
+        https://github.com/mapbox/mapbox-navigation-android/pull/4928
+        These colors can be updated with a new release of 2.0.0-rc
+-->
+        <item name="maneuverTurnIconColor">#FF9E9E9E</item>
+        <item name="maneuverTurnIconShadowColor">#FF9E9E9E</item>
+    </style>
+
+    <!--  Styles that's need to support backward compatibility, waiting for https://mapbox.atlassian.net/browse/NAVAND-1830  -->
+    <style name="MapboxStylePrimaryManeuver">
+        <item name="android:textColor">@color/mapbox_primary_maneuver_text_color</item>
+        <item name="android:textSize">30sp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="MapboxStyleExitTextForPrimary">
+        <item name="android:textSize">30sp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mapbox_exit_text_color</item>
+    </style>
+
+    <style name="MapboxStyleSecondaryManeuver">
+        <item name="android:textColor">@color/mapbox_secondary_maneuver_text_color</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="MapboxStyleExitTextForSecondary">
+        <item name="android:textSize">24sp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mapbox_exit_text_color</item>
+    </style>
+
+    <style name="MapboxStyleSubManeuver">
+        <item name="android:textColor">@color/mapbox_sub_maneuver_text_color</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+
+    <style name="MapboxStyleExitTextForSub">
+        <item name="android:textSize">18sp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mapbox_exit_text_color</item>
+    </style>
+</resources>

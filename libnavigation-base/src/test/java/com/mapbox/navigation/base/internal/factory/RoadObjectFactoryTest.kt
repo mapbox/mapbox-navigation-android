@@ -69,7 +69,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -88,12 +88,12 @@ class RoadObjectFactoryTest {
             ID,
             CountryBorderCrossingInfo(
                 CountryBorderCrossingAdminInfo(USA_CODE_2, USA_CODE_3),
-                CountryBorderCrossingAdminInfo(CANADA_CODE_2, CANADA_CODE_3)
+                CountryBorderCrossingAdminInfo(CANADA_CODE_2, CANADA_CODE_3),
             ),
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -115,7 +115,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as TollCollection
 
@@ -137,7 +137,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as TollCollection
@@ -161,14 +161,14 @@ class RoadObjectFactoryTest {
                 SDKAmenity(
                     type = SDKAmenityType.ATM,
                     name = amenityATM.name,
-                    brand = amenityATM.brand
-                )
+                    brand = amenityATM.brand,
+                ),
             ),
             guideMapUri = "some_uri",
             length = LENGTH,
             provider = SDKRoadObjectProvider.MAPBOX,
             isUrban = false,
-            nativeRoadObject = nativeObject
+            nativeRoadObject = nativeObject,
         )
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as RestStop
 
@@ -192,14 +192,14 @@ class RoadObjectFactoryTest {
                 SDKAmenity(
                     type = SDKAmenityType.ATM,
                     name = amenityATM.name,
-                    brand = amenityATM.brand
-                )
+                    brand = amenityATM.brand,
+                ),
             ),
             guideMapUri = "some_uri",
             length = LENGTH,
             provider = SDKRoadObjectProvider.MAPBOX,
             isUrban = false,
-            nativeRoadObject = nativeObject
+            nativeRoadObject = nativeObject,
         )
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject) as RestStop
 
@@ -220,7 +220,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -264,19 +264,19 @@ class RoadObjectFactoryTest {
                 mapOf(
                     "en" to listOf(
                         INCIDENT_AFFECTED_ROAD_NAME_EN1,
-                        INCIDENT_AFFECTED_ROAD_NAME_EN2
+                        INCIDENT_AFFECTED_ROAD_NAME_EN2,
                     ),
                     "ja" to listOf(
                         INCIDENT_AFFECTED_ROAD_NAME_JA1,
-                        INCIDENT_AFFECTED_ROAD_NAME_JA2
+                        INCIDENT_AFFECTED_ROAD_NAME_JA2,
                     ),
                 ),
-                INCIDENT_LENGTH
+                INCIDENT_LENGTH,
             ),
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -301,7 +301,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -322,7 +322,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -343,7 +343,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -364,7 +364,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -384,7 +384,7 @@ class RoadObjectFactoryTest {
             LENGTH,
             SDKRoadObjectProvider.MAPBOX,
             false,
-            nativeObject
+            nativeObject,
         )
 
         val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
@@ -442,25 +442,25 @@ class RoadObjectFactoryTest {
                 createRoadObject(
                     type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
                     location = matchedRoadObjectLocation(location.shape),
-                    id = "0"
+                    id = "0",
                 ),
-                5.0
+                5.0,
             ),
             UpcomingRouteAlert(
                 createRoadObject(
                     type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
                     location = matchedRoadObjectLocation(location.shape),
-                    id = "1"
+                    id = "1",
                 ),
-                9.0
+                9.0,
             ),
             UpcomingRouteAlert(
                 createRoadObject(
                     type = com.mapbox.navigator.RoadObjectType.RESTRICTED_AREA,
                     location = matchedRoadObjectLocation(location.shape),
-                    id = "2"
+                    id = "2",
                 ),
-                10.0
+                10.0,
             ),
         )
         val secondUpdate: List<UpcomingRouteAlertUpdate> = listOf(
@@ -479,9 +479,11 @@ class RoadObjectFactoryTest {
     }
 
     private fun matchedRoadObjectLocation(geometry: Geometry): MatchedRoadObjectLocation {
-        return MatchedRoadObjectLocation.valueOf(object : RouteAlertLocation(1) {
-            override fun getShape(): Geometry = geometry
-        })
+        return MatchedRoadObjectLocation.valueOf(
+            object : RouteAlertLocation(1) {
+                override fun getShape(): Geometry = geometry
+            },
+        )
     }
 
     private val incident = createRoadObject(
@@ -516,20 +518,20 @@ class RoadObjectFactoryTest {
             hashMapOf(
                 "en" to listOf(INCIDENT_AFFECTED_ROAD_NAME_EN1, INCIDENT_AFFECTED_ROAD_NAME_EN2),
                 "ja" to listOf(INCIDENT_AFFECTED_ROAD_NAME_JA1, INCIDENT_AFFECTED_ROAD_NAME_JA2),
-            )
-        )
+            ),
+        ),
     )
 
     private val tunnel = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TUNNEL,
         location = matchedRoadObjectLocation(location.shape),
-        tunnelInfo = com.mapbox.navigator.TunnelInfo("id#0", TUNNEL_NAME)
+        tunnelInfo = com.mapbox.navigator.TunnelInfo("id#0", TUNNEL_NAME),
     )
 
     private val railwayCrossing = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.RAILWAY_CROSSING,
         location = matchedRoadObjectLocation(location.shape),
-        railwayCrossingInfo = com.mapbox.navigator.RailwayCrossingInfo("id#1")
+        railwayCrossingInfo = com.mapbox.navigator.RailwayCrossingInfo("id#1"),
     )
 
     private val mergingAreaLeft = createRoadObject(
@@ -537,8 +539,8 @@ class RoadObjectFactoryTest {
         location = matchedRoadObjectLocation(location.shape),
         mergingAreaInfo = com.mapbox.navigator.MergingAreaInfo(
             "id#0",
-            com.mapbox.navigator.MergingAreaType.FROM_LEFT
-        )
+            com.mapbox.navigator.MergingAreaType.FROM_LEFT,
+        ),
     )
 
     private val mergingAreaRight = createRoadObject(
@@ -546,8 +548,8 @@ class RoadObjectFactoryTest {
         location = matchedRoadObjectLocation(location.shape),
         mergingAreaInfo = com.mapbox.navigator.MergingAreaInfo(
             "id#0",
-            com.mapbox.navigator.MergingAreaType.FROM_RIGHT
-        )
+            com.mapbox.navigator.MergingAreaType.FROM_RIGHT,
+        ),
     )
 
     private val mergingAreaBothSides = createRoadObject(
@@ -555,20 +557,20 @@ class RoadObjectFactoryTest {
         location = matchedRoadObjectLocation(location.shape),
         mergingAreaInfo = com.mapbox.navigator.MergingAreaInfo(
             "id#0",
-            com.mapbox.navigator.MergingAreaType.FROM_BOTH
-        )
+            com.mapbox.navigator.MergingAreaType.FROM_BOTH,
+        ),
     )
 
     private val ic = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.IC,
         location = matchedRoadObjectLocation(location.shape),
-        icInfo = com.mapbox.navigator.IcInfo("id#2", listOf(LocalizedString("en", "name")))
+        icInfo = com.mapbox.navigator.IcInfo("id#2", listOf(LocalizedString("en", "name"))),
     )
 
     private val jct = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.JCT,
         location = matchedRoadObjectLocation(location.shape),
-        jctInfo = com.mapbox.navigator.JctInfo("id#3", listOf(LocalizedString("it", "nome")))
+        jctInfo = com.mapbox.navigator.JctInfo("id#3", listOf(LocalizedString("it", "nome"))),
     )
 
     private val countryBorderCrossing = createRoadObject(
@@ -577,8 +579,8 @@ class RoadObjectFactoryTest {
         countryBorderCrossingInfo = com.mapbox.navigator.BorderCrossingInfo(
             "id#4",
             com.mapbox.navigator.AdminInfo(USA_CODE_3, USA_CODE_2),
-            com.mapbox.navigator.AdminInfo(CANADA_CODE_3, CANADA_CODE_2)
-        )
+            com.mapbox.navigator.AdminInfo(CANADA_CODE_3, CANADA_CODE_2),
+        ),
     )
 
     private val tollCollectionGantry = createRoadObject(
@@ -587,8 +589,8 @@ class RoadObjectFactoryTest {
         tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
             "id#5",
             com.mapbox.navigator.TollCollectionType.TOLL_GANTRY,
-            "toll_name_1"
-        )
+            "toll_name_1",
+        ),
     )
 
     private val tollCollectionBooth = createRoadObject(
@@ -598,13 +600,13 @@ class RoadObjectFactoryTest {
             "id#6",
             com.mapbox.navigator.TollCollectionType.TOLL_BOOTH,
             "toll_name_2",
-        )
+        ),
     )
 
     private val amenityATM = Amenity(
         com.mapbox.navigator.AmenityType.ATM,
         "amenity_ATM",
-        "brand_ATM"
+        "brand_ATM",
     )
 
     private val restStopRest = createRoadObject(
@@ -616,7 +618,7 @@ class RoadObjectFactoryTest {
             "rest_stop_name",
             listOf(amenityATM),
             "some_uri",
-        )
+        ),
     )
 
     private val restStopService = createRoadObject(
@@ -628,7 +630,7 @@ class RoadObjectFactoryTest {
             "rest_area_name",
             listOf(amenityATM),
             "some_uri",
-        )
+        ),
     )
 
     private val restrictedArea = createRoadObject(
@@ -638,7 +640,7 @@ class RoadObjectFactoryTest {
 
     private val notification = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.NOTIFICATION,
-        location = matchedRoadObjectLocation(location.shape)
+        location = matchedRoadObjectLocation(location.shape),
     )
 
     private fun createRoadObject(
@@ -653,7 +655,7 @@ class RoadObjectFactoryTest {
         icInfo: com.mapbox.navigator.IcInfo? = null,
         jctInfo: com.mapbox.navigator.JctInfo? = null,
         mergingAreaInfo: com.mapbox.navigator.MergingAreaInfo? = null,
-        id: String = ID
+        id: String = ID,
     ): RoadObject {
         val metadata = when (type) {
             com.mapbox.navigator.RoadObjectType.INCIDENT ->

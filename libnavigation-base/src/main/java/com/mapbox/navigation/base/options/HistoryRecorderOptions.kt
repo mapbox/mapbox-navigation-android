@@ -6,7 +6,7 @@ package com.mapbox.navigation.base.options
  * @param fileDirectory used for saving history files. Null use a default directory.
  */
 class HistoryRecorderOptions private constructor(
-    val fileDirectory: String?
+    val fileDirectory: String?,
 ) {
     /**
      * @return the builder that created the [HistoryRecorderOptions]
@@ -63,7 +63,7 @@ class HistoryRecorderOptions private constructor(
          */
         fun build(): HistoryRecorderOptions {
             return HistoryRecorderOptions(
-                fileDirectory = fileDirectory
+                fileDirectory = fileDirectory,
             )
         }
     }

@@ -61,7 +61,7 @@ class AdasValueOnEdge private constructor(
             AdasValueOnEdge(
                 shapeIndex = nativeObj.shapeIndex,
                 percentAlong = nativeObj.percentAlong,
-                value = nativeObj.value
+                value = nativeObj.value,
             )
     }
 }

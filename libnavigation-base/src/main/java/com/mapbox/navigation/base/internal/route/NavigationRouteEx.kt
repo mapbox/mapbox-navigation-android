@@ -2,7 +2,6 @@
 
 package com.mapbox.navigation.base.internal.route
 
-import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
@@ -14,8 +13,7 @@ import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.SDKRouteParser
+import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.toNavigationRoute
@@ -29,26 +27,6 @@ import com.mapbox.navigator.RouterOrigin
 private const val ROUTE_REFRESH_LOG_CATEGORY = "RouteRefresh"
 
 val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
-
-/**
- * Convert [DirectionsRoute] to [NavigationRoute] without
- * looking the corresponding object up in [RouteCompatibilityCache].
- */
-@VisibleForTesting(otherwise = VisibleForTesting.NONE)
-fun DirectionsRoute.toTestNavigationRoute(
-    routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
-    sdkRouteParser: SDKRouteParser = SDKRouteParser.default,
-): NavigationRoute = toNavigationRoute(sdkRouteParser, routerOrigin, false)
-
-/**
- * Convert list of [DirectionsRoute]s to list of [NavigationRoute]s without
- * looking the corresponding object up in [RouteCompatibilityCache].
- */
-@VisibleForTesting(otherwise = VisibleForTesting.NONE)
-fun List<DirectionsRoute>.toTestNavigationRoutes(
-    routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
-    sdkRouteParser: SDKRouteParser = SDKRouteParser.default,
-) = map { it.toTestNavigationRoute(routerOrigin, sdkRouteParser) }
 
 /**
  * Internal handle for the route's native peer.
@@ -71,6 +49,33 @@ fun NavigationRoute.refreshRoute(
     responseTimeElapsedSeconds: Long,
     refreshTtl: Int?,
 ): NavigationRoute {
+    return refreshRoute(
+        initialLegIndex,
+        currentLegGeometryIndex,
+        legAnnotations,
+        incidents,
+        closures,
+        waypoints,
+        responseTimeElapsedSeconds,
+        refreshTtl,
+        IncidentsRefresher(),
+        ClosuresRefresher(),
+    )
+}
+
+@WorkerThread
+internal fun NavigationRoute.refreshRoute(
+    initialLegIndex: Int,
+    currentLegGeometryIndex: Int?,
+    legAnnotations: List<LegAnnotation?>?,
+    incidents: List<List<Incident>?>?,
+    closures: List<List<Closure>?>?,
+    waypoints: List<DirectionsWaypoint?>?,
+    responseTimeElapsedSeconds: Long,
+    refreshTtl: Int?,
+    incidentsRefresher: IncidentsRefresher,
+    closuresRefresher: ClosuresRefresher,
+): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
         if (index < initialLegIndex) {
             routeLeg
@@ -82,38 +87,39 @@ fun NavigationRoute.refreshRoute(
                 } else {
                     0
                 }
+            val lastLegRefreshIndex = try {
+                startingLegGeometryIndex + newAnnotation.size() - 1
+            } catch (ex: IllegalArgumentException) {
+                // refresh is only possible if annotations are requested, so this is not expected to happen
+                logE(ROUTE_REFRESH_LOG_CATEGORY) {
+                    ex.message ?: "Unknown error"
+                }
+                startingLegGeometryIndex
+            }
             val mergedAnnotation = AnnotationsRefresher.getRefreshedAnnotations(
                 routeLeg.annotation(),
                 newAnnotation,
-                startingLegGeometryIndex
+                startingLegGeometryIndex,
+                this.overriddenTraffic?.takeIf { it.legIndex == index }?.startIndex,
+                this.overriddenTraffic?.takeIf { it.legIndex == index }?.length,
+            )
+            val mergedIncidents = incidentsRefresher.getRefreshedRoadObjects(
+                routeLeg.incidents(),
+                incidents?.getOrNull(index),
+                startingLegGeometryIndex,
+                lastLegRefreshIndex,
+            )
+            val mergedClosures = closuresRefresher.getRefreshedRoadObjects(
+                routeLeg.closures(),
+                closures?.getOrNull(index),
+                startingLegGeometryIndex,
+                lastLegRefreshIndex,
             )
             routeLeg.toBuilder()
                 .duration(mergedAnnotation?.duration()?.sumOf { it } ?: routeLeg.duration())
                 .annotation(mergedAnnotation)
-                .incidents(
-                    incidents?.getOrNull(index)?.map {
-                        it.toBuilder()
-                            .geometryIndexStart(
-                                adjustedIndex(startingLegGeometryIndex, it.geometryIndexStart())
-                            )
-                            .geometryIndexEnd(
-                                adjustedIndex(startingLegGeometryIndex, it.geometryIndexEnd())
-                            )
-                            .build()
-                    }
-                )
-                .closures(
-                    closures?.getOrNull(index)?.map {
-                        it.toBuilder()
-                            .geometryIndexStart(
-                                adjustedIndex(startingLegGeometryIndex, it.geometryIndexStart())
-                            )
-                            .geometryIndexEnd(
-                                adjustedIndex(startingLegGeometryIndex, it.geometryIndexEnd())
-                            )
-                            .build()
-                    }
-                )
+                .incidents(mergedIncidents)
+                .closures(mergedClosures)
                 .steps(routeLeg.steps()?.updateSteps(directionsRoute, mergedAnnotation))
                 .build()
         }
@@ -124,25 +130,29 @@ fun NavigationRoute.refreshRoute(
             .waypoints(buildNewWaypoints(this.waypoints(), waypoints))
             .updateRouteDurationBasedOnLegsDurationAndChargeTime(
                 updateLegs = updateLegs,
-                waypoints = buildNewWaypoints(this@refreshRoute.waypoints, waypoints)
+                waypoints = buildNewWaypoints(this@refreshRoute.waypoints, waypoints),
             )
             .updateRefreshTtl(this.unrecognizedJsonProperties, refreshTtl)
             .build()
     }
-    val directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder = {
-        waypoints(buildNewWaypoints(directionsResponse.waypoints(), waypoints))
+    val waypointsBlock: List<DirectionsWaypoint>?.() -> List<DirectionsWaypoint>? = {
+        buildNewWaypoints(this, waypoints)
     }
     val newExpirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds)
     return update(
         directionsRouteBlock,
-        directionsResponseBlock,
-        newExpirationTimeElapsedSeconds ?: expirationTimeElapsedSeconds
+        waypointsBlock,
+        newExpirationTimeElapsedSeconds ?: expirationTimeElapsedSeconds,
     )
 }
 
+val NavigationRoute.routeOptions get() = this.routeOptions
+
+val NavigationRoute.overriddenTraffic get() = this.overriddenTraffic
+
 private fun DirectionsRoute.Builder.updateRefreshTtl(
     oldUnrecognizedProperties: Map<String, JsonElement>?,
-    newRefreshTtl: Int?
+    newRefreshTtl: Int?,
 ): DirectionsRoute.Builder {
     return if (newRefreshTtl == null) {
         if (oldUnrecognizedProperties.isNullOrEmpty()) {
@@ -151,20 +161,16 @@ private fun DirectionsRoute.Builder.updateRefreshTtl(
             unrecognizedJsonProperties(
                 oldUnrecognizedProperties.toMutableMap().also {
                     it.remove(Constants.RouteResponse.KEY_REFRESH_TTL)
-                }
+                },
             )
         }
     } else {
         unrecognizedJsonProperties(
             oldUnrecognizedProperties.orEmpty().toMutableMap().also {
                 it[Constants.RouteResponse.KEY_REFRESH_TTL] = JsonPrimitive(newRefreshTtl)
-            }
+            },
         )
     }
-}
-
-private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {
-    return offsetIndex + (originalIndex ?: 0)
 }
 
 /**
@@ -173,14 +179,16 @@ private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int {
  */
 fun NavigationRoute.update(
     directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute,
-    directionsResponseBlock: DirectionsResponse.Builder.() -> DirectionsResponse.Builder,
+    waypointsBlock: List<DirectionsWaypoint>?.() -> List<DirectionsWaypoint>?,
     newExpirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
+    overriddenTraffic: CongestionNumericOverride? = this.overriddenTraffic,
 ): NavigationRoute {
     val refreshedRoute = directionsRoute.directionsRouteBlock()
     return copy(
         directionsRoute = refreshedRoute,
-        directionsResponse = directionsResponse.toBuilder().directionsResponseBlock().build(),
-        expirationTimeElapsedSeconds = newExpirationTimeElapsedSeconds
+        waypoints = waypoints.waypointsBlock(),
+        expirationTimeElapsedSeconds = newExpirationTimeElapsedSeconds,
+        overriddenTraffic = overriddenTraffic,
     )
 }
 
@@ -201,55 +209,21 @@ fun NavigationRoute.isExpired(): Boolean {
 fun NavigationRoute.refreshNativePeer(): NavigationRoute = copy()
 
 /**
- * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.
- */
-@VisibleForTesting(otherwise = VisibleForTesting.NONE)
-fun createNavigationRoute(
-    directionsRoute: DirectionsRoute,
-    sdkRouteParser: SDKRouteParser,
-): NavigationRoute =
-    directionsRoute.toTestNavigationRoute(
-        com.mapbox.navigation.base.route.RouterOrigin.Custom(),
-        sdkRouteParser
-    )
-
-/**
- * Internal API used for testing purposes. Needed to avoid calling native parser from unit tests.
- */
-@VisibleForTesting
-fun createNavigationRoutes(
-    directionsResponse: DirectionsResponse,
-    routeOptions: RouteOptions,
-    routeParser: SDKRouteParser,
-    routerOrigin: com.mapbox.navigation.base.route.RouterOrigin,
-    responseTimeElapsedSeconds: Long?
-): List<NavigationRoute> =
-    NavigationRoute.create(
-        directionsResponse,
-        routeOptions,
-        routeParser,
-        routerOrigin,
-        responseTimeElapsedSeconds
-    )
-
-/**
  * Internal API to create a new [NavigationRoute] from a native peer.
  */
 fun RouteInterface.toNavigationRoute(
     responseTimeElapsedSeconds: Long,
     directionsResponse: DirectionsResponse,
-    optimiseDirectionsResponseStructure: Boolean
 ): NavigationRoute {
     return this.toNavigationRoute(
         responseTimeElapsedSeconds,
         directionsResponse,
-        optimiseDirectionsResponseStructure
     )
 }
 
 private fun List<LegStep>.updateSteps(
     route: DirectionsRoute,
-    mergedAnnotation: LegAnnotation?
+    mergedAnnotation: LegAnnotation?,
 ): List<LegStep> {
     val mergedDurations = mergedAnnotation?.duration() ?: return this
     val result = mutableListOf<LegStep>()
@@ -259,7 +233,7 @@ private fun List<LegStep>.updateSteps(
         if (stepPointsSize < 2) {
             logE(
                 "step at $index has less than 2 points, unable to update duration",
-                ROUTE_REFRESH_LOG_CATEGORY
+                ROUTE_REFRESH_LOG_CATEGORY,
             )
             return this
         }

@@ -5,10 +5,12 @@ import android.graphics.Color
 import android.view.View
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraChangedCallback
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.style.layers.addLayer
@@ -18,7 +20,6 @@ import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
-import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -64,7 +65,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
     private val context: Context,
     private val mapView: MapView,
-    private val layerAbove: String? = null
+    private val layerAbove: String? = null,
 ) {
     private val pointsSourceId = "mbx_viewport_data_source_points_source"
     private val pointsLayerId = "mbx_viewport_data_source_points_layer"
@@ -82,12 +83,12 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
                 mapView.addView(mapPaddingBorder)
                 mapView.addView(userPaddingBorder)
                 mapView.addView(cameraCenter)
-                mapboxMap.addOnCameraChangeListener(cameraChangeListener)
+                cameraChangedSubscription = mapboxMap.subscribeCameraChanged(cameraChangeCallback)
             } else {
                 mapView.removeView(cameraCenter)
                 mapView.removeView(userPaddingBorder)
                 mapView.removeView(mapPaddingBorder)
-                mapboxMap.removeOnCameraChangeListener(cameraChangeListener)
+                cameraChangedSubscription?.cancel()
                 mapboxMap.getStyle()?.removeStyleLayer(pointsLayerId)
                 mapboxMap.getStyle()?.removeStyleSource(pointsSourceId)
             }
@@ -136,18 +137,19 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
     private val cameraCenter = View(context).apply {
         val params = FrameLayout.LayoutParams(
             (6 * context.resources.displayMetrics.density).toInt(),
-            (6 * context.resources.displayMetrics.density).toInt()
+            (6 * context.resources.displayMetrics.density).toInt(),
         )
         layoutParams = params
         setBackgroundColor(Color.RED)
     }
 
-    private val cameraChangeListener = OnCameraChangeListener {
+    private val cameraChangeCallback = CameraChangedCallback {
         mapView.post {
             updateMapCameraCenter()
             updateMapPadding()
         }
     }
+    private var cameraChangedSubscription: Cancelable? = null
 
     private fun updateMapCameraCenter() {
         val center = mapboxMap.pixelForCoordinate(mapboxMap.cameraState.center)
@@ -192,12 +194,14 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
                 return
             }
             NavigationCameraState.TRANSITION_TO_FOLLOWING,
-            NavigationCameraState.FOLLOWING -> {
+            NavigationCameraState.FOLLOWING,
+            -> {
                 userPaddingBorder.visibility = View.VISIBLE
                 followingUserPadding
             }
             NavigationCameraState.TRANSITION_TO_OVERVIEW,
-            NavigationCameraState.OVERVIEW -> {
+            NavigationCameraState.OVERVIEW,
+            -> {
                 userPaddingBorder.visibility = View.VISIBLE
                 overviewUserPadding
             }
@@ -223,11 +227,13 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
                 return
             }
             NavigationCameraState.TRANSITION_TO_FOLLOWING,
-            NavigationCameraState.FOLLOWING -> {
+            NavigationCameraState.FOLLOWING,
+            -> {
                 followingPoints
             }
             NavigationCameraState.TRANSITION_TO_OVERVIEW,
-            NavigationCameraState.OVERVIEW -> {
+            NavigationCameraState.OVERVIEW,
+            -> {
                 overviewPoints
             }
         }

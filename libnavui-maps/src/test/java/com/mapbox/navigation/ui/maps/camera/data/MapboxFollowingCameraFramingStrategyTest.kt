@@ -23,16 +23,16 @@ class MapboxFollowingCameraFramingStrategyTest {
     private val postManeuverFramingPoints = decodeArrays3(
         Gson().fromJson(
             FileUtils.loadJsonFixture("multileg_route_post_maneuver_framing_geometry.json"),
-            List::class.java
+            List::class.java,
         ) as List<List<List<LinkedTreeMap<String, String>>>>,
-        pointAdapter
+        pointAdapter,
     )
     private val averageIntersectionDistancesOnRoute = decodeArrays2(
         Gson().fromJson(
             FileUtils.loadJsonFixture("multileg_route_average_intersection_distances.json"),
-            List::class.java
+            List::class.java,
         ) as List<List<Double>>,
-        doubleAdapter
+        doubleAdapter,
     )
     private val sut = MapboxFollowingCameraFramingStrategy
 
@@ -43,7 +43,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             every { distanceRemaining } returns 93.4f
             every { stepPoints } returns listOf(
                 Point.fromLngLat(-77.157347, 38.783004),
-                Point.fromLngLat(-77.157471, 38.78217)
+                Point.fromLngLat(-77.157471, 38.78217),
             )
             every { stepIndex } returns 0
         }
@@ -53,7 +53,7 @@ class MapboxFollowingCameraFramingStrategyTest {
         }
         val expected: List<Point> = listOf(
             Point.fromLngLat(-77.157347, 38.783004),
-            Point.fromLngLat(-77.157471, 38.78217)
+            Point.fromLngLat(-77.157471, 38.78217),
         )
         val routeProgress: RouteProgress = mockk {
             every { currentLegProgress } returns legProgress
@@ -65,7 +65,7 @@ class MapboxFollowingCameraFramingStrategyTest {
                 intersectionDensityCalculation.enabled = false
                 intersectionDensityCalculation.averageDistanceMultiplier = 7.0
             },
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute
+            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -78,7 +78,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             every { distanceRemaining } returns 23.4f
             every { stepPoints } returns listOf(
                 Point.fromLngLat(-77.157347, 38.783004),
-                Point.fromLngLat(-77.157471, 38.78217)
+                Point.fromLngLat(-77.157471, 38.78217),
             )
             every { stepIndex } returns 0
         }
@@ -88,7 +88,7 @@ class MapboxFollowingCameraFramingStrategyTest {
         }
         val expected: List<Point> = listOf(
             Point.fromLngLat(-77.15743994716026, 38.78237885723322),
-            Point.fromLngLat(-77.157471, 38.78217)
+            Point.fromLngLat(-77.157471, 38.78217),
         )
         val routeProgress: RouteProgress = mockk {
             every { currentLegProgress } returns legProgress
@@ -100,7 +100,7 @@ class MapboxFollowingCameraFramingStrategyTest {
                 intersectionDensityCalculation.enabled = false
                 intersectionDensityCalculation.averageDistanceMultiplier = 7.0
             },
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute
+            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -114,7 +114,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             every { stepPoints } returns listOf(
                 Point.fromLngLat(-77.166911, 38.776967),
                 Point.fromLngLat(-77.168279, 38.777027),
-                Point.fromLngLat(-77.168762, 38.777048)
+                Point.fromLngLat(-77.168762, 38.777048),
             )
             every { stepIndex } returns 1
         }
@@ -125,7 +125,7 @@ class MapboxFollowingCameraFramingStrategyTest {
         val expected: List<Point> = listOf(
             Point.fromLngLat(-77.16760644581015, 38.77699750401471),
             Point.fromLngLat(-77.168279, 38.777027),
-            Point.fromLngLat(-77.168762, 38.777048)
+            Point.fromLngLat(-77.168762, 38.777048),
         )
         val routeProgress: RouteProgress = mockk {
             every { currentLegProgress } returns legProgress
@@ -137,7 +137,7 @@ class MapboxFollowingCameraFramingStrategyTest {
                 intersectionDensityCalculation.enabled = false
                 intersectionDensityCalculation.averageDistanceMultiplier = 7.0
             },
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute
+            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -151,7 +151,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             every { stepPoints } returns listOf(
                 Point.fromLngLat(-77.166911, 38.776967),
                 Point.fromLngLat(-77.168279, 38.777027),
-                Point.fromLngLat(-77.168762, 38.777048)
+                Point.fromLngLat(-77.168762, 38.777048),
             )
             every { stepIndex } returns 1
         }
@@ -162,7 +162,7 @@ class MapboxFollowingCameraFramingStrategyTest {
         val expected: List<Point> = listOf(
             Point.fromLngLat(-77.16760644581015, 38.77699750401471),
             Point.fromLngLat(-77.168279, 38.777027),
-            Point.fromLngLat(-77.16853194636113, 38.77703799791736)
+            Point.fromLngLat(-77.16853194636113, 38.77703799791736),
         )
         val routeProgress: RouteProgress = mockk {
             every { currentLegProgress } returns legProgress
@@ -174,7 +174,7 @@ class MapboxFollowingCameraFramingStrategyTest {
                 intersectionDensityCalculation.enabled = true
                 intersectionDensityCalculation.averageDistanceMultiplier = 0.5
             },
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute
+            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -187,7 +187,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             every { distanceRemaining } returns 0f
             every { stepPoints } returns listOf(
                 Point.fromLngLat(-77.157347, 38.783004),
-                Point.fromLngLat(-77.157471, 38.78217)
+                Point.fromLngLat(-77.157471, 38.78217),
             )
             every { stepIndex } returns 0
         }
@@ -206,7 +206,7 @@ class MapboxFollowingCameraFramingStrategyTest {
                 intersectionDensityCalculation.enabled = false
                 intersectionDensityCalculation.averageDistanceMultiplier = 7.0
             },
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute
+            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -224,7 +224,7 @@ class MapboxFollowingCameraFramingStrategyTest {
                 Point.fromLngLat(21.0, 9.0),
                 Point.fromLngLat(19.0, 9.0),
                 Point.fromLngLat(19.0, 13.0),
-                Point.fromLngLat(22.0, 13.0)
+                Point.fromLngLat(22.0, 13.0),
             )
             every { stepIndex } returns 0
         }
@@ -235,7 +235,7 @@ class MapboxFollowingCameraFramingStrategyTest {
         val expected: List<Point> = listOf(
             Point.fromLngLat(20.0, 11.0),
             Point.fromLngLat(20.0, 12.0),
-            Point.fromLngLat(21.0, 12.0)
+            Point.fromLngLat(21.0, 12.0),
         )
         val routeProgress: RouteProgress = mockk {
             every { currentLegProgress } returns legProgress
@@ -247,7 +247,7 @@ class MapboxFollowingCameraFramingStrategyTest {
                 intersectionDensityCalculation.enabled = false
                 intersectionDensityCalculation.averageDistanceMultiplier = 7.0
             },
-            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute
+            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -272,7 +272,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             followingFrameOptions = FollowingFrameOptions().apply {
                 frameGeometryAfterManeuver.enabled = false
             },
-            postManeuverFramingPoints = postManeuverFramingPoints
+            postManeuverFramingPoints = postManeuverFramingPoints,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -297,7 +297,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             followingFrameOptions = FollowingFrameOptions().apply {
                 frameGeometryAfterManeuver.enabled = true
             },
-            postManeuverFramingPoints = emptyList()
+            postManeuverFramingPoints = emptyList(),
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -317,7 +317,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             Point.fromLngLat(-77.168619, 38.777744),
             Point.fromLngLat(-77.168499, 38.777768),
             Point.fromLngLat(-77.167878, 38.777921),
-            Point.fromLngLat(-77.1676211, 38.7779783)
+            Point.fromLngLat(-77.1676211, 38.7779783),
         )
         val routeProgress: RouteProgress = mockk {
             every { currentLegProgress } returns legProgress
@@ -328,7 +328,7 @@ class MapboxFollowingCameraFramingStrategyTest {
             followingFrameOptions = FollowingFrameOptions().apply {
                 frameGeometryAfterManeuver.enabled = true
             },
-            postManeuverFramingPoints = postManeuverFramingPoints
+            postManeuverFramingPoints = postManeuverFramingPoints,
         )
 
         assertArrays1(expected, actual, pointAdapter)

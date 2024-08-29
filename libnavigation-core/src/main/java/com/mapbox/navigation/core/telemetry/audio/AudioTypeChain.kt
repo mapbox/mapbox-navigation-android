@@ -6,7 +6,7 @@ internal class AudioTypeChain {
         unknownAudioType: AudioTypeResolver.Unknown = AudioTypeResolver.Unknown(),
         speakerAudioType: AudioTypeResolver.Speaker = AudioTypeResolver.Speaker(),
         headphonesAudioType: AudioTypeResolver.Headphones = AudioTypeResolver.Headphones(),
-        bluetoothAudioType: AudioTypeResolver.Bluetooth = AudioTypeResolver.Bluetooth()
+        bluetoothAudioType: AudioTypeResolver.Bluetooth = AudioTypeResolver.Bluetooth(),
     ): AudioTypeResolver {
         speakerAudioType.nextChain(unknownAudioType)
         headphonesAudioType.nextChain(speakerAudioType)

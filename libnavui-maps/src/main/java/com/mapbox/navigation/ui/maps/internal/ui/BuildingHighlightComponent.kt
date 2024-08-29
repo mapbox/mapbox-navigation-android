@@ -25,7 +25,7 @@ class BuildingHighlightComponent(
     private var map: MapboxMap,
     private var options: MapboxBuildingHighlightOptions,
     private var buildingsApi: MapboxBuildingsApi = MapboxBuildingsApi(map),
-    private var buildingView: MapboxBuildingView = MapboxBuildingView()
+    private var buildingView: MapboxBuildingView = MapboxBuildingView(),
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {

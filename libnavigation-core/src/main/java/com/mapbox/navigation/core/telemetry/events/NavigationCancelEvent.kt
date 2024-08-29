@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
 internal class NavigationCancelEvent(
-    phoneState: PhoneState
+    phoneState: PhoneState,
 ) : NavigationEvent(phoneState) {
     /*
      * Don't remove any fields, cause they should match with

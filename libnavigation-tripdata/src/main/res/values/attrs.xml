@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Defines the color of turn icon -->
+  <attr name="maneuverTurnIconColor" format="reference|color" />
+
+  <!-- Defines the color of shadow in the turn icon -->
+  <attr name="maneuverTurnIconShadowColor" format="reference|color" />
+</resources>

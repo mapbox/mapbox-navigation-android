@@ -478,7 +478,7 @@ class RouteProgressExTest {
                         }
                         every { geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
                     },
-                    "uuid"
+                    "uuid",
                 )
                 return mockk {
                     val navigationRoute = this
@@ -523,7 +523,7 @@ class RouteProgressExTest {
             assertEquals(
                 description,
                 expectedHasUnexpectedUpcomingClosures,
-                hasUnexpectedUpcomingClosures
+                hasUnexpectedUpcomingClosures,
             )
         }
     }

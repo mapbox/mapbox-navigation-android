@@ -17,7 +17,7 @@ internal class RouteRefreshPauseResumeIntegrationTest : RouteRefreshIntegrationT
         routeRefreshController = createRefreshController(refreshInterval = 60_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)
         routeRefreshController.onRoutesChanged(
-            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
         testDispatcher.advanceTimeBy(60_000)
 
@@ -42,7 +42,7 @@ internal class RouteRefreshPauseResumeIntegrationTest : RouteRefreshIntegrationT
         routeRefreshController = createRefreshController(refreshInterval = 60_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)
         routeRefreshController.onRoutesChanged(
-            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
         testDispatcher.advanceTimeBy(61_000)
 
@@ -63,7 +63,7 @@ internal class RouteRefreshPauseResumeIntegrationTest : RouteRefreshIntegrationT
         routeRefreshController = createRefreshController(refreshInterval = 60_000)
         routeRefreshController.registerRouteRefreshObserver(refreshObserver)
         routeRefreshController.onRoutesChanged(
-            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
         testDispatcher.advanceTimeBy(60_000)
 
@@ -76,7 +76,7 @@ internal class RouteRefreshPauseResumeIntegrationTest : RouteRefreshIntegrationT
 
         val newRoutes = setUpRoutes("route_response_route_refresh_multileg.json")
         routeRefreshController.onRoutesChanged(
-            RoutesUpdatedResult(newRoutes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            RoutesUpdatedResult(newRoutes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
 
         testDispatcher.advanceTimeBy(30_000)

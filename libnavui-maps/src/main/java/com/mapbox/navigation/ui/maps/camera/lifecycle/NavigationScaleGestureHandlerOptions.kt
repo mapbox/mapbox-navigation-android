@@ -34,16 +34,22 @@ class NavigationScaleGestureHandlerOptions private constructor(
      * Best paired with the [followingMultiFingerMoveThreshold] set to 0 or a relatively small value
      * to not interfere with gestures outside of the defined rectangle.
      */
-    val followingMultiFingerProtectedMoveArea: RectF?
+    val followingMultiFingerProtectedMoveArea: RectF?,
+    /**
+     * When in [NavigationCameraState.FOLLOWING], sets minimum rotation angle in degrees required
+     * to start rotation gesture.
+     */
+    val followingRotationAngleThreshold: Float,
 ) {
 
     /**
      * Rebuilds the options.
      */
-    fun toBuilder() = Builder(context)
+    fun toBuilder(): Builder = Builder(context)
         .followingInitialMoveThreshold(followingInitialMoveThreshold)
         .followingMultiFingerMoveThreshold(followingMultiFingerMoveThreshold)
         .followingMultiFingerProtectedMoveArea(followingMultiFingerProtectedMoveArea)
+        .followingRotationAngleThreshold(followingRotationAngleThreshold)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -62,6 +68,9 @@ class NavigationScaleGestureHandlerOptions private constructor(
         if (followingMultiFingerProtectedMoveArea != other.followingMultiFingerProtectedMoveArea) {
             return false
         }
+        if (followingRotationAngleThreshold != other.followingRotationAngleThreshold) {
+            return false
+        }
 
         return true
     }
@@ -74,6 +83,7 @@ class NavigationScaleGestureHandlerOptions private constructor(
         result = 31 * result + followingInitialMoveThreshold.hashCode()
         result = 31 * result + followingMultiFingerMoveThreshold.hashCode()
         result = 31 * result + followingMultiFingerProtectedMoveArea.hashCode()
+        result = 31 * result + followingRotationAngleThreshold.hashCode()
         return result
     }
 
@@ -85,7 +95,8 @@ class NavigationScaleGestureHandlerOptions private constructor(
             "context=$context, " +
             "followingInitialMoveThreshold=$followingInitialMoveThreshold, " +
             "followingMultiFingerMoveThreshold=$followingMultiFingerMoveThreshold, " +
-            "followingMultiFingerProtectedMoveArea=$followingMultiFingerProtectedMoveArea" +
+            "followingMultiFingerProtectedMoveArea=$followingMultiFingerProtectedMoveArea, " +
+            "followingRotationAngleThreshold=$followingRotationAngleThreshold" +
             ")"
     }
 
@@ -95,13 +106,14 @@ class NavigationScaleGestureHandlerOptions private constructor(
     class Builder(private val context: Context) {
         private var followingInitialMoveThreshold: Float =
             context.resources.getDimension(
-                R.dimen.mapbox_navigationCamera_trackingInitialMoveThreshold
+                R.dimen.mapbox_navigationCamera_trackingInitialMoveThreshold,
             )
         private var followingMultiFingerMoveThreshold: Float =
             context.resources.getDimension(
-                R.dimen.mapbox_navigationCamera_trackingMultiFingerMoveThreshold
+                R.dimen.mapbox_navigationCamera_trackingMultiFingerMoveThreshold,
             )
         private var followingMultiFingerProtectedMoveArea: RectF? = null
+        private var followingRotationAngleThreshold: Float = 5.0f
 
         /**
          * When in [NavigationCameraState.FOLLOWING], sets minimum single pointer movement (map pan)
@@ -109,7 +121,7 @@ class NavigationScaleGestureHandlerOptions private constructor(
          *
          * Defaults to 25dp.
          */
-        fun followingInitialMoveThreshold(followingInitialMoveThreshold: Float) = apply {
+        fun followingInitialMoveThreshold(followingInitialMoveThreshold: Float): Builder = apply {
             this.followingInitialMoveThreshold = followingInitialMoveThreshold
         }
 
@@ -120,9 +132,10 @@ class NavigationScaleGestureHandlerOptions private constructor(
          *
          * Defaults to 400dp.
          */
-        fun followingMultiFingerMoveThreshold(followingMultiFingerMoveThreshold: Float) = apply {
-            this.followingMultiFingerMoveThreshold = followingMultiFingerMoveThreshold
-        }
+        fun followingMultiFingerMoveThreshold(followingMultiFingerMoveThreshold: Float): Builder =
+            apply {
+                this.followingMultiFingerMoveThreshold = followingMultiFingerMoveThreshold
+            }
 
         /**
          * When in [NavigationCameraState.FOLLOWING], sets protected multi pointer gesture area.
@@ -135,10 +148,23 @@ class NavigationScaleGestureHandlerOptions private constructor(
          *
          * Defaults to `null`.
          */
-        fun followingMultiFingerProtectedMoveArea(followingMultiFingerProtectedMoveArea: RectF?) =
-            apply {
-                this.followingMultiFingerProtectedMoveArea = followingMultiFingerProtectedMoveArea
-            }
+        fun followingMultiFingerProtectedMoveArea(
+            followingMultiFingerProtectedMoveArea: RectF?,
+        ): Builder = apply {
+            this.followingMultiFingerProtectedMoveArea = followingMultiFingerProtectedMoveArea
+        }
+
+        /**
+         * When in [NavigationCameraState.FOLLOWING], sets minimum rotation angle in degrees required
+         * to start rotation gesture.
+         *
+         * Default to 5.0f.
+         */
+        fun followingRotationAngleThreshold(
+            followingRotationAngleThreshold: Float,
+        ): Builder = apply {
+            this.followingRotationAngleThreshold = followingRotationAngleThreshold
+        }
 
         /**
          * Builds [NavigationScaleGestureHandlerOptions].
@@ -147,7 +173,8 @@ class NavigationScaleGestureHandlerOptions private constructor(
             context,
             followingInitialMoveThreshold,
             followingMultiFingerMoveThreshold,
-            followingMultiFingerProtectedMoveArea
+            followingMultiFingerProtectedMoveArea,
+            followingRotationAngleThreshold,
         )
     }
 }

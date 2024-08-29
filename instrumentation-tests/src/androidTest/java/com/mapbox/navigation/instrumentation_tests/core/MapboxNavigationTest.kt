@@ -13,9 +13,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -25,8 +22,10 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.resetTripSessionAndWait
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.readRawFileText
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
@@ -63,13 +62,12 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
                     .routingTilesOptions(
                         RoutingTilesOptions.Builder()
                             .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                            .build()
+                            .build(),
                     )
-                    .build()
+                    .build(),
             )
         }
     }
@@ -80,19 +78,14 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
     }
 
     @Test
-    fun trip_session_resets_successfully_sync() = sdkTest {
-        mapboxNavigation.resetTripSession()
-    }
-
-    @Test
     fun current_leg_index() = sdkTest {
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
                 DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
                 readRawFileText(activity, R.raw.multileg_route),
-                coordinates
-            )
+                coordinates,
+            ),
         )
 
         mapboxNavigation.startTripSession()
@@ -101,9 +94,10 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
 
         val routes = mapboxNavigation.requestRoutes(
             RouteOptions.builder()
+                .baseUrl(mockWebServerRule.baseUrl)
                 .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .coordinatesList(coordinates)
-                .build()
+                .build(),
         ).getSuccessfulResultOrThrowException().routes
         mapboxNavigation.setNavigationRoutes(routes)
 
@@ -135,8 +129,8 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
             MockDirectionsRequestHandler(
                 DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
                 readRawFileText(activity, R.raw.multileg_route),
-                coordinates
-            )
+                coordinates,
+            ),
         )
 
         mapboxNavigation.startTripSession()
@@ -148,7 +142,7 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
                 .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .coordinatesList(coordinates)
                 .baseUrl(mockWebServerRule.baseUrl)
-                .build()
+                .build(),
         ).getSuccessfulResultOrThrowException().routes
         stayOnPosition(coordinates[1])
         mapboxNavigation.setNavigationRoutes(routes, initialLegIndex = 1)
@@ -170,7 +164,7 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
                 latitude = position.latitude()
                 longitude = position.longitude()
             },
-            times = 120
+            times = 120,
         )
     }
 }

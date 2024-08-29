@@ -102,7 +102,7 @@ class AdasSpeedLimitInfo private constructor(
 
         @JvmSynthetic
         fun createFromNativeObject(
-            nativeObj: com.mapbox.navigator.SpeedLimitInfo
+            nativeObj: com.mapbox.navigator.SpeedLimitInfo,
         ): AdasSpeedLimitInfo {
             val speedUnit = when (nativeObj.unit) {
                 SpeedLimitUnit.KILOMETRES_PER_HOUR -> SpeedUnit.KILOMETERS_PER_HOUR
@@ -113,8 +113,8 @@ class AdasSpeedLimitInfo private constructor(
                 speedUnit = speedUnit,
                 speedLimitType = createSpeedLimitType(nativeObj.type),
                 restriction = AdasSpeedLimitRestriction.createFromNativeObject(
-                    nativeObj.restriction
-                )
+                    nativeObj.restriction,
+                ),
             )
         }
 

@@ -14,9 +14,9 @@ internal fun TelemetryLocation.toValue(): Value {
     val fields = hashMapOf<String, Value>()
     fields["lat"] = latitude.toValue()
     fields["lng"] = longitude.toValue()
-    fields["speed"] = speed.toValue()
-    fields["course"] = bearing.toValue()
-    fields["altitude"] = altitude.toValue()
+    speed?.let { fields["speed"] = it.toValue() }
+    bearing?.let { fields["course"] = it.toValue() }
+    altitude?.let { fields["altitude"] = it.toValue() }
     fields["timestamp"] = timestamp.toValue()
     fields["horizontalAccuracy"] = horizontalAccuracy.toValue()
     fields["verticalAccuracy"] = verticalAccuracy.toValue()

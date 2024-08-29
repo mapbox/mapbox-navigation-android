@@ -66,7 +66,7 @@ class BitmapEncodeOptions private constructor(val width: Int, val compressQualit
          *
          * @throws IllegalStateException if [width] is less than 1.
          */
-        fun width(@IntRange(from = 1) width: Int) = apply {
+        fun width(@IntRange(from = 1) width: Int): Builder = apply {
             require(width >= 1) { "width must be >= 1" }
             this.width = width
         }
@@ -76,7 +76,7 @@ class BitmapEncodeOptions private constructor(val width: Int, val compressQualit
          *
          * @throws IllegalStateException if [width] is outside [0, 100].
          */
-        fun compressQuality(@IntRange(from = 0, to = 100) compressQuality: Int) = apply {
+        fun compressQuality(@IntRange(from = 0, to = 100) compressQuality: Int): Builder = apply {
             require(compressQuality in 0..100) { "compressQuality must be in 0..100" }
             this.compressQuality = compressQuality
         }

@@ -1,0 +1,31 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply from: file("../gradle/testing-module-settings.gradle")
+
+group = project.ext.mapboxArtifactGroupId
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+    }
+}
+
+dependencies {
+    // Mapbox Navigation SDK
+    api project(':libnavigation-android')
+    api project(":libnavui-util")
+    api project(":libtesting-resources")
+
+    // test
+    api project(':libtesting-ui')
+}

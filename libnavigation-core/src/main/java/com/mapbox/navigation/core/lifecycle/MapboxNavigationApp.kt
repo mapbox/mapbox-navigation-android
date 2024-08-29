@@ -7,11 +7,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import kotlin.jvm.Throws
 import kotlin.reflect.KClass
 
 /**
  * Manages a default lifecycle for [MapboxNavigation].
+ *
+ * Alternative way of obtaining the instance of the [MapboxNavigation]
+ * is [MapboxNavigationProvider].
+ *
+ * Note that [MapboxNavigationProvider] and [MapboxNavigationApp] can't be used together
+ * at the same time.
  *
  * 1. Call [MapboxNavigationApp.setup] to specify your [NavigationOptions].
  * 2. Register and unregister your [MapboxNavigationObserver] instances with
@@ -85,7 +92,7 @@ object MapboxNavigationApp {
      */
     @UiThread
     @JvmStatic
-    fun setup(navigationOptions: NavigationOptions) = apply {
+    fun setup(navigationOptions: NavigationOptions): MapboxNavigationApp = apply {
         mapboxNavigationAppDelegate.setup { navigationOptions }
     }
 
@@ -98,7 +105,7 @@ object MapboxNavigationApp {
      */
     @UiThread
     @JvmStatic
-    fun setup(navigationOptionsProvider: NavigationOptionsProvider) = apply {
+    fun setup(navigationOptionsProvider: NavigationOptionsProvider): MapboxNavigationApp = apply {
         mapboxNavigationAppDelegate.setup(navigationOptionsProvider)
     }
 
@@ -107,7 +114,7 @@ object MapboxNavigationApp {
      * granular control of which lifecycle is used for creating [MapboxNavigation].
      */
     @JvmStatic
-    fun attachAllActivities(application: Application) = apply {
+    fun attachAllActivities(application: Application): MapboxNavigationApp = apply {
         mapboxNavigationAppDelegate.attachAllActivities(application)
     }
 
@@ -117,7 +124,7 @@ object MapboxNavigationApp {
      */
     @UiThread
     @JvmStatic
-    fun disable() = apply {
+    fun disable(): MapboxNavigationApp = apply {
         mapboxNavigationAppDelegate.disable()
     }
 
@@ -132,7 +139,7 @@ object MapboxNavigationApp {
      */
     @UiThread
     @JvmStatic
-    fun attach(lifecycleOwner: LifecycleOwner) = apply {
+    fun attach(lifecycleOwner: LifecycleOwner): MapboxNavigationApp = apply {
         mapboxNavigationAppDelegate.attach(lifecycleOwner)
     }
 
@@ -147,7 +154,7 @@ object MapboxNavigationApp {
      */
     @UiThread
     @JvmStatic
-    fun detach(lifecycleOwner: LifecycleOwner) = apply {
+    fun detach(lifecycleOwner: LifecycleOwner): MapboxNavigationApp = apply {
         mapboxNavigationAppDelegate.detach(lifecycleOwner)
     }
 
@@ -156,7 +163,9 @@ object MapboxNavigationApp {
      */
     @UiThread
     @JvmStatic
-    fun registerObserver(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
+    fun registerObserver(
+        mapboxNavigationObserver: MapboxNavigationObserver,
+    ): MapboxNavigationApp = apply {
         mapboxNavigationAppDelegate.registerObserver(mapboxNavigationObserver)
     }
 
@@ -165,7 +174,9 @@ object MapboxNavigationApp {
      */
     @UiThread
     @JvmStatic
-    fun unregisterObserver(mapboxNavigationObserver: MapboxNavigationObserver) = apply {
+    fun unregisterObserver(
+        mapboxNavigationObserver: MapboxNavigationObserver,
+    ): MapboxNavigationApp = apply {
         mapboxNavigationAppDelegate.unregisterObserver(mapboxNavigationObserver)
     }
 
@@ -216,7 +227,7 @@ object MapboxNavigationApp {
      * allows you to get the current instance to call those functions.
      *
      * For example, you do not need to [registerObserver] in order to call
-     * [MapboxNavigation.postUserFeedback] or [MapboxNavigation.setRoutes].
+     * [MapboxNavigation.postUserFeedback] or [MapboxNavigation.setNavigationRoutes].
      */
     @JvmStatic
     fun current(): MapboxNavigation? = mapboxNavigationAppDelegate.current()

@@ -28,7 +28,7 @@ object RoutesPreviewExtra {
     @Retention(AnnotationRetention.BINARY)
     @StringDef(
         PREVIEW_NEW,
-        PREVIEW_CLEAN_UP
+        PREVIEW_CLEAN_UP,
     )
     annotation class RoutePreviewUpdateReason
 }

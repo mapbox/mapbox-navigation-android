@@ -6,7 +6,7 @@ import com.mapbox.android.gestures.AndroidGesturesManager
 
 internal class LocationGesturesManager(
     context: Context,
-    private val onUpEventCallback: (AndroidGesturesManager) -> Unit
+    private val onUpEventCallback: (AndroidGesturesManager) -> Unit,
 ) : AndroidGesturesManager(context) {
     override fun onTouchEvent(motionEvent: MotionEvent?): Boolean {
         if (motionEvent != null) {

@@ -8,10 +8,10 @@ import com.mapbox.navigation.ui.maps.building.model.BuildingValue
 internal sealed class BuildingResult {
 
     data class QueriedBuildings(
-        val queriedBuildings: Expected<BuildingError, BuildingValue>
+        val queriedBuildings: Expected<BuildingError, BuildingValue>,
     ) : BuildingResult()
 
     data class GetDestination(
-        val point: Point?
+        val point: Point?,
     ) : BuildingResult()
 }

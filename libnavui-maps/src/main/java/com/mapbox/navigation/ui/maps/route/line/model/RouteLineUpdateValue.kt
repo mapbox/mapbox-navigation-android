@@ -2,56 +2,12 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 /**
  * Represents data for updating the appearance of the route lines.
- *
- * @param primaryRouteLineDynamicData the data describing the primary route line
- * @param alternativeRouteLinesDynamicData the data describing alternative route lines
- * @param routeLineMaskingLayerDynamicData the data describing the masking layers
  */
 class RouteLineUpdateValue internal constructor(
-    val primaryRouteLineDynamicData: RouteLineDynamicData,
-    val alternativeRouteLinesDynamicData: List<RouteLineDynamicData>,
-    val routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null
+    internal val primaryRouteLineDynamicData: RouteLineDynamicData?,
+    internal val alternativeRouteLinesDynamicData: List<RouteLineDynamicData>,
+    internal val routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null,
 ) {
-
-    internal var ignorePrimaryRouteLineData = false
-
-    /**
-     * @return a class with mutable values for replacing.
-     */
-    fun toMutableValue() = MutableRouteLineUpdateValue(
-        primaryRouteLineDynamicData,
-        alternativeRouteLinesDynamicData,
-        routeLineMaskingLayerDynamicData
-    ).also {
-        it.ignorePrimaryRouteLineData = ignorePrimaryRouteLineData
-    }
-
-    /**
-     * Represents the mutable data for updating the appearance of the route lines.
-     *
-     * @param primaryRouteLineDynamicData the data describing the primary route line
-     * @param alternativeRouteLinesDynamicData the data describing alternative route lines
-     * @param routeLineMaskingLayerDynamicData the data describing the masking layers
-     */
-    class MutableRouteLineUpdateValue internal constructor(
-        var primaryRouteLineDynamicData: RouteLineDynamicData,
-        var alternativeRouteLinesDynamicData: List<RouteLineDynamicData>,
-        var routeLineMaskingLayerDynamicData: RouteLineDynamicData? = null
-    ) {
-
-        internal var ignorePrimaryRouteLineData = false
-
-        /**
-         * @return a RouteLineUpdateValue
-         */
-        fun toImmutableValue() = RouteLineUpdateValue(
-            primaryRouteLineDynamicData,
-            alternativeRouteLinesDynamicData,
-            routeLineMaskingLayerDynamicData
-        ).also {
-            it.ignorePrimaryRouteLineData = ignorePrimaryRouteLineData
-        }
-    }
 
     /**
      * Indicates whether some other object is "equal to" this one.

@@ -50,7 +50,8 @@ fun createDirectionsRoute(
     routeIndex: String = "0",
     requestUuid: String? = "testUUID",
     waypoints: List<DirectionsWaypoint>? = null,
-    refreshTtl: Int? = null
+    refreshTtl: Int? = null,
+    geometry: String? = null,
 ): DirectionsRoute = DirectionsRoute.builder()
     .distance(distance)
     .duration(duration)
@@ -58,6 +59,7 @@ fun createDirectionsRoute(
     .routeOptions(routeOptions)
     .routeIndex(routeIndex)
     .requestUuid(requestUuid)
+    .geometry(geometry)
     .waypoints(waypoints)
     .apply { refreshTtl?.let { unrecognizedJsonProperties(mapOf("refresh_ttl" to JsonPrimitive(it))) } }
     .build()
@@ -151,15 +153,15 @@ fun createBannerView(
 }
 
 fun createRouteLegAnnotation(
-    congestion: List<String> = listOf("severe", "moderate"),
-    congestionNumeric: List<Int> = listOf(90, 50),
-    distance: List<Double> = listOf(10.0, 10.0),
-    duration: List<Double> = listOf(2.0, 2.0),
-    maxSpeed: List<MaxSpeed> = listOf(createMaxSpeed(40), createMaxSpeed(60)),
-    speed: List<Double> = listOf(40.4, 60.7),
-    stateOfCharge: List<Int> = listOf(80, 79),
-    freeFlowSpeed: List<Int> = listOf(2, 5),
-    currentSpeed: List<Int> = listOf(5, 9),
+    congestion: List<String>? = listOf("severe", "moderate"),
+    congestionNumeric: List<Int>? = listOf(90, 50),
+    distance: List<Double>? = listOf(10.0, 10.0),
+    duration: List<Double>? = listOf(2.0, 2.0),
+    maxSpeed: List<MaxSpeed>? = listOf(createMaxSpeed(40), createMaxSpeed(60)),
+    speed: List<Double>? = listOf(40.4, 60.7),
+    stateOfCharge: List<Int>? = listOf(80, 79),
+    freeFlowSpeed: List<Int>? = listOf(2, 5),
+    currentSpeed: List<Int>? = listOf(5, 9),
 ): LegAnnotation {
     return LegAnnotation.builder()
         .distance(distance)
@@ -171,13 +173,16 @@ fun createRouteLegAnnotation(
         .freeflowSpeed(freeFlowSpeed)
         .currentSpeed(currentSpeed)
         .unrecognizedJsonProperties(
-            mapOf(
-                "state_of_charge" to JsonArray().apply {
-                    stateOfCharge.forEach {
-                        add(JsonPrimitive(it))
+            stateOfCharge?.let { stateOfCharge ->
+                mapOf(
+                    "state_of_charge" to JsonArray().apply {
+                        stateOfCharge.forEach {
+                            add(JsonPrimitive(it))
+                        }
                     }
-                }
-            )
+                )
+            }
+
         )
         .build()
 }

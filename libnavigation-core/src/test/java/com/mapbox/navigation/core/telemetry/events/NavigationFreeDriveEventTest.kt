@@ -22,12 +22,12 @@ class NavigationFreeDriveEventTest {
             location = TelemetryLocation(
                 2.2,
                 3.3,
-                10.0f,
-                11.0f,
+                10.0,
+                11.0,
                 12.0,
                 "timestamp_0",
-                13.0f,
-                15.0f
+                13.0,
+                15.0,
             )
             eventType = "eventType_0"
             appMetadata = AppMetadata(
@@ -47,7 +47,7 @@ class NavigationFreeDriveEventTest {
             assertEquals(freeDriveEvent.batteryLevel.toLong(), content["batteryLevel"]!!.contents)
             assertEquals(
                 freeDriveEvent.screenBrightness.toLong(),
-                content["screenBrightness"]!!.contents
+                content["screenBrightness"]!!.contents,
             )
             assertEquals(freeDriveEvent.batteryPluggedIn, content["batteryPluggedIn"]!!.contents)
             assertEquals(freeDriveEvent.connectivity, content["connectivity"]!!.contents)
@@ -58,16 +58,16 @@ class NavigationFreeDriveEventTest {
             assertEquals(freeDriveEvent.locationEngine, content["locationEngine"]!!.contents)
             assertEquals(
                 freeDriveEvent.percentTimeInPortrait.toLong(),
-                content["percentTimeInPortrait"]!!.contents
+                content["percentTimeInPortrait"]!!.contents,
             )
             assertEquals(
                 freeDriveEvent.percentTimeInForeground.toLong(),
-                content["percentTimeInForeground"]!!.contents
+                content["percentTimeInForeground"]!!.contents,
             )
             assertEquals(freeDriveEvent.simulation, content["simulation"]!!.contents)
             assertEquals(
                 freeDriveEvent.navigatorSessionIdentifier,
-                content["navigatorSessionIdentifier"]!!.contents
+                content["navigatorSessionIdentifier"]!!.contents,
             )
             assertEquals(freeDriveEvent.startTimestamp, content["startTimestamp"]!!.contents)
             assertEquals(freeDriveEvent.sessionIdentifier, content["sessionIdentifier"]!!.contents)

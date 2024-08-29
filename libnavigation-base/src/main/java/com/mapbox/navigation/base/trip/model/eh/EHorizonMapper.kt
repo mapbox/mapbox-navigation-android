@@ -90,7 +90,7 @@ internal fun ElectronicHorizonPosition.mapToEHorizonPosition() =
     EHorizonPosition(
         position().mapToEHorizonGraphPosition(),
         tree().mapToEHorizon(),
-        type().mapToEHorizonResultType()
+        type().mapToEHorizonResultType(),
     )
 
 /**
@@ -100,7 +100,7 @@ internal fun RoadObjectEnterExitInfo.mapToRoadObjectEnterExitInfo() =
     SDKRoadObjectEnterExitInfo(
         roadObjectId,
         enterFromStartOrExitFromEnd,
-        type.mapToRoadObjectType()
+        type.mapToRoadObjectType(),
     )
 
 /**
@@ -109,7 +109,7 @@ internal fun RoadObjectEnterExitInfo.mapToRoadObjectEnterExitInfo() =
 internal fun RoadObjectPassInfo.mapToRoadObjectPassInfo() =
     SDKRoadObjectPassInfo(
         roadObjectId,
-        type.mapToRoadObjectType()
+        type.mapToRoadObjectType(),
     )
 
 /**
@@ -118,7 +118,7 @@ internal fun RoadObjectPassInfo.mapToRoadObjectPassInfo() =
 internal fun RoadObjectDistance.mapToRoadObjectDistance(): SDKRoadObjectDistanceInfo {
     return distanceInfo.mapToRoadObjectDistanceInfo(
         roadObjectId,
-        type.mapToRoadObjectType()
+        type.mapToRoadObjectType(),
     )
 }
 
@@ -127,14 +127,14 @@ internal fun RoadObjectDistance.mapToRoadObjectDistance(): SDKRoadObjectDistance
  */
 internal fun RoadObjectDistanceInfo.mapToRoadObjectDistanceInfo(
     roadObjectId: String,
-    roadObjectType: Int
+    roadObjectType: Int,
 ):
     SDKRoadObjectDistanceInfo {
     return when {
         isGantryDistanceInfo -> GantryDistanceInfo(
             roadObjectId,
             roadObjectType,
-            gantryDistanceInfo.distance
+            gantryDistanceInfo.distance,
         )
         isLineDistanceInfo -> with(lineDistanceInfo) {
             LineDistanceInfo(
@@ -150,7 +150,7 @@ internal fun RoadObjectDistanceInfo.mapToRoadObjectDistanceInfo(
         isPointDistanceInfo -> PointDistanceInfo(
             roadObjectId,
             roadObjectType,
-            pointDistanceInfo.distance
+            pointDistanceInfo.distance,
         )
         isPolygonDistanceInfo -> with(polygonDistanceInfo) {
             val entrances = mapToGates(entrances)
@@ -183,7 +183,7 @@ internal fun MatchedRoadObjectLocation.mapToRoadObjectLocation(): RoadObjectLoca
         isMatchedGantryLocation -> {
             GantryLocation(
                 matchedGantryLocation.positions.mapToRoadObjectPositions(),
-                matchedGantryLocation.shape
+                matchedGantryLocation.shape,
             )
         }
         isMatchedPointLocation -> {
@@ -194,19 +194,19 @@ internal fun MatchedRoadObjectLocation.mapToRoadObjectLocation(): RoadObjectLoca
             PolygonLocation(
                 matchedPolygonLocation.entries.mapToRoadObjectPositions(),
                 matchedPolygonLocation.exits.mapToRoadObjectPositions(),
-                matchedPolygonLocation.shape
+                matchedPolygonLocation.shape,
             )
         }
         isMatchedPolylineLocation -> {
             PolylineLocation(
                 matchedPolylineLocation.path.mapToEHorizonGraphPath(),
-                matchedPolylineLocation.shape
+                matchedPolylineLocation.shape,
             )
         }
         isOpenLRLineLocation -> {
             OpenLRLineLocation(
                 openLRLineLocation.path.mapToEHorizonGraphPath(),
-                openLRLineLocation.shape
+                openLRLineLocation.shape,
             )
         }
         isOpenLRPointAlongLineLocation -> {
@@ -225,7 +225,7 @@ internal fun MatchedRoadObjectLocation.mapToRoadObjectLocation(): RoadObjectLoca
                 matchedSubgraphLocation.enters.mapToRoadObjectPositions(),
                 matchedSubgraphLocation.exits.mapToRoadObjectPositions(),
                 matchedSubgraphLocation.edges.mapToSubgraphEdges(),
-                matchedSubgraphLocation.shape
+                matchedSubgraphLocation.shape,
             )
         }
         else -> throw IllegalArgumentException("Unsupported object location type.")
@@ -238,13 +238,13 @@ internal fun List<Position>.mapToRoadObjectPositions(): List<RoadObjectPosition>
 internal fun Position.mapToRoadObjectPosition(): RoadObjectPosition {
     return RoadObjectPosition(
         position.mapToEHorizonGraphPosition(),
-        coordinate
+        coordinate,
     )
 }
 
 internal fun Map<Long, SubgraphEdge>.mapToSubgraphEdges(): Map<Long, SDKSubgraphEdge> {
     val edges = mutableMapOf<Long, SDKSubgraphEdge>()
-    this.forEach {
+    this.entries.forEach {
         edges[it.key] = it.value.mapToSubgraphEdge()
     }
 
@@ -257,7 +257,7 @@ internal fun SubgraphEdge.mapToSubgraphEdge() =
         innerEdgeIds,
         outerEdgeIds,
         shape,
-        length
+        length,
     )
 
 /**
@@ -316,7 +316,7 @@ internal fun RoadObjectProvider.mapToRoadObjectProvider(): String {
 internal fun RoadObjectEdgeLocation.mapToRoadObjectEdgeLocation(): SDKRoadObjectEdgeLocation {
     return SDKRoadObjectEdgeLocation(
         percentAlongBegin,
-        percentAlongEnd
+        percentAlongEnd,
     )
 }
 
@@ -365,7 +365,7 @@ internal fun EHorizonGraphPath.mapToNativeGraphPath(): GraphPath {
         edges,
         percentAlongBegin,
         percentAlongEnd,
-        length
+        length,
     )
 }
 
@@ -375,7 +375,7 @@ internal fun EHorizonGraphPath.mapToNativeGraphPath(): GraphPath {
 internal fun EHorizonGraphPosition.mapToNativeGraphPosition(): GraphPosition {
     return GraphPosition(
         edgeId,
-        percentAlong
+        percentAlong,
     )
 }
 
@@ -389,7 +389,7 @@ internal fun SDKMatchableOpenLr.mapToNativeMatchableOpenLr(): MatchableOpenLr {
 internal fun SDKMatchableGeometry.mapToNativeMatchableGeometry(): MatchableGeometry {
     return MatchableGeometry(
         roadObjectId,
-        coordinates
+        coordinates,
     )
 }
 
@@ -397,7 +397,7 @@ internal fun SDKMatchablePoint.mapToNativeMatchablePoint(): MatchablePoint {
     return MatchablePoint(
         roadObjectId,
         point,
-        bearing
+        bearing,
     )
 }
 
@@ -461,6 +461,7 @@ private fun ElectronicHorizonResultType.mapToEHorizonResultType(): String {
     return when (this) {
         ElectronicHorizonResultType.INITIAL -> EHorizonResultType.INITIAL
         ElectronicHorizonResultType.UPDATE -> EHorizonResultType.UPDATE
+        ElectronicHorizonResultType.NOT_AVAILABLE -> EHorizonResultType.NOT_AVAILABLE
     }
 }
 
@@ -470,7 +471,7 @@ private fun ElectronicHorizonResultType.mapToEHorizonResultType(): String {
 private fun GraphPosition.mapToEHorizonGraphPosition(): EHorizonGraphPosition {
     return EHorizonGraphPosition(
         edgeId,
-        percentAlong
+        percentAlong,
     )
 }
 
@@ -482,7 +483,7 @@ private fun GraphPath.mapToEHorizonGraphPath(): EHorizonGraphPath {
         edges,
         percentAlongBegin,
         percentAlongEnd,
-        length
+        length,
     )
 }
 
@@ -495,7 +496,7 @@ private fun com.mapbox.navigator.Gate.mapToGate(): Gate {
         id,
         position.mapToRoadObjectPosition(),
         probability,
-        distance
+        distance,
     )
 }
 

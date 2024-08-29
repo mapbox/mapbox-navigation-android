@@ -1,13 +1,11 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.mapbox.navigation.testing.ui.utils.coroutines
 
-import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
+import com.mapbox.common.location.Location
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -16,7 +14,10 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
+import com.mapbox.navigation.core.mapmatching.MapMatchingFailure
+import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
+import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.RoutesInvalidatedObserver
 import com.mapbox.navigation.core.RoutesInvalidatedParams
@@ -30,7 +31,6 @@ import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
-import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
@@ -38,7 +38,6 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
-import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
@@ -47,7 +46,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedResult
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -120,15 +118,6 @@ fun RerouteController.rerouteStates(): Flow<RerouteState> {
     )
 }
 
-fun MapboxNavigation.roadObjectsOnRoute(): Flow<List<UpcomingRoadObject>> {
-    return loggedCallbackFlow(
-        { RoadObjectsOnRouteObserver(it) },
-        { registerRoadObjectsOnRouteObserver(it) },
-        { unregisterRoadObjectsOnRouteObserver(it) },
-        "UpcomingRoadObject"
-    )
-}
-
 fun MapboxNavigation.rawLocationUpdates(): Flow<Location> {
     return loggedCallbackFlow(
         {
@@ -153,7 +142,8 @@ sealed interface NavigationRouteAlternativesResult {
     data class OnRouteAlternatives(
         val routeProgress: RouteProgress,
         val alternatives: List<NavigationRoute>,
-        val routerOrigin: RouterOrigin
+        @RouterOrigin
+        val routerOrigin: String
     ) : NavigationRouteAlternativesResult
 
     data class OnRouteAlternativeError(
@@ -161,41 +151,13 @@ sealed interface NavigationRouteAlternativesResult {
     ) : NavigationRouteAlternativesResult
 }
 
-fun MapboxNavigation.alternativesUpdates(): Flow<NavigationRouteAlternativesResult> = callbackFlow {
-    val observer = object : NavigationRouteAlternativesObserver {
-        override fun onRouteAlternatives(
-            routeProgress: RouteProgress,
-            alternatives: List<NavigationRoute>,
-            routerOrigin: RouterOrigin
-        ) {
-            trySend(
-                NavigationRouteAlternativesResult.OnRouteAlternatives(
-                    routeProgress,
-                    alternatives,
-                    routerOrigin
-                )
-            )
-        }
-
-        override fun onRouteAlternativesError(error: RouteAlternativesError) {
-            trySend(
-                NavigationRouteAlternativesResult.OnRouteAlternativeError(
-                    error
-                )
-            )
-        }
-
-    }
-    registerRouteAlternativesObserver(observer)
-    awaitClose {
-        unregisterRouteAlternativesObserver(observer)
-    }
-}
-
 suspend fun MapboxNavigation.requestRoutes(options: RouteOptions) =
     suspendCancellableCoroutine<RouteRequestResult> { continuation ->
         val callback = object : NavigationRouterCallback {
-            override fun onRoutesReady(routes: List<NavigationRoute>, routerOrigin: RouterOrigin) {
+            override fun onRoutesReady(
+                routes: List<NavigationRoute>,
+                @RouterOrigin routerOrigin: String
+            ) {
                 continuation.resume(RouteRequestResult.Success(routes, routerOrigin))
             }
 
@@ -203,12 +165,46 @@ suspend fun MapboxNavigation.requestRoutes(options: RouteOptions) =
                 continuation.resume(RouteRequestResult.Failure(reasons))
             }
 
-            override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+            override fun onCanceled(routeOptions: RouteOptions, @RouterOrigin routerOrigin: String) {
             }
         }
         val id = requestRoutes(options, callback)
         continuation.invokeOnCancellation {
             cancelRouteRequest(id)
+        }
+    }
+
+@ExperimentalPreviewMapboxNavigationAPI
+sealed class MapMatchingRequestResult {
+    data class Success(
+        val value: MapMatchingSuccessfulResult
+    ) : MapMatchingRequestResult()
+
+    data class Failure(
+        val reasons: MapMatchingFailure
+    ) : MapMatchingRequestResult()
+
+    object Cancelled: MapMatchingRequestResult()
+
+    fun getSuccessfulOrThrowException() = (this as Success).value
+}
+
+@ExperimentalPreviewMapboxNavigationAPI
+suspend fun MapboxNavigation.requestMapMatching(options: MapMatchingOptions) =
+    suspendCancellableCoroutine<MapMatchingRequestResult> { continuation ->
+        val callback = object : MapMatchingAPICallback {
+            override fun success(result: MapMatchingSuccessfulResult) {
+                continuation.resume(MapMatchingRequestResult.Success(result))
+            }
+            override fun failure(failure: MapMatchingFailure) {
+                continuation.resume(MapMatchingRequestResult.Failure(failure))
+            }
+            override fun onCancel() {
+            }
+        }
+        val id = requestMapMatching(options, callback)
+        continuation.invokeOnCancellation {
+            cancelMapMatchingRequest(id)
         }
     }
 
@@ -223,7 +219,7 @@ suspend fun MapboxNavigation.setNavigationRoutesAsync(
 sealed class RouteRequestResult {
     data class Success(
         val routes: List<NavigationRoute>,
-        val routerOrigin: RouterOrigin
+        @RouterOrigin val routerOrigin: String
     ) : RouteRequestResult()
 
     data class Failure(

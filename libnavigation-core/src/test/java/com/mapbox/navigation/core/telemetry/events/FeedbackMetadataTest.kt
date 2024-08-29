@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.telemetry.events
 
-import android.location.Location
 import com.google.gson.Gson
 import com.google.gson.JsonParser
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocations
@@ -25,24 +25,12 @@ class FeedbackMetadataTest {
         const val REROUTE_COUNT = 1
 
         private val locationsBefore = listOf(
-            Location("providername1").apply {
-                latitude = 0.1
-                longitude = 0.2
-            },
-            Location("providername2").apply {
-                latitude = 1.1
-                longitude = 1.2
-            }
+            Location.Builder().source("providername1").latitude(0.1).longitude(0.2).build(),
+            Location.Builder().source("providername2").latitude(1.1).longitude(1.2).build(),
         )
         private val locationsAfter = listOf(
-            Location("providername3").apply {
-                latitude = 3.1
-                longitude = 3.2
-            },
-            Location("providername4").apply {
-                latitude = 4.1
-                longitude = 4.2
-            }
+            Location.Builder().source("providername3").latitude(3.1).longitude(3.2).build(),
+            Location.Builder().source("providername4").latitude(4.1).longitude(4.2).build(),
         )
     }
 
@@ -87,6 +75,7 @@ class FeedbackMetadataTest {
             locationsBeforeEvent = locationsBefore.toTelemetryLocations(),
             locationsAfterEvent = locationsAfter.toTelemetryLocations(),
             locationEngineNameExternal = "LOCATION_ENGINE_NAME_EXTERNAL",
+            simulation = true,
             percentTimeInPortrait = 50,
             percentTimeInForeground = 20,
             eventVersion = 100,
@@ -101,7 +90,7 @@ class FeedbackMetadataTest {
                 applicationState = "APP_STATE",
                 created = "CREATED_DATA",
                 feedbackId = "FEEDBACK_ID",
-                userId = "USER_ID"
+                userId = "USER_ID",
             ),
             metricsDirectionsRoute = MetricsDirectionsRoute(route = null),
             metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
@@ -110,6 +99,6 @@ class FeedbackMetadataTest {
                 version = "APP_METADATA_VERSION",
                 userId = "APP_METADATA_USER_ID",
                 sessionId = "APP_METADATA_SESSION_ID",
-            )
+            ),
         )
 }

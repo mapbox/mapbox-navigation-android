@@ -24,7 +24,7 @@ class RouteRefreshStateHolderTest {
 
         verify(exactly = 1) {
             observer.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED, null)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED, null),
             )
         }
     }
@@ -40,8 +40,8 @@ class RouteRefreshStateHolderTest {
             observer.onNewState(
                 RouteRefreshStateResult(
                     RouteRefreshExtra.REFRESH_STATE_STARTED,
-                    null
-                )
+                    null,
+                ),
             )
         }
     }
@@ -64,8 +64,8 @@ class RouteRefreshStateHolderTest {
             observer.onNewState(
                 RouteRefreshStateResult(
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-                    null
-                )
+                    null,
+                ),
             )
         }
     }
@@ -81,8 +81,8 @@ class RouteRefreshStateHolderTest {
             observer.onNewState(
                 RouteRefreshStateResult(
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-                    null
-                )
+                    null,
+                ),
             )
         }
     }
@@ -106,8 +106,8 @@ class RouteRefreshStateHolderTest {
             observer.onNewState(
                 RouteRefreshStateResult(
                     RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                    message
-                )
+                    message,
+                ),
             )
         }
     }
@@ -122,7 +122,7 @@ class RouteRefreshStateHolderTest {
 
         verify(exactly = 1) {
             observer.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, message)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, message),
             )
         }
     }
@@ -144,7 +144,7 @@ class RouteRefreshStateHolderTest {
 
         verify(exactly = 1) {
             observer.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED),
             )
         }
     }
@@ -158,7 +158,7 @@ class RouteRefreshStateHolderTest {
 
         verify(exactly = 1) {
             observer.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED),
             )
         }
     }
@@ -191,7 +191,7 @@ class RouteRefreshStateHolderTest {
 
         verify(exactly = 1) {
             observer.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED, null)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED, null),
             )
         }
     }
@@ -241,7 +241,7 @@ class RouteRefreshStateHolderTest {
 
         verify(exactly = 1) {
             observer.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED, null)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED, null),
             )
         }
         clearAllMocks(answers = false)
@@ -252,10 +252,10 @@ class RouteRefreshStateHolderTest {
 
         verify(exactly = 1) {
             observer.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED, null)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED, null),
             )
             secondObserver.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED, null)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_CANCELED, null),
             )
         }
         clearAllMocks(answers = false)
@@ -266,7 +266,7 @@ class RouteRefreshStateHolderTest {
 
         verify(exactly = 1) {
             secondObserver.onNewState(
-                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, null)
+                RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED, null),
             )
         }
         verify(exactly = 0) { observer.onNewState(any()) }

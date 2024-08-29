@@ -3,14 +3,19 @@ package com.mapbox.navigation.copilot
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.SystemClock
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.google.gson.GsonBuilder
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory
+import com.mapbox.common.MapboxOptions
+import com.mapbox.common.MapboxServices
 import com.mapbox.common.UploadOptions
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.options.getOwner
+import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil.getTokenForService
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -39,7 +44,6 @@ import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -54,7 +58,7 @@ import java.util.Locale
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapboxCopilotImpl(
-    private val mapboxNavigation: MapboxNavigation
+    private val mapboxNavigation: MapboxNavigation,
 ) {
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
@@ -78,14 +82,16 @@ internal class MapboxCopilotImpl(
             }
         }
     private var startSessionTime: Long = 0
-    private var appSessionId =
+    private val owner = mapboxNavigation.navigationOptions.copilotOptions.getOwner()
+    private val appSessionId =
         mapboxNavigation.navigationOptions.eventsAppMetadata?.sessionId ?: "_"
     private var driveId = "_"
     private var startedAt = ""
-    private var appUserId = mapboxNavigation.navigationOptions.eventsAppMetadata?.userId ?: "_"
+    private val appUserId = mapboxNavigation.navigationOptions.copilotOptions.userId
+        ?: mapboxNavigation.navigationOptions.eventsAppMetadata?.userId ?: "_"
     private var endedAt = ""
     private var driveMode = ""
-    private val foregroundBackgroundLifecycleObserver = object : DefaultLifecycleObserver() {
+    private val foregroundBackgroundLifecycleObserver = object : DefaultLifecycleObserver {
         override fun onResume(owner: LifecycleOwner) {
             push(GoingToForegroundEvent)
         }
@@ -94,7 +100,6 @@ internal class MapboxCopilotImpl(
             push(GoingToBackgroundEvent)
         }
     }
-    private val accessToken = mapboxNavigation.navigationOptions.accessToken.orEmpty()
     private val deviceType = mapboxNavigation.navigationOptions.deviceProfile.deviceType
 
     private val shouldSendHistoryOnlyWithFeedback =
@@ -168,7 +173,7 @@ internal class MapboxCopilotImpl(
         registerUserFeedbackCallback(userFeedbackCallback)
         appLifecycleOwner.lifecycle.addObserver(foregroundBackgroundLifecycleObserver)
         mapboxNavigation.registerHistoryRecordingStateChangeObserver(
-            historyRecordingStateChangeObserver
+            historyRecordingStateChangeObserver,
         )
     }
 
@@ -180,7 +185,7 @@ internal class MapboxCopilotImpl(
         appLifecycleOwner.lifecycle.removeObserver(foregroundBackgroundLifecycleObserver)
         appLifecycleOwnerCleanupAction()
         mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(
-            historyRecordingStateChangeObserver
+            historyRecordingStateChangeObserver,
         )
         uploadHistory()
     }
@@ -246,7 +251,7 @@ internal class MapboxCopilotImpl(
     }
 
     private fun startRecordingHistory(
-        historyRecordingSessionState: HistoryRecordingSessionState
+        historyRecordingSessionState: HistoryRecordingSessionState,
     ) {
         copilotHistoryRecorder.startRecording()
         currentHistoryRecordingSessionState = historyRecordingSessionState
@@ -400,7 +405,10 @@ internal class MapboxCopilotImpl(
 
     private fun buildAttachmentMetadata(copilotMetadata: CopilotMetadata): AttachmentMetadata {
         val filename = generateFilename(copilotMetadata)
-        val owner = retrieveOwnerFrom(accessToken)
+        val owner =
+            this.owner?.takeIf { it.isNotBlank() } ?: retrieveOwnerFrom(
+                getTokenForService(MapboxServices.DIRECTIONS),
+            )
         val sessionId = generateSessionId(copilotMetadata, owner)
         return AttachmentMetadata(
             name = filename,
@@ -420,12 +428,7 @@ internal class MapboxCopilotImpl(
 
         // we have to leave it up to end users to ensure the filename in the metadata matches the actual name of the file
         val to = copyToAndRemove(from, metadata.name)
-        var url = if (HistoryAttachmentsUtils.retrieveIsDebug()) {
-            STAGING_BASE_URL
-        } else {
-            PROD_BASE_URL
-        }
-        url += "/attachments/v1?access_token=$accessToken"
+        val url = "$PROD_BASE_URL/attachments/v1?access_token=${MapboxOptions.accessToken}"
 
         return UploadOptions(
             to.absolutePath,
@@ -433,6 +436,7 @@ internal class MapboxCopilotImpl(
             HashMap(),
             gson.toJson(metadataList),
             MEDIA_TYPE_ZIP,
+            MapboxCopilot.sdkInformation,
         )
     }
 
@@ -495,7 +499,6 @@ internal class MapboxCopilotImpl(
         internal const val ZIP = "zip"
         internal const val MEDIA_TYPE_ZIP = "application/zip"
         internal const val LOG_CATEGORY = "MapboxCopilot"
-        private const val STAGING_BASE_URL = "https://api-events-staging.tilestream.net"
         private const val PROD_BASE_URL = "https://events.mapbox.com"
     }
 }

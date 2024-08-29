@@ -8,7 +8,7 @@ package com.mapbox.navigation.core.history.model
  */
 class HistoryEventGetStatus internal constructor(
     override val eventTimestamp: Double,
-    val elapsedRealtimeNanos: Long
+    val elapsedRealtimeNanos: Long,
 ) : HistoryEvent {
 
     /**

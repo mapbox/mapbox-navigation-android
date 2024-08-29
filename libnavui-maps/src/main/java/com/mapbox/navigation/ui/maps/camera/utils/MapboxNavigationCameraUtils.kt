@@ -4,7 +4,10 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.CameraAnimatorsFactory
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
+import com.mapbox.maps.plugin.animation.getCameraAnimatorsFactory
 import kotlin.math.hypot
 import kotlin.math.ln
 import kotlin.math.pow
@@ -65,23 +68,26 @@ internal fun projectedDistance(
     mapboxMap: MapboxMap,
     currentPoint: Point,
     targetPoint: Point,
-    targetZL: Double
+    targetZL: Double,
 ): Double {
     return hypot(
         mapboxMap.project(currentPoint, targetZL).x - mapboxMap.project(targetPoint, targetZL).x,
-        mapboxMap.project(targetPoint, targetZL).y - mapboxMap.project(targetPoint, targetZL).y
+        mapboxMap.project(targetPoint, targetZL).y - mapboxMap.project(targetPoint, targetZL).y,
     )
 }
 
 internal fun screenDistanceFromMapCenterToTarget(
     mapboxMap: MapboxMap,
     currentCenter: Point,
-    targetCenter: Point
+    targetCenter: Point,
 ): Double {
     val currentCenterScreenCoordinate = mapboxMap.pixelForCoordinate(currentCenter)
     val locationScreenCoordinate = mapboxMap.pixelForCoordinate(targetCenter)
     return hypot(
         currentCenterScreenCoordinate.x - locationScreenCoordinate.x,
-        currentCenterScreenCoordinate.y - locationScreenCoordinate.y
+        currentCenterScreenCoordinate.y - locationScreenCoordinate.y,
     )
 }
+
+internal fun CameraAnimationsPlugin.getAnimatorsFactory(): CameraAnimatorsFactory =
+    getCameraAnimatorsFactory()

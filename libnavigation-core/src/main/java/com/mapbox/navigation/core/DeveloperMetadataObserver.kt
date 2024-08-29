@@ -25,7 +25,7 @@ fun interface DeveloperMetadataObserver {
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class DeveloperMetadata internal constructor(
-    val copilotSessionId: String
+    val copilotSessionId: String,
 ) {
 
     /**
@@ -57,7 +57,7 @@ class DeveloperMetadata internal constructor(
     }
 
     internal fun copy(
-        copilotSessionId: String = this.copilotSessionId
+        copilotSessionId: String = this.copilotSessionId,
     ): DeveloperMetadata {
         return DeveloperMetadata(copilotSessionId)
     }

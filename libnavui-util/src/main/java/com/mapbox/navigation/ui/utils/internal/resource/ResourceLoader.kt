@@ -47,7 +47,7 @@ abstract class ResourceLoader {
     abstract fun load(
         tileStore: TileStore,
         request: ResourceLoadRequest,
-        callback: ResourceLoadCallback
+        callback: ResourceLoadCallback,
     ): Long
 
     /**
@@ -95,7 +95,7 @@ interface ResourceLoadObserver {
      */
     fun onFinish(
         request: ResourceLoadRequest,
-        result: Expected<ResourceLoadError, ResourceLoadResult>
+        result: Expected<ResourceLoadError, ResourceLoadResult>,
     )
 }
 

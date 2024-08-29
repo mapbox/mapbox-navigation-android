@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -20,69 +21,82 @@ class RouteRefreshValidatorTest {
 
     @Test
     fun `validateRoute valid`() {
-        every { route.routeOptions } returns createRouteOptions(enableRefresh = true)
-        every { route.directionsRoute } returns createDirectionsRoute(requestUuid = "uuid")
+        val route = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                requestUuid = "uuid",
+                routeOptions = createRouteOptions(enableRefresh = true),
+            ),
+        )
 
         assertEquals(
             RouteRefreshValidator.RouteValidationResult.Valid,
-            RouteRefreshValidator.validateRoute(route)
+            RouteRefreshValidator.validateRoute(route),
         )
     }
 
     @Test
     fun `validateRoute enableRefresh is null`() {
-        every { route.routeOptions } returns createRouteOptions(enableRefresh = null)
         every { route.directionsRoute } returns createDirectionsRoute(requestUuid = "uuid")
 
         assertEquals(
             RouteRefreshValidator.RouteValidationResult
                 .Invalid("RouteOptions#enableRefresh is false"),
-            RouteRefreshValidator.validateRoute(route)
+            RouteRefreshValidator.validateRoute(route),
         )
     }
 
     @Test
     fun `validateRoute enableRefresh is false`() {
-        every { route.routeOptions } returns createRouteOptions(enableRefresh = false)
         every { route.directionsRoute } returns createDirectionsRoute(requestUuid = "uuid")
 
         assertEquals(
             RouteRefreshValidator.RouteValidationResult
                 .Invalid("RouteOptions#enableRefresh is false"),
-            RouteRefreshValidator.validateRoute(route)
+            RouteRefreshValidator.validateRoute(route),
         )
     }
 
     @Test
     fun `validateRoute requestUuid is null`() {
-        every { route.routeOptions } returns createRouteOptions(enableRefresh = true)
-        every { route.directionsRoute } returns createDirectionsRoute(requestUuid = null)
+        val route = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                requestUuid = null,
+                routeOptions = createRouteOptions(enableRefresh = true),
+            ),
+        )
 
         assertEquals(
             RouteRefreshValidator.RouteValidationResult.Invalid(noUuidMessage),
-            RouteRefreshValidator.validateRoute(route)
+            RouteRefreshValidator.validateRoute(route),
         )
     }
 
     @Test
     fun `validateRoute requestUuid is empty`() {
-        every { route.routeOptions } returns createRouteOptions(enableRefresh = true)
-        every { route.directionsRoute } returns createDirectionsRoute(requestUuid = "")
+        val route = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                requestUuid = "",
+                routeOptions = createRouteOptions(enableRefresh = true),
+            ),
+        )
 
         assertEquals(
             RouteRefreshValidator.RouteValidationResult.Invalid(noUuidMessage),
-            RouteRefreshValidator.validateRoute(route)
+            RouteRefreshValidator.validateRoute(route),
         )
     }
 
     @Test
     fun `validateRoute requestUuid is blank`() {
-        every { route.routeOptions } returns createRouteOptions(enableRefresh = true)
-        every { route.directionsRoute } returns createDirectionsRoute(requestUuid = "   ")
-
+        val route = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                requestUuid = "   ",
+                routeOptions = createRouteOptions(enableRefresh = true),
+            ),
+        )
         assertEquals(
             RouteRefreshValidator.RouteValidationResult.Invalid(noUuidMessage),
-            RouteRefreshValidator.validateRoute(route)
+            RouteRefreshValidator.validateRoute(route),
         )
     }
 
@@ -107,7 +121,7 @@ class RouteRefreshValidatorTest {
             RouteRefreshValidator.RouteValidationResult.Valid to mockk(relaxed = true),
             RouteRefreshValidator.RouteValidationResult.Valid to mockk(relaxed = true),
             RouteRefreshValidator.RouteValidationResult.Invalid("some reason") to
-                mockk(relaxed = true) { every { id } returns "id#0" }
+                mockk(relaxed = true) { every { id } returns "id#0" },
         )
         assertEquals("id#0 some reason", RouteRefreshValidator.joinValidationErrorMessages(list))
     }
@@ -120,11 +134,11 @@ class RouteRefreshValidatorTest {
             RouteRefreshValidator.RouteValidationResult.Invalid("reason 2") to
                 mockk(relaxed = true) { every { id } returns "id#1" },
             RouteRefreshValidator.RouteValidationResult.Invalid("reason 3") to
-                mockk(relaxed = true) { every { id } returns "id#2" }
+                mockk(relaxed = true) { every { id } returns "id#2" },
         )
         assertEquals(
             "id#0 reason 1. id#1 reason 2. id#2 reason 3",
-            RouteRefreshValidator.joinValidationErrorMessages(list)
+            RouteRefreshValidator.joinValidationErrorMessages(list),
         )
     }
 }

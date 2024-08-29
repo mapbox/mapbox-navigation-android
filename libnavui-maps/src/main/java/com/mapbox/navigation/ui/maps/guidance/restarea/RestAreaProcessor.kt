@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.guidance.restarea
 import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.ResourceLoadError
@@ -16,7 +17,8 @@ import com.mapbox.navigation.ui.utils.internal.SvgUtil
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
-import java.io.ByteArrayInputStream
+import com.mapbox.navigation.utils.internal.ByteBufferBackedInputStream
+import com.mapbox.navigation.utils.internal.isNotEmpty
 
 internal object RestAreaProcessor {
 
@@ -52,7 +54,7 @@ internal object RestAreaProcessor {
     }
 
     private fun getSapaMapUrl(
-        bannerInstructions: BannerInstructions
+        bannerInstructions: BannerInstructions,
     ): String? = bannerInstructions.getBannerComponents()?.findGuideMapUrl()
 
     private fun List<BannerComponents>.findGuideMapUrl(): String? {
@@ -75,27 +77,27 @@ internal object RestAreaProcessor {
     }
 
     private fun processResponse(
-        response: Expected<ResourceLoadError, ResourceLoadResult>
+        response: Expected<ResourceLoadError, ResourceLoadResult>,
     ): RestAreaResult {
         return response.fold(
             { error ->
                 RestAreaResult.RestAreaMapSvg.Failure(
-                    error.type.name + ": " + error.message
+                    error.type.name + ": " + error.message,
                 )
             },
             { responseData ->
                 when (responseData.status) {
                     ResourceLoadStatus.AVAILABLE -> {
-                        val blob: ByteArray = responseData.data?.data ?: byteArrayOf()
-                        if (blob.isEmpty()) {
-                            RestAreaResult.RestAreaMapSvg.Empty
+                        val dataRef = responseData.data?.data
+                        if (dataRef?.isNotEmpty() == true) {
+                            RestAreaResult.RestAreaMapSvg.Success(dataRef)
                         } else {
-                            RestAreaResult.RestAreaMapSvg.Success(blob)
+                            RestAreaResult.RestAreaMapSvg.Empty
                         }
                     }
                     ResourceLoadStatus.UNAUTHORIZED -> {
                         RestAreaResult.RestAreaMapSvg.Failure(
-                            "Your token cannot access this resource, contact support"
+                            "Your token cannot access this resource, contact support",
                         )
                     }
                     ResourceLoadStatus.NOT_FOUND -> {
@@ -105,7 +107,7 @@ internal object RestAreaProcessor {
                         RestAreaResult.RestAreaMapSvg.Failure("Unknown error")
                     }
                 }
-            }
+            },
         )
     }
 
@@ -123,16 +125,18 @@ internal object RestAreaProcessor {
     }
 
     private fun processSvg(
-        svg: ByteArray,
-        options: MapboxRestAreaOptions
+        svg: DataRef,
+        options: MapboxRestAreaOptions,
     ): RestAreaResult {
         val expected: Expected<Exception, Bitmap> = try {
-            val stream = ByteArrayInputStream(svg)
+            val stream = ByteBufferBackedInputStream(svg.buffer)
             ExpectedFactory.createValue(
-                SvgUtil.renderAsBitmapWithWidth(
-                    stream,
-                    options.desiredGuideMapWidth
-                )
+                stream.use {
+                    SvgUtil.renderAsBitmapWithWidth(
+                        it,
+                        options.desiredGuideMapWidth,
+                    )
+                },
             )
         } catch (ex: Exception) {
             ExpectedFactory.createError(ex)
@@ -143,7 +147,7 @@ internal object RestAreaProcessor {
             },
             { value ->
                 RestAreaResult.RestAreaBitmap.Success(value)
-            }
+            },
         )
     }
 }

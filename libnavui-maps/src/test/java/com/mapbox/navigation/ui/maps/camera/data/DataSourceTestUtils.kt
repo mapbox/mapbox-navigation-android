@@ -10,7 +10,7 @@ import org.junit.Assert
 internal fun <V, D> assertArrays1(
     expected: List<V>,
     actual: List<V>,
-    adapter: ArrayTestAdapter<V, D>
+    adapter: ArrayTestAdapter<V, D>,
 ) {
     Assert.assertTrue(expected.size == actual.size)
     expected.forEachIndexed { index, expectedValue ->
@@ -22,7 +22,7 @@ internal fun <V, D> assertArrays1(
 internal fun <V, D> assertArrays2(
     expected: List<List<V>>,
     actual: List<List<V>>,
-    adapter: ArrayTestAdapter<V, D>
+    adapter: ArrayTestAdapter<V, D>,
 ) {
     Assert.assertTrue(expected.size == actual.size)
     expected.forEachIndexed { index, nestedExpected ->
@@ -33,7 +33,7 @@ internal fun <V, D> assertArrays2(
 internal fun <V, D> assertArrays3(
     expected: List<List<List<V>>>,
     actual: List<List<List<V>>>,
-    adapter: ArrayTestAdapter<V, D>
+    adapter: ArrayTestAdapter<V, D>,
 ) {
     Assert.assertTrue(expected.size == actual.size)
     expected.forEachIndexed { index, nestedExpected ->
@@ -49,7 +49,7 @@ internal fun <V, D> decodeArrays1(list: List<D>, adapter: ArrayTestAdapter<V, D>
 
 internal fun <V, D> decodeArrays2(
     list: List<List<D>>,
-    adapter: ArrayTestAdapter<V, D>
+    adapter: ArrayTestAdapter<V, D>,
 ): List<List<V>> {
     return list.map { nestedList ->
         decodeArrays1(nestedList, adapter)
@@ -58,7 +58,7 @@ internal fun <V, D> decodeArrays2(
 
 internal fun <V, D> decodeArrays3(
     list: List<List<List<D>>>,
-    adapter: ArrayTestAdapter<V, D>
+    adapter: ArrayTestAdapter<V, D>,
 ): List<List<List<V>>> {
     return list.map { nestedList ->
         decodeArrays2(nestedList, adapter)
@@ -95,7 +95,7 @@ internal fun <V, D> encodeArrays2(list: List<List<V>>, adapter: ArrayTestAdapter
 
 internal fun <V, D> encodeArrays3(
     list: List<List<List<V>>>,
-    adapter: ArrayTestAdapter<V, D>
+    adapter: ArrayTestAdapter<V, D>,
 ): String {
     val builder = StringBuilder()
     builder.append("[")

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -81,9 +82,9 @@ internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
             routeProgress?.navigationRoute,
             routeProgress?.currentLegProgress,
             routeProgress?.distanceRemaining,
-            routeProgress?.durationRemaining
+            routeProgress?.durationRemaining,
         ) { _routeProgress, _navigationRoute, _currentLegProgress,
-            _distanceRemaining, _durationRemaining ->
+            _distanceRemaining, _durationRemaining, ->
             obtainRouteData(_navigationRoute)
             obtainLegData(_currentLegProgress)
             obtainStepData(_routeProgress)
@@ -114,7 +115,7 @@ internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
     private fun obtainRouteData(navigationRoute: NavigationRoute) {
         val route = navigationRoute.directionsRoute
         directionsRouteGeometry = route.geometry()
-        directionsRouteRequestIdentifier = navigationRoute.directionsResponse.uuid()
+        directionsRouteRequestIdentifier = navigationRoute.responseUUID
         directionsRouteStepCount = obtainStepCount(route)
         directionsRouteIndex = navigationRoute.routeIndex
         directionsRouteDistance = route.distance().toInt()

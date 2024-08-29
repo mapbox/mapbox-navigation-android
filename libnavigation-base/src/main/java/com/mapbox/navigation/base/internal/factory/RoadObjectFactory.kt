@@ -36,13 +36,13 @@ object RoadObjectFactory {
                 buildUpcomingRoadObject(
                     buildRoadObject(it.roadObject),
                     it.distanceToStart,
-                    null
+                    null,
                 )
             }
     }
 
     fun List<UpcomingRoadObject>.getUpdatedObjectsAhead(
-        upcomingRouteAlertUpdates: List<UpcomingRouteAlertUpdate>
+        upcomingRouteAlertUpdates: List<UpcomingRouteAlertUpdate>,
     ): List<UpcomingRoadObject> {
         val idToDistanceRemaining = upcomingRouteAlertUpdates.associate {
             it.id to it.distanceToStart
@@ -56,8 +56,8 @@ object RoadObjectFactory {
                         distanceToStart = idToDistanceRemaining[it.roadObject.id],
                         // distance info is only present for EH,
                         // and UpcomingRoadObject's come from route response only
-                        distanceInfo = null
-                    )
+                        distanceInfo = null,
+                    ),
                 )
             }
         }
@@ -74,7 +74,7 @@ object RoadObjectFactory {
      * Build matching error from native error
      */
     fun buildRoadObjectMatchingError(
-        nativeError: com.mapbox.navigator.RoadObjectMatcherError
+        nativeError: com.mapbox.navigator.RoadObjectMatcherError,
     ): RoadObjectMatcherError {
         with(nativeError) {
             return RoadObjectMatcherError(roadObjectId, description)
@@ -97,7 +97,7 @@ object RoadObjectFactory {
     fun buildUpcomingRoadObject(
         roadObject: RoadObject,
         distanceToStart: Double?,
-        distanceInfo: RoadObjectDistanceInfo?
+        distanceInfo: RoadObjectDistanceInfo?,
     ) =
         UpcomingRoadObject(roadObject, distanceToStart, distanceInfo)
 }

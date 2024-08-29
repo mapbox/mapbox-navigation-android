@@ -1,8 +1,8 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
-import android.location.Location
 import androidx.annotation.FloatRange
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.navigation.base.internal.utils.safeCompareTo
 
 /**
  * Options that impact generation of frames.
@@ -225,7 +225,7 @@ class FollowingFrameOptions {
             StepManeuver.MERGE,
             StepManeuver.ON_RAMP,
             StepManeuver.OFF_RAMP,
-            StepManeuver.FORK
+            StepManeuver.FORK,
         )
     }
 
@@ -291,13 +291,42 @@ class FollowingFrameOptions {
      * @param x position from the left edge of the padding in the `<0.0, 1.0>` range
      * @param y position from the top edge of the padding in the `<0.0, 1.0>` range
      */
-    data class FocalPoint(
+    class FocalPoint(
         @FloatRange(from = 0.0, to = 1.0) val x: Double,
-        @FloatRange(from = 0.0, to = 1.0) val y: Double
+        @FloatRange(from = 0.0, to = 1.0) val y: Double,
     ) {
         init {
             require(x in 0.0..1.0) { "x value must be within [0.0..1.0] range" }
             require(y in 0.0..1.0) { "y value must be within [0.0..1.0] range" }
+        }
+
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as FocalPoint
+
+            if (!x.safeCompareTo(other.x)) return false
+            return y.safeCompareTo(other.y)
+        }
+
+        /**
+         * Returns a hash code value for the object.
+         */
+        override fun hashCode(): Int {
+            var result = x.hashCode()
+            result = 31 * result + y.hashCode()
+            return result
+        }
+
+        /**
+         * Returns a string representation of the object.
+         */
+        override fun toString(): String {
+            return "FocalPoint(x=$x, y=$y)"
         }
     }
 }

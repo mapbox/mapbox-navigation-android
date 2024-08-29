@@ -15,6 +15,9 @@ class CopilotOptionsTest : BuilderTest<CopilotOptions, CopilotOptions.Builder>()
         .maxHistoryFilesPerSession(2)
         .maxTotalHistoryFilesSizePerSession(250000)
         .shouldRecordFreeDriveHistories(false)
+        .shouldRecordRouteLineEvents(true)
+        .userId("user-id")
+        .ownerName("mapbox")
 
     @Test
     override fun trigger() {

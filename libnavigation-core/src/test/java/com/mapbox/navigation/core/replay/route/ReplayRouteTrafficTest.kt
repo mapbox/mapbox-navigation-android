@@ -19,7 +19,7 @@ class ReplayRouteTrafficTest {
             Point.fromLngLat(-121.467236, 38.562249),
             Point.fromLngLat(-121.46786, 38.562416),
             Point.fromLngLat(-121.468017, 38.562054),
-            Point.fromLngLat(-121.467804, 38.561996)
+            Point.fromLngLat(-121.467804, 38.561996),
         )
         val distances = listOf(
             63.788258828152905,
@@ -28,7 +28,7 @@ class ReplayRouteTrafficTest {
             6.119912374175893,
             57.36079720958969,
             42.51621717661491,
-            19.61608648662988
+            19.61608648662988,
         )
         val speeds = listOf(2.2, 2.3, 2.2, 0.6, 7.5, 1.7, 2.2)
 
@@ -48,7 +48,7 @@ class ReplayRouteTrafficTest {
             Point.fromLngLat(-121.467236, 38.562249),
             Point.fromLngLat(-121.46786, 38.562416),
             Point.fromLngLat(-121.468017, 38.562054),
-            Point.fromLngLat(-121.467804, 38.561996)
+            Point.fromLngLat(-121.467804, 38.561996),
         )
         val distances = listOf(
             63.788258828152905,
@@ -57,7 +57,7 @@ class ReplayRouteTrafficTest {
             6.119912374175893,
             57.36079720958969,
             42.51621717661491,
-            19.61608648662988
+            19.61608648662988,
         )
         val speeds = listOf(2.2, 2.3, 2.2, 0.6, 7.5, 1.7, 2.2)
 
@@ -67,14 +67,14 @@ class ReplayRouteTrafficTest {
             assertEquals(
                 d,
                 trafficLocations[index].distance,
-                0.1
+                0.1,
             )
         }
         speeds.forEachIndexed { index, s ->
             assertEquals(
                 s,
                 trafficLocations[index].speedMps,
-                0.01
+                0.01,
             )
         }
     }
@@ -94,7 +94,7 @@ class ReplayRouteTrafficTest {
             Point.fromLngLat(-121.46786, 38.562416),
             Point.fromLngLat(-121.468017, 38.562054),
             Point.fromLngLat(-121.468017, 38.562054),
-            Point.fromLngLat(-121.467804, 38.561996)
+            Point.fromLngLat(-121.467804, 38.561996),
         )
         val distances = listOf(
             63.788258828152905,
@@ -103,7 +103,7 @@ class ReplayRouteTrafficTest {
             6.119912374175893,
             57.36079720958969,
             42.51621717661491,
-            19.61608648662988
+            19.61608648662988,
         )
         val speeds = listOf(2.2, 2.3, 2.2, 0.6, 7.5, 1.7, 2.2)
 
@@ -123,7 +123,7 @@ class ReplayRouteTrafficTest {
             Point.fromLngLat(-121.467236, 38.562249),
             Point.fromLngLat(-121.46786, 38.562416),
             Point.fromLngLat(-121.468017, 38.562054),
-            Point.fromLngLat(-121.467804, 38.561996)
+            Point.fromLngLat(-121.467804, 38.561996),
         )
         val distances = listOf(63.788258828152905, 25.0465943752, 63.4807095838, 62.1323036632)
         val speeds = listOf(2.2, 2.3, 7.5, 2.2)

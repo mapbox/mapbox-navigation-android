@@ -6,7 +6,7 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 
 class LocationComponent(
-    val locationProvider: NavigationLocationProvider
+    val locationProvider: NavigationLocationProvider,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {

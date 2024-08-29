@@ -1,10 +1,11 @@
 package com.mapbox.navigation.core.routeoptions
 
-import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.location.Location
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.indexOfNextRequestedCoordinate
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -30,7 +31,7 @@ class RouteOptionsUpdaterParameterizedTest(
     private val initWaypointIndices: String?,
     private val nextCoordinateIndex: Int,
     private val expectedWaypointNames: String,
-    private val expectedWaypointIndices: String?
+    private val expectedWaypointIndices: String?,
 ) {
 
     companion object {
@@ -63,7 +64,7 @@ class RouteOptionsUpdaterParameterizedTest(
                 null,
                 1,
                 ";mid1;mid2;mid3;mid4;mid5;finish",
-                null
+                null,
             ),
             arrayOf(
                 7,
@@ -71,7 +72,7 @@ class RouteOptionsUpdaterParameterizedTest(
                 null,
                 3,
                 ";mid3;mid4;mid5;finish",
-                null
+                null,
             ),
             arrayOf(
                 7,
@@ -79,7 +80,7 @@ class RouteOptionsUpdaterParameterizedTest(
                 null,
                 5,
                 ";mid5;finish",
-                null
+                null,
             ),
             arrayOf(
                 7,
@@ -87,7 +88,7 @@ class RouteOptionsUpdaterParameterizedTest(
                 "0;1;2;3;4;5;6",
                 1,
                 ";mid1;mid2;mid3;mid4;mid5;finish",
-                "0;1;2;3;4;5;6"
+                "0;1;2;3;4;5;6",
             ),
             arrayOf(
                 7,
@@ -95,8 +96,8 @@ class RouteOptionsUpdaterParameterizedTest(
                 "0;1;2;3;4;5;6",
                 5,
                 ";mid5;finish",
-                "0;1;2"
-            )
+                "0;1;2",
+            ),
         )
     }
 
@@ -114,6 +115,7 @@ class RouteOptionsUpdaterParameterizedTest(
         routeRefreshAdapter = RouteOptionsUpdater()
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
     fun new_options_return_modified_waypoints() {
         mockkStatic(::indexOfNextRequestedCoordinate) {
@@ -143,7 +145,7 @@ class RouteOptionsUpdaterParameterizedTest(
             assertEquals(expectedWaypointNames, updatedWaypointNames)
             MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(
                 routeOptions,
-                updatedRouteOptions
+                updatedRouteOptions,
             )
         }
     }
@@ -152,7 +154,7 @@ class RouteOptionsUpdaterParameterizedTest(
         val location = mockk<Location>(relaxUnitFun = true)
         every { location.longitude } returns -122.4232
         every { location.latitude } returns 23.54423
-        every { location.bearing } returns 11f
+        every { location.bearing } returns 11.0
         locationMatcherResult = mockk {
             every { enhancedLocation } returns location
             every { zLevel } returns 2
@@ -168,14 +170,14 @@ class RouteOptionsUpdaterParameterizedTest(
             .coordinatesList(
                 List(coordinatesSize) {
                     Point.fromLngLat(1.0, 1.0)
-                }
+                },
             )
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .annotationsList(
                 listOf(
                     DirectionsCriteria.ANNOTATION_SPEED,
-                    DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC
-                )
+                    DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
+                ),
             )
             .alternatives(true)
             .steps(true)

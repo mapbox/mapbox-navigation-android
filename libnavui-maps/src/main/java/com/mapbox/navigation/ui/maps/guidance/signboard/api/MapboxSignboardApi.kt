@@ -4,10 +4,13 @@ import android.content.Context
 import android.net.Uri
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.MapboxServices
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
+import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardAction
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardProcessor
@@ -25,12 +28,10 @@ import kotlinx.coroutines.launch
  * Mapbox Signboard Api allows you to generate signboard for select maneuvers.
  * By default uses the [MapboxExternalFileResolver].
  * Check out [MapboxExternalFileResolver.resolveFont] to know how css style's fonts are treated
- * @property accessToken String
  */
 class MapboxSignboardApi @JvmOverloads constructor(
-    private val accessToken: String,
     private val parser: SvgToBitmapParser,
-    private val options: MapboxSignboardOptions = MapboxSignboardOptions.Builder().build()
+    private val options: MapboxSignboardOptions = MapboxSignboardOptions.Builder().build(),
 ) {
 
     private companion object {
@@ -38,13 +39,11 @@ class MapboxSignboardApi @JvmOverloads constructor(
     }
 
     constructor(
-        accessToken: String,
         applicationContext: Context,
-        options: MapboxSignboardOptions = MapboxSignboardOptions.Builder().build()
+        options: MapboxSignboardOptions = MapboxSignboardOptions.Builder().build(),
     ) : this(
-        accessToken,
         MapboxSvgToBitmapParser(MapboxExternalFileResolver(applicationContext.assets)),
-        options
+        options,
     )
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
@@ -58,7 +57,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
      */
     fun generateSignboard(
         instructions: BannerInstructions,
-        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
+        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>,
     ) {
         val action = SignboardAction.CheckSignboardAvailability(instructions)
         when (val result = SignboardProcessor.process(action)) {
@@ -68,15 +67,15 @@ class MapboxSignboardApi @JvmOverloads constructor(
             is SignboardResult.SignboardUnavailable -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        SignboardError("No signboard available for current maneuver.", null)
-                    )
+                        SignboardError("No signboard available for current maneuver.", null),
+                    ),
                 )
             }
             else -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        SignboardError("Inappropriate $result emitted for $action.", null)
-                    )
+                        SignboardError("Inappropriate $result emitted for $action.", null),
+                    ),
                 )
             }
         }
@@ -91,11 +90,12 @@ class MapboxSignboardApi @JvmOverloads constructor(
 
     private fun makeSignboardRequest(
         result: SignboardResult.SignboardAvailable,
-        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
+        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>,
     ) {
-        val url = Uri.parse(result.signboardUrl).buildUpon().apply {
-            appendQueryParameter(KEY, accessToken)
-        }.build().toString()
+        val accessToken = MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
+        val url = Uri.parse(result.signboardUrl).buildUpon()
+            .appendQueryParameter(KEY, accessToken)
+            .build().toString()
         val requestAction = SignboardAction.PrepareSignboardRequest(url)
         val signboardRequest = SignboardProcessor.process(requestAction)
         val loadRequest = (signboardRequest as SignboardResult.SignboardRequest).request
@@ -107,7 +107,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
 
     private fun onSignboardResponse(
         loadResult: Expected<ResourceLoadError, ResourceLoadResult>,
-        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
+        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>,
     ) {
         val action = SignboardAction.ProcessSignboardResponse(loadResult)
         when (val result = SignboardProcessor.process(action)) {
@@ -116,29 +116,29 @@ class MapboxSignboardApi @JvmOverloads constructor(
             }
             is SignboardResult.SignboardSvg.Failure -> {
                 consumer.accept(
-                    ExpectedFactory.createError(SignboardError(result.error, null))
+                    ExpectedFactory.createError(SignboardError(result.error, null)),
                 )
             }
             is SignboardResult.SignboardSvg.Empty -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        SignboardError("No signboard available for current maneuver.", null)
-                    )
+                        SignboardError("No signboard available for current maneuver.", null),
+                    ),
                 )
             }
             else -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        SignboardError("Inappropriate $result emitted for $action.", null)
-                    )
+                        SignboardError("Inappropriate $result emitted for $action.", null),
+                    ),
                 )
             }
         }
     }
 
     private fun onSvgAvailable(
-        svg: ByteArray,
-        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
+        svg: DataRef,
+        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>,
     ) {
         val action = SignboardAction.ParseSvgToBitmap(svg, parser, options)
         when (val result = SignboardProcessor.process(action)) {
@@ -151,8 +151,8 @@ class MapboxSignboardApi @JvmOverloads constructor(
             else -> {
                 consumer.accept(
                     ExpectedFactory.createError(
-                        SignboardError("Inappropriate $result emitted for $action.", null)
-                    )
+                        SignboardError("Inappropriate $result emitted for $action.", null),
+                    ),
                 )
             }
         }

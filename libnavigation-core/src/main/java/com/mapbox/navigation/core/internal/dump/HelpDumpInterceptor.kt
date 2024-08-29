@@ -15,7 +15,7 @@ class HelpDumpInterceptor : MapboxDumpInterceptor {
         return MapboxDumpRegistry.getInterceptors().filter { it != this }.map {
             Pair(
                 "${command()}:${it.command()}",
-                "Get the commands available from ${it.command()}"
+                "Get the commands available from ${it.command()}",
             )
         }
     }
@@ -23,7 +23,7 @@ class HelpDumpInterceptor : MapboxDumpInterceptor {
     override fun intercept(
         fileDescriptor: FileDescriptor,
         writer: PrintWriter,
-        commands: List<String>
+        commands: List<String>,
     ) {
         if (commands.isEmpty()) {
             printHelpFullDescription(writer)
@@ -49,7 +49,7 @@ class HelpDumpInterceptor : MapboxDumpInterceptor {
 
     private fun List<Pair<String, String>>.prettyString() = joinToString(
         separator = System.lineSeparator(),
-        transform = { it.prettyString() }
+        transform = { it.prettyString() },
     )
 
     private fun Pair<String, String>.prettyString() = "$first, $second"
@@ -87,7 +87,7 @@ Command arguments can be passed as key:value and are separated by spaces.
 
 Request help for the commands available. This list is given with the `help` command.
 ${availableCommands().prettyString()}
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 

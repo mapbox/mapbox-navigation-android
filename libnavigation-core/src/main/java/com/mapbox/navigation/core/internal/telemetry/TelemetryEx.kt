@@ -2,8 +2,7 @@
 
 package com.mapbox.navigation.core.internal.telemetry
 
-import android.location.Location
-import android.os.Build
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -24,13 +23,9 @@ internal fun Location.toTelemetryLocation(): TelemetryLocation {
         speed,
         bearing,
         altitude,
-        time.toString(),
-        accuracy,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            verticalAccuracyMeters
-        } else {
-            0f
-        },
+        timestamp.toString(),
+        horizontalAccuracy ?: 0.0,
+        verticalAccuracy ?: 0.0,
     )
 }
 

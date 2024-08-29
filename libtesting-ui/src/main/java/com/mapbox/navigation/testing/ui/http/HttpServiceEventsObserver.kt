@@ -1,10 +1,12 @@
 package com.mapbox.navigation.testing.ui.http
 
-import com.mapbox.common.DownloadOptions
 import com.mapbox.common.HttpRequest
+import com.mapbox.common.HttpRequestOrResponse
 import com.mapbox.common.HttpResponse
 import com.mapbox.common.HttpServiceFactory
 import com.mapbox.common.HttpServiceInterceptorInterface
+import com.mapbox.common.HttpServiceInterceptorRequestContinuation
+import com.mapbox.common.HttpServiceInterceptorResponseContinuation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,19 +37,20 @@ class HttpServiceEventsObserver : HttpServiceInterceptorInterface {
     val onRequestEventsFlow: Flow<HttpServiceEvent.Request> = eventsFlow
         .mapNotNull { it as? HttpServiceEvent.Request }
 
-    override fun onRequest(request: HttpRequest): HttpRequest {
+    override fun onRequest(
+        request: HttpRequest,
+        continuation: HttpServiceInterceptorRequestContinuation
+    ) {
         onEvent(HttpServiceEvent.Request(request))
-        return request
+        continuation.run(HttpRequestOrResponse.valueOf(request))
     }
 
-    override fun onDownload(download: DownloadOptions): DownloadOptions {
-        onEvent(HttpServiceEvent.Download(download))
-        return download
-    }
-
-    override fun onResponse(response: HttpResponse): HttpResponse {
+    override fun onResponse(
+        response: HttpResponse,
+        continuation: HttpServiceInterceptorResponseContinuation
+    ) {
         onEvent(HttpServiceEvent.Response(response))
-        return response
+        continuation.run(response)
     }
 
     private fun onEvent(event: HttpServiceEvent) {
@@ -57,12 +60,12 @@ class HttpServiceEventsObserver : HttpServiceInterceptorInterface {
     companion object {
         fun register(): HttpServiceEventsObserver {
             return HttpServiceEventsObserver().also {
-                HttpServiceFactory.getInstance().setInterceptor(it)
+                HttpServiceFactory.setHttpServiceInterceptor(it)
             }
         }
 
         fun unregister() {
-            HttpServiceFactory.getInstance().setInterceptor(null)
+            HttpServiceFactory.setHttpServiceInterceptor(null)
         }
     }
 }

@@ -19,7 +19,7 @@ class NavigationComponentProviderTest {
         val observer = mockk<DeveloperMetadataObserver>(relaxed = true)
 
         val aggregator = NavigationComponentProvider.createDeveloperMetadataAggregator(
-            historyRecordingStateHandler
+            historyRecordingStateHandler,
         )
         verify {
             historyRecordingStateHandler.registerCopilotSessionObserver(aggregator)

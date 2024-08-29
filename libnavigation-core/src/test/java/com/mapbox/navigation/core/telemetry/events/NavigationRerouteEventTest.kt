@@ -16,7 +16,7 @@ class NavigationRerouteEventTest {
     fun testValue() {
         val rerouteEvent = NavigationRerouteEvent(
             EventsTestHelper.mockPhoneState(),
-            EventsProvider.mockNavigationStepData()
+            EventsProvider.mockNavigationStepData(),
         ).apply {
             fillValues()
             newDistanceRemaining = 50
@@ -27,25 +27,25 @@ class NavigationRerouteEventTest {
                 TelemetryLocation(
                     2.2,
                     3.3,
-                    10.0f,
-                    11.0f,
+                    10.0,
+                    11.0,
                     12.0,
                     "timestamp_0",
-                    13.0f,
-                    15.0f,
-                )
+                    13.0,
+                    15.0,
+                ),
             )
             locationsAfter = arrayOf(
                 TelemetryLocation(
                     12.2,
                     13.3,
-                    110.0f,
-                    111.0f,
+                    110.0,
+                    111.0,
                     112.0,
                     "timestamp_1",
-                    113.0f,
-                    115.0f,
-                )
+                    113.0,
+                    115.0,
+                ),
             )
             screenshot = "screenshot_0"
         }
@@ -57,16 +57,16 @@ class NavigationRerouteEventTest {
             assertEquals(rerouteEvent.feedbackId, content["feedbackId"]!!.contents)
             assertEquals(
                 rerouteEvent.newDistanceRemaining.toLong(),
-                content["newDistanceRemaining"]!!.contents
+                content["newDistanceRemaining"]!!.contents,
             )
             assertEquals(
                 rerouteEvent.newDurationRemaining.toLong(),
-                content["newDurationRemaining"]!!.contents
+                content["newDurationRemaining"]!!.contents,
             )
             assertEquals(rerouteEvent.newGeometry, content["newGeometry"]!!.contents)
             assertEquals(
                 rerouteEvent.secondsSinceLastReroute.toLong(),
-                content["secondsSinceLastReroute"]!!.contents
+                content["secondsSinceLastReroute"]!!.contents,
             )
             assertEquals(rerouteEvent.screenshot, content["screenshot"]!!.contents)
             assertTrue(content.containsKey("locationsBefore"))
@@ -85,22 +85,22 @@ class NavigationRerouteEventTest {
                 Assert.assertEquals("upcomingName_0", stepContent["upcomingName"]!!.contents)
                 Assert.assertEquals(
                     "upcomingModifier_0",
-                    stepContent["upcomingModifier"]!!.contents
+                    stepContent["upcomingModifier"]!!.contents,
                 )
                 Assert.assertEquals(
                     "previousInstruction_0",
-                    stepContent["previousInstruction"]!!.contents
+                    stepContent["previousInstruction"]!!.contents,
                 )
                 Assert.assertEquals("previousName_0", stepContent["previousName"]!!.contents)
                 Assert.assertEquals(
                     "upcomingInstruction_0",
-                    stepContent["upcomingInstruction"]!!.contents
+                    stepContent["upcomingInstruction"]!!.contents,
                 )
                 Assert.assertEquals("previousType_0", stepContent["previousType"]!!.contents)
                 Assert.assertEquals("upcomingType_0", stepContent["upcomingType"]!!.contents)
                 Assert.assertEquals(
                     "previousModifier_0",
-                    stepContent["previousModifier"]!!.contents
+                    stepContent["previousModifier"]!!.contents,
                 )
             }
         }

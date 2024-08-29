@@ -19,12 +19,6 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.ApproximateCoordinates
-import com.mapbox.navigation.instrumentation_tests.utils.assertions.waitUntilHasSize
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
-import com.mapbox.navigation.instrumentation_tests.utils.toApproximateCoordinates
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -32,8 +26,13 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.navigateNextRouteLeg
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.ApproximateCoordinates
+import com.mapbox.navigation.testing.utils.assertions.waitUntilHasSize
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.readRawFileText
+import com.mapbox.navigation.testing.utils.toApproximateCoordinates
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
@@ -56,13 +55,13 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     private val evCoordinates = listOf(
         Point.fromLngLat(11.5852259, 48.1760993),
-        Point.fromLngLat(10.3406374, 49.16479)
+        Point.fromLngLat(10.3406374, 49.16479),
     )
 
     private val nonEvCoordinates = listOf(
         Point.fromLngLat(-121.496066, 38.577764),
         Point.fromLngLat(-121.480279, 38.57674),
-        Point.fromLngLat(-121.468434, 38.58225)
+        Point.fromLngLat(-121.468434, 38.58225),
     )
 
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -94,14 +93,13 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
                     .routingTilesOptions(
                         RoutingTilesOptions.Builder()
                             .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                            .build()
+                            .build(),
                     )
                     .navigatorPredictionMillis(0L)
-                    .build()
+                    .build(),
             )
             mockWebServerRule.requestHandlers.clear()
         }
@@ -179,7 +177,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             generateRouteOptions(coordinates, electric = false, waypointsPerRoute = false)
                 .toBuilder()
                 .waypointIndicesList(listOf(0, 1, 3, 5))
-                .build()
+                .build(),
         )
             .getSuccessfulResultOrThrowException()
             .routes
@@ -187,17 +185,19 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
 
         val nextWaypoints = mutableListOf<LegWaypoint?>()
-        mapboxNavigation.registerArrivalObserver(object : ArrivalObserver {
-            override fun onWaypointArrival(routeProgress: RouteProgress) {
-                nextWaypoints.add(routeProgress.currentLegProgress?.legDestination)
-            }
+        mapboxNavigation.registerArrivalObserver(
+            object : ArrivalObserver {
+                override fun onWaypointArrival(routeProgress: RouteProgress) {
+                    nextWaypoints.add(routeProgress.currentLegProgress?.legDestination)
+                }
 
-            override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
-            }
+                override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+                }
 
-            override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
-            }
-        })
+                override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+                }
+            },
+        )
         stayOnPosition(coordinates[1], 90f)
         nextWaypoints.waitUntilHasSize(1)
         var legWaypoint = nextWaypoints[0]!!
@@ -226,7 +226,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     fun leg_destination_ev_route() = sdkTest {
         val coordinates = listOf(
             Point.fromLngLat(48.39023, 11.063842),
-            Point.fromLngLat(49.164725, 10.340713)
+            Point.fromLngLat(49.164725, 10.340713),
         )
         addResponseHandler(R.raw.ev_route_response_for_refresh_with_2_waypoints, coordinates)
         stayOnPosition(coordinates[0])
@@ -240,35 +240,37 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
 
         val nextWaypoints = mutableListOf<LegWaypoint?>()
-        mapboxNavigation.registerArrivalObserver(object : ArrivalObserver {
-            override fun onWaypointArrival(routeProgress: RouteProgress) {
-                nextWaypoints.add(routeProgress.currentLegProgress?.legDestination)
-            }
+        mapboxNavigation.registerArrivalObserver(
+            object : ArrivalObserver {
+                override fun onWaypointArrival(routeProgress: RouteProgress) {
+                    nextWaypoints.add(routeProgress.currentLegProgress?.legDestination)
+                }
 
-            override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
-            }
+                override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+                }
 
-            override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
-            }
-        })
-        stayOnPosition(routes[0].directionsResponse.waypoints()!![1].location(), 315f)
+                override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+                }
+            },
+        )
+        stayOnPosition(routes[0].waypoints!![1].location(), 315f)
         nextWaypoints.waitUntilHasSize(1)
         var legWaypoint = nextWaypoints[0]!!
 
         checkLocation(
-            routes[0].directionsResponse.waypoints()!![1].location(),
-            legWaypoint.location
+            routes[0].waypoints!![1].location(),
+            legWaypoint.location,
         )
         assertEquals(LegWaypoint.EV_CHARGING_ADDED, legWaypoint.type)
 
         mapboxNavigation.navigateNextRouteLeg()
-        stayOnPosition(routes[0].directionsResponse.waypoints()!![2].location(), 0f)
+        stayOnPosition(routes[0].waypoints!![2].location(), 0f)
         nextWaypoints.waitUntilHasSize(2)
         legWaypoint = nextWaypoints[1]!!
 
         checkLocation(
-            routes[0].directionsResponse.waypoints()!![2].location(),
-            legWaypoint.location
+            routes[0].waypoints!![2].location(),
+            legWaypoint.location,
         )
         assertEquals(LegWaypoint.EV_CHARGING_ADDED, legWaypoint.type)
     }
@@ -285,7 +287,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                 longitude = point.longitude()
                 this.bearing = bearing
             },
-            100
+            100,
         )
     }
 
@@ -295,7 +297,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         waypointsPerRoute: Boolean? = null,
     ): List<NavigationRoute> {
         return mapboxNavigation.requestRoutes(
-            generateRouteOptions(coordinates, electric, waypointsPerRoute)
+            generateRouteOptions(coordinates, electric, waypointsPerRoute),
         )
             .getSuccessfulResultOrThrowException()
             .routes
@@ -331,7 +333,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                             "ev_unconditioned_charging_curve" to
                                 "0,50000;42000,35000;60000,15000;80000,5000",
                             "auxiliary_consumption" to "300",
-                        )
+                        ),
                     )
                 }
             }
@@ -346,19 +348,19 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             expected,
             route.waypoints!!.map {
                 it.name() to it.location().toApproximateCoordinates(tolerance)
-            }
+            },
         )
         assertEquals(
             expected,
             route.internalWaypoints().map {
                 it.name to it.location.toApproximateCoordinates(tolerance)
-            }
+            },
         )
         assertEquals(
             expected,
-            route.directionsResponse.waypoints()!!.map {
+            route.waypoints!!.map {
                 it.name() to it.location().toApproximateCoordinates(tolerance)
-            }
+            },
         )
         assertNull(route.directionsRoute.waypoints())
     }
@@ -371,21 +373,20 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             expected,
             route.waypoints!!.map {
                 it.name() to it.location().toApproximateCoordinates(tolerance)
-            }
+            },
         )
         assertEquals(
             expected,
             route.internalWaypoints().map {
                 it.name to it.location.toApproximateCoordinates(tolerance)
-            }
+            },
         )
         assertEquals(
             expected,
             route.directionsRoute.waypoints()!!.map {
                 it.name() to it.location().toApproximateCoordinates(tolerance)
-            }
+            },
         )
-        assertNull(route.directionsResponse.waypoints())
     }
 
     private fun addResponseHandler(@IdRes fileId: Int, coordinates: List<Point>) {
@@ -393,7 +394,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             "driving-traffic",
             readRawFileText(activity, fileId),
             coordinates,
-            relaxedExpectedCoordinates = true
+            relaxedExpectedCoordinates = true,
         )
         mockWebServerRule.requestHandlers.add(routeHandler)
     }

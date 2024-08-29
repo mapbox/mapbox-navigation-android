@@ -6,7 +6,7 @@ import com.mapbox.navigation.testing.BuilderTest
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class AdasisConfigProfileShortTypeOptionsTest :
     BuilderTest<
-        AdasisConfigProfileShortTypeOptions, AdasisConfigProfileShortTypeOptions.Builder>() {
+        AdasisConfigProfileShortTypeOptions, AdasisConfigProfileShortTypeOptions.Builder,>() {
 
     override fun getImplementationClass() = AdasisConfigProfileShortTypeOptions::class
 
@@ -17,7 +17,7 @@ class AdasisConfigProfileShortTypeOptionsTest :
             .roadCondition(false)
             .variableSpeedSign(true)
             .headingChange(false)
-            .historyAverageSpeed(true)
+            .historyAverageSpeed(false)
     }
 
     override fun trigger() {

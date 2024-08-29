@@ -17,7 +17,7 @@ import com.mapbox.navigation.core.BuildConfig
  * @property navigatorSessionIdentifier group id of modes under one Telemetry session
  */
 internal abstract class NavigationEvent(
-    phoneState: PhoneState
+    phoneState: PhoneState,
 ) : MetricEventInternal {
 
     private companion object {

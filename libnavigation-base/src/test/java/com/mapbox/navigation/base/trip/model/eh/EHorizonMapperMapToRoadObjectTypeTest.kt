@@ -24,11 +24,11 @@ internal class EHorizonMapperMapToRoadObjectTypeTest(
                 arrayOf<Any>(RoadObjectType.INCIDENT, SDKRoadObjectType.INCIDENT),
                 arrayOf<Any>(
                     RoadObjectType.TOLL_COLLECTION_POINT,
-                    SDKRoadObjectType.TOLL_COLLECTION
+                    SDKRoadObjectType.TOLL_COLLECTION,
                 ),
                 arrayOf<Any>(
                     RoadObjectType.BORDER_CROSSING,
-                    SDKRoadObjectType.COUNTRY_BORDER_CROSSING
+                    SDKRoadObjectType.COUNTRY_BORDER_CROSSING,
                 ),
                 arrayOf<Any>(RoadObjectType.TUNNEL, SDKRoadObjectType.TUNNEL),
                 arrayOf<Any>(RoadObjectType.RESTRICTED_AREA, SDKRoadObjectType.RESTRICTED_AREA),

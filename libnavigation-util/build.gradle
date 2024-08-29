@@ -2,6 +2,10 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply from: "../gradle/ktlint.gradle"
+apply from: file("../gradle/artifact-settings.gradle")
+
+// for lint to correctly identify groupId
+group = project.ext.mapboxArtifactGroupId
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -17,23 +21,17 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
     }
-
-    buildFeatures {
-        viewBinding true
-    }
-
 }
 
 dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidXCore
-    implementation dependenciesList.androidXLifecycleRuntime
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxCommonNative
-    implementation dependenciesList.mapboxCommonOkHttp
     api dependenciesList.mapboxAndroidCommon
     implementation dependenciesList.mapboxAnnotations
+    implementation dependenciesList.mapboxSdkServices
 
     apply from: "../gradle/unit-testing-dependencies.gradle"
     testImplementation project(':libtesting-utils')

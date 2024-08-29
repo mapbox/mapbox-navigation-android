@@ -18,6 +18,8 @@ class AnnotationsRefresherTest(
     private val newAnnotation: LegAnnotation?,
     private val legGeometryIndex: Int,
     private val expectedMergedAnnotation: LegAnnotation?,
+    private val startFakeCongestionIndex: Int?,
+    private val fakeCongestionLength: Int?,
     private val description: String,
 ) {
 
@@ -27,7 +29,7 @@ class AnnotationsRefresherTest(
     companion object {
 
         @JvmStatic
-        @Parameterized.Parameters(name = "{4}")
+        @Parameterized.Parameters(name = "{6}")
         fun data(): Collection<Array<Any?>> {
             val defaultAnnotation = LegAnnotation.builder().build()
             val annotationWithCongestionNumericOnlyEmpty = defaultAnnotation.toBuilder()
@@ -42,68 +44,86 @@ class AnnotationsRefresherTest(
                     null,
                     0,
                     null,
-                    "Everything is null. Null old annotation turns merged one to null."
+                    null,
+                    null,
+                    "Everything is null. Null old annotation turns merged one to null.",
                 ),
                 arrayOf(
                     defaultAnnotation,
                     null,
                     0,
                     defaultAnnotation,
-                    "Default + null. Null old annotation property turns merged property to null."
+                    null,
+                    null,
+                    "Default + null. Null old annotation property turns merged property to null.",
                 ),
                 arrayOf(
                     defaultAnnotation,
                     defaultAnnotation,
                     0,
                     defaultAnnotation,
+                    null,
+                    null,
                     "2 default annotations, index = 0. " +
-                        "Null old annotation property turns merged property to null."
+                        "Null old annotation property turns merged property to null.",
                 ),
                 arrayOf(
                     defaultAnnotation,
                     defaultAnnotation,
                     5,
                     defaultAnnotation,
+                    null,
+                    null,
                     "2 default annotations, index = 5. " +
-                        "Null old annotation property turns merged property to null."
+                        "Null old annotation property turns merged property to null.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     defaultAnnotation,
                     0,
                     annotationWithCongestionNumericOnlyEmpty,
+                    null,
+                    null,
                     "Empty congestion_numeric + default, index = 0. " +
-                        "congestion_numeric is backfilled."
+                        "congestion_numeric is backfilled.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     defaultAnnotation,
                     5,
                     defaultAnnotation,
+                    null,
+                    null,
                     "Empty congestion_numeric + default, index = 5. " +
-                        "Index out of bounds results in null annotation property"
+                        "Index out of bounds results in null annotation property",
                 ),
                 arrayOf(
                     defaultAnnotation,
                     annotationWithCongestionNumericOnlyEmpty,
                     0,
                     defaultAnnotation,
+                    null,
+                    null,
                     "Default + empty congestion_numeric, index = 0. " +
-                        "Null old annotation property turns merged property to null."
+                        "Null old annotation property turns merged property to null.",
                 ),
                 arrayOf(
                     defaultAnnotation,
                     annotationWithCongestionNumericOnlyEmpty,
                     5,
                     defaultAnnotation,
+                    null,
+                    null,
                     "Default + empty congestion_numeric, index = 5. " +
-                        "Mismatched sizes result in null merged annotation property."
+                        "Mismatched sizes result in null merged annotation property.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     annotationWithCongestionNumericOnlyEmpty,
                     0,
                     annotationWithCongestionNumericOnlyEmpty,
+                    null,
+                    null,
                     "Empty congestion_numeric x2, index = 0. New annotation property is used.",
                 ),
                 arrayOf(
@@ -111,71 +131,89 @@ class AnnotationsRefresherTest(
                     defaultAnnotation,
                     0,
                     annotationWithCongestionNumericOnlyFilled,
+                    null,
+                    null,
                     "Filled congestion_numeric + default, index = 0. " +
-                        "congestion_numeric is backfilled."
+                        "congestion_numeric is backfilled.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     defaultAnnotation,
                     5,
                     annotationWithCongestionNumericOnlyFilled,
+                    null,
+                    null,
                     "Filled congestion_numeric + default, index = 5. " +
-                        "Nothing changes since index is the last."
+                        "Nothing changes since index is the last.",
                 ),
                 arrayOf(
                     defaultAnnotation,
                     LegAnnotation.builder().congestionNumeric(listOf(3, 4, 5)).build(),
                     2,
                     defaultAnnotation,
+                    null,
+                    null,
                     "Default + filled congestion_numeric, index = 2." +
-                        "Index is too big: return null annotation."
+                        "Index is too big: return null annotation.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyEmpty,
                     LegAnnotation.builder().congestionNumeric(listOf(3, 4, 5)).build(),
                     2,
                     defaultAnnotation,
+                    null,
+                    null,
                     "Empty congestion_numeric + filled congestion_numeric, index = 2. " +
-                        "Index is too big: return null annotation."
+                        "Index is too big: return null annotation.",
                 ),
                 arrayOf(
                     LegAnnotation.builder().congestionNumeric(listOf(1)).build(),
                     LegAnnotation.builder().congestionNumeric(listOf(3, 4, 5)).build(),
                     2,
                     defaultAnnotation,
+                    null,
+                    null,
                     "Partially filled congestion_numeric + filled congestion_numeric, index = 2. " +
-                        "Index is too big: return null annotation."
+                        "Index is too big: return null annotation.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     LegAnnotation.builder().congestionNumeric(listOf(6, 7, 8, 9, 10)).build(),
                     0,
                     LegAnnotation.builder().congestionNumeric(listOf(6, 7, 8, 9, 10)).build(),
-                    "Filled congestion_numeric x2, index = 0. New annotation property is used."
+                    null,
+                    null,
+                    "Filled congestion_numeric x2, index = 0. New annotation property is used.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     LegAnnotation.builder().congestionNumeric(listOf(8, 9, 10)).build(),
                     2,
                     LegAnnotation.builder().congestionNumeric(listOf(1, 2, 8, 9, 10)).build(),
+                    null,
+                    null,
                     "Filled congestion_numeric x2, index = 2. Annotations before current " +
-                        "geometry index should be updated to old value."
+                        "geometry index should be updated to old value.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     LegAnnotation.builder().congestionNumeric(listOf(8, 9, 10, 11)).build(),
                     2,
                     LegAnnotation.builder().congestionNumeric(listOf(1, 2, 8, 9, 10)).build(),
+                    null,
+                    null,
                     "Filled congestion_numeric + too long new annotation, index = 2. " +
-                        "Excessive new annotations should be ignored."
+                        "Excessive new annotations should be ignored.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     LegAnnotation.builder().congestionNumeric(listOf(8, 9)).build(),
                     2,
                     LegAnnotation.builder().congestionNumeric(listOf(1, 2, 8, 9, 5)).build(),
+                    null,
+                    null,
                     "Filled congestion_numeric + too short new annotation, index = 2. " +
-                        "Last items are filled with old values."
+                        "Last items are filled with old values.",
                 ),
                 arrayOf(
                     LegAnnotation.builder().congestion(List(5) { "unknown" }).build(),
@@ -185,24 +223,30 @@ class AnnotationsRefresherTest(
                         .builder()
                         .congestion(listOf("unknown", "unknown", "low", "severe", "unknown"))
                         .build(),
+                    null,
+                    null,
                     "Congestion filled with default values + " +
-                        "update in the middle updates only middle."
+                        "update in the middle updates only middle.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     annotationWithCongestionNumericOnlyEmpty,
                     5,
                     annotationWithCongestionNumericOnlyFilled,
+                    null,
+                    null,
                     "Filled congestion_numeric + empty congestion numeric, index = 5. " +
-                        "Old annotation property is used before current index."
+                        "Old annotation property is used before current index.",
                 ),
                 arrayOf(
                     annotationWithCongestionNumericOnlyFilled,
                     annotationWithCongestionNumericOnlyEmpty,
                     6,
                     defaultAnnotation,
+                    null,
+                    null,
                     "Filled congestion_numeric + empty congestion numeric, index = 6. " +
-                        "Index out of bounds results in null annotation."
+                        "Index out of bounds results in null annotation.",
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -212,7 +256,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
@@ -230,7 +274,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("f", "g", "h", "i", "j")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(6, 7, 8, 9, 10))
                         .congestion(listOf("c6", "c7", "c8", "c9", "c10"))
@@ -242,7 +286,7 @@ class AnnotationsRefresherTest(
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
-                            }
+                            },
                         )
                         .build(),
                     0,
@@ -253,7 +297,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("f", "g", "h", "i", "j")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(6, 7, 8, 9, 10))
                         .congestion(listOf("c6", "c7", "c8", "c9", "c10"))
@@ -263,12 +307,14 @@ class AnnotationsRefresherTest(
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
-                            }
+                            },
                         )
                         .freeflowSpeed(listOf(5, 4, 3, 2, 1))
                         .currentSpeed(listOf(6, 5, 4, 3, 2))
                         .build(),
-                    "Everything is filled, index = 0. New annotation properties are used."
+                    null,
+                    null,
+                    "Everything is filled, index = 0. New annotation properties are used.",
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -278,7 +324,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
@@ -290,7 +336,7 @@ class AnnotationsRefresherTest(
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10).unit("mph").build()
-                            }
+                            },
                         )
                         .build(),
                     LegAnnotation.builder()
@@ -300,7 +346,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("i", "j")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(9, 10))
                         .congestion(listOf("c9", "c10"))
@@ -312,7 +358,7 @@ class AnnotationsRefresherTest(
                         .maxspeed(
                             List(2) {
                                 MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
-                            }
+                            },
                         )
                         .build(),
                     3,
@@ -323,7 +369,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "i", "j")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(1, 2, 3, 9, 10))
                         .congestion(listOf("c1", "c2", "c3", "c9", "c10"))
@@ -336,13 +382,15 @@ class AnnotationsRefresherTest(
                             } +
                                 List(2) {
                                     MaxSpeed.builder().speed(it * 10 + 1).unit("kmh").build()
-                                }
+                                },
                         )
                         .freeflowSpeed(listOf(1, 2, 3, 11, 22))
                         .currentSpeed(listOf(2, 3, 4, 33, 44))
                         .build(),
+                    null,
+                    null,
                     "Everything is filled, index = 3. " +
-                        "Old annotations properties are used before current index."
+                        "Old annotations properties are used before current index.",
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -352,7 +400,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
@@ -362,7 +410,7 @@ class AnnotationsRefresherTest(
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10).unit("mph").build()
-                            }
+                            },
                         )
                         .build(),
                     LegAnnotation.builder()
@@ -384,7 +432,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
@@ -394,11 +442,13 @@ class AnnotationsRefresherTest(
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10).unit("mph").build()
-                            }
+                            },
                         )
                         .build(),
+                    null,
+                    null,
                     "Everything is filled, index = 5. " +
-                        "Old annotation properties are used before current index."
+                        "Old annotation properties are used before current index.",
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -408,7 +458,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
@@ -418,7 +468,7 @@ class AnnotationsRefresherTest(
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10).unit("mph").build()
-                            }
+                            },
                         )
                         .build(),
                     defaultAnnotation,
@@ -430,7 +480,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .congestionNumeric(listOf(1, 2, 3, 4, 5))
                         .congestion(listOf("c1", "c2", "c3", "c4", "c5"))
@@ -440,11 +490,13 @@ class AnnotationsRefresherTest(
                         .maxspeed(
                             List(5) {
                                 MaxSpeed.builder().speed(it * 10).unit("mph").build()
-                            }
+                            },
                         )
                         .build(),
+                    null,
+                    null,
                     "Everything is filled + default, index = 5. " +
-                        "Old annotation properties are used before current index."
+                        "Old annotation properties are used before current index.",
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -452,7 +504,7 @@ class AnnotationsRefresherTest(
                             mapOf(
                                 "state_of_charge" to JsonPrimitive("aaa"),
                                 "custom_annotation" to JsonPrimitive("bbb"),
-                            )
+                            ),
                         )
                         .build(),
                     LegAnnotation.builder()
@@ -462,12 +514,14 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .build(),
                     0,
                     LegAnnotation.builder().build(),
-                    "Non list old annotation unrecognized properties are ignored."
+                    null,
+                    null,
+                    "Non list old annotation unrecognized properties are ignored.",
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -477,7 +531,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .build(),
                     LegAnnotation.builder()
@@ -485,12 +539,14 @@ class AnnotationsRefresherTest(
                             mapOf(
                                 "state_of_charge" to JsonPrimitive("aaa"),
                                 "custom_annotation" to JsonPrimitive("bbb"),
-                            )
+                            ),
                         )
                         .build(),
                     5,
                     LegAnnotation.builder().build(),
-                    "Non list new annotation unrecognized properties are ignored."
+                    null,
+                    null,
+                    "Non list new annotation unrecognized properties are ignored.",
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -500,7 +556,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("z", "y", "x", "w", "v")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .build(),
                     LegAnnotation.builder()
@@ -510,7 +566,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation2" to listOf("a", "b", "c", "d", "e")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .build(),
                     3,
@@ -521,10 +577,12 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("z", "y", "x", "w", "v")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .build(),
-                    "Unrecognized properties keys don't match: old values are used."
+                    null,
+                    null,
+                    "Unrecognized properties keys don't match: old values are used.",
                 ),
                 arrayOf(
                     LegAnnotation.builder()
@@ -534,7 +592,7 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("z", "y", "x", "w", "v")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .build(),
                     null,
@@ -546,10 +604,52 @@ class AnnotationsRefresherTest(
                                     .toJsonArray(::JsonPrimitive),
                                 "custom_annotation" to listOf("z", "y", "x", "w", "v")
                                     .toJsonArray(::JsonPrimitive),
-                            )
+                            ),
                         )
                         .build(),
-                    "Unrecognized properties migrate from old annotation if new annotation is null"
+                    null,
+                    null,
+                    "Unrecognized properties migrate from old annotation if new annotation is null",
+                ),
+                arrayOf(
+                    annotationWithCongestionNumericOnlyFilled,
+                    LegAnnotation.builder().congestionNumeric(listOf(6, 7, 8, 9, 10)).build(),
+                    0,
+                    LegAnnotation.builder().congestionNumeric(listOf(1, 2, 8, 9, 10)).build(),
+                    0,
+                    2,
+                    "Filled congestion_numeric + x2, index = 0, overridden length = 2. " +
+                        "New annotation property is used after fake traffic.",
+                ),
+                arrayOf(
+                    annotationWithCongestionNumericOnlyFilled,
+                    LegAnnotation.builder().congestionNumeric(listOf(6, 7, 8, 9, 10)).build(),
+                    0,
+                    LegAnnotation.builder().congestionNumeric(listOf(6, 2, 3, 9, 10)).build(),
+                    1,
+                    2,
+                    "Filled congestion_numeric + x2, index = 0, overridden length = 2, " +
+                        "override starts from index = 1. Override should remain.",
+                ),
+                arrayOf(
+                    annotationWithCongestionNumericOnlyFilled,
+                    LegAnnotation.builder().congestionNumeric(listOf(6, 7, 8, 9, 10)).build(),
+                    1,
+                    LegAnnotation.builder().congestionNumeric(listOf(1, 2, 3, 8, 9)).build(),
+                    1,
+                    2,
+                    "Filled congestion_numeric + x2, index = 1, overridden length = 2. " +
+                        "New annotation property is used after override.",
+                ),
+                arrayOf(
+                    annotationWithCongestionNumericOnlyFilled,
+                    LegAnnotation.builder().congestionNumeric(listOf(6, 7, 8, 9, 10)).build(),
+                    1,
+                    LegAnnotation.builder().congestionNumeric(listOf(1, 2, 7, 8, 9)).build(),
+                    0,
+                    2,
+                    "Filled congestion_numeric + x2, index = 1, overridden length = 2, override " +
+                        "starts from index = 0. New annotation property is used after override.",
                 ),
             )
         }
@@ -560,7 +660,9 @@ class AnnotationsRefresherTest(
         val actual = AnnotationsRefresher.getRefreshedAnnotations(
             oldAnnotation,
             newAnnotation,
-            legGeometryIndex
+            legGeometryIndex,
+            startFakeCongestionIndex,
+            fakeCongestionLength,
         )
         assertEquals(expectedMergedAnnotation, actual)
     }

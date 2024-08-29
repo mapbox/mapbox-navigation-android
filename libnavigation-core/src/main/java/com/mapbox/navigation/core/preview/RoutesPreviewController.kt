@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 @UiThread
 internal class RoutesPreviewController(
     private val routesDataParser: RoutesDataParser,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
 ) {
 
     private val mutex = Mutex()
@@ -52,7 +52,7 @@ internal class RoutesPreviewController(
     fun previewNavigationRoutes(
         routesToPreview: List<NavigationRoute>,
         primaryRouteIndex: Int = 0,
-        onCompleted: () -> Unit = {}
+        onCompleted: () -> Unit = {},
     ) {
         scope.launch {
             mutex.withLock {
@@ -86,18 +86,18 @@ internal class RoutesPreviewController(
     private fun setNewRoutesPreview(preview: RoutesPreview) {
         lastUpdate = RoutesPreviewUpdate(
             reason = RoutesPreviewExtra.PREVIEW_NEW,
-            routesPreview = preview
+            routesPreview = preview,
         )
     }
 
     private suspend fun previewRoutesInternal(
         routesToPreview: List<NavigationRoute>,
-        primaryRouteIndex: Int
+        primaryRouteIndex: Int,
     ) {
         if (routesToPreview.isEmpty()) {
             lastUpdate = RoutesPreviewUpdate(
                 RoutesPreviewExtra.PREVIEW_CLEAN_UP,
-                null
+                null,
             )
             return
         }
@@ -106,14 +106,14 @@ internal class RoutesPreviewController(
             createRoutesPreview(
                 previewedRoutes,
                 routesDataParser.parse(previewedRoutes),
-                routesToPreview
+                routesToPreview,
             )
         setNewRoutesPreview(preview)
     }
 
     private fun movePrimaryRouteToTheBeginning(
         primaryRouteIndex: Int,
-        routesToPreview: List<NavigationRoute>
+        routesToPreview: List<NavigationRoute>,
     ): List<NavigationRoute> {
         val previewedRoutes = if (primaryRouteIndex == 0) {
             routesToPreview
@@ -129,7 +129,7 @@ internal class RoutesPreviewController(
     private fun createRoutesPreview(
         routes: List<NavigationRoute>,
         routesData: RoutesData,
-        originalRoutes: List<NavigationRoute>
+        originalRoutes: List<NavigationRoute>,
     ): RoutesPreview {
         val preview = RoutesPreview(
             alternativesMetadata = routesData.alternativeRoutes().map { nativeAlternative ->
@@ -139,7 +139,7 @@ internal class RoutesPreviewController(
             },
             routesList = routes,
             originalRoutesList = originalRoutes,
-            primaryRouteIndex = originalRoutes.indexOf(routes.first())
+            primaryRouteIndex = originalRoutes.indexOf(routes.first()),
         )
         return preview
     }

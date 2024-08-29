@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core.replay.route
 
-import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.testutil.replay.measureSpeedDistances
@@ -41,18 +41,14 @@ class ReplayRouteMapperTest {
     }
 
     @Test
-    fun `should map android location`() {
+    fun `should map common location`() {
         val location: Location = mockk {
-            every { provider } returns "test provider"
+            every { source } returns "test provider"
             every { latitude } returns -122.392624
             every { longitude } returns 37.764107
-            every { hasAccuracy() } returns true
-            every { accuracy } returns 11.0f
-            every { hasBearing() } returns true
-            every { bearing } returns 12.0f
-            every { hasSpeed() } returns true
-            every { speed } returns 2.0f
-            every { hasAltitude() } returns true
+            every { horizontalAccuracy } returns 11.0
+            every { bearing } returns 12.0
+            every { speed } returns 2.0
             every { altitude } returns 25.0
         }
 
@@ -71,13 +67,13 @@ class ReplayRouteMapperTest {
     @Test
     fun `should map android location with optional`() {
         val location: Location = mockk {
-            every { provider } returns "test provider"
+            every { source } returns "test provider"
             every { latitude } returns -122.392624
             every { longitude } returns 37.764107
-            every { hasAccuracy() } returns false
-            every { hasBearing() } returns false
-            every { hasSpeed() } returns false
-            every { hasAltitude() } returns false
+            every { horizontalAccuracy } returns null
+            every { bearing } returns null
+            every { speed } returns null
+            every { altitude } returns null
         }
 
         val replayEvent = ReplayRouteMapper.mapToUpdateLocation(0.1, location)
@@ -108,7 +104,7 @@ class ReplayRouteMapperTest {
             "mapRouteLegAnnotation only works when there are speed and distance profiles",
             "Directions request should include annotations DirectionsCriteria.ANNOTATION_SPEED" +
                 " and DirectionsCriteria.ANNOTATION_DISTANCE",
-            failureMessage
+            failureMessage,
         )
     }
 
@@ -134,7 +130,7 @@ class ReplayRouteMapperTest {
     @Test
     fun `an artificial driver drives with almost constant speed along a motorway`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("german_motorway_direction_route.json")
+            FileUtils.loadJsonFixture("german_motorway_direction_route.json"),
         )
 
         val updateEvents = replayRouteMapper.mapDirectionsRouteGeometry(route)
@@ -148,7 +144,7 @@ class ReplayRouteMapperTest {
         val maxSpeed = speedUpdatesAmongARoute.maxOf { it }
         assertTrue(
             "speed changes too much on the way: $speedUpdatesAmongARoute",
-            maxSpeed - minSpeed < 1
+            maxSpeed - minSpeed < 1,
         )
     }
 
@@ -180,7 +176,7 @@ class ReplayRouteMapperTest {
         val geometry = "kxia{Ao{daU??z@f@nAnAnAvBzEvBz@f@nAnA?rDzEg@bGg@bBg@nAwBzOgc@vBcGRcGg@" +
             "sDg@kCsI{JgEvVcGv[oFb[_I~a@_I~a@kC~MwBjMcB~HoA~H"
         val events = ReplayRouteMapper(
-            ReplayRouteOptions.Builder().frequency(10.0).build()
+            ReplayRouteOptions.Builder().frequency(10.0).build(),
         ).mapGeometry(geometry)
 
         events.measureSpeedDistances().forEach {
@@ -190,7 +186,7 @@ class ReplayRouteMapperTest {
 
     private fun resourceAsString(
         name: String,
-        packageName: String = "com.mapbox.navigation.core.replay.route"
+        packageName: String = "com.mapbox.navigation.core.replay.route",
     ): String {
         val inputStream = javaClass.classLoader?.getResourceAsStream("$packageName/$name")
         return IOUtils.toString(inputStream, "UTF-8")

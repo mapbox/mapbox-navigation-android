@@ -10,7 +10,7 @@ package com.mapbox.navigation.base.options
  */
 class IncidentsOptions private constructor(
     val graph: String,
-    val apiUrl: String
+    val apiUrl: String,
 ) {
 
     /**
@@ -82,7 +82,7 @@ class IncidentsOptions private constructor(
         fun build(): IncidentsOptions {
             return IncidentsOptions(
                 graph = graph,
-                apiUrl = apiUrl
+                apiUrl = apiUrl,
             )
         }
     }

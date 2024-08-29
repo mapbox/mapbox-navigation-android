@@ -6,6 +6,6 @@ import com.mapbox.android.gestures.AndroidGesturesManager
 internal object NavigationCameraLifecycleProvider {
     fun getCustomGesturesManager(
         context: Context,
-        onUpEventCallback: (AndroidGesturesManager) -> Unit
+        onUpEventCallback: (AndroidGesturesManager) -> Unit,
     ): AndroidGesturesManager = LocationGesturesManager(context, onUpEventCallback)
 }

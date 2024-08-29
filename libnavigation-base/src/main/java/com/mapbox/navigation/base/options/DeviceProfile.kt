@@ -9,7 +9,7 @@ package com.mapbox.navigation.base.options
  */
 class DeviceProfile private constructor(
     val customConfig: String,
-    val deviceType: DeviceType
+    val deviceType: DeviceType,
 ) {
 
     /**
@@ -27,19 +27,19 @@ class DeviceProfile private constructor(
         /**
          * Json custom configuration used by the navigator
          */
-        fun customConfig(customConfig: String) = apply { this.customConfig = customConfig }
+        fun customConfig(customConfig: String): Builder = apply { this.customConfig = customConfig }
 
         /**
          * Change the [DeviceType]
          */
-        fun deviceType(deviceType: DeviceType) = apply { this.deviceType = deviceType }
+        fun deviceType(deviceType: DeviceType): Builder = apply { this.deviceType = deviceType }
 
         /**
          * Build the [DeviceType]
          */
         fun build() = DeviceProfile(
             customConfig = customConfig,
-            deviceType = deviceType
+            deviceType = deviceType,
         )
     }
 
@@ -87,5 +87,5 @@ enum class DeviceType {
     /**
      * Automobiles that provide data directly from the vehicle
      */
-    AUTOMOBILE
+    AUTOMOBILE,
 }

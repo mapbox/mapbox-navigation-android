@@ -12,7 +12,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  */
 class GantryLocation internal constructor(
     val positions: List<RoadObjectPosition>,
-    shape: Geometry
+    shape: Geometry,
 ) : RoadObjectLocation(GANTRY, shape) {
 
     /**

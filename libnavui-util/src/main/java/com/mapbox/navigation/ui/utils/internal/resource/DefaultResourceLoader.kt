@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong
  */
 internal class DefaultResourceLoader(
     private val tileStore: TileStore,
-    private val reachability: ReachabilityInterface
+    private val reachability: ReachabilityInterface,
 ) : ResourceLoader() {
 
     private val nextRequestId = AtomicLong(0L)
@@ -43,7 +43,7 @@ internal class DefaultResourceLoader(
     override fun load(
         tileStore: TileStore,
         request: ResourceLoadRequest,
-        callback: ResourceLoadCallback
+        callback: ResourceLoadCallback,
     ): Long {
         val requestId = nextRequestId.incrementAndGet()
         val callbackAdapter = CallbackAdapter(request, callback, observers)
@@ -52,7 +52,7 @@ internal class DefaultResourceLoader(
         cancelableMap[requestId] = tileStore.loadResource(
             /* description */ request.toResourceDescription(),
             /* options */ loadOptions(request, requestId),
-            /* progressCallback */ callbackAdapter
+            /* progressCallback */ callbackAdapter,
         ) {
             cancelableMap.remove(requestId)
             callbackAdapter.run(it)
@@ -73,14 +73,14 @@ internal class DefaultResourceLoader(
                 tag,
                 ResourceLoadFlags.ACCEPT_EXPIRED,
                 NetworkRestriction.DISALLOW_ALL,
-                null
+                null,
             )
         } else {
             ResourceLoadOptions(
                 tag,
                 request.flags,
                 request.networkRestriction,
-                null
+                null,
             )
         }
     }
@@ -94,12 +94,12 @@ internal class DefaultResourceLoader(
     }
 
     private fun ResourceLoadRequest.toResourceDescription() =
-        ResourceDescription(url, TileDataDomain.NAVIGATION)
+        ResourceDescription(TileDataDomain.NAVIGATION, url)
 
     private class CallbackAdapter(
         private val request: ResourceLoadRequest,
         private val callback: ResourceLoadCallback,
-        private val observers: Queue<ResourceLoadObserver>
+        private val observers: Queue<ResourceLoadObserver>,
     ) : ResourceLoadProgressCallback, ResourceLoadResultCallback {
 
         fun notifyOnStart(request: ResourceLoadRequest) {

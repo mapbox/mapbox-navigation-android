@@ -26,7 +26,7 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             maxSpeedMps,
-            distanceMeters
+            distanceMeters,
         )
 
         var currentSpeed = 0.0
@@ -50,7 +50,7 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             maxSpeedMps,
-            distanceMeters
+            distanceMeters,
         )
 
         segment.steps.forEach {
@@ -68,7 +68,7 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters
+            distanceMeters,
         )
 
         segment.steps.apply {
@@ -89,7 +89,7 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters
+            distanceMeters,
         )
 
         segment.steps.apply {
@@ -109,7 +109,7 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters
+            distanceMeters,
         )
 
         segment.steps.apply {
@@ -129,7 +129,7 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters
+            distanceMeters,
         )
 
         segment.steps.apply {
@@ -149,7 +149,7 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters
+            distanceMeters,
         )
 
         assertEquals(223.96630390737917, segment.steps.last().positionMeters, 0.00001)
@@ -166,7 +166,7 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters
+            distanceMeters,
         )
 
         segment.steps.apply {
@@ -181,7 +181,7 @@ class ReplayRouteInterpolatorTest {
         val coordinates = listOf(
             Point.fromLngLat(-121.46991, 38.550876),
             Point.fromLngLat(-121.470231, 38.550964),
-            Point.fromLngLat(-121.468834, 38.550765)
+            Point.fromLngLat(-121.468834, 38.550765),
         )
 
         val speedProfile = routeInterpolator.createSpeedProfile(defaultOptions, coordinates)
@@ -201,7 +201,7 @@ class ReplayRouteInterpolatorTest {
             Point.fromLngLat(-121.465571, 38.562884),
             Point.fromLngLat(-121.465435, 38.563267),
             Point.fromLngLat(-121.466527, 38.564469),
-            Point.fromLngLat(-121.466363, 38.564845)
+            Point.fromLngLat(-121.466363, 38.564845),
         )
 
         val speedProfile = routeInterpolator.createSpeedProfile(options, coordinates)
@@ -216,7 +216,7 @@ class ReplayRouteInterpolatorTest {
         val coordinates = listOf(
             Point.fromLngLat(-121.470231, 38.550964),
             Point.fromLngLat(-121.469887, 38.551753),
-            Point.fromLngLat(-121.470231, 38.550964)
+            Point.fromLngLat(-121.470231, 38.550964),
         )
 
         val speedProfile = routeInterpolator.createSpeedProfile(defaultOptions, coordinates)
@@ -227,13 +227,13 @@ class ReplayRouteInterpolatorTest {
     @Test
     fun `should keep max speed for minor curvatures on a motorway`() {
         val motorway = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("german_motorway_direction_route.json")
+            FileUtils.loadJsonFixture("german_motorway_direction_route.json"),
         )
         val coordinatesFromMotorway = motorway.completeGeometryToPoints()
 
         val speedProfile = routeInterpolator.createSpeedProfile(
             defaultOptions,
-            coordinatesFromMotorway
+            coordinatesFromMotorway,
         )
 
         val speedAlongARoute = speedProfile
@@ -243,7 +243,7 @@ class ReplayRouteInterpolatorTest {
         val maxSpeed = speedAlongARoute.maxOf { it }
         assertTrue(
             "speed changes too much on the way: $speedAlongARoute",
-            maxSpeed - minSpeed < 1
+            maxSpeed - minSpeed < 1,
         )
     }
 
@@ -275,7 +275,7 @@ class ReplayRouteInterpolatorTest {
             Point.fromLngLat(-122.444359, 37.73598),
             Point.fromLngLat(-122.444352, 37.73608),
             Point.fromLngLat(-122.444367, 37.736129),
-            Point.fromLngLat(-122.444375, 37.736141)
+            Point.fromLngLat(-122.444375, 37.736141),
         )
 
         val speedProfile = routeInterpolator.createSpeedProfile(defaultOptions, coordinates)
@@ -291,7 +291,7 @@ class ReplayRouteInterpolatorTest {
             Point.fromLngLat(-122.445946, 37.737075),
             Point.fromLngLat(-122.446511, 37.737594),
             Point.fromLngLat(-122.447785, 37.738033),
-            Point.fromLngLat(-122.447999, 37.738063)
+            Point.fromLngLat(-122.447999, 37.738063),
         )
 
         val speedProfile = routeInterpolator.createSpeedProfile(defaultOptions, coordinates)
@@ -312,7 +312,7 @@ class ReplayRouteInterpolatorTest {
             ReplayRouteLocation(1, Point.fromLngLat(11.5774440, 48.163593)),
             ReplayRouteLocation(2, Point.fromLngLat(11.5774200, 48.163711)),
             ReplayRouteLocation(3, Point.fromLngLat(11.5774634, 48.163716)),
-            ReplayRouteLocation(4, Point.fromLngLat(11.5775070, 48.163722))
+            ReplayRouteLocation(4, Point.fromLngLat(11.5775070, 48.163722)),
         )
 
         val lastBearing = TurfMeasurement.bearing(coordinates[3].point, coordinates[4].point)
@@ -325,7 +325,7 @@ class ReplayRouteInterpolatorTest {
     fun `should create bearing for a short route`() {
         val coordinates = listOf(
             ReplayRouteLocation(0, Point.fromLngLat(11.5774679, 48.163475)),
-            ReplayRouteLocation(1, Point.fromLngLat(11.5774440, 48.163593))
+            ReplayRouteLocation(1, Point.fromLngLat(11.5774440, 48.163593)),
         )
 
         val bearing = TurfMeasurement.bearing(coordinates[0].point, coordinates[1].point)

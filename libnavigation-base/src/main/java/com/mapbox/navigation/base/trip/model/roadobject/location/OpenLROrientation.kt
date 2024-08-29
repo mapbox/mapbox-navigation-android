@@ -36,7 +36,7 @@ object OpenLROrientation {
         NO_ORIENTATION_OR_UNKNOWN,
         WITH_LINE_DIRECTION,
         AGAINST_LINE_DIRECTION,
-        BOTH
+        BOTH,
     )
     annotation class Type
 }

@@ -10,7 +10,7 @@ package com.mapbox.navigation.core.history.model
 class HistoryEventPushHistoryRecord internal constructor(
     override val eventTimestamp: Double,
     val type: String,
-    val properties: String
+    val properties: String,
 ) : HistoryEvent {
 
     /**

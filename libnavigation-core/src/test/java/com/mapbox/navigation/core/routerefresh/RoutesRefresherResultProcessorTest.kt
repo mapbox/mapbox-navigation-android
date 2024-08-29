@@ -22,7 +22,7 @@ class RoutesRefresherResultProcessorTest {
         observersManager,
         expiringDataRemover,
         timeProvider,
-        staleDataTimeout
+        staleDataTimeout,
     )
 
     @Test

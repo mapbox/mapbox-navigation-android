@@ -15,6 +15,6 @@ object RoutesRenderedResultFactory {
         successfullyRenderedRouteIds,
         renderingCancelledRouteIds,
         successfullyClearedRouteIds,
-        clearingCancelledRouteIds
+        clearingCancelledRouteIds,
     )
 }

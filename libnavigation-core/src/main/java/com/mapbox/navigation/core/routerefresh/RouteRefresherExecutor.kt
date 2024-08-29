@@ -47,7 +47,7 @@ internal class RouteRefresherExecutor(
         finishCallback: (RoutesRefresherExecutorResult) -> Unit,
     ) {
         queuedRequest?.finishCallback?.invoke(
-            RoutesRefresherExecutorResult.ReplacedByNewer
+            RoutesRefresherExecutorResult.ReplacedByNewer,
         )
         queuedRequest = QueuedRequest(routes, startCallback, finishCallback)
         runQueue()

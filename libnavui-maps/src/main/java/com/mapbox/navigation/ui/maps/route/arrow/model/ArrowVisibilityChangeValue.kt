@@ -8,5 +8,5 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
  * @param layerVisibilityModifications the layer visibility modifications
  */
 class ArrowVisibilityChangeValue internal constructor(
-    val layerVisibilityModifications: List<Pair<String, Visibility>>
+    val layerVisibilityModifications: List<Pair<String, Visibility>>,
 )

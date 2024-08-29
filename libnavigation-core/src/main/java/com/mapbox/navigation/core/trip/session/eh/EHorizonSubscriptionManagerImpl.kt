@@ -23,28 +23,28 @@ internal class EHorizonSubscriptionManagerImpl(
 
     private val electronicHorizonObserver = object : ElectronicHorizonObserver {
         override fun onRoadObjectEnter(
-            roadObjectInfo: com.mapbox.navigator.RoadObjectEnterExitInfo
+            roadObjectInfo: com.mapbox.navigator.RoadObjectEnterExitInfo,
         ) {
             notifyAllObservers {
                 onRoadObjectEnter(
-                    EHorizonFactory.buildRoadObjectEnterExitInfo(roadObjectInfo)
+                    EHorizonFactory.buildRoadObjectEnterExitInfo(roadObjectInfo),
                 )
             }
         }
 
         override fun onRoadObjectExit(
-            roadObjectInfo: com.mapbox.navigator.RoadObjectEnterExitInfo
+            roadObjectInfo: com.mapbox.navigator.RoadObjectEnterExitInfo,
         ) {
             notifyAllObservers {
                 onRoadObjectExit(
-                    EHorizonFactory.buildRoadObjectEnterExitInfo(roadObjectInfo)
+                    EHorizonFactory.buildRoadObjectEnterExitInfo(roadObjectInfo),
                 )
             }
         }
 
         override fun onPositionUpdated(
             position: ElectronicHorizonPosition,
-            distances: MutableList<com.mapbox.navigator.RoadObjectDistance>
+            distances: MutableList<com.mapbox.navigator.RoadObjectDistance>,
         ) {
             mainJobController.scope.launch {
                 val eHorizonPosition = EHorizonFactory.buildEHorizonPosition(position)
@@ -65,7 +65,7 @@ internal class EHorizonSubscriptionManagerImpl(
         override fun onRoadObjectPassed(info: com.mapbox.navigator.RoadObjectPassInfo) {
             notifyAllObservers {
                 onRoadObjectPassed(
-                    EHorizonFactory.buildRoadObjectPassInfo(info)
+                    EHorizonFactory.buildRoadObjectPassInfo(info),
                 )
             }
         }

@@ -23,7 +23,7 @@ internal class RoutesCacheClearer : RoutesObserver, RoutesPreviewObserver {
         } else {
             DecodeUtils.clearCacheExceptFor(
                 result.navigationRoutes.map { it.directionsRoute } +
-                    currentPreviewsRoutes?.map { it.directionsRoute }.orEmpty()
+                    currentPreviewsRoutes?.map { it.directionsRoute }.orEmpty(),
             )
         }
     }

@@ -37,8 +37,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class TelemetryWrapperTest {
 
-    private val testAccessToken = "test-access-token"
-    private val userAgent: String = "test-user-agent"
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var navigationOptions: NavigationOptions
 
@@ -52,7 +50,7 @@ class TelemetryWrapperTest {
         } returns mockk(relaxUnitFun = true)
         mockkObject(TelemetryServiceProvider)
         every {
-            TelemetryServiceProvider.provideTelemetryService(any())
+            TelemetryServiceProvider.provideTelemetryService()
         } returns mockk(relaxUnitFun = true)
 
         mockkObject(MapboxNavigationTelemetry)
@@ -88,7 +86,6 @@ class TelemetryWrapperTest {
 
         mapboxNavigation = mockk(relaxed = true)
         navigationOptions = mockk<NavigationOptions>(relaxed = true).apply {
-            every { accessToken } returns testAccessToken
             every { applicationContext } returns mockk(relaxed = true)
         }
 
@@ -108,7 +105,7 @@ class TelemetryWrapperTest {
         if (BuildConfig.DEBUG) {
             assertThrows(
                 "Already initialized",
-                IllegalStateException::class.java
+                IllegalStateException::class.java,
             ) {
                 telemetryWrapper.initialize()
                 telemetryWrapper.initialize()
@@ -121,7 +118,7 @@ class TelemetryWrapperTest {
         if (BuildConfig.DEBUG) {
             assertThrows(
                 "Initialize object first",
-                IllegalStateException::class.java
+                IllegalStateException::class.java,
             ) {
                 telemetryWrapper.initialize()
                 telemetryWrapper.destroy()
@@ -135,7 +132,7 @@ class TelemetryWrapperTest {
         if (BuildConfig.DEBUG) {
             assertThrows(
                 "Initialize object first",
-                IllegalStateException::class.java
+                IllegalStateException::class.java,
             ) {
                 telemetryWrapper.destroy()
             }
@@ -153,7 +150,7 @@ class TelemetryWrapperTest {
                 mapboxNavigation,
                 navigationOptions,
                 MapboxMetricsReporter,
-                any()
+                any(),
             )
         }
     }
@@ -169,7 +166,7 @@ class TelemetryWrapperTest {
                 mapboxNavigation,
                 navigationOptions,
                 MapboxMetricsReporter,
-                any()
+                any(),
             )
         }
     }
@@ -239,7 +236,7 @@ class TelemetryWrapperTest {
             SCREENSHOT,
             FEEDBACK_SUB_TYPE,
             feedbackMetadata,
-            userFeedbackCallback
+            userFeedbackCallback,
         )
 
         verify(exactly = 1) {
@@ -250,7 +247,7 @@ class TelemetryWrapperTest {
                 SCREENSHOT,
                 FEEDBACK_SUB_TYPE,
                 feedbackMetadata,
-                userFeedbackCallback
+                userFeedbackCallback,
             )
         }
     }
@@ -267,7 +264,7 @@ class TelemetryWrapperTest {
             SCREENSHOT,
             FEEDBACK_SUB_TYPE,
             mockk<FeedbackMetadata>(relaxed = true),
-            mockk<UserFeedbackCallback>(relaxed = true)
+            mockk<UserFeedbackCallback>(relaxed = true),
         )
 
         verify(exactly = 0) {
@@ -292,7 +289,7 @@ class TelemetryWrapperTest {
 
         verify(exactly = 1) {
             MapboxNavigationTelemetry.destroy(
-                mapboxNavigation
+                mapboxNavigation,
             )
         }
     }
@@ -306,16 +303,16 @@ class TelemetryWrapperTest {
 
         verify(exactly = 0) {
             MapboxNavigationTelemetry.destroy(
-                mapboxNavigation
+                mapboxNavigation,
             )
         }
     }
 
     private fun TelemetryWrapper.initialize() {
-        telemetryWrapper.initialize(
+        initialize(
             mapboxNavigation,
             navigationOptions,
-            userAgent,
+            mockk(),
         )
     }
 

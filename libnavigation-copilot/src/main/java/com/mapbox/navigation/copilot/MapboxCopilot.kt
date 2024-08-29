@@ -7,6 +7,7 @@ import com.mapbox.navigation.copilot.MapboxCopilot.stop
 import com.mapbox.navigation.copilot.internal.PushStatusObserver
 import com.mapbox.navigation.core.DeveloperMetadataObserver
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import java.util.concurrent.CopyOnWriteArraySet
@@ -50,6 +51,8 @@ object MapboxCopilot : MapboxNavigationObserver {
 
     private var copilot: MapboxCopilotImpl? = null
     internal val pushStatusObservers = CopyOnWriteArraySet<PushStatusObserver>()
+
+    internal val sdkInformation = SdkInfoProvider.sdkInformation()
 
     /**
      * Starts Copilot.

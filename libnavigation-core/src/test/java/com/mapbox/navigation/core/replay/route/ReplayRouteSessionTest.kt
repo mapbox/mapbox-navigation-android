@@ -1,11 +1,12 @@
 package com.mapbox.navigation.core.replay.route
 
 import android.content.Context
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.Cancelable
+import com.mapbox.common.location.DeviceLocationProvider
+import com.mapbox.common.location.GetLocationCallback
+import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -26,6 +27,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
@@ -62,22 +64,27 @@ class ReplayRouteSessionTest {
             firstArg<TripSessionResetCallback>().onTripSessionReset()
         }
     }
-    private val bestLocationEngine: LocationEngine = mockk {
-        every { getLastLocation(any()) } just runs
+    private val locationProvider: DeviceLocationProvider = mockk {
+        every { getLastLocation(any()) } returns Cancelable { }
     }
 
     private val sut = ReplayRouteSession().setOptions(
         ReplayRouteSessionOptions.Builder()
             .locationResetEnabled(false)
-            .build()
+            .build(),
     )
 
     @Before
     fun setup() {
         mockkStatic(PermissionsManager::class)
+        mockkObject(PermissionsManager)
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns false
-        mockkStatic(LocationEngineProvider::class)
-        every { LocationEngineProvider.getBestLocationEngine(any()) } returns bestLocationEngine
+        mockkStatic(LocationServiceFactory::class)
+        every { LocationServiceFactory.getOrCreate() } returns mockk {
+            every {
+                getDeviceLocationProvider(null)
+            } returns ExpectedFactory.createValue(locationProvider)
+        }
     }
 
     @After
@@ -118,22 +125,22 @@ class ReplayRouteSessionTest {
 
     @Test
     fun `onAttached - should push first device location if enabled`() {
-        val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
-        every { bestLocationEngine.getLastLocation(capture(locationCallbackSlot)) } just runs
+        val locationCallbackSlot = slot<GetLocationCallback>()
+        every {
+            locationProvider.getLastLocation(capture(locationCallbackSlot))
+        } returns Cancelable { }
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
         val replayEventsSlot = slot<List<ReplayEventBase>>()
         every { replayer.pushEvents(capture(replayEventsSlot)) } returns replayer
 
         sut.setOptions(ReplayRouteSessionOptions.Builder().locationResetEnabled(true).build())
         sut.onAttached(mapboxNavigation)
-        locationCallbackSlot.captured.onSuccess(
-            mockk {
-                every { lastLocation } returns mockk(relaxed = true) {
-                    every { latitude } returns 1.0
-                    every { longitude } returns -2.0
-                    every { provider } returns "ReplayRouteSessionTest"
-                }
-            }
+        locationCallbackSlot.captured.run(
+            mockk(relaxed = true) {
+                every { latitude } returns 1.0
+                every { longitude } returns -2.0
+                every { source } returns "ReplayRouteSessionTest"
+            },
         )
 
         verifyOrder {
@@ -148,7 +155,7 @@ class ReplayRouteSessionTest {
 
     @Test
     fun `onAttached - should not push first device location if disabled`() {
-        every { bestLocationEngine.getLastLocation(any()) } just runs
+        every { locationProvider.getLastLocation(any()) } returns Cancelable { }
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
         val replayEventsSlot = slot<List<ReplayEventBase>>()
         every { replayer.pushEvents(capture(replayEventsSlot)) } returns replayer
@@ -157,7 +164,7 @@ class ReplayRouteSessionTest {
         sut.onAttached(mapboxNavigation)
 
         verify(exactly = 0) {
-            bestLocationEngine.getLastLocation(any())
+            locationProvider.getLastLocation(any())
         }
     }
 
@@ -212,7 +219,7 @@ class ReplayRouteSessionTest {
         sut.setOptions(
             ReplayRouteSessionOptions.Builder()
                 .decodeMinDistance(1.0)
-                .build()
+                .build(),
         )
 
         sut.onAttached(mapboxNavigation)
@@ -239,7 +246,7 @@ class ReplayRouteSessionTest {
         sut.setOptions(
             ReplayRouteSessionOptions.Builder()
                 .decodeMinDistance(0.001)
-                .build()
+                .build(),
         )
         sut.onAttached(mapboxNavigation)
         routeProgressObserver.captured.onRouteProgressChanged(routeProgress)
@@ -253,19 +260,21 @@ class ReplayRouteSessionTest {
         val geometryPoints = PolylineUtils.decode(geometry, 6)
         assertTrue(
             "${pushedPoints.size} > ${geometryPoints.size}",
-            pushedPoints.size > geometryPoints.size
+            pushedPoints.size > geometryPoints.size,
         )
         assertTrue(
             geometryPoints.all { lhs ->
                 pushedPoints.firstOrNull { rhs -> lhs.equals(rhs) } != null
-            }
+            },
         )
     }
 
     @Test
     fun `onAttached - should push gps location when route is not set`() {
-        val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
-        every { bestLocationEngine.getLastLocation(capture(locationCallbackSlot)) } just runs
+        val locationCallbackSlot = slot<GetLocationCallback>()
+        every {
+            locationProvider.getLastLocation(capture(locationCallbackSlot))
+        } returns Cancelable { }
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
         val replayEventsSlot = slot<List<ReplayEventBase>>()
         every { replayer.pushEvents(capture(replayEventsSlot)) } returns replayer
@@ -273,16 +282,14 @@ class ReplayRouteSessionTest {
         sut.setOptions(ReplayRouteSessionOptions.Builder().locationResetEnabled(true).build())
         sut.onAttached(mapboxNavigation)
         routesObserver.captured.onRoutesChanged(
-            mockk { every { navigationRoutes } returns emptyList() }
+            mockk { every { navigationRoutes } returns emptyList() },
         )
-        locationCallbackSlot.captured.onSuccess(
-            mockk {
-                every { lastLocation } returns mockk(relaxed = true) {
-                    every { latitude } returns 1.0
-                    every { longitude } returns -2.0
-                    every { provider } returns "ReplayRouteSessionTest"
-                }
-            }
+        locationCallbackSlot.captured.run(
+            mockk(relaxed = true) {
+                every { latitude } returns 1.0
+                every { longitude } returns -2.0
+                every { source } returns "ReplayRouteSessionTest"
+            },
         )
 
         verifyOrder {
@@ -335,7 +342,7 @@ class ReplayRouteSessionTest {
             mockk {
                 every { navigationRoute } returns primaryRoute
                 every { currentRouteGeometryIndex } returns 12
-            }
+            },
         )
 
         val pushedEvents = slot<List<ReplayEventBase>>()
@@ -422,7 +429,7 @@ class ReplayRouteSessionTest {
     private fun verifySkipToIndex(
         pushedEvents: List<ReplayEventBase>,
         primaryRoute: NavigationRoute,
-        currentRouteGeometryIndex: Int
+        currentRouteGeometryIndex: Int,
     ) {
         val geometry = primaryRoute.directionsRoute.geometry()!!
         val fullRoute = PolylineUtils.decode(geometry, 6)
@@ -447,7 +454,6 @@ class ReplayRouteSessionTest {
             "tGiUxByHlDjBp@^zKdG`Ah@`HtDx@d@rGlDl@\\pAp@dAl@p@^nItEpQvJfAh@fDjB`D`Br@`@nKpFbDhB" +
             "~KlGtDvBvAwE|EqPzFeSvHaXtA{ElAiE|@_D"
         every { id } returns "test-navigation-route-id"
-        every { routeOptions }
         every { directionsRoute } returns mockk {
             every { routeOptions() } returns mockk {
                 every { geometries() } returns "polyline6"

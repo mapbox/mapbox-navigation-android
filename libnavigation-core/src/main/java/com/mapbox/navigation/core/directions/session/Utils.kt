@@ -25,7 +25,7 @@ internal object Utils {
         return DirectionsSessionRoutes(
             validRoutes,
             ignoredAlternatives.map { IgnoredRoute(it, INVALID_ROUTE_REASON) },
-            setRoutesInfo
+            setRoutesInfo,
         )
     }
 }

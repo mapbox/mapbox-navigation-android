@@ -12,7 +12,7 @@ internal object NavigationSessionUtils {
 
     fun getNewNavigationSessionState(
         isDriving: Boolean,
-        hasRoutes: Boolean
+        hasRoutes: Boolean,
     ): NavigationSessionState = getNewState(
         isDriving,
         hasRoutes,
@@ -23,7 +23,7 @@ internal object NavigationSessionUtils {
 
     fun getNewHistoryRecordingSessionState(
         isDriving: Boolean,
-        hasRoutes: Boolean
+        hasRoutes: Boolean,
     ): HistoryRecordingSessionState = getNewState(
         isDriving,
         hasRoutes,

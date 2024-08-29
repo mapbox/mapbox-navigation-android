@@ -26,9 +26,7 @@ class MapboxNavigationOwnerTest {
     val loggerRule = LoggingFrontendTestRule()
 
     private val navigationOptionsProvider = mockk<NavigationOptionsProvider> {
-        every { createNavigationOptions() } returns mockk {
-            every { accessToken } returns "test_access_token"
-        }
+        every { createNavigationOptions() } returns mockk()
     }
 
     private val mapboxNavigationOwner = MapboxNavigationOwner()

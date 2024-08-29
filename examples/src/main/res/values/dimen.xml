@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="history_text_margin">16dp</dimen>
-    <dimen name="history_app_bar_height">180dp</dimen>
-    <dimen name="history_fab_margin">16dp</dimen>
-</resources>

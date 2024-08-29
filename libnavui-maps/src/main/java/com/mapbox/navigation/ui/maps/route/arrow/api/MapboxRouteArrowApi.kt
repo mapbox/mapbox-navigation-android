@@ -121,7 +121,7 @@ class MapboxRouteArrowApi {
         val arrowHeadFeatureCollection = getArrowHeadFeatureCollection()
         return ArrowAddedValue(
             shaftFeatureCollection,
-            arrowHeadFeatureCollection
+            arrowHeadFeatureCollection,
         )
     }
 
@@ -149,7 +149,7 @@ class MapboxRouteArrowApi {
                 value
                     .arrowHeadFeatureCollection
                     .features()
-                    ?.firstOrNull()
+                    ?.firstOrNull(),
             )
         }
     }
@@ -192,8 +192,8 @@ class MapboxRouteArrowApi {
             return ExpectedFactory.createError(
                 InvalidPointError(
                     "An arrow must have at least 2 points.",
-                    null
-                )
+                    null,
+                ),
             )
         }
 
@@ -201,8 +201,8 @@ class MapboxRouteArrowApi {
         return ExpectedFactory.createValue(
             ArrowAddedValue(
                 getShaftFeatureCollection(),
-                getArrowHeadFeatureCollection()
-            )
+                getArrowHeadFeatureCollection(),
+            ),
         )
     }
 
@@ -217,7 +217,7 @@ class MapboxRouteArrowApi {
         arrows.remove(arrow)
         return RemoveArrowValue(
             getShaftFeatureCollection(),
-            getArrowHeadFeatureCollection()
+            getArrowHeadFeatureCollection(),
         )
     }
 
@@ -231,7 +231,7 @@ class MapboxRouteArrowApi {
         maneuverPoints = ManeuverArrow(listOf())
         return ClearArrowsValue(
             getShaftFeatureCollection(),
-            getArrowHeadFeatureCollection()
+            getArrowHeadFeatureCollection(),
         )
     }
 
@@ -248,12 +248,12 @@ class MapboxRouteArrowApi {
         val arrowHeadFeatures = arrows.map {
             val azimuth = TurfMeasurement.bearing(
                 it.points[it.points.size - 2],
-                it.points[it.points.size - 1]
+                it.points[it.points.size - 1],
             )
             Feature.fromGeometry(it.points[it.points.size - 1]).also { feature ->
                 feature.addNumberProperty(
                     ARROW_BEARING,
-                    wrap(azimuth, 0.0, MAX_DEGREES)
+                    wrap(azimuth, 0.0, MAX_DEGREES),
                 )
             }
         }
@@ -265,7 +265,7 @@ class MapboxRouteArrowApi {
             Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE),
             Pair(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID, Visibility.NONE),
             Pair(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID, Visibility.NONE),
-            Pair(RouteLayerConstants.ARROW_HEAD_LAYER_ID, Visibility.NONE)
+            Pair(RouteLayerConstants.ARROW_HEAD_LAYER_ID, Visibility.NONE),
         )
     }
 
@@ -274,7 +274,7 @@ class MapboxRouteArrowApi {
             Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.VISIBLE),
             Pair(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID, Visibility.VISIBLE),
             Pair(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID, Visibility.VISIBLE),
-            Pair(RouteLayerConstants.ARROW_HEAD_LAYER_ID, Visibility.VISIBLE)
+            Pair(RouteLayerConstants.ARROW_HEAD_LAYER_ID, Visibility.VISIBLE),
         )
     }
 

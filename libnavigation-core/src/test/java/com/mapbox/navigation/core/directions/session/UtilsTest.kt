@@ -21,7 +21,7 @@ class UtilsTest {
         val actual = Utils.createDirectionsSessionRoutes(
             emptyList(),
             NativeSetRouteValue(emptyList(), emptyList()),
-            SetRoutes.CleanUp
+            SetRoutes.CleanUp,
         )
 
         assertEquals(expected, actual)
@@ -33,16 +33,16 @@ class UtilsTest {
         val expected = DirectionsSessionRoutes(
             listOf(primaryRoute),
             emptyList(),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         val actual = Utils.createDirectionsSessionRoutes(
             emptyList(),
             NativeSetRouteValue(
                 listOf(primaryRoute, mockk(relaxed = true)),
-                listOf(mockk(relaxed = true))
+                listOf(mockk(relaxed = true)),
             ),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         assertEquals(expected, actual)
@@ -54,7 +54,7 @@ class UtilsTest {
         val expected = DirectionsSessionRoutes(
             listOf(primaryRoute),
             emptyList(),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         val actual = Utils.createDirectionsSessionRoutes(
@@ -63,7 +63,7 @@ class UtilsTest {
                 listOf(primaryRoute, mockk(relaxed = true)),
                 emptyList(),
             ),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         assertEquals(expected, actual)
@@ -75,7 +75,7 @@ class UtilsTest {
         val expected = DirectionsSessionRoutes(
             listOf(primaryRoute),
             emptyList(),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         val actual = Utils.createDirectionsSessionRoutes(
@@ -84,7 +84,7 @@ class UtilsTest {
                 listOf(primaryRoute, mockk(relaxed = true)),
                 listOf(alternativeWithId("id#0")),
             ),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         assertEquals(expected, actual)
@@ -98,7 +98,7 @@ class UtilsTest {
         val expected = DirectionsSessionRoutes(
             listOf(primaryRoute, alternative1, alternative2),
             emptyList(),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         val actual = Utils.createDirectionsSessionRoutes(
@@ -107,7 +107,7 @@ class UtilsTest {
                 listOf(primaryRoute, alternative1, alternative2),
                 listOf(alternativeWithId("id#1"), alternativeWithId("id#2")),
             ),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         assertEquals(expected, actual)
@@ -121,7 +121,7 @@ class UtilsTest {
         val expected = DirectionsSessionRoutes(
             listOf(primaryRoute, alternative2),
             listOf(IgnoredRoute(alternative1, invalidRouteReason)),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         val actual = Utils.createDirectionsSessionRoutes(
@@ -130,7 +130,7 @@ class UtilsTest {
                 listOf(primaryRoute, alternative1, alternative2),
                 listOf(alternativeWithId("id#2")),
             ),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         assertEquals(expected, actual)
@@ -147,7 +147,7 @@ class UtilsTest {
                 IgnoredRoute(alternative1, invalidRouteReason),
                 IgnoredRoute(alternative2, invalidRouteReason),
             ),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         val actual = Utils.createDirectionsSessionRoutes(
@@ -156,7 +156,7 @@ class UtilsTest {
                 listOf(primaryRoute, alternative1, alternative2),
                 emptyList(),
             ),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
 
         assertEquals(expected, actual)

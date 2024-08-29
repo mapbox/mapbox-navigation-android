@@ -27,13 +27,13 @@ class RoutesRefreshDataTest {
         val alternativeRouteProgressData = RouteProgressData(4, 5, 6)
         val expected = listOf(
             primaryRoute to primaryRouteProgressData,
-            alternativeRoute to alternativeRouteProgressData
+            alternativeRoute to alternativeRouteProgressData,
         )
 
         val actual = RoutesRefreshData(
             primaryRoute,
             primaryRouteProgressData,
-            listOf(alternativeRoute to alternativeRouteProgressData)
+            listOf(alternativeRoute to alternativeRouteProgressData),
         )
 
         assertEquals(expected, actual.allRoutesRefreshData)

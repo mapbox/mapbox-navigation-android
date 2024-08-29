@@ -15,7 +15,7 @@ internal sealed class NativeSetRouteResult
  */
 internal class NativeSetRouteValue(
     val routes: List<NavigationRoute>,
-    val nativeAlternatives: List<RouteAlternative>
+    val nativeAlternatives: List<RouteAlternative>,
 ) : NativeSetRouteResult() {
 
     override fun toString(): String {
@@ -46,7 +46,7 @@ internal class NativeSetRouteValue(
  * @param error Reason why the routes were not set.
  */
 internal class NativeSetRouteError(
-    val error: String
+    val error: String,
 ) : NativeSetRouteResult() {
 
     override fun toString(): String {

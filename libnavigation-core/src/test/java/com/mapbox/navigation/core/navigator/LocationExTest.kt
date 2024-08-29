@@ -1,12 +1,11 @@
 package com.mapbox.navigation.core.navigator
 
-import android.location.Location
-import android.os.Bundle
 import com.mapbox.bindgen.Value
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,42 +15,22 @@ import java.util.Date
 class LocationExTest {
 
     @Test
-    fun bundleToMap() {
-        val expected = Bundle()
-        expected.putBoolean("bool", true)
-        expected.putByte("byte", 55)
-        expected.putChar("char", 'a')
-        expected.putDouble("double", 11.0)
-        expected.putFloat("float", 22.0f)
-        expected.putInt("int", 33)
-        expected.putShort("short", 44)
-        expected.putString("str", "strValue")
-
-        val actual = expected.toMap().toBundle()
-
-        assertEquals(expected.toString(), actual.toString())
-    }
-
-    @Test
     fun toFixLocation() {
-        val location = Location(PROVIDER).apply {
-            latitude = LATITUDE
-            longitude = LONGITUDE
-            time = TIME
-            elapsedRealtimeNanos = ELAPSED_REAL_TIME
-            speed = SPEED
-            bearing = BEARING
-            altitude = ALTITUDE
-            accuracy = ACCURACY
-            bearingAccuracyDegrees = BEARING_ACCURACY
-            speedAccuracyMetersPerSecond = SPEED_ACCURACY
-            verticalAccuracyMeters = VERTICAL_ACCURACY
-            extras = BUNDLE
-        }
-        Location::class.java.getDeclaredMethod(
-            "setIsFromMockProvider",
-            Boolean::class.java
-        ).invoke(location, IS_MOCK)
+        val location = Location.Builder()
+            .source(PROVIDER)
+            .latitude(LATITUDE)
+            .longitude(LONGITUDE)
+            .timestamp(TIME)
+            .monotonicTimestamp(ELAPSED_REAL_TIME)
+            .speed(SPEED.toDouble())
+            .bearing(BEARING.toDouble())
+            .altitude(ALTITUDE)
+            .horizontalAccuracy(ACCURACY.toDouble())
+            .bearingAccuracy(BEARING_ACCURACY.toDouble())
+            .speedAccuracy(SPEED_ACCURACY.toDouble())
+            .verticalAccuracy(VERTICAL_ACCURACY.toDouble())
+            .extra(EXTRA)
+            .build()
 
         location.toFixLocation().run {
             assertEquals(LATITUDE, coordinate.latitude(), .0)
@@ -92,23 +71,22 @@ class LocationExTest {
         fixLocation.toLocation().run {
             assertEquals(LATITUDE, latitude, .0)
             assertEquals(LONGITUDE, longitude, .0)
-            assertEquals(ELAPSED_REAL_TIME, elapsedRealtimeNanos)
-            assertEquals(DATE, Date(time))
-            assertEquals(SPEED, speed, .0f)
-            assertEquals(BEARING, bearing, .0f)
-            assertEquals(ALTITUDE, altitude, .0)
-            assertEquals(ACCURACY, accuracy, .0f)
-            assertEquals(PROVIDER, provider)
-            assertEquals(BEARING_ACCURACY, bearingAccuracyDegrees, .0f)
-            assertEquals(SPEED_ACCURACY, speedAccuracyMetersPerSecond, .0f)
-            assertEquals(VERTICAL_ACCURACY, verticalAccuracyMeters, .0f)
-            assertEquals(BUNDLE.toString(), EXTRAS.toBundle().toString())
-            assertEquals(IS_MOCK, isFromMockProvider)
+            assertEquals(ELAPSED_REAL_TIME, monotonicTimestamp)
+            assertEquals(DATE, Date(timestamp))
+            assertEquals(SPEED.toDouble(), speed!!, .0)
+            assertEquals(BEARING.toDouble(), bearing!!, .0)
+            assertEquals(ALTITUDE, altitude!!, .0)
+            assertEquals(ACCURACY.toDouble(), horizontalAccuracy!!, .0)
+            assertEquals(PROVIDER, source)
+            assertEquals(BEARING_ACCURACY.toDouble(), bearingAccuracy!!, .0)
+            assertEquals(SPEED_ACCURACY.toDouble(), speedAccuracy!!, .0)
+            assertEquals(VERTICAL_ACCURACY.toDouble(), verticalAccuracy!!, .0)
+            assertEquals(EXTRA, extra)
         }
     }
 
     @Test
-    fun checkLocationWithZeroParams() {
+    fun checkLocationWithNullParams() {
         val fixLocation = FixLocation(
             Point.fromLngLat(LONGITUDE, LATITUDE),
             ELAPSED_REAL_TIME,
@@ -126,30 +104,24 @@ class LocationExTest {
         )
 
         fixLocation.toLocation().run {
-            assertFalse(hasSpeed())
-            assertFalse(hasBearing())
-            assertFalse(hasAltitude())
-            assertFalse(hasAccuracy())
-            assertFalse(hasBearingAccuracy())
-            assertFalse(hasSpeedAccuracy())
-            assertFalse(hasVerticalAccuracy())
+            assertNull(speed)
+            assertNull(bearing)
+            assertNull(altitude)
+            assertNull(horizontalAccuracy)
+            assertNull(bearingAccuracy)
+            assertNull(speedAccuracy)
+            assertNull(verticalAccuracy)
 
-            assertEquals(ZERO_VALUE, speed, .0f)
-            assertEquals(ZERO_VALUE, bearing, .0f)
-            assertEquals(ZERO_VALUE, altitude.toFloat())
-            assertEquals(ZERO_VALUE, accuracy, .0f)
-            assertEquals(ZERO_VALUE, bearingAccuracyDegrees, .0f)
-            assertEquals(ZERO_VALUE, speedAccuracyMetersPerSecond, .0f)
-            assertEquals(ZERO_VALUE, verticalAccuracyMeters, .0f)
-            assertEquals(EMPTY_EXTRAS.toString(), extras!!.toMap().toString())
-            assertEquals(IS_MOCK, isFromMockProvider)
+            assertEquals(
+                hashMapOf("is_mock" to Value.valueOf(IS_MOCK)),
+                extra!!.contents as HashMap<String, Value>,
+            )
         }
     }
 
     companion object {
         private val NULL_VALUE = null
         private val DATE = Date()
-        private const val ZERO_VALUE = .0f
         private const val PROVIDER = "Test"
         private const val LATITUDE = 11.0
         private const val LONGITUDE = 22.0
@@ -162,19 +134,18 @@ class LocationExTest {
         private const val BEARING_ACCURACY = 50f
         private const val SPEED_ACCURACY = 60f
         private const val VERTICAL_ACCURACY = 70f
-        private val EXTRAS = { ->
-            val extras = FixLocationExtras()
-            extras.put("satellites", Value(42))
-            extras.put("string", Value("str42"))
-            extras
-        }()
-        private val BUNDLE = { ->
-            val bundle = Bundle()
-            bundle.putInt("satellites", 42)
-            bundle.putString("string", "str42")
-            bundle
-        }()
-        private val EMPTY_EXTRAS = FixLocationExtras()
+        private val EXTRAS = FixLocationExtras().also {
+            it["satellites"] = Value(42)
+            it["string"] = Value("str42")
+        }
         private const val IS_MOCK = true
+        private val EXTRA = Value.valueOf(
+            hashMapOf(
+                "satellites" to Value.valueOf(42),
+                "string" to Value.valueOf("str42"),
+                "is_mock" to Value.valueOf(true),
+            ),
+        )
+        private val EMPTY_EXTRAS = FixLocationExtras()
     }
 }

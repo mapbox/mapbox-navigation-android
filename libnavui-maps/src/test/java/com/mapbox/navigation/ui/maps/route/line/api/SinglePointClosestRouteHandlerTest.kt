@@ -2,10 +2,11 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
-import com.mapbox.maps.QueryFeaturesCallback
+import com.mapbox.maps.QueriedRenderedFeature
+import com.mapbox.maps.QueryRenderedFeaturesCallback
 import com.mapbox.maps.ScreenCoordinate
 import io.mockk.every
 import io.mockk.mockk
@@ -76,7 +77,7 @@ class SinglePointClosestRouteHandlerTest {
 
     @Test
     fun handle_success_indexIsNotFound() = runBlockingTest {
-        val queriedFeatures = listOf<QueriedFeature>(mockk(), mockk())
+        val queriedFeatures = listOf<QueriedRenderedFeature>(mockk(), mockk())
         mockMapAnswer(ExpectedFactory.createValue(queriedFeatures))
         every {
             ClosestRouteUtils.getIndexOfFirstFeature(any(), any())
@@ -90,7 +91,7 @@ class SinglePointClosestRouteHandlerTest {
 
     @Test
     fun handle_success_indexIsFound() = runBlockingTest {
-        val queriedFeatures = listOf<QueriedFeature>(mockk(), mockk())
+        val queriedFeatures = listOf<QueriedRenderedFeature>(mockk(), mockk())
         mockMapAnswer(ExpectedFactory.createValue(queriedFeatures))
         every {
             ClosestRouteUtils.getIndexOfFirstFeature(queriedFeatures, features)
@@ -101,15 +102,16 @@ class SinglePointClosestRouteHandlerTest {
         assertEquals(index, result.value!!)
     }
 
-    private fun mockMapAnswer(result: Expected<String, List<QueriedFeature>>) {
+    private fun mockMapAnswer(result: Expected<String, List<QueriedRenderedFeature>>) {
         every {
             map.queryRenderedFeatures(
-                clickPoint,
+                match { it.isScreenCoordinate && it.screenCoordinate == clickPoint },
                 match { it.layerIds == layerIds && it.filter == null },
-                any()
+                any(),
             )
         } answers {
-            thirdArg<QueryFeaturesCallback>().run(result)
+            thirdArg<QueryRenderedFeaturesCallback>().run(result)
+            Cancelable {}
         }
     }
 }

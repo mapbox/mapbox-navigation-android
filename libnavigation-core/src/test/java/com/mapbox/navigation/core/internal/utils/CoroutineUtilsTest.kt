@@ -34,7 +34,7 @@ class CoroutineUtilsTest {
         parentThread = HandlerThread("parent thread").also { it.start() }
         parentJob = SupervisorJob()
         parentScope = CoroutineScope(
-            SupervisorJob() + Handler(parentThread.looper).asCoroutineDispatcher()
+            SupervisorJob() + Handler(parentThread.looper).asCoroutineDispatcher(),
         )
     }
 
@@ -156,11 +156,11 @@ class CoroutineUtilsTest {
         try {
             val childScope1 = CoroutineUtils.createScope(
                 parentJob,
-                Handler(thread1.looper).asCoroutineDispatcher()
+                Handler(thread1.looper).asCoroutineDispatcher(),
             )
             val childScope2 = CoroutineUtils.createScope(
                 parentJob,
-                Handler(thread2.looper).asCoroutineDispatcher()
+                Handler(thread2.looper).asCoroutineDispatcher(),
             )
 
             var childThread1: Thread? = null

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
+import com.jparams.verifier.tostring.ToStringVerifier
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
@@ -13,6 +14,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import nl.jqno.equalsverifier.EqualsVerifier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -21,7 +23,6 @@ import org.junit.Test
 class NavigationSessionTest {
 
     private val route: NavigationRoute = mockk {
-        every { routeOptions } returns mockk()
         every { directionsRoute } returns mockk()
     }
     private val stateObserver: NavigationSessionStateObserver = mockk()
@@ -42,7 +43,7 @@ class NavigationSessionTest {
 
         verify(exactly = 1) {
             stateObserver.onNavigationSessionStateChanged(
-                Idle
+                Idle,
             )
         }
     }
@@ -53,7 +54,7 @@ class NavigationSessionTest {
         val navigationSession = NavigationSession()
         routes.add(route)
         navigationSession.onRoutesChanged(
-            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
@@ -61,7 +62,7 @@ class NavigationSessionTest {
 
         verify(exactly = 1) {
             stateObserver.onNavigationSessionStateChanged(
-                ActiveGuidance(navigationSessionStateSlot.captured.sessionId)
+                ActiveGuidance(navigationSessionStateSlot.captured.sessionId),
             )
         }
     }
@@ -75,7 +76,7 @@ class NavigationSessionTest {
 
         verify(exactly = 1) {
             stateObserver.onNavigationSessionStateChanged(
-                FreeDrive(navigationSessionStateSlot.captured.sessionId)
+                FreeDrive(navigationSessionStateSlot.captured.sessionId),
             )
         }
     }
@@ -90,7 +91,7 @@ class NavigationSessionTest {
 
         verify(exactly = 2) {
             stateObserver.onNavigationSessionStateChanged(
-                Idle
+                Idle,
             )
         }
     }
@@ -103,13 +104,13 @@ class NavigationSessionTest {
 
         routes.add(route)
         navigationSession.onRoutesChanged(
-            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
         verify(exactly = 1) {
             stateObserver.onNavigationSessionStateChanged(
-                ActiveGuidance(navigationSessionStateSlot.captured.sessionId)
+                ActiveGuidance(navigationSessionStateSlot.captured.sessionId),
             )
         }
     }
@@ -123,7 +124,7 @@ class NavigationSessionTest {
 
         verify(exactly = 1) {
             stateObserver.onNavigationSessionStateChanged(
-                FreeDrive(navigationSessionStateSlot.captured.sessionId)
+                FreeDrive(navigationSessionStateSlot.captured.sessionId),
             )
         }
     }
@@ -139,7 +140,7 @@ class NavigationSessionTest {
 
         verify(exactly = 0) {
             stateObserver.onNavigationSessionStateChanged(
-                Idle
+                Idle,
             )
         }
     }
@@ -154,13 +155,13 @@ class NavigationSessionTest {
 
         routes.add(route)
         navigationSession.onRoutesChanged(
-            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
         verify(exactly = 0) {
             stateObserver.onNavigationSessionStateChanged(
-                ActiveGuidance(navigationSessionStateSlot.captured.sessionId)
+                ActiveGuidance(navigationSessionStateSlot.captured.sessionId),
             )
         }
     }
@@ -176,7 +177,7 @@ class NavigationSessionTest {
 
         verify(exactly = 0) {
             stateObserver.onNavigationSessionStateChanged(
-                FreeDrive(navigationSessionStateSlot.captured.sessionId)
+                FreeDrive(navigationSessionStateSlot.captured.sessionId),
             )
         }
     }
@@ -200,8 +201,8 @@ class NavigationSessionTest {
         every {
             mockedStateObserver.onNavigationSessionStateChanged(
                 capture(
-                    navigationSessionStateSlot
-                )
+                    navigationSessionStateSlot,
+                ),
             )
         } just runs
         val navigationSession = NavigationSession()
@@ -220,8 +221,8 @@ class NavigationSessionTest {
         every {
             mockedStateObserver.onNavigationSessionStateChanged(
                 capture(
-                    navigationSessionStateSlot
-                )
+                    navigationSessionStateSlot,
+                ),
             )
         } just runs
         val navigationSession = NavigationSession()
@@ -239,8 +240,8 @@ class NavigationSessionTest {
         every {
             mockedStateObserver.onNavigationSessionStateChanged(
                 capture(
-                    navigationSessionStateSlot
-                )
+                    navigationSessionStateSlot,
+                ),
             )
         } just runs
         val routes = mutableListOf<NavigationRoute>()
@@ -249,7 +250,7 @@ class NavigationSessionTest {
 
         routes.add(route)
         navigationSession.onRoutesChanged(
-            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
@@ -264,8 +265,8 @@ class NavigationSessionTest {
         every {
             mockedStateObserver.onNavigationSessionStateChanged(
                 capture(
-                    navigationSessionStateSlots
-                )
+                    navigationSessionStateSlots,
+                ),
             )
         } just runs
         val routes = mutableListOf<NavigationRoute>()
@@ -277,20 +278,30 @@ class NavigationSessionTest {
         navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
         routes.add(
             mockk {
-                every { routeOptions } returns mockk()
                 every { directionsRoute } returns mockk()
-            }
+            },
         )
         navigationSession.onRoutesChanged(
-            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            createRoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         routes.clear()
         navigationSession.onRoutesChanged(
-            createRoutesUpdatedResult(emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP)
+            createRoutesUpdatedResult(emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP),
         )
         val two = navigationSessionStateSlots[1].sessionId
 
         assertEquals(one, two)
+    }
+
+    @Test
+    fun testGeneratedEqualsHashcodeToStringFunctions() {
+        listOf(
+            FreeDrive::class.java,
+            ActiveGuidance::class.java,
+        ).forEach {
+            EqualsVerifier.forClass(it).verify()
+            ToStringVerifier.forClass(it).verify()
+        }
     }
 }

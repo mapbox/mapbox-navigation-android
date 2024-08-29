@@ -19,7 +19,7 @@ internal class ReplayRouteInterpolator {
      */
     fun createSpeedProfile(
         options: ReplayRouteOptions,
-        distinctPoints: List<Point>
+        distinctPoints: List<Point>,
     ): List<ReplayRouteLocation> {
         val smoothLocations = routeSmoother.smoothRoute(distinctPoints, SMOOTH_THRESHOLD_METERS)
         smoothLocations.first().speedMps = 0.0
@@ -42,7 +42,7 @@ internal class ReplayRouteInterpolator {
         options: ReplayRouteOptions,
         startSpeed: Double,
         endSpeed: Double,
-        distance: Double
+        distance: Double,
     ): ReplayRouteSegment {
         val segment = calculateSegmentSpeedAndDistances(options, startSpeed, endSpeed, distance)
         val speedSteps = mutableListOf<ReplayRouteStep>()
@@ -50,18 +50,18 @@ internal class ReplayRouteInterpolator {
                 frequency = options.frequency,
                 startSpeed = startSpeed,
                 endSpeed = segment.maxSpeedMps,
-                distance = segment.speedUpDistance
+                distance = segment.speedUpDistance,
             )
             .addCruisingSteps(
                 frequency = options.frequency,
                 speed = segment.maxSpeedMps,
-                distance = segment.cruiseDistance
+                distance = segment.cruiseDistance,
             )
             .addAcceleratingSteps(
                 frequency = options.frequency,
                 startSpeed = segment.maxSpeedMps,
                 endSpeed = endSpeed,
-                distance = segment.slowDownDistance
+                distance = segment.slowDownDistance,
             )
             .clampLastStep(endSpeed, distance)
 
@@ -87,7 +87,7 @@ internal class ReplayRouteInterpolator {
         options: ReplayRouteOptions,
         startSpeed: Double,
         endSpeed: Double,
-        distance: Double
+        distance: Double,
     ): ReplayRouteSegment {
         // Solving for v with a v^2 problem requires the quadratic formula.
         // This is the result, sorry it's a mess.
@@ -124,7 +124,7 @@ internal class ReplayRouteInterpolator {
     private fun MutableList<ReplayRouteStep>.addCruisingSteps(
         frequency: Double,
         speed: Double,
-        distance: Double
+        distance: Double,
     ) = apply {
         if (distance == 0.0) return this
         val startDistance = lastOrNull()?.positionMeters ?: 0.0
@@ -139,7 +139,7 @@ internal class ReplayRouteInterpolator {
                 timeSeconds = startTime + t,
                 acceleration = 0.0,
                 speedMps = speed,
-                positionMeters = startDistance + speed * t
+                positionMeters = startDistance + speed * t,
             )
             add(replayRouteStep)
         }
@@ -149,7 +149,7 @@ internal class ReplayRouteInterpolator {
         frequency: Double,
         startSpeed: Double,
         endSpeed: Double,
-        distance: Double
+        distance: Double,
     ) = apply {
         if (distance == 0.0) return this
         val startDistance = lastOrNull()?.positionMeters ?: 0.0
@@ -165,7 +165,7 @@ internal class ReplayRouteInterpolator {
                 timeSeconds = startTime + t,
                 acceleration = acceleration,
                 speedMps = startSpeed + acceleration * t,
-                positionMeters = newtonDistance(t, startDistance, startSpeed, acceleration)
+                positionMeters = newtonDistance(t, startDistance, startSpeed, acceleration),
             )
             add(replayRouteStep)
         }
@@ -176,11 +176,11 @@ internal class ReplayRouteInterpolator {
      */
     private fun MutableList<ReplayRouteStep>.clampLastStep(
         endSpeed: Double,
-        distance: Double
+        distance: Double,
     ) = apply {
         val lastStep = last().copy(
             speedMps = endSpeed,
-            positionMeters = distance
+            positionMeters = distance,
         )
         set(lastIndex, lastStep)
     }
@@ -206,7 +206,7 @@ internal class ReplayRouteInterpolator {
         val lookAhead = 2
         var bearing = TurfMeasurement.bearing(
             replayRouteLocations[0].point,
-            replayRouteLocations[1].point
+            replayRouteLocations[1].point,
         )
         replayRouteLocations.forEachIndexed { index, location ->
             val nextIndex = min(index + lookAhead, replayRouteLocations.lastIndex)
@@ -221,7 +221,7 @@ internal class ReplayRouteInterpolator {
 
     private fun createSpeedForTurns(
         options: ReplayRouteOptions,
-        smoothLocations: List<ReplayRouteLocation>
+        smoothLocations: List<ReplayRouteLocation>,
     ) {
         for (i in 1 until smoothLocations.lastIndex) {
             val segmentStart = smoothLocations[i - 1]
@@ -246,7 +246,7 @@ internal class ReplayRouteInterpolator {
 
     private fun reduceSpeedForDistances(
         options: ReplayRouteOptions,
-        smoothLocations: List<ReplayRouteLocation>
+        smoothLocations: List<ReplayRouteLocation>,
     ) {
         // Check the speed estimates with their speeds. Reduce the speed to ensure the estimates
         // are within the acceleration limits. For example, a car can only go so fast, and slamming

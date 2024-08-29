@@ -131,7 +131,7 @@ class SchemaTest {
 
     private fun schemaContainsPropertyFields(
         properties: JsonObject,
-        fields: List<Field>
+        fields: List<Field>,
     ) {
         var distanceRemainingCount = 0
         var durationRemainingCount = 0
@@ -223,7 +223,7 @@ class SchemaTest {
             assertEquals(
                 "schema and impl fields count should match for $fieldName",
                 objectProperties.keySet().size,
-                propertyFields.size
+                propertyFields.size,
             )
 
             propertyFields.forEach { objectField ->
@@ -232,7 +232,7 @@ class SchemaTest {
                     ?.value ?: objectField.name
                 assertTrue(
                     "schema and impl object $fieldName should both have a $name property",
-                    objectProperties.has(name)
+                    objectProperties.has(name),
                 )
                 val objectProperty = objectProperties.get(name).asJsonObject
                 verifyProperty(objectProperty, objectField.type, objectField.name)
@@ -314,12 +314,12 @@ class SchemaTest {
             when {
                 it.isEmpty() -> {
                     throw IllegalArgumentException(
-                        "missing $eventName schema for version $version"
+                        "missing $eventName schema for version $version",
                     )
                 }
                 it.size > 1 -> {
                     throw IllegalArgumentException(
-                        "multiple $eventName schemas for version $version"
+                        "multiple $eventName schemas for version $version",
                     )
                 }
                 else -> {
@@ -379,7 +379,7 @@ class SchemaTest {
 
     private fun generateStepSchemaJson(
         stepJson: String,
-        schemaString: String
+        schemaString: String,
     ): String {
         var stepJson = stepJson
         var schemaString = schemaString

@@ -195,169 +195,169 @@ internal object EventsTestHelper {
             assertEquals(
                 "event value",
                 eventName,
-                content["event"]!!.contents
+                content["event"]!!.contents,
             )
             assertEquals(
                 "navigatorSessionIdentifier value",
                 navigatorSessionIdentifier,
-                content["navigatorSessionIdentifier"]!!.contents
+                content["navigatorSessionIdentifier"]!!.contents,
             )
             assertEquals(
                 "startTimestamp value",
                 startTimestamp,
-                content["startTimestamp"]!!.contents
+                content["startTimestamp"]!!.contents,
             )
             assertEquals(
                 "driverMode value",
                 driverMode,
-                content["driverMode"]!!.contents
+                content["driverMode"]!!.contents,
             )
             assertEquals(
                 "sessionIdentifier value",
                 sessionIdentifier,
-                content["sessionIdentifier"]!!.contents
+                content["sessionIdentifier"]!!.contents,
             )
             assertEquals(
                 "geometry value",
                 geometry,
-                content["geometry"]!!.contents
+                content["geometry"]!!.contents,
             )
             assertEquals(
                 "profile value",
                 profile,
-                content["profile"]!!.contents
+                content["profile"]!!.contents,
             )
             assertEquals(
                 "requestIdentifier value",
                 requestIdentifier,
-                content["requestIdentifier"]!!.contents
+                content["requestIdentifier"]!!.contents,
             )
             assertEquals(
                 "originalGeometry value",
                 originalGeometry,
-                content["originalGeometry"]!!.contents
+                content["originalGeometry"]!!.contents,
             )
             assertEquals(
                 "locationEngine value",
                 locationEngine,
-                content["locationEngine"]!!.contents
+                content["locationEngine"]!!.contents,
             )
             assertEquals(
                 "tripIdentifier value",
                 tripIdentifier,
-                content["tripIdentifier"]!!.contents
+                content["tripIdentifier"]!!.contents,
             )
             assertEquals(
                 "lat value",
                 lat,
                 content["lat"]!!.contents as Double,
-                0.0
+                0.0,
             )
             assertEquals(
                 "lng value",
                 lng,
                 content["lng"]!!.contents as Double,
-                0.0
+                0.0,
             )
             assertEquals(
                 "simulation value",
                 simulation,
-                content["simulation"]!!.contents
+                content["simulation"]!!.contents,
             )
             assertEquals(
                 "absoluteDistanceToDestination value",
                 absoluteDistanceToDestination.toLong(),
-                content["absoluteDistanceToDestination"]!!.contents
+                content["absoluteDistanceToDestination"]!!.contents,
             )
             assertEquals(
                 "percentTimeInPortrait value",
                 percentTimeInPortrait.toLong(),
-                content["percentTimeInPortrait"]!!.contents
+                content["percentTimeInPortrait"]!!.contents,
             )
             assertEquals(
                 "percentTimeInForeground value",
                 percentTimeInForeground.toLong(),
-                content["percentTimeInForeground"]!!.contents
+                content["percentTimeInForeground"]!!.contents,
             )
             assertEquals(
                 "distanceCompleted value",
                 distanceCompleted.toLong(),
-                content["distanceCompleted"]!!.contents
+                content["distanceCompleted"]!!.contents,
             )
             assertEquals(
                 "distanceRemaining value",
                 distanceRemaining.toLong(),
-                content["distanceRemaining"]!!.contents
+                content["distanceRemaining"]!!.contents,
             )
             assertEquals(
                 "eventVersion value",
                 eventVersion.toLong(),
-                content["eventVersion"]!!.contents
+                content["eventVersion"]!!.contents,
             )
             assertEquals(
                 "estimatedDistance value",
                 estimatedDistance.toLong(),
-                content["estimatedDistance"]!!.contents
+                content["estimatedDistance"]!!.contents,
             )
             assertEquals(
                 "estimatedDuration value",
                 estimatedDuration.toLong(),
-                content["estimatedDuration"]!!.contents
+                content["estimatedDuration"]!!.contents,
             )
             assertEquals(
                 "rerouteCount value",
                 rerouteCount.toLong(),
-                content["rerouteCount"]!!.contents
+                content["rerouteCount"]!!.contents,
             )
             assertEquals(
                 "originalEstimatedDistance value",
                 originalEstimatedDistance.toLong(),
-                content["originalEstimatedDistance"]!!.contents
+                content["originalEstimatedDistance"]!!.contents,
             )
             assertEquals(
                 "originalEstimatedDuration value",
                 originalEstimatedDuration.toLong(),
-                content["originalEstimatedDuration"]!!.contents
+                content["originalEstimatedDuration"]!!.contents,
             )
             assertEquals(
                 "stepCount value",
                 stepCount.toLong(),
-                content["stepCount"]!!.contents
+                content["stepCount"]!!.contents,
             )
             assertEquals(
                 "originalStepCount value",
                 originalStepCount.toLong(),
-                content["originalStepCount"]!!.contents
+                content["originalStepCount"]!!.contents,
             )
             assertEquals(
                 "legIndex value",
                 legIndex.toLong(),
-                content["legIndex"]!!.contents
+                content["legIndex"]!!.contents,
             )
             assertEquals(
                 "legCount value",
                 legCount.toLong(),
-                content["legCount"]!!.contents
+                content["legCount"]!!.contents,
             )
             assertEquals(
                 "stepIndex value",
                 stepIndex.toLong(),
-                content["stepIndex"]!!.contents
+                content["stepIndex"]!!.contents,
             )
             assertEquals(
                 "voiceIndex value",
                 voiceIndex.toLong(),
-                content["voiceIndex"]!!.contents
+                content["voiceIndex"]!!.contents,
             )
             assertEquals(
                 "bannerIndex value",
                 bannerIndex.toLong(),
-                content["bannerIndex"]!!.contents
+                content["bannerIndex"]!!.contents,
             )
             assertEquals(
                 "totalStepCount value",
                 totalStepCount.toLong(),
-                content["totalStepCount"]!!.contents
+                content["totalStepCount"]!!.contents,
             )
             assertTrue(content.containsKey("appMetadata"))
             content["appMetadata"]!!.verifyAppMetadata(appMetadata)
@@ -369,22 +369,22 @@ internal object EventsTestHelper {
             assertEquals(
                 "appMetadata, name value",
                 appMetadata.name,
-                appMetadataContent["name"]!!.contents
+                appMetadataContent["name"]!!.contents,
             )
             assertEquals(
                 "appMetadata, version value",
                 appMetadata.version,
-                appMetadataContent["version"]!!.contents
+                appMetadataContent["version"]!!.contents,
             )
             assertEquals(
                 "appMetadata, sessionId value",
                 appMetadata.sessionId,
-                appMetadataContent["sessionId"]!!.contents
+                appMetadataContent["sessionId"]!!.contents,
             )
             assertEquals(
                 "appMetadata, userId value",
                 appMetadata.userId,
-                appMetadataContent["userId"]!!.contents
+                appMetadataContent["userId"]!!.contents,
             )
         }
     }
@@ -395,47 +395,47 @@ internal object EventsTestHelper {
                 "check TelemetryLocation: latitude value",
                 location.latitude,
                 content["lat"]!!.contents as Double,
-                0.000001
+                0.000001,
             )
             assertEquals(
                 "check TelemetryLocation: longitude value",
                 location.longitude,
                 content["lng"]!!.contents as Double,
-                0.000001
+                0.000001,
             )
             assertEquals(
                 "check TelemetryLocation: speed value",
                 location.speed.toString().toDouble(),
                 content["speed"]!!.contents as Double,
-                0.001
+                0.001,
             )
             assertEquals(
                 "check TelemetryLocation: bearing value",
                 location.bearing.toString().toDouble(),
                 content["course"]!!.contents as Double,
-                0.001
+                0.001,
             )
             assertEquals(
                 "check TelemetryLocation: altitude value",
                 location.altitude,
-                content["altitude"]!!.contents
+                content["altitude"]!!.contents,
             )
             assertEquals(
                 "check TelemetryLocation: timestamp value",
                 location.timestamp,
-                content["timestamp"]!!.contents
+                content["timestamp"]!!.contents,
             )
             assertEquals(
                 "check TelemetryLocation: timestamp value",
                 location.horizontalAccuracy.toString().toDouble(),
                 content["horizontalAccuracy"]!!.contents as Double,
-                0.001
+                0.001,
             )
             assertEquals(
                 "check TelemetryLocation: verticalAccuracy value",
                 location.verticalAccuracy.toString().toDouble(),
                 content["verticalAccuracy"]!!.contents as Double,
-                0.001
+                0.001,
             )
         }
     }

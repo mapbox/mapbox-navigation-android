@@ -19,7 +19,7 @@ class ReplayRouteOptions private constructor(
     val turnSpeedMps: Double,
     val uTurnSpeedMps: Double,
     val maxAcceleration: Double,
-    val minAcceleration: Double
+    val minAcceleration: Double,
 ) {
     /**
      * @return the builder that created the [ReplayRouteOptions]
@@ -102,7 +102,7 @@ class ReplayRouteOptions private constructor(
                 uTurnSpeedMps = uTurnSpeedMps,
                 maxAcceleration = maxAcceleration,
                 minAcceleration = minAcceleration,
-                frequency = frequency
+                frequency = frequency,
             )
         }
 

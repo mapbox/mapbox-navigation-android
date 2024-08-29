@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable
 
 fun Bitmap.drawableWithHeight(
     drawableHeight: Int,
-    resources: Resources
+    resources: Resources,
 ): Drawable {
     val drawable: Drawable = BitmapDrawable(resources, this)
     val right = (drawableHeight * width.toDouble() / height.toDouble()).toInt()

@@ -1,0 +1,493 @@
+{
+  "matchings": [
+    {
+      "confidence": 0.264001,
+      "weight_name": "auto",
+      "weight": 255.139,
+      "duration": 134.918,
+      "distance": 416.572,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "USA",
+              "iso_3166_1": "US"
+            }
+          ],
+          "weight": 176.583,
+          "duration": 70.97,
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    39
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 0,
+                  "location": [
+                    -117.136363,
+                    32.701081
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive northeast on Sampson Street.",
+                "bearing_after": 39,
+                "bearing_before": 0,
+                "location": [
+                  -117.136363,
+                  32.701081
+                ]
+              },
+              "name": "Sampson Street",
+              "duration": 6.764,
+              "distance": 30.061,
+              "driving_side": "right",
+              "weight": 8.27,
+              "mode": "driving",
+              "geometry": "qh|j}@t}ll~EaLuK"
+            },
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    39,
+                    130,
+                    219,
+                    308
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 2,
+                  "turn_weight": 12.5,
+                  "turn_duration": 5.622,
+                  "mapbox_streets_v8": {
+                    "class": "tertiary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 3,
+                  "geometry_index": 1,
+                  "location": [
+                    -117.13616,
+                    32.70129
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto Harrison Avenue.",
+                "modifier": "left",
+                "bearing_after": 308,
+                "bearing_before": 39,
+                "location": [
+                  -117.13616,
+                  32.70129
+                ]
+              },
+              "name": "Harrison Avenue",
+              "duration": 38.618,
+              "distance": 201.642,
+              "driving_side": "right",
+              "weight": 52.992,
+              "mode": "driving",
+              "geometry": "su|j}@~pll~E{ApCadAhbB"
+            },
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    40,
+                    130,
+                    220,
+                    310
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 1,
+                  "turn_weight": 7,
+                  "turn_duration": 2.005,
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 3,
+                  "location": [
+                    -117.137822,
+                    32.702441
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn right onto South Evans Street.",
+                "modifier": "right",
+                "bearing_after": 40,
+                "bearing_before": 310,
+                "location": [
+                  -117.137822,
+                  32.702441
+                ]
+              },
+              "name": "South Evans Street",
+              "duration": 13.772,
+              "distance": 62.103,
+              "driving_side": "right",
+              "weight": 21.391,
+              "mode": "driving",
+              "geometry": "q}~j}@zxol~EeEcE{S_S"
+            },
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    39,
+                    130,
+                    219,
+                    308
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 2,
+                  "turn_weight": 82,
+                  "turn_duration": 2.105,
+                  "mapbox_streets_v8": {
+                    "class": "service"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 5,
+                  "location": [
+                    -117.137404,
+                    32.702874
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn right.",
+                "modifier": "right",
+                "bearing_after": 130,
+                "bearing_before": 39,
+                "location": [
+                  -117.137404,
+                  32.702874
+                ]
+              },
+              "name": "",
+              "duration": 11.817,
+              "distance": 16.187,
+              "driving_side": "right",
+              "weight": 93.931,
+              "mode": "driving",
+              "geometry": "sx_k}@v~nl~ExDiG"
+            },
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    310
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 6,
+                  "location": [
+                    -117.137271,
+                    32.702781
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "You have arrived at your destination.",
+                "bearing_after": 0,
+                "bearing_before": 130,
+                "location": [
+                  -117.137271,
+                  32.702781
+                ]
+              },
+              "name": "",
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "yr_k}@lvnl~E??"
+            }
+          ],
+          "distance": 309.992,
+          "summary": "Harrison Avenue, South Evans Street"
+        },
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "USA",
+              "iso_3166_1": "US"
+            }
+          ],
+          "weight": 78.557,
+          "duration": 63.948,
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    130
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "service"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 0,
+                  "location": [
+                    -117.137271,
+                    32.702781
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive southeast.",
+                "bearing_after": 130,
+                "bearing_before": 0,
+                "location": [
+                  -117.137271,
+                  32.702781
+                ]
+              },
+              "name": "",
+              "duration": 63.948,
+              "distance": 106.58,
+              "driving_side": "right",
+              "weight": 78.557,
+              "mode": "driving",
+              "geometry": "yr_k}@lvnl~Ehe@qu@"
+            },
+            {
+              "intersections": [
+                {
+                  "bearings": [
+                    310
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 1,
+                  "location": [
+                    -117.136398,
+                    32.702168
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "You have arrived at your destination.",
+                "bearing_after": 0,
+                "bearing_before": 130,
+                "location": [
+                  -117.136398,
+                  32.702168
+                ]
+              },
+              "name": "",
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "ol~j}@z_ml~E??"
+            }
+          ],
+          "distance": 106.58,
+          "summary": ""
+        }
+      ],
+      "geometry": "qh|j}@t}ll~EaLuK{ApCadAhbBeEcE{S_SxDiGhe@qu@"
+    }
+  ],
+  "tracepoints": [
+    {
+      "matchings_index": 0,
+      "waypoint_index": 0,
+      "alternatives_count": 0,
+      "distance": 4.205,
+      "name": "",
+      "location": [
+        -117.136363,
+        32.701081
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 2.268,
+      "name": "Harrison Avenue",
+      "location": [
+        -117.136362,
+        32.701425
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 0.287,
+      "name": "Harrison Avenue",
+      "location": [
+        -117.136659,
+        32.701632
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 1.95,
+      "name": "Harrison Avenue",
+      "location": [
+        -117.136977,
+        32.701853
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 0.227,
+      "name": "Harrison Avenue",
+      "location": [
+        -117.13743,
+        32.702169
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 0.574,
+      "name": "Harrison Avenue",
+      "location": [
+        -117.137648,
+        32.70232
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 1.002,
+      "name": "South Evans Street",
+      "location": [
+        -117.137697,
+        32.702568
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 0.41,
+      "name": "South Evans Street",
+      "location": [
+        -117.137491,
+        32.702783
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": 1,
+      "alternatives_count": 0,
+      "distance": 0.233,
+      "name": "",
+      "location": [
+        -117.137271,
+        32.702781
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 0.473,
+      "name": "",
+      "location": [
+        -117.136949,
+        32.702555
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 0.281,
+      "name": "",
+      "location": [
+        -117.136783,
+        32.702438
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": null,
+      "alternatives_count": 1,
+      "distance": 0.067,
+      "name": "",
+      "location": [
+        -117.136618,
+        32.702322
+      ]
+    },
+    {
+      "matchings_index": 0,
+      "waypoint_index": 2,
+      "alternatives_count": 0,
+      "distance": 0.419,
+      "name": "",
+      "location": [
+        -117.136398,
+        32.702168
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "A8XCVJNUZdtoBuUBiSRw2uLpI5iz3HeMtBfz-FLtpJXk5eGzVtLuEw=="
+}

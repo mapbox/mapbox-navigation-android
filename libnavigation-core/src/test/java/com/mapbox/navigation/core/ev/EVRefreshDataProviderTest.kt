@@ -26,7 +26,7 @@ class EVRefreshDataProviderTest {
     fun `EV route empty data`() {
         val unrecognizedProperties = mapOf(
             "engine" to JsonPrimitive("electric"),
-            "aaa" to JsonPrimitive(11)
+            "aaa" to JsonPrimitive(11),
         )
         every {
             evDynamicDataHolder.currentData(unrecognizedProperties)
@@ -40,7 +40,7 @@ class EVRefreshDataProviderTest {
     fun `EV route non empty data`() {
         val unrecognizedProperties = mapOf(
             "engine" to JsonPrimitive("electric"),
-            "aaa" to JsonPrimitive(11)
+            "aaa" to JsonPrimitive(11),
         )
         every {
             evDynamicDataHolder.currentData(unrecognizedProperties)
@@ -51,9 +51,9 @@ class EVRefreshDataProviderTest {
             mapOf(
                 "engine" to "electric",
                 "aa" to "bb",
-                "ccc" to "ddd"
+                "ccc" to "ddd",
             ),
-            sut.get(options)
+            sut.get(options),
         )
     }
 }

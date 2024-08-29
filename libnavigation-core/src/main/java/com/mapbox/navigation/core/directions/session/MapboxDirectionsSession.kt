@@ -2,14 +2,13 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
-import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
-import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.core.internal.router.GetRouteSignature
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
+import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.initialLegIndex
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -17,10 +16,10 @@ import java.util.concurrent.CopyOnWriteArraySet
  * Default implementation of [DirectionsSession].
  *
  * @property router route fetcher. Usually Onboard, Offboard or Hybrid
- * @property routesUpdatedResult info of last routes update. Fetched from [Router] or might be set manually
+ * @property routesUpdatedResult info of last routes update.
  */
 internal class MapboxDirectionsSession(
-    private val router: NavigationRouterV2,
+    private val router: Router,
 ) : DirectionsSession {
 
     private val onSetNavigationRoutesFinishedObservers = CopyOnWriteArraySet<RoutesObserver>()
@@ -46,7 +45,6 @@ internal class MapboxDirectionsSession(
         ) {
             return
         }
-        RouteCompatibilityCache.setDirectionsSessionResult(routes.acceptedRoutes)
 
         val result = routes.toRoutesUpdatedResult().also { routesUpdatedResult = it }
         onSetNavigationRoutesFinishedObservers.forEach {
@@ -78,11 +76,10 @@ internal class MapboxDirectionsSession(
      * @param routeRefreshRequestData Object containing information needed for refresh request
      * @param callback Callback that gets notified with the results of the request
      */
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun requestRouteRefresh(
         route: NavigationRoute,
         routeRefreshRequestData: RouteRefreshRequestData,
-        callback: NavigationRouterRefreshCallback
+        callback: NavigationRouterRefreshCallback,
     ): Long {
         return router.getRouteRefresh(route, routeRefreshRequestData, callback)
     }
@@ -105,9 +102,10 @@ internal class MapboxDirectionsSession(
      */
     override fun requestRoutes(
         routeOptions: RouteOptions,
-        routerCallback: NavigationRouterCallback
+        signature: GetRouteSignature,
+        routerCallback: NavigationRouterCallback,
     ): Long {
-        return router.getRoute(routeOptions, routerCallback)
+        return router.getRoute(routeOptions, signature, routerCallback)
     }
 
     override fun cancelRouteRequest(requestId: Long) {
@@ -137,13 +135,13 @@ internal class MapboxDirectionsSession(
     }
 
     override fun registerSetNavigationRoutesStartedObserver(
-        observer: SetNavigationRoutesStartedObserver
+        observer: SetNavigationRoutesStartedObserver,
     ) {
         onSetNavigationRoutesStartedObservers.add(observer)
     }
 
     override fun unregisterSetNavigationRoutesStartedObserver(
-        observer: SetNavigationRoutesStartedObserver
+        observer: SetNavigationRoutesStartedObserver,
     ) {
         onSetNavigationRoutesStartedObservers.remove(observer)
     }

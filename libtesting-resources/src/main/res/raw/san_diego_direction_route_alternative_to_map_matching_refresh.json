@@ -1,0 +1,1 @@
+{"code":"Ok","route":{"legs":[{"annotation":{"maxspeed":[{"speed":40,"unit":"km/h"},{"speed":40,"unit":"km/h"},{"unknown":true},{"unknown":true},{"unknown":true}],"congestion_numeric":[null,null,null,null,null],"speed":[5.3,6.7,1.7,1.7,5.6],"distance":[30,61,51.4,1.7,25.9],"duration":[5.693,9.156,36.23,1.076,4.664]}}],"refresh_ttl":84874}}

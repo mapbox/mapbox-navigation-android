@@ -11,8 +11,9 @@ import com.mapbox.navigation.base.route.RouterOrigin
  */
 class RouteAlternativesError internal constructor(
     val message: String,
-    val routerOrigin: RouterOrigin? = null,
-    val throwable: Throwable? = null
+    @RouterOrigin
+    val routerOrigin: String? = null,
+    val throwable: Throwable? = null,
 ) {
     /**
      * Indicates whether some other object is "equal to" this one.

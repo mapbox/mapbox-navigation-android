@@ -5,9 +5,16 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 
 @UiThread
-internal interface InternalRerouteController : NavigationRerouteController {
+internal abstract class InternalRerouteController : RerouteController() {
 
-    fun reroute(callback: RoutesCallback)
+    /**
+     * Invoked when re-route is not needed anymore (for instance when driver returns to previous route).
+     * Might be ignored depending on [RerouteState] e.g. if a route has been fetched it does not make sense to interrupt re-routing
+     */
+    abstract fun interrupt()
+
+    abstract fun rerouteOnDeviation(callback: RoutesCallback)
+    abstract fun rerouteOnParametersChange(callback: RoutesCallback)
 
     @UiThread
     fun interface RoutesCallback {
@@ -19,7 +26,8 @@ internal interface InternalRerouteController : NavigationRerouteController {
 internal class RerouteResult internal constructor(
     val routes: List<NavigationRoute>,
     val initialLegIndex: Int,
-    val origin: RouterOrigin,
+    @RouterOrigin
+    val origin: String,
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -30,9 +38,7 @@ internal class RerouteResult internal constructor(
 
         if (routes != other.routes) return false
         if (initialLegIndex != other.initialLegIndex) return false
-        if (origin != other.origin) return false
-
-        return true
+        return origin == other.origin
     }
 
     override fun hashCode(): Int {

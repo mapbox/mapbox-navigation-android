@@ -15,7 +15,7 @@ package com.mapbox.navigation.base.trip.model.eh
  */
 class EHorizonGraphPosition internal constructor(
     val edgeId: Long,
-    val percentAlong: Double
+    val percentAlong: Double,
 ) {
 
     /**

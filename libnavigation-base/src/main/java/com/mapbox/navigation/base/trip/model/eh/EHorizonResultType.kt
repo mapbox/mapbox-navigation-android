@@ -32,9 +32,14 @@ object EHorizonResultType {
     const val UPDATE = "UPDATE"
 
     /**
+     * EH is not available due to being in off-road, fallback or uncertain state
+     */
+    const val NOT_AVAILABLE = "NOT_AVAILABLE"
+
+    /**
      * Retention policy for the EHorizonResultType
      */
     @Retention(AnnotationRetention.BINARY)
-    @StringDef(INITIAL, UPDATE)
+    @StringDef(INITIAL, UPDATE, NOT_AVAILABLE)
     annotation class Type
 }

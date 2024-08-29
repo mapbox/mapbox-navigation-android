@@ -43,12 +43,12 @@ internal class BannerInstructionEvent private constructor() {
 
     data class LatestInstructionWrapper(
         val latestInstructionIndex: Int,
-        val latestBannerInstructions: BannerInstructions
+        val latestBannerInstructions: BannerInstructions,
     ) {
         companion object {
             fun createOrNull(
                 latestInstructionIndex: Int?,
-                latestBannerInstructions: BannerInstructions?
+                latestBannerInstructions: BannerInstructions?,
             ): LatestInstructionWrapper? =
                 ifNonNull(latestInstructionIndex, latestBannerInstructions) { idx, instruction ->
                     LatestInstructionWrapper(idx, instruction)

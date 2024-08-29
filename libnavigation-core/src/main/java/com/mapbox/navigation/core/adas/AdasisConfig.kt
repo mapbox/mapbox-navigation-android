@@ -72,7 +72,7 @@ class AdasisConfig private constructor(
         /**
          * ADASISv2 path level specific configurations
          */
-        fun pathOptions(pathsOptions: AdasisConfigPathOptions) = apply {
+        fun pathOptions(pathsOptions: AdasisConfigPathOptions): Builder = apply {
             this.pathOptions = pathsOptions
         }
 

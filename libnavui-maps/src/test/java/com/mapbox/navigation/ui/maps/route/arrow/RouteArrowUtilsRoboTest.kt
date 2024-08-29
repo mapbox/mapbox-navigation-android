@@ -8,6 +8,7 @@ import com.mapbox.bindgen.Value
 import com.mapbox.maps.Image
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import io.mockk.every
@@ -17,6 +18,7 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -25,6 +27,9 @@ import org.robolectric.RobolectricTestRunner
 class RouteArrowUtilsRoboTest {
 
     private lateinit var ctx: Context
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @Before
     fun setUp() {
@@ -91,13 +96,13 @@ class RouteArrowUtilsRoboTest {
         assertEquals(
             RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (shaftSourceValueSlots.last().contents as HashMap<String, Value>)
-            ["tolerance"]!!.contents
+            ["tolerance"]!!.contents,
         )
 
         verify {
             style.addStyleSource(
                 RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
-                capture(headSourceValueSlots)
+                capture(headSourceValueSlots),
             )
         }
         assertEquals(
@@ -111,12 +116,12 @@ class RouteArrowUtilsRoboTest {
         assertEquals(
             "",
             (headSourceValueSlots.last().contents as HashMap<String, Value>)["data"]!!
-                .contents.toString()
+                .contents.toString(),
         )
         assertEquals(
             RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (headSourceValueSlots.last().contents as HashMap<String, Value>)
-            ["tolerance"]!!.contents
+            ["tolerance"]!!.contents,
         )
 
         verify { style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING) }
@@ -133,40 +138,40 @@ class RouteArrowUtilsRoboTest {
         verify {
             style.addPersistentStyleLayer(
                 capture(addStyleLayerSlots),
-                capture(addStyleLayerPositionSlots)
+                capture(addStyleLayerPositionSlots),
             )
         }
         assertEquals(
             "mapbox-navigation-arrow-shaft-casing-layer",
-            (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents
+            (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "mapbox-navigation-arrow-head-casing-layer",
-            (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents
+            (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "mapbox-navigation-arrow-shaft-layer",
-            (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents
+            (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "mapbox-navigation-arrow-head-layer",
-            (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents
+            (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "mapbox-top-level-route-layer",
-            addStyleLayerPositionSlots[0].above
+            addStyleLayerPositionSlots[0].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-shaft-casing-layer",
-            addStyleLayerPositionSlots[1].above
+            addStyleLayerPositionSlots[1].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-head-casing-layer",
-            addStyleLayerPositionSlots[2].above
+            addStyleLayerPositionSlots[2].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-shaft-layer",
-            addStyleLayerPositionSlots[3].above
+            addStyleLayerPositionSlots[3].above,
         )
     }
 
@@ -215,24 +220,24 @@ class RouteArrowUtilsRoboTest {
         verify {
             style.addPersistentStyleLayer(
                 capture(addStyleLayerSlots),
-                capture(addStyleLayerPositionSlots)
+                capture(addStyleLayerPositionSlots),
             )
         }
         assertEquals(
             "foobar",
-            addStyleLayerPositionSlots[0].above
+            addStyleLayerPositionSlots[0].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-shaft-casing-layer",
-            addStyleLayerPositionSlots[1].above
+            addStyleLayerPositionSlots[1].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-head-casing-layer",
-            addStyleLayerPositionSlots[2].above
+            addStyleLayerPositionSlots[2].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-shaft-layer",
-            addStyleLayerPositionSlots[3].above
+            addStyleLayerPositionSlots[3].above,
         )
     }
 
@@ -289,13 +294,13 @@ class RouteArrowUtilsRoboTest {
         assertEquals(
             RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (shaftSourceValueSlots.last().contents as HashMap<String, Value>)
-            ["tolerance"]!!.contents
+            ["tolerance"]!!.contents,
         )
 
         verify {
             style.addStyleSource(
                 RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
-                capture(headSourceValueSlots)
+                capture(headSourceValueSlots),
             )
         }
         assertEquals(
@@ -313,7 +318,7 @@ class RouteArrowUtilsRoboTest {
         assertEquals(
             RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (headSourceValueSlots.last().contents as HashMap<String, Value>)
-            ["tolerance"]!!.contents
+            ["tolerance"]!!.contents,
         )
 
         verify { style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING) }
@@ -330,40 +335,40 @@ class RouteArrowUtilsRoboTest {
         verify {
             style.addPersistentStyleLayer(
                 capture(addStyleLayerSlots),
-                capture(addStyleLayerPositionSlots)
+                capture(addStyleLayerPositionSlots),
             )
         }
         assertEquals(
             "mapbox-navigation-arrow-shaft-casing-layer",
-            (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents
+            (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "mapbox-navigation-arrow-head-casing-layer",
-            (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents
+            (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "mapbox-navigation-arrow-shaft-layer",
-            (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents
+            (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "mapbox-navigation-arrow-head-layer",
-            (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents
+            (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             null,
-            addStyleLayerPositionSlots[0].above
+            addStyleLayerPositionSlots[0].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-shaft-casing-layer",
-            addStyleLayerPositionSlots[1].above
+            addStyleLayerPositionSlots[1].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-head-casing-layer",
-            addStyleLayerPositionSlots[2].above
+            addStyleLayerPositionSlots[2].above,
         )
         assertEquals(
             "mapbox-navigation-arrow-shaft-layer",
-            addStyleLayerPositionSlots[3].above
+            addStyleLayerPositionSlots[3].above,
         )
     }
 }

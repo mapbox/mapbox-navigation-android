@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param roadCondition if true, roadCondition type will be generated
  * @param variableSpeedSign if true, variableSpeedSign type will be generated
  * @param headingChange if true, headingChange type will be generated
- * @param historyAverageSpeed if true, headingChange type will be generated
+ * @param historyAverageSpeed if true, historyAverageSpeed type will be generated
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasisConfigProfileShortTypeOptions private constructor(
@@ -85,7 +85,7 @@ class AdasisConfigProfileShortTypeOptions private constructor(
             "curvature=$curvature, " +
             "roadCondition=$roadCondition, " +
             "variableSpeedSign=$variableSpeedSign, " +
-            "headingChange=$headingChange" +
+            "headingChange=$headingChange, " +
             "historyAverageSpeed=$historyAverageSpeed" +
             ")"
     }
@@ -100,47 +100,47 @@ class AdasisConfigProfileShortTypeOptions private constructor(
         private var roadCondition: Boolean = true
         private var variableSpeedSign: Boolean = false
         private var headingChange: Boolean = true
-        private var historyAverageSpeed: Boolean = false
+        private var historyAverageSpeed: Boolean = true
 
         /**
          * If true, slopeStep type will be generated
          */
-        fun slopeStep(slopeStep: Boolean) = apply {
+        fun slopeStep(slopeStep: Boolean): Builder = apply {
             this.slopeStep = slopeStep
         }
 
         /**
          * If true, curvature type will be generated
          */
-        fun curvature(curvature: Boolean) = apply {
+        fun curvature(curvature: Boolean): Builder = apply {
             this.curvature = curvature
         }
 
         /**
          * If true, roadCondition type will be generated
          */
-        fun roadCondition(roadCondition: Boolean) = apply {
+        fun roadCondition(roadCondition: Boolean): Builder = apply {
             this.roadCondition = roadCondition
         }
 
         /**
          * If true, variableSpeedSign type will be generated
          */
-        fun variableSpeedSign(variableSpeedSign: Boolean) = apply {
+        fun variableSpeedSign(variableSpeedSign: Boolean): Builder = apply {
             this.variableSpeedSign = variableSpeedSign
         }
 
         /**
          * If true, headingChange type will be generated
          */
-        fun headingChange(headingChange: Boolean) = apply {
+        fun headingChange(headingChange: Boolean): Builder = apply {
             this.headingChange = headingChange
         }
 
         /**
          * If true, historyAverageSpeed type will be generated
          */
-        fun historyAverageSpeed(historyAverageSpeed: Boolean) = apply {
+        fun historyAverageSpeed(historyAverageSpeed: Boolean): Builder = apply {
             this.historyAverageSpeed = historyAverageSpeed
         }
 

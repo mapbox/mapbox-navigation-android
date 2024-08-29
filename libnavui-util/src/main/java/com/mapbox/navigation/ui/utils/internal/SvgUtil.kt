@@ -8,6 +8,7 @@ import com.caverock.androidsvg.SVGExternalFileResolver
 import com.caverock.androidsvg.SVGParseException
 import com.mapbox.navigation.utils.internal.logE
 import java.io.ByteArrayInputStream
+import java.io.InputStream
 
 object SvgUtil {
 
@@ -17,7 +18,7 @@ object SvgUtil {
         stream: ByteArrayInputStream,
         desiredWidth: Int,
         desiredHeight: Int,
-        cssStyles: String? = null
+        cssStyles: String? = null,
     ): Bitmap? {
         return try {
             val svg = SVG.getFromInputStream(stream)
@@ -41,7 +42,7 @@ object SvgUtil {
     fun renderAsBitmapWithHeight(
         stream: ByteArrayInputStream,
         desiredHeight: Int,
-        cssStyles: String? = null
+        cssStyles: String? = null,
     ): Bitmap? {
         return try {
             val svg = SVG.getFromInputStream(stream)
@@ -66,10 +67,10 @@ object SvgUtil {
 
     @Throws
     fun renderAsBitmapWithWidth(
-        stream: ByteArrayInputStream,
+        stream: InputStream,
         desiredWidth: Int,
         cssStyles: String? = null,
-        resolver: SVGExternalFileResolver? = null
+        resolver: SVGExternalFileResolver? = null,
     ): Bitmap {
         ifNonNull(resolver) { svgResolver ->
             SVG.registerExternalFileResolver(svgResolver)
@@ -91,7 +92,7 @@ object SvgUtil {
         svg: SVG,
         width: Int,
         height: Int,
-        cssStyles: String? = null
+        cssStyles: String? = null,
     ): Bitmap {
         val signboard = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val signboardCanvas = Canvas(signboard)

@@ -1,12 +1,12 @@
 package com.mapbox.navigation.core.telemetry
 
 import android.content.Context
-import android.location.Location
 import android.media.AudioManager
 import android.provider.Settings
 import android.text.TextUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.common.TelemetrySystemUtils
+import com.mapbox.common.location.Location
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
@@ -54,7 +54,7 @@ internal fun obtainStepCount(directionsRoute: DirectionsRoute?): Int =
  */
 internal fun obtainAbsoluteDistance(
     currentLocation: Location?,
-    finalPoint: Point
+    finalPoint: Point,
 ): Int {
     val currentPoint = currentLocation?.let {
         Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
@@ -69,7 +69,7 @@ internal fun obtainAbsoluteDistance(
  */
 internal fun obtainAbsoluteDistance(
     currentPoint: Point?,
-    finalPoint: Point
+    finalPoint: Point,
 ): Int {
     currentPoint?.let {
         return TurfMeasurement.distance(it, finalPoint, TurfConstants.UNIT_METERS).toInt()
@@ -90,7 +90,7 @@ internal fun obtainVolumeLevel(context: Context): Int {
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     return floor(
         PERCENT_NORMALIZER * audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) /
-            audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
     ).toInt()
 }
 
@@ -101,7 +101,7 @@ internal fun obtainScreenBrightness(context: Context): Int =
     try {
         val systemScreenBrightness = Settings.System.getInt(
             context.contentResolver,
-            Settings.System.SCREEN_BRIGHTNESS
+            Settings.System.SCREEN_BRIGHTNESS,
         )
         calculateScreenBrightnessPercentage(systemScreenBrightness)
     } catch (exception: Settings.SettingNotFoundException) {

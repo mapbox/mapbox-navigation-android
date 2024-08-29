@@ -37,7 +37,7 @@ class MapboxRestAreaGuideMapView : AppCompatImageView {
     constructor(
         context: Context,
         attrs: AttributeSet?,
-        defStyleAttr: Int
+        defStyleAttr: Int,
     ) : super(context, attrs, defStyleAttr)
 
     /**
@@ -53,7 +53,7 @@ class MapboxRestAreaGuideMapView : AppCompatImageView {
             },
             { value ->
                 setImageBitmap(value.bitmap)
-            }
+            },
         )
     }
 }

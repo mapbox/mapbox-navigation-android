@@ -17,7 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigation
  */
 fun forwardMapboxNavigation(
     attach: (MapboxNavigation) -> Unit,
-    detach: (MapboxNavigation) -> Unit
+    detach: (MapboxNavigation) -> Unit,
 ) = object : MapboxNavigationObserver {
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         attach(mapboxNavigation)

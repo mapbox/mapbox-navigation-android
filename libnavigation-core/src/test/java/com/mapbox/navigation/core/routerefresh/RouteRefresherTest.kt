@@ -3,12 +3,12 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.RoutesRefreshData
 import com.mapbox.navigation.core.RoutesRefreshDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
@@ -66,7 +66,7 @@ class RouteRefresherTest {
     private val routesRefreshData = RoutesRefreshData(
         route1,
         routesProgressData1,
-        listOf(route2 to routesProgressData2)
+        listOf(route2 to routesProgressData2),
     )
 
     private val routesRefreshDataProvider = mockk<RoutesRefreshDataProvider>(relaxed = true)
@@ -121,17 +121,17 @@ class RouteRefresherTest {
         }
         every { routeDiffProvider.buildRouteDiffs(route1, newRoute1, legIndex1) } returns listOf(
             "diff#1",
-            "diff#2"
+            "diff#2",
         )
         every { routeDiffProvider.buildRouteDiffs(route2, newRoute2, legIndex2) } returns listOf(
             "diff#3",
-            "diff#4"
+            "diff#4",
         )
         val expected = RoutesRefresherResult(
             RouteRefresherResult(newRoute1, routesProgressData1, RouteRefresherStatus.SUCCESS),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
-            )
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
@@ -187,7 +187,7 @@ class RouteRefresherTest {
                     every { message } returns "error message"
                     every { throwable } returns ConcurrentModificationException()
                     every { refreshTtl } returns null
-                }
+                },
             )
             0
         }
@@ -197,13 +197,13 @@ class RouteRefresherTest {
         }
         every { routeDiffProvider.buildRouteDiffs(any(), any(), any()) } returns listOf(
             "diff#1",
-            "diff#2"
+            "diff#2",
         )
         val expected = RoutesRefresherResult(
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
-            )
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
@@ -213,7 +213,7 @@ class RouteRefresherTest {
             logger.logE(
                 "Route refresh error: error message " +
                     "throwable=java.util.ConcurrentModificationException",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
             logger.logI("diff#1", "RouteRefreshController")
@@ -234,7 +234,7 @@ class RouteRefresherTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-30T21:59:00Z"),
                             createIncident(endTime = "2022-06-31T21:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
@@ -245,10 +245,10 @@ class RouteRefresherTest {
                             createIncident(endTime = "2022-06-30T20:59:00Z"),
                             createIncident(endTime = "bad time"),
                             createIncident(endTime = "2022-06-30T19:59:00Z"),
-                        )
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         )
         val route2 = createNavigationRoute(
             directionsRoute = createDirectionsRoute(
@@ -261,35 +261,35 @@ class RouteRefresherTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T10:59:00Z"),
                             createIncident(endTime = "2022-06-21T10:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
                             .congestion(listOf("heavy", "moderate"))
                             .congestionNumeric(listOf(90, 80))
                             .build(),
-                        incidents = null
+                        incidents = null,
                     ),
                     createRouteLeg(
                         annotation = null,
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder().build(),
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:50:00Z"),
-                        )
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         )
         val route3 = createNavigationRoute(directionsRoute = createDirectionsRoute(legs = null))
         val routesRefreshData = RoutesRefreshData(
             route1,
             routesProgressData1,
-            listOf(route2 to routesProgressData2, route3 to routesProgressData3)
+            listOf(route2 to routesProgressData2, route3 to routesProgressData3),
         )
         coEvery {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2, route3))
@@ -303,7 +303,7 @@ class RouteRefresherTest {
                     every { message } returns "error message 1"
                     every { throwable } returns ConcurrentModificationException()
                     every { refreshTtl } returns null
-                }
+                },
             )
             0
         }
@@ -313,7 +313,7 @@ class RouteRefresherTest {
                     every { message } returns "error message 2"
                     every { throwable } returns IllegalStateException()
                     every { refreshTtl } returns null
-                }
+                },
             )
             0
         }
@@ -323,7 +323,7 @@ class RouteRefresherTest {
                     every { message } returns "error message 3"
                     every { throwable } returns IndexOutOfBoundsException()
                     every { refreshTtl } returns null
-                }
+                },
             )
             0
         }
@@ -331,8 +331,8 @@ class RouteRefresherTest {
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
             listOf(
                 RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.FAILURE),
-                RouteRefresherResult(route3, routesProgressData3, RouteRefresherStatus.FAILURE)
-            )
+                RouteRefresherResult(route3, routesProgressData3, RouteRefresherStatus.FAILURE),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2, route3), 10)
@@ -342,17 +342,17 @@ class RouteRefresherTest {
             logger.logE(
                 "Route refresh error: error message 1 " +
                     "throwable=java.util.ConcurrentModificationException",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logE(
                 "Route refresh error: error message 2 " +
                     "throwable=java.lang.IllegalStateException",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logE(
                 "Route refresh error: error message 3 " +
                     "throwable=java.lang.IndexOutOfBoundsException",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
         }
     }
@@ -370,7 +370,7 @@ class RouteRefresherTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-30T21:59:00Z"),
                             createIncident(endTime = "2022-06-31T21:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
@@ -381,10 +381,10 @@ class RouteRefresherTest {
                             createIncident(endTime = "2022-06-30T20:59:00Z"),
                             createIncident(endTime = "bad time"),
                             createIncident(endTime = "2022-06-30T19:59:00Z"),
-                        )
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         )
         val route2 = createNavigationRoute(
             directionsRoute = createDirectionsRoute(
@@ -397,35 +397,35 @@ class RouteRefresherTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T10:59:00Z"),
                             createIncident(endTime = "2022-06-21T10:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
                             .congestion(listOf("heavy", "moderate"))
                             .congestionNumeric(listOf(90, 80))
                             .build(),
-                        incidents = null
+                        incidents = null,
                     ),
                     createRouteLeg(
                         annotation = null,
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder().build(),
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:50:00Z"),
-                        )
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         )
         val route3 = createNavigationRoute(directionsRoute = createDirectionsRoute(legs = null))
         val routesRefreshData = RoutesRefreshData(
             route1,
             routesProgressData1,
-            listOf(route2 to routesProgressData2, route3 to routesProgressData3)
+            listOf(route2 to routesProgressData2, route3 to routesProgressData3),
         )
         coEvery {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2, route3))
@@ -439,7 +439,7 @@ class RouteRefresherTest {
                     every { message } returns "error message 1"
                     every { throwable } returns ConcurrentModificationException()
                     every { refreshTtl } returns 5
-                }
+                },
             )
             0
         }
@@ -449,7 +449,7 @@ class RouteRefresherTest {
                     every { message } returns "error message 2"
                     every { throwable } returns IllegalStateException()
                     every { refreshTtl } returns 0
-                }
+                },
             )
             0
         }
@@ -459,7 +459,7 @@ class RouteRefresherTest {
                     every { message } returns "error message 3"
                     every { throwable } returns IndexOutOfBoundsException()
                     every { refreshTtl } returns null
-                }
+                },
             )
             0
         }
@@ -467,8 +467,8 @@ class RouteRefresherTest {
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
             listOf(
                 RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALIDATED),
-                RouteRefresherResult(route3, routesProgressData3, RouteRefresherStatus.FAILURE)
-            )
+                RouteRefresherResult(route3, routesProgressData3, RouteRefresherStatus.FAILURE),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2, route3), 10)
@@ -478,17 +478,17 @@ class RouteRefresherTest {
             logger.logE(
                 "Route refresh error: error message 1 " +
                     "throwable=java.util.ConcurrentModificationException",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logE(
                 "Route refresh error: error message 2 " +
                     "throwable=java.lang.IllegalStateException",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logE(
                 "Route refresh error: error message 3 " +
                     "throwable=java.lang.IndexOutOfBoundsException",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
         }
     }
@@ -506,8 +506,8 @@ class RouteRefresherTest {
         val expected = RoutesRefresherResult(
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
-            )
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
@@ -516,7 +516,7 @@ class RouteRefresherTest {
         verify(exactly = 1) {
             logger.logI(
                 "Route refresh for route $route1Id was cancelled after timeout",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
         }
@@ -538,8 +538,8 @@ class RouteRefresherTest {
         val expected = RoutesRefresherResult(
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALID),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
-            )
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
@@ -548,7 +548,7 @@ class RouteRefresherTest {
         verify {
             logger.logI(
                 "route $route1Id can't be refreshed because $reason",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
         }
@@ -572,7 +572,7 @@ class RouteRefresherTest {
                             incidents = listOf(
                                 createIncident(endTime = "2022-06-30T21:59:00Z"),
                                 createIncident(endTime = "2022-06-31T21:59:00Z"),
-                            )
+                            ),
                         ),
                         createRouteLeg(
                             annotation = LegAnnotation.builder()
@@ -583,11 +583,11 @@ class RouteRefresherTest {
                                 createIncident(endTime = "2022-06-30T20:59:00Z"),
                                 createIncident(endTime = "bad time"),
                                 createIncident(endTime = "2022-06-30T19:59:00Z"),
-                            )
+                            ),
                         ),
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         ) {
             every { id } returns route1Id
         }
@@ -603,18 +603,18 @@ class RouteRefresherTest {
                             incidents = listOf(
                                 createIncident(endTime = "2022-06-31T10:59:00Z"),
                                 createIncident(endTime = "2022-06-21T10:59:00Z"),
-                            )
+                            ),
                         ),
                         createRouteLeg(
                             annotation = LegAnnotation.builder()
                                 .congestion(listOf("heavy", "moderate"))
                                 .congestionNumeric(listOf(90, 80))
                                 .build(),
-                            incidents = null
+                            incidents = null,
                         ),
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         ) { every { id } returns route2Id }
         every {
             RouteRefreshValidator.validateRoute(route1)
@@ -625,14 +625,14 @@ class RouteRefresherTest {
         val routesRefreshData = RoutesRefreshData(
             route1,
             routesProgressData1,
-            listOf(route2 to routesProgressData2)
+            listOf(route2 to routesProgressData2),
         )
         coEvery {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
         } returns routesRefreshData
         val expected = RoutesRefresherResult(
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALID),
-            listOf(RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALID))
+            listOf(RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALID)),
         )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
@@ -641,11 +641,11 @@ class RouteRefresherTest {
         verify {
             logger.logI(
                 "route $route1Id can't be refreshed because $reason1",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logI(
                 "route $route2Id can't be refreshed because $reason2",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
         }
     }
@@ -671,8 +671,8 @@ class RouteRefresherTest {
         val expected = RoutesRefresherResult(
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALIDATED),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS)
-            )
+                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
@@ -681,7 +681,7 @@ class RouteRefresherTest {
         verify {
             logger.logI(
                 "route $route1Id will not be refreshed because it is invalidated",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
         }
@@ -703,7 +703,7 @@ class RouteRefresherTest {
                             incidents = listOf(
                                 createIncident(endTime = "2022-06-30T21:59:00Z"),
                                 createIncident(endTime = "2022-06-31T21:59:00Z"),
-                            )
+                            ),
                         ),
                         createRouteLeg(
                             annotation = LegAnnotation.builder()
@@ -714,11 +714,11 @@ class RouteRefresherTest {
                                 createIncident(endTime = "2022-06-30T20:59:00Z"),
                                 createIncident(endTime = "bad time"),
                                 createIncident(endTime = "2022-06-30T19:59:00Z"),
-                            )
+                            ),
                         ),
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         ) {
             every { id } returns route1Id
         }
@@ -734,18 +734,18 @@ class RouteRefresherTest {
                             incidents = listOf(
                                 createIncident(endTime = "2022-06-31T10:59:00Z"),
                                 createIncident(endTime = "2022-06-21T10:59:00Z"),
-                            )
+                            ),
                         ),
                         createRouteLeg(
                             annotation = LegAnnotation.builder()
                                 .congestion(listOf("heavy", "moderate"))
                                 .congestionNumeric(listOf(90, 80))
                                 .build(),
-                            incidents = null
+                            incidents = null,
                         ),
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         ) { every { id } returns route2Id }
         every {
             RouteRefreshValidator.validateRoute(route1)
@@ -758,7 +758,7 @@ class RouteRefresherTest {
         val routesRefreshData = RoutesRefreshData(
             route1,
             routesProgressData1,
-            listOf(route2 to routesProgressData2)
+            listOf(route2 to routesProgressData2),
         )
         coEvery {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
@@ -766,8 +766,8 @@ class RouteRefresherTest {
         val expected = RoutesRefresherResult(
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALIDATED),
             listOf(
-                RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALIDATED)
-            )
+                RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALIDATED),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
@@ -776,11 +776,11 @@ class RouteRefresherTest {
         verify {
             logger.logI(
                 "route $route1Id will not be refreshed because it is invalidated",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
             logger.logI(
                 "route $route2Id will not be refreshed because it is invalidated",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
         }
     }

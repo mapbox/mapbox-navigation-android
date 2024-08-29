@@ -3,12 +3,14 @@ package com.mapbox.navigation.navigator.internal
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigator.BillingProductType
 import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigFactory
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
@@ -52,13 +54,15 @@ object NavigatorLoader {
         cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        router: RouterInterface?,
+        offlineCacheHandle: CacheHandle?,
     ): NativeComponents {
         val navigator = Navigator(
             config,
             cacheHandle,
             historyRecorderComposite,
-            router,
+            RouterType.HYBRID,
+            null,
+            offlineCacheHandle,
         )
         val graphAccessor = GraphAccessor(cacheHandle)
         val roadObjectMatcher = RoadObjectMatcher(cacheHandle)
@@ -69,6 +73,7 @@ object NavigatorLoader {
             cacheHandle,
             roadObjectMatcher,
             navigator.routeAlternativesController,
+            createInputService(config, historyRecorderComposite),
         )
     }
 
@@ -77,7 +82,7 @@ object NavigatorLoader {
         tilesConfig: TilesConfig,
         historyRecorder: HistoryRecorderHandle?,
     ): CacheHandle {
-        return CacheFactory.build(tilesConfig, config, historyRecorder)
+        return CacheFactory.build(tilesConfig, config, historyRecorder, BillingProductType.CF)
     }
 
     fun createNativeRouterInterface(
@@ -93,16 +98,23 @@ object NavigatorLoader {
         )
     }
 
+    private fun createInputService(
+        config: ConfigHandle,
+        historyRecorder: HistoryRecorderHandle?,
+    ): InputsServiceHandle {
+        return InputsServiceHandle.build(config, historyRecorder)
+    }
+
     private fun buildHistoryRecorder(
         historyDir: String?,
-        config: ConfigHandle
+        config: ConfigHandle,
     ): HistoryRecorderHandle? {
         return if (historyDir != null) {
             val historyRecorderHandle = HistoryRecorderHandle.build(historyDir, config)
             if (historyRecorderHandle == null) {
                 logE(
                     "Could not create directory directory to write events",
-                    "NavigatorLoader"
+                    "NavigatorLoader",
                 )
             }
             historyRecorderHandle
@@ -155,5 +167,6 @@ object NavigatorLoader {
         val cache: CacheHandle,
         val roadObjectMatcher: RoadObjectMatcher,
         val routeAlternativesController: RouteAlternativesControllerInterface,
+        val inputsService: InputsServiceHandle,
     )
 }

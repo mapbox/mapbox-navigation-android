@@ -11,5 +11,5 @@ import com.mapbox.navigation.base.trip.notification.TripNotification
  */
 internal data class MapboxNotificationData(
     val notificationId: Int,
-    val notification: Notification
+    val notification: Notification,
 )

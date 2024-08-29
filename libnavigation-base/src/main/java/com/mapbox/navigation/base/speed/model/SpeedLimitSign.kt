@@ -12,5 +12,5 @@ enum class SpeedLimitSign {
     /**
      * Speed limit sign that follows VIENNA conventions
      */
-    VIENNA
+    VIENNA,
 }

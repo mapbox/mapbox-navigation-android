@@ -40,7 +40,7 @@ object TimeFormat {
     @IntDef(
         NONE_SPECIFIED,
         TWELVE_HOURS,
-        TWENTY_FOUR_HOURS
+        TWENTY_FOUR_HOURS,
     )
     annotation class Type
 }

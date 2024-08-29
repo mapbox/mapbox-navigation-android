@@ -1,11 +1,11 @@
 package com.mapbox.navigation.core.trip.session
 
-import android.location.Location
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.getUpdatedObjectsAhead
@@ -65,7 +65,7 @@ internal class MapboxTripSession(
     private val tripSessionLocationEngine: TripSessionLocationEngine,
     private val navigator: MapboxNativeNavigator,
     private val threadController: ThreadController,
-    private val eHorizonSubscriptionManager: EHorizonSubscriptionManager
+    private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
 ) : TripSession {
 
     private var isUpdatingRoute = false
@@ -93,34 +93,34 @@ internal class MapboxTripSession(
                 setRouteToNativeNavigator(
                     routes,
                     setRoutes.initialLegIndex(),
-                    SetRoutesReason.CLEAN_UP
+                    SetRoutesReason.CLEAN_UP,
                 )
             }
             is SetRoutes.NewRoutes -> {
                 setRouteToNativeNavigator(
                     routes,
                     setRoutes.initialLegIndex(),
-                    SetRoutesReason.NEW_ROUTE
+                    SetRoutesReason.NEW_ROUTE,
                 )
             }
             is SetRoutes.Reroute -> {
                 setRouteToNativeNavigator(
                     routes,
                     setRoutes.initialLegIndex(),
-                    SetRoutesReason.REROUTE
+                    SetRoutesReason.REROUTE,
                 )
             }
             is SetRoutes.Alternatives -> {
                 NativeSetRouteValue(
                     routes = routes,
-                    nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1))
+                    nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1)),
                 )
             }
             is SetRoutes.Reorder -> {
                 setRouteToNativeNavigator(
                     routes,
                     setRoutes.initialLegIndex(),
-                    SetRoutesReason.ALTERNATIVE
+                    SetRoutesReason.ALTERNATIVE,
                 )
             }
             is SetRoutes.RefreshRoutes -> {
@@ -152,13 +152,13 @@ internal class MapboxTripSession(
                                 }
                             NativeSetRouteValue(
                                 routes = refreshedRoutes,
-                                nativeAlternatives = value
+                                nativeAlternatives = value,
                             )
-                        }
+                        },
                     ).also {
                         logD(
                             "routes update (route IDs: ${routes.map { it.id }}) - refresh finished",
-                            LOG_CATEGORY
+                            LOG_CATEGORY,
                         )
                     }
                 } else {
@@ -180,7 +180,7 @@ internal class MapboxTripSession(
     ): NativeSetRouteResult = updateRouteTransaction {
         logD(
             "native routes update (route IDs: ${routes.map { it.id }}) - starting",
-            LOG_CATEGORY
+            LOG_CATEGORY,
         )
         val newPrimaryRoute = routes.firstOrNull()
         return@updateRouteTransaction navigator.setRoutes(
@@ -195,7 +195,7 @@ internal class MapboxTripSession(
             isOffRoute = false
             invalidateLatestInstructions(
                 bannerInstructionEvent.latestInstructionWrapper,
-                lastVoiceInstruction
+                lastVoiceInstruction,
             )
             routeProgress = null
         }.mapValue {
@@ -203,7 +203,7 @@ internal class MapboxTripSession(
         }.fold({ NativeSetRouteError(it) }, { NativeSetRouteValue(routes, it) }).also {
             logD(
                 "native routes update (route IDs: ${routes.map { it.id }}) - finished",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
         }
     }
@@ -216,8 +216,6 @@ internal class MapboxTripSession(
     private val stateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
     private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
-    private val roadObjectsOnRouteObservers =
-        CopyOnWriteArraySet<RoadObjectsOnRouteObserver>()
     private val fallbackVersionsObservers = CopyOnWriteArraySet<FallbackVersionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
@@ -253,7 +251,6 @@ internal class MapboxTripSession(
                 return
             }
             field = value
-            roadObjectsOnRouteObservers.forEach { it.onNewRoadObjectsOnTheRoute(value) }
         }
 
     override var locationMatcherResult: LocationMatcherResult? = null
@@ -278,24 +275,27 @@ internal class MapboxTripSession(
             }
         }
 
+    // worker thread
     private val onRawLocationUpdate: (Location) -> Unit = { rawLocation ->
         val locationHash = rawLocation.hashCode()
         logD(
             "updateRawLocation; system elapsed time: ${System.nanoTime()}; " +
-                "location ($locationHash) elapsed time: ${rawLocation.elapsedRealtimeNanos}",
-            LOG_CATEGORY
+                "location ($locationHash) elapsed time: ${rawLocation.monotonicTimestamp}",
+            LOG_CATEGORY,
         )
-        this.rawLocation = rawLocation
-        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
+        mainJobController.scope.launch {
+            this@MapboxTripSession.rawLocation = rawLocation
+            locationObservers.forEach { it.onNewRawLocation(rawLocation) }
+        }
         mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
             logD(
                 "updateRawLocation; notify navigator for ($locationHash) - start",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             navigator.updateLocation(rawLocation.toFixLocation())
             logD(
                 "updateRawLocation; notify navigator for ($locationHash) - end",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
         }
     }
@@ -497,7 +497,7 @@ internal class MapboxTripSession(
      * Register [BannerInstructionsObserver]
      */
     override fun registerBannerInstructionsObserver(
-        bannerInstructionsObserver: BannerInstructionsObserver
+        bannerInstructionsObserver: BannerInstructionsObserver,
     ) {
         bannerInstructionsObservers.add(bannerInstructionsObserver)
         checkLatestValidBannerInstructionEvent { bannerInstruction ->
@@ -509,7 +509,7 @@ internal class MapboxTripSession(
      * Unregister [BannerInstructionsObserver]
      */
     override fun unregisterBannerInstructionsObserver(
-        bannerInstructionsObserver: BannerInstructionsObserver
+        bannerInstructionsObserver: BannerInstructionsObserver,
     ) {
         bannerInstructionsObservers.remove(bannerInstructionsObserver)
     }
@@ -527,7 +527,7 @@ internal class MapboxTripSession(
      * Register [VoiceInstructionsObserver]
      */
     override fun registerVoiceInstructionsObserver(
-        voiceInstructionsObserver: VoiceInstructionsObserver
+        voiceInstructionsObserver: VoiceInstructionsObserver,
     ) {
         voiceInstructionsObservers.add(voiceInstructionsObserver)
     }
@@ -536,7 +536,7 @@ internal class MapboxTripSession(
      * Unregister [VoiceInstructionsObserver]
      */
     override fun unregisterVoiceInstructionsObserver(
-        voiceInstructionsObserver: VoiceInstructionsObserver
+        voiceInstructionsObserver: VoiceInstructionsObserver,
     ) {
         voiceInstructionsObservers.remove(voiceInstructionsObserver)
     }
@@ -580,30 +580,13 @@ internal class MapboxTripSession(
                         "finished",
                         "(is leg updated: $legIndexUpdated; " +
                             "latestInstructionWrapper: [$latestInstructionWrapper]; " +
-                            "lastVoiceInstruction: [$lastVoiceInstruction])"
-                    )
+                            "lastVoiceInstruction: [$lastVoiceInstruction])",
+                    ),
                 )
             } finally {
                 callback.onLegIndexUpdatedCallback(legIndexUpdated)
             }
         }
-    }
-
-    override fun registerRoadObjectsOnRouteObserver(
-        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
-    ) {
-        roadObjectsOnRouteObservers.add(roadObjectsOnRouteObserver)
-        roadObjectsOnRouteObserver.onNewRoadObjectsOnTheRoute(roadObjects)
-    }
-
-    override fun unregisterRoadObjectsOnRouteObserver(
-        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
-    ) {
-        roadObjectsOnRouteObservers.remove(roadObjectsOnRouteObserver)
-    }
-
-    override fun unregisterAllRoadObjectsOnRouteObservers() {
-        roadObjectsOnRouteObservers.clear()
     }
 
     override fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
@@ -619,7 +602,7 @@ internal class MapboxTripSession(
     }
 
     override fun registerFallbackVersionsObserver(
-        fallbackVersionsObserver: FallbackVersionsObserver
+        fallbackVersionsObserver: FallbackVersionsObserver,
     ) {
         if (fallbackVersionsObservers.isEmpty()) {
             navigator.setFallbackVersionsObserver(nativeFallbackVersionsObserver)
@@ -628,7 +611,7 @@ internal class MapboxTripSession(
     }
 
     override fun unregisterFallbackVersionsObserver(
-        fallbackVersionsObserver: FallbackVersionsObserver
+        fallbackVersionsObserver: FallbackVersionsObserver,
     ) {
         fallbackVersionsObservers.remove(fallbackVersionsObserver)
         if (fallbackVersionsObservers.isEmpty()) {
@@ -652,7 +635,7 @@ internal class MapboxTripSession(
             "navigatorObserver#onStatus; " +
                 "fixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}, " +
                 "state: ${status.routeState}",
-            LOG_CATEGORY
+            LOG_CATEGORY,
         )
         logD(LOG_CATEGORY) {
             "navigatorObserver#onStatus; banner instruction: [${status.bannerInstruction}]," +
@@ -664,7 +647,7 @@ internal class MapboxTripSession(
         val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
         val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)
         updateLocationMatcherResult(
-            tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
+            tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road),
         )
         zLevel = status.layer
 
@@ -682,13 +665,13 @@ internal class MapboxTripSession(
                 tripStatus.navigationStatus.getCurrentBannerInstructions(primaryRoute)
             triggerObserver = bannerInstructionEvent.isOccurring(
                 bannerInstructions,
-                nativeBannerInstruction?.index
+                nativeBannerInstruction?.index,
             )
         }
         val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
         val latestBannerInstructionsWrapper = bannerInstructionEvent.latestInstructionWrapper
         val upcomingRoadObjects = roadObjects.getUpdatedObjectsAhead(
-            tripStatus.navigationStatus.upcomingRouteAlertUpdates
+            tripStatus.navigationStatus.upcomingRouteAlertUpdates,
         )
         val routeProgress = tripStatus.route?.let {
             val currentLegDestination = tripStatus.getCurrentLegDestination(it)
@@ -700,14 +683,14 @@ internal class MapboxTripSession(
                 latestBannerInstructionsWrapper?.latestInstructionIndex,
                 lastVoiceInstruction,
                 upcomingRoadObjects,
-                currentLegDestination
+                currentLegDestination,
             ).also {
                 if (it == null) {
                     logD(
                         "route progress update dropped - " +
                             "currentPrimaryRoute ID: ${primaryRoute?.id}; " +
                             "currentState: ${status.routeState}",
-                        LOG_CATEGORY
+                        LOG_CATEGORY,
                     )
                 }
             }
@@ -719,14 +702,14 @@ internal class MapboxTripSession(
 
     private fun updateRouteProgress(
         progress: RouteProgress?,
-        shouldTriggerBannerInstructionsObserver: Boolean
+        shouldTriggerBannerInstructionsObserver: Boolean,
     ) {
         routeProgress = progress
         tripService.updateNotification(buildTripNotificationState(progress))
         progress?.let { progress ->
             logD(
                 "dispatching progress update; state: ${progress.currentState}",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
             if (shouldTriggerBannerInstructionsObserver) {
@@ -751,7 +734,7 @@ internal class MapboxTripSession(
     }
 
     private fun checkLatestValidBannerInstructionEvent(
-        action: (BannerInstructions) -> Unit
+        action: (BannerInstructions) -> Unit,
     ) {
         ifNonNull(bannerInstructionEvent.latestBannerInstructions) {
             action(it)
@@ -774,7 +757,7 @@ internal class MapboxTripSession(
     }
 
     private fun checkBannerInstructionEvent(
-        action: (BannerInstructions) -> Unit
+        action: (BannerInstructions) -> Unit,
     ) {
         ifNonNull(bannerInstructionEvent.bannerInstructions) { bannerInstructions ->
             action(bannerInstructions)
@@ -783,7 +766,7 @@ internal class MapboxTripSession(
 
     private fun checkVoiceInstructionEvent(
         currentVoiceInstructions: VoiceInstructions?,
-        action: (VoiceInstructions) -> Unit
+        action: (VoiceInstructions) -> Unit,
     ) {
         ifNonNull(currentVoiceInstructions) { voiceInstructions ->
             action(voiceInstructions)

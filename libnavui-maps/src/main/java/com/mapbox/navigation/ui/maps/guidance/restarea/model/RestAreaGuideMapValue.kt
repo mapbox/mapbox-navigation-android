@@ -7,5 +7,5 @@ import android.graphics.Bitmap
  * @property bitmap contains the service/parking area guide map.
  */
 class RestAreaGuideMapValue internal constructor(
-    val bitmap: Bitmap
+    val bitmap: Bitmap,
 )

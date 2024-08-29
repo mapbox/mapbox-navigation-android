@@ -20,5 +20,5 @@ enum class VanishingPointState {
     /**
      * Ignore puck position updates and leave the vanishing point in the current position.
      */
-    DISABLED
+    DISABLED,
 }

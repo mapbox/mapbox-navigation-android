@@ -1,12 +1,15 @@
 package com.mapbox.navigation.ui.maps.building
 
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueryFeaturesCallback
+import com.mapbox.maps.QueryRenderedFeaturesCallback
+import com.mapbox.maps.RenderedQueryGeometry
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.utils.WaypointFactory
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -16,7 +19,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -129,7 +132,7 @@ class BuildingProcessorTest {
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
                     Point.fromLngLat(5.5, 6.6),
-                )
+                ),
             )
         }
 
@@ -302,7 +305,7 @@ class BuildingProcessorTest {
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
                     Point.fromLngLat(5.5, 6.6),
-                )
+                ),
             )
         }
 
@@ -352,7 +355,7 @@ class BuildingProcessorTest {
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
                     Point.fromLngLat(5.5, 6.6),
-                )
+                ),
             )
         }
 
@@ -396,7 +399,7 @@ class BuildingProcessorTest {
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
                     Point.fromLngLat(5.5, 6.6),
-                )
+                ),
             )
         }
         val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
@@ -481,7 +484,7 @@ class BuildingProcessorTest {
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
                     Point.fromLngLat(5.5, 6.6),
-                )
+                ),
             )
         }
         val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
@@ -530,7 +533,7 @@ class BuildingProcessorTest {
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
                     Point.fromLngLat(5.5, 6.6),
-                )
+                ),
             )
         }
         val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
@@ -744,7 +747,7 @@ class BuildingProcessorTest {
                 listOf(
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
-                )
+                ),
             )
         }
 
@@ -824,7 +827,7 @@ class BuildingProcessorTest {
                 listOf(
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
-                )
+                ),
             )
         }
 
@@ -861,7 +864,7 @@ class BuildingProcessorTest {
                 listOf(
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
-                )
+                ),
             )
         }
         val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
@@ -903,7 +906,7 @@ class BuildingProcessorTest {
                 listOf(
                     Point.fromLngLat(1.1, 2.2),
                     Point.fromLngLat(3.3, 4.4),
-                )
+                ),
             )
         }
         val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
@@ -988,26 +991,33 @@ class BuildingProcessorTest {
     }
 
     @Test
-    fun `queryBuilding will query correct building layers`() = runBlockingTest {
-        val callbackSlot = slot<QueryFeaturesCallback>()
+    fun `queryBuilding will query correct building layers`() = runTest {
+        val callbackSlot = slot<QueryRenderedFeaturesCallback>()
         val optionsSlot = slot<RenderedQueryOptions>()
         val screenCoordinate = mockk<ScreenCoordinate>()
         val mockMap = mockk<MapboxMap>(relaxed = true) {
             every { pixelForCoordinate(any()) } returns screenCoordinate
             every {
-                queryRenderedFeatures(any<ScreenCoordinate>(), any(), capture(callbackSlot))
+                queryRenderedFeatures(any<RenderedQueryGeometry>(), any(), capture(callbackSlot))
             } answers {
                 callbackSlot.captured.run(ExpectedFactory.createValue(listOf()))
+                Cancelable {}
             }
         }
         val action = BuildingAction.QueryBuilding(
             Point.fromLngLat(-122.4145, 37.7653),
-            mockMap
+            mockMap,
         )
 
         BuildingProcessor.queryBuilding(action)
 
-        verify { mockMap.queryRenderedFeatures(screenCoordinate, capture(optionsSlot), any()) }
+        verify {
+            mockMap.queryRenderedFeatures(
+                match { it.screenCoordinate == screenCoordinate },
+                capture(optionsSlot),
+                any(),
+            )
+        }
         assertEquals(2, optionsSlot.captured.layerIds!!.size)
         assertTrue(optionsSlot.captured.layerIds!!.contains("building"))
         assertTrue(optionsSlot.captured.layerIds!!.contains("building-extrusion"))

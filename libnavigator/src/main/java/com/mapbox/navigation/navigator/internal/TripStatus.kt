@@ -11,5 +11,5 @@ import com.mapbox.navigator.NavigationStatus
  */
 data class TripStatus(
     val route: NavigationRoute?,
-    val navigationStatus: NavigationStatus
+    val navigationStatus: NavigationStatus,
 )

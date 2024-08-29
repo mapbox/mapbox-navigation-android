@@ -1,11 +1,11 @@
 package com.mapbox.navigation.core.replay.route
 
-import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
@@ -23,21 +23,10 @@ class ReplayRouteMapper @JvmOverloads constructor(
     /**
      * Options that allow you to control the driver and car behavior
      */
-    var options: ReplayRouteOptions = ReplayRouteOptions.Builder().build()
+    var options: ReplayRouteOptions = ReplayRouteOptions.Builder().build(),
 ) {
 
     private val replayRouteDriver = ReplayRouteDriver()
-
-    /**
-     * @see ReplayRouteMapper
-     */
-    @Deprecated(
-        message = "Setting a Logger has no effect, logging is handled internally."
-    )
-    constructor(
-        options: ReplayRouteOptions = ReplayRouteOptions.Builder().build(),
-        logger: com.mapbox.base.common.logger.Logger
-    ) : this(options)
 
     /**
      * Take a [DirectionsRoute] and map it to events that can be replayed by the [MapboxReplayer].
@@ -53,7 +42,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
         if (!usesPolyline6) {
             logW(
                 "Make sure that the route's geometry is encoded with polyline6'",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
         }
         directionsRoute.geometry() ?: return emptyList()
@@ -151,8 +140,8 @@ class ReplayRouteMapper @JvmOverloads constructor(
                     altitude = null,
                     accuracyHorizontal = null,
                     bearing = null,
-                    speed = null
-                )
+                    speed = null,
+                ),
             )
         }
 
@@ -170,17 +159,13 @@ class ReplayRouteMapper @JvmOverloads constructor(
                 location = ReplayEventLocation(
                     lon = location.longitude,
                     lat = location.latitude,
-                    provider = location.provider,
+                    provider = location.source,
                     time = eventTimestamp,
-                    altitude = if (location.hasAltitude()) location.altitude else null,
-                    accuracyHorizontal = if (location.hasAccuracy()) {
-                        location.accuracy.toDouble()
-                    } else {
-                        null
-                    },
-                    bearing = if (location.hasBearing()) location.bearing.toDouble() else null,
-                    speed = if (location.hasSpeed()) location.speed.toDouble() else null
-                )
+                    altitude = location.altitude,
+                    accuracyHorizontal = location.horizontalAccuracy,
+                    bearing = location.bearing,
+                    speed = location.speed,
+                ),
             )
         }
 
@@ -201,8 +186,8 @@ class ReplayRouteMapper @JvmOverloads constructor(
                     altitude = null,
                     accuracyHorizontal = REPLAY_ROUTE_ACCURACY_HORIZONTAL,
                     bearing = location.bearing,
-                    speed = location.speedMps
-                )
+                    speed = location.speedMps,
+                ),
             )
         }
     }

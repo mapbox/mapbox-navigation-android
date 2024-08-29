@@ -270,7 +270,7 @@ object FeedbackEvent {
         INCORRECT_AUDIO_GUIDANCE,
         POSITIONING_ISSUE,
         ARRIVAL_FEEDBACK_GOOD,
-        ARRIVAL_FEEDBACK_NOT_GOOD
+        ARRIVAL_FEEDBACK_NOT_GOOD,
     )
     annotation class Type
 
@@ -280,7 +280,7 @@ object FeedbackEvent {
     @Retention(AnnotationRetention.BINARY)
     @StringDef(
         REROUTE,
-        UI
+        UI,
     )
     annotation class Source
 
@@ -326,7 +326,7 @@ object FeedbackEvent {
         ARRIVAL_FEEDBACK_WRONG_LOCATION,
         ARRIVAL_FEEDBACK_WRONG_ENTRANCE,
         ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS,
-        ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED
+        ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED,
     )
     annotation class SubType
 

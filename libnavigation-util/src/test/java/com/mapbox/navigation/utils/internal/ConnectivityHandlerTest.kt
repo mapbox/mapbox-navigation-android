@@ -74,7 +74,7 @@ class ConnectivityHandlerTest {
         verify {
             logger.logD(
                 "NetworkStatus=${NetworkStatus.NOT_REACHABLE}",
-                "ConnectivityHandler"
+                "ConnectivityHandler",
             )
         }
     }
@@ -90,7 +90,7 @@ class ConnectivityHandlerTest {
         verify {
             logger.logD(
                 "NetworkStatus=${NetworkStatus.REACHABLE_VIA_WI_FI}",
-                "ConnectivityHandler"
+                "ConnectivityHandler",
             )
         }
     }
@@ -106,7 +106,7 @@ class ConnectivityHandlerTest {
         verify {
             logger.logD(
                 "NetworkStatus=${NetworkStatus.REACHABLE_VIA_ETHERNET}",
-                "ConnectivityHandler"
+                "ConnectivityHandler",
             )
         }
     }
@@ -122,7 +122,7 @@ class ConnectivityHandlerTest {
         verify {
             logger.logD(
                 "NetworkStatus=${NetworkStatus.REACHABLE_VIA_WWAN}",
-                "ConnectivityHandler"
+                "ConnectivityHandler",
             )
         }
     }

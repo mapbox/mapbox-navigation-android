@@ -3,8 +3,10 @@ package com.mapbox.navigation.core.history
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.utils.internal.logW
-import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.HistoryRecorderHandleInterface
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Provides a mechanism for saving and retrieving Mapbox navigation history files.
@@ -15,11 +17,19 @@ import com.mapbox.navigator.HistoryRecorderHandle
  */
 class MapboxHistoryRecorder internal constructor(
     navigationOptions: NavigationOptions,
-    internal var historyRecorderHandle: HistoryRecorderHandle? = null,
+    internal var historyRecorderHandle: HistoryRecorderHandleInterface? = null,
 ) {
 
+    private var enabled: Boolean = false
+        set(value) {
+            if (value != field) {
+                enabledObservers.forEach { notifyEnabledObserver(value, it) }
+                field = value
+            }
+        }
     private val historyRecorderOptions = navigationOptions.historyRecorderOptions
     private val historyFiles = HistoryFiles(navigationOptions.applicationContext)
+    private val enabledObservers = CopyOnWriteArrayList<HistoryRecordingEnabledObserver>()
 
     /**
      * The file directory where the history files are stored.
@@ -40,6 +50,7 @@ class MapboxHistoryRecorder internal constructor(
      */
     fun startRecording() {
         checkRecorderInitialized()
+        enabled = true
         historyRecorderHandle?.apply { startRecording() }
     }
 
@@ -58,6 +69,7 @@ class MapboxHistoryRecorder internal constructor(
      */
     fun stopRecording(result: SaveHistoryCallback) {
         checkRecorderInitialized()
+        enabled = false
         historyRecorderHandle?.apply {
             stopRecording { filePath: String? ->
                 result.onSaved(filePath)
@@ -79,9 +91,34 @@ class MapboxHistoryRecorder internal constructor(
 
     internal fun copilotFileDirectory(): String? = historyFiles.copilotAbsolutePath()
 
+    internal fun registerHistoryRecordingEnabledObserver(
+        observer: HistoryRecordingEnabledObserver,
+    ) {
+        enabledObservers.add(observer)
+        notifyEnabledObserver(enabled, observer)
+    }
+
+    internal fun unregisterHistoryRecordingEnabledObserver(
+        observer: HistoryRecordingEnabledObserver,
+    ) {
+        enabledObservers.remove(observer)
+    }
+
+    internal fun unregisterAllHistoryRecordingEnabledObservers() {
+        enabledObservers.clear()
+    }
+
     private fun checkRecorderInitialized() {
         if (historyRecorderHandle == null) {
             logW("The history recorder is not initialized", "MapboxHistoryRecorder")
+        }
+    }
+
+    private fun notifyEnabledObserver(enabled: Boolean, observer: HistoryRecordingEnabledObserver) {
+        if (enabled) {
+            observer.onEnabled(this)
+        } else {
+            observer.onDisabled(this)
         }
     }
 }

@@ -45,7 +45,7 @@ class DeveloperMetadataAggregatorTest {
         sut.onCopilotSessionChanged(HistoryRecordingSessionState.FreeDrive(sessionId = newValue))
         clearMocks(observer)
         sut.onCopilotSessionChanged(
-            HistoryRecordingSessionState.ActiveGuidance(sessionId = newValue)
+            HistoryRecordingSessionState.ActiveGuidance(sessionId = newValue),
         )
 
         verify(exactly = 0) { observer.onDeveloperMetadataChanged(any()) }

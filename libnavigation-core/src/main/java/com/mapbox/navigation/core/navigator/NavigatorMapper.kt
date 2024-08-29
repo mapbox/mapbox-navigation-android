@@ -2,11 +2,11 @@
 
 package com.mapbox.navigation.core.navigator
 
-import android.location.Location
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
@@ -17,7 +17,6 @@ import com.mapbox.navigation.base.internal.factory.SpeedLimitInfoFactory
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.speed.model.SpeedLimitInfo
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -64,11 +63,11 @@ internal fun getRouteProgressFrom(
 }
 
 internal fun NavigationStatus.getTripStatusFrom(
-    route: NavigationRoute?
+    route: NavigationRoute?,
 ): TripStatus =
     TripStatus(
         route,
-        this
+        this,
     )
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
@@ -170,7 +169,7 @@ private fun NavigationStatus.getRouteProgress(
         stepDistanceRemaining,
         stepDistanceTraveled,
         stepFractionTraveled,
-        stepDurationRemaining
+        stepDurationRemaining,
     )
 
     val routeLegProgress = buildRouteLegProgressObject(
@@ -183,7 +182,7 @@ private fun NavigationStatus.getRouteProgress(
         routeStepProgress,
         routeLegProgressUpcomingStep,
         shapeIndex,
-        currentLegDestination
+        currentLegDestination,
     )
 
     val alternativeRouteIndicesMap = alternativeRouteIndices.associate {
@@ -214,12 +213,12 @@ private fun NavigationStatus.getRouteProgress(
         locatedAlternativeRouteId,
         geometryIndex,
         inParkingAisle,
-        alternativeRouteIndicesMap
+        alternativeRouteIndicesMap,
     )
 }
 
 internal fun NavigationStatus.getCurrentBannerInstructions(
-    currentRoute: NavigationRoute?
+    currentRoute: NavigationRoute?,
 ): BannerInstructions? {
     return ifNonNull(currentRoute, bannerInstruction) { route, nativeBanner ->
         route.directionsRoute.legs()?.let { legs ->
@@ -232,7 +231,7 @@ internal fun NavigationStatus.getCurrentBannerInstructions(
                             banners[nativeBanner.index]
                                 .toBuilder()
                                 .distanceAlongGeometry(
-                                    nativeBanner.remainingStepDistance.toDouble()
+                                    nativeBanner.remainingStepDistance.toDouble(),
                                 )
                                 .build()
                         }
@@ -272,7 +271,7 @@ internal fun RouteState.convertState(): RouteProgressState {
 internal fun TripStatus.getLocationMatcherResult(
     enhancedLocation: Location,
     keyPoints: List<Location>,
-    road: Road
+    road: Road,
 ): LocationMatcherResult {
     return LocationMatcherResult(
         enhancedLocation,
@@ -280,7 +279,6 @@ internal fun TripStatus.getLocationMatcherResult(
         navigationStatus.offRoadProba > 0.5,
         navigationStatus.offRoadProba,
         navigationStatus.mapMatcherOutput.isTeleport,
-        navigationStatus.prepareSpeedLimit(),
         navigationStatus.prepareSpeedLimitInfo(),
         navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f,
         navigationStatus.layer,
@@ -288,27 +286,6 @@ internal fun TripStatus.getLocationMatcherResult(
         navigationStatus.isFallback,
         navigationStatus.inTunnel,
     )
-}
-
-internal fun NavigationStatus.prepareSpeedLimit(): SpeedLimit? {
-    return ifNonNull(speedLimit) { limit ->
-        val speedLimitUnit = when (limit.localeUnit) {
-            SpeedLimitUnit.KILOMETRES_PER_HOUR ->
-                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR
-            else -> com.mapbox.navigation.base.speed.model.SpeedLimitUnit.MILES_PER_HOUR
-        }
-        val speedLimitSign = convertSign(limit.localeSign)
-        val speedKmph = when (speedLimitUnit) {
-            com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR -> limit.speed
-            com.mapbox.navigation.base.speed.model.SpeedLimitUnit.MILES_PER_HOUR ->
-                mphToKmph(limit.speed)
-        }
-        SpeedLimit(
-            speedKmph,
-            speedLimitUnit,
-            speedLimitSign
-        )
-    }
 }
 
 internal fun NavigationStatus.prepareSpeedLimitInfo(): SpeedLimitInfo {
@@ -322,12 +299,12 @@ internal fun NavigationStatus.prepareSpeedLimitInfo(): SpeedLimitInfo {
     return SpeedLimitInfoFactory.createSpeedLimitInfo(
         speedLimit.speed,
         speedLimitUnit,
-        speedLimitSign
+        speedLimitSign,
     )
 }
 
 private fun convertSign(
-    nativeSign: SpeedLimitSign
+    nativeSign: SpeedLimitSign,
 ): com.mapbox.navigation.base.speed.model.SpeedLimitSign {
     return when (nativeSign) {
         SpeedLimitSign.MUTCD -> com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD

@@ -17,7 +17,7 @@ import kotlin.math.pow
 @ExperimentalPreviewMapboxNavigationAPI
 class ReplayPolylineDecodeStream(
     val encodedPath: String,
-    precision: Int
+    precision: Int,
 ) : Iterator<Point> {
 
     private val len = encodedPath.length
@@ -81,7 +81,7 @@ class ReplayPolylineDecodeStream(
      */
     fun decode(
         minDistance: Double,
-        @TurfConstants.TurfUnitCriteria units: String = TurfConstants.UNIT_KILOMETERS
+        @TurfConstants.TurfUnitCriteria units: String = TurfConstants.UNIT_KILOMETERS,
     ): List<Point> {
         val points = mutableListOf<Point>()
         var travelled = 0.0

@@ -17,16 +17,16 @@ class AdasisConfigPathOptionsTest :
 
         return AdasisConfigPathOptions.Builder()
             .stubOptions(
-                AdasisStubOptions.Builder().options(messageOptions).build()
+                AdasisStubOptions.Builder().options(messageOptions).build(),
             )
             .segmentOptions(
-                AdasisSegmentOptions.Builder().options(messageOptions).build()
+                AdasisSegmentOptions.Builder().options(messageOptions).build(),
             )
             .profileShortOptions(
-                AdasisProfileShortOptions.Builder().options(messageOptions).build()
+                AdasisProfileShortOptions.Builder().options(messageOptions).build(),
             )
             .profileLongOptions(
-                AdasisProfileLongOptions.Builder().options(messageOptions).build()
+                AdasisProfileLongOptions.Builder().options(messageOptions).build(),
             )
     }
 

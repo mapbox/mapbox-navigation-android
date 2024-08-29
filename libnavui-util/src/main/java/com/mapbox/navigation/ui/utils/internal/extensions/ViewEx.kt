@@ -34,27 +34,29 @@ fun View.slideHeight(fromHeight: Int, toHeight: Int, duration: Long): ValueAnima
 
 fun ValueAnimator.play(
     doOnStart: (() -> Unit)? = null,
-    doOnEnd: (() -> Unit)? = null
+    doOnEnd: (() -> Unit)? = null,
 ) {
     val set = AnimatorSet()
     set.play(this)
     set.interpolator = AccelerateDecelerateInterpolator()
-    set.addListener(object : Animator.AnimatorListener {
-        override fun onAnimationStart(animation: Animator) {
-            doOnStart?.invoke()
-        }
+    set.addListener(
+        object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {
+                doOnStart?.invoke()
+            }
 
-        override fun onAnimationEnd(animation: Animator) {
-            doOnEnd?.invoke()
-        }
+            override fun onAnimationEnd(animation: Animator) {
+                doOnEnd?.invoke()
+            }
 
-        override fun onAnimationCancel(animation: Animator) {
-            // No implementation
-        }
+            override fun onAnimationCancel(animation: Animator) {
+                // No implementation
+            }
 
-        override fun onAnimationRepeat(animation: Animator) {
-            // No implementation
-        }
-    })
+            override fun onAnimationRepeat(animation: Animator) {
+                // No implementation
+            }
+        },
+    )
     set.start()
 }

@@ -1,28 +1,21 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.common.TilesetDescriptor
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PredictiveCacheOptionsTest {
+
+    private val mockTilesetDescriptor1: TilesetDescriptor = mockk()
+    private val mockTilesetDescriptor2: TilesetDescriptor = mockk()
 
     @Test
     fun defaultMapsOptionsList() {
         val expected = PredictiveCacheMapsOptions.Builder().build()
         val actual = PredictiveCacheOptions.Builder().build()
 
-        assertEquals(expected, actual.predictiveCacheMapsOptions)
         assertEquals(listOf(expected), actual.predictiveCacheMapsOptionsList)
-    }
-
-    @Test
-    fun deprecatedMapsOptions() {
-        val mapsOptions = PredictiveCacheMapsOptions.Builder().minZoom(12).maxZoom(14).build()
-        val actual = PredictiveCacheOptions.Builder()
-            .predictiveCacheMapsOptions(mapsOptions)
-            .build()
-
-        assertEquals(mapsOptions, actual.predictiveCacheMapsOptions)
-        assertEquals(listOf(mapsOptions), actual.predictiveCacheMapsOptionsList)
     }
 
     @Test
@@ -33,8 +26,27 @@ class PredictiveCacheOptionsTest {
             .predictiveCacheMapsOptionsList(listOf(mapsOptions1, mapsOptions2))
             .build()
 
-        assertEquals(mapsOptions1, actual.predictiveCacheMapsOptions)
         assertEquals(listOf(mapsOptions1, mapsOptions2), actual.predictiveCacheMapsOptionsList)
+    }
+
+    @Test
+    fun customSearchOptionsList() {
+        val options1 = PredictiveCacheSearchOptions
+            .Builder(mockTilesetDescriptor1)
+            .build()
+
+        val options2 = PredictiveCacheSearchOptions
+            .Builder(mockTilesetDescriptor2)
+            .build()
+
+        val actual = PredictiveCacheOptions.Builder()
+            .predictiveCacheSearchOptionsList(listOf(options1, options2))
+            .build()
+
+        assertEquals(
+            listOf(options1, options2),
+            actual.predictiveCacheSearchOptionsList,
+        )
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -44,37 +56,10 @@ class PredictiveCacheOptionsTest {
             .build()
     }
 
-    @Test
-    fun customMapsOptionsAfterDeprecatedMapsOptions() {
-        val deprecatedMapsOptions = PredictiveCacheMapsOptions.Builder()
-            .minZoom(7)
-            .maxZoom(9)
+    @Test(expected = IllegalArgumentException::class)
+    fun customEmptySearchOptionsList() {
+        PredictiveCacheOptions.Builder()
+            .predictiveCacheSearchOptionsList(emptyList())
             .build()
-        val mapsOptions1 = PredictiveCacheMapsOptions.Builder().minZoom(12).maxZoom(14).build()
-        val mapsOptions2 = PredictiveCacheMapsOptions.Builder().minZoom(11).maxZoom(13).build()
-        val actual = PredictiveCacheOptions.Builder()
-            .predictiveCacheMapsOptions(deprecatedMapsOptions)
-            .predictiveCacheMapsOptionsList(listOf(mapsOptions1, mapsOptions2))
-            .build()
-
-        assertEquals(mapsOptions1, actual.predictiveCacheMapsOptions)
-        assertEquals(listOf(mapsOptions1, mapsOptions2), actual.predictiveCacheMapsOptionsList)
-    }
-
-    @Test
-    fun deprecatedMapsOptionsAfterCustomMapsOptionsList() {
-        val deprecatedMapsOptions = PredictiveCacheMapsOptions.Builder()
-            .minZoom(7)
-            .maxZoom(9)
-            .build()
-        val mapsOptions1 = PredictiveCacheMapsOptions.Builder().minZoom(12).maxZoom(14).build()
-        val mapsOptions2 = PredictiveCacheMapsOptions.Builder().minZoom(11).maxZoom(13).build()
-        val actual = PredictiveCacheOptions.Builder()
-            .predictiveCacheMapsOptionsList(listOf(mapsOptions1, mapsOptions2))
-            .predictiveCacheMapsOptions(deprecatedMapsOptions)
-            .build()
-
-        assertEquals(deprecatedMapsOptions, actual.predictiveCacheMapsOptions)
-        assertEquals(listOf(deprecatedMapsOptions), actual.predictiveCacheMapsOptionsList)
     }
 }

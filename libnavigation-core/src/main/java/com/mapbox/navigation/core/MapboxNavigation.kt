@@ -9,35 +9,27 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.annotation.module.MapboxModuleType
-import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.BaseMapboxInitializer
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
-import com.mapbox.navigation.base.internal.NavigationRouterV2
+import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
+import com.mapbox.navigation.base.internal.accounts.SkuIdProviderImpl
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.MapMatchingMatch
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouter
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.RouteAlternativesOptions
-import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toDirectionsRoutes
-import com.mapbox.navigation.base.route.toNavigationRoutes
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
@@ -51,48 +43,52 @@ import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.arrival.AutoArrivalController
-import com.mapbox.navigation.core.directions.LegacyNavigationRouterAdapter
-import com.mapbox.navigation.core.directions.LegacyRouterAdapter
+import com.mapbox.navigation.core.datainputs.DataInputsManager
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesSetStartedParams
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedObserver
 import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.MapboxNavigationSDKInitializerImpl
 import com.mapbox.navigation.core.internal.ReachabilityService
+import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.core.internal.SdkInfoProvider
+import com.mapbox.navigation.core.internal.congestions.TrafficOverrideHandler
+import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
+import com.mapbox.navigation.core.internal.routealternatives.NavigationRouteAlternativesObserver
+import com.mapbox.navigation.core.internal.router.GetRouteSignature
+import com.mapbox.navigation.core.internal.router.RouterWrapper
 import com.mapbox.navigation.core.internal.telemetry.CustomEvent
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
 import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.internal.utils.ModuleParams
-import com.mapbox.navigation.core.internal.utils.isInternalImplementation
 import com.mapbox.navigation.core.internal.utils.mapToReason
 import com.mapbox.navigation.core.internal.utils.paramsProvider
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
+import com.mapbox.navigation.core.mapmatching.MapMatchingAPIProvider
+import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
+import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.InternalRerouteController
-import com.mapbox.navigation.core.reroute.InternalRerouteControllerAdapter
-import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
-import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteResult
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
-import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
-import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCallback
+import com.mapbox.navigation.core.routealternatives.UpdateRouteSuggestion
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
@@ -117,7 +113,6 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
-import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
@@ -128,9 +123,9 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.GraphAccessor
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore
+import com.mapbox.navigation.core.utils.SystemLocaleWatcher
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
-import com.mapbox.navigation.navigator.internal.router.RouterInterfaceAdapter
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -140,13 +135,13 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
+import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PollingConfig
-import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -163,10 +158,6 @@ import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
-private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
-    "You need to provide an access token in NavigationOptions in order to use the default " +
-        "Router."
 private const val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
     "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
 private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
@@ -200,12 +191,12 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * ### Routing
  * A route can be requested with:
- * - [requestRoutes], if successful, returns a route reference without acting on it. You can then pass the generated routes to [setRoutes].
- * - [setRoutes] sets new routes, clear current ones, or changes the route at primary index 0.
+ * - [requestRoutes], if successful, returns a route reference without acting on it. You can then pass the generated routes to [setNavigationRoutes].
+ * - [setNavigationRoutes] sets new routes, clear current ones, or changes the route at primary index 0.
  * The routes are immediately available via the [RoutesObserver] and the first route (at index 0) is going to be chosen as the primary one.
  *
  * ### Route reason update
- * When routes are updated via [setRoutes] the reason that is spread via [RoutesObserver.onRoutesChanged] might be:
+ * When routes are updated via [setNavigationRoutes] the reason that is spread via [RoutesObserver.onRoutesChanged] might be:
  * - [RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP] if list of routes is empty;
  * - [RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE] if any of the routes received via [RouteAlternativesObserver.onRouteAlternatives] are set. **Order does not matter**.
  * - [RoutesExtra.ROUTES_UPDATE_REASON_NEW] otherwise.
@@ -229,12 +220,12 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *     object : NavigationRouterCallback {
  *         override fun onRoutesReady(
  *             routes: List<NavigationRoute>,
- *             routerOrigin: RouterOrigin
+ *             @RouterOrigin routerOrigin: String
  *         ) {
  *             mapboxNavigation.setNavigationRoutes(routes)
  *         }
  *         override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) { }
- *         override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) { }
+ *         override fun onCanceled(routeOptions: RouteOptions, @RouterOrigin routerOrigin: String) { }
  *     }
  * )
  * ```
@@ -246,21 +237,30 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * When the routes are manually cleared, the SDK automatically fall back to either [Idle] or [FreeDrive] state.
  *
- * You can use [setRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
+ * You can use [setNavigationRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
+ * @param historyRecorder Use the history recorder to save history files.
+ *   @see [HistoryRecorderOptions] to enable and customize the directory
+ *   @see [MapboxHistoryReader] to read the files
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @UiThread
 class MapboxNavigation @VisibleForTesting internal constructor(
     val navigationOptions: NavigationOptions,
     private val threadController: ThreadController,
+    val historyRecorder: MapboxHistoryRecorder,
+    internal val copilotHistoryRecorder: MapboxHistoryRecorder,
+    internal val compositeRecorder: MapboxHistoryRecorder,
     private val telemetryWrapper: TelemetryWrapper = TelemetryWrapper(),
 ) {
 
-    constructor(navigationOptions: NavigationOptions) : this(
+    internal constructor(navigationOptions: NavigationOptions) : this(
         navigationOptions,
         ThreadController(),
+        MapboxHistoryRecorder(navigationOptions),
+        MapboxHistoryRecorder(navigationOptions),
+        MapboxHistoryRecorder(navigationOptions),
         TelemetryWrapper(),
     )
 
@@ -275,9 +275,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private val tripSessionLocationEngine: TripSessionLocationEngine
     private val billingController: BillingController
     private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
-        Channel(Channel.CONFLATED)
+        Channel(Channel.CONFLATED),
     )
     private val tripNotificationInterceptorOwner = TripNotificationInterceptorOwner()
+    private val trafficOverrideHandler = TrafficOverrideHandler(
+        navigationOptions.trafficOverrideOptions,
+    )
     private val internalRoutesObserver: RoutesObserver
     private val routesCacheClearer = NavigationComponentProvider.createRoutesCacheClearer()
     private val internalOffRouteObserver: OffRouteObserver
@@ -295,25 +298,24 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.eHorizonOptions.alertServiceOptions.collectBridges,
             navigationOptions.eHorizonOptions.alertServiceOptions.collectRestrictedAreas,
             navigationOptions.eHorizonOptions.alertServiceOptions.collectMergingAreas,
+            navigationOptions.eHorizonOptions.alertServiceOptions.collectServiceAreas,
         ),
     )
 
     private val routesPreviewController = NavigationComponentProvider.createRoutesPreviewController(
-        threadController.getMainScopeAndRootJob().scope
+        threadController.getMainScopeAndRootJob().scope,
     )
 
     private val routeUpdateMutex = Mutex()
 
-    // native Router Interface
-    private val nativeRouter: RouterInterface
+    private val mapMatchingAPI = MapMatchingAPIProvider.provideMapMatchingAPI()
 
     private val routesProgressDataProvider =
         NavigationComponentProvider.createRouteRefreshRequestDataProvider()
 
     private val evDynamicDataHolder = NavigationComponentProvider.createEVDynamicDataHolder()
 
-    // Router provided via @Modules, might be outer
-    private val moduleRouter: NavigationRouterV2
+    private val routerWrapper: RouterWrapper
 
     private val incidentsOptions: IncidentsOptions? = navigationOptions.incidentsOptions.run {
         if (graph.isNotEmpty() || apiUrl.isNotEmpty()) {
@@ -335,7 +337,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         pollingConfig,
         incidentsOptions,
         null,
-        null,
         navigationOptions.enableSensors,
     )
 
@@ -346,11 +347,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     private var rerouteController: InternalRerouteController?
     private val defaultRerouteController: InternalRerouteController
-
-    private var _navigator: MapboxNativeNavigator?
-
-    internal val navigator: MapboxNativeNavigator
-        get() = _navigator ?: error("MapboxNavigation is destroyed")
 
     /**
      * [NavigationVersionSwitchObserver] is notified when navigation switches tiles version.
@@ -391,21 +387,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     val roadObjectMatcher: RoadObjectMatcher
 
     /**
-     * Use the history recorder to save history files.
-     *
-     * @see [HistoryRecorderOptions] to enable and customize the directory
-     * @see [MapboxHistoryReader] to read the files
-     */
-    val historyRecorder = MapboxHistoryRecorder(navigationOptions)
-
-    /**
      * Use route refresh controller to handle route refreshes.
      * @see [RouteRefreshController] for more details.
      */
     @ExperimentalPreviewMapboxNavigationAPI
     val routeRefreshController: RouteRefreshController
-
-    internal val copilotHistoryRecorder = MapboxHistoryRecorder(navigationOptions)
 
     /**
      * **THIS IS AN EXPERIMENTAL API, DO NOT USE IN A PRODUCTION ENVIRONMENT.**
@@ -420,13 +406,29 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     /**
      * Use this property to provide ETC gate update info.
+     *
+     * Deprecated, use [DataInputsManager.updateEtcGateInfo] instead.
      */
     @ExperimentalPreviewMapboxNavigationAPI
+    @Deprecated("EtcGateApi is deprecated", ReplaceWith("DataInputsManager.updateEtcGateInfo"))
     val etcGateAPI: EtcGateApi
+
+    /**
+     * Provides service that allows users to provide data from external sensors to the navigator.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    val dataInputsManager: DataInputsManager
 
     private var reachabilityObserverId: Long? = null
 
     private var latestLegIndex: Int? = null
+
+    private val historyRecorders: List<MapboxHistoryRecorder> = listOf(
+        historyRecorder,
+        copilotHistoryRecorder,
+    )
+
+    private val systemLocaleWatcher: SystemLocaleWatcher
 
     /**
      * Describes whether this instance of `MapboxNavigation` has been destroyed by calling
@@ -438,16 +440,22 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     var isDestroyed = false
         private set
 
+    private var _navigator: MapboxNativeNavigator?
+
+    internal val navigator: MapboxNativeNavigator
+        get() = _navigator ?: error("MapboxNavigation is destroyed")
+
+    internal val skuIdProvider: SkuIdProvider
+
     init {
         BaseMapboxInitializer.init(MapboxNavigationSDKInitializerImpl::class.java)
-
         if (hasInstance) {
             throw IllegalStateException(
                 """
                     A different MapboxNavigation instance already exists.
                     Make sure to destroy it with #onDestroy before creating a new one.
                     Also see MapboxNavigationApp for instance management assistance.
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
         hasInstance = true
@@ -459,7 +467,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         val tilesConfig = createTilesConfig(
             isFallback = false,
-            tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
+            tilesVersion = navigationOptions.routingTilesOptions.tilesVersion,
         )
 
         historyRecorderHandles = createHistoryRecorderHandles(config)
@@ -467,70 +475,46 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         val cacheHandle = NavigatorLoader.createCacheHandle(
             config,
             tilesConfig,
-            historyRecorderHandles.composite
-        )
-
-        nativeRouter = NavigatorLoader.createNativeRouterInterface(
-            cacheHandle,
-            config,
             historyRecorderHandles.composite,
         )
 
-        val routeParsingManager = createRouteParsingManager(
-            navigationOptions.longRoutesOptimisationOptions
-        )
-        routeParsingManager.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
-        val result = MapboxModuleProvider.createModule<Router>(MapboxModuleType.NavigationRouter) {
-            paramsProvider(
-                ModuleParams.NavigationRouter(
-                    navigationOptions.accessToken
-                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER),
-                    nativeRouter,
-                    threadController,
-                    routeParsingManager
-                )
-            )
-        }
-        moduleRouter = when (result) {
-            is NavigationRouterV2 -> result
-            is NavigationRouter -> LegacyNavigationRouterAdapter(result)
-            else -> LegacyNavigationRouterAdapter(LegacyRouterAdapter(result))
-        }
         _navigator = NavigationComponentProvider.createNativeNavigator(
             cacheHandle,
             config,
             historyRecorderHandles.composite,
-            navigationOptions.accessToken ?: "",
-            if (moduleRouter.isInternalImplementation()) {
-                // We pass null to let NN know that default router is used and it can rely
-                // on implementation details in some cases like offline-online switch.
-                // Meanwhile platform SDK uses its own instance of native router for
-                // route requests
-                null
-            } else {
-                RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
-            },
+            createOfflineCacheHandle(config),
         )
+
+        val routeParsingManager = createRouteParsingManager()
+        routeParsingManager.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
+        routerWrapper = RouterWrapper(
+            navigator.getRouter(),
+            threadController,
+            routeParsingManager,
+            compositeRecorder,
+        )
+
         etcGateAPI = EtcGateApi(navigator.experimental)
+        dataInputsManager = DataInputsManager(navigator)
 
         assignHistoryRecorders()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         historyRecordingStateHandler = NavigationComponentProvider
             .createHistoryRecordingStateHandler()
         developerMetadataAggregator = NavigationComponentProvider.createDeveloperMetadataAggregator(
-            historyRecordingStateHandler
+            historyRecordingStateHandler,
         )
 
         val notification: TripNotification = MapboxModuleProvider
             .createModule(
-                MapboxModuleType.NavigationTripNotification
+                MapboxModuleType.NavigationTripNotification,
             ) {
                 paramsProvider(
                     ModuleParams.NavigationTripNotification(
                         navigationOptions,
                         tripNotificationInterceptorOwner,
-                        navigationOptions.distanceFormatterOptions
-                    )
+                        navigationOptions.distanceFormatterOptions,
+                    ),
                 )
             }
         if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
@@ -545,7 +529,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
         tripSessionLocationEngine = NavigationComponentProvider.createTripSessionLocationEngine(
-            navigationOptions = navigationOptions
+            locationOptions = navigationOptions.locationOptions,
         )
         tripSession = NavigationComponentProvider.createTripSession(
             tripService = tripService,
@@ -558,30 +542,44 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.registerStateObserver(navigationSession)
         tripSession.registerStateObserver(historyRecordingStateHandler)
 
-        directionsSession = NavigationComponentProvider.createDirectionsSession(moduleRouter)
+        directionsSession = NavigationComponentProvider.createDirectionsSession(routerWrapper)
         directionsSession.registerSetNavigationRoutesFinishedObserver(navigationSession)
         if (reachabilityObserverId == null) {
             reachabilityObserverId = ReachabilityService.addReachabilityObserver(
-                connectivityHandler
+                connectivityHandler,
             )
         }
 
+        if (navigationOptions.trafficOverrideOptions.isEnabled) {
+            tripSession.registerRouteProgressObserver(trafficOverrideHandler)
+            tripSession.registerLocationObserver(trafficOverrideHandler)
+            registerRoutesObserver(trafficOverrideHandler)
+            trafficOverrideHandler.registerRouteTrafficRefreshObserver { navigationRoutes ->
+                setManuallyRefreshedRoutes(navigationRoutes)
+            }
+        }
+
         arrivalProgressObserver = NavigationComponentProvider.createArrivalProgressObserver(
-            tripSession
+            tripSession,
         )
         setArrivalController()
 
+        skuIdProvider = SkuIdProviderImpl()
+
+        val sdkInformation = SdkInfoProvider.sdkInformation()
+
         billingController = NavigationComponentProvider.createBillingController(
-            navigationOptions.accessToken,
             navigationSession,
             tripSession,
-            arrivalProgressObserver
+            arrivalProgressObserver,
+            skuIdProvider,
+            sdkInformation,
         )
 
         telemetryWrapper.initialize(
             mapboxNavigation = this,
             navigationOptions = navigationOptions,
-            userAgent = obtainUserAgent(),
+            sdkInformation = sdkInformation,
         )
 
         val routeOptionsProvider = RouteOptionsUpdater()
@@ -591,8 +589,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator,
             tripSession,
             threadController,
-            routeParsingManager
+            routeParsingManager,
         )
+        routeAlternativesController.setRouteUpdateSuggestionListener(::updateRoutes)
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             Dispatchers.Main,
@@ -601,14 +600,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             directionsSession,
             routesProgressDataProvider,
             evDynamicDataHolder,
-            Time.SystemClockImpl
+            Time.SystemClockImpl,
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController.registerRouteRefreshObserver {
             internalSetNavigationRoutes(
                 listOf(it.primaryRouteRefresherResult.route) +
                     it.alternativesRouteRefresherResults.map { it.route },
-                SetRoutes.RefreshRoutes(it.primaryRouteRefresherResult.routeProgressData)
+                SetRoutes.RefreshRoutes(it.primaryRouteRefresherResult.routeProgressData),
             )
         }
 
@@ -628,16 +627,32 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
         registerRoutesObserver(internalRoutesObserver)
-        registerRoutesObserver(routeRefreshController)
+        registerRoutesObserver(routeRefreshController::onRoutesChanged)
         setUpRouteCacheClearer()
 
         roadObjectsStore = RoadObjectsStore(navigator)
         graphAccessor = GraphAccessor(navigator)
         tilesetDescriptorFactory = TilesetDescriptorFactory(
             navigationOptions.routingTilesOptions,
-            navigator.cache
+            navigator.cache,
         )
         roadObjectMatcher = RoadObjectMatcher(navigator)
+
+        systemLocaleWatcher = SystemLocaleWatcher.create(
+            navigationOptions.applicationContext,
+            navigator,
+        )
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    private fun createOfflineCacheHandle(config: ConfigHandle): CacheHandle? {
+        val version = navigationOptions.routingTilesOptions.fallbackOfflineTilesVersion
+            ?: return null
+        return NavigatorLoader.createCacheHandle(
+            config,
+            createTilesConfig(true, version),
+            historyRecorderHandles.composite,
+        )
     }
 
     /**
@@ -694,7 +709,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     /**
      * Functionally the same as [startTripSession] except the locations do not come from the
-     * [NavigationOptions.locationEngine]. The events are emitted by the [mapboxReplayer].
+     * [NavigationOptions.mockLocationProvider]. The events are emitted by the [mapboxReplayer].
      *
      * This allows you to simulate navigation routes or replay history from the [historyRecorder].
      */
@@ -703,16 +718,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         startSession(withForegroundService, true)
     }
 
-    /**
-     * Reset the session with the same configuration. The location becomes unknown,
-     * but the [NavigationOptions] stay the same.
-     *
-     * Call this function before significant change of location, e.g. when restarting
-     * navigation simulation, or before resetting location to not real (simulated)
-     * position without recreation of [MapboxNavigation].
-     */
-    @Deprecated(message = "use the overload with the callback instead")
-    fun resetTripSession() {
+    private fun resetTripSessionBlocking() {
         // using a blocking function to keep parity with the original implementation so that
         // Nav Native is fully done with the reset when this function returns
         runBlocking {
@@ -783,63 +789,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun getZLevel(): Int? = tripSession.zLevel
 
     /**
-     * Requests a route using the available [Router] implementation.
-     *
-     * Use [MapboxNavigation.setRoutes] to supply the returned list of routes, transformed list, or a list from an external source, to be managed by the SDK.
-     *
-     * Example:
-     * ```
-     * mapboxNavigation.requestRoutes(routeOptions, object : RouterCallback {
-     *     override fun onRoutesReady(routes: List<DirectionsRoute>) {
-     *         ...
-     *         mapboxNavigation.setRoutes(routes)
-     *     }
-     *     ...
-     * })
-     * ```
-     *
-     * @param routeOptions params for the route request.
-     * **Make sure to use the [applyDefaultNavigationOptions] for the best navigation experience** (and to set required request parameters).
-     * You can also use [applyLanguageAndVoiceUnitOptions] get instructions' language and voice unit based on the device's [Locale].
-     * It's also worth exploring other available options (like enabling alternative routes, specifying destination approach type, defining waypoint types, etc.)
-     * @param routesRequestCallback listener that gets notified when request state changes
-     * @return requestId, see [cancelRouteRequest]
-     * @see [registerRoutesObserver]
-     * @see [registerRouteProgressObserver]
-     * @see [applyDefaultNavigationOptions]
-     * @see [applyLanguageAndVoiceUnitOptions]
-     */
-    @Deprecated("use #requestRoutes(RouteOptions, NavigationRouterCallback) instead")
-    fun requestRoutes(
-        routeOptions: RouteOptions,
-        routesRequestCallback: RouterCallback
-    ): Long {
-        return requestRoutes(
-            routeOptions,
-            object : NavigationRouterCallback {
-                override fun onRoutesReady(
-                    routes: List<NavigationRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    routesRequestCallback.onRoutesReady(
-                        routes.toDirectionsRoutes(),
-                        routerOrigin
-                    )
-                }
-
-                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
-                    routesRequestCallback.onFailure(reasons, routeOptions)
-                }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    routesRequestCallback.onCanceled(routeOptions, routerOrigin)
-                }
-            }
-        )
-    }
-
-    /**
-     * Requests a route using the available [NavigationRouter] implementation.
+     * Requests a route.
      *
      * Use [MapboxNavigation.setNavigationRoutes] to supply the returned list of routes, transformed list, or a list from an external source, to be managed by the SDK.
      *
@@ -867,9 +817,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun requestRoutes(
         routeOptions: RouteOptions,
-        callback: NavigationRouterCallback
+        callback: NavigationRouterCallback,
     ): Long {
-        return directionsSession.requestRoutes(routeOptions, callback)
+        return directionsSession.requestRoutes(
+            routeOptions,
+            GetRouteSignature(GetRouteSignature.Reason.NEW_ROUTE, GetRouteSignature.Origin.APP),
+            callback,
+        )
     }
 
     /**
@@ -880,38 +834,28 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * Set a list of routes.
-     *
-     * If the list is not empty, the route at index 0 is valid, and the trip session is started,
-     * then the SDK enters an `Active Guidance` state and [RouteProgress] updates will be available.
-     *
-     * If the list is empty, the SDK will exit the `Active Guidance` state.
-     *
-     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the
-     * routes list reference managed by the SDK changes, regardless of a source.
-     *
-     * This call is asynchronous, only once processing finishes the effects are available through [MapboxNavigation.getNavigationRoutes] and [RoutesObserver].
-     * If this call fails, no changes are made to the routes managed by the [MapboxNavigation], they are not cleared. Observe the processing with [MapboxNavigation.setNavigationRoutes]'s callback.
-     *
-     * **Deprecated**: use #setNavigationRoutes(List<NavigationRoute>) instead. To fetch [NavigationRoute]
-     * list use #requestRoutes(RouteOptions, NavigationRouterCallback) or create an instance of
-     * [NavigationRoute] via [NavigationRoute.create], which requires an original [DirectionsResponse]
-     * object or a raw JSON response.
-     *
-     * @param routes a list of [DirectionsRoute]s
-     * @param initialLegIndex starting leg to follow. By default the first leg is used.
-     * @see [requestRoutes]
+     * Requests routes from
+     * [Mapbox Map Matching API](https://docs.mapbox.com/api/navigation/map-matching/) and
+     * transforms result to [NavigationRoute]s that could be used for [setNavigationRoutes].
+     * @param mapMatchingOptions map matching options
+     * @param callback listener that gets notified when request state changes
+     * @return requestId, see [cancelMapMatchingRequest]
+     * @see [MapMatchingMatch], [MapMatchingSuccessfulResult], [MapMatchingAPICallback]
      */
-    @JvmOverloads
-    @Deprecated(
-        "use #setNavigationRoutes(List<NavigationRoute>) instead",
-        ReplaceWith(
-            "setNavigationRoutes(routes.toNavigationRoutes(), initialLegIndex)",
-            "com.mapbox.navigation.base.route.toNavigationRoutes"
-        )
-    )
-    fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int = 0) {
-        setNavigationRoutes(routes.toNavigationRoutes(), initialLegIndex)
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun requestMapMatching(
+        mapMatchingOptions: MapMatchingOptions,
+        callback: MapMatchingAPICallback,
+    ): Long {
+        return mapMatchingAPI.requestMapMatching(mapMatchingOptions, callback)
+    }
+
+    /**
+     * Cancels a specific map matching request using the ID returned by [requestMapMatching].
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun cancelMapMatchingRequest(requestId: Long) {
+        mapMatchingAPI.cancel(requestId)
     }
 
     /**
@@ -936,7 +880,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun setNavigationRoutes(
         routes: List<NavigationRoute>,
         initialLegIndex: Int = 0,
-        callback: RoutesSetCallback? = null
+        callback: RoutesSetCallback? = null,
     ) {
         if (routes.isNotEmpty()) {
             billingController.onExternalRouteSet(routes.first(), initialLegIndex)
@@ -948,9 +892,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routes.first() == directionsSession.routes.firstOrNull() -> {
                 SetRoutes.Alternatives(initialLegIndex)
             }
+
             directionsSession.routes.map { it.id }.contains(routes.first().id) -> {
                 SetRoutes.Reorder(initialLegIndex)
             }
+
             else -> SetRoutes.NewRoutes(initialLegIndex)
         }
         internalSetNavigationRoutes(
@@ -1089,6 +1035,21 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ?: directionsSession.initialLegIndex
     }
 
+    @VisibleForTesting
+    internal fun setManuallyRefreshedRoutes(routes: List<NavigationRoute>) {
+        internalSetNavigationRoutes(
+            routes,
+            SetRoutes.RefreshRoutes(
+                RouteProgressData(
+                    legIndex = currentLegIndex(),
+                    0, // isn't used
+                    0, // isn't used
+                ),
+                isManualRefresh = true,
+            ),
+        )
+    }
+
     private fun internalSetNavigationRoutes(
         routes: List<NavigationRoute>,
         setRoutesInfo: SetRoutes,
@@ -1102,11 +1063,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             SetRoutes.CleanUp,
             is SetRoutes.NewRoutes,
             is SetRoutes.Reroute,
-            is SetRoutes.Reorder -> {
+            is SetRoutes.Reorder,
+            -> {
                 rerouteController?.interrupt()
             }
+
             is SetRoutes.RefreshRoutes,
-            is SetRoutes.Alternatives -> {
+            is SetRoutes.Alternatives,
+            -> {
                 // do not interrupt reroute when primary route has not changed
             }
         }
@@ -1122,8 +1086,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                             "Alternatives ${routes.drop(1).map { it.id }} " +
                                 "are outdated. Primary route has changed " +
                                 "from ${routes.first().id} " +
-                                "to ${directionsSession.routes.firstOrNull()?.id}"
-                        )
+                                "to ${directionsSession.routes.firstOrNull()?.id}",
+                        ),
                     )
                 } else {
                     historyRecordingStateHandler.setRoutes(routes)
@@ -1132,25 +1096,33 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                             val directionsSessionRoutes = Utils.createDirectionsSessionRoutes(
                                 routes,
                                 processedRoutes,
-                                setRoutesInfo
+                                setRoutesInfo,
                             )
                             directionsSession.setNavigationRoutesFinished(directionsSessionRoutes)
+                            if (setRoutesInfo is SetRoutes.RefreshRoutes &&
+                                setRoutesInfo.isManualRefresh
+                            ) {
+                                routeRefreshController.onRoutesRefreshedManually(
+                                    routes,
+                                )
+                            }
                             routesSetResult = ExpectedFactory.createValue(
                                 RoutesSetSuccess(
                                     directionsSessionRoutes.ignoredRoutes.associate {
                                         it.navigationRoute.id to
                                             RoutesSetError("invalid alternative")
-                                    }
-                                )
+                                    },
+                                ),
                             )
                         }
+
                         is NativeSetRouteError -> {
                             logE(
                                 "Routes with IDs ${routes.map { it.id }} " +
-                                    "will be ignored as they are not valid"
+                                    "will be ignored as they are not valid",
                             )
                             routesSetResult = ExpectedFactory.createError(
-                                RoutesSetError(processedRoutes.error)
+                                RoutesSetError(processedRoutes.error),
                             )
                             historyRecordingStateHandler.lastSetRoutesFailed()
                         }
@@ -1183,28 +1155,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             if (this is NativeSetRouteValue) {
                 routeAlternativesController.processAlternativesMetadata(
                     this.routes,
-                    nativeAlternatives
+                    nativeAlternatives,
                 )
             }
         }
     }
-
-    /**
-     * Get a list of routes.
-     *
-     * If the list is not empty, the route at index 0 is the one treated as the primary route
-     * and used for route progress, off route events and map-matching calculations.
-     *
-     * @return a list of [DirectionsRoute]s
-     */
-    @Deprecated(
-        "use #getNavigationRoutes() instead",
-        ReplaceWith(
-            "getNavigationRoutes().toDirectionsRoutes()",
-            "com.mapbox.navigation.base.route.toDirectionsRoutes"
-        )
-    )
-    fun getRoutes(): List<DirectionsRoute> = directionsSession.routes.toDirectionsRoutes()
 
     /**
      * Get a list of routes.
@@ -1217,59 +1172,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun getNavigationRoutes(): List<NavigationRoute> = directionsSession.routes
 
     /**
-     * Requests an alternative route using the original [RouteOptions] associated with
-     * [MapboxNavigation.setRoutes()] call and [Router] implementation.
-     * @see [registerRouteAlternativesObserver]
-     */
-    fun requestAlternativeRoutes() {
-        routeAlternativesController.triggerAlternativeRequest(null)
-    }
-
-    /**
-     * Requests an alternative route using the original [RouteOptions] associated with
-     * [MapboxNavigation.setRoutes()] call and [Router] implementation.
-     * @see [registerRouteAlternativesObserver]
-     */
-    fun requestAlternativeRoutes(callback: NavigationRouteAlternativesRequestCallback? = null) {
-        routeAlternativesController.triggerAlternativeRequest(callback)
-    }
-
-    /**
-     * Requests an alternative route using the original [RouteOptions] associated with
-     * [MapboxNavigation.setRoutes()] call and [Router] implementation.
-     * @see [registerRouteAlternativesObserver]
-     */
-    fun requestAlternativeRoutes(callback: RouteAlternativesRequestCallback) {
-        routeAlternativesController.triggerAlternativeRequest(
-            object : NavigationRouteAlternativesRequestCallback {
-                override fun onRouteAlternativeRequestFinished(
-                    routeProgress: RouteProgress,
-                    alternatives: List<NavigationRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    callback.onRouteAlternativeRequestFinished(
-                        routeProgress,
-                        alternatives.toDirectionsRoutes(),
-                        routerOrigin
-                    )
-                }
-
-                override fun onRouteAlternativesRequestError(error: RouteAlternativesError) {
-                    callback.onRouteAlternativesAborted(error.message)
-                }
-            }
-        )
-    }
-
-    /**
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
-    fun onDestroy() {
+    internal fun onDestroy() {
         if (isDestroyed) return
         logD("onDestroy", LOG_CATEGORY)
+        systemLocaleWatcher.destroy()
         billingController.onDestroy()
         directionsSession.shutdown()
         directionsSession.unregisterAllSetNavigationRoutesFinishedObserver()
+        mapMatchingAPI.cancelAll()
         tripSession.stop()
         tripSession.unregisterAllLocationObservers()
         tripSession.unregisterAllRouteProgressObservers()
@@ -1277,13 +1189,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllStateObservers()
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
-        tripSession.unregisterAllRoadObjectsOnRouteObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
+        tripSessionLocationEngine.destroy()
         routeAlternativesController.unregisterAll()
         internalSetNavigationRoutes(emptyList(), SetRoutes.CleanUp)
-        resetTripSession()
+
+        // TODO can resetTripSession() be non-blocking call?
+        resetTripSessionBlocking()
+
         navigator.unregisterAllObservers()
+        navigator.shutdown()
+
         navigationVersionSwitchObservers.clear()
         arrivalProgressObserver.unregisterAllObservers()
 
@@ -1302,9 +1219,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             reachabilityObserverId = null
         }
         resetAdasisMessageObserver()
+        historyRecorders.forEach { it.unregisterAllHistoryRecordingEnabledObservers() }
 
         _navigator = null
-
         isDestroyed = true
         hasInstance = false
     }
@@ -1390,7 +1307,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * The SDK will push this event only once per route step.
      */
     fun registerBannerInstructionsObserver(
-        bannerInstructionsObserver: BannerInstructionsObserver
+        bannerInstructionsObserver: BannerInstructionsObserver,
     ) {
         tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
     }
@@ -1399,7 +1316,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Unregisters [BannerInstructionsObserver].
      */
     fun unregisterBannerInstructionsObserver(
-        bannerInstructionsObserver: BannerInstructionsObserver
+        bannerInstructionsObserver: BannerInstructionsObserver,
     ) {
         tripSession.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
     }
@@ -1488,64 +1405,20 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * Set [RerouteController] that's automatically invoked when user is off-route.
-     *
-     * By default [MapboxRerouteController] is used.
-     * Pass `null` to disable automatic reroute.
-     * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
-     */
-    @Deprecated(
-        "Custom rerouting logic is deprecated. Use setRerouteEnabled to enable/disable reroutes"
-    )
-    fun setRerouteController(rerouteController: RerouteController?) {
-        setRerouteController(
-            rerouteController?.let { LegacyRerouteControllerAdapter(it) }
-        )
-    }
-
-    /**
-     * Set [NavigationRerouteController] that's automatically invoked when user is off-route.
-     *
-     * By default [MapboxRerouteController] is used.
-     * Pass `null` to disable automatic reroute.
-     * A user will stay in `OFF_ROUTE` state until a new route is set or the user gets back to the route.
-     */
-    @JvmOverloads
-    @Deprecated(
-        "Custom rerouting logic is deprecated. Use setRerouteEnabled to enable/disable reroutes."
-    )
-    fun setRerouteController(
-        rerouteController: NavigationRerouteController? = defaultRerouteController
-    ) {
-        val oldController = this.rerouteController
-        this.rerouteController = if (rerouteController is InternalRerouteController) {
-            rerouteController
-        } else {
-            rerouteController?.let { InternalRerouteControllerAdapter(it) }
-        }
-        if (oldController?.state == RerouteState.FetchingRoute) {
-            oldController.interrupt()
-            reroute()
-        }
-    }
-
-    /**
      * Set [RerouteOptionsAdapter]. It allows modify [RouteOptions] of default implementation of
-     * [NavigationRerouteController] ([RerouteController]).
+     * [RerouteController].
      */
     fun setRerouteOptionsAdapter(
-        rerouteOptionsAdapter: RerouteOptionsAdapter?
+        rerouteOptionsAdapter: RerouteOptionsAdapter?,
     ) {
         (rerouteController as? MapboxRerouteController)
             ?.setRerouteOptionsAdapter(rerouteOptionsAdapter)
     }
 
     /**
-     * Get currently set [RerouteController].
-     *
-     * @see setRerouteController
+     * Get currently used [RerouteController]. Null if [isRerouteEnabled] is false.
      */
-    fun getRerouteController(): NavigationRerouteController? = rerouteController
+    fun getRerouteController(): RerouteController? = rerouteController
 
     /**
      * Enables/disables rerouting.
@@ -1555,19 +1428,57 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun setRerouteEnabled(enabled: Boolean) {
         if (enabled) {
             if (rerouteController == null) {
-                setRerouteController(defaultRerouteController)
+                rerouteController = defaultRerouteController
             }
         } else {
-            setRerouteController(null)
+            val oldController = rerouteController
+            if (oldController != null) {
+                val oldState = oldController.state
+                if (oldState == RerouteState.FetchingRoute) {
+                    oldController.interrupt()
+                }
+                rerouteController = null
+            }
         }
     }
 
     /**
      * Whether rerouting is enabled. True by default.
-     * It can be disabled by invoking [setRerouteEnabled] with false as a parameter,
-     * or via a deprecated [setRerouteController] with null controller.
+     * It can be disabled by invoking [setRerouteEnabled] with false as a parameter.
      */
     fun isRerouteEnabled(): Boolean = rerouteController != null
+
+    /**
+     * Triggers route recalculation for the case when user wants to
+     * change route options during active guidance.
+     *
+     * Route recalculation is an asynchronous operation. You can track reroute progress via
+     * [RerouteStateObserver], use [RerouteController.registerRerouteStateObserver] to set one.
+     * In case of successful route replan, you will receive new routes in [RoutesObserver] with
+     * [RoutesUpdatedResult.reason] equals to [RoutesExtra.ROUTES_UPDATE_REASON_REROUTE].
+     *
+     * Route options are supposed to be updated by [RerouteOptionsAdapter]. Implement
+     * your [RerouteOptionsAdapter] so that it updates all route options
+     * which users can modify during active guidance. Set your [RerouteOptionsAdapter]
+     * to [MapboxNavigation] using [setRerouteOptionsAdapter].
+     *
+     * Be aware that route replan could be interrupted by a new reroute, for example the one
+     * caused by deviation from the primary route. Because of that, it's important to update all
+     * changeable route options on every reroute in [RerouteOptionsAdapter] and be ready to receive
+     * [RerouteState.Interrupted] in [RerouteStateObserver].
+     *
+     * This method does nothing if rerouting is disabled. See [isRerouteEnabled] to check
+     * if rerouting is enabled and [setRerouteEnabled] to turn off/on rerouting.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun replanRoute() {
+        rerouteController?.rerouteOnParametersChange {
+            internalSetNavigationRoutes(
+                it.routes,
+                SetRoutes.Reroute(it.initialLegIndex),
+            )
+        }
+    }
 
     /**
      * Registers [ArrivalObserver]. Monitor arrival at stops and destinations. For more control
@@ -1598,31 +1509,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun navigateNextRouteLeg(callback: LegIndexUpdatedCallback) {
         arrivalProgressObserver.navigateNextRouteLeg(callback)
-    }
-
-    /**
-     * Registers an observer that gets notified whenever the route changes and provides the list
-     * of road objects on this new route, if there are any. The objects returned here are equal to
-     * the ones available in [RouteProgress.upcomingRoadObjects], but they capture the whole route
-     * (not only what's ahead of us).
-     *
-     * @see unregisterRoadObjectsOnRouteObserver
-     */
-    fun registerRoadObjectsOnRouteObserver(
-        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
-    ) {
-        tripSession.registerRoadObjectsOnRouteObserver(roadObjectsOnRouteObserver)
-    }
-
-    /**
-     * Unregisters the route objects observer.
-     *
-     * @see registerRoadObjectsOnRouteObserver
-     */
-    fun unregisterRoadObjectsOnRouteObserver(
-        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
-    ) {
-        tripSession.unregisterRoadObjectsOnRouteObserver(roadObjectsOnRouteObserver)
     }
 
     /**
@@ -1772,7 +1658,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         telemetryWrapper.postCustomEvent(
             payload = payload,
             customEventType = customEventType,
-            customEventVersion = customEventVersion
+            customEventVersion = customEventVersion,
         )
     }
 
@@ -1787,46 +1673,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper =
         telemetryWrapper.provideFeedbackMetadataWrapper() ?: throw java.lang.IllegalStateException(
-            "To get FeedbackMetadataWrapper Telemetry must be enabled"
+            "To get FeedbackMetadataWrapper Telemetry must be enabled",
         )
-
-    /**
-     * Start observing alternatives routes for a trip session via [RouteAlternativesObserver].
-     * Route alternatives are requested periodically based on [RouteAlternativesOptions].
-     *
-     * @param routeAlternativesObserver RouteAlternativesObserver
-     */
-    fun registerRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
-        routeAlternativesController.register(routeAlternativesObserver)
-    }
-
-    /**
-     * Stop observing the possibility of route alternatives.
-     *
-     * @param routeAlternativesObserver RouteAlternativesObserver
-     */
-    fun unregisterRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
-        routeAlternativesController.unregister(routeAlternativesObserver)
-    }
-
-    /**
-     * Start observing alternatives routes for a trip session via [NavigationRouteAlternativesObserver].
-     * Route alternatives are requested periodically based on [RouteAlternativesOptions].
-     */
-    fun registerRouteAlternativesObserver(
-        routeAlternativesObserver: NavigationRouteAlternativesObserver
-    ) {
-        routeAlternativesController.register(routeAlternativesObserver)
-    }
-
-    /**
-     * Stop observing the possibility of route alternatives.
-     */
-    fun unregisterRouteAlternativesObserver(
-        routeAlternativesObserver: NavigationRouteAlternativesObserver
-    ) {
-        routeAlternativesController.unregister(routeAlternativesObserver)
-    }
 
     /**
      * If the provided [navigationRoute] is an alternative route in the current session,
@@ -1845,6 +1693,29 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
+     * Replaces default alternative routes handling by a custom one.
+     * [setContinuousAlternativesEnabled] doesn't affect custom alternative routes handling.
+     * Use [restoreDefaultRouteAlternativesObserver] to restore default .
+     */
+    internal fun setRouteAlternativesObserver(
+        routeAlternativesObserver: NavigationRouteAlternativesObserver,
+    ) {
+        routeAlternativesController.setRouteAlternativesObserver(
+            routeAlternativesObserver,
+        )
+    }
+
+    /**
+     * Restores default route alternative observer which could be replaced via
+     * [setRouteAlternativesObserver].
+     * Restore doesn't re-enable continuous alternatives if they were disabled by
+     * [setContinuousAlternativesEnabled].
+     */
+    internal fun restoreDefaultRouteAlternativesObserver() {
+        routeAlternativesController.restoreDefaultRouteAlternativesObserver()
+    }
+
+    /**
      * If the provided [navigationRoutes] are alternative routes in the current session,
      * this function will return the associated with those route metadata.
      *
@@ -1857,9 +1728,26 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * This function doesn't return anything for primary route in the current session.
      */
     fun getAlternativeMetadataFor(
-        navigationRoutes: List<NavigationRoute>
+        navigationRoutes: List<NavigationRoute>,
     ): List<AlternativeRouteMetadata> {
         return navigationRoutes.mapNotNull { getAlternativeMetadataFor(it) }
+    }
+
+    /**
+     * Enables/disabled continuous alternatives automatic update. Enabled by default.
+     * When enabled, [MapboxNavigation] automatically:
+     * 1. Removes passed alternatives
+     * 2. Updates available alternatives
+     * 3. Switches to an online alternative when internet connection is restored
+     * @param enabled defines if continuous alternatives should be automatically updated.
+     */
+    fun setContinuousAlternativesEnabled(enabled: Boolean) {
+        val listener = if (enabled) {
+            ::updateRoutes
+        } else {
+            null
+        }
+        routeAlternativesController.setRouteUpdateSuggestionListener(listener)
     }
 
     /**
@@ -1894,7 +1782,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @param navigationSessionStateObserver NavigationSessionStateObserver
      */
     fun registerNavigationSessionStateObserver(
-        navigationSessionStateObserver: NavigationSessionStateObserver
+        navigationSessionStateObserver: NavigationSessionStateObserver,
     ) {
         navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
     }
@@ -1905,7 +1793,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @param navigationSessionStateObserver NavigationSessionStateObserver
      */
     fun unregisterNavigationSessionStateObserver(
-        navigationSessionStateObserver: NavigationSessionStateObserver
+        navigationSessionStateObserver: NavigationSessionStateObserver,
     ) {
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
     }
@@ -1917,7 +1805,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun registerDeveloperMetadataObserver(
-        developerMetadataObserver: DeveloperMetadataObserver
+        developerMetadataObserver: DeveloperMetadataObserver,
     ) {
         developerMetadataAggregator.registerObserver(developerMetadataObserver)
     }
@@ -1929,7 +1817,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun unregisterDeveloperMetadataObserver(
-        developerMetadataObserver: DeveloperMetadataObserver
+        developerMetadataObserver: DeveloperMetadataObserver,
     ) {
         developerMetadataAggregator.unregisterObserver(developerMetadataObserver)
     }
@@ -1970,7 +1858,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun onEVDataUpdated(data: Map<String, String>) {
         evDynamicDataHolder.updateData(data)
         routeAlternativesController.onEVDataUpdated(
-            HashMap(evDynamicDataHolder.currentData(emptyMap()))
+            HashMap(evDynamicDataHolder.currentData(emptyMap())),
         )
     }
 
@@ -1997,7 +1885,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun setAdasisMessageObserver(adasisConfig: AdasisConfig, observer: AdasisV2MessageObserver) {
         navigator.setAdasisMessageCallback(
             { observer.onMessage(it) },
-            adasisConfig.toNativeAdasisConfig()
+            adasisConfig.toNativeAdasisConfig(),
         )
     }
 
@@ -2014,9 +1902,21 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     internal fun unregisterOnRoutesSetStartedObserver(
-        observer: SetNavigationRoutesStartedObserver
+        observer: SetNavigationRoutesStartedObserver,
     ) {
         directionsSession.unregisterSetNavigationRoutesStartedObserver(observer)
+    }
+
+    internal fun registerHistoryRecordingEnabledObserver(
+        observer: HistoryRecordingEnabledObserver,
+    ) {
+        historyRecorders.forEach { it.registerHistoryRecordingEnabledObserver(observer) }
+    }
+
+    internal fun unregisterHistoryRecordingEnabledObserver(
+        observer: HistoryRecordingEnabledObserver,
+    ) {
+        historyRecorders.forEach { it.unregisterHistoryRecordingEnabledObserver(observer) }
     }
 
     private fun createHistoryRecorderHandles(config: ConfigHandle) =
@@ -2029,6 +1929,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun assignHistoryRecorders() {
         historyRecorder.historyRecorderHandle = historyRecorderHandles.general
         copilotHistoryRecorder.historyRecorderHandle = historyRecorderHandles.copilot
+        compositeRecorder.historyRecorderHandle = historyRecorderHandles.composite
     }
 
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
@@ -2036,7 +1937,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             val previousState = tripSession.getState()
             tripSession.start(
                 withTripService = withTripService,
-                withReplayEnabled = withReplayEnabled
+                withReplayEnabled = withReplayEnabled,
             )
             // It's possible that we are in a state when routes are set,
             // but session is not started. In this case, as soon as routes are set,
@@ -2063,7 +1964,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
         if (offRoute) {
-            reroute()
+            rerouteOnDeviation()
         } else {
             rerouteController?.interrupt()
         }
@@ -2082,7 +1983,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 logD(
                     "FallbackVersionsObserver.onFallbackVersionsFound called with an empty " +
                         "versions list, navigator can't be recreated.",
-                    LOG_CATEGORY
+                    LOG_CATEGORY,
                 )
             }
         }
@@ -2090,11 +1991,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         override fun onCanReturnToLatest(version: String) {
             recreateNavigatorInstance(
                 isFallback = false,
-                tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
+                tilesVersion = navigationOptions.routingTilesOptions.tilesVersion,
             )
             navigationVersionSwitchObservers.forEach { observer ->
                 observer.onSwitchToTargetVersion(
-                    navigationOptions.routingTilesOptions.tilesVersion.takeIf { it.isNotEmpty() }
+                    navigationOptions.routingTilesOptions.tilesVersion.takeIf { it.isNotEmpty() },
                 )
             }
         }
@@ -2104,7 +2005,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         logD(
             "recreateNavigatorInstance(). " +
                 "isFallback = $isFallback, tilesVersion = $tilesVersion",
-            LOG_CATEGORY
+            LOG_CATEGORY,
         )
 
         val config = NavigatorLoader.createConfig(
@@ -2114,25 +2015,20 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         historyRecorderHandles = createHistoryRecorderHandles(config)
 
         mainJobController.scope.launch {
-            // TODO we should also recreate router and share CacheHandle
-
             val cacheHandle = NavigatorLoader.createCacheHandle(
                 config,
                 createTilesConfig(isFallback, tilesVersion),
-                historyRecorderHandles.composite
+                historyRecorderHandles.composite,
             )
 
             navigator.recreate(
                 cacheHandle,
                 config,
                 historyRecorderHandles.composite,
-                navigationOptions.accessToken ?: "",
-                if (moduleRouter.isInternalImplementation()) {
-                    nativeRouter
-                } else {
-                    RouterInterfaceAdapter(moduleRouter, ::getNavigationRoutes)
-                },
             )
+
+            routerWrapper.resetRouter(navigator.getRouter())
+
             etcGateAPI.experimental = navigator.experimental
             assignHistoryRecorders()
 
@@ -2145,23 +2041,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     when (isFallback) {
                         true -> SetRoutesReason.FALLBACK_TO_OFFLINE
                         false -> SetRoutesReason.RESTORE_TO_ONLINE
-                    }
+                    },
                 )
             }
         }
     }
 
-    private fun reroute() {
-        rerouteController?.reroute { result: RerouteResult ->
+    private fun rerouteOnDeviation() {
+        rerouteController?.rerouteOnDeviation { result: RerouteResult ->
             internalSetNavigationRoutes(
                 result.routes,
-                SetRoutes.Reroute(result.initialLegIndex)
+                SetRoutes.Reroute(result.initialLegIndex),
             )
         }
-    }
-
-    private fun obtainUserAgent(): String {
-        return "$MAPBOX_NAVIGATION_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
     }
 
     private fun monitorNotificationActionButton(channel: ReceiveChannel<NotificationAction>) {
@@ -2171,13 +2063,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 when (notificationAction) {
                     NotificationAction.END_NAVIGATION -> tripSession.stop()
                 }
-            }
+            },
         )
     }
 
     private fun createTilesConfig(
         isFallback: Boolean,
-        tilesVersion: String
+        tilesVersion: String,
     ): TilesConfig {
         // TODO StrictMode may report a violation as we're creating a File from the Main
         val offlineFilesPath = RoutingTilesFiles(navigationOptions.applicationContext)
@@ -2197,11 +2089,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 navigationOptions.routingTilesOptions.tilesBaseUri.toString(),
                 dataset,
                 tilesVersion,
-                navigationOptions.accessToken ?: "",
                 isFallback,
                 navigationOptions.routingTilesOptions.tilesVersion,
-                navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion
-            )
+                navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion,
+            ),
         )
     }
 
@@ -2210,11 +2101,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             false -> {
                 block()
             }
+
             true -> {
                 throw IllegalStateException(
                     """
                         This instance of MapboxNavigation is destroyed.
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -2240,7 +2132,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 if (preview.routesList.size > 1) {
                     suspendCoroutine<Unit> { continuation ->
                         routesPreviewController.previewNavigationRoutes(
-                            listOf(preview.originalRoutesList[preview.primaryRouteIndex])
+                            listOf(preview.originalRoutesList[preview.primaryRouteIndex]),
                         ) {
                             continuation.resume(Unit)
                         }
@@ -2248,6 +2140,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 }
             }
         }
+    }
+
+    private fun updateRoutes(suggestion: UpdateRouteSuggestion) {
+        setNavigationRoutes(suggestion.newRoutes)
     }
 
     private companion object {

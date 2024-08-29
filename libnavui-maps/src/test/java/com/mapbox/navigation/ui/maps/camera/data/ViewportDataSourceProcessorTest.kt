@@ -36,39 +36,39 @@ class ViewportDataSourceProcessorTest {
     private val doubleAdapter = DoubleArrayTestAdapter()
 
     private val multiLegRoute = DirectionsRoute.fromJson(
-        FileUtils.loadJsonFixture("multileg_route.json")
+        FileUtils.loadJsonFixture("multileg_route.json"),
     )
 
     private val completeRoutePoints = decodeArrays3(
         Gson().fromJson(
             FileUtils.loadJsonFixture("multileg_route_all_points_per_step.json"),
-            List::class.java
+            List::class.java,
         ) as List<List<List<LinkedTreeMap<String, String>>>>,
-        pointAdapter
+        pointAdapter,
     )
 
     private val simplifiedCompleteRoutePoints = decodeArrays3(
         Gson().fromJson(
             FileUtils.loadJsonFixture("multileg_route_simplified_all_points_per_step.json"),
-            List::class.java
+            List::class.java,
         ) as List<List<List<LinkedTreeMap<String, String>>>>,
-        pointAdapter
+        pointAdapter,
     )
 
     private val postManeuverFramingPoints = decodeArrays3(
         Gson().fromJson(
             FileUtils.loadJsonFixture("multileg_route_post_maneuver_framing_geometry.json"),
-            List::class.java
+            List::class.java,
         ) as List<List<List<LinkedTreeMap<String, String>>>>,
-        pointAdapter
+        pointAdapter,
     )
 
     private val averageIntersectionDistancesOnRoute = decodeArrays2(
         Gson().fromJson(
             FileUtils.loadJsonFixture("multileg_route_average_intersection_distances.json"),
-            List::class.java
+            List::class.java,
         ) as List<List<Double>>,
-        doubleAdapter
+        doubleAdapter,
     )
 
     private val defaultFocalPoint = FollowingFrameOptions.FocalPoint(0.5, 1.0)
@@ -91,7 +91,7 @@ class ViewportDataSourceProcessorTest {
             distanceToCoalesceCompoundManeuvers = 150.0,
             distanceToFrameAfterManeuver = 100.0,
             route = multiLegRoute,
-            completeRoutePoints = completeRoutePoints
+            completeRoutePoints = completeRoutePoints,
         )
 
         assertArrays3(expected, actual, pointAdapter)
@@ -106,7 +106,7 @@ class ViewportDataSourceProcessorTest {
             distanceToCoalesceCompoundManeuvers = 150.0,
             distanceToFrameAfterManeuver = 100.0,
             route = multiLegRoute,
-            completeRoutePoints = completeRoutePoints
+            completeRoutePoints = completeRoutePoints,
         )
 
         assertArrays3(expected, actual, pointAdapter)
@@ -120,7 +120,7 @@ class ViewportDataSourceProcessorTest {
             enabled = false,
             minimumMetersForIntersectionDensity = 20.0,
             route = multiLegRoute,
-            completeRoutePoints = completeRoutePoints
+            completeRoutePoints = completeRoutePoints,
         )
 
         assertArrays2(expected, actual, doubleAdapter)
@@ -134,7 +134,7 @@ class ViewportDataSourceProcessorTest {
             enabled = true,
             minimumMetersForIntersectionDensity = 20.0,
             route = multiLegRoute,
-            completeRoutePoints = completeRoutePoints
+            completeRoutePoints = completeRoutePoints,
         )
 
         assertArrays2(expected, actual, doubleAdapter)
@@ -147,7 +147,7 @@ class ViewportDataSourceProcessorTest {
         val actual = simplifyCompleteRoutePoints(
             enabled = false,
             simplificationFactor = 25,
-            completeRoutePoints = completeRoutePoints
+            completeRoutePoints = completeRoutePoints,
         )
 
         assertArrays3(expected, actual, pointAdapter)
@@ -160,7 +160,7 @@ class ViewportDataSourceProcessorTest {
         val actual = simplifyCompleteRoutePoints(
             enabled = true,
             simplificationFactor = 25,
-            completeRoutePoints = completeRoutePoints
+            completeRoutePoints = completeRoutePoints,
         )
 
         assertArrays3(expected, actual, pointAdapter)
@@ -173,7 +173,7 @@ class ViewportDataSourceProcessorTest {
         val actual = simplifyCompleteRoutePoints(
             enabled = true,
             simplificationFactor = 0,
-            completeRoutePoints = completeRoutePoints
+            completeRoutePoints = completeRoutePoints,
         )
 
         assertArrays3(expected, actual, pointAdapter)
@@ -186,7 +186,7 @@ class ViewportDataSourceProcessorTest {
         val actual = simplifyCompleteRoutePoints(
             enabled = true,
             simplificationFactor = -2,
-            completeRoutePoints = completeRoutePoints
+            completeRoutePoints = completeRoutePoints,
         )
 
         assertArrays3(expected, actual, pointAdapter)
@@ -199,16 +199,16 @@ class ViewportDataSourceProcessorTest {
             val actual = getPitchFallbackFromRouteProgress(
                 routeProgressWith(
                     upcomingManeuverType = it,
-                    distanceToUpcomingManeuver = 150f
+                    distanceToUpcomingManeuver = 150f,
                 ),
-                FollowingFrameOptions()
+                FollowingFrameOptions(),
             )
 
             assertEquals(
                 "Camera pitch should not update to 0 for maneuver `$it`",
                 45.0,
                 actual,
-                0.0000001
+                0.0000001,
             )
         }
     }
@@ -220,14 +220,14 @@ class ViewportDataSourceProcessorTest {
         val actual = getPitchFallbackFromRouteProgress(
             routeProgressWith(
                 upcomingManeuverType = "fork",
-                distanceToUpcomingManeuver = 150f
+                distanceToUpcomingManeuver = 150f,
             ),
             FollowingFrameOptions().apply {
                 defaultPitch = 45.0
                 pitchNearManeuvers.enabled = false
                 pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
                 pitchNearManeuvers.excludedManeuvers = emptyList()
-            }
+            },
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -240,14 +240,14 @@ class ViewportDataSourceProcessorTest {
         val actual = getPitchFallbackFromRouteProgress(
             routeProgressWith(
                 upcomingManeuverType = "fork",
-                distanceToUpcomingManeuver = 200f
+                distanceToUpcomingManeuver = 200f,
             ),
             FollowingFrameOptions().apply {
                 defaultPitch = 45.0
                 pitchNearManeuvers.enabled = true
                 pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
                 pitchNearManeuvers.excludedManeuvers = emptyList()
-            }
+            },
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -260,14 +260,14 @@ class ViewportDataSourceProcessorTest {
         val actual = getPitchFallbackFromRouteProgress(
             routeProgressWith(
                 upcomingManeuverType = "fork",
-                distanceToUpcomingManeuver = 150f
+                distanceToUpcomingManeuver = 150f,
             ),
             FollowingFrameOptions().apply {
                 defaultPitch = 45.0
                 pitchNearManeuvers.enabled = true
                 pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
                 pitchNearManeuvers.excludedManeuvers = emptyList()
-            }
+            },
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -280,14 +280,14 @@ class ViewportDataSourceProcessorTest {
         val actual = getPitchFallbackFromRouteProgress(
             routeProgressWith(
                 upcomingManeuverType = "fork",
-                distanceToUpcomingManeuver = 150f
+                distanceToUpcomingManeuver = 150f,
             ),
             FollowingFrameOptions().apply {
                 defaultPitch = 45.0
                 pitchNearManeuvers.enabled = true
                 pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
                 pitchNearManeuvers.excludedManeuvers = listOf("fork")
-            }
+            },
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -305,14 +305,14 @@ class ViewportDataSourceProcessorTest {
             Point.fromLngLat(-77.153415, 38.771307),
             Point.fromLngLat(-77.153451, 38.771105),
             Point.fromLngLat(-77.153461, 38.770924),
-            Point.fromLngLat(-77.153468, 38.77091)
+            Point.fromLngLat(-77.153468, 38.77091),
         )
 
         val actual = getRemainingPointsOnRoute(
             simplifiedCompleteRoutePoints = completeRoutePoints,
             pointsToFrameOnCurrentStep = emptyList(),
             currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
+            currentStepProgress = stepProgress,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -332,17 +332,17 @@ class ViewportDataSourceProcessorTest {
             Point.fromLngLat(-77.153415, 38.771307),
             Point.fromLngLat(-77.153451, 38.771105),
             Point.fromLngLat(-77.153461, 38.770924),
-            Point.fromLngLat(-77.153468, 38.77091)
+            Point.fromLngLat(-77.153468, 38.77091),
         )
 
         val actual = getRemainingPointsOnRoute(
             simplifiedCompleteRoutePoints = completeRoutePoints,
             pointsToFrameOnCurrentStep = listOf(
                 Point.fromLngLat(-77.123, 38.77091),
-                Point.fromLngLat(-77.456, 38.77091)
+                Point.fromLngLat(-77.456, 38.77091),
             ),
             currentLegProgress = legProgress,
-            currentStepProgress = stepProgress
+            currentStepProgress = stepProgress,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -454,9 +454,9 @@ class ViewportDataSourceProcessorTest {
             currentMapCameraBearing = 30.0,
             pointsForBearing = listOf(
                 Point.fromLngLat(-77.456, 38.77091),
-                Point.fromLngLat(-77.123, 38.77091)
+                Point.fromLngLat(-77.123, 38.77091),
             ),
-            vehicleBearing = 95.0
+            vehicleBearing = 95.0,
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -472,9 +472,9 @@ class ViewportDataSourceProcessorTest {
             currentMapCameraBearing = 30.0,
             pointsForBearing = listOf(
                 Point.fromLngLat(-77.456, 38.77091),
-                Point.fromLngLat(-77.123, 38.77091)
+                Point.fromLngLat(-77.123, 38.77091),
             ),
-            vehicleBearing = 95.0
+            vehicleBearing = 95.0,
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -490,9 +490,9 @@ class ViewportDataSourceProcessorTest {
             currentMapCameraBearing = 120.0,
             pointsForBearing = listOf(
                 Point.fromLngLat(-77.456, 38.77091),
-                Point.fromLngLat(-77.123, 38.77091)
+                Point.fromLngLat(-77.123, 38.77091),
             ),
-            vehicleBearing = 110.0
+            vehicleBearing = 110.0,
         )
 
         assertEquals(expected, actual, 0.0000001)

@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 private const val LOG_CATEGORY = "NavigationRouteUtils"
@@ -50,6 +51,7 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
                 .getOrNull(routeLegIndex).orEmpty()
 
             routeLeg.closures()?.forEach { closure ->
+                this.ensureActive()
                 if (closure in unavoidableLegClosures) {
                     // skipping expected closures
                     return@forEach
@@ -68,7 +70,7 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
                 }
                 val silentWaypointsInClosureRange = silentWaypoints.inGeometryRange(
                     closure.geometryIndexStart(),
-                    closure.geometryIndexEnd()
+                    closure.geometryIndexEnd(),
                 )
                 if (silentWaypointsInClosureRange.isNotEmpty()) {
                     silentWaypointsInClosureRange.forEach {
@@ -82,7 +84,7 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
                                     "[${this@hasUnexpectedUpcomingClosures.navigationRoute.id}] " +
                                     "has closure at leg index $routeLegIndex, that overlaps " +
                                     "silent (via) waypoint",
-                                LOG_CATEGORY
+                                LOG_CATEGORY,
                             )
                             return@withContext true
                         }
@@ -106,20 +108,20 @@ suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
                         "Route with id " +
                             "[${this@hasUnexpectedUpcomingClosures.navigationRoute.id}] has " +
                             "closure at the start of the leg, leg index $routeLegIndex",
-                        LOG_CATEGORY
+                        LOG_CATEGORY,
                     )
                     return@withContext true
                 }
                 if (closure.geometryIndexEnd() == legLastGeometryIndex &&
                     snappingResultList.getOrNull(
-                            currentLegFirstWaypointIndex + silentWaypoints.size + 1
+                            currentLegFirstWaypointIndex + silentWaypoints.size + 1,
                         ) != true
                 ) {
                     logD(
                         "Route with id " +
                             "[${this@hasUnexpectedUpcomingClosures.navigationRoute.id}] has " +
                             "closure at the end of the leg, leg index $routeLegIndex",
-                        LOG_CATEGORY
+                        LOG_CATEGORY,
                     )
                     return@withContext true
                 }
@@ -143,12 +145,12 @@ private fun DirectionsRoute.getSnappingResultList(): List<Boolean> {
     val snappingResultList = mutableListOf<Boolean>()
     val maxIndex = maxOf(
         snappingIncludeClosuresList?.size ?: 0,
-        snappingIncludeStaticClosuresList?.size ?: 0
+        snappingIncludeStaticClosuresList?.size ?: 0,
     )
     for (index in 0 until maxIndex) {
         snappingResultList.add(
             snappingIncludeClosuresList?.getOrNull(index) ?: false ||
-                snappingIncludeStaticClosuresList?.getOrNull(index) ?: false
+                snappingIncludeStaticClosuresList?.getOrNull(index) ?: false,
         )
     }
     return snappingResultList
@@ -159,7 +161,7 @@ private fun DirectionsRoute.getSnappingResultList(): List<Boolean> {
  */
 private fun List<LegSilentWaypoints>.inGeometryRange(
     geometryIndexStart: Int,
-    geometryIndexEnd: Int
+    geometryIndexEnd: Int,
 ): List<Int> {
     return mapIndexedNotNull { index, legSilentWaypoints ->
         if (legSilentWaypoints.geometryIndex in geometryIndexStart..geometryIndexEnd) {
@@ -199,7 +201,7 @@ private fun DirectionsRoute.stepsGeometryToPoints(
 private fun RouteLeg.silentWaypoints(): List<LegSilentWaypoints> =
     viaWaypoints()?.map {
         LegSilentWaypoints(
-            it.geometryIndex()
+            it.geometryIndex(),
         )
     } ?: emptyList()
 

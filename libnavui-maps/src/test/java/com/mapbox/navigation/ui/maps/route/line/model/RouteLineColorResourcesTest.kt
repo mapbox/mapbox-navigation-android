@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import com.mapbox.navigation.testing.BuilderTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Test
 import kotlin.reflect.KClass
 
@@ -14,10 +13,6 @@ class RouteLineColorResourcesTest :
 
     override fun getFilledUpBuilder(): RouteLineColorResources.Builder {
         return RouteLineColorResources.Builder()
-            .lowCongestionRange(1..4)
-            .moderateCongestionRange(41..58)
-            .heavyCongestionRange(61..78)
-            .severeCongestionRange(81..99)
             .routeDefaultColor(4)
             .routeLowCongestionColor(5)
             .routeModerateCongestionColor(6)
@@ -222,10 +217,6 @@ class RouteLineColorResourcesTest :
     @Test
     fun toBuilder() {
         val routeLineColorResources = RouteLineColorResources.Builder()
-            .lowCongestionRange(1..4)
-            .moderateCongestionRange(5..9)
-            .heavyCongestionRange(10..14)
-            .severeCongestionRange(15..19)
             .routeDefaultColor(4)
             .routeLowCongestionColor(5)
             .routeModerateCongestionColor(6)
@@ -251,10 +242,6 @@ class RouteLineColorResourcesTest :
 
         val result = routeLineColorResources.toBuilder().build()
 
-        assertEquals(1..4, result.lowCongestionRange)
-        assertEquals(5..9, result.moderateCongestionRange)
-        assertEquals(10..14, result.heavyCongestionRange)
-        assertEquals(15..19, result.severeCongestionRange)
         assertEquals(1, result.routeLineTraveledColor)
         assertEquals(2, result.routeLineTraveledCasingColor)
         assertEquals(3, result.routeUnknownCongestionColor)
@@ -276,232 +263,5 @@ class RouteLineColorResourcesTest :
         assertEquals(19, result.routeClosureColor)
         assertEquals(20, result.alternativeRouteClosureColor)
         assertEquals(21, result.inActiveRouteLegsColor)
-    }
-
-    @Test
-    fun `verify congestion ranges if not specified`() {
-        val colorLineResources = RouteLineColorResources.Builder().build()
-
-        assertEquals(0..39, colorLineResources.lowCongestionRange)
-        assertEquals(40..59, colorLineResources.moderateCongestionRange)
-        assertEquals(60..79, colorLineResources.heavyCongestionRange)
-        assertEquals(80..100, colorLineResources.severeCongestionRange)
-    }
-
-    @Test
-    fun `when low congestion range first value is negative then throw exception`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(-10..39)
-                .build()
-        }
-        assertEquals(
-            "Ranges containing values less than 0 or greater than 100 are invalid.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when low congestion range last value is greater than 100 then throw exception`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(0..110)
-                .build()
-        }
-        assertEquals(
-            "Ranges containing values less than 0 or greater than 100 are invalid.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when moderate congestion range first value is negative then throw exception`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .moderateCongestionRange(-10..39)
-                .build()
-        }
-        assertEquals(
-            "Ranges containing values less than 0 or greater than 100 are invalid.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when moderate congestion range last value is greater than 100 then throw exception`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .moderateCongestionRange(80..110)
-                .build()
-        }
-        assertEquals(
-            "Ranges containing values less than 0 or greater than 100 are invalid.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when heavy congestion range first value is negative then throw exception`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .heavyCongestionRange(-10..39)
-                .build()
-        }
-        assertEquals(
-            "Ranges containing values less than 0 or greater than 100 are invalid.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when heavy congestion range last value is greater than 100 then throw exception`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .heavyCongestionRange(80..101)
-                .build()
-        }
-        assertEquals(
-            "Ranges containing values less than 0 or greater than 100 are invalid.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when severe congestion range first value is negative then throw exception`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .severeCongestionRange(-10..39)
-                .build()
-        }
-        assertEquals(
-            "Ranges containing values less than 0 or greater than 100 are invalid.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when severe congestion range last value is greater than 100 then throw exception`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(0..39)
-                .moderateCongestionRange(40..59)
-                .heavyCongestionRange(60..79)
-                .severeCongestionRange(80..105)
-                .build()
-        }
-        assertEquals(
-            "Ranges containing values less than 0 or greater than 100 are invalid.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when low and moderate overlap then throw exception`() {
-        val exception = assertThrows(IllegalStateException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(40..59)
-                .moderateCongestionRange(0..52)
-                .heavyCongestionRange(60..79)
-                .severeCongestionRange(80..100)
-                .build()
-        }
-        assertEquals(
-            "Traffic congestion ranges should not overlap each other.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when low and heavy overlap then throw exception`() {
-        val exception = assertThrows(IllegalStateException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(0..39)
-                .moderateCongestionRange(60..79)
-                .heavyCongestionRange(20..59)
-                .severeCongestionRange(80..100)
-                .build()
-        }
-        assertEquals(
-            "Traffic congestion ranges should not overlap each other.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when low and severe overlap then throw exception`() {
-        val exception = assertThrows(IllegalStateException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(0..39)
-                .moderateCongestionRange(60..79)
-                .heavyCongestionRange(80..100)
-                .severeCongestionRange(20..59)
-                .build()
-        }
-        assertEquals(
-            "Traffic congestion ranges should not overlap each other.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when moderate and heavy overlap then throw exception`() {
-        val exception = assertThrows(IllegalStateException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(0..39)
-                .moderateCongestionRange(40..59)
-                .heavyCongestionRange(55..79)
-                .severeCongestionRange(80..100)
-                .build()
-        }
-        assertEquals(
-            "Traffic congestion ranges should not overlap each other.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when moderate and severe overlap then throw exception`() {
-        val exception = assertThrows(IllegalStateException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(0..39)
-                .moderateCongestionRange(40..59)
-                .heavyCongestionRange(80..100)
-                .severeCongestionRange(55..79)
-                .build()
-        }
-        assertEquals(
-            "Traffic congestion ranges should not overlap each other.",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `when heavy and severe overlap then throw exception`() {
-        val exception = assertThrows(IllegalStateException::class.java) {
-            RouteLineColorResources
-                .Builder()
-                .lowCongestionRange(0..39)
-                .moderateCongestionRange(40..59)
-                .heavyCongestionRange(60..79)
-                .severeCongestionRange(75..100)
-                .build()
-        }
-        assertEquals(
-            "Traffic congestion ranges should not overlap each other.",
-            exception.message
-        )
     }
 }

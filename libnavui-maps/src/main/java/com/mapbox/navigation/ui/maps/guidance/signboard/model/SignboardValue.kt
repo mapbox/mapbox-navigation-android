@@ -7,5 +7,5 @@ import android.graphics.Bitmap
  * @property bitmap contains the signboard.
  */
 class SignboardValue internal constructor(
-    val bitmap: Bitmap
+    val bitmap: Bitmap,
 )

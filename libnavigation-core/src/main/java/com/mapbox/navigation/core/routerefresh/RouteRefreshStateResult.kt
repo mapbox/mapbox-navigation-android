@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 @ExperimentalPreviewMapboxNavigationAPI
 class RouteRefreshStateResult internal constructor(
     @RouteRefreshExtra.RouteRefreshState val state: String,
-    val message: String? = null
+    val message: String? = null,
 ) {
     /**
      * Regenerate whenever a change is made

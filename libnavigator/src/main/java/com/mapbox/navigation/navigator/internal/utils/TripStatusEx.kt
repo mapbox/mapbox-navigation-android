@@ -18,7 +18,7 @@ fun TripStatus.calculateRemainingWaypoints(): Int {
     return if (routeWaypoints != null) {
         val waypointsCount = routeWaypoints.size
         val nextWaypointIndex = normalizeNextWaypointIndex(
-            this.navigationStatus.nextWaypointIndex
+            this.navigationStatus.nextWaypointIndex,
         )
         return waypointsCount - nextWaypointIndex
     } else {
@@ -28,7 +28,7 @@ fun TripStatus.calculateRemainingWaypoints(): Int {
 
 fun TripStatus.getCurrentLegDestination(route: NavigationRoute): LegWaypoint? {
     val nextWaypointIndex = normalizeNextWaypointIndex(
-        this.navigationStatus.nextWaypointIndex
+        this.navigationStatus.nextWaypointIndex,
     )
     val waypoint = route.internalWaypoints().drop(nextWaypointIndex).firstOrNull {
         it.isLegWaypoint()
@@ -62,5 +62,5 @@ fun TripStatus.getCurrentLegDestination(route: NavigationRoute): LegWaypoint? {
  */
 private fun normalizeNextWaypointIndex(nextWaypointIndex: Int) = max(
     INDEX_OF_INITIAL_LEG_TARGET,
-    nextWaypointIndex
+    nextWaypointIndex,
 )

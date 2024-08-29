@@ -11,13 +11,13 @@ object TripNotificationStateFactory {
         bannerInstructions: BannerInstructions?,
         distanceRemaining: Double?,
         durationRemaining: Double?,
-        drivingSide: String?
+        drivingSide: String?,
     ): TripNotificationState {
         return TripNotificationState.TripNotificationData(
             bannerInstructions,
             distanceRemaining,
             durationRemaining,
-            drivingSide
+            drivingSide,
         )
     }
 
@@ -27,7 +27,7 @@ object TripNotificationStateFactory {
                 progress.bannerInstructions,
                 progress.currentLegProgress?.currentStepProgress?.distanceRemaining?.toDouble(),
                 progress.currentLegProgress?.durationRemaining,
-                progress.currentLegProgress?.currentStepProgress?.step?.drivingSide()
+                progress.currentLegProgress?.currentStepProgress?.step?.drivingSide(),
             )
         } ?: TripNotificationState.TripNotificationFreeState()
     }

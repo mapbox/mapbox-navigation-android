@@ -6,27 +6,16 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.route.deserializeNavigationRouteFrom
+import com.mapbox.navigation.base.internal.route.serialize
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
-import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.RoutesInvalidatedParams
 import com.mapbox.navigation.core.directions.session.RoutesExtra
-import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.DynamicResponseModifier
-import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
-import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPositionAndWaitForUpdate
-import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -36,15 +25,25 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesInvalidatedResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.DynamicResponseModifier
+import com.mapbox.navigation.testing.utils.http.FailByRequestMockRequestHandler
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.location.stayOnPositionAndWaitForUpdate
+import com.mapbox.navigation.testing.utils.readRawFileText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -94,8 +93,8 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh_with_ttl),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         val routeOptions = generateRouteOptions(coordinates)
         mapboxNavigation.startTripSession()
@@ -113,6 +112,39 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
+    fun refreshTtlExpiresOnFirstRefreshForAllRoutesAfterDeserialization() = sdkTest {
+        createMapboxNavigation(frequentRefreshOptions)
+        mockWebServerRule.requestHandlers.clear()
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_route_refresh_with_ttl),
+                coordinates,
+            ),
+        )
+        val routeOptions = generateRouteOptions(coordinates)
+        mapboxNavigation.startTripSession()
+        stayOnPosition(coordinates[0].latitude(), coordinates[0].longitude(), 190f) {
+            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            val deserializedRoutes = withContext(Dispatchers.Default) {
+                requestedRoutes.map { initialRoute ->
+                    deserializeNavigationRouteFrom(initialRoute.serialize()).onError {
+                        fail("Can't deserialize: ${it.message}")
+                    }.value!!
+                }
+            }
+
+            mapboxNavigation.setNavigationRoutes(deserializedRoutes)
+            val routesInvalidatedResult = withTimeout(4000) {
+                mapboxNavigation.routesInvalidatedResults().first()
+            }
+            assertEquals(deserializedRoutes, routesInvalidatedResult.invalidatedRoutes)
+        }
+    }
+
+    @Test
     fun refreshTtlExpiresOnDifferentRefreshesForDifferentRoutes() = sdkTest {
         createMapboxNavigation(frequentRefreshOptions)
         mockWebServerRule.requestHandlers.clear()
@@ -120,14 +152,14 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh_with_different_ttls),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh_with_different_ttls",
                 readRawFileText(context, R.raw.route_response_route_refreshed_with_different_ttls),
-            )
+            ),
         )
         val routeOptions = generateRouteOptions(coordinates)
         mapboxNavigation.startTripSession()
@@ -152,7 +184,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             }
             assertEquals(
                 listOf(requestedRoutes[1].id),
-                invalidatedResults[1].invalidatedRoutes.map { it.id }
+                invalidatedResults[1].invalidatedRoutes.map { it.id },
             )
         }
     }
@@ -162,18 +194,18 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
         createMapboxNavigation(frequentRefreshOptions)
         val alternativeCoordinates = listOf(
             Point.fromLngLat(-122.2750659, 37.8052036),
-            Point.fromLngLat(-122.2647245, 37.8138895)
+            Point.fromLngLat(-122.2647245, 37.8138895),
         )
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_alternatives_with_large_ttl),
-                alternativeCoordinates
-            )
+                alternativeCoordinates,
+            ),
         )
         val originalRoutes = mapboxNavigation.requestRoutes(
-            generateRouteOptions(alternativeCoordinates)
+            generateRouteOptions(alternativeCoordinates),
         ).getSuccessfulResultOrThrowException().routes
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(
@@ -181,32 +213,15 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
                 "driving-traffic",
                 readRawFileText(context, R.raw.alternative_route_response_for_route_with_large_ttl),
                 alternativeCoordinates,
-                relaxedExpectedCoordinates = true
-            )
+                relaxedExpectedCoordinates = true,
+            ),
         )
-        val alternativesObserver = object : NavigationRouteAlternativesObserver {
-            override fun onRouteAlternatives(
-                routeProgress: RouteProgress,
-                alternatives: List<NavigationRoute>,
-                routerOrigin: RouterOrigin
-            ) {
-                mapboxNavigation.setNavigationRoutes(
-                    listOf(mapboxNavigation.getNavigationRoutes().first()) + alternatives
-                )
-            }
-
-            override fun onRouteAlternativesError(error: RouteAlternativesError) {
-                // no-op
-            }
-        }
-
-        mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
         mapboxNavigation.startTripSession()
         stayOnPositionAndWaitForUpdate(
             mapboxNavigation,
             alternativeCoordinates[0].latitude(),
             alternativeCoordinates[0].longitude(),
-            0f
+            0f,
         ) { }
         mapboxNavigation.setNavigationRoutes(originalRoutes)
         mockLocationReplayerRule.playRoute(originalRoutes.first().directionsRoute)
@@ -223,7 +238,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
         }
         assertEquals(
             listOf("alternative_route_response_for_route_with_large_ttl#0"),
-            invalidatedResults.invalidatedRoutes.map { it.id }
+            invalidatedResults.invalidatedRoutes.map { it.id },
         )
     }
 
@@ -235,24 +250,24 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh_with_large_ttls),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         // refresh_ttl = 2
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh_with_large_ttls",
                 readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2),
-                routeIndex = 0
-            )
+                routeIndex = 0,
+            ),
         )
         // refresh_ttl = 5
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh_with_large_ttls",
                 readRawFileText(context, R.raw.route_response_route_refreshed_ttl_5),
-                routeIndex = 1
-            )
+                routeIndex = 1,
+            ),
         )
         val routeOptions = generateRouteOptions(coordinates)
         mapboxNavigation.startTripSession()
@@ -275,8 +290,8 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh_with_large_ttls",
                     readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2),
-                    routeIndex = 1
-                )
+                    routeIndex = 1,
+                ),
             )
 
             val actualRoutesInvalidatedResults = mapboxNavigation
@@ -288,7 +303,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
                     // after third refresh
                     listOf("route_response_route_refresh_with_large_ttls#1"),
                 ),
-                actualRoutesInvalidatedResults.map { it.invalidatedRoutes.map { it.id } }
+                actualRoutesInvalidatedResults.map { it.invalidatedRoutes.map { it.id } },
             )
         }
     }
@@ -301,8 +316,8 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh_with_large_ttls),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         val routeOptions = generateRouteOptions(coordinates)
         mapboxNavigation.startTripSession()
@@ -317,14 +332,14 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
                     "driving-traffic",
                     readRawFileText(context, R.raw.route_response_with_large_ttl_reroute),
                     null,
-                    relaxedExpectedCoordinates = true
-                )
+                    relaxedExpectedCoordinates = true,
+                ),
             )
             mockWebServerRule.requestHandlers.add(
                 MockDirectionsRefreshHandler(
                     "route_response_with_large_ttl_reroute",
                     readRawFileText(context, R.raw.route_response_with_large_ttl_reroute_refresh),
-                )
+                ),
             )
             mapboxNavigation.setNavigationRoutes(routes)
         }
@@ -332,10 +347,11 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             latitude = coordinates[0].latitude()
             longitude = coordinates[0].longitude() + 0.002
         }
-        stayOnPosition(offRouteLocation.latitude, offRouteLocation.longitude, 0f) {
+        stayOnPosition(offRouteLocation.latitude, offRouteLocation.longitude, 180f) {
             mapboxNavigation.routesUpdates()
                 .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
                 .first()
+            mapboxNavigation.setRerouteEnabled(false)
             mapboxNavigation.routesUpdates()
                 .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
                 .first()
@@ -345,7 +361,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             }
             assertEquals(
                 listOf("route_response_with_large_ttl_reroute#0"),
-                invalidatedResult.invalidatedRoutes.map { it.id }
+                invalidatedResult.invalidatedRoutes.map { it.id },
             )
         }
     }
@@ -358,14 +374,14 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh",
-                readRawFileText(context, R.raw.route_response_route_refresh_annotations)
-            )
+                readRawFileText(context, R.raw.route_response_route_refresh_annotations),
+            ),
         )
         stayOnPosition(coordinates[0].latitude(), coordinates[0].longitude(), 190f) {
             val routesInvalidatedResults = mutableListOf<RoutesInvalidatedParams>()
@@ -389,16 +405,16 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh_medium_ttl),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh_medium_ttl",
-                readRawFileText(context, R.raw.route_response_route_refresh_annotations)
+                readRawFileText(context, R.raw.route_response_route_refresh_annotations),
             ).also {
                 it.jsonResponseModifier = DynamicResponseModifier()
-            }
+            },
         )
         stayOnPosition(coordinates[0].latitude(), coordinates[0].longitude(), 190f) {
             val routesInvalidatedResults = mutableListOf<RoutesInvalidatedParams>()
@@ -417,7 +433,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             }
             assertEquals(
                 routes.map { it.id },
-                routesInvalidatedResult.invalidatedRoutes.map { it.id }
+                routesInvalidatedResult.invalidatedRoutes.map { it.id },
             )
         }
     }
@@ -430,16 +446,16 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh",
-                readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2)
+                readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2),
             ).also {
                 it.jsonResponseModifier = DynamicResponseModifier()
-            }
+            },
         )
         stayOnPosition(coordinates[0].latitude(), coordinates[0].longitude(), 190f) {
             val routesInvalidatedResults = mutableListOf<RoutesInvalidatedParams>()
@@ -458,7 +474,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             }
             assertEquals(
                 routes.map { it.id },
-                routesInvalidatedResult.invalidatedRoutes.map { it.id }
+                routesInvalidatedResult.invalidatedRoutes.map { it.id },
             )
         }
     }
@@ -471,14 +487,14 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh_with_large_ttls),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         val refreshHandler = FailByRequestMockRequestHandler(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh_with_large_ttls",
-                readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2)
-            )
+                readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2),
+            ),
         ).also {
             it.failResponse = true
             it.errorBody = """{"refresh_ttl": 0}"""
@@ -494,7 +510,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             delay(4000) // refresh interval
             assertEquals(
                 routes.map { it.id },
-                routesInvalidatedResults.first().invalidatedRoutes.map { it.id }
+                routesInvalidatedResults.first().invalidatedRoutes.map { it.id },
             )
         }
     }
@@ -507,14 +523,14 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh_medium_ttl),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         val refreshHandler = FailByRequestMockRequestHandler(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh_medium_ttl",
-                readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2)
-            )
+                readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2),
+            ),
         ).also {
             it.failResponse = true
         }
@@ -536,7 +552,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             }
             assertEquals(
                 routes.map { it.id },
-                routesInvalidatedResult.invalidatedRoutes.map { it.id }
+                routesInvalidatedResult.invalidatedRoutes.map { it.id },
             )
         }
     }
@@ -550,14 +566,14 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(context, R.raw.route_response_route_refresh_with_ttl),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         val refreshHandler = FailByRequestMockRequestHandler(
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh_with_large_ttls",
-                readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2)
-            )
+                readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2),
+            ),
         ).also {
             it.failResponse = true
         }
@@ -587,7 +603,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
 
             assertEquals(
                 routes.map { it.id },
-                routesInvalidatedResults.first().invalidatedRoutes.map { it.id }
+                routesInvalidatedResults.first().invalidatedRoutes.map { it.id },
             )
         }
     }
@@ -604,10 +620,9 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
     private fun createMapboxNavigation(routeRefreshOptions: RouteRefreshOptions) {
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(context)
-                .accessToken(getMapboxAccessTokenFromResources(context))
                 .routeRefreshOptions(routeRefreshOptions)
                 .navigatorPredictionMillis(0L)
-                .build()
+                .build(),
         )
     }
 }

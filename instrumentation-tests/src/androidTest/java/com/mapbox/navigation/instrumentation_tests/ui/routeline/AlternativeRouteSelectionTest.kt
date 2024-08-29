@@ -3,20 +3,22 @@ package com.mapbox.navigation.instrumentation_tests.ui.routeline
 import android.location.Location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -26,7 +28,7 @@ import org.junit.Test
 import java.util.concurrent.CountDownLatch
 
 class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
-    BasicNavigationViewActivity::class.java
+    BasicNavigationViewActivity::class.java,
 ) {
 
     @get:Rule
@@ -40,10 +42,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     private lateinit var routeLineView: MapboxRouteLineView
 
     override fun setupMockLocation(): Location {
-        val directionsResponse = RoutesProvider
-            .loadDirectionsResponse(context, R.raw.multiple_routes)
-        val origin = directionsResponse.waypoints()!!.map { it.location()!! }
-            .first()
+        val origin = RoutesProvider.multiple_routes(context).routeWaypoints.first()
         return mockLocationUpdatesRule.generateLocationUpdate {
             latitude = origin.latitude()
             longitude = origin.longitude()
@@ -53,17 +52,16 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     @Before
     fun setUp() {
         runOnMainSync {
-            mapboxNavigation = MapboxNavigation(
+            mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .build()
+                    .build(),
             )
         }
     }
 
     @After
     fun tearDown() {
-        mapboxNavigation.onDestroy()
+        MapboxNavigationProvider.destroy()
     }
 
     @Test
@@ -79,30 +77,29 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
 
         runOnMainSync {
             // Create routes where an alternative is set to the primary route position.
-            val updatedRoutes = routeLineApi.getRoutes().toMutableList()
+            val updatedRoutes = routeLineApi.getNavigationRoutes().toMutableList()
             val alternative = updatedRoutes[1]
             updatedRoutes[1] = updatedRoutes[0]
             updatedRoutes[0] = alternative
 
             // Update the route line api and MapboxNavigation with an alternative primary.
-            val updatedRouteLines = updatedRoutes.map { RouteLine(it, null) }
-            routeLineApi.setRoutes(updatedRouteLines) { result ->
+            routeLineApi.setNavigationRoutes(updatedRoutes) { result ->
                 assertTrue(result.isValue)
 
                 routeLineView.renderRouteDrawData(
                     activity.mapboxMap.getStyle()!!,
-                    result
+                    result,
                 )
-                assertEquals(alternative, routeLineApi.getRoutes()[0])
-                assertEquals(alternative, routeLineApi.getPrimaryRoute())
+                assertEquals(alternative, routeLineApi.getNavigationRoutes()[0])
+                assertEquals(alternative, routeLineApi.getPrimaryNavigationRoute())
                 routeLineRoutesIsSet.countDown()
             }
-            mapboxNavigation.setRoutes(updatedRoutes)
+            mapboxNavigation.setNavigationRoutes(updatedRoutes)
 
             // Observe route progress and verify the alternative is now the primary route.
             mapboxNavigation.registerRouteProgressObserver { routeProgress ->
                 // The route index has been changed, so only compare the geometry
-                assertEquals(alternative.geometry(), routeProgress.route.geometry())
+                assertEquals(alternative.directionsRoute.geometry(), routeProgress.route.geometry())
                 routeProgressCount.countDown()
             }
 
@@ -116,37 +113,43 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     }
 
     private fun setupRouteWithAlternatives() {
-        val directionsResponse = RoutesProvider
-            .loadDirectionsResponse(activity, R.raw.multiple_routes)
-        val route = directionsResponse.routes()[0]
-        runOnMainSync {
-            mapboxNavigation.setRoutes(directionsResponse.routes())
-            mockLocationReplayerRule.playRoute(route)
+        runBlocking(Dispatchers.Main) {
+            val routes = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                RoutesProvider.multiple_routes(context),
+            )
+            mapboxNavigation.setNavigationRoutes(
+                routes,
+            )
+            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
         }
     }
 
     private fun verifyRouteLineIsUpdatedWithAlternatives() {
         val countDownLatch = CountDownLatch(1)
         runOnMainSync {
-            routeLineView = MapboxRouteLineView(MapboxRouteLineOptions.Builder(activity).build())
-            routeLineApi = MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
+            routeLineView = MapboxRouteLineView(
+                MapboxRouteLineViewOptions.Builder(activity).build(),
+            )
+            routeLineApi = MapboxRouteLineApi(MapboxRouteLineApiOptions.Builder().build())
 
-            mapboxNavigation.registerRoutesObserver(object : RoutesObserver {
-                override fun onRoutesChanged(result: RoutesUpdatedResult) {
-                    mapboxNavigation.unregisterRoutesObserver(this)
+            mapboxNavigation.registerRoutesObserver(
+                object : RoutesObserver {
+                    override fun onRoutesChanged(result: RoutesUpdatedResult) {
+                        mapboxNavigation.unregisterRoutesObserver(this)
 
-                    val routeLines = result.routes.map { RouteLine(it, null) }
-                    routeLineApi.setRoutes(routeLines) { result ->
-                        routeLineView.renderRouteDrawData(
-                            activity.mapboxMap.getStyle()!!,
-                            result
-                        )
+                        routeLineApi.setNavigationRoutes(result.navigationRoutes) { setResult ->
+                            routeLineView.renderRouteDrawData(
+                                activity.mapboxMap.getStyle()!!,
+                                setResult,
+                            )
+                        }
+
+                        assertEquals(3, result.navigationRoutes.size)
+                        countDownLatch.countDown()
                     }
-
-                    assertEquals(3, result.routes.size)
-                    countDownLatch.countDown()
-                }
-            })
+                },
+            )
         }
         countDownLatch.await()
     }

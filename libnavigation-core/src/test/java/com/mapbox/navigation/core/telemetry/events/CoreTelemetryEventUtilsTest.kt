@@ -5,21 +5,22 @@ import com.mapbox.navigation.core.telemetry.events.EventsTestHelper.verifyTeleme
 import com.mapbox.navigation.core.testutil.EventsProvider
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class CoreTelemetryEventUtilsTest {
 
     @Test
-    fun `TelemetryLocation to value`() {
+    fun `filled TelemetryLocation to value`() {
         val telemetryLocation = TelemetryLocation(
             latitude = 1.1,
             longitude = 2.2,
-            speed = 3.3f,
-            bearing = 4.4f,
+            speed = 3.3,
+            bearing = 4.4,
             altitude = 5.5,
             timestamp = "timestamp_0",
-            horizontalAccuracy = 6.6f,
-            verticalAccuracy = 7.7f,
+            horizontalAccuracy = 6.6,
+            verticalAccuracy = 7.7,
         )
 
         val toValue = telemetryLocation.toValue()
@@ -30,6 +31,33 @@ class CoreTelemetryEventUtilsTest {
             assertEquals(3.3, content["speed"]!!.contents as Double, 0.001)
             assertEquals(4.4, content["course"]!!.contents as Double, 0.001)
             assertEquals(5.5, content["altitude"]!!.contents as Double, 0.001)
+            assertEquals("timestamp_0", content["timestamp"]!!.contents)
+            assertEquals(6.6, content["horizontalAccuracy"]!!.contents as Double, 0.001)
+            assertEquals(7.7, content["verticalAccuracy"]!!.contents as Double, 0.001)
+        }
+    }
+
+    @Test
+    fun `nullable TelemetryLocation to value`() {
+        val telemetryLocation = TelemetryLocation(
+            latitude = 1.1,
+            longitude = 2.2,
+            speed = null,
+            bearing = null,
+            altitude = null,
+            timestamp = "timestamp_0",
+            horizontalAccuracy = 6.6,
+            verticalAccuracy = 7.7,
+        )
+
+        val toValue = telemetryLocation.toValue()
+
+        (toValue.contents as HashMap<String, Value>).let { content ->
+            assertEquals(1.1, content["lat"]!!.contents as Double, 0.000001)
+            assertEquals(2.2, content["lng"]!!.contents as Double, 0.000001)
+            assertNull(content["speed"])
+            assertNull(content["course"])
+            assertNull(content["altitude"])
             assertEquals("timestamp_0", content["timestamp"]!!.contents)
             assertEquals(6.6, content["horizontalAccuracy"]!!.contents as Double, 0.001)
             assertEquals(7.7, content["verticalAccuracy"]!!.contents as Double, 0.001)
@@ -89,7 +117,7 @@ class CoreTelemetryEventUtilsTest {
 
         assertArrayEquals(
             strings,
-            (toValue.contents!! as List<Value>).map { it.contents as String }.toTypedArray()
+            (toValue.contents!! as List<Value>).map { it.contents as String }.toTypedArray(),
         )
     }
 

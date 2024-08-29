@@ -31,7 +31,7 @@ class Waypoint internal constructor(
         AnnotationTarget.PROPERTY,
         AnnotationTarget.VALUE_PARAMETER,
         AnnotationTarget.FUNCTION,
-        AnnotationTarget.TYPE
+        AnnotationTarget.TYPE,
     )
     @Retention(AnnotationRetention.BINARY)
     @IntDef(REGULAR, SILENT, EV_CHARGING_SERVER, EV_CHARGING_USER)
