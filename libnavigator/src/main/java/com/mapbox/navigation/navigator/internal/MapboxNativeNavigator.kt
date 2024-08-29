@@ -38,17 +38,6 @@ import com.mapbox.navigator.UpdateExternalSensorDataCallback
 interface MapboxNativeNavigator {
 
     /**
-     * Initialize the navigator with a device profile
-     */
-    fun create(
-        cacheHandle: CacheHandle,
-        config: ConfigHandle,
-        historyRecorderComposite: HistoryRecorderHandle?,
-        accessToken: String,
-        router: RouterInterface?,
-    ): MapboxNativeNavigator
-
-    /**
      * Reinitialize the navigator with a device profile
      */
     fun recreate(
@@ -205,13 +194,13 @@ interface MapboxNativeNavigator {
 
     val routeAlternativesController: RouteAlternativesControllerInterface
 
-    val graphAccessor: GraphAccessor?
+    val graphAccessor: GraphAccessor
 
-    val roadObjectsStore: RoadObjectsStore?
+    val roadObjectsStore: RoadObjectsStore
 
     val cache: CacheHandle
 
-    val roadObjectMatcher: RoadObjectMatcher?
+    val roadObjectMatcher: RoadObjectMatcher
 
     val experimental: Experimental
 }

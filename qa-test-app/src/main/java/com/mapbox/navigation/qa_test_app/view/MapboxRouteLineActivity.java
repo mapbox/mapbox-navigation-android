@@ -47,6 +47,7 @@ import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListen
 import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions;
+import com.mapbox.navigation.base.options.PredictiveCacheOptions;
 import com.mapbox.navigation.base.options.RoutingTilesOptions;
 import com.mapbox.navigation.base.route.RouterCallback;
 import com.mapbox.navigation.base.route.RouterFailure;
@@ -184,9 +185,14 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     routeArrowView = new MapboxRouteArrowView(routeArrowOptions);
 
     predictiveCacheController = new PredictiveCacheController(
-        new PredictiveCacheLocationOptions.Builder().build(),
-        message -> Log.e(TAG, "predictive cache error: " + message)
+      mapboxNavigation,
+      new PredictiveCacheOptions.Builder().build()
     );
+
+    predictiveCacheController.setPredictiveCacheControllerErrorHandler(
+      message -> Log.e(TAG, "predictive cache error: " + message)
+    );
+
     predictiveCacheController.createStyleMapControllers(mapboxMap);
   }
 

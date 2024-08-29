@@ -230,15 +230,6 @@ internal open class MapboxNavigationBaseTest {
         } returns routesPreviewController
         every { NavigationComponentProvider.createRoutesCacheClearer() } returns routesCacheClearer
 
-        every {
-            navigator.create(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
-        } returns navigator
         mockkObject(TelemetryUtilsDelegate)
         every { TelemetryUtilsDelegate.getEventsCollectionState() } returns true
     }

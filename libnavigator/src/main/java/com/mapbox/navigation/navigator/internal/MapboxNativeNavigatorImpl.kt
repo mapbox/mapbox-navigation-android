@@ -56,17 +56,18 @@ import kotlin.coroutines.resume
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
  */
-object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
+class MapboxNativeNavigatorImpl(
+    cacheHandle: CacheHandle,
+    config: ConfigHandle,
+    historyRecorderComposite: HistoryRecorderHandle?,
+    accessToken: String,
+    router: RouterInterface?,
+) : MapboxNativeNavigator {
 
-    private const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
-
-    // TODO: What should be the default value? Should we expose it publicly?
-    private const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2
-
-    private var navigator: Navigator? = null
-    override var graphAccessor: GraphAccessor? = null
-    override var roadObjectMatcher: RoadObjectMatcher? = null
-    override var roadObjectsStore: RoadObjectsStore? = null
+    private lateinit var navigator: Navigator
+    override lateinit var graphAccessor: GraphAccessor
+    override lateinit var roadObjectMatcher: RoadObjectMatcher
+    override lateinit var roadObjectsStore: RoadObjectsStore
     override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
     override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
@@ -74,21 +75,21 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
     private lateinit var accessToken: String
 
-    // Route following
+    init {
+        init(cacheHandle, config, historyRecorderComposite, accessToken, router)
+    }
 
     /**
      * Create or reset resources. This must be called before calling any
      * functions within [MapboxNativeNavigatorImpl]
      */
-    override fun create(
+    private fun init(
         cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
         accessToken: String,
         router: RouterInterface?,
-    ): MapboxNativeNavigator {
-        navigator?.shutdown()
-
+    ) {
         val nativeComponents = NavigatorLoader.createNavigator(
             cacheHandle,
             config,
@@ -103,7 +104,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         cache = nativeComponents.cache
         routeAlternativesController = nativeComponents.routeAlternativesController
         this.accessToken = accessToken
-        return this
     }
 
     /**
@@ -116,26 +116,29 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         accessToken: String,
         router: RouterInterface
     ) {
-        val storeNavSessionState = navigator!!.storeNavigationSession()
-        create(cacheHandle, config, historyRecorderComposite, accessToken, router)
-        navigator!!.restoreNavigationSession(storeNavSessionState)
+        val storeNavSessionState = navigator.storeNavigationSession()
+
+        navigator.shutdown()
+
+        init(cacheHandle, config, historyRecorderComposite, accessToken, router)
+        navigator.restoreNavigationSession(storeNavSessionState)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
     }
 
     override suspend fun resetRideSession() = suspendCancellableCoroutine<Unit> {
-        navigator!!.reset {
+        navigator.reset {
             it.resume(Unit)
         }
     }
 
     override fun startNavigationSession() {
-        navigator!!.startNavigationSession()
+        navigator.startNavigationSession()
     }
 
     override fun stopNavigationSession() {
-        navigator!!.stopNavigationSession()
+        navigator.stopNavigationSession()
     }
 
     /**
@@ -147,16 +150,16 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun updateLocation(rawLocation: FixLocation): Boolean =
         suspendCancellableCoroutine { continuation ->
-            navigator!!.updateLocation(rawLocation) {
+            navigator.updateLocation(rawLocation) {
                 continuation.resume(it)
             }
         }
 
     override fun addNavigatorObserver(navigatorObserver: NavigatorObserver) =
-        navigator!!.addObserver(navigatorObserver)
+        navigator.addObserver(navigatorObserver)
 
     override fun removeNavigatorObserver(navigatorObserver: NavigatorObserver) =
-        navigator!!.removeObserver(navigatorObserver)
+        navigator.removeObserver(navigatorObserver)
 
     // Routing
 
@@ -166,7 +169,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         alternatives: List<NavigationRoute>,
         reason: SetRoutesReason,
     ): Expected<String, SetRoutesResult> = suspendCancellableCoroutine { continuation ->
-        navigator!!.setRoutes(
+        navigator.setRoutes(
             primaryRoute?.let { route ->
                 SetRoutesParams(
                     route.nativeRoute(),
@@ -190,7 +193,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override suspend fun setAlternativeRoutes(
         routes: List<NavigationRoute>
     ): List<RouteAlternative> = suspendCancellableCoroutine { continuation ->
-        navigator!!.setAlternativeRoutes(
+        navigator.setAlternativeRoutes(
             routes.map { it.nativeRoute() }
         ) { result ->
             result.onError {
@@ -279,7 +282,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                     "with generated refresh response: $refreshResponseJson",
                 LOG_CATEGORY
             )
-            navigator!!.refreshRoute(
+            navigator.refreshRoute(
                 refreshResponseJson,
                 route.nativeRoute().routeId
             ) { callback(continuation, it) }
@@ -297,7 +300,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun updateLegIndex(legIndex: Int): Boolean =
         suspendCancellableCoroutine { continuation ->
-            navigator!!.changeLeg(legIndex) {
+            navigator.changeLeg(legIndex) {
                 continuation.resume(it)
             }
         }
@@ -310,21 +313,21 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param eHorizonObserver
      */
     override fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?) {
-        navigator!!.setElectronicHorizonObserver(eHorizonObserver)
+        navigator.setElectronicHorizonObserver(eHorizonObserver)
     }
 
     override fun addRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver) {
-        roadObjectsStore?.addObserver(roadObjectsStoreObserver)
+        roadObjectsStore.addObserver(roadObjectsStoreObserver)
     }
 
     override fun removeRoadObjectsStoreObserver(
         roadObjectsStoreObserver: RoadObjectsStoreObserver
     ) {
-        roadObjectsStore?.removeObserver(roadObjectsStoreObserver)
+        roadObjectsStore.removeObserver(roadObjectsStoreObserver)
     }
 
     override fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?) {
-        navigator!!.setFallbackVersionsObserver(fallbackVersionsObserver)
+        navigator.setFallbackVersionsObserver(fallbackVersionsObserver)
     }
 
     override fun setNativeNavigatorRecreationObserver(
@@ -334,9 +337,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     }
 
     override fun unregisterAllObservers() {
-        navigator!!.setElectronicHorizonObserver(null)
-        navigator!!.setFallbackVersionsObserver(null)
-        roadObjectsStore?.removeAllCustomRoadObjects()
+        navigator.setElectronicHorizonObserver(null)
+        navigator.setFallbackVersionsObserver(null)
+        roadObjectsStore.removeAllCustomRoadObjects()
         nativeNavigatorRecreationObservers.clear()
     }
 
@@ -359,7 +362,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         tileVariant: String,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController =
-        navigator!!.createPredictiveCacheController(
+        navigator.createPredictiveCacheController(
             tileStore,
             createDefaultMapsPredictiveCacheControllerOptions(tileVariant),
             predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
@@ -379,7 +382,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         tilesetDescriptor: TilesetDescriptor,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController =
-        navigator!!.createPredictiveCacheController(
+        navigator.createPredictiveCacheController(
             tileStore,
             listOf(tilesetDescriptor),
             predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
@@ -396,7 +399,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun createNavigationPredictiveCacheController(
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController =
-        navigator!!.createPredictiveCacheController(
+        navigator.createPredictiveCacheController(
             predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
         )
 
@@ -420,17 +423,24 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         data: SensorData,
         callback: UpdateExternalSensorDataCallback,
     ) {
-        navigator!!.updateExternalSensorData(data, callback)
+        navigator.updateExternalSensorData(data, callback)
     }
 
     override fun setAdasisMessageCallback(
         callback: ADASISv2MessageCallback,
         adasisConfig: AdasisConfig,
     ) {
-        navigator!!.setAdasisMessageCallback(callback, adasisConfig)
+        navigator.setAdasisMessageCallback(callback, adasisConfig)
     }
 
     override fun resetAdasisMessageCallback() {
-        navigator!!.resetAdasisMessageCallback()
+        navigator.resetAdasisMessageCallback()
+    }
+
+    private companion object {
+        const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
+
+        // TODO: What should be the default value? Should we expose it publicly?
+        const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2
     }
 }
