@@ -6,6 +6,24 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.20.2 - 29 August, 2024
+### Changelog
+[Changes between v2.20.1 and v2.20.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.20.1...v2.20.2)
+
+#### Features
+- The `PredictiveCacheController(PredictiveCacheOptions)` constructor is now deprecated. Use `PredictiveCacheController(MapboxNavigation, PredictiveCacheOptions)` instead. [#7856](https://github.com/mapbox/mapbox-navigation-android/pull/7856)
+
+#### Bug fixes and improvements
+- Fixed an issue where native memory was not being properly released after the `MapboxNavigation` object was destroyed. [#7856](https://github.com/mapbox/mapbox-navigation-android/pull/7856)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.18.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.18.3))
+- Mapbox Navigation Native `v206.0.0`
+- Mapbox Core Common `v23.10.1`
+- Mapbox Java `v7.1.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.1.0))
+
+
 ## Mapbox Navigation SDK 2.20.1 - 22 July, 2024
 ### Changelog
 [Changes between v2.20.0 and v2.20.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.20.0...v2.20.1)
