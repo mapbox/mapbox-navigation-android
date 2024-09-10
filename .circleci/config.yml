@@ -25,6 +25,7 @@ executors:
       - image: mbgl/android-ndk-r22:latest
     working_directory: ~/code
     environment:
+      LTS_V2_BRANCH_NAME: lts/v2
       MBX_CI_DOMAIN: o619qyc20d.execute-api.us-east-1.amazonaws.com
       FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
       ALLOW_SNAPSHOT_REPOSITORY: << pipeline.parameters.mapbox_navigation_native_upstream >>
@@ -43,8 +44,8 @@ workflows:
           filters:
             branches:
               ignore:
-                - main
-                - /release-v.*/
+                - $LTS_V2_BRANCH_NAME
+                - /release-v2.*/
       - release-snapshot:
           requires:
             - release-snapshot-start
@@ -52,18 +53,18 @@ workflows:
           filters:
             branches:
               only:
-                - main
-                - /release-v.*/
+                - $LTS_V2_BRANCH_NAME
+                - /release-v2.*/
       - release:
           filters:
             tags:
-              only: /v.*/
+              only: /v2.*/
             branches:
               ignore: /.*/
       - release-androidauto:
           filters:
             tags:
-              only: /androidauto-v.*/
+              only: /androidauto-v([0-2]).*/
             branches:
               ignore: /.*/
       - publish-documentation:
@@ -71,7 +72,7 @@ workflows:
             - release
           filters:
             tags:
-              only: /^v.*/
+              only: /^v2.*/
             branches:
               ignore: /.*/
   daily-billing-tests:
@@ -84,7 +85,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - $LTS_V2_BRANCH_NAME
   default:
     jobs:
       - assemble
@@ -95,7 +96,7 @@ workflows:
       - changelog-verification:
           filters:
             branches:
-              ignore: /^(main|release-.*)/
+              ignore: /^($LTS_V2_BRANCH_NAME|release-v2.*)/
       - prepare-static-analysis
       - verify-codestyle:
           requires:
@@ -442,7 +443,7 @@ commands:
       - run:
           name: Run Navigation Core SDK Unit Tests and generate Jacoco test report
           command: |
-            if [[ "$CIRCLE_BRANCH" == "main" ]]; then
+            if [[ "$CIRCLE_BRANCH" == "$LTS_V2_BRANCH_NAME" ]]; then
               echo "Run all core unit tests"
               make core-unit-tests-jacoco
             else
@@ -469,7 +470,7 @@ commands:
       - run:
           name: Run Navigation UI SDK Unit Tests and generate Jacoco test report
           command: |
-            if [[ "$CIRCLE_BRANCH" == "main" ]]; then
+            if [[ "$CIRCLE_BRANCH" == "$LTS_V2_BRANCH_NAME" ]]; then
               echo "Run all ui unit tests"
               make ui-unit-tests-jacoco
             else
