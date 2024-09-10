@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import android.location.Location
 import android.location.LocationManager
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -51,10 +51,11 @@ class NavigationCameraComponentTest {
 
     @Test
     fun `should observe location and update viewport data source`() = runBlockingTest {
-        val location = Location(LocationManager.PASSIVE_PROVIDER).apply {
-            latitude = 1.0
-            longitude = 2.0
-        }
+        val location = Location.Builder()
+            .source(LocationManager.PASSIVE_PROVIDER)
+            .latitude(1.0)
+            .longitude(2.0)
+            .build()
         val locationResult = mockk<LocationMatcherResult> {
             every { enhancedLocation } returns location
         }
@@ -70,7 +71,7 @@ class NavigationCameraComponentTest {
 
     private fun given(
         routeProgress: RouteProgress? = null,
-        locationResult: LocationMatcherResult? = null
+        locationResult: LocationMatcherResult? = null,
     ) {
         if (routeProgress != null) {
             val progressObserver = slot<RouteProgressObserver>()

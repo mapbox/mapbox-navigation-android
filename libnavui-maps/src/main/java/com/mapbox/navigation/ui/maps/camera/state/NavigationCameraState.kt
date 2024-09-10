@@ -51,5 +51,5 @@ enum class NavigationCameraState {
      * When in this state, each update to the [ViewportDataSource]
      * will automatically trigger another transition.
      */
-    OVERVIEW
+    OVERVIEW,
 }

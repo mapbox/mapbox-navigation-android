@@ -24,7 +24,7 @@ class CountryBorderCrossing internal constructor(
     length,
     provider,
     isUrban,
-    nativeRoadObject
+    nativeRoadObject,
 ) {
 
     /**

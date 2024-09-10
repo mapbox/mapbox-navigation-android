@@ -115,12 +115,12 @@ class BannerInstructionEventTest {
 
         assertEquals(
             BannerInstructionEvent.LatestInstructionWrapper(0, anyBannerInstructions),
-            bannerInstructionEvent.latestInstructionWrapper
+            bannerInstructionEvent.latestInstructionWrapper,
         )
         assertEquals(
             anyBannerInstructions,
-            bannerInstructionEvent.latestBannerInstructions
+            bannerInstructionEvent.latestBannerInstructions,
         )
-        assertEquals(0, bannerInstructionEvent.latestInstructionIndex,)
+        assertEquals(0, bannerInstructionEvent.latestInstructionIndex)
     }
 }

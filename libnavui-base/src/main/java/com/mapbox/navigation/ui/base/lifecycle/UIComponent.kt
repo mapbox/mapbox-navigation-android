@@ -47,6 +47,6 @@ open class UIComponent : MapboxNavigationObserver {
         context: CoroutineContext = EmptyCoroutineContext,
         crossinline action: suspend (value: T) -> Unit,
     ) {
-        coroutineScope.launch(context) { collect(action) }
+        coroutineScope.launch(context) { collect { action(it) } }
     }
 }

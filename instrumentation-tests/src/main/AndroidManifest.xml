@@ -24,10 +24,7 @@
         <activity android:name=".activity.EmptyTestActivity" />
         <activity android:name=".activity.BasicNavigationViewActivity" />
         <activity android:name=".activity.NavigationViewTestActivity" />
-        <activity
-            android:name=".activity.NavigationViewLifecycleTestActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
-            />
+        <activity android:name=".activity.NavigationStateVisualizationActivity"/>
     </application>
 
 </manifest>

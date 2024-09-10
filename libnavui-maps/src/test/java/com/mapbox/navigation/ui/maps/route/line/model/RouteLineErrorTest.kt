@@ -10,7 +10,7 @@ class RouteLineErrorTest {
     fun toMutableValue() {
         val original = RouteLineError(
             "foobar",
-            RuntimeException()
+            RuntimeException(),
         )
 
         val result = original.toMutableValue()
@@ -23,7 +23,7 @@ class RouteLineErrorTest {
     fun toImmutableValue() {
         val original = RouteLineError(
             "foobar",
-            RuntimeException()
+            RuntimeException(),
         )
         val replacementMessage = "doodle"
         val replacementThrowable = RuntimeException()

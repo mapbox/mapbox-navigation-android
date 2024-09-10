@@ -1,53 +1,41 @@
 package com.mapbox.navigation.core
 
 import androidx.annotation.UiThread
-import androidx.annotation.VisibleForTesting
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.core.telemetry.TelemetryWrapper
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Singleton responsible for ensuring there is only one MapboxNavigation instance.
+ * Singleton responsible for ensuring there is only one [MapboxNavigation] instance.
+ * Alternative way of obtaining the instance of the [MapboxNavigation] is [MapboxNavigationApp].
+ *
+ * Note that [MapboxNavigationProvider] and [MapboxNavigationApp] can't be used together
+ * at the same time.
  */
 @UiThread
-@Deprecated(
-    message = "Use MapboxNavigationApp to attach MapboxNavigation to lifecycles."
-)
 object MapboxNavigationProvider {
+
     @Volatile
     private var mapboxNavigation: MapboxNavigation? = null
 
+    private val observers = CopyOnWriteArrayList<MapboxNavigationObserver>()
+
     /**
-     * Create MapboxNavigation with provided options.
-     * Should be called before [retrieve]
+     * Create MapboxNavigation with provided options. Previously created instance
+     * of the [MapboxNavigation] will be destroyed. Should be called before [retrieve].
      *
-     * @param navigationOptions
+     * @param navigationOptions options used to customize various features of the SDK.
+     * @see [MapboxNavigationApp.setup]
      */
     @JvmStatic
-    @Deprecated(
-        message = "Set the navigation options with MapboxNavigationApp.setup"
-    )
     fun create(navigationOptions: NavigationOptions): MapboxNavigation {
         mapboxNavigation?.onDestroy()
         mapboxNavigation = MapboxNavigation(
-            navigationOptions
-        )
-
-        return mapboxNavigation!!
-    }
-
-    @VisibleForTesting
-    internal fun create(
-        navigationOptions: NavigationOptions,
-        threadController: ThreadController = ThreadController(),
-        telemetryWrapper: TelemetryWrapper = TelemetryWrapper()
-    ): MapboxNavigation {
-        mapboxNavigation?.onDestroy()
-        mapboxNavigation = MapboxNavigation(
             navigationOptions,
-            threadController,
-            telemetryWrapper,
         )
+
+        observers.forEach { it.onAttached(mapboxNavigation!!) }
 
         return mapboxNavigation!!
     }
@@ -56,12 +44,9 @@ object MapboxNavigationProvider {
      * Retrieve MapboxNavigation instance. Should be called after [create].
      *
      * @see [isCreated]
+     * @see [MapboxNavigationApp.current]
      */
     @JvmStatic
-    @Deprecated(
-        message = "Get the MapboxNavigation instance through MapboxNavigationObserver or" +
-            " MapboxNavigationApp.current"
-    )
     fun retrieve(): MapboxNavigation {
         if (!isCreated()) {
             throw RuntimeException("Need to create MapboxNavigation before using it.")
@@ -74,11 +59,11 @@ object MapboxNavigationProvider {
      * Destroy MapboxNavigation when your process/activity exits.
      */
     @JvmStatic
-    @Deprecated(
-        message = "MapboxNavigationApp will determine when to destroy MapboxNavigation instances"
-    )
     fun destroy() {
-        mapboxNavigation?.onDestroy()
+        mapboxNavigation?.let { navigation ->
+            navigation.onDestroy()
+            observers.forEach { it.onDetached(navigation) }
+        }
         mapboxNavigation = null
     }
 
@@ -88,5 +73,15 @@ object MapboxNavigationProvider {
     @JvmStatic
     fun isCreated(): Boolean {
         return mapboxNavigation?.isDestroyed == false
+    }
+
+    internal fun registerObserver(observer: MapboxNavigationObserver) {
+        observers.add(observer)
+        mapboxNavigation?.let { observer.onAttached(it) }
+    }
+
+    internal fun unregisterObserver(observer: MapboxNavigationObserver) {
+        observers.remove(observer)
+        mapboxNavigation?.let { observer.onDetached(it) }
     }
 }

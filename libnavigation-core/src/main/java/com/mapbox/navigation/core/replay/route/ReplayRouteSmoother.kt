@@ -25,7 +25,7 @@ internal class ReplayRouteSmoother {
      */
     fun smoothRoute(
         distinctPoints: List<Point>,
-        thresholdMeters: Double
+        thresholdMeters: Double,
     ): List<ReplayRouteLocation> {
         val smoothIndices = smoothRouteIndices(distinctPoints, thresholdMeters)
         val smoothLocations = smoothIndices.map { ReplayRouteLocation(it, distinctPoints[it]) }
@@ -41,7 +41,7 @@ internal class ReplayRouteSmoother {
     private fun smoothRouteBearingDistance(
         distinctPoints: List<Point>,
         smoothLocations: List<ReplayRouteLocation>,
-        startBearing: Double
+        startBearing: Double,
     ) {
         var bearing = startBearing
         for (i in 1 until smoothLocations.lastIndex) {
@@ -59,7 +59,7 @@ internal class ReplayRouteSmoother {
     private fun smoothSegmentBearingDistance(
         distinctPoints: List<Point>,
         segmentStart: ReplayRouteLocation,
-        segmentEnd: ReplayRouteLocation
+        segmentEnd: ReplayRouteLocation,
     ): Double {
         val segmentRoute =
             segmentRoute(distinctPoints, segmentStart.routeIndex!!, segmentEnd.routeIndex!!)
@@ -158,7 +158,7 @@ internal class ReplayRouteSmoother {
         return doubleArrayOf(
             EARTH_RADIUS * cos(latitudeRadians) * cos(longitudeRadians),
             EARTH_RADIUS * cos(latitudeRadians) * sin(longitudeRadians),
-            EARTH_RADIUS * sin(latitudeRadians)
+            EARTH_RADIUS * sin(latitudeRadians),
         )
     }
 
@@ -172,7 +172,7 @@ internal class ReplayRouteSmoother {
         return doubleArrayOf(
             toPoint3[0] - fromPoint3[0],
             toPoint3[1] - fromPoint3[1],
-            toPoint3[2] - fromPoint3[2]
+            toPoint3[2] - fromPoint3[2],
         )
     }
 
@@ -181,7 +181,7 @@ internal class ReplayRouteSmoother {
         return doubleArrayOf(
             vector3[0] / length,
             vector3[1] / length,
-            vector3[2] / length
+            vector3[2] / length,
         )
     }
 
@@ -199,7 +199,7 @@ internal class ReplayRouteSmoother {
         return doubleArrayOf(
             lhs[1] * rhs[2] - lhs[2] * rhs[1],
             lhs[2] * rhs[0] - lhs[0] * rhs[2],
-            lhs[0] * rhs[1] - lhs[1] * rhs[0]
+            lhs[0] * rhs[1] - lhs[1] * rhs[0],
         )
     }
 

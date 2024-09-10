@@ -8,7 +8,7 @@ import org.junit.Test
 
 class NavigationScaleGestureHandlerOptionsTest :
     BuilderTest<NavigationScaleGestureHandlerOptions,
-        NavigationScaleGestureHandlerOptions.Builder>() {
+        NavigationScaleGestureHandlerOptions.Builder,>() {
     override fun getImplementationClass() = NavigationScaleGestureHandlerOptions::class
 
     override fun getFilledUpBuilder() = NavigationScaleGestureHandlerOptions.Builder(
@@ -21,11 +21,12 @@ class NavigationScaleGestureHandlerOptionsTest :
                     getDimension(R.dimen.mapbox_navigationCamera_trackingMultiFingerMoveThreshold)
                 } returns 20f
             }
-        }
+        },
     )
         .followingInitialMoveThreshold(123f)
         .followingMultiFingerMoveThreshold(456f)
         .followingMultiFingerProtectedMoveArea(mockk())
+        .followingRotationAngleThreshold(120f)
 
     @Test
     override fun trigger() {

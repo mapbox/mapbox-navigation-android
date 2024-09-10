@@ -22,14 +22,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -45,14 +45,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_left
+            R.drawable.mapbox_ic_notification_turn_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -68,14 +68,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_right
+            R.drawable.mapbox_ic_notification_turn_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -91,14 +91,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -114,14 +114,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_uturn
+            R.drawable.mapbox_ic_notification_uturn,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -137,14 +137,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_slight_right
+            R.drawable.mapbox_ic_notification_turn_slight_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -160,14 +160,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_slight_left
+            R.drawable.mapbox_ic_notification_turn_slight_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -183,14 +183,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_sharp_right
+            R.drawable.mapbox_ic_notification_turn_sharp_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -206,14 +206,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_sharp_left
+            R.drawable.mapbox_ic_notification_turn_sharp_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -229,14 +229,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -252,14 +252,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_arrive
+            R.drawable.mapbox_ic_notification_arrive,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -275,14 +275,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_depart
+            R.drawable.mapbox_ic_notification_depart,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -298,14 +298,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_on_ramp
+            R.drawable.mapbox_ic_notification_on_ramp,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -321,14 +321,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_off_ramp
+            R.drawable.mapbox_ic_notification_off_ramp,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -344,14 +344,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_fork
+            R.drawable.mapbox_ic_notification_fork,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -367,14 +367,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -390,14 +390,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -413,14 +413,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_end_of_road_left
+            R.drawable.mapbox_ic_notification_end_of_road_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -436,14 +436,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -459,14 +459,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_arrive_left
+            R.drawable.mapbox_ic_notification_arrive_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -482,14 +482,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_arrive_right
+            R.drawable.mapbox_ic_notification_arrive_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -505,14 +505,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_arrive_straight
+            R.drawable.mapbox_ic_notification_arrive_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -528,14 +528,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_depart_left
+            R.drawable.mapbox_ic_notification_depart_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -551,14 +551,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_depart_right
+            R.drawable.mapbox_ic_notification_depart_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -574,14 +574,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_depart_straight
+            R.drawable.mapbox_ic_notification_depart_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -597,14 +597,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_end_of_road_left
+            R.drawable.mapbox_ic_notification_end_of_road_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -620,14 +620,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_end_of_road_right
+            R.drawable.mapbox_ic_notification_end_of_road_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -643,14 +643,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_fork_right
+            R.drawable.mapbox_ic_notification_fork_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -666,14 +666,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_fork_left
+            R.drawable.mapbox_ic_notification_fork_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -689,14 +689,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_fork_straight
+            R.drawable.mapbox_ic_notification_fork_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -712,14 +712,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_fork_slight_left
+            R.drawable.mapbox_ic_notification_fork_slight_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -735,14 +735,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_fork_slight_right
+            R.drawable.mapbox_ic_notification_fork_slight_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -758,14 +758,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_merge_right
+            R.drawable.mapbox_ic_notification_merge_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -781,14 +781,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_merge_left
+            R.drawable.mapbox_ic_notification_merge_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -804,14 +804,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -827,14 +827,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_merge_slight_left
+            R.drawable.mapbox_ic_notification_merge_slight_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -850,14 +850,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_merge_slight_right
+            R.drawable.mapbox_ic_notification_merge_slight_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -873,14 +873,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_off_ramp_left
+            R.drawable.mapbox_ic_notification_off_ramp_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -896,14 +896,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_off_ramp_right
+            R.drawable.mapbox_ic_notification_off_ramp_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -919,14 +919,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_off_ramp_slight_left
+            R.drawable.mapbox_ic_notification_off_ramp_slight_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -942,14 +942,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_off_ramp_slight_right
+            R.drawable.mapbox_ic_notification_off_ramp_slight_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -965,14 +965,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_right
+            R.drawable.mapbox_ic_notification_turn_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -988,14 +988,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_left
+            R.drawable.mapbox_ic_notification_turn_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1011,14 +1011,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1034,14 +1034,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_slight_left
+            R.drawable.mapbox_ic_notification_turn_slight_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1057,14 +1057,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_slight_right
+            R.drawable.mapbox_ic_notification_turn_slight_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1080,14 +1080,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_sharp_left
+            R.drawable.mapbox_ic_notification_turn_sharp_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1103,14 +1103,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_sharp_right
+            R.drawable.mapbox_ic_notification_turn_sharp_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1126,14 +1126,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_right
+            R.drawable.mapbox_ic_notification_turn_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1149,14 +1149,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_left
+            R.drawable.mapbox_ic_notification_turn_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1172,14 +1172,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1195,14 +1195,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_uturn
+            R.drawable.mapbox_ic_notification_uturn,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1218,14 +1218,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_slight_left
+            R.drawable.mapbox_ic_notification_turn_slight_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1241,14 +1241,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_slight_right
+            R.drawable.mapbox_ic_notification_turn_slight_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1264,14 +1264,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_sharp_left
+            R.drawable.mapbox_ic_notification_turn_sharp_left,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1287,14 +1287,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_sharp_right
+            R.drawable.mapbox_ic_notification_turn_sharp_right,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)
@@ -1310,14 +1310,14 @@ class NotificationTurnIconHelperTest {
             mockDegrees,
             mockDrivingSide,
             false,
-            R.drawable.mapbox_ic_notification_turn_straight
+            R.drawable.mapbox_ic_notification_turn_straight,
         )
 
         val actual = turnIconHelper.retrieveTurnIcon(
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDrivingSide,
         )
 
         assertEquals(expected, actual)

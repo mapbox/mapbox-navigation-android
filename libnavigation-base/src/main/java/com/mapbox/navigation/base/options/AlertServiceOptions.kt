@@ -9,12 +9,14 @@ package com.mapbox.navigation.base.options
  * @param collectBridges whether Bridges should be collected
  * @param collectRestrictedAreas whether Restricted Areas should be collected
  * @param collectMergingAreas whether Merging Areas should be collected
+ * @param collectServiceAreas whether Service Areas should be collected
  */
 class AlertServiceOptions private constructor(
     val collectTunnels: Boolean,
     val collectBridges: Boolean,
     val collectRestrictedAreas: Boolean,
     val collectMergingAreas: Boolean,
+    val collectServiceAreas: Boolean,
 ) {
 
     /**
@@ -25,6 +27,7 @@ class AlertServiceOptions private constructor(
         collectBridges(collectBridges)
         collectRestrictedAreas(collectRestrictedAreas)
         collectMergingAreas(collectMergingAreas)
+        collectServiceAreas(collectServiceAreas)
     }
 
     /**
@@ -40,6 +43,7 @@ class AlertServiceOptions private constructor(
         if (collectBridges != other.collectBridges) return false
         if (collectRestrictedAreas != other.collectRestrictedAreas) return false
         if (collectMergingAreas != other.collectMergingAreas) return false
+        if (collectServiceAreas != other.collectServiceAreas) return false
 
         return true
     }
@@ -52,6 +56,7 @@ class AlertServiceOptions private constructor(
         result = 31 * result + collectBridges.hashCode()
         result = 31 * result + collectRestrictedAreas.hashCode()
         result = 31 * result + collectMergingAreas.hashCode()
+        result = 31 * result + collectServiceAreas.hashCode()
         return result
     }
 
@@ -63,7 +68,8 @@ class AlertServiceOptions private constructor(
             "collectTunnels='$collectTunnels', " +
             "collectBridges='$collectBridges', " +
             "collectRestrictedAreas='$collectRestrictedAreas', " +
-            "collectMergingAreas='$collectMergingAreas'" +
+            "collectMergingAreas='$collectMergingAreas', " +
+            "collectServiceAreas='$collectServiceAreas'" +
             ")"
     }
 
@@ -75,6 +81,7 @@ class AlertServiceOptions private constructor(
         private var collectBridges: Boolean = true
         private var collectRestrictedAreas: Boolean = false
         private var collectMergingAreas: Boolean = false
+        private var collectServiceAreas: Boolean = false
 
         /**
          * Set whether Tunnels should be collected defaults to `true`.
@@ -105,6 +112,13 @@ class AlertServiceOptions private constructor(
         }
 
         /**
+         * Set whether Service Areas should be collected defaults to `false`.
+         */
+        fun collectServiceAreas(collectServiceAreas: Boolean): Builder = apply {
+            this.collectServiceAreas = collectServiceAreas
+        }
+
+        /**
          * Build the [AlertServiceOptions]
          */
         fun build(): AlertServiceOptions {
@@ -113,6 +127,7 @@ class AlertServiceOptions private constructor(
                 collectBridges = collectBridges,
                 collectRestrictedAreas = collectRestrictedAreas,
                 collectMergingAreas = collectMergingAreas,
+                collectServiceAreas = collectServiceAreas,
             )
         }
     }

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.options
 
 import com.mapbox.navigation.testing.BuilderTest
+import io.mockk.mockk
 import org.junit.Test
 import kotlin.reflect.KClass
 
@@ -17,10 +18,11 @@ class PredictiveCacheMapsOptionsTest :
                     currentLocationRadiusInMeters(300)
                     routeBufferRadiusInMeters(50)
                     destinationLocationRadiusInMeters(20)
-                }.build()
+                }.build(),
             )
             minZoom(20)
             maxZoom(30)
+            extraOptions(mockk(relaxed = true))
         }
 
     @Test

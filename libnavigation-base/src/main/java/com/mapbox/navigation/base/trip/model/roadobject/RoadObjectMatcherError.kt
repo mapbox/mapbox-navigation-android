@@ -8,7 +8,7 @@ package com.mapbox.navigation.base.trip.model.roadobject
  */
 class RoadObjectMatcherError internal constructor(
     val roadObjectId: String,
-    val error: String
+    val error: String,
 ) {
 
     /**

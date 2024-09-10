@@ -17,13 +17,6 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.DynamicResponseModifier
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.NthAttemptHandler
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.http.MockRequestHandler
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
@@ -32,7 +25,13 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.testing.utils.DynamicResponseModifier
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.http.MockRoutingTileEndpointErrorRequestHandler
+import com.mapbox.navigation.testing.utils.http.NthAttemptHandler
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.readRawFileText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -58,7 +57,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
     private lateinit var mapboxNavigation: MapboxNavigation
     private val twoCoordinates = listOf(
         Point.fromLngLat(-121.496066, 38.577764),
-        Point.fromLngLat(-121.480279, 38.57674)
+        Point.fromLngLat(-121.480279, 38.57674),
     )
 
     @Before
@@ -105,12 +104,12 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         assertEquals(
             224.2239,
             requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-            0.0001
+            0.0001,
         )
         assertEquals(
             258.767,
             refreshedRoutes.navigationRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-            0.0001
+            0.0001,
         )
 
         // no route refresh 4 seconds after refresh on demand
@@ -131,7 +130,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
             ),
-            observer.getStatesSnapshot()
+            observer.getStatesSnapshot(),
         )
     }
 
@@ -140,7 +139,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         val observer = TestObserver()
         baseRefreshHandler.jsonResponseModifier = DynamicResponseModifier()
         setupMockRequestHandlers(
-            NthAttemptHandler(baseRefreshHandler, 1)
+            NthAttemptHandler(baseRefreshHandler, 1),
         )
 
         createMapboxNavigation(createRouteRefreshOptionsWithInvalidInterval(5_000))
@@ -170,22 +169,21 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
             ),
-            observer.getStatesSnapshot()
+            observer.getStatesSnapshot(),
         )
     }
 
     private fun createMapboxNavigation(routeRefreshOptions: RouteRefreshOptions) {
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
                 .routeRefreshOptions(routeRefreshOptions)
                 .routingTilesOptions(
                     RoutingTilesOptions.Builder()
                         .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                        .build()
+                        .build(),
                 )
                 .navigatorPredictionMillis(0L)
-                .build()
+                .build(),
         )
     }
 
@@ -196,7 +194,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
                 longitude = twoCoordinates[0].longitude()
                 bearing = 190f
             },
-            times = 120
+            times = 120,
         )
     }
 
@@ -217,8 +215,8 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(activity, R.raw.route_response_single_route_refresh),
-                twoCoordinates
-            )
+                twoCoordinates,
+            ),
         )
         mockWebServerRule.requestHandlers.add(refreshHandler)
         mockWebServerRule.requestHandlers.add(MockRoutingTileEndpointErrorRequestHandler())
@@ -231,7 +229,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             ?.sum()!!
 
     private fun createRouteRefreshOptionsWithInvalidInterval(
-        intervalMillis: Long
+        intervalMillis: Long,
     ): RouteRefreshOptions {
         val routeRefreshOptions = RouteRefreshOptions.Builder()
             .intervalMillis(TimeUnit.SECONDS.toMillis(30))

@@ -6,8 +6,10 @@ import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.model.FadingConfig
 
 /**
  * Options for determining the appearance of maneuver arrow(s)
@@ -22,7 +24,14 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_L
  * @param arrowShaftCasingScaleExpression an [Expression] governing the scaling of the maneuver arrow shaft casing
  * @param arrowHeadScaleExpression an [Expression] governing the scaling of the maneuver arrow head
  * @param arrowHeadCasingScaleExpression an [Expression] governing the scaling of the maneuver arrow head casing
+ * @param slotName determines the elevation of the route layers. The route line will default to the MIDDLE slot.
+ * To change, add your own custom slot before route arrow initialization and provide the slot name as a option here. see https://docs.mapbox.com/style-spec/reference/slots/ and [StyleManager.getStyleSlots]
+ * @param fadeOnHighZoomsConfig configuration of route arrows fading out (see [FadingConfig] for details).
+ * NOTE: route arrows disappear at zoom levels 14.0 or lower. Make sure zoom levels specified in [FadingConfig] are greater than 14.0.
+ * NOTE: this property guards fading out the arrows on transition from a lower to a higher zoom level,
+ * meaning that [FadingConfig.startFadingZoom] must be less than or equal to [FadingConfig.finishFadingZoom].
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteArrowOptions private constructor(
     @ColorInt val arrowColor: Int,
     @ColorInt val arrowCasingColor: Int,
@@ -30,12 +39,14 @@ class RouteArrowOptions private constructor(
     private val arrowHeadIconCasingDrawable: Int,
     val arrowHeadIcon: Drawable,
     val arrowHeadIconCasing: Drawable,
-    val aboveLayerId: String,
+    @Deprecated("Use slotName option.") val aboveLayerId: String,
     val tolerance: Double,
     val arrowShaftScaleExpression: Expression,
     val arrowShaftCasingScaleExpression: Expression,
     val arrowHeadScaleExpression: Expression,
-    val arrowHeadCasingScaleExpression: Expression
+    val arrowHeadCasingScaleExpression: Expression,
+    val slotName: String,
+    val fadeOnHighZoomsConfig: FadingConfig?,
 ) {
 
     /**
@@ -55,7 +66,9 @@ class RouteArrowOptions private constructor(
             arrowShaftScaleExpression,
             arrowShaftCasingScaleExpression,
             arrowHeadScaleExpression,
-            arrowHeadCasingScaleExpression
+            arrowHeadCasingScaleExpression,
+            slotName,
+            fadeOnHighZoomsConfig,
         )
     }
 
@@ -80,6 +93,8 @@ class RouteArrowOptions private constructor(
         if (arrowShaftCasingScaleExpression != other.arrowShaftCasingScaleExpression) return false
         if (arrowHeadScaleExpression != other.arrowHeadScaleExpression) return false
         if (arrowHeadCasingScaleExpression != other.arrowHeadCasingScaleExpression) return false
+        if (slotName != other.slotName) return false
+        if (fadeOnHighZoomsConfig != other.fadeOnHighZoomsConfig) return false
 
         return true
     }
@@ -100,6 +115,8 @@ class RouteArrowOptions private constructor(
         result = 31 * result + arrowShaftCasingScaleExpression.hashCode()
         result = 31 * result + arrowHeadScaleExpression.hashCode()
         result = 31 * result + arrowHeadCasingScaleExpression.hashCode()
+        result = 31 * result + slotName.hashCode()
+        result = 31 * result + fadeOnHighZoomsConfig.hashCode()
         return result
     }
 
@@ -118,7 +135,9 @@ class RouteArrowOptions private constructor(
             "arrowShaftScaleExpression=$arrowShaftScaleExpression, " +
             "arrowShaftCasingScaleExpression=$arrowShaftCasingScaleExpression, " +
             "arrowHeadScaleExpression=$arrowHeadScaleExpression, " +
-            "arrowHeadCasingScaleExpression=$arrowHeadCasingScaleExpression" +
+            "arrowHeadCasingScaleExpression=$arrowHeadCasingScaleExpression, " +
+            "slotName=$slotName, " +
+            "fadingConfig=$fadeOnHighZoomsConfig" +
             ")"
     }
 
@@ -136,7 +155,9 @@ class RouteArrowOptions private constructor(
         private var arrowShaftScaleExpression: Expression?,
         private var arrowShaftCasingScaleExpression: Expression?,
         private var arrowHeadScaleExpression: Expression?,
-        private var arrowHeadCasingScaleExpression: Expression?
+        private var arrowHeadCasingScaleExpression: Expression?,
+        private var slotName: String?,
+        private var fadeOnHighZoomsConfig: FadingConfig?,
     ) {
 
         /**
@@ -153,7 +174,9 @@ class RouteArrowOptions private constructor(
             null,
             null,
             null,
-            null
+            null,
+            null,
+            null,
         )
 
         /**
@@ -194,8 +217,17 @@ class RouteArrowOptions private constructor(
          *
          * @param layerId the map layer ID
          */
+        @Deprecated("Use slotName")
         fun withAboveLayerId(layerId: String): Builder =
             apply { this.aboveLayerId = layerId }
+
+        /**
+         * The slot name to use for route arrow position in the layer stack.
+         *
+         * @param name the name of the slot to use.
+         * @return the builder
+         */
+        fun withSlotName(name: String): Builder = apply { this.slotName = name }
 
         /**
          * Douglas-Peucker simplification tolerance (higher means simpler geometries and faster performance)
@@ -252,20 +284,52 @@ class RouteArrowOptions private constructor(
             apply { this.arrowHeadCasingScaleExpression = expression }
 
         /**
+         * Configuration of route arrows fading out (see [FadingConfig] for details).
+         * NOTE: route arrows disappear at zoom levels 14.0 or lower. Make sure zoom levels specified in [FadingConfig] are greater than 14.0.
+         * NOTE: this property guards fading out the arrows on transition from a lower to a higher zoom level,
+         * meaning that [FadingConfig.startFadingZoom] must be less than or equal to [FadingConfig.finishFadingZoom].
+         *
+         * @param config [FadingConfig]
+         * @return the builder
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun withFadeOnHighZoomsConfig(config: FadingConfig?): Builder = apply {
+            this.fadeOnHighZoomsConfig = config
+        }
+
+        /**
          * Applies the supplied parameters and instantiates a RouteArrowOptions
          *
          * @return a RouteArrowOptions object
          */
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         fun build(): RouteArrowOptions {
             val arrowHeadIcon = AppCompatResources.getDrawable(
                 context,
-                arrowHeadIconDrawable
+                arrowHeadIconDrawable,
             )
             val arrowHeadCasingIcon = AppCompatResources.getDrawable(
                 context,
-                arrowHeadIconCasingDrawable
+                arrowHeadIconCasingDrawable,
             )
             val routeArrowAboveLayerId: String = aboveLayerId ?: TOP_LEVEL_ROUTE_LINE_LAYER_ID
+            val routeArrowSlotName: String = slotName ?: RouteLayerConstants.DEFAULT_ROUTE_LINE_SLOT
+
+            fadeOnHighZoomsConfig?.let {
+                if (it.startFadingZoom <= RouteLayerConstants.ARROW_HIDDEN_ZOOM_LEVEL) {
+                    throw IllegalArgumentException(
+                        "FadingConfig#startFadingZoom must be greater than or equal to" +
+                            " ${RouteLayerConstants.ARROW_HIDDEN_ZOOM_LEVEL}, " +
+                            "but was: ${it.startFadingZoom}.",
+                    )
+                }
+                if (it.startFadingZoom > it.finishFadingZoom) {
+                    throw IllegalArgumentException(
+                        "FadingConfig#startFadingZoom (${it.startFadingZoom}) must be less than " +
+                            "or equal to FadingConfig#finishFadingZoom (${it.finishFadingZoom}).",
+                    )
+                }
+            }
 
             val arrowShaftScalingExpression: Expression = arrowShaftScaleExpression
                 ?: Expression.interpolate {
@@ -335,7 +399,9 @@ class RouteArrowOptions private constructor(
                 arrowShaftScalingExpression,
                 arrowShaftCasingScaleExpression,
                 arrowHeadScalingExpression,
-                arrowHeadCasingScalingExpression
+                arrowHeadCasingScalingExpression,
+                routeArrowSlotName,
+                fadeOnHighZoomsConfig,
             )
         }
     }

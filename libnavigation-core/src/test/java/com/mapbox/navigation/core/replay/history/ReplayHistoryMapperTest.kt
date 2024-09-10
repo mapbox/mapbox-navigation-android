@@ -35,12 +35,12 @@ class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMa
                     altitude = null,
                     accuracyHorizontal = null,
                     bearing = null,
-                    speed = null
-                )
+                    speed = null,
+                ),
             )
         }
         .setRouteMapper {
-            ReplaySetRoute(it.eventTimestamp, null)
+            ReplaySetNavigationRoute.Builder(it.eventTimestamp).build()
         }
         .statusMapper {
             ReplayEventGetStatus(it.eventTimestamp)
@@ -51,8 +51,8 @@ class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMa
                     object : ReplayEventBase {
                         override val eventTimestamp: Double = 1357.0246
                     }
-                }
-            )
+                },
+            ),
         )
 
     override fun trigger() {
@@ -77,13 +77,13 @@ class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMa
     fun `should map HistoryEventSetRoute`() {
         val event: HistoryEventSetRoute = mockk {
             every { eventTimestamp } returns 1580744198.879556
-            every { directionsRoute } returns mockk(relaxed = true)
+            every { navigationRoute } returns mockk(relaxed = true)
         }
 
         val replayHistoryMapper = ReplayHistoryMapper.Builder().build()
         val replayEvent = replayHistoryMapper.mapToReplayEvent(event)!!
 
-        assertTrue(replayEvent is ReplaySetRoute)
+        assertTrue(replayEvent is ReplaySetNavigationRoute)
         assertEquals(1580744198.879556, replayEvent.eventTimestamp, 0.0001)
     }
 
@@ -162,7 +162,7 @@ class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMa
             every { properties } returns mapOf(
                 "user_id" to "13495",
                 "feedback" to "Amazing alternative route suggestion",
-                "rating" to "5"
+                "rating" to "5",
             ).toString()
         }
 
@@ -170,7 +170,7 @@ class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMa
             override val eventTimestamp: Double,
             val userId: Long,
             val feedback: String,
-            val rating: Int
+            val rating: Int,
         ) : ReplayEventBase
 
         val replayHistoryMapper = ReplayHistoryMapper.Builder()
@@ -189,10 +189,10 @@ class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMa
                             eventTimestamp = pushHistory.eventTimestamp,
                             userId = propertiesMap["user_id"]!!.toLong(),
                             feedback = propertiesMap["feedback"]!!,
-                            rating = propertiesMap["rating"]!!.toInt()
+                            rating = propertiesMap["rating"]!!.toInt(),
                         )
-                    }
-                )
+                    },
+                ),
             )
             .build()
 

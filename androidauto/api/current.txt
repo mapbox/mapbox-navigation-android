@@ -1,0 +1,995 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.androidauto {
+
+  public final class MapboxCarContext {
+    ctor public MapboxCarContext(androidx.lifecycle.Lifecycle lifecycle, com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap);
+    method public com.mapbox.navigation.ui.androidauto.MapboxCarContext customize(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.androidauto.MapboxCarOptions.Customization,kotlin.Unit> action);
+    method public androidx.car.app.CarContext getCarContext();
+    method public androidx.lifecycle.Lifecycle getLifecycle();
+    method public com.mapbox.maps.extension.androidauto.MapboxCarMap getMapboxCarMap();
+    method public com.mapbox.navigation.ui.androidauto.settings.MapboxCarStorage getMapboxCarStorage();
+    method public com.mapbox.navigation.ui.androidauto.navigation.MapboxCarNavigationManager getMapboxNavigationManager();
+    method public com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager getMapboxScreenManager();
+    method public com.mapbox.navigation.ui.androidauto.MapboxCarOptions getOptions();
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRequest getRoutePreviewRequest();
+    property public final androidx.car.app.CarContext carContext;
+    property public final androidx.lifecycle.Lifecycle lifecycle;
+    property public final com.mapbox.maps.extension.androidauto.MapboxCarMap mapboxCarMap;
+    property public final com.mapbox.navigation.ui.androidauto.settings.MapboxCarStorage mapboxCarStorage;
+    property public final com.mapbox.navigation.ui.androidauto.navigation.MapboxCarNavigationManager mapboxNavigationManager;
+    property public final com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager mapboxScreenManager;
+    property public final com.mapbox.navigation.ui.androidauto.MapboxCarOptions options;
+    property public final com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRequest routePreviewRequest;
+  }
+
+  public final class MapboxCarOptions {
+    ctor public MapboxCarOptions();
+    method public void applyCustomization(com.mapbox.navigation.ui.androidauto.MapboxCarOptions.Customization customization);
+    method public com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider getActionStripProvider();
+    method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions getCarFeedbackOptions();
+    method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions getCarPlaceSearchOptions();
+    method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
+    method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions getNotificationOptions();
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions> getSpeedLimitOptions();
+    property public final com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider actionStripProvider;
+    property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions carFeedbackOptions;
+    property public final com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions carPlaceSearchOptions;
+    property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
+    property public final com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions notificationOptions;
+    property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor routeOptionsInterceptor;
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions> speedLimitOptions;
+  }
+
+  public static final class MapboxCarOptions.Customization {
+    ctor public MapboxCarOptions.Customization();
+    method public com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider? getActionsStripProvider();
+    method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions? getCarFeedbackOptions();
+    method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider? getFeedbackPollProvider();
+    method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions? getNotificationOptions();
+    method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? getPlaceSearchOptions();
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor? getRouteOptionsInterceptor();
+    method public com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions? getSpeedLimitOptions();
+    method public void setActionsStripProvider(com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider?);
+    method public void setCarFeedbackOptions(com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions?);
+    method public void setFeedbackPollProvider(com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider?);
+    method public void setNotificationOptions(com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions?);
+    method public void setPlaceSearchOptions(com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions?);
+    method public void setRouteOptionsInterceptor(com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor?);
+    method public void setSpeedLimitOptions(com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions?);
+    property public final com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider? actionsStripProvider;
+    property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions? carFeedbackOptions;
+    property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider? feedbackPollProvider;
+    property public final com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions? notificationOptions;
+    property public final com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? placeSearchOptions;
+    property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor? routeOptionsInterceptor;
+    property public final com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions? speedLimitOptions;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.action {
+
+  public final class MapboxMapActionStrip {
+    ctor public MapboxMapActionStrip(androidx.car.app.Screen screen, com.mapbox.navigation.ui.androidauto.navigation.CarNavigationCamera carNavigationCamera);
+    method public androidx.car.app.model.ActionStrip build();
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class MapboxScreenActionStripProvider {
+    ctor public MapboxScreenActionStripProvider();
+    method public androidx.car.app.model.ActionStrip getActionStrip(androidx.car.app.Screen screen, @com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.Key String mapboxScreen);
+    method protected androidx.car.app.model.ActionStrip getActiveGuidance(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getFavorites(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getFreeDrive(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getGeoDeeplink(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getRoutePreview(androidx.car.app.Screen screen);
+    method protected androidx.car.app.model.ActionStrip getSearch(androidx.car.app.Screen screen);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.deeplink {
+
+  public final class GeoDeeplinkGeocoding {
+    ctor public GeoDeeplinkGeocoding(String accessToken);
+    method public void cancel();
+    method public com.mapbox.api.geocoding.v5.MapboxGeocoding? getCurrentMapboxGeocoding();
+    method public suspend Object? requestPlaces(com.mapbox.navigation.core.geodeeplink.GeoDeeplink geoDeeplink, com.mapbox.geojson.Point origin, kotlin.coroutines.Continuation<? super com.mapbox.api.geocoding.v5.models.GeocodingResponse>);
+    method public void setCurrentMapboxGeocoding(com.mapbox.api.geocoding.v5.MapboxGeocoding?);
+    property public final com.mapbox.api.geocoding.v5.MapboxGeocoding? currentMapboxGeocoding;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class GeoDeeplinkNavigateAction {
+    ctor public GeoDeeplinkNavigateAction(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.navigation.ui.androidauto.MapboxCarContext getMapboxCarContext();
+    method public boolean onNewIntent(android.content.Intent intent);
+    property public final com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext;
+  }
+
+  public final class GeoDeeplinkParser {
+    method public kotlinx.coroutines.channels.ReceiveChannel<com.mapbox.navigation.core.geodeeplink.GeoDeeplink> getDestinationReceiveChannel();
+    method public void parseAndSave(String? geoDeeplink);
+    property public final kotlinx.coroutines.channels.ReceiveChannel<com.mapbox.navigation.core.geodeeplink.GeoDeeplink> destinationReceiveChannel;
+    field public static final com.mapbox.navigation.ui.androidauto.deeplink.GeoDeeplinkParser INSTANCE;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.feedback.core {
+
+  public final class CarFeedbackOptions {
+    method public com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions getBitmapEncodeOptions();
+    property public final com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions bitmapEncodeOptions;
+  }
+
+  public static final class CarFeedbackOptions.Builder {
+    ctor public CarFeedbackOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions build();
+  }
+
+  public class CarFeedbackPollProvider {
+    ctor public CarFeedbackPollProvider();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getActiveGuidanceFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getArrivalFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getFreeDriveFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getRoutePreviewFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getSearchFeedbackPoll(androidx.car.app.CarContext carContext);
+  }
+
+  public abstract class CarFeedbackScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public CarFeedbackScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+    method public abstract com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public abstract String getSourceName();
+    method public void onFinish();
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.feedback.ui {
+
+  public final class CarFeedbackAction {
+    ctor public CarFeedbackAction(@com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.Key String carFeedbackScreen);
+    method public androidx.car.app.model.Action getAction(androidx.car.app.Screen screen);
+  }
+
+  public abstract sealed class CarFeedbackIcon {
+  }
+
+  public static final class CarFeedbackIcon.Local extends com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon {
+    ctor public CarFeedbackIcon.Local(androidx.car.app.model.CarIcon icon);
+    method public androidx.car.app.model.CarIcon component1();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon.Local copy(androidx.car.app.model.CarIcon icon);
+    method public androidx.car.app.model.CarIcon getIcon();
+    property public final androidx.car.app.model.CarIcon icon;
+  }
+
+  public static final class CarFeedbackIcon.Remote extends com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon {
+    ctor public CarFeedbackIcon.Remote(android.net.Uri uri);
+    method public android.net.Uri component1();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon.Remote copy(android.net.Uri uri);
+    method public android.net.Uri getUri();
+    property public final android.net.Uri uri;
+  }
+
+  public final class CarFeedbackOption {
+    ctor public CarFeedbackOption(String title, com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon icon, String? type = null, java.util.List<java.lang.String>? subType = null, String? searchFeedbackReason = null, String? favoritesFeedbackReason = null, com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll? nextPoll = null);
+    method public String component1();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon component2();
+    method public String? component3();
+    method public java.util.List<java.lang.String>? component4();
+    method public String? component5();
+    method public String? component6();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll? component7();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackOption copy(String title, com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon icon, String? type, java.util.List<java.lang.String>? subType, String? searchFeedbackReason, String? favoritesFeedbackReason, com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll? nextPoll);
+    method public String? getFavoritesFeedbackReason();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon getIcon();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll? getNextPoll();
+    method public String? getSearchFeedbackReason();
+    method public java.util.List<java.lang.String>? getSubType();
+    method public String getTitle();
+    method public String? getType();
+    property public final String? favoritesFeedbackReason;
+    property public final com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackIcon icon;
+    property public final com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll? nextPoll;
+    property public final String? searchFeedbackReason;
+    property public final java.util.List<java.lang.String>? subType;
+    property public final String title;
+    property public final String? type;
+  }
+
+  public final class CarFeedbackPoll {
+    ctor public CarFeedbackPoll(String title, java.util.List<com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackOption> options);
+    method public String component1();
+    method public java.util.List<com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackOption> component2();
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll copy(String title, java.util.List<com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackOption> options);
+    method public java.util.List<com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackOption> getOptions();
+    method public String getTitle();
+    property public final java.util.List<com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackOption> options;
+    property public final String title;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.freedrive {
+
+  public final class FreeDriveActionStrip {
+    ctor public FreeDriveActionStrip(androidx.car.app.Screen screen);
+    method public androidx.car.app.model.Action buildFavoritesAction();
+    method public androidx.car.app.model.Action buildFeedbackAction();
+    method public androidx.car.app.model.Action buildSearchAction();
+    method public androidx.car.app.model.Action buildSettingsAction();
+    method public androidx.car.app.model.ActionStrip.Builder builder();
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.location {
+
+  public final class CarLocationProvider implements com.mapbox.maps.plugin.locationcomponent.LocationProvider com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public static com.mapbox.navigation.ui.androidauto.location.CarLocationProvider getRegisteredInstance();
+    method public com.mapbox.common.location.Location? lastLocation();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void registerLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    method public void unRegisterLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    method public suspend Object? validLocation(kotlin.coroutines.Continuation<? super com.mapbox.common.location.Location>);
+    field public static final com.mapbox.navigation.ui.androidauto.location.CarLocationProvider.Companion Companion;
+  }
+
+  public static final class CarLocationProvider.Companion {
+    method public com.mapbox.navigation.ui.androidauto.location.CarLocationProvider getRegisteredInstance();
+  }
+
+  public final class CarLocationPuck {
+    method public com.mapbox.maps.plugin.LocationPuck2D navigationPuck2D();
+    field public static final com.mapbox.navigation.ui.androidauto.location.CarLocationPuck INSTANCE;
+  }
+
+  public final class CarLocationRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarLocationRenderer();
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.map {
+
+  public final class MapboxCarMapLoader implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public MapboxCarMapLoader();
+    method public com.mapbox.maps.extension.style.StyleContract.StyleExtension getStyleExtension(boolean isDarkMode);
+    method public com.mapbox.navigation.ui.androidauto.map.MapboxCarMapLoader onCarConfigurationChanged(androidx.car.app.CarContext carContext);
+    method public com.mapbox.navigation.ui.androidauto.map.MapboxCarMapLoader setDarkStyleOverride(com.mapbox.maps.extension.style.StyleContract.StyleExtension? styleContract);
+    method public com.mapbox.navigation.ui.androidauto.map.MapboxCarMapLoader setLightStyleOverride(com.mapbox.maps.extension.style.StyleContract.StyleExtension? styleContract);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.map.compass {
+
+  public final class CarCompassRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarCompassRenderer();
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.map.logo {
+
+  public final class CarLogoRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarLogoRenderer();
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.navigation {
+
+  public final class CarActiveGuidanceMarkers implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarActiveGuidanceMarkers(com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider carRoutesProvider = com.mapbox.navigation.ui.androidauto.routes.NavigationCarRoutesProvider());
+  }
+
+  public final class CarArrivalTrigger implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public CarArrivalTrigger();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void triggerArrival();
+  }
+
+  public enum CarCameraMode {
+    enum_constant public static final com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode FOLLOWING;
+    enum_constant public static final com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode IDLE;
+    enum_constant public static final com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode OVERVIEW;
+  }
+
+  public final class CarDistanceFormatter {
+    method public static androidx.car.app.model.Distance carDistance(double distanceMeters);
+    method public static android.text.SpannableString formatDistance(double distance);
+    field public static final com.mapbox.navigation.ui.androidauto.navigation.CarDistanceFormatter INSTANCE;
+  }
+
+  public final class CarLocationsOverviewCamera implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarLocationsOverviewCamera(com.mapbox.maps.CameraOptions initialCameraOptions = CameraOptions.<init>().zoom(DEFAULT_INITIAL_ZOOM).build());
+    method @UiThread public void updateWithLocations(java.util.List<com.mapbox.geojson.Point> points);
+    field public static final double DEFAULT_INITIAL_ZOOM = 15.0;
+  }
+
+  @UiThread public final class CarNavigationCamera implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarNavigationCamera(com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode initialCarCameraMode, com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode? alternativeCarCameraMode, com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider carRoutesProvider = com.mapbox.navigation.ui.androidauto.routes.NavigationCarRoutesProvider(), com.mapbox.maps.CameraOptions? initialCameraOptions = CameraOptions.<init>().zoom(DEFAULT_INITIAL_ZOOM).build());
+    method public boolean followingZoomUpdatesAllowed();
+    method public com.mapbox.maps.extension.androidauto.DefaultMapboxCarMapGestureHandler getGestureHandler();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode> getNextCameraMode();
+    method public void updateCameraMode(com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode carCameraMode);
+    method public void zoomInAction();
+    method public void zoomOutAction();
+    method public void zoomUpdatesAllowed(boolean allowed);
+    property public final com.mapbox.maps.extension.androidauto.DefaultMapboxCarMapGestureHandler gestureHandler;
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode> nextCameraMode;
+  }
+
+  public final class CarNavigationCameraKt {
+  }
+
+  public final class CarNavigationEtaMapper {
+    ctor public CarNavigationEtaMapper(com.mapbox.navigation.tripdata.progress.api.MapboxTripProgressApi tripProgressApi);
+    method public androidx.car.app.navigation.model.TravelEstimate getDestinationTravelEstimate(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+  }
+
+  public final class CarNavigationInfo {
+    method public androidx.car.app.navigation.model.TravelEstimate? getDestinationTravelEstimate();
+    method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? getNavigationInfo();
+    property public final androidx.car.app.navigation.model.TravelEstimate? destinationTravelEstimate;
+    property public final androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? navigationInfo;
+  }
+
+  public final class CarNavigationInfoMapper {
+    ctor public CarNavigationInfoMapper(android.content.Context context, com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverInstructionRenderer carManeuverInstructionRenderer, com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverIconRenderer carManeuverIconRenderer, com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLanesImageRenderer carLanesImageGenerator);
+    method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? mapNavigationInfo(com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>> expectedManeuvers, java.util.List<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield> routeShields, com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue? junctionValue = null);
+    method public androidx.car.app.navigation.model.NavigationTemplate.NavigationInfo? mapNavigationInfo(com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>> expectedManeuvers, java.util.List<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield> routeShields, com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+  }
+
+  public final class CarNavigationInfoProvider implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarNavigationInfoProvider();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.CarNavigationInfo> getCarNavigationInfo();
+    method public com.mapbox.navigation.ui.androidauto.navigation.CarNavigationInfoProvider invalidateOnChange(androidx.car.app.Screen screen);
+    method public androidx.car.app.navigation.model.NavigationTemplate.Builder setNavigationInfo(androidx.car.app.navigation.model.NavigationTemplate.Builder builder);
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.CarNavigationInfo> carNavigationInfo;
+  }
+
+  public final class MapUserStyleObserver implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public MapUserStyleObserver();
+    method public String getStyleId();
+    method public String getUserId();
+    method public void setStyleId(String);
+    method public void setUserId(String);
+    property public final String styleId;
+    property public final String userId;
+  }
+
+  public final class MapboxCarNavigationManager implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public kotlinx.coroutines.flow.StateFlow<java.lang.Boolean> getAutoDriveEnabledFlow();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    property public final kotlinx.coroutines.flow.StateFlow<java.lang.Boolean> autoDriveEnabledFlow;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.navigation.audioguidance {
+
+  public final class AppAudioGuidanceUiKt {
+    method @UiThread public static void muteAudioGuidance(androidx.lifecycle.Lifecycle);
+  }
+
+  public final class CarAudioGuidanceAction {
+    ctor public CarAudioGuidanceAction();
+    method public androidx.car.app.model.Action getAction(androidx.car.app.Screen screen);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.navigation.lanes {
+
+  public final class CarLaneIcon {
+    ctor public CarLaneIcon(com.mapbox.navigation.tripdata.maneuver.model.LaneIcon laneIcon, boolean isActive);
+    method public com.mapbox.navigation.tripdata.maneuver.model.LaneIcon component1();
+    method public boolean component2();
+    method public com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLaneIcon copy(com.mapbox.navigation.tripdata.maneuver.model.LaneIcon laneIcon, boolean isActive);
+    method public com.mapbox.navigation.tripdata.maneuver.model.LaneIcon getLaneIcon();
+    method public boolean isActive();
+    property public final boolean isActive;
+    property public final com.mapbox.navigation.tripdata.maneuver.model.LaneIcon laneIcon;
+  }
+
+  public final class CarLaneIconOptions {
+    method public android.content.res.Resources.Theme getActiveTheme();
+    method public android.content.res.Resources.Theme getNotActiveTheme();
+    method public com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLaneIconOptions.Builder toBuilder();
+    property public final android.content.res.Resources.Theme activeTheme;
+    property public final android.content.res.Resources.Theme notActiveTheme;
+  }
+
+  public static final class CarLaneIconOptions.Builder {
+    ctor public CarLaneIconOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLaneIconOptions.Builder activeTheme(android.content.res.Resources.Theme activeTheme);
+    method public com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLaneIconOptions build(android.content.Context? context = null);
+    method public com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLaneIconOptions.Builder notActiveTheme(android.content.res.Resources.Theme notActiveTheme);
+  }
+
+  public final class CarLanesImage {
+    method public androidx.car.app.model.CarIcon getCarIcon();
+    method public java.util.List<androidx.car.app.navigation.model.Lane> getLanes();
+    property public final androidx.car.app.model.CarIcon carIcon;
+    property public final java.util.List<androidx.car.app.navigation.model.Lane> lanes;
+  }
+
+  public final class CarLanesImageRenderer {
+    ctor public CarLanesImageRenderer(android.content.Context context, @ColorInt int background = 0, com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLaneIconOptions options = CarLaneIconOptions.<init>().build(context));
+    method public int getBackground();
+    method public com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLaneIconOptions getOptions();
+    method public com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLanesImage? renderLanesImage(com.mapbox.navigation.tripdata.maneuver.model.Lane? lane);
+    property public final int background;
+    property public final com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLaneIconOptions options;
+  }
+
+  public final class CarLanesImageRendererKt {
+    method public static androidx.car.app.navigation.model.Step.Builder useMapboxLaneGuidance(androidx.car.app.navigation.model.Step.Builder, com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLanesImageRenderer imageGenerator, com.mapbox.navigation.tripdata.maneuver.model.Lane? laneGuidance);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.navigation.maneuver {
+
+  public final class CarManeuverIconOptions {
+    method public int getBackground();
+    method public android.content.Context getContext();
+    method public int getStyleRes();
+    method public com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverIconOptions.Builder toBuilder();
+    property public final int background;
+    property public final android.content.Context context;
+    property public final int styleRes;
+  }
+
+  public static final class CarManeuverIconOptions.Builder {
+    ctor public CarManeuverIconOptions.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverIconOptions.Builder background(@ColorInt int background);
+    method public com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverIconOptions build();
+    method public com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverIconOptions.Builder styleRes(@StyleRes Integer? styleRes);
+  }
+
+  public final class CarManeuverIconRenderer {
+    ctor public CarManeuverIconRenderer(com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverIconOptions options);
+    method public androidx.car.app.model.CarIcon? renderManeuverIcon(com.mapbox.navigation.tripdata.maneuver.model.PrimaryManeuver maneuver);
+    method public androidx.car.app.model.CarIcon? renderManeuverIcon(com.mapbox.navigation.tripdata.maneuver.model.SubManeuver maneuver);
+  }
+
+  public final class CarManeuverInstructionRenderer {
+    ctor public CarManeuverInstructionRenderer();
+    method public CharSequence renderInstruction(java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Component> maneuver, java.util.List<? extends com.mapbox.navigation.tripdata.shield.model.RouteShield> shields, com.mapbox.navigation.ui.androidauto.ui.maneuver.view.MapboxExitText exitView, String? modifier, int desiredHeight);
+  }
+
+  public final class CarManeuverMapper {
+    method public androidx.car.app.navigation.model.Trip from(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi maneuverApi);
+    method public androidx.car.app.navigation.model.Maneuver.Builder from(com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>> exp);
+    method public androidx.car.app.navigation.model.Maneuver.Builder from(String? maneuverType, String? maneuverModifier, Double? degrees = null);
+    field public static final com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverMapper INSTANCE;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.navigation.roadlabel {
+
+  public final class CarRoadLabelOptions {
+    method public int getBackgroundColor();
+    method public int getRoundedLabelColor();
+    method public Integer? getShadowColor();
+    method public int getTextColor();
+    method public com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder toBuilder();
+    property public final int backgroundColor;
+    property public final int roundedLabelColor;
+    property public final Integer? shadowColor;
+    property public final int textColor;
+    field public static final com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions.Companion Companion;
+  }
+
+  public static final class CarRoadLabelOptions.Builder {
+    ctor public CarRoadLabelOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder backgroundColor(@ColorInt int backgroundColor);
+    method public com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions build();
+    method public com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder roundedLabelColor(@ColorInt int roundedLabelColor);
+    method public com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder shadowColor(@ColorInt Integer? shadowColor);
+    method public com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions.Builder textColor(@ColorInt int textColor);
+  }
+
+  public static final class CarRoadLabelOptions.Companion {
+    method public com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions getDefault();
+    property public final com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelOptions default;
+  }
+
+  public final class CarRoadLabelRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarRoadLabelRenderer();
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.navigation.speedlimit {
+
+  public final class CarSpeedLimitRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarSpeedLimitRenderer(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+  }
+
+  public final class SpeedLimitOptions {
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign? getForcedSignFormat();
+    method public int getWarningThreshold();
+    method public com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign? forcedSignFormat;
+    property public final int warningThreshold;
+  }
+
+  public static final class SpeedLimitOptions.Builder {
+    ctor public SpeedLimitOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions build();
+    method public com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions.Builder forcedSignFormat(com.mapbox.navigation.base.speed.model.SpeedLimitSign? forcedSignFormat);
+    method public com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions.Builder warningThreshold(int warningThreshold);
+  }
+
+  @com.mapbox.maps.MapboxExperimental public final class SpeedLimitWidget extends com.mapbox.maps.renderer.widget.BitmapWidget {
+    ctor public SpeedLimitWidget(com.mapbox.navigation.base.speed.model.SpeedLimitSign initialSignFormat = com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD);
+    method public void update(Integer? speedLimit, int speed, com.mapbox.navigation.base.speed.model.SpeedLimitSign? signFormat, int threshold);
+    method public void update(com.mapbox.navigation.base.speed.model.SpeedLimitSign? signFormat, int threshold);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.notification {
+
+  public final class MapboxCarNotification implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+  }
+
+  public final class MapboxCarNotificationOptions {
+    method public Class<? extends androidx.car.app.CarAppService>? getStartAppService();
+    method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions.Builder toBuilder();
+    property public final Class<? extends androidx.car.app.CarAppService>? startAppService;
+  }
+
+  public static final class MapboxCarNotificationOptions.Builder {
+    ctor public MapboxCarNotificationOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions build();
+    method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions.Builder startAppService(Class<? extends androidx.car.app.CarAppService>? startAppService);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.placeslistonmap {
+
+  public final class PlaceMarkerRenderer {
+    ctor public PlaceMarkerRenderer(android.content.Context context, @ColorInt int background = 0);
+    method public android.graphics.Bitmap? getBitmap();
+    method public androidx.car.app.model.CarIcon renderMarker();
+    method public void setBitmap(android.graphics.Bitmap?);
+    property public final android.graphics.Bitmap? bitmap;
+  }
+
+  @UiThread public interface PlacesListItemClickListener {
+    method public void onItemClick(com.mapbox.navigation.ui.androidauto.search.PlaceRecord placeRecord);
+  }
+
+  public final class PlacesListItemMapper {
+    ctor public PlacesListItemMapper(com.mapbox.navigation.ui.androidauto.placeslistonmap.PlaceMarkerRenderer placeMarkerRenderer, com.mapbox.navigation.base.formatter.UnitType unitType);
+    method public androidx.car.app.model.ItemList mapToItemList(com.mapbox.common.location.Location anchorLocation, java.util.List<com.mapbox.navigation.ui.androidauto.search.PlaceRecord> places, com.mapbox.navigation.ui.androidauto.placeslistonmap.PlacesListItemClickListener? itemClickListener);
+  }
+
+  @UiThread public final class PlacesListOnMapLayerUtil {
+    ctor public PlacesListOnMapLayerUtil();
+    method public void initializePlacesListOnMapLayer(com.mapbox.maps.Style style, android.content.res.Resources resources);
+    method public void removePlacesListOnMapLayer(com.mapbox.maps.Style style);
+    method public void updatePlacesListOnMapLayer(com.mapbox.maps.Style style, com.mapbox.geojson.FeatureCollection featureCollection);
+    field public static final com.mapbox.navigation.ui.androidauto.placeslistonmap.PlacesListOnMapLayerUtil.Companion Companion;
+  }
+
+  public static final class PlacesListOnMapLayerUtil.Companion {
+  }
+
+  public final class PlacesListOnMapManager implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public PlacesListOnMapManager(com.mapbox.navigation.ui.androidauto.placeslistonmap.PlacesListOnMapProvider placesListOnMapProvider);
+    method public kotlinx.coroutines.flow.StateFlow<androidx.car.app.model.ItemList> getItemList();
+    method public kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.ui.androidauto.search.PlaceRecord>> getPlaceRecords();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.search.PlaceRecord> getPlaceSelected();
+    property public final kotlinx.coroutines.flow.StateFlow<androidx.car.app.model.ItemList> itemList;
+    property public final kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.ui.androidauto.search.PlaceRecord>> placeRecords;
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.search.PlaceRecord> placeSelected;
+  }
+
+  public interface PlacesListOnMapProvider {
+    method public void cancel();
+    method public suspend Object? getPlaces(kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.androidauto.search.GetPlacesError,java.util.List<? extends com.mapbox.navigation.ui.androidauto.search.PlaceRecord>>>);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.preview {
+
+  public final class CarRouteLineRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
+    ctor public CarRouteLineRenderer(com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider carRoutesProvider = com.mapbox.navigation.ui.androidauto.routes.NavigationCarRoutesProvider());
+  }
+
+  public fun interface CarRouteOptionsInterceptor {
+    method public com.mapbox.api.directions.v5.models.RouteOptions.Builder intercept(com.mapbox.api.directions.v5.models.RouteOptions.Builder builder);
+  }
+
+  public final class CarRoutePreviewRepository {
+    ctor public CarRoutePreviewRepository();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.search.PlaceRecord> getPlaceRecord();
+    method public kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getRoutes();
+    method public void setRoutePreview(com.mapbox.navigation.ui.androidauto.search.PlaceRecord placeRecord, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.search.PlaceRecord> placeRecord;
+    property public final kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> routes;
+  }
+
+  public final class CarRoutePreviewRequest implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method @UiThread public void cancelRequest();
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRepository? getRepository();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method @UiThread public void request(com.mapbox.navigation.ui.androidauto.search.PlaceRecord placeRecord, com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRequestCallback callback);
+    property public final com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRepository? repository;
+  }
+
+  public interface CarRoutePreviewRequestCallback {
+    method public void onDestinationLocationUnknown();
+    method public void onNoRoutesFound();
+    method public void onRoutesReady(com.mapbox.navigation.ui.androidauto.search.PlaceRecord placeRecord, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public void onUnknownCurrentLocation();
+  }
+
+  public final class PreviewCarRoutesProvider implements com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider {
+    ctor public PreviewCarRoutesProvider(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getNavigationRoutes();
+    method public void updateRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    property public kotlinx.coroutines.flow.StateFlow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class PreviewCarRoutesProvider2 implements com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider {
+    ctor public PreviewCarRoutesProvider2();
+    method public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getNavigationRoutes();
+    method public kotlinx.coroutines.flow.Flow<com.mapbox.navigation.core.preview.RoutesPreview> getRoutesPreview();
+    method public void updateSelectedRoute(int index);
+    property public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
+    property public final kotlinx.coroutines.flow.Flow<com.mapbox.navigation.core.preview.RoutesPreview> routesPreview;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.routes {
+
+  public interface CarRoutesProvider {
+    method public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getNavigationRoutes();
+    property public abstract kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
+  }
+
+  public final class NavigationCarRoutesProvider implements com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider {
+    ctor public NavigationCarRoutesProvider();
+    method public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> getNavigationRoutes();
+    property public kotlinx.coroutines.flow.Flow<java.util.List<com.mapbox.navigation.base.route.NavigationRoute>> navigationRoutes;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.screenmanager {
+
+  public final class MapboxScreen {
+    field public static final String ACTIVE_GUIDANCE = "MAPBOX_ACTIVE_GUIDANCE";
+    field public static final String ACTIVE_GUIDANCE_FEEDBACK = "MAPBOX_ACTIVE_GUIDANCE_FEEDBACK";
+    field public static final String ARRIVAL = "MAPBOX_ARRIVAL";
+    field public static final String FAVORITES = "MAPBOX_FAVORITES";
+    field public static final String FAVORITES_FEEDBACK = "MAPBOX_FAVORITES_FEEDBACK";
+    field public static final String FREE_DRIVE = "MAPBOX_FREE_DRIVE";
+    field public static final String FREE_DRIVE_FEEDBACK = "MAPBOX_FREE_DRIVE_FEEDBACK";
+    field public static final String GEO_DEEPLINK = "MAPBOX_GEO_DEEPLINK";
+    field public static final String GEO_DEEPLINK_FEEDBACK = "MAPBOX_GEO_DEEPLINK_FEEDBACK";
+    field public static final com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen INSTANCE;
+    field public static final String NEEDS_LOCATION_PERMISSION = "MAPBOX_NEEDS_LOCATION_PERMISSION";
+    field public static final String ROUTE_PREVIEW = "MAPBOX_ROUTE_PREVIEW";
+    field public static final String ROUTE_PREVIEW_FEEDBACK = "MAPBOX_ROUTE_PREVIEW_FEEDBACK";
+    field public static final String SEARCH = "MAPBOX_SEARCH";
+    field public static final String SEARCH_FEEDBACK = "MAPBOX_SEARCH_FEEDBACK";
+    field public static final String SETTINGS = "MAPBOX_SETTINGS";
+  }
+
+  @StringDef({com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SETTINGS, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FREE_DRIVE, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FREE_DRIVE_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SEARCH, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FAVORITES, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FAVORITES_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ARRIVAL}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MapboxScreen.Key {
+  }
+
+  public final class MapboxScreenEvent {
+    method public String getKey();
+    method public String getOperation();
+    property public final String key;
+    property public final String operation;
+  }
+
+  public fun interface MapboxScreenFactory {
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class MapboxScreenGraph {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.androidauto.MapboxCarContext prepareExperimentalRoutePreviewScreen(com.mapbox.navigation.ui.androidauto.MapboxCarContext);
+    method public static com.mapbox.navigation.ui.androidauto.MapboxCarContext prepareScreens(com.mapbox.navigation.ui.androidauto.MapboxCarContext);
+  }
+
+  public final class MapboxScreenManager {
+    method public operator boolean contains(String key);
+    method @UiThread public androidx.car.app.Screen createScreen(String screenKey);
+    method public static com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenEvent? current();
+    method public static kotlinx.coroutines.flow.SharedFlow<com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenEvent> getScreenEvent();
+    method @UiThread @kotlin.jvm.Throws(exceptionClasses=IllegalStateException::class) public boolean goBack() throws java.lang.IllegalStateException;
+    method public static void push(String key);
+    method public com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager putAll(kotlin.Pair<java.lang.String,? extends com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory>... pairs);
+    method public static void replaceTop(String key);
+    method public operator <T extends com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory> com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory? set(String key, T factory);
+    property public static final kotlinx.coroutines.flow.SharedFlow<com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenEvent> screenEvent;
+    field public static final com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager.Companion Companion;
+  }
+
+  public static final class MapboxScreenManager.Companion {
+    method public com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenEvent? current();
+    method public kotlinx.coroutines.flow.SharedFlow<com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenEvent> getScreenEvent();
+    method public void push(String key);
+    method public void replaceTop(String key);
+    property public final kotlinx.coroutines.flow.SharedFlow<com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenEvent> screenEvent;
+  }
+
+  public final class MapboxScreenOperation {
+    field public static final String CREATED = "CREATED";
+    field public static final String GO_BACK = "GO_BACK";
+    field public static final com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenOperation INSTANCE;
+    field public static final String PUSH = "PUSH";
+    field public static final String REPLACE_TOP = "REPLACE_TOP";
+  }
+
+  @StringDef({com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenOperation.CREATED, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenOperation.REPLACE_TOP, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenOperation.PUSH, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenOperation.GO_BACK}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MapboxScreenOperation.Type {
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.screenmanager.factories {
+
+  public final class ActiveGuidanceFeedbackScreenFactory extends com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackScreenFactory {
+    ctor public ActiveGuidanceFeedbackScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public String getSourceName();
+  }
+
+  public final class ActiveGuidanceScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public ActiveGuidanceScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class ArrivalScreenFactory extends com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackScreenFactory {
+    ctor public ArrivalScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public String getSourceName();
+  }
+
+  public final class FavoritesFeedbackScreenFactory extends com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackScreenFactory {
+    ctor public FavoritesFeedbackScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public String getSourceName();
+  }
+
+  public final class FavoritesScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public FavoritesScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class FreeDriveFeedbackScreenFactory extends com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackScreenFactory {
+    ctor public FreeDriveFeedbackScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public String getSourceName();
+  }
+
+  public final class FreeDriveScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public FreeDriveScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class GeoDeeplinkPlacesCarScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public GeoDeeplinkPlacesCarScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class GeoDeeplinkPlacesFeedbackScreenFactory extends com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackScreenFactory {
+    ctor public GeoDeeplinkPlacesFeedbackScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public String getSourceName();
+  }
+
+  public final class NeedsLocationPermissionScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public NeedsLocationPermissionScreenFactory();
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class RoutePreviewFeedbackScreenFactory extends com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackScreenFactory {
+    ctor public RoutePreviewFeedbackScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public String getSourceName();
+  }
+
+  public final class RoutePreviewScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public RoutePreviewScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoutePreviewScreenFactory2 implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public RoutePreviewScreenFactory2(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class SearchPlacesFeedbackScreenFactory extends com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackScreenFactory {
+    ctor public SearchPlacesFeedbackScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackPoll getCarFeedbackPoll(androidx.car.app.CarContext carContext);
+    method public String getSourceName();
+  }
+
+  public final class SearchPlacesScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public SearchPlacesScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+  public final class SettingsScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public SettingsScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.search {
+
+  public final class CarPlaceSearchOptions {
+    method public String? getAccessToken();
+    method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions.Builder toBuilder();
+    property public final String? accessToken;
+  }
+
+  public static final class CarPlaceSearchOptions.Builder {
+    ctor public CarPlaceSearchOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions.Builder accessToken(String? accessToken);
+    method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions build();
+  }
+
+  public final class GetPlacesError {
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class PlaceRecord {
+    ctor public PlaceRecord(String id, String name, com.mapbox.geojson.Point? coordinate, String? description = null, java.util.List<java.lang.String> categories = listOf());
+    method public java.util.List<java.lang.String> getCategories();
+    method public com.mapbox.geojson.Point? getCoordinate();
+    method public String? getDescription();
+    method public String getId();
+    method public String getName();
+    property public final java.util.List<java.lang.String> categories;
+    property public final com.mapbox.geojson.Point? coordinate;
+    property public final String? description;
+    property public final String id;
+    property public final String name;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.settings {
+
+  public final class MapboxCarStorage {
+    method public androidx.car.app.CarContext getCarContext();
+    method public boolean readSharedPref(String key, boolean defaultValue);
+    method public void writeSharedPref(String key, boolean value);
+    property public final androidx.car.app.CarContext carContext;
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.ui.maneuver.model {
+
+  public final class ManeuverExitOptions {
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd getMutcdExitProperties();
+    method public int getTextAppearance();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties.PropertiesVienna getViennaExitProperties();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties;
+    property public final int textAppearance;
+    property public final com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties;
+  }
+
+  public static final class ManeuverExitOptions.Builder {
+    ctor public ManeuverExitOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions build();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions.Builder mutcdExitProperties(com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties.PropertiesMutcd mutcdExitProperties);
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions.Builder textAppearance(@StyleRes int textAppearance);
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions.Builder viennaExitProperties(com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties.PropertiesVienna viennaExitProperties);
+  }
+
+  public final class ManeuverPrimaryOptions {
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions getExitOptions();
+    method public int getTextAppearance();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverPrimaryOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions exitOptions;
+    property public final int textAppearance;
+  }
+
+  public static final class ManeuverPrimaryOptions.Builder {
+    ctor public ManeuverPrimaryOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverPrimaryOptions build();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverPrimaryOptions.Builder exitOptions(com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions exitOptions);
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverPrimaryOptions.Builder textAppearance(@StyleRes int textAppearance);
+  }
+
+  public final class ManeuverSecondaryOptions {
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions getExitOptions();
+    method public int getTextAppearance();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverSecondaryOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions exitOptions;
+    property public final int textAppearance;
+  }
+
+  public static final class ManeuverSecondaryOptions.Builder {
+    ctor public ManeuverSecondaryOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverSecondaryOptions build();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverSecondaryOptions.Builder exitOptions(com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions exitOptions);
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverSecondaryOptions.Builder textAppearance(@StyleRes int textAppearance);
+  }
+
+  public final class ManeuverSubOptions {
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions getExitOptions();
+    method public int getTextAppearance();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverSubOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions exitOptions;
+    property public final int textAppearance;
+  }
+
+  public static final class ManeuverSubOptions.Builder {
+    ctor public ManeuverSubOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverSubOptions build();
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverSubOptions.Builder exitOptions(com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverExitOptions exitOptions);
+    method public com.mapbox.navigation.ui.androidauto.ui.maneuver.model.ManeuverSubOptions.Builder textAppearance(@StyleRes int textAppearance);
+  }
+
+  public abstract sealed class MapboxExitProperties {
+    method public final int getExitBackground();
+    method public final int getExitLeftDrawable();
+    method public final int getExitRightDrawable();
+    method public final int getFallbackDrawable();
+    method public final boolean getShouldFallbackWithDrawable();
+    method public final boolean getShouldFallbackWithText();
+    property public final int exitBackground;
+    property public final int exitLeftDrawable;
+    property public final int exitRightDrawable;
+    property public final int fallbackDrawable;
+    property public final boolean shouldFallbackWithDrawable;
+    property public final boolean shouldFallbackWithText;
+  }
+
+  public static final class MapboxExitProperties.PropertiesMutcd extends com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties {
+    ctor public MapboxExitProperties.PropertiesMutcd(boolean shouldFallbackWithText = false, boolean shouldFallbackWithDrawable = true, @DrawableRes int exitBackground = com.mapbox.navigation.tripdata.R.drawable.mapbox_exit_board_background, @DrawableRes int fallbackDrawable = com.mapbox.navigation.tripdata.R.drawable.mapbox_ic_exit_arrow_right_mutcd, @DrawableRes int exitLeftDrawable = com.mapbox.navigation.tripdata.R.drawable.mapbox_ic_exit_arrow_left_mutcd, @DrawableRes int exitRightDrawable = com.mapbox.navigation.tripdata.R.drawable.mapbox_ic_exit_arrow_right_mutcd);
+  }
+
+  public static final class MapboxExitProperties.PropertiesVienna extends com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties {
+    ctor public MapboxExitProperties.PropertiesVienna(boolean shouldFallbackWithText = false, boolean shouldFallbackWithDrawable = true, @DrawableRes int exitBackground = com.mapbox.navigation.tripdata.R.drawable.mapbox_exit_board_background, @DrawableRes int fallbackDrawable = com.mapbox.navigation.tripdata.R.drawable.mapbox_ic_exit_arrow_left_vienna, @DrawableRes int exitLeftDrawable = com.mapbox.navigation.tripdata.R.drawable.mapbox_ic_exit_arrow_left_vienna, @DrawableRes int exitRightDrawable = com.mapbox.navigation.tripdata.R.drawable.mapbox_ic_exit_arrow_right_vienna);
+  }
+
+}
+
+package com.mapbox.navigation.ui.androidauto.ui.maneuver.view {
+
+  @UiThread public final class MapboxExitText extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxExitText(android.content.Context context);
+    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public android.graphics.Bitmap getViewAsBitmap();
+    method public void setExit(String? modifier, com.mapbox.navigation.tripdata.maneuver.model.ExitNumberComponentNode exit);
+    method public android.graphics.drawable.Drawable styleExitWith(android.graphics.Bitmap bitmap, int drawableHeight);
+    method public void updateExitProperties(com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties? properties);
+    method public void updateTextAppearance(@StyleRes int style);
+  }
+
+}
+

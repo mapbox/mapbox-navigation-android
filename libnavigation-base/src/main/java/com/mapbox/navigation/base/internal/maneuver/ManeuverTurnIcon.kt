@@ -6,5 +6,5 @@ data class ManeuverTurnIcon(
     val degree: Float?,
     val drivingSide: String?,
     val shouldFlipIcon: Boolean,
-    @DrawableRes val icon: Int?
+    @DrawableRes val icon: Int?,
 )

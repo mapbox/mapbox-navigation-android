@@ -34,7 +34,7 @@ class ExpiringDataRemoverTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-30T21:59:00Z"),
                             createIncident(endTime = "2022-06-31T21:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
@@ -45,10 +45,10 @@ class ExpiringDataRemoverTest {
                             createIncident(endTime = "2022-06-30T20:59:00Z"),
                             createIncident(endTime = "bad time"),
                             createIncident(endTime = "2022-06-30T19:59:00Z"),
-                        )
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         )
         val expectedNewRoute1 = createNavigationRoute(
             directionsRoute = createDirectionsRoute(
@@ -61,7 +61,7 @@ class ExpiringDataRemoverTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-30T21:59:00Z"),
                             createIncident(endTime = "2022-06-31T21:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
@@ -71,10 +71,10 @@ class ExpiringDataRemoverTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-30T20:59:00Z"),
                             createIncident(endTime = "bad time"),
-                        )
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         )
         val route2 = createNavigationRoute(
             directionsRoute = createDirectionsRoute(
@@ -87,36 +87,36 @@ class ExpiringDataRemoverTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T10:59:00Z"),
                             createIncident(endTime = "2022-06-21T10:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
                             .congestion(listOf("heavy", "moderate"))
                             .congestionNumeric(listOf(90, 80))
                             .build(),
-                        incidents = null
+                        incidents = null,
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
                             .congestion(listOf("severe", "low"))
                             .congestionNumeric(listOf(120, 20))
                             .build(),
-                        incidents = null
+                        incidents = null,
                     ),
                     createRouteLeg(
                         annotation = null,
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder().build(),
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:50:00Z"),
-                        )
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         )
         val expectedNewRoute2 = createNavigationRoute(
             directionsRoute = createDirectionsRoute(
@@ -129,40 +129,40 @@ class ExpiringDataRemoverTest {
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T10:59:00Z"),
                             createIncident(endTime = "2022-06-21T10:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
                             .congestion(listOf("heavy", "moderate"))
                             .congestionNumeric(listOf(90, 80))
                             .build(),
-                        incidents = null
+                        incidents = null,
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder()
                             .congestion(listOf("unknown", "unknown"))
                             .congestionNumeric(listOf(null, null))
                             .build(),
-                        incidents = null
+                        incidents = null,
                     ),
                     createRouteLeg(
                         annotation = null,
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:59:00Z"),
-                        )
+                        ),
                     ),
                     createRouteLeg(
                         annotation = LegAnnotation.builder().build(),
                         incidents = listOf(
                             createIncident(endTime = "2022-06-31T22:50:00Z"),
-                        )
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         )
         val route3 = createNavigationRoute(directionsRoute = createDirectionsRoute(legs = null))
         val expectedNewRoute3 = createNavigationRoute(
-            directionsRoute = createDirectionsRoute(legs = null)
+            directionsRoute = createDirectionsRoute(legs = null),
         )
         val route1RouteProgressData = RouteProgressData(1, 2, 3)
         val route2RouteProgressData = RouteProgressData(2, 5, 6)
@@ -173,33 +173,33 @@ class ExpiringDataRemoverTest {
                 RouteRefresherResult(
                     route2,
                     route2RouteProgressData,
-                    RouteRefresherStatus.FAILURE
+                    RouteRefresherStatus.FAILURE,
                 ),
                 RouteRefresherResult(
                     route3,
                     route3RouteProgressData,
-                    RouteRefresherStatus.INVALIDATED
-                )
-            )
+                    RouteRefresherStatus.INVALIDATED,
+                ),
+            ),
         )
         val expected = RoutesRefresherResult(
             RouteRefresherResult(
                 expectedNewRoute1,
                 route1RouteProgressData,
-                RouteRefresherStatus.SUCCESS
+                RouteRefresherStatus.SUCCESS,
             ),
             listOf(
                 RouteRefresherResult(
                     expectedNewRoute2,
                     route2RouteProgressData,
-                    RouteRefresherStatus.FAILURE
+                    RouteRefresherStatus.FAILURE,
                 ),
                 RouteRefresherResult(
                     expectedNewRoute3,
                     route3RouteProgressData,
-                    RouteRefresherStatus.INVALIDATED
-                )
-            )
+                    RouteRefresherStatus.INVALIDATED,
+                ),
+            ),
         )
 
         val actual = sut.removeExpiringDataFromRoutesProgressData(input)

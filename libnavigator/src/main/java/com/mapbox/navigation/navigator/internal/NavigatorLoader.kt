@@ -1,14 +1,20 @@
 package com.mapbox.navigation.navigator.internal
 
+import androidx.annotation.VisibleForTesting
+import com.mapbox.navigation.base.BuildConfig
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
+import com.mapbox.navigation.utils.internal.getOrPutJsonObject
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigator.BillingProductType
 import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigFactory
 import com.mapbox.navigator.ConfigHandle
+import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
@@ -19,7 +25,10 @@ import com.mapbox.navigator.RouterFactory
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterType
 import com.mapbox.navigator.SettingsProfile
+import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TilesConfig
+import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * This class is expected to gain more responsibility as we define [customConfig].
@@ -30,12 +39,13 @@ object NavigatorLoader {
     fun createConfig(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
-    ): ConfigHandle =
-        ConfigFactory.build(
+    ): ConfigHandle {
+        return ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            deviceProfile.customConfig,
+            enableTelemetryNavigationEvents(deviceProfile.customConfig),
         )
+    }
 
     fun createHistoryRecorderHandles(
         config: ConfigHandle,
@@ -52,13 +62,16 @@ object NavigatorLoader {
         cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        router: RouterInterface?,
+        offlineCacheHandle: CacheHandle?,
+        eventsMetadataProvider: EventsMetadataInterface,
     ): NativeComponents {
         val navigator = Navigator(
             config,
             cacheHandle,
             historyRecorderComposite,
-            router,
+            RouterType.HYBRID,
+            null,
+            offlineCacheHandle,
         )
         val graphAccessor = GraphAccessor(cacheHandle)
         val roadObjectMatcher = RoadObjectMatcher(cacheHandle)
@@ -69,6 +82,8 @@ object NavigatorLoader {
             cacheHandle,
             roadObjectMatcher,
             navigator.routeAlternativesController,
+            createInputService(config, historyRecorderComposite),
+            navigator.getTelemetry(eventsMetadataProvider),
         )
     }
 
@@ -77,7 +92,7 @@ object NavigatorLoader {
         tilesConfig: TilesConfig,
         historyRecorder: HistoryRecorderHandle?,
     ): CacheHandle {
-        return CacheFactory.build(tilesConfig, config, historyRecorder)
+        return CacheFactory.build(tilesConfig, config, historyRecorder, BillingProductType.CF)
     }
 
     fun createNativeRouterInterface(
@@ -93,16 +108,23 @@ object NavigatorLoader {
         )
     }
 
+    private fun createInputService(
+        config: ConfigHandle,
+        historyRecorder: HistoryRecorderHandle?,
+    ): InputsServiceHandle {
+        return InputsServiceHandle.build(config, historyRecorder)
+    }
+
     private fun buildHistoryRecorder(
         historyDir: String?,
-        config: ConfigHandle
+        config: ConfigHandle,
     ): HistoryRecorderHandle? {
         return if (historyDir != null) {
             val historyRecorderHandle = HistoryRecorderHandle.build(historyDir, config)
             if (historyRecorderHandle == null) {
                 logE(
                     "Could not create directory directory to write events",
-                    "NavigatorLoader"
+                    "NavigatorLoader",
                 )
             }
             historyRecorderHandle
@@ -143,6 +165,33 @@ object NavigatorLoader {
         }
     }
 
+    // TODO should be enabled by default in NN when platforms migrate to native telemetry
+    @VisibleForTesting
+    internal fun enableTelemetryNavigationEvents(
+        config: String,
+        sendImmediate: Boolean = BuildConfig.DEBUG,
+    ): String {
+        val rootJson = if (config.isNotBlank()) {
+            try {
+                JSONObject(config)
+            } catch (e: JSONException) {
+                logE("Custom config is not valid: $e, $config")
+                JSONObject()
+            }
+        } else {
+            JSONObject()
+        }
+
+        rootJson.getOrPutJsonObject("features")
+            .put("useTelemetryNavigationEvents", true)
+
+        if (sendImmediate) {
+            rootJson.getOrPutJsonObject("telemetry")
+                .put("eventsPriority", "Immediate")
+        }
+        return rootJson.toString()
+    }
+
     data class HistoryRecorderHandles(
         val general: HistoryRecorderHandle?,
         val copilot: HistoryRecorderHandle?,
@@ -155,5 +204,7 @@ object NavigatorLoader {
         val cache: CacheHandle,
         val roadObjectMatcher: RoadObjectMatcher,
         val routeAlternativesController: RouteAlternativesControllerInterface,
+        val inputsService: InputsServiceHandle,
+        val telemetry: Telemetry,
     )
 }

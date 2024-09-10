@@ -27,8 +27,43 @@ internal const val NAV_FEEDBACK_SUBMITTED_EVENT_NAME = "nav_feedback_submitted"
  * @property searchResults [SearchResults] from search request
  */
 @ExperimentalPreviewMapboxNavigationAPI
-data class SearchResultsEvent(val searchResults: SearchResults) :
-    HistoryEvent(SEARCH_RESULTS_EVENT_NAME, searchResults)
+class SearchResultsEvent(val searchResults: SearchResults) : HistoryEvent(
+    SEARCH_RESULTS_EVENT_NAME,
+    searchResults,
+) {
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SearchResultsEvent
+
+        if (snakeCaseEventName != other.snakeCaseEventName) return false
+        return searchResults == other.searchResults
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = snakeCaseEventName.hashCode()
+        result = 31 * result + searchResults.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "SearchResultsEvent(" +
+            "snakeCaseEventName=$snakeCaseEventName, " +
+            "searchResults=$searchResults" +
+            ")"
+    }
+}
 
 /**
  * SearchResultUsedEvent.
@@ -38,8 +73,43 @@ data class SearchResultsEvent(val searchResults: SearchResults) :
  * @property searchResultUsed
  */
 @ExperimentalPreviewMapboxNavigationAPI
-data class SearchResultUsedEvent(val searchResultUsed: SearchResultUsed) :
-    HistoryEvent(SEARCH_RESULT_USED_EVENT_NAME, searchResultUsed)
+class SearchResultUsedEvent(val searchResultUsed: SearchResultUsed) : HistoryEvent(
+    SEARCH_RESULT_USED_EVENT_NAME,
+    searchResultUsed,
+) {
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SearchResultUsedEvent
+
+        if (snakeCaseEventName != other.snakeCaseEventName) return false
+        return searchResultUsed == other.searchResultUsed
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = snakeCaseEventName.hashCode()
+        result = 31 * result + searchResultUsed.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "SearchResultUsedEvent(" +
+            "snakeCaseEventName=$snakeCaseEventName, " +
+            "searchResultUsed=$searchResultUsed" +
+            ")"
+    }
+}
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal data class DriveEndsEvent(val driveEnds: DriveEnds) :

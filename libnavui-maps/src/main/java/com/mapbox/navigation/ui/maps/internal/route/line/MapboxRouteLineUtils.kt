@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.graphics.Color
 import android.util.LruCache
-import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
@@ -13,11 +12,11 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
-import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addPersistentLayer
@@ -38,23 +37,27 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.line.api.HeavyRouteLineExpressionProvider
+import com.mapbox.navigation.ui.maps.route.line.api.LightRouteLineExpressionProvider
+import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineExpressionCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.model.ExpressionOffsetData
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
 import com.mapbox.navigation.ui.maps.route.line.model.InactiveRouteColors
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineSourceKey
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimExpressionProvider
-import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset
+import com.mapbox.navigation.ui.maps.route.line.model.SegmentColorType
+import com.mapbox.navigation.ui.maps.route.model.FadingConfig
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheRouteResult
@@ -64,14 +67,15 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
+import kotlinx.coroutines.CoroutineScope
 import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal object MapboxRouteLineUtils {
 
     private const val LOG_CATEGORY = "MapboxRouteLineUtils"
@@ -80,12 +84,18 @@ internal object MapboxRouteLineUtils {
 
     internal val extractRouteDataCache: LruCache<
         CacheResultUtils.CacheResultKeyRouteTraffic<
-            List<ExtractedRouteData>>, List<ExtractedRouteData>>
+            List<ExtractedRouteData>,
+            >,
+        List<ExtractedRouteData>,
+        >
         by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
 
     private val granularDistancesCache: LruCache<
         CacheResultUtils.CacheResultKeyRoute<
-            RouteLineGranularDistances?>, RouteLineGranularDistances?>
+            RouteLineGranularDistances?,
+            >,
+        RouteLineGranularDistances?,
+        >
         by lazy { LruCache(NUMBER_OF_SUPPORTED_ROUTES) }
 
     val layerGroup1SourceKey = RouteLineSourceKey(RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID)
@@ -99,7 +109,7 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_1_CASING,
         RouteLayerConstants.LAYER_GROUP_1_MAIN,
         RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
-        RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
+        RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
     )
 
     // ordering is important
@@ -109,7 +119,7 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_2_CASING,
         RouteLayerConstants.LAYER_GROUP_2_MAIN,
         RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
-        RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
+        RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
     )
 
     // ordering is important
@@ -119,7 +129,7 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.LAYER_GROUP_3_CASING,
         RouteLayerConstants.LAYER_GROUP_3_MAIN,
         RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
-        RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
+        RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
     )
 
     // ordering is important
@@ -129,13 +139,13 @@ internal object MapboxRouteLineUtils {
         RouteLayerConstants.MASKING_LAYER_CASING,
         RouteLayerConstants.MASKING_LAYER_MAIN,
         RouteLayerConstants.MASKING_LAYER_TRAFFIC,
-        RouteLayerConstants.MASKING_LAYER_RESTRICTED
+        RouteLayerConstants.MASKING_LAYER_RESTRICTED,
     )
 
     val sourceLayerMap = mapOf<RouteLineSourceKey, Set<String>>(
         Pair(layerGroup1SourceKey, layerGroup1SourceLayerIds),
         Pair(layerGroup2SourceKey, layerGroup2SourceLayerIds),
-        Pair(layerGroup3SourceKey, layerGroup3SourceLayerIds)
+        Pair(layerGroup3SourceKey, layerGroup3SourceLayerIds),
     )
 
     /**
@@ -146,18 +156,19 @@ internal object MapboxRouteLineUtils {
      * the part of the route line that isn't visible
      * @param lineStartColor the starting color for the line gradient. This is usually transparent
      * and steps are added indicating a color change.
-     * @param lineColor a default line color
+     * @param lineColorType a default line color
      * @param routeLineExpressionData a collection of [RouteLineExpressionData]. Generally an
      * [Expression] step should be created for each item in the collection subject to some
      * filtering.
      *
      * @return the Expression that can be used in a Layer's properties.
      */
-    internal fun getTrafficLineExpression(
+    private fun getTrafficLineExpression(
+        dynamicOptions: RouteLineViewOptionsData,
         distanceOffset: Double,
         lineStartColor: Int,
-        lineColor: Int,
-        routeLineExpressionData: List<RouteLineExpressionData>
+        lineColorType: SegmentColorType,
+        routeLineExpressionData: List<RouteLineExpressionData>,
     ): Expression {
         var lastColor = Int.MAX_VALUE
         val expressionBuilder = Expression.ExpressionBuilder("step")
@@ -168,16 +179,17 @@ internal object MapboxRouteLineUtils {
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
-                RouteLineExpressionData(distanceOffset, congestionValue = "", lineColor, 0)
-            }
+                RouteLineExpressionData(distanceOffset, congestionValue = "", lineColorType, 0)
+            },
         ).forEach {
             // If the color hasn't changed there's no reason to add it to the expression. A smaller
             // expression is less work for the map to process.
-            if (it.segmentColor != lastColor) {
-                lastColor = it.segmentColor
+            val segmentColor = it.segmentColorType.getColor(dynamicOptions)
+            if (segmentColor != lastColor) {
+                lastColor = segmentColor
                 expressionBuilder.stop {
                     literal(it.offset)
-                    color(it.segmentColor)
+                    color(segmentColor)
                 }
             }
         }
@@ -194,12 +206,13 @@ internal object MapboxRouteLineUtils {
      * represent that distance and should be calculated based on the route distance in order
      * to create a similar looking gradient regardless of the route length.
      */
-    internal fun getTrafficLineExpressionSoftGradient(
+    private fun getTrafficLineExpressionSoftGradient(
+        dynamicOptions: RouteLineViewOptionsData,
         distanceOffset: Double,
         lineStartColor: Int,
-        lineColor: Int,
+        lineColorType: SegmentColorType,
         softGradientStopGap: Double,
-        routeLineExpressionData: List<RouteLineExpressionData>
+        routeLineExpressionData: List<RouteLineExpressionData>,
     ): Expression {
         val vanishPointStopGap = VANISH_POINT_STOP_GAP
         val expressionBuilder = Expression.InterpolatorBuilder("interpolate")
@@ -210,10 +223,12 @@ internal object MapboxRouteLineUtils {
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
-                RouteLineExpressionData(distanceOffset, congestionValue = "", lineColor, 0)
-            }
+                RouteLineExpressionData(distanceOffset, congestionValue = "", lineColorType, 0)
+            },
         )
-        filteredItems.forEachIndexed { index, expressionData ->
+        var prevIndex = 0
+        for (index in filteredItems.indices) {
+            val expressionData = filteredItems[index]
             if (index == 0) {
                 if (expressionData.offset > 0) {
                     expressionBuilder.stop {
@@ -231,28 +246,36 @@ internal object MapboxRouteLineUtils {
 
                 expressionBuilder.stop {
                     literal(expressionData.offset)
-                    color(expressionData.segmentColor)
+                    color(expressionData.segmentColorType.getColor(dynamicOptions))
                 }
             } else {
-                // ignoring offset points that are at the end of a route
-                // as that would create a gradient slope towards the last point of the route
-                // which is not necessary
-                if (expressionData.offset < 1.0) {
-                    val stopGapOffset = expressionData.offset - softGradientStopGap
-                    val stopGapOffsetToUse = if (stopGapOffset > filteredItems[index - 1].offset) {
-                        stopGapOffset
-                    } else {
-                        filteredItems[index - 1].offset + vanishPointStopGap
-                    }
+                val curColor = expressionData.segmentColorType.getColor(dynamicOptions)
+                val prevColor = filteredItems[prevIndex].segmentColorType.getColor(dynamicOptions)
+                if (prevColor != curColor) {
+                    // ignoring offset points that are at the end of a route
+                    // as that would create a gradient slope towards the last point of the route
+                    // which is not necessary
+                    if (expressionData.offset < 1.0) {
+                        val stopGapOffset = expressionData.offset - softGradientStopGap
+                        val stopGapOffsetToUse =
+                            if (stopGapOffset > filteredItems[prevIndex].offset) {
+                                stopGapOffset
+                            } else {
+                                filteredItems[prevIndex].offset + vanishPointStopGap
+                            }
 
-                    expressionBuilder.stop {
-                        literal(stopGapOffsetToUse)
-                        color(filteredItems[index - 1].segmentColor)
-                    }
+                        expressionBuilder.stop {
+                            literal(stopGapOffsetToUse)
+                            color(
+                                filteredItems[prevIndex].segmentColorType.getColor(dynamicOptions),
+                            )
+                        }
 
-                    expressionBuilder.stop {
-                        literal(expressionData.offset)
-                        color(expressionData.segmentColor)
+                        expressionBuilder.stop {
+                            literal(expressionData.offset)
+                            color(expressionData.segmentColorType.getColor(dynamicOptions))
+                        }
+                        prevIndex = index
                     }
                 }
             }
@@ -261,13 +284,33 @@ internal object MapboxRouteLineUtils {
     }
 
     /**
-     * Returns an [Expression] for a gradient line that will start with the @param lineBaseColor,
-     * creating the first step at the @param distanceOffset with additional steps
-     * according to the items in the @param routeLineExpressionData.
+     * Returns an [Expression] for a gradient line that will use [defaultColor] for the current active leg
+     * and all previous legs. All legs after the current leg will use [substitutionColor].
+     */
+    internal fun getExpressionSubstitutingColorForUpcomingLegs(
+        routeLineExpressionData: List<RouteLineExpressionData>,
+        defaultColor: Int,
+        substitutionColor: Int,
+        activeLegIndex: Int,
+    ) = getRouteLineExpression(
+        distanceOffset = 0.0,
+        routeLineExpressionData = routeLineExpressionData,
+        lineBaseColor = defaultColor,
+        defaultColor = defaultColor,
+        substitutionColor = substitutionColor,
+        shouldSubstituteColor = { legIndex ->
+            legIndex > activeLegIndex
+        },
+    )
+
+    /**
+     * Returns an [Expression] for a gradient line that will start with the [lineBaseColor],
+     * creating the first step at the [distanceOffset] with additional steps
+     * according to the items in the [routeLineExpressionData].
      *
-     * If the @param activeLegIndex is greater than or equal to zero a color substitution will
+     * If the [activeLegIndex] is greater than or equal to zero a color substitution will
      * take place in the expression if the underlying data's leg index parameter does not
-     * equal the @param activeLegIndex. This was added for the feature allowing for alternate
+     * equal the [activeLegIndex]. This was added for the feature allowing for alternate
      * styling of inactive route legs. To avoid this substitution altogether pass in an
      * activeLegIndex value less than zero.
      *
@@ -281,13 +324,31 @@ internal object MapboxRouteLineUtils {
      *
      * @return an [Expression] intended to be used as a gradient line
      */
-    internal fun getRouteLineExpression(
+    internal fun getExpressionSubstitutingColorForInactiveLegs(
         distanceOffset: Double,
         routeLineExpressionData: List<RouteLineExpressionData>,
         lineBaseColor: Int,
         defaultColor: Int,
         substitutionColor: Int,
-        activeLegIndex: Int
+        activeLegIndex: Int,
+    ) = getRouteLineExpression(
+        distanceOffset,
+        routeLineExpressionData,
+        lineBaseColor,
+        defaultColor,
+        substitutionColor,
+        shouldSubstituteColor = { legIndex ->
+            activeLegIndex >= 0 && legIndex != activeLegIndex
+        },
+    )
+
+    private fun getRouteLineExpression(
+        distanceOffset: Double,
+        routeLineExpressionData: List<RouteLineExpressionData>,
+        lineBaseColor: Int,
+        defaultColor: Int,
+        substitutionColor: Int,
+        shouldSubstituteColor: (Int) -> Boolean,
     ): Expression {
         var lastColor = Int.MAX_VALUE
         val expressionBuilder = Expression.ExpressionBuilder("step")
@@ -298,10 +359,16 @@ internal object MapboxRouteLineUtils {
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
-                RouteLineExpressionData(distanceOffset, congestionValue = "", defaultColor, 0)
-            }
+                // colors are unused
+                RouteLineExpressionData(
+                    distanceOffset,
+                    congestionValue = "",
+                    SegmentColorType.PRIMARY_DEFAULT,
+                    0,
+                )
+            },
         ).forEach {
-            val colorToUse = if (activeLegIndex >= 0 && it.legIndex != activeLegIndex) {
+            val colorToUse = if (shouldSubstituteColor(it.legIndex)) {
                 substitutionColor
             } else {
                 defaultColor
@@ -336,7 +403,7 @@ internal object MapboxRouteLineUtils {
     internal fun getRouteLineExpression(
         offset: Double,
         traveledColor: Int,
-        lineBaseColor: Int
+        lineBaseColor: Int,
     ): Expression {
         val expressionBuilder = Expression.ExpressionBuilder("step")
         expressionBuilder.lineProgress()
@@ -358,7 +425,7 @@ internal object MapboxRouteLineUtils {
     internal fun <T : ExpressionOffsetData> getFilteredRouteLineExpressionData(
         distanceOffset: Double,
         routeLineExpressionData: List<T>,
-        defaultObjectCreator: () -> T
+        defaultObjectCreator: () -> T,
     ): List<T> {
         val filteredItems = routeLineExpressionData.filterIndexed { index, restrictionData ->
             restrictionData.offset > distanceOffset &&
@@ -369,6 +436,7 @@ internal object MapboxRouteLineUtils {
                 true -> listOf(defaultObjectCreator())
                 false -> listOf(routeLineExpressionData.last().copyWithNewOffset(distanceOffset))
             }
+
             false -> {
                 val firstItemIndex = routeLineExpressionData.indexOf(filteredItems.first())
                 val fillerItem = if (firstItemIndex == 0) {
@@ -382,34 +450,38 @@ internal object MapboxRouteLineUtils {
     }
 
     fun getRouteFeatureDataProvider(
-        directionsRoutes: List<NavigationRoute>
+        directionsRoutes: List<NavigationRoute>,
     ): () -> List<RouteFeatureData> = {
         directionsRoutes.map(::generateFeatureCollection)
     }
 
     fun getRouteLineFeatureDataProvider(
-        directionsRoutes: List<NavigationRouteLine>
+        directionsRoutes: List<NavigationRouteLine>,
     ): () -> List<RouteFeatureData> = {
         directionsRoutes.map(::generateFeatureCollection)
     }
 
     internal fun resolveNumericToValue(
         congestionValue: Int?,
-        routeLineColorResources: RouteLineColorResources
+        staticOptions: MapboxRouteLineApiOptions,
     ): String {
         return when (congestionValue) {
-            in routeLineColorResources.lowCongestionRange -> {
+            in staticOptions.lowCongestionRange -> {
                 RouteLayerConstants.LOW_CONGESTION_VALUE
             }
-            in routeLineColorResources.heavyCongestionRange -> {
+
+            in staticOptions.heavyCongestionRange -> {
                 RouteLayerConstants.HEAVY_CONGESTION_VALUE
             }
-            in routeLineColorResources.severeCongestionRange -> {
+
+            in staticOptions.severeCongestionRange -> {
                 RouteLayerConstants.SEVERE_CONGESTION_VALUE
             }
-            in routeLineColorResources.moderateCongestionRange -> {
+
+            in staticOptions.moderateCongestionRange -> {
                 RouteLayerConstants.MODERATE_CONGESTION_VALUE
             }
+
             else -> {
                 RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
             }
@@ -423,61 +495,74 @@ internal object MapboxRouteLineUtils {
      * @param isPrimaryRoute indicates if the congestion value for the primary route should
      * be returned or the color for an alternative route.
      */
-    @ColorInt
-    fun getRouteColorForCongestion(
+    fun getRouteColorTypeForCongestion(
         congestionValue: String,
         isPrimaryRoute: Boolean,
-        routeLineColorResources: RouteLineColorResources
-    ): Int {
+    ): SegmentColorType {
         return when (isPrimaryRoute) {
             true -> when (congestionValue) {
                 RouteLayerConstants.LOW_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeLowCongestionColor
+                    SegmentColorType.PRIMARY_LOW_CONGESTION
                 }
+
                 RouteLayerConstants.MODERATE_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeModerateCongestionColor
+                    SegmentColorType.PRIMARY_MODERATE_CONGESTION
                 }
+
                 RouteLayerConstants.HEAVY_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeHeavyCongestionColor
+                    SegmentColorType.PRIMARY_HEAVY_CONGESTION
                 }
+
                 RouteLayerConstants.SEVERE_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeSevereCongestionColor
+                    SegmentColorType.PRIMARY_SEVERE_CONGESTION
                 }
+
                 RouteLayerConstants.UNKNOWN_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeUnknownCongestionColor
+                    SegmentColorType.PRIMARY_UNKNOWN_CONGESTION
                 }
+
                 RouteLayerConstants.CLOSURE_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeClosureColor
+                    SegmentColorType.PRIMARY_CLOSURE
                 }
+
                 RouteLayerConstants.RESTRICTED_CONGESTION_VALUE -> {
-                    routeLineColorResources.restrictedRoadColor
+                    SegmentColorType.PRIMARY_RESTRICTED
                 }
-                else -> routeLineColorResources.routeDefaultColor
+
+                else -> SegmentColorType.PRIMARY_DEFAULT
             }
+
             false -> when (congestionValue) {
                 RouteLayerConstants.LOW_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteLowCongestionColor
+                    SegmentColorType.ALTERNATIVE_LOW_CONGESTION
                 }
+
                 RouteLayerConstants.MODERATE_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteModerateCongestionColor
+                    SegmentColorType.ALTERNATIVE_MODERATE_CONGESTION
                 }
+
                 RouteLayerConstants.HEAVY_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteHeavyCongestionColor
+                    SegmentColorType.ALTERNATIVE_HEAVY_CONGESTION
                 }
+
                 RouteLayerConstants.SEVERE_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteSevereCongestionColor
+                    SegmentColorType.ALTERNATIVE_SEVERE_CONGESTION
                 }
+
                 RouteLayerConstants.UNKNOWN_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteUnknownCongestionColor
+                    SegmentColorType.ALTERNATIVE_UNKNOWN_CONGESTION
                 }
+
                 RouteLayerConstants.CLOSURE_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteClosureColor
+                    SegmentColorType.ALTERNATIVE_CLOSURE
                 }
+
                 RouteLayerConstants.RESTRICTED_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteRestrictedRoadColor
+                    SegmentColorType.ALTERNATIVE_RESTRICTED
                 }
+
                 else -> {
-                    routeLineColorResources.alternativeRouteDefaultColor
+                    SegmentColorType.ALTERNATIVE_DEFAULT
                 }
             }
         }
@@ -486,40 +571,39 @@ internal object MapboxRouteLineUtils {
     /**
      * Returns the color that is used to represent traffic congestion on inactive legs of the primary route.
      */
-    @ColorInt
-    fun getCongestionColorForInactiveRouteLegs(
+    fun getCongestionColorTypeForInactiveRouteLegs(
         congestionValue: String,
         colors: InactiveRouteColors,
-    ): Int = when (congestionValue) {
+    ): SegmentColorType = when (congestionValue) {
         RouteLayerConstants.LOW_CONGESTION_VALUE -> {
-            colors.inactiveRouteLegLowCongestionColor
+            colors.inactiveRouteLegLowCongestionColorType
         }
 
         RouteLayerConstants.MODERATE_CONGESTION_VALUE -> {
-            colors.inactiveRouteLegModerateCongestionColor
+            colors.inactiveRouteLegModerateCongestionColorType
         }
 
         RouteLayerConstants.HEAVY_CONGESTION_VALUE -> {
-            colors.inactiveRouteLegHeavyCongestionColor
+            colors.inactiveRouteLegHeavyCongestionColorType
         }
 
         RouteLayerConstants.SEVERE_CONGESTION_VALUE -> {
-            colors.inactiveRouteLegSevereCongestionColor
+            colors.inactiveRouteLegSevereCongestionColorType
         }
 
         RouteLayerConstants.UNKNOWN_CONGESTION_VALUE -> {
-            colors.inactiveRouteLegUnknownCongestionColor
+            colors.inactiveRouteLegUnknownCongestionColorType
         }
 
         RouteLayerConstants.CLOSURE_CONGESTION_VALUE -> {
-            colors.inactiveRouteLegClosureColor
+            colors.inactiveRouteLegClosureColorType
         }
 
         RouteLayerConstants.RESTRICTED_CONGESTION_VALUE -> {
-            colors.inactiveRouteLegRestrictedRoadColor
+            colors.inactiveRouteLegRestrictedRoadColorType
         }
 
-        else -> colors.inactiveRouteLegUnknownCongestionColor
+        else -> colors.inactiveRouteLegUnknownCongestionColorType
     }
 
     /**
@@ -543,35 +627,34 @@ internal object MapboxRouteLineUtils {
         route: NavigationRoute,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
-        routeLineColorResources: RouteLineColorResources,
+        options: MapboxRouteLineApiOptions,
     ): List<RouteLineExpressionData> {
         val congestionProvider =
-            getTrafficCongestionAnnotationProvider(route, routeLineColorResources)
+            getTrafficCongestionAnnotationProvider(route, options)
         val annotationExpressionData = extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
-            congestionProvider
+            congestionProvider,
         )
 
         return when (annotationExpressionData.isEmpty()) {
             false -> {
                 getRouteLineExpressionDataWithStreetClassOverride(
                     annotationExpressionData,
-                    routeLineColorResources,
                     isPrimaryRoute,
-                    trafficBackfillRoadClasses
+                    trafficBackfillRoadClasses,
                 )
             }
+
             true -> listOf(
                 RouteLineExpressionData(
                     0.0,
                     "",
-                    getRouteColorForCongestion(
+                    getRouteColorTypeForCongestion(
                         "",
                         isPrimaryRoute,
-                        routeLineColorResources
                     ),
-                    0
-                )
+                    0,
+                ),
             )
         }
     }
@@ -582,12 +665,12 @@ internal object MapboxRouteLineUtils {
      */
     internal val extractRouteDataWithTrafficAndRoadClassDeDuped: (
         route: NavigationRoute,
-        trafficCongestionProvider: (RouteLeg) -> List<String>?
+        trafficCongestionProvider: (RouteLeg) -> List<String>?,
     ) -> List<ExtractedRouteData> =
         { route: NavigationRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
             val extractedRouteDataItems = extractRouteData(
                 route,
-                trafficCongestionProvider
+                trafficCongestionProvider,
             )
             extractedRouteDataItems.filterIndexed { index, extractedRouteData ->
                 when {
@@ -597,9 +680,11 @@ internal object MapboxRouteLineUtils {
                         extractedRouteData.trafficCongestionIdentifier &&
                         extractedRouteDataItems[index - 1].roadClass ==
                         extractedRouteData.roadClass -> false
+
                     extractedRouteDataItems[index - 1].trafficCongestionIdentifier ==
                         extractedRouteData.trafficCongestionIdentifier &&
                         extractedRouteData.roadClass == null -> false
+
                     else -> true
                 }
             }
@@ -612,7 +697,7 @@ internal object MapboxRouteLineUtils {
      */
     internal fun extractRouteRestrictionData(
         route: NavigationRoute,
-        distancesProvider: (NavigationRoute) -> RouteLineGranularDistances?
+        distancesProvider: (NavigationRoute) -> RouteLineGranularDistances?,
     ): List<ExtractedRouteRestrictionData> {
         val itemsToReturn = mutableListOf<ExtractedRouteRestrictionData>()
         route.directionsRoute.legs()?.forEachIndexed { legIndex, leg ->
@@ -636,8 +721,8 @@ internal object MapboxRouteLineUtils {
                                         ExtractedRouteRestrictionData(
                                             this,
                                             stepIntersectionData.second,
-                                            legIndex
-                                        )
+                                            legIndex,
+                                        ),
                                     )
                                 }
                             }
@@ -655,7 +740,7 @@ internal object MapboxRouteLineUtils {
      * intersection.
      */
     private fun filterForRestrictedIntersections(
-        leg: RouteLeg
+        leg: RouteLeg,
     ): List<Pair<StepIntersection, Boolean>>? {
         val intersections = leg.steps()?.map {
             it.intersections() ?: emptyList()
@@ -687,7 +772,7 @@ internal object MapboxRouteLineUtils {
      */
     internal val extractRouteData: (
         route: NavigationRoute,
-        trafficCongestionProvider: (RouteLeg) -> List<String>?
+        trafficCongestionProvider: (RouteLeg) -> List<String>?,
     ) -> List<ExtractedRouteData> =
         { route: NavigationRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
             val itemsToReturn = mutableListOf<ExtractedRouteData>()
@@ -707,8 +792,10 @@ internal object MapboxRouteLineUtils {
                             isInAClosure -> RouteLayerConstants.CLOSURE_CONGESTION_VALUE
                             trafficCongestion.isNullOrEmpty() ->
                                 RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+
                             index >= trafficCongestion.size ->
                                 RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+
                             else -> trafficCongestion[index]
                         }
                         val roadClass = getRoadClassForIndex(roadClassArray, index)
@@ -721,8 +808,8 @@ internal object MapboxRouteLineUtils {
                                 congestionValue,
                                 roadClass,
                                 legIndex,
-                                isLegOrigin = index == 0
-                            )
+                                isLegOrigin = index == 0,
+                            ),
                         )
                     }
                 }
@@ -735,11 +822,11 @@ internal object MapboxRouteLineUtils {
         }.cacheRouteTrafficResult(extractRouteDataCache)
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
-        routeLineColorResources: RouteLineColorResources
-    ) -> (RouteLeg) -> List<String> = { routeLineColorResources: RouteLineColorResources ->
+        options: MapboxRouteLineApiOptions,
+    ) -> (RouteLeg) -> List<String> = { options: MapboxRouteLineApiOptions ->
         { routeLeg: RouteLeg ->
             routeLeg.annotation()?.congestionNumeric()?.map { v ->
-                resolveNumericToValue(v, routeLineColorResources)
+                resolveNumericToValue(v, options)
             } ?: listOf()
         }
     }.cacheResult(1)
@@ -762,14 +849,14 @@ internal object MapboxRouteLineUtils {
 
     internal fun getTrafficCongestionAnnotationProvider(
         route: NavigationRoute,
-        routeLineColorResources: RouteLineColorResources
+        staticOptions: MapboxRouteLineApiOptions,
     ): (RouteLeg) -> List<String>? {
         return if (
             route.directionsRoute.routeOptions()
                 ?.annotationsList()
                 ?.contains(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC) == true
         ) {
-            getRouteLegTrafficNumericCongestionProvider(routeLineColorResources)
+            getRouteLegTrafficNumericCongestionProvider(staticOptions)
         } else {
             getRouteLegTrafficCongestionProvider
         }
@@ -783,7 +870,7 @@ internal object MapboxRouteLineUtils {
     }
 
     internal fun getRoadClassArray(
-        steps: List<LegStep>?
+        steps: List<LegStep>?,
     ): Array<String?> {
         val intersectionsWithGeometryIndex = steps
             ?.mapNotNull { it.intersections() }
@@ -795,7 +882,7 @@ internal object MapboxRouteLineUtils {
         return when (intersectionsWithGeometryIndex.isNotEmpty()) {
             true -> {
                 arrayOfNulls<String>(
-                    intersectionsWithGeometryIndex.last().geometryIndex()!! + 1
+                    intersectionsWithGeometryIndex.last().geometryIndex()!! + 1,
                 ).apply {
                     intersectionsWithGeometryIndex.forEach {
                         val roadClass: String =
@@ -808,12 +895,13 @@ internal object MapboxRouteLineUtils {
                                 "Geometry index for step intersection unexpected or " +
                                     "incorrect. There is a risk of incorrect " +
                                     "road class styling applied to the route line.",
-                                LOG_CATEGORY
+                                LOG_CATEGORY,
                             )
                         }
                     }
                 }
             }
+
             false -> {
                 arrayOfNulls(0)
             }
@@ -844,9 +932,8 @@ internal object MapboxRouteLineUtils {
      */
     internal fun getRouteLineExpressionDataWithStreetClassOverride(
         annotationExpressionData: List<ExtractedRouteData>,
-        routeLineColorResources: RouteLineColorResources,
         isPrimaryRoute: Boolean,
-        trafficOverrideRoadClasses: List<String>
+        trafficOverrideRoadClasses: List<String>,
     ): List<RouteLineExpressionData> {
         val expressionDataToReturn = mutableListOf<RouteLineExpressionData>()
         annotationExpressionData.forEachIndexed { index, annotationExpData ->
@@ -861,10 +948,9 @@ internal object MapboxRouteLineUtils {
                     annotationExpData.trafficCongestionIdentifier
                 }
 
-            val trafficColor = getRouteColorForCongestion(
+            val trafficColorType = getRouteColorTypeForCongestion(
                 trafficIdentifier,
                 isPrimaryRoute,
-                routeLineColorResources
             )
 
             if (index == 0 || annotationExpData.isLegOrigin) {
@@ -872,18 +958,18 @@ internal object MapboxRouteLineUtils {
                     RouteLineExpressionData(
                         annotationExpData.offset,
                         congestionValue = trafficIdentifier,
-                        trafficColor,
-                        annotationExpData.legIndex
-                    )
+                        trafficColorType,
+                        annotationExpData.legIndex,
+                    ),
                 )
-            } else if (trafficColor != expressionDataToReturn.last().segmentColor) {
+            } else if (trafficColorType != expressionDataToReturn.last().segmentColorType) {
                 expressionDataToReturn.add(
                     RouteLineExpressionData(
                         annotationExpData.offset,
                         congestionValue = trafficIdentifier,
-                        trafficColor,
-                        annotationExpData.legIndex
-                    )
+                        trafficColorType,
+                        annotationExpData.legIndex,
+                    ),
                 )
             }
         }
@@ -911,7 +997,7 @@ internal object MapboxRouteLineUtils {
         generateRouteFeatureData(route.route, route.identifier)
 
     private fun calculateGranularDistances(
-        stepsPoints: List<List<List<Point>>>
+        stepsPoints: List<List<List<Point>>>,
     ): RouteLineGranularDistances {
         var distance = 0.0
 
@@ -963,7 +1049,7 @@ internal object MapboxRouteLineUtils {
                         squashed.copyOfRange(1, squashed.size)
                     } else {
                         squashed
-                    } as Array<RouteLineDistancesIndex>
+                    } as Array<RouteLineDistancesIndex>,
                 )
             }
             legsArray.add(legIndex, legArray.toTypedArray())
@@ -976,7 +1062,7 @@ internal object MapboxRouteLineUtils {
                     distances.copyOfRange(1, distances.size)
                 } else {
                     distances
-                }
+                },
             )
         }
 
@@ -990,7 +1076,7 @@ internal object MapboxRouteLineUtils {
 
     private val generateRouteFeatureData: (
         route: NavigationRoute,
-        identifier: String?
+        identifier: String?,
     ) -> RouteFeatureData = { route: NavigationRoute, identifier: String? ->
         val routeGeometry = route.directionsRoute.completeGeometryToLineString()
         val routeFeature = when (identifier) {
@@ -1005,7 +1091,7 @@ internal object MapboxRouteLineUtils {
         RouteFeatureData(
             route,
             FeatureCollection.fromFeatures(listOf(routeFeature)),
-            routeGeometry
+            routeGeometry,
         )
     }
 
@@ -1054,7 +1140,7 @@ internal object MapboxRouteLineUtils {
                     logE(
                         "Layer $belowLayerId not found. Route line related layers will be " +
                             "placed at top of the map stack.",
-                        LOG_CATEGORY
+                        LOG_CATEGORY,
                     )
                     null
                 }
@@ -1070,7 +1156,7 @@ internal object MapboxRouteLineUtils {
     internal fun calculateDistance(point1: Point, point2: Point): Double {
         val d = doubleArrayOf(
             (projectX(point1.longitude()) - projectX(point2.longitude())),
-            (projectY(point1.latitude()) - projectY(point2.latitude()))
+            (projectY(point1.latitude()) - projectY(point2.latitude())),
         )
         return sqrt(d[0] * d[0] + d[1] * d[1])
     }
@@ -1087,7 +1173,7 @@ internal object MapboxRouteLineUtils {
     internal fun findDistanceToNearestPointOnCurrentLine(
         point: Point,
         granularDistances: RouteLineGranularDistances,
-        upcomingIndex: Int
+        upcomingIndex: Int,
     ): Double {
         return TurfMisc.nearestPointOnLine(
             point,
@@ -1098,8 +1184,96 @@ internal object MapboxRouteLineUtils {
                 }
                 points
             },
-            TurfConstants.UNIT_METERS
+            TurfConstants.UNIT_METERS,
         ).getNumberProperty("dist")?.toDouble() ?: 0.0
+    }
+
+    /**
+     * Searches for the closest [RouteLineDistanceIndex] to the point
+     * that the point hasn't passed along the route.
+     *
+     * For example if point is between index 2 and 3 of [RouteLineGranularDistances]
+     * and closest to 2 but has already past the [RouteLineGranularDistances] at index
+     * 2 along the route, the [RouteLineGranularDistances] at index 3 will be returned.
+     */
+    /*
+        Prior to this the RouteProgress.currentRouteGeometryIndex was used
+        to find the closest RouteLineGranularDistances to a point but there
+        are cases where nav. native can emit values in non-consecutive order.
+        Meaning values emitted can resemble 7-8-9-8-9-10. This would result
+        in trim-offset values that would jump in value then decrement in value.
+        The code below should resolve this issue by returning the same RouteLineGranularDistances
+        index even in cases where the upcomingIndex parameter has incremented
+        "erroneously".
+
+        In order to determine which RouteLineDistanceIndex to return the bearing of the
+        two RouteLineDistanceIndexes the point is between are compared to the bearing
+        of the point to the preliminary RouteLineDistanceIndex. If the point hasn't passed
+        the preliminary RouteLineDistanceIndex it should have a similar bearing.
+     */
+    internal fun findClosestRouteLineDistanceIndexToPoint(
+        point: Point,
+        granularDistances: RouteLineGranularDistances,
+        upcomingIndex: Int,
+    ): Int {
+        val closest = getClosestRoutLineDistanceIndex(point, granularDistances, upcomingIndex)
+        if (closest.first == 0) {
+            return 1
+        }
+
+        val baseBearing = TurfMeasurement.bearing(
+            granularDistances.routeDistances[closest.first - 1].point,
+            granularDistances.routeDistances[closest.first].point,
+        )
+        val closesPointBearing = TurfMeasurement.bearing(
+            point,
+            granularDistances.routeDistances[closest.first].point,
+        )
+        return if (isWithin30Degrees(baseBearing, closesPointBearing)) {
+            closest.first
+        } else {
+            if (closest.first < granularDistances.routeDistances.lastIndex) {
+                closest.first + 1
+            } else {
+                closest.first
+            }
+        }
+    }
+
+    private fun getClosestRoutLineDistanceIndex(
+        point: Point,
+        granularDistances: RouteLineGranularDistances,
+        upcomingIndex: Int,
+    ): Pair<Int, Double> {
+        val pointIndex = max(upcomingIndex - 10, 0)
+        val initialDistance = TurfMeasurement.distance(
+            granularDistances.routeDistances[pointIndex].point,
+            point,
+            TurfConstants.UNIT_METERS,
+        )
+        var closest = Pair(pointIndex, initialDistance)
+        for (i in pointIndex..upcomingIndex) {
+            val distance = TurfMeasurement.distance(
+                granularDistances.routeDistances[i].point,
+                point,
+                TurfConstants.UNIT_METERS,
+            )
+            if (distance < closest.second) {
+                closest = Pair(i, distance)
+            }
+        }
+        return closest
+    }
+
+    /*
+    Determines if two bearings have a range of 30 degrees or less.
+     */
+    private fun isWithin30Degrees(bearing1: Double, bearing2: Double): Boolean {
+        val normalizedBearing1 = bearing1 % 360
+        val normalizedBearing2 = bearing2 % 360
+        val difference = abs(normalizedBearing1 - normalizedBearing2)
+
+        return difference <= 30
     }
 
     internal fun buildScalingExpression(scalingValues: List<RouteLineScaleValue>): Expression {
@@ -1108,7 +1282,7 @@ internal object MapboxRouteLineUtils {
         expressionBuilder.zoom()
         scalingValues.forEach { routeLineScaleValue ->
             expressionBuilder.stop {
-                this.literal(routeLineScaleValue.scaleStop.toDouble())
+                literal(routeLineScaleValue.scaleStop.toDouble())
                 product {
                     literal(routeLineScaleValue.scaleMultiplier.toDouble())
                     literal(routeLineScaleValue.scale.toDouble())
@@ -1128,7 +1302,7 @@ internal object MapboxRouteLineUtils {
      */
     private fun Style.sourcePropertiesCompatible(
         sourceId: String,
-        properties: HashMap<String, Value>
+        properties: HashMap<String, Value>,
     ) = properties.all {
         val existing = getStyleSourceProperty(sourceId, it.key).value
         val existingContents = existing.contents
@@ -1147,7 +1321,7 @@ internal object MapboxRouteLineUtils {
         id: String,
         tolerance: Double,
         useLineMetrics: Boolean,
-        enableSharedCache: Boolean
+        enableSharedCache: Boolean,
     ) {
         val source = if (styleSourceExists(id)) {
             getSourceAs<GeoJsonSource>(id)
@@ -1173,136 +1347,209 @@ internal object MapboxRouteLineUtils {
                     expectedProperties.apply {
                         // reuse feature collections when re-adding the source
                         put("data", Value(source?.data ?: ""))
-                    }
-                )
+                    },
+                ),
             )
         }
     }
 
-    fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
+    @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
+    fun initializeLayers(
+        style: Style,
+        options: MapboxRouteLineViewOptions,
+    ) {
+        val styleContainsSlotName = style.styleSlots.contains(options.slotName).also {
+            if (!it) {
+                logE(LOG_CATEGORY) {
+                    "The ${options.slotName} slot is not present in the style."
+                }
+            }
+        }
         val belowLayerIdToUse: String? =
             getBelowLayerIdToUse(
                 options.routeLineBelowLayerId,
-                style
+                style,
             )
+
+        val opacityExpression = options.opacityExpression()
+        val restrictedRoadsOpacityExpression = options.restrictedRoadsOpacityExpression()
 
         style.addNewOrReuseSource(
             RouteLayerConstants.WAYPOINT_SOURCE_ID,
             options.tolerance,
             useLineMetrics = false,
-            enableSharedCache = false
+            enableSharedCache = false,
         )
         style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
-            enableSharedCache = options.shareLineGeometrySources
+            enableSharedCache = options.shareLineGeometrySources,
         )
         style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
-            enableSharedCache = options.shareLineGeometrySources
+            enableSharedCache = options.shareLineGeometrySources,
         )
         style.addNewOrReuseSource(
             RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             options.tolerance,
             useLineMetrics = true,
-            enableSharedCache = options.shareLineGeometrySources
+            enableSharedCache = options.shareLineGeometrySources,
         )
 
         if (!style.styleLayerExists(RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)) {
             style.addPersistentLayer(
                 BackgroundLayer(
                     RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
-                ).apply { this.backgroundOpacity(0.0) },
-                LayerPosition(null, belowLayerIdToUse, null)
+                ).apply {
+                    backgroundOpacity(0.0)
+                    if (styleContainsSlotName) {
+                        this.slot(options.slotName)
+                    }
+                },
+                LayerPosition(null, belowLayerIdToUse, null),
             )
         }
 
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeCasingLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAIL)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_3_TRAIL,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_CASING)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_3_CASING,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeCasingLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_MAIN)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_3_MAIN,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
-                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeTrafficLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (options.displayRestrictedRoadSections) {
             if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED)) {
                 LineLayer(
                     RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
-                    RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID
+                    RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
                 )
-                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    .lineWidth(options.restrictedRoadLineWidth)
                     .lineJoin(LineJoin.ROUND)
-                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
-                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
-                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineColor(options.routeLineColorResources.restrictedRoadColor)
+                    .lineDasharray(options.restrictedRoadDashArray)
                     .lineCap(LineCap.ROUND)
+                    .lineEmissiveStrength(1.0)
+                    .lineOpacity(restrictedRoadsOpacityExpression)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                         style.layerLineDepthOcclusionFactor(
                             layerId,
-                            options.lineDepthOcclusionFactor
+                            options.lineDepthOcclusionFactor,
                         )
+                        if (styleContainsSlotName) {
+                            this.slot(options.slotName)
+                        }
                     }
             }
         }
@@ -1310,86 +1557,142 @@ internal object MapboxRouteLineUtils {
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeCasingLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAIL)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_2_TRAIL,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_CASING)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_2_CASING,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeCasingLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_MAIN)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_2_MAIN,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
-                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeTrafficLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (options.displayRestrictedRoadSections) {
             if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED)) {
                 LineLayer(
                     RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
-                    RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
+                    RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
                 )
-                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    .lineWidth(options.restrictedRoadLineWidth)
                     .lineJoin(LineJoin.ROUND)
-                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
-                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
-                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineColor(options.routeLineColorResources.restrictedRoadColor)
+                    .lineDasharray(options.restrictedRoadDashArray)
                     .lineCap(LineCap.ROUND)
+                    .lineEmissiveStrength(1.0)
+                    .lineOpacity(restrictedRoadsOpacityExpression)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                         style.layerLineDepthOcclusionFactor(
                             layerId,
-                            options.lineDepthOcclusionFactor
+                            options.lineDepthOcclusionFactor,
                         )
+                    }
+                    .also {
+                        if (styleContainsSlotName) {
+                            it.slot(options.slotName)
+                        }
                     }
             }
         }
@@ -1397,86 +1700,140 @@ internal object MapboxRouteLineUtils {
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeCasingLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAIL)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_1_TRAIL,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_CASING)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_1_CASING,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeCasingLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_MAIN)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_1_MAIN,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC)) {
             LineLayer(
                 RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeTrafficLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (options.displayRestrictedRoadSections) {
             if (!style.styleLayerExists(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED)) {
                 LineLayer(
                     RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
-                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
                 )
-                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    .lineWidth(options.restrictedRoadLineWidth)
                     .lineJoin(LineJoin.ROUND)
-                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
-                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
-                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineColor(options.routeLineColorResources.restrictedRoadColor)
+                    .lineDasharray(options.restrictedRoadDashArray)
                     .lineCap(LineCap.ROUND)
+                    .lineEmissiveStrength(1.0)
+                    .lineOpacity(restrictedRoadsOpacityExpression)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                         style.layerLineDepthOcclusionFactor(
                             layerId,
-                            options.lineDepthOcclusionFactor
+                            options.lineDepthOcclusionFactor,
                         )
+                        if (styleContainsSlotName) {
+                            this.slot(options.slotName)
+                        }
                     }
             }
         }
@@ -1484,105 +1841,164 @@ internal object MapboxRouteLineUtils {
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAIL_CASING)) {
             LineLayer(
                 RouteLayerConstants.MASKING_LAYER_TRAIL_CASING,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeCasingLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAIL)) {
             LineLayer(
                 RouteLayerConstants.MASKING_LAYER_TRAIL,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_CASING)) {
             LineLayer(
                 RouteLayerConstants.MASKING_LAYER_CASING,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeCasingLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeCasingLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_MAIN)) {
             LineLayer(
                 RouteLayerConstants.MASKING_LAYER_MAIN,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_TRAFFIC)) {
             LineLayer(
                 RouteLayerConstants.MASKING_LAYER_TRAFFIC,
-                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
                 .lineCap(LineCap.ROUND)
                 .lineJoin(LineJoin.ROUND)
-                .lineWidth(options.resourceProvider.routeTrafficLineScaleExpression)
+                .lineWidth(options.scaleExpressions.routeTrafficLineScaleExpression)
+                .lineEmissiveStrength(1.0)
+                .apply { opacityExpression?.let { lineOpacity(it) } }
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
-                    style.layerLineDepthOcclusionFactor(layerId, options.lineDepthOcclusionFactor)
+                    style.layerLineDepthOcclusionFactor(
+                        layerId,
+                        options.lineDepthOcclusionFactor,
+                    )
+                }
+                .also {
+                    if (styleContainsSlotName) {
+                        it.slot(options.slotName)
+                    }
                 }
         }
         if (options.displayRestrictedRoadSections) {
             if (!style.styleLayerExists(RouteLayerConstants.MASKING_LAYER_RESTRICTED)) {
                 LineLayer(
                     RouteLayerConstants.MASKING_LAYER_RESTRICTED,
-                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
+                    RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
                 )
-                    .lineWidth(options.resourceProvider.restrictedRoadLineWidth)
+                    .lineWidth(options.restrictedRoadLineWidth)
                     .lineJoin(LineJoin.ROUND)
-                    .lineOpacity(options.resourceProvider.restrictedRoadOpacity)
-                    .lineColor(options.resourceProvider.routeLineColorResources.restrictedRoadColor)
-                    .lineDasharray(options.resourceProvider.restrictedRoadDashArray)
+                    .lineColor(options.routeLineColorResources.restrictedRoadColor)
+                    .lineDasharray(options.restrictedRoadDashArray)
                     .lineCap(LineCap.ROUND)
+                    .lineEmissiveStrength(1.0)
+                    .lineOpacity(restrictedRoadsOpacityExpression)
                     .apply {
                         style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                         style.layerLineDepthOcclusionFactor(
                             layerId,
-                            options.lineDepthOcclusionFactor
+                            options.lineDepthOcclusionFactor,
                         )
+                        if (styleContainsSlotName) {
+                            this.slot(options.slotName)
+                        }
                     }
             }
         }
         if (!style.styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)) {
             style.addPersistentLayer(
                 BackgroundLayer(
-                    RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
-                ).apply { this.backgroundOpacity(0.0) },
-                LayerPosition(null, belowLayerIdToUse, null)
+                    RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID,
+                ).apply {
+                    backgroundOpacity(0.0)
+                    if (styleContainsSlotName) {
+                        this.slot(options.slotName)
+                    }
+                },
+                LayerPosition(null, belowLayerIdToUse, null),
             )
         }
 
         if (!style.hasStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME)) {
-            options.originIcon.getBitmap().let {
+            options.originWaypointIcon.getBitmap().let {
                 style.addImage(RouteLayerConstants.ORIGIN_MARKER_NAME, it)
             }
         }
         if (!style.hasStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME)) {
-            options.destinationIcon.getBitmap().let {
+            options.destinationWaypointIcon.getBitmap().let {
                 style.addImage(RouteLayerConstants.DESTINATION_MARKER_NAME, it)
             }
         }
@@ -1590,7 +2006,7 @@ internal object MapboxRouteLineUtils {
             style.addPersistentLayer(
                 SymbolLayer(
                     RouteLayerConstants.WAYPOINT_LAYER_ID,
-                    RouteLayerConstants.WAYPOINT_SOURCE_ID
+                    RouteLayerConstants.WAYPOINT_SOURCE_ID,
                 )
                     .iconOffset(options.waypointLayerIconOffset)
                     .iconAnchor(options.waypointLayerIconAnchor)
@@ -1599,16 +2015,16 @@ internal object MapboxRouteLineUtils {
                             toString {
                                 get { literal(RouteLayerConstants.WAYPOINT_PROPERTY_KEY) }
                             }
-                            literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
                             stop {
-                                RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
+                                literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
                                 literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
                             }
                             stop {
-                                RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
+                                literal(RouteLayerConstants.WAYPOINT_DESTINATION_VALUE)
                                 literal(RouteLayerConstants.DESTINATION_MARKER_NAME)
                             }
-                        }
+                            literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
+                        },
                     ).iconSize(
                         interpolate {
                             exponential { literal(1.5) }
@@ -1629,18 +2045,255 @@ internal object MapboxRouteLineUtils {
                                 literal(22.0)
                                 literal(2.8)
                             }
+                        },
+                    ).also {
+                        if (styleContainsSlotName) {
+                            it.slot(options.slotName)
                         }
-                    )
+                    }
                     .iconPitchAlignment(options.iconPitchAlignment)
                     .iconAllowOverlap(true)
                     .iconIgnorePlacement(true)
-                    .iconKeepUpright(true),
-                LayerPosition(null, belowLayerIdToUse, null)
+                    .iconKeepUpright(true)
+                    .apply { opacityExpression?.let { iconOpacity(it) } },
+                LayerPosition(null, belowLayerIdToUse, null),
             )
         }
     }
 
-    internal fun layersAreInitialized(style: Style, options: MapboxRouteLineOptions): Boolean {
+    // for a set of dynamic values, see MapboxRouteLineViewDynamicOptionsBuilder
+    // scale expressions and restricted layer colors will be changed when routes are re-rendered.
+    @OptIn(MapboxExperimental::class)
+    internal fun updateLayersStyling(style: Style, viewOptions: MapboxRouteLineViewOptions) {
+        val opacityExpression = viewOptions.opacityExpression()
+        val restrictedRoadsOpacityExpression = viewOptions.restrictedRoadsOpacityExpression()
+        val styleContainsSlotName = style.styleSlots.contains(viewOptions.slotName).also {
+            if (!it) {
+                logW(LOG_CATEGORY) {
+                    "The ${viewOptions.slotName} slot is not present in the style."
+                }
+            }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_3_TRAIL) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_3_CASING) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_3_MAIN) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_3_RESTRICTED) as? LineLayer)?.let {
+            it.lineWidth(viewOptions.restrictedRoadLineWidth)
+            it.lineDasharray(viewOptions.restrictedRoadDashArray)
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            it.lineOpacity(restrictedRoadsOpacityExpression)
+        }
+
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_2_TRAIL) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_2_CASING) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_2_MAIN) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_2_RESTRICTED) as? LineLayer)?.let {
+            it.lineWidth(viewOptions.restrictedRoadLineWidth)
+            it.lineDasharray(viewOptions.restrictedRoadDashArray)
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            it.lineOpacity(restrictedRoadsOpacityExpression)
+        }
+
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_1_TRAIL) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_1_CASING) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_1_MAIN) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.LAYER_GROUP_1_RESTRICTED) as? LineLayer)?.let {
+            it.lineWidth(viewOptions.restrictedRoadLineWidth)
+            it.lineDasharray(viewOptions.restrictedRoadDashArray)
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            it.lineOpacity(restrictedRoadsOpacityExpression)
+        }
+
+        (style.getLayer(RouteLayerConstants.MASKING_LAYER_TRAIL_CASING) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.MASKING_LAYER_TRAIL) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.MASKING_LAYER_CASING) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.MASKING_LAYER_MAIN) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.MASKING_LAYER_TRAFFIC) as? LineLayer)?.let {
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
+        }
+        (style.getLayer(RouteLayerConstants.MASKING_LAYER_RESTRICTED) as? LineLayer)?.let {
+            it.lineWidth(viewOptions.restrictedRoadLineWidth)
+            it.lineDasharray(viewOptions.restrictedRoadDashArray)
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
+            it.lineOpacity(restrictedRoadsOpacityExpression)
+        }
+
+        viewOptions.originWaypointIcon.getBitmap().let {
+            style.addImage(RouteLayerConstants.ORIGIN_MARKER_NAME, it)
+        }
+        viewOptions.destinationWaypointIcon.getBitmap().let {
+            style.addImage(
+                RouteLayerConstants.DESTINATION_MARKER_NAME,
+                it,
+            )
+        }
+        (style.getLayer(RouteLayerConstants.WAYPOINT_LAYER_ID) as? SymbolLayer)?.let {
+            it.iconOffset(viewOptions.waypointLayerIconOffset)
+            it.iconAnchor(viewOptions.waypointLayerIconAnchor)
+            it.iconImage(
+                match {
+                    toString {
+                        get { literal(RouteLayerConstants.WAYPOINT_PROPERTY_KEY) }
+                    }
+                    stop {
+                        literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
+                        literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
+                    }
+                    stop {
+                        literal(RouteLayerConstants.WAYPOINT_DESTINATION_VALUE)
+                        literal(RouteLayerConstants.DESTINATION_MARKER_NAME)
+                    }
+                    literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
+                },
+            )
+            it.iconPitchAlignment(viewOptions.iconPitchAlignment)
+            if (styleContainsSlotName) {
+                it.slot(viewOptions.slotName)
+            }
+            opacityExpression?.let { expr -> it.iconOpacity(expr) }
+        }
+    }
+
+    internal fun layersAreInitialized(
+        style: Style,
+        options: MapboxRouteLineViewOptions,
+    ): Boolean {
         return style.styleSourceExists(RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID) &&
             style.styleSourceExists(RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID) &&
             style.styleSourceExists(RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID) &&
@@ -1676,56 +2329,56 @@ internal object MapboxRouteLineUtils {
             }
     }
 
-    internal fun getTrafficLineExpressionProducer(
+    internal fun getTrafficLineExpression(
         route: NavigationRoute,
-        colorResources: RouteLineColorResources,
+        staticOptions: MapboxRouteLineApiOptions,
+        dynamicData: RouteLineViewOptionsData,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
         vanishingPointOffset: Double,
         lineStartColor: Int,
-        lineColor: Int,
-        useSoftGradient: Boolean,
-        softGradientTransitionDistance: Double
-    ) = RouteLineExpressionProvider {
+        lineColorType: SegmentColorType,
+    ): Expression {
         val segments: List<RouteLineExpressionData> = calculateRouteLineSegments(
             route,
             trafficBackfillRoadClasses,
             isPrimaryRoute,
-            colorResources
+            staticOptions,
         )
-        val stopGap = softGradientTransitionDistance / route.directionsRoute.distance()
-        getTrafficLineExpression(
+        return getTrafficLineExpression(
+            dynamicData,
             vanishingPointOffset,
             lineStartColor,
-            lineColor,
-            stopGap,
-            useSoftGradient,
-            segments
+            lineColorType,
+            segments,
+            route.directionsRoute.distance(),
         )
     }
 
     internal fun getTrafficLineExpression(
+        dynamicData: RouteLineViewOptionsData,
         vanishingPointOffset: Double,
         lineStartColor: Int,
-        lineColor: Int,
-        stopGap: Double,
-        useSoftGradient: Boolean,
+        lineColorType: SegmentColorType,
         segments: List<RouteLineExpressionData>,
+        routeDistance: Double,
     ): Expression {
-        return if (useSoftGradient) {
+        return if (dynamicData.displaySoftGradientForTraffic) {
             getTrafficLineExpressionSoftGradient(
+                dynamicData,
                 vanishingPointOffset,
                 lineStartColor,
-                lineColor,
-                stopGap,
-                segments
+                lineColorType,
+                dynamicData.softGradientTransition / routeDistance,
+                segments,
             )
         } else {
             getTrafficLineExpression(
+                dynamicData,
                 vanishingPointOffset,
                 lineStartColor,
-                lineColor,
-                segments
+                lineColorType,
+                segments,
             )
         }
     }
@@ -1734,43 +2387,60 @@ internal object MapboxRouteLineUtils {
         routeData: List<ExtractedRouteRestrictionData>,
         vanishingPointOffset: Double,
         activeLegIndex: Int,
-        options: MapboxRouteLineOptions
-    ): RouteLineExpressionProvider {
-        val colorResources = options.resourceProvider.routeLineColorResources
-        val inactiveColor = if (options.styleInactiveRouteLegsIndependently) {
-            colorResources.inactiveRouteLegRestrictedRoadColor
-        } else {
-            colorResources.restrictedRoadColor
+        staticOptions: MapboxRouteLineApiOptions,
+    ): (data: RouteLineViewOptionsData) -> Expression {
+        return {
+            val colorResources = it.routeLineColorResources
+            val inactiveColor = if (staticOptions.styleInactiveRouteLegsIndependently) {
+                colorResources.inactiveRouteLegRestrictedRoadColor
+            } else {
+                colorResources.restrictedRoadColor
+            }
+            getRestrictedLineExpression(
+                routeData,
+                vanishingPointOffset,
+                activeLegIndex,
+                staticOptions.calculateRestrictedRoadSections,
+                activeColor = colorResources.restrictedRoadColor,
+                inactiveColor = inactiveColor,
+            )
         }
-        return getRestrictedLineExpressionProducer(
-            routeData,
-            vanishingPointOffset,
-            activeLegIndex,
-            options.displayRestrictedRoadSections,
-            activeColor = colorResources.restrictedRoadColor,
-            inactiveColor = inactiveColor,
-        )
     }
 
     internal fun getRestrictedLineExpressionProducer(
+        staticOptions: MapboxRouteLineApiOptions,
+        routeData: List<ExtractedRouteRestrictionData>,
+        vanishingPointOffset: Double,
+        activeLegIndex: Int,
+        inactiveColorType: SegmentColorType,
+    ): (data: RouteLineViewOptionsData) -> Expression = {
+        getRestrictedLineExpression(
+            routeData,
+            vanishingPointOffset,
+            activeLegIndex,
+            staticOptions.calculateRestrictedRoadSections,
+            it.routeLineColorResources.restrictedRoadColor,
+            inactiveColorType.getColor(it),
+        )
+    }
+
+    private fun getRestrictedLineExpression(
         routeData: List<ExtractedRouteRestrictionData>,
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         displayRestrictedEnabled: Boolean,
         activeColor: Int,
         inactiveColor: Int,
-    ) = RouteLineExpressionProvider {
-        if (displayRestrictedEnabled) {
-            getRestrictedLineExpression(
-                vanishingPointOffset,
-                activeLegIndex,
-                restrictedSectionColor = activeColor,
-                restrictedSectionInactiveColor = inactiveColor,
-                routeData
-            )
-        } else {
-            color(Color.TRANSPARENT)
-        }
+    ): Expression = if (displayRestrictedEnabled) {
+        getRestrictedLineExpression(
+            vanishingPointOffset,
+            activeLegIndex,
+            restrictedSectionColor = activeColor,
+            restrictedSectionInactiveColor = inactiveColor,
+            routeData,
+        )
+    } else {
+        color(Color.TRANSPARENT)
     }
 
     internal fun getRestrictedLineExpression(
@@ -1778,7 +2448,7 @@ internal object MapboxRouteLineUtils {
         activeLegIndex: Int,
         restrictedSectionColor: Int,
         restrictedSectionInactiveColor: Int,
-        routeLineExpressionData: List<ExtractedRouteRestrictionData>
+        routeLineExpressionData: List<ExtractedRouteRestrictionData>,
     ): Expression {
         var lastColor = Int.MAX_VALUE
         val expressionBuilder = Expression.ExpressionBuilder("step")
@@ -1790,7 +2460,7 @@ internal object MapboxRouteLineUtils {
             routeLineExpressionData,
             defaultObjectCreator = {
                 ExtractedRouteRestrictionData(vanishingPointOffset)
-            }
+            },
         ).forEach {
             val colorToUse = if (activeLegIndex >= 0 && it.legIndex != activeLegIndex) {
                 if (it.isInRestrictedSection) {
@@ -1824,19 +2494,22 @@ internal object MapboxRouteLineUtils {
 
     internal fun getLayerIdsForPrimaryRoute(
         style: Style,
-        sourceLayerMap: Map<RouteLineSourceKey, Set<String>>
+        sourceLayerMap: Map<RouteLineSourceKey, Set<String>>,
     ): Set<String> {
         return getTopRouteLineRelatedLayerId(style)?.run {
             when (this) {
                 in layerGroup1SourceLayerIds -> {
                     sourceLayerMap[layerGroup1SourceKey]
                 }
+
                 in layerGroup2SourceLayerIds -> {
                     sourceLayerMap[layerGroup2SourceKey]
                 }
+
                 in layerGroup3SourceLayerIds -> {
                     sourceLayerMap[layerGroup3SourceKey]
                 }
+
                 else -> setOf()
             }
         } ?: setOf()
@@ -1847,14 +2520,14 @@ internal object MapboxRouteLineUtils {
             val upperRange = style.styleLayers.indexOf(
                 StyleObjectInfo(
                     RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID,
-                    "background"
-                )
+                    "background",
+                ),
             )
             val lowerRange = style.styleLayers.indexOf(
                 StyleObjectInfo(
                     RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
-                    "background"
-                )
+                    "background",
+                ),
             )
 
             style.styleLayers.subList(lowerRange, upperRange)
@@ -1865,28 +2538,10 @@ internal object MapboxRouteLineUtils {
         }.getOrNull()
     }
 
-    /**
-     * Looks for a property in the [FeatureCollection] matching an identifier in the
-     * collection of [RouteStyleDescriptor] items and if a match is found the color from
-     * the [RouteStyleDescriptor] is returned. If no match is found the fallback color is returned.
-     */
-    internal fun getMatchingColors(
-        featureCollection: FeatureCollection?,
-        styleDescriptors: List<RouteStyleDescriptor>,
-        fallbackLineColor: Int,
-        fallbackLineCasingColor: Int
-    ): Pair<Int, Int> {
-        return styleDescriptors.firstOrNull {
-            featureCollectionHasProperty(featureCollection, 0, it.routeIdentifier)
-        }?.run {
-            Pair(this.lineColor, this.lineCasingColor)
-        } ?: Pair(fallbackLineColor, fallbackLineCasingColor)
-    }
-
     internal tailrec fun featureCollectionHasProperty(
         featureCollection: FeatureCollection?,
         index: Int,
-        property: String
+        property: String,
     ): Boolean {
         return when {
             featureCollection == null -> false
@@ -1896,6 +2551,7 @@ internal object MapboxRouteLineUtils {
                 .features()
                 ?.get(index)
                 ?.hasNonNullValueForProperty(property) == true -> true
+
             else -> featureCollectionHasProperty(featureCollection, index + 1, property)
         }
     }
@@ -1906,7 +2562,7 @@ internal object MapboxRouteLineUtils {
     internal fun getAlternativeRouteDeviationOffsets(
         metadata: AlternativeRouteMetadata,
         distancesProvider: (NavigationRoute) -> RouteLineGranularDistances? =
-            granularDistancesProvider
+            granularDistancesProvider,
     ): Double {
         return distancesProvider(metadata.navigationRoute)?.let { distances ->
             if (distances.routeDistances.isEmpty() || distances.completeDistance <= 0) {
@@ -1916,7 +2572,7 @@ internal object MapboxRouteLineUtils {
                         "unable to calculate the deviation point of the alternative with ID " +
                         "'${metadata.navigationRoute.id}' to hide the portion that overlaps " +
                         "with the primary route.",
-                    LOG_CATEGORY
+                    LOG_CATEGORY,
                 )
                 return@let 0.0
             }
@@ -1928,7 +2584,7 @@ internal object MapboxRouteLineUtils {
                         "unable to calculate the deviation point of the alternative with ID " +
                         "'${metadata.navigationRoute.id}' to hide the portion that overlaps " +
                         "with the primary route.",
-                    LOG_CATEGORY
+                    LOG_CATEGORY,
                 )
                 return@let 0.0
             }.distanceRemaining
@@ -1938,41 +2594,12 @@ internal object MapboxRouteLineUtils {
                         "unable to calculate the deviation point of the alternative with ID " +
                         "'${metadata.navigationRoute.id}' to hide the portion that overlaps " +
                         "with the primary route.",
-                    LOG_CATEGORY
+                    LOG_CATEGORY,
                 )
                 return@let 0.0
             }
             1.0 - distanceRemaining / distances.completeDistance
         } ?: 0.0
-    }
-    internal fun getMaskingLayerDynamicData(
-        route: NavigationRoute?,
-        offset: Double
-    ): RouteLineDynamicData? {
-        return if (
-            (route?.directionsRoute?.legs()?.size ?: 1) > 1
-        ) {
-            val trimmedOffsetExpression = literal(
-                listOf(
-                    0.0,
-                    offset
-                )
-            )
-            RouteLineDynamicData(
-                baseExpressionProvider =
-                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
-                casingExpressionProvider =
-                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
-                trafficExpressionProvider =
-                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
-                restrictedSectionExpressionProvider =
-                RouteLineTrimExpressionProvider { trimmedOffsetExpression },
-                trailExpressionProvider = null,
-                trailCasingExpressionProvider = null,
-            )
-        } else {
-            null
-        }
     }
 
     private fun projectX(x: Double): Double {
@@ -2020,8 +2647,209 @@ internal object MapboxRouteLineUtils {
         style.removeStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME)
         style.removeStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME)
     }
+
+    internal fun getPrimaryRouteLineDynamicData(
+        calculationsScope: CoroutineScope,
+        routeLineOptions: MapboxRouteLineApiOptions,
+        routeLineExpressionData: List<RouteLineExpressionData>,
+        restrictedExpressionData: List<ExtractedRouteRestrictionData>,
+        primaryRouteDistance: Double,
+        vanishingPointOffset: Double,
+        legIndex: Int,
+    ): RouteLineDynamicData {
+        val primaryRouteTrafficLineExpressionCommandHolder =
+            RouteLineExpressionCommandHolder(
+                HeavyRouteLineExpressionProvider(calculationsScope) {
+                    getTrafficLineExpression(
+                        it,
+                        vanishingPointOffset,
+                        Color.TRANSPARENT,
+                        SegmentColorType.PRIMARY_UNKNOWN_CONGESTION,
+                        routeLineExpressionData,
+                        primaryRouteDistance,
+                    )
+                },
+                LineGradientCommandApplier(),
+            )
+
+        val primaryRouteBaseExpressionCommandHolder =
+            RouteLineExpressionCommandHolder(
+                LightRouteLineExpressionProvider {
+                    // TODO why are we changing traveled portion to traveled color instead of
+                    //  making it transparent to show trail layers?
+                    if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                        getExpressionSubstitutingColorForInactiveLegs(
+                            vanishingPointOffset,
+                            routeLineExpressionData,
+                            it.routeLineColorResources.routeLineTraveledColor,
+                            it.routeLineColorResources.routeDefaultColor,
+                            it.routeLineColorResources.inActiveRouteLegsColor,
+                            legIndex,
+                        )
+                    } else {
+                        getRouteLineExpression(
+                            vanishingPointOffset,
+                            it.routeLineColorResources.routeLineTraveledColor,
+                            it.routeLineColorResources.routeDefaultColor,
+                        )
+                    }
+                },
+                LineGradientCommandApplier(),
+            )
+
+        val primaryRouteCasingExpressionCommandHolder = RouteLineExpressionCommandHolder(
+            // TODO why are we changing traveled portion to traveled color instead of
+            //  making it transparent to show trail layers?
+            LightRouteLineExpressionProvider {
+                if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                    getExpressionSubstitutingColorForInactiveLegs(
+                        vanishingPointOffset,
+                        routeLineExpressionData,
+                        it.routeLineColorResources.routeLineTraveledCasingColor,
+                        it.routeLineColorResources.routeCasingColor,
+                        it.routeLineColorResources.inactiveRouteLegCasingColor,
+                        legIndex,
+                    )
+                } else {
+                    getRouteLineExpression(
+                        vanishingPointOffset,
+                        it.routeLineColorResources.routeLineTraveledCasingColor,
+                        it.routeLineColorResources.routeCasingColor,
+                    )
+                }
+            },
+            LineGradientCommandApplier(),
+        )
+
+        // TODO if vanishing route line is not used, trail layers should never be visible,
+        //  so we shouldn't need to change their colors.
+        //  However, all layers are initialized to grey right now,
+        //  and they should be initialized as transparent instead.
+        val primaryRouteTrailExpressionCommandHolder = RouteLineExpressionCommandHolder(
+            LightRouteLineExpressionProvider {
+                if (routeLineOptions.styleInactiveRouteLegsIndependently &&
+                    routeLineOptions.vanishingRouteLineEnabled
+                ) {
+                    // if both independent styling and vanishing route line are enabled,
+                    // we need to only draw trailing layers for previous and current legs,
+                    // upcoming legs should not have trail because they can be transparent
+                    getExpressionSubstitutingColorForUpcomingLegs(
+                        routeLineExpressionData,
+                        it.routeLineColorResources.routeLineTraveledColor,
+                        Color.TRANSPARENT,
+                        legIndex,
+                    )
+                } else if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                    // if independent styling is enabled and vanishing route line is not,
+                    // we only want to draw trail under current leg,
+                    // as without the vanishing route line enabled the traveled portion should not
+                    // be emphasized at all and if the inactive legs were transparent,
+                    // the trail would show up
+                    getExpressionSubstitutingColorForInactiveLegs(
+                        distanceOffset = 0.0,
+                        routeLineExpressionData = routeLineExpressionData,
+                        lineBaseColor = it.routeLineColorResources.routeLineTraveledColor,
+                        defaultColor = it.routeLineColorResources.routeLineTraveledColor,
+                        substitutionColor = Color.TRANSPARENT,
+                        activeLegIndex = legIndex,
+                    )
+                } else {
+                    // if independent styling is not enabled,
+                    // we can draw the trail under the whole route,
+                    // if vanishing route line is enabled it will show up, if not, it won't
+                    getRouteLineExpression(
+                        0.0,
+                        it.routeLineColorResources.routeLineTraveledColor,
+                        it.routeLineColorResources.routeLineTraveledColor,
+                    )
+                }
+            },
+            LineGradientCommandApplier(),
+        )
+        // the same conditions apply for the trail casing as do for the trail layers
+        val primaryRouteTrailCasingExpressionCommandHolder = RouteLineExpressionCommandHolder(
+            LightRouteLineExpressionProvider {
+                if (routeLineOptions.styleInactiveRouteLegsIndependently &&
+                    routeLineOptions.vanishingRouteLineEnabled
+                ) {
+                    getExpressionSubstitutingColorForUpcomingLegs(
+                        routeLineExpressionData,
+                        it.routeLineColorResources.routeLineTraveledCasingColor,
+                        Color.TRANSPARENT,
+                        legIndex,
+                    )
+                } else if (routeLineOptions.styleInactiveRouteLegsIndependently) {
+                    getExpressionSubstitutingColorForInactiveLegs(
+                        distanceOffset = 0.0,
+                        routeLineExpressionData = routeLineExpressionData,
+                        lineBaseColor = it.routeLineColorResources.routeLineTraveledCasingColor,
+                        defaultColor = it.routeLineColorResources.routeLineTraveledCasingColor,
+                        substitutionColor = Color.TRANSPARENT,
+                        activeLegIndex = legIndex,
+                    )
+                } else {
+                    getRouteLineExpression(
+                        0.0,
+                        it.routeLineColorResources.routeLineTraveledCasingColor,
+                        it.routeLineColorResources.routeLineTraveledCasingColor,
+                    )
+                }
+            },
+            LineGradientCommandApplier(),
+        )
+
+        // If the displayRestrictedRoadSections is true AND the route has restricted sections
+        // then produce a gradient that is transparent except for the restricted sections.
+        // If false produce a gradient for the restricted line layer that is completely transparent.
+        val primaryRouteRestrictedSectionsExpressionProducer =
+            RouteLineExpressionCommandHolder(
+                HeavyRouteLineExpressionProvider(
+                    calculationsScope,
+                    getNonMaskingRestrictedLineExpressionProducer(
+                        restrictedExpressionData,
+                        0.0,
+                        legIndex,
+                        routeLineOptions,
+                    ),
+                ),
+                LineGradientCommandApplier(),
+            )
+
+        return RouteLineDynamicData(
+            primaryRouteBaseExpressionCommandHolder,
+            primaryRouteCasingExpressionCommandHolder,
+            primaryRouteTrafficLineExpressionCommandHolder,
+            primaryRouteRestrictedSectionsExpressionProducer,
+            RouteLineTrimOffset(vanishingPointOffset),
+            primaryRouteTrailExpressionCommandHolder,
+            primaryRouteTrailCasingExpressionCommandHolder,
+        )
+    }
 }
 
 private fun Style.layerLineDepthOcclusionFactor(layerId: String, factor: Double) {
     setStyleLayerProperty(layerId, "line-depth-occlusion-factor", Value(factor))
 }
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+private fun MapboxRouteLineViewOptions.opacityExpression(): Expression? =
+    fadeOnHighZoomsConfig?.opacityExpression()
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+internal fun FadingConfig.opacityExpression(): Expression = interpolate {
+    linear()
+    zoom()
+    stop { literal(startFadingZoom); literal(1.0) }
+    stop { literal(finishFadingZoom); literal(0.0) }
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+private fun MapboxRouteLineViewOptions.restrictedRoadsOpacityExpression(): Expression =
+    fadeOnHighZoomsConfig?.let {
+        interpolate {
+            linear()
+            zoom()
+            stop { literal(it.startFadingZoom); literal(restrictedRoadOpacity) }
+            stop { literal(it.finishFadingZoom); literal(0.0) }
+        }
+    } ?: Expression.Companion.literal(restrictedRoadOpacity)

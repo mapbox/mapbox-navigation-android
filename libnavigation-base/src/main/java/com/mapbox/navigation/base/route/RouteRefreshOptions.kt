@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
  * @param intervalMillis The refresh interval in milliseconds, default is 5 min.
  */
 class RouteRefreshOptions private constructor(
-    val intervalMillis: Long
+    val intervalMillis: Long,
 ) {
     /**
      * @return the builder that created the [RouteRefreshOptions]
@@ -80,7 +80,7 @@ class RouteRefreshOptions private constructor(
                 "Route refresh interval out of range $intervalMillis < $MINIMUM_REFRESH_INTERVAL"
             }
             return RouteRefreshOptions(
-                intervalMillis = intervalMillis
+                intervalMillis = intervalMillis,
             )
         }
     }

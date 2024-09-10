@@ -1,0 +1,8009 @@
+{
+  "code": "Ok",
+  "route": {
+    "legs": [
+      {},
+      {
+        "annotation": {
+          "maxspeed": [
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 60,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            }
+          ],
+          "congestion_numeric": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "speed": [
+            25,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.4,
+            13.4,
+            13.4,
+            13.4,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            14.9,
+            14.9,
+            15,
+            15,
+            5.6,
+            5.6,
+            5.6,
+            5.6,
+            5.6,
+            5.6,
+            5.6,
+            5.6,
+            5.6,
+            5.6,
+            5.6,
+            5.3,
+            5.3,
+            5.2,
+            5.3,
+            5.2,
+            5.2,
+            5.5,
+            5.3,
+            5.3,
+            5.3,
+            5.3,
+            5.5,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            4.4,
+            3.9,
+            6.6,
+            7.7,
+            4.7,
+            4.7,
+            4.7,
+            4.7,
+            4.7,
+            4.7,
+            4.4,
+            4.4,
+            4.5,
+            10.8,
+            11,
+            11.8,
+            12.2,
+            11.9,
+            11.9,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            16.1,
+            15.8,
+            15.6,
+            15.6,
+            15.6,
+            15.6,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            15.5,
+            16.7,
+            16.7,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            16.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.7,
+            19.7,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            20.8,
+            20.8,
+            20.8,
+            20.8,
+            20.8,
+            21.1,
+            21.1,
+            21,
+            21.1,
+            20.6,
+            20.6,
+            20.6,
+            20.6,
+            20.6,
+            20.6,
+            18.8,
+            18.9,
+            18.9,
+            19,
+            18,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            20.5,
+            20.5,
+            20.5,
+            20.5,
+            20.5,
+            19.2,
+            19.5,
+            19.5,
+            19.5,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.5,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            19.5,
+            19.5,
+            19.2,
+            19.1,
+            19.8,
+            19.3,
+            19.7,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.7,
+            22.7,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.2,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8
+          ],
+          "distance": [
+            21.7,
+            30.1,
+            24,
+            25.4,
+            27.1,
+            38.7,
+            82.8,
+            80.3,
+            67.8,
+            109.4,
+            84.7,
+            90.4,
+            76.3,
+            101.2,
+            38.8,
+            61.8,
+            24.5,
+            15.6,
+            13.4,
+            19.5,
+            15.4,
+            16,
+            21.9,
+            13.1,
+            23.1,
+            13.4,
+            14.8,
+            22.8,
+            11.5,
+            18.7,
+            18.6,
+            40.2,
+            43.3,
+            55.7,
+            50.5,
+            61.8,
+            45.3,
+            71.2,
+            12.3,
+            30,
+            70,
+            62.9,
+            52.5,
+            23.8,
+            15.6,
+            17.2,
+            17.3,
+            28.7,
+            3.1,
+            32.9,
+            19,
+            19.2,
+            15.7,
+            11.4,
+            13.4,
+            14.5,
+            13.5,
+            19.3,
+            26.4,
+            27.8,
+            18.9,
+            30,
+            36.1,
+            23.5,
+            16.6,
+            10.1,
+            5.6,
+            4.6,
+            7.5,
+            21.3,
+            30,
+            23.9,
+            18,
+            13.5,
+            147.3,
+            4.6,
+            29.1,
+            37.9,
+            32.3,
+            30,
+            15.7,
+            34.3,
+            9.7,
+            25.8,
+            9.6,
+            9.2,
+            25.8,
+            30.9,
+            30,
+            20.5,
+            22.8,
+            34.9,
+            32,
+            83.5,
+            23.7,
+            39.2,
+            40.2,
+            73.2,
+            35,
+            22.8,
+            16.5,
+            11.5,
+            15.1,
+            29.8,
+            28.2,
+            29.9,
+            15.7,
+            16,
+            17.6,
+            13.4,
+            12.5,
+            15.4,
+            18,
+            66,
+            51.9,
+            46.7,
+            40.9,
+            52,
+            16,
+            18.3,
+            17.8,
+            10,
+            13.1,
+            14.8,
+            27.4,
+            20.9,
+            31.4,
+            29.2,
+            13.4,
+            11.1,
+            21.2,
+            7.8,
+            28.4,
+            24.5,
+            8.1,
+            8.8,
+            11.5,
+            7,
+            5.5,
+            16.3,
+            19.7,
+            4.2,
+            2.3,
+            3.7,
+            2.4,
+            2.3,
+            3.2,
+            3.2,
+            3.1,
+            2.1,
+            3.2,
+            3.7,
+            4.4,
+            23.7,
+            52.2,
+            8.9,
+            51.8,
+            15.6,
+            8.3,
+            10.2,
+            11,
+            10.3,
+            43.7,
+            34.3,
+            58.3,
+            17.3,
+            18.5,
+            36.5,
+            14.9,
+            16.4,
+            126.7,
+            50.1,
+            49.9,
+            12.1,
+            13.4,
+            17.9,
+            13.4,
+            15.5,
+            13.9,
+            14.9,
+            13.8,
+            36,
+            35,
+            15.7,
+            10.5,
+            12.4,
+            20.7,
+            34.9,
+            50.6,
+            51.5,
+            31,
+            20.6,
+            58.8,
+            56.6,
+            60.8,
+            20.6,
+            13.5,
+            13.4,
+            20.6,
+            13.4,
+            13.5,
+            11.4,
+            11.3,
+            16.6,
+            15.5,
+            14.8,
+            13.1,
+            20.8,
+            16.7,
+            56.4,
+            24.5,
+            26.8,
+            41.5,
+            87.8,
+            37.9,
+            93.7,
+            33.3,
+            130.7,
+            19.8,
+            13.8,
+            17.6,
+            53.2,
+            15.3,
+            9.8,
+            16,
+            10.5,
+            11.4,
+            11.4,
+            12.3,
+            9.5,
+            10.7,
+            18.6,
+            16.7,
+            22.1,
+            24.1,
+            22.9,
+            22.2,
+            17.8,
+            34,
+            21.7,
+            59.8,
+            30.8,
+            37.2,
+            48.5,
+            69,
+            59.8,
+            58.7,
+            48.5,
+            120.5,
+            20.6,
+            19.9,
+            23.8,
+            14,
+            23,
+            12,
+            17.7,
+            11.8,
+            11.6,
+            12.4,
+            12.4,
+            8.8,
+            14.9,
+            13.8,
+            11.5,
+            16.6,
+            21.2,
+            35.5,
+            53.5,
+            127,
+            84,
+            78.5,
+            86.9,
+            66.5,
+            95.7,
+            59,
+            81.7,
+            43.9,
+            19.6,
+            22.3,
+            18.4,
+            17.7,
+            29,
+            25.8,
+            3.7,
+            27.1,
+            23.7,
+            24,
+            19,
+            20.2,
+            18.5,
+            23.2,
+            20.2,
+            70.9,
+            48.3,
+            58.5,
+            51.8,
+            34.2,
+            38.7,
+            34.4,
+            41.2,
+            28.2,
+            31.1,
+            27,
+            24.6,
+            27.8,
+            21.6,
+            25.9,
+            20.8,
+            27.5,
+            37.6,
+            32.3,
+            25.8,
+            28.1,
+            29,
+            27.2,
+            32.2,
+            42.2,
+            51.3,
+            167.7,
+            64.4,
+            97.1,
+            66.2,
+            23.2,
+            37.4,
+            16.3,
+            32,
+            22.8,
+            24.2,
+            28.1,
+            22.8,
+            29.9,
+            59.7,
+            127,
+            91.2,
+            21.4,
+            70.7,
+            43.7,
+            51.7,
+            20.6,
+            141.3,
+            134.4,
+            98.7,
+            26.1,
+            35.6,
+            54.9,
+            77.5,
+            172.6,
+            172.6,
+            56.1,
+            89.5,
+            461.2,
+            850.3,
+            13.9,
+            121.6,
+            30.7,
+            25.3,
+            39.4,
+            31.8,
+            28.8,
+            40.3,
+            47.9,
+            32.3,
+            35.9,
+            32.3,
+            35.9,
+            13.8,
+            55.2,
+            43.4,
+            45.4,
+            35,
+            154.6,
+            325.8,
+            119.4,
+            150.6,
+            8.4,
+            11.2,
+            40.2,
+            75.3,
+            100,
+            39.2,
+            126.8,
+            94.9,
+            17.5,
+            45.4,
+            195.8,
+            198.1,
+            169.8,
+            75.2,
+            169,
+            173.2,
+            105.1,
+            28.9,
+            15.4,
+            45.3,
+            87.9,
+            83.9,
+            6.3,
+            17.1,
+            85.9,
+            53,
+            126.8,
+            182.9,
+            86.2,
+            137.2,
+            132.2,
+            63.6,
+            190.2,
+            81,
+            50.3,
+            195.6,
+            86.5,
+            66,
+            59.6,
+            73.4,
+            40,
+            70,
+            45.4,
+            47.3,
+            10.2,
+            41.6,
+            73.3,
+            159.1,
+            217.9,
+            158.8,
+            239.8,
+            14.2,
+            125.3,
+            13.4,
+            144.1,
+            448.4,
+            118.2,
+            32.9,
+            225.8,
+            45.8,
+            42.6,
+            102,
+            77.2,
+            116.6,
+            73.9,
+            44.3,
+            212,
+            6.9,
+            118.6,
+            161.4
+          ],
+          "duration": [
+            0.868,
+            2.276,
+            1.804,
+            1.902,
+            2.032,
+            2.901,
+            6.208,
+            6.026,
+            5.085,
+            8.203,
+            6.347,
+            6.782,
+            5.72,
+            7.588,
+            2.909,
+            4.638,
+            1.832,
+            1.172,
+            1.007,
+            1.458,
+            1.154,
+            1.201,
+            1.64,
+            0.981,
+            1.738,
+            1.004,
+            1.11,
+            1.708,
+            0.864,
+            1.402,
+            1.394,
+            3.013,
+            3.247,
+            4.174,
+            3.789,
+            4.632,
+            3.398,
+            5.333,
+            0.926,
+            2.266,
+            5.257,
+            4.721,
+            3.945,
+            1.782,
+            1.172,
+            1.302,
+            1.29,
+            2.147,
+            0.226,
+            2.471,
+            1.425,
+            1.44,
+            1.184,
+            0.856,
+            1.002,
+            1.089,
+            1.015,
+            1.446,
+            1.98,
+            2.087,
+            1.42,
+            2.254,
+            2.706,
+            1.762,
+            1.25,
+            0.758,
+            0.415,
+            0.346,
+            0.565,
+            1.595,
+            2.254,
+            1.793,
+            1.352,
+            1.01,
+            9.464,
+            0.316,
+            1.871,
+            2.436,
+            2.074,
+            1.93,
+            1.011,
+            2.2,
+            0.628,
+            1.653,
+            0.616,
+            0.597,
+            1.653,
+            1.989,
+            1.924,
+            1.323,
+            1.459,
+            2.246,
+            2.058,
+            5.362,
+            1.522,
+            2.515,
+            2.58,
+            4.697,
+            2.251,
+            1.459,
+            1.06,
+            0.741,
+            0.965,
+            1.919,
+            1.811,
+            1.916,
+            1.01,
+            1.029,
+            1.13,
+            0.86,
+            0.804,
+            0.986,
+            1.155,
+            4.24,
+            3.487,
+            3.131,
+            2.733,
+            3.467,
+            2.919,
+            3.286,
+            3.195,
+            1.798,
+            2.359,
+            2.668,
+            4.92,
+            3.757,
+            5.63,
+            5.255,
+            2.411,
+            2.077,
+            3.986,
+            3.551,
+            5.341,
+            4.719,
+            1.541,
+            3.638,
+            4.172,
+            1.309,
+            1.041,
+            3.071,
+            3.64,
+            1.635,
+            0.434,
+            0.705,
+            0.45,
+            0.44,
+            0.616,
+            0.616,
+            0.586,
+            0.396,
+            0.616,
+            0.699,
+            0.834,
+            8.448,
+            13.413,
+            3.492,
+            8.703,
+            3.413,
+            1.757,
+            2.143,
+            2.325,
+            2.175,
+            9.264,
+            7.736,
+            13.189,
+            3.825,
+            1.771,
+            3.33,
+            1.256,
+            1.34,
+            10.622,
+            4.197,
+            3.107,
+            0.75,
+            0.829,
+            1.115,
+            0.831,
+            0.962,
+            0.857,
+            0.928,
+            0.857,
+            2.23,
+            2.175,
+            0.976,
+            0.647,
+            0.77,
+            1.285,
+            2.17,
+            3.137,
+            3.199,
+            1.921,
+            1.278,
+            3.648,
+            3.516,
+            3.853,
+            1.332,
+            0.867,
+            0.857,
+            1.323,
+            0.862,
+            0.869,
+            0.73,
+            0.73,
+            1.068,
+            0.996,
+            0.953,
+            0.837,
+            1.343,
+            1.071,
+            3.629,
+            1.577,
+            1.722,
+            2.672,
+            5.647,
+            2.438,
+            6.026,
+            2.006,
+            7.841,
+            1.226,
+            0.843,
+            1.073,
+            3.242,
+            0.937,
+            0.594,
+            0.978,
+            0.643,
+            0.695,
+            0.693,
+            0.754,
+            0.577,
+            0.652,
+            1.139,
+            1.016,
+            1.351,
+            1.469,
+            1.394,
+            1.355,
+            1.089,
+            2.072,
+            1.324,
+            3.647,
+            1.882,
+            2.268,
+            2.954,
+            4.211,
+            3.647,
+            3.586,
+            2.954,
+            7.355,
+            1.258,
+            1.21,
+            1.454,
+            0.852,
+            1.405,
+            0.735,
+            1.075,
+            0.721,
+            0.711,
+            0.755,
+            0.755,
+            0.541,
+            0.908,
+            0.841,
+            0.702,
+            1.012,
+            1.294,
+            2.163,
+            3.265,
+            7.749,
+            5.123,
+            4.788,
+            5.298,
+            4.055,
+            5.838,
+            3.6,
+            4.985,
+            2.677,
+            1.194,
+            1.366,
+            1.117,
+            1.082,
+            1.772,
+            1.332,
+            0.191,
+            1.396,
+            1.219,
+            1.232,
+            0.977,
+            1.039,
+            0.953,
+            1.19,
+            1.039,
+            3.646,
+            2.484,
+            3.007,
+            2.662,
+            1.761,
+            1.99,
+            1.769,
+            2.119,
+            1.449,
+            1.6,
+            1.386,
+            1.265,
+            1.428,
+            1.113,
+            1.33,
+            1.068,
+            1.414,
+            1.937,
+            1.659,
+            1.326,
+            1.444,
+            1.495,
+            1.398,
+            1.653,
+            2.171,
+            2.603,
+            8.502,
+            2.912,
+            4.367,
+            2.981,
+            1.041,
+            1.685,
+            0.734,
+            1.44,
+            1.025,
+            1.087,
+            1.262,
+            1.026,
+            1.346,
+            2.684,
+            5.712,
+            4.106,
+            1.026,
+            3.39,
+            2.097,
+            2.48,
+            0.991,
+            6.708,
+            6.376,
+            4.689,
+            1.232,
+            1.732,
+            2.67,
+            3.769,
+            8.389,
+            8.392,
+            2.729,
+            4.784,
+            24.423,
+            45.036,
+            0.73,
+            6.757,
+            1.668,
+            1.358,
+            2.112,
+            1.706,
+            1.546,
+            2.16,
+            2.573,
+            1.735,
+            1.927,
+            1.734,
+            1.928,
+            0.742,
+            2.696,
+            2.115,
+            2.213,
+            1.703,
+            7.532,
+            17.026,
+            6.134,
+            7.731,
+            0.432,
+            0.579,
+            2.07,
+            3.875,
+            5.15,
+            2.006,
+            6.552,
+            4.884,
+            0.912,
+            2.331,
+            10.073,
+            10.194,
+            8.73,
+            3.87,
+            8.707,
+            8.903,
+            5.496,
+            1.513,
+            0.783,
+            2.348,
+            4.462,
+            3.795,
+            0.284,
+            0.769,
+            3.868,
+            2.386,
+            5.707,
+            8.235,
+            3.883,
+            6.177,
+            5.953,
+            2.824,
+            8.451,
+            3.6,
+            2.233,
+            8.693,
+            3.844,
+            2.862,
+            2.586,
+            3.183,
+            1.734,
+            3.039,
+            1.968,
+            2.052,
+            0.441,
+            1.806,
+            3.179,
+            6.902,
+            9.569,
+            6.974,
+            10.535,
+            0.625,
+            5.511,
+            0.591,
+            6.328,
+            19.696,
+            5.192,
+            1.447,
+            10.17,
+            2.034,
+            1.871,
+            4.477,
+            3.391,
+            5.119,
+            3.243,
+            1.945,
+            9.309,
+            0.301,
+            5.208,
+            7.085
+          ]
+        },
+        "incidents": [
+          {
+            "id": "17064696308200333",
+            "type": "construction",
+            "creation_time": "2023-03-15T13:00:00Z",
+            "start_time": "2023-03-15T13:00:00Z",
+            "end_time": "2035-03-15T13:15:00Z",
+            "iso_3166_1_alpha2": "JP",
+            "iso_3166_1_alpha3": "JPN",
+            "description": "Pavement work",
+            "sub_type": "construction",
+            "sub_type_description": "Lane restriction",
+            "alertc_codes": [
+              410,
+              40
+            ],
+            "lanes_blocked": [],
+            "length": 353,
+            "south": 35.662555,
+            "west": 139.761886,
+            "north": 35.665405,
+            "east": 139.763168,
+            "congestion": {
+              "value": 101
+            },
+            "geometry_index_start": 131,
+            "geometry_index_end": 141,
+            "affected_road_names": [
+              "海岸通り/Kaigan St./都道３１６号線/Todou No.316 Line"
+            ]
+          },
+          {
+            "id": "12120609785884788",
+            "type": "construction",
+            "creation_time": "2023-03-15T13:00:00Z",
+            "start_time": "2023-03-15T13:00:00Z",
+            "end_time": "2035-03-15T13:15:00Z",
+            "iso_3166_1_alpha2": "JP",
+            "iso_3166_1_alpha3": "JPN",
+            "description": "Pavement work",
+            "sub_type": "construction",
+            "sub_type_description": "Lane restriction",
+            "alertc_codes": [
+              410,
+              40
+            ],
+            "lanes_blocked": [],
+            "length": 301,
+            "south": 35.662658,
+            "west": 139.762405,
+            "north": 35.665107,
+            "east": 139.763473,
+            "congestion": {
+              "value": 101
+            },
+            "geometry_index_start": 153,
+            "geometry_index_end": 157,
+            "affected_road_names": [
+              "海岸通り/Kaigan St./都道３１６号線/Todou No.316 Line"
+            ]
+          }
+        ]
+      },
+      {
+        "annotation": {
+          "maxspeed": [
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 70,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 80,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "speed": 50,
+              "unit": "km/h"
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            }
+          ],
+          "congestion_numeric": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "speed": [
+            22.8,
+            22.8,
+            22.8,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            21.1,
+            21.1,
+            21.1,
+            21.6,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.4,
+            21.1,
+            18.6,
+            18.6,
+            18.6,
+            18.3,
+            18.3,
+            18.3,
+            20.5,
+            19.4,
+            19.4,
+            19.4,
+            19.4,
+            18.4,
+            18.4,
+            18.4,
+            18.4,
+            18.4,
+            18.7,
+            18.7,
+            14.7,
+            14.7,
+            14.7,
+            14.7,
+            14.7,
+            14.7,
+            14.7,
+            15.8,
+            15.8,
+            15.8,
+            15.8,
+            15.8,
+            15.8,
+            12.4,
+            12.6,
+            12.6,
+            12.6,
+            12.6,
+            12.5,
+            12.5,
+            12.5,
+            12.5,
+            12.5,
+            12.5,
+            11.7,
+            12,
+            5,
+            5,
+            13.6,
+            13.6,
+            13,
+            2.5,
+            15.3,
+            11.2,
+            15.3,
+            15.3,
+            15.3,
+            15.3,
+            15.3,
+            15.3,
+            15.3,
+            14.1,
+            14.1,
+            14.1,
+            14.1,
+            14.1,
+            14.5,
+            14.5,
+            14.5,
+            14.5,
+            14.5,
+            14.5,
+            14.5,
+            14.5,
+            14.5,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            11.7,
+            20.1,
+            20.3,
+            21.5,
+            21.1,
+            21.1,
+            21.1,
+            22.5,
+            14.3,
+            24.8,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.7,
+            24.8,
+            23,
+            23,
+            23,
+            23,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.9,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            18.6,
+            21.2,
+            21.2,
+            21.2,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            21.7,
+            21.7,
+            21.7,
+            21.7,
+            21.7,
+            21.7,
+            21.7,
+            21.7,
+            21.7,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            21.6,
+            21.6,
+            21.6,
+            21.6,
+            21.6,
+            21.6,
+            21.6,
+            21.6,
+            20,
+            20,
+            20,
+            20.1,
+            19.3,
+            19.8,
+            19.1,
+            19.7,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.3,
+            22.2,
+            22.3,
+            22.3,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.2,
+            22.6,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.7,
+            22.7,
+            22.7,
+            22.7,
+            22.8,
+            22.8,
+            22.8,
+            20,
+            20.3,
+            20.3,
+            19.6,
+            21.2,
+            21.2,
+            23.6,
+            23.1,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23.3,
+            23.4,
+            22.2,
+            21.6,
+            21.6,
+            21.4,
+            21.4,
+            21.2,
+            21.7,
+            21.7,
+            23.3,
+            23,
+            23.2,
+            23.1,
+            22.7,
+            22.7,
+            21.9,
+            21.9,
+            22,
+            22,
+            21.9,
+            21.9,
+            21.9,
+            22,
+            22,
+            22,
+            22,
+            22,
+            22,
+            21.9,
+            21.9,
+            21.9,
+            22,
+            22,
+            22,
+            22,
+            22.2,
+            22.7,
+            22.7,
+            22.7,
+            23.3,
+            23.3,
+            23.2,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            22.5,
+            23.3,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            22.6,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.9,
+            23.9,
+            23.9,
+            23.9,
+            23.6,
+            23.6,
+            23.6,
+            23.6,
+            23.6,
+            23.6,
+            23.6,
+            23.6,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23.3,
+            23.3,
+            23.3,
+            22.9,
+            22.8,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            23.1,
+            22.8,
+            22.8,
+            22.8,
+            22.8,
+            23.1,
+            23.1,
+            23,
+            23,
+            23.1,
+            23.1,
+            23.1,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            23.3,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13,
+            13,
+            13,
+            13,
+            13,
+            13,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23.1,
+            23.1,
+            23.1,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23.1,
+            23.1,
+            22.5,
+            22.5,
+            22.5,
+            23,
+            22.2,
+            16.3,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            16.7,
+            16.7,
+            16.7,
+            16.7,
+            11.1,
+            11.1,
+            13.8,
+            13.8,
+            13.9,
+            13.9,
+            13.9,
+            13.9,
+            13.6,
+            4.7,
+            13.5,
+            13.3,
+            4.7,
+            13.9,
+            13.9,
+            13.9,
+            12.5,
+            12.5,
+            12.4,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            11.1,
+            17.8,
+            16.7,
+            16.7,
+            16.7,
+            16.7
+          ],
+          "distance": [
+            48.1,
+            86.8,
+            160.3,
+            64.2,
+            82,
+            20.3,
+            6,
+            94.2,
+            92.3,
+            254.7,
+            131.7,
+            65.5,
+            141.8,
+            80.6,
+            94,
+            144.3,
+            41.2,
+            83.1,
+            49.7,
+            102.5,
+            60.5,
+            34.3,
+            41.7,
+            44.4,
+            42.4,
+            7.2,
+            39.2,
+            46.5,
+            47.3,
+            46.5,
+            48.7,
+            49.8,
+            72,
+            48.4,
+            49.3,
+            189.2,
+            102.6,
+            230.5,
+            315.2,
+            286.2,
+            51.9,
+            53.3,
+            51.9,
+            53.7,
+            78.1,
+            60.9,
+            48.4,
+            21.6,
+            73.5,
+            21.6,
+            71.1,
+            42.9,
+            41.4,
+            34.4,
+            48.9,
+            34.5,
+            16.8,
+            16.8,
+            12.7,
+            17.8,
+            10.6,
+            12.9,
+            12.9,
+            13.3,
+            14.3,
+            10.8,
+            19.5,
+            10.8,
+            11.2,
+            14.9,
+            51,
+            60.1,
+            89.3,
+            80.3,
+            39.7,
+            35,
+            16.1,
+            17.3,
+            15.7,
+            13.7,
+            4.1,
+            6.1,
+            8.4,
+            13.7,
+            16.3,
+            13.8,
+            19.3,
+            45.5,
+            71.2,
+            29.1,
+            14.7,
+            43,
+            77.2,
+            29.1,
+            50.8,
+            75.7,
+            60.8,
+            24.7,
+            187.1,
+            58.4,
+            64,
+            2.3,
+            34.8,
+            35.8,
+            21.9,
+            29.4,
+            29.6,
+            28.8,
+            27,
+            33.8,
+            28.1,
+            17.1,
+            25.4,
+            19.3,
+            11.4,
+            15.5,
+            14.5,
+            53.5,
+            49.9,
+            66.9,
+            48.9,
+            79.7,
+            26.6,
+            25.2,
+            43.2,
+            22.6,
+            16.4,
+            14.5,
+            20.9,
+            14.3,
+            10.5,
+            13.4,
+            11.5,
+            12.4,
+            12.5,
+            10.9,
+            12.9,
+            13.5,
+            12.4,
+            9.7,
+            11.6,
+            29.4,
+            22.9,
+            50.1,
+            34.3,
+            5.1,
+            74.1,
+            75.6,
+            7.5,
+            57.4,
+            70.1,
+            56.5,
+            52.4,
+            52.3,
+            53.5,
+            52.1,
+            284.5,
+            315.2,
+            231.8,
+            290.8,
+            48.5,
+            49.3,
+            73,
+            47.8,
+            48.6,
+            47.5,
+            47.5,
+            45.3,
+            45.4,
+            43.4,
+            43.4,
+            41.6,
+            28.3,
+            65.2,
+            58.8,
+            47.3,
+            42.5,
+            82.4,
+            119.6,
+            73.3,
+            144.3,
+            105.3,
+            109.4,
+            145.4,
+            27.2,
+            227.8,
+            97.9,
+            70.2,
+            58.6,
+            128.3,
+            164.4,
+            57.2,
+            80.3,
+            253.9,
+            23,
+            8.2,
+            234.2,
+            82.7,
+            78.1,
+            31.9,
+            18,
+            22.8,
+            109.6,
+            65.3,
+            56.1,
+            53.2,
+            53.2,
+            129,
+            38.1,
+            107.7,
+            116.9,
+            203.3,
+            147.5,
+            128,
+            14.3,
+            72,
+            51.8,
+            13.4,
+            98.9,
+            250.8,
+            54.2,
+            120.8,
+            63.3,
+            30.9,
+            153.2,
+            76.6,
+            48.3,
+            48.2,
+            58.5,
+            68.5,
+            47,
+            100.4,
+            98.2,
+            44.8,
+            56.3,
+            158.6,
+            136.5,
+            115.5,
+            120.4,
+            36.3,
+            268.9,
+            45.5,
+            87.1,
+            80.7,
+            124.2,
+            95,
+            18.8,
+            44.1,
+            63.8,
+            13.8,
+            43.5,
+            18.7,
+            25.7,
+            69.2,
+            48.5,
+            15.4,
+            28.9,
+            93.7,
+            28.6,
+            157,
+            145.3,
+            97.9,
+            379.3,
+            74.1,
+            129,
+            64.9,
+            75.3,
+            61.8,
+            80.5,
+            88.6,
+            96.9,
+            165,
+            160.8,
+            73.2,
+            137,
+            139.2,
+            154.5,
+            27.8,
+            46.5,
+            45.5,
+            44.5,
+            32.5,
+            40.3,
+            28,
+            33,
+            33.7,
+            40,
+            43.8,
+            43.7,
+            90.6,
+            153.1,
+            964.1,
+            361.2,
+            5.8,
+            71.5,
+            34.8,
+            5.2,
+            106.2,
+            86.6,
+            185.1,
+            73.8,
+            59.1,
+            37.1,
+            110.8,
+            214.3,
+            107,
+            171.6,
+            186.8,
+            212.8,
+            463.6,
+            29.6,
+            147.5,
+            112.2,
+            152.1,
+            75.9,
+            49.4,
+            633.2,
+            49.2,
+            31.5,
+            121.8,
+            207,
+            55.2,
+            152.3,
+            102.8,
+            154.7,
+            114,
+            67.4,
+            110.8,
+            146.3,
+            72.9,
+            65.1,
+            127,
+            49.4,
+            98.2,
+            27,
+            18.6,
+            58.1,
+            75.6,
+            229.1,
+            267.1,
+            46.7,
+            101.3,
+            21.7,
+            405.7,
+            448.9,
+            70.5,
+            101.6,
+            27.7,
+            30.9,
+            65.8,
+            266,
+            98.9,
+            290.6,
+            309.2,
+            116.5,
+            74.1,
+            38.3,
+            370.2,
+            57.8,
+            48.5,
+            40.7,
+            50.5,
+            52.7,
+            87.5,
+            504.9,
+            274.4,
+            273.3,
+            76,
+            71.3,
+            39.7,
+            24.8,
+            298.6,
+            256.1,
+            255,
+            2.3,
+            99.7,
+            38.1,
+            74.8,
+            83.8,
+            58.8,
+            96.7,
+            43.7,
+            38.9,
+            34.1,
+            38.8,
+            51.1,
+            4.9,
+            48.4,
+            43.7,
+            39.1,
+            25,
+            32.9,
+            75.5,
+            136.1,
+            53.2,
+            628.2,
+            59,
+            396,
+            194.3,
+            355.2,
+            124.5,
+            26.9,
+            216.2,
+            4.4,
+            169.6,
+            100.4,
+            268.6,
+            102.6,
+            141.3,
+            13.1,
+            171.7,
+            211.1,
+            13.2,
+            170.2,
+            132.2,
+            590.4,
+            228.2,
+            121.1,
+            108.4,
+            133.9,
+            385.4,
+            268.7,
+            206.8,
+            122.3,
+            85.2,
+            196.5,
+            170.3,
+            67.1,
+            88.4,
+            73.9,
+            76.2,
+            224.6,
+            234.5,
+            44.9,
+            238.2,
+            31.4,
+            181.3,
+            440.6,
+            160.4,
+            29.7,
+            76.2,
+            117.7,
+            44.3,
+            48.4,
+            57.3,
+            36.9,
+            12.6,
+            62.5,
+            93.7,
+            73,
+            45.3,
+            75.9,
+            97.7,
+            54.2,
+            98.3,
+            60.4,
+            117,
+            18.1,
+            301.3,
+            301,
+            38.9,
+            292.3,
+            322,
+            308.8,
+            323,
+            49.7,
+            272,
+            60.4,
+            74.1,
+            51.5,
+            97.1,
+            74.6,
+            340.9,
+            47.4,
+            126.8,
+            59.4,
+            107.3,
+            47.7,
+            55.4,
+            48.7,
+            24.8,
+            24.1,
+            23.5,
+            40.5,
+            19.8,
+            48.3,
+            26.7,
+            33.2,
+            59.5,
+            126.7,
+            132.1,
+            52,
+            48.4,
+            35.5,
+            48.6,
+            64.8,
+            48.3,
+            64,
+            37.2,
+            78.1,
+            14,
+            74.4,
+            283.1,
+            36,
+            345.8,
+            487.8,
+            129.7,
+            64,
+            48,
+            182.2,
+            82.7,
+            92,
+            28.3,
+            105.1,
+            149,
+            126.2,
+            153.5,
+            223.4,
+            36.5,
+            103.1,
+            35.8,
+            12,
+            2.2,
+            199.1,
+            158.2,
+            102.2,
+            22.6,
+            65.9,
+            12.5,
+            10.6,
+            149.1,
+            27.6,
+            83.9,
+            28.9,
+            131.8,
+            7.4,
+            54.7,
+            17.7,
+            49.2,
+            12.4,
+            20.7,
+            63,
+            55.9,
+            20,
+            33.6,
+            2.1,
+            3.2,
+            9.2,
+            8.3,
+            21.2,
+            35.9,
+            225.9,
+            69.7
+          ],
+          "duration": [
+            2.109,
+            3.806,
+            7.026,
+            2.772,
+            3.517,
+            0.868,
+            0.256,
+            4.04,
+            3.954,
+            10.929,
+            5.78,
+            2.878,
+            6.223,
+            3.537,
+            4.129,
+            6.334,
+            1.807,
+            3.962,
+            2.352,
+            4.848,
+            2.805,
+            1.605,
+            1.946,
+            2.075,
+            1.983,
+            0.338,
+            1.835,
+            2.171,
+            2.213,
+            2.175,
+            2.277,
+            2.329,
+            3.368,
+            2.259,
+            2.305,
+            8.849,
+            4.796,
+            10.771,
+            14.734,
+            13.378,
+            2.426,
+            2.488,
+            2.426,
+            2.51,
+            3.65,
+            2.84,
+            2.256,
+            1.029,
+            3.954,
+            1.16,
+            3.815,
+            2.344,
+            2.266,
+            1.881,
+            2.384,
+            1.777,
+            0.864,
+            0.87,
+            0.655,
+            0.963,
+            0.572,
+            0.704,
+            0.698,
+            0.718,
+            0.767,
+            0.577,
+            1.538,
+            0.734,
+            0.759,
+            1.01,
+            3.469,
+            4.087,
+            6.067,
+            5.078,
+            2.505,
+            2.213,
+            1.013,
+            1.09,
+            0.996,
+            1.096,
+            0.326,
+            0.485,
+            0.662,
+            1.087,
+            1.303,
+            1.103,
+            1.544,
+            3.635,
+            5.686,
+            2.328,
+            1.278,
+            3.6,
+            15.401,
+            5.808,
+            5.753,
+            5.587,
+            4.691,
+            17.622,
+            18.726,
+            7.227,
+            4.201,
+            0.155,
+            2.28,
+            2.346,
+            1.435,
+            1.93,
+            1.935,
+            2.037,
+            1.908,
+            2.393,
+            1.984,
+            1.207,
+            1.804,
+            1.334,
+            0.788,
+            1.07,
+            1.002,
+            3.701,
+            3.449,
+            4.631,
+            3.38,
+            6.805,
+            2.277,
+            2.146,
+            3.698,
+            1.936,
+            1.402,
+            1.239,
+            1.784,
+            1.228,
+            0.902,
+            1.14,
+            0.986,
+            1.064,
+            1.065,
+            0.934,
+            1.105,
+            1.157,
+            1.057,
+            0.833,
+            0.99,
+            2.521,
+            1.205,
+            2.466,
+            1.59,
+            0.244,
+            3.513,
+            3.585,
+            0.332,
+            4.024,
+            2.846,
+            2.287,
+            2.121,
+            2.112,
+            2.166,
+            2.11,
+            11.507,
+            12.753,
+            9.376,
+            11.762,
+            1.963,
+            1.995,
+            2.954,
+            1.935,
+            1.966,
+            1.922,
+            1.919,
+            1.833,
+            1.839,
+            1.754,
+            1.755,
+            1.685,
+            1.145,
+            2.629,
+            2.55,
+            2.053,
+            1.842,
+            3.574,
+            5.325,
+            3.257,
+            6.409,
+            4.68,
+            4.86,
+            6.459,
+            1.185,
+            10.01,
+            4.299,
+            3.083,
+            2.574,
+            5.633,
+            7.217,
+            2.514,
+            3.524,
+            13.654,
+            1.238,
+            0.441,
+            12.584,
+            4.445,
+            4.198,
+            1.712,
+            0.968,
+            1.227,
+            5.89,
+            3.51,
+            3.013,
+            2.522,
+            2.515,
+            6.103,
+            1.734,
+            4.905,
+            5.324,
+            9.256,
+            6.719,
+            5.829,
+            0.65,
+            3.28,
+            2.358,
+            0.612,
+            4.501,
+            11.425,
+            2.47,
+            5.5,
+            2.883,
+            1.41,
+            7.07,
+            3.536,
+            2.231,
+            2.222,
+            2.702,
+            3.164,
+            2.166,
+            4.635,
+            4.536,
+            2.038,
+            2.563,
+            7.226,
+            6.215,
+            5.259,
+            5.487,
+            1.652,
+            12.238,
+            2.071,
+            4.022,
+            3.731,
+            5.736,
+            4.388,
+            0.869,
+            2.038,
+            2.947,
+            0.638,
+            2.204,
+            0.933,
+            1.289,
+            3.45,
+            2.504,
+            0.783,
+            1.513,
+            4.766,
+            1.278,
+            6.982,
+            6.46,
+            4.371,
+            16.848,
+            3.348,
+            5.805,
+            2.916,
+            3.384,
+            2.787,
+            3.626,
+            3.989,
+            4.365,
+            7.425,
+            7.245,
+            3.244,
+            6.095,
+            6.189,
+            6.872,
+            1.237,
+            2.065,
+            2.02,
+            1.977,
+            1.446,
+            1.789,
+            1.259,
+            1.45,
+            1.484,
+            1.759,
+            1.923,
+            1.918,
+            3.974,
+            7.691,
+            47.533,
+            17.809,
+            0.296,
+            3.376,
+            1.645,
+            0.245,
+            4.598,
+            3.762,
+            8.03,
+            3.203,
+            2.566,
+            1.61,
+            4.757,
+            9.171,
+            4.822,
+            7.938,
+            8.631,
+            9.958,
+            21.693,
+            1.403,
+            6.792,
+            5.169,
+            6.514,
+            3.304,
+            2.125,
+            27.455,
+            2.168,
+            1.388,
+            5.574,
+            9.44,
+            2.537,
+            6.92,
+            4.714,
+            7.061,
+            5.195,
+            3.068,
+            5.044,
+            6.661,
+            3.318,
+            2.967,
+            5.782,
+            2.257,
+            4.485,
+            1.232,
+            0.846,
+            2.646,
+            3.44,
+            10.43,
+            12.034,
+            2.07,
+            4.455,
+            0.956,
+            17.395,
+            19.248,
+            3.051,
+            4.455,
+            1.219,
+            1.354,
+            2.886,
+            11.673,
+            4.338,
+            12.754,
+            13.427,
+            5.057,
+            3.218,
+            1.659,
+            16.073,
+            2.535,
+            2.152,
+            1.804,
+            2.251,
+            2.346,
+            3.892,
+            21.669,
+            12.045,
+            12.001,
+            3.336,
+            3.131,
+            1.777,
+            1.077,
+            12.952,
+            11.108,
+            11.065,
+            0.1,
+            4.322,
+            1.65,
+            3.241,
+            3.636,
+            2.545,
+            4.195,
+            1.893,
+            1.686,
+            1.479,
+            1.682,
+            2.196,
+            0.212,
+            2.074,
+            1.874,
+            1.676,
+            1.07,
+            1.411,
+            3.236,
+            5.836,
+            2.279,
+            26.307,
+            2.469,
+            16.582,
+            8.139,
+            15.056,
+            5.277,
+            1.14,
+            9.174,
+            0.186,
+            7.2,
+            4.26,
+            11.377,
+            4.468,
+            6.127,
+            0.569,
+            7.452,
+            9.155,
+            0.573,
+            7.384,
+            5.737,
+            25.312,
+            9.78,
+            5.193,
+            4.741,
+            5.883,
+            16.723,
+            11.65,
+            8.967,
+            5.303,
+            3.695,
+            8.519,
+            7.384,
+            2.913,
+            3.879,
+            3.244,
+            3.343,
+            9.861,
+            10.164,
+            1.944,
+            10.347,
+            1.364,
+            7.86,
+            19.102,
+            6.956,
+            1.293,
+            3.268,
+            5.048,
+            1.902,
+            2.075,
+            2.459,
+            1.58,
+            0.541,
+            2.682,
+            6.779,
+            5.254,
+            3.262,
+            5.465,
+            7.032,
+            3.909,
+            7.072,
+            4.352,
+            8.422,
+            1.309,
+            21.694,
+            21.676,
+            2.801,
+            21.043,
+            23.191,
+            22.235,
+            23.259,
+            3.583,
+            19.586,
+            4.347,
+            5.333,
+            3.71,
+            6.993,
+            5.372,
+            24.544,
+            3.414,
+            9.728,
+            4.56,
+            8.227,
+            3.658,
+            4.254,
+            3.736,
+            1.1,
+            1.043,
+            1.02,
+            1.76,
+            0.861,
+            2.096,
+            1.163,
+            1.438,
+            2.573,
+            5.488,
+            5.729,
+            2.257,
+            2.1,
+            1.542,
+            2.106,
+            2.813,
+            2.096,
+            2.778,
+            1.611,
+            3.385,
+            0.606,
+            3.302,
+            12.564,
+            1.6,
+            15.007,
+            21.96,
+            7.932,
+            5.773,
+            4.318,
+            16.38,
+            22.446,
+            8.278,
+            2.546,
+            9.45,
+            8.964,
+            7.567,
+            9.227,
+            13.411,
+            3.31,
+            9.304,
+            2.596,
+            0.868,
+            0.187,
+            14.342,
+            11.4,
+            7.362,
+            3.677,
+            21.128,
+            8.961,
+            0.792,
+            33.561,
+            1.991,
+            6.02,
+            2.078,
+            10.525,
+            0.595,
+            4.41,
+            1.603,
+            4.425,
+            1.119,
+            1.857,
+            5.677,
+            5.029,
+            1.797,
+            3.025,
+            0.187,
+            0.291,
+            0.828,
+            0.479,
+            1.27,
+            2.154,
+            13.554,
+            4.186
+          ]
+        }
+      }
+    ]
+  }
+}

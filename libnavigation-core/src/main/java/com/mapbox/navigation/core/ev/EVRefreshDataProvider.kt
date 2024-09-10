@@ -6,7 +6,7 @@ import com.mapbox.navigation.core.routeoptions.ROUTE_OPTIONS_VALUE_ELECTRIC
 import com.mapbox.navigation.core.routeoptions.isEVRoute
 
 internal class EVRefreshDataProvider(
-    private val evDynamicDataHolder: EVDynamicDataHolder
+    private val evDynamicDataHolder: EVDynamicDataHolder,
 ) {
 
     fun get(initialRouteOptions: RouteOptions): Map<String, String> {
@@ -14,7 +14,7 @@ internal class EVRefreshDataProvider(
         if (initialRouteOptions.isEVRoute()) {
             result[ROUTE_OPTIONS_KEY_ENGINE] = ROUTE_OPTIONS_VALUE_ELECTRIC
             result.putAll(
-                evDynamicDataHolder.currentData(initialRouteOptions.unrecognizedJsonProperties!!)
+                evDynamicDataHolder.currentData(initialRouteOptions.unrecognizedJsonProperties!!),
             )
         }
         return result

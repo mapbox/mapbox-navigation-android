@@ -1,7 +1,7 @@
 package com.mapbox.navigation.copilot
 
 import android.util.Base64
-import com.mapbox.navigation.copilot.internal.CopilotMetadata
+import com.mapbox.navigation.copilot.internal.CopilotSession
 import io.mockk.every
 import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
@@ -19,7 +19,7 @@ class HistoryAttachmentsUtilsTest {
 
     @Test
     fun `generate filename`() {
-        val navigationSession = CopilotMetadata(
+        val navigationSession = CopilotSession(
             appMode = "mbx-debug",
             driveMode = "free-drive",
             driveId = "3e48fd7a-fc82-42a8-9bae-baeb724f92ce",
@@ -32,7 +32,7 @@ class HistoryAttachmentsUtilsTest {
             appSessionId = "3e48fd7b-ac82-42a8-9abe-aaeb724f92ce",
         )
 
-        val filename = HistoryAttachmentsUtils.generateFilename(navigationSession)
+        val filename = HistoryAttachmentsUtils.attachmentFilename(navigationSession)
 
         val expectedFilename = "2022-05-12T17:47:42.353Z__2022-05-12T17:48:12.504Z__android__" +
             "2.7.0-beta.1__108.0.1_____v0.108.0-9-g0527ee4__" +
@@ -42,7 +42,7 @@ class HistoryAttachmentsUtilsTest {
 
     @Test
     fun `generate session id`() {
-        val navigationSession = CopilotMetadata(
+        val navigationSession = CopilotSession(
             appMode = "mbx-debug",
             driveMode = "free-drive",
             driveId = "3e48fd7a-fc82-42a8-9bae-baeb724f92ce",

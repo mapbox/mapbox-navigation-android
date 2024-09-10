@@ -3,23 +3,23 @@ package com.mapbox.navigation.copilot.internal
 /**
  * PushStatus
  *
- * @property metadata [CopilotMetadata]
+ * @property metadata [CopilotSession]
  */
 sealed class PushStatus {
 
-    abstract val metadata: CopilotMetadata
+    abstract val metadata: CopilotSession
 
     /**
      * Success
      *
-     * @property metadata [CopilotMetadata]
+     * @property metadata [CopilotSession]
      */
-    data class Success(override val metadata: CopilotMetadata) : PushStatus()
+    data class Success(override val metadata: CopilotSession) : PushStatus()
 
     /**
      * Failed
      *
-     * @property metadata [CopilotMetadata]
+     * @property metadata [CopilotSession]
      */
-    data class Failed(override val metadata: CopilotMetadata) : PushStatus()
+    data class Failed(override val metadata: CopilotSession) : PushStatus()
 }

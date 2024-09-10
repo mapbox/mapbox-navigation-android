@@ -1,34 +1,35 @@
 package com.mapbox.navigation.ui.utils.internal.network
 
-import com.mapbox.common.DownloadOptions
 import com.mapbox.common.HttpRequest
+import com.mapbox.common.HttpRequestOrResponse
 import com.mapbox.common.HttpResponse
 import com.mapbox.common.HttpServiceInterceptorInterface
+import com.mapbox.common.HttpServiceInterceptorRequestContinuation
+import com.mapbox.common.HttpServiceInterceptorResponseContinuation
 import com.mapbox.navigation.utils.internal.logD
 
 class LoggingInterceptor : HttpServiceInterceptorInterface {
-    override fun onRequest(request: HttpRequest): HttpRequest {
+
+    override fun onRequest(
+        request: HttpRequest,
+        continuation: HttpServiceInterceptorRequestContinuation,
+    ) {
         logD(
             ">> onRequest ${request.url}|${request.headers}",
-            LOG_CAT
+            LOG_CAT,
         )
-        return request
+        continuation.run(HttpRequestOrResponse(request))
     }
 
-    override fun onDownload(download: DownloadOptions): DownloadOptions {
+    override fun onResponse(
+        response: HttpResponse,
+        continuation: HttpServiceInterceptorResponseContinuation,
+    ) {
         logD(
-            ">> onDownload ${download.request.url}|${download.request.headers}",
-            LOG_CAT
+            "<< onResponse ${response.result.value?.code} ${response.request.url}",
+            LOG_CAT,
         )
-        return download
-    }
-
-    override fun onResponse(response: HttpResponse): HttpResponse {
-        logD(
-            "<< onResponse ${response.result?.value?.code} ${response.request.url}",
-            LOG_CAT
-        )
-        return response
+        continuation.run(response)
     }
 
     companion object {

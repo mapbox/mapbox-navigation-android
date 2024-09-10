@@ -25,7 +25,7 @@ class RoutesRefreshDataProviderTest {
         val primaryRouteProgressData = RouteProgressData(4, 5, 6)
         val routesProgressData = RoutesProgressData(
             primaryRouteProgressData,
-            mapOf("id#1" to RouteProgressData(7, 8, 9))
+            mapOf("id#1" to RouteProgressData(7, 8, 9)),
         )
         val primaryRoute = mockk<NavigationRoute>(relaxed = true)
         coEvery {
@@ -55,7 +55,7 @@ class RoutesRefreshDataProviderTest {
             mapOf(
                 "id#1" to alternativeRoute1ProgressData,
                 "id#2" to alternativeRoute2ProgressData,
-            )
+            ),
         )
         coEvery {
             routesProgressDataProvider.getRouteRefreshRequestDataOrWait()
@@ -65,12 +65,12 @@ class RoutesRefreshDataProviderTest {
             primaryRouteProgressData,
             listOf(
                 alternativeRoute1 to alternativeRoute1ProgressData,
-                alternativeRoute2 to alternativeRoute2ProgressData
-            )
+                alternativeRoute2 to alternativeRoute2ProgressData,
+            ),
         )
 
         val actual = sut.getRoutesRefreshData(
-            listOf(primaryRoute, alternativeRoute1, alternativeRoute2)
+            listOf(primaryRoute, alternativeRoute1, alternativeRoute2),
         )
 
         assertEquals(expected, actual)
@@ -92,7 +92,7 @@ class RoutesRefreshDataProviderTest {
             mapOf(
                 "id#2" to alternativeRoute2ProgressData,
                 "id#3" to RouteProgressData(3, 5, 7),
-            )
+            ),
         )
         coEvery {
             routesProgressDataProvider.getRouteRefreshRequestDataOrWait()
@@ -100,11 +100,11 @@ class RoutesRefreshDataProviderTest {
         val expected = RoutesRefreshData(
             primaryRoute,
             primaryRouteProgressData,
-            listOf(alternativeRoute1 to null, alternativeRoute2 to alternativeRoute2ProgressData)
+            listOf(alternativeRoute1 to null, alternativeRoute2 to alternativeRoute2ProgressData),
         )
 
         val actual = sut.getRoutesRefreshData(
-            listOf(primaryRoute, alternativeRoute1, alternativeRoute2)
+            listOf(primaryRoute, alternativeRoute1, alternativeRoute2),
         )
 
         assertEquals(expected, actual)

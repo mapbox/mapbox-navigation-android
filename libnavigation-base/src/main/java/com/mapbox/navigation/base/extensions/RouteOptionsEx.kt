@@ -22,7 +22,7 @@ import java.util.Locale
 @JvmOverloads
 fun RouteOptions.Builder.applyDefaultNavigationOptions(
     @DirectionsCriteria.ProfileCriteria profile: String =
-        DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+        DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
 ): RouteOptions.Builder = apply {
     val defaultAnnotations = listOf(
         DirectionsCriteria.ANNOTATION_SPEED,
@@ -37,7 +37,7 @@ fun RouteOptions.Builder.applyDefaultNavigationOptions(
                     DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
                     DirectionsCriteria.ANNOTATION_MAXSPEED,
                     DirectionsCriteria.ANNOTATION_CLOSURE,
-                ).apply { addAll(defaultAnnotations) }
+                ).apply { addAll(defaultAnnotations) },
             )
             continueStraight(true)
             enableRefresh(true)
@@ -46,19 +46,20 @@ fun RouteOptions.Builder.applyDefaultNavigationOptions(
             annotationsList(
                 mutableListOf(
                     DirectionsCriteria.ANNOTATION_MAXSPEED,
-                ).apply { addAll(defaultAnnotations) }
+                ).apply { addAll(defaultAnnotations) },
             )
             continueStraight(true)
             enableRefresh(false)
         }
         DirectionsCriteria.PROFILE_CYCLING,
-        DirectionsCriteria.PROFILE_WALKING -> {
+        DirectionsCriteria.PROFILE_WALKING,
+        -> {
             annotationsList(defaultAnnotations)
             continueStraight(false)
             enableRefresh(false)
         }
         else -> throw IllegalArgumentException(
-            "Unknown profile [$profile]. It must be one [DirectionsCriteria.ProfileCriteria]"
+            "Unknown profile [$profile]. It must be one [DirectionsCriteria.ProfileCriteria]",
         )
     }
 
@@ -92,7 +93,7 @@ fun RouteOptions.Builder.applyLanguageAndVoiceUnitOptions(context: Context): Rou
 fun RouteOptions.Builder.coordinates(
     origin: Point,
     waypoints: List<Point>? = null,
-    destination: Point
+    destination: Point,
 ): RouteOptions.Builder {
     val coordinates = mutableListOf<Point>().apply {
         add(origin)

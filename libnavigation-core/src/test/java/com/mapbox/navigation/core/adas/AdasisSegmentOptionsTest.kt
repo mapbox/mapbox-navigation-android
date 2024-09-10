@@ -4,7 +4,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class AdasisSegmentOptionsTest : BuilderTest<AdasisSegmentOptions, AdasisSegmentOptions.Builder>() {
+internal class AdasisSegmentOptionsTest :
+    BuilderTest<AdasisSegmentOptions, AdasisSegmentOptions.Builder>() {
 
     override fun getImplementationClass() = AdasisSegmentOptions::class
 

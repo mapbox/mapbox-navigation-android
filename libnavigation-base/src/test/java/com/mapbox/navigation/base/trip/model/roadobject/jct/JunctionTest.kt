@@ -17,7 +17,7 @@ class JunctionTest {
             1.0,
             RoadObjectProvider.MAPBOX,
             true,
-            mockk()
+            mockk(),
         )
 
         assertEquals(RoadObjectType.JCT, actual.objectType)

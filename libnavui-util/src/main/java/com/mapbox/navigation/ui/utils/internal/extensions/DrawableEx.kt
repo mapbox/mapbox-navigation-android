@@ -23,7 +23,7 @@ fun Drawable.getBitmap(): Bitmap {
         val bitmap = Bitmap.createBitmap(
             intrinsicWidth,
             intrinsicHeight,
-            Bitmap.Config.ARGB_8888
+            Bitmap.Config.ARGB_8888,
         )
         val canvas = Canvas(bitmap)
         setBounds(0, 0, canvas.width, canvas.height)
@@ -38,7 +38,7 @@ fun Drawable.getBitmap(): Bitmap {
 fun Drawable.withBlurEffect(context: Context, radius: Float): Drawable {
     return BitmapDrawable(
         context.resources,
-        blurBitmap(context, getBitmap(), radius)
+        blurBitmap(context, getBitmap(), radius),
     )
 }
 
@@ -46,7 +46,7 @@ private fun blurBitmap(
     context: Context,
     image: Bitmap,
     radius: Float,
-    scale: Float = 1.0f
+    scale: Float = 1.0f,
 ): Bitmap = runCatching {
     val width = (image.width * scale).roundToInt()
     val height = (image.height * scale).roundToInt()

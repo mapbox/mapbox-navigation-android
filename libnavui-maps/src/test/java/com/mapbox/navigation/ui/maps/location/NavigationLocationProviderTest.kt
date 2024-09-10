@@ -1,12 +1,18 @@
 package com.mapbox.navigation.ui.maps.location
 
 import android.animation.ValueAnimator
-import android.location.Location
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
+import com.mapbox.maps.logI
 import com.mapbox.maps.plugin.locationcomponent.LocationConsumer
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -17,7 +23,14 @@ class NavigationLocationProviderTest {
 
     @Before
     fun setup() {
+        mockkStatic("com.mapbox.maps.MapboxLogger")
+        every { logI(any(), any()) } just Runs
         navigationLocationProvider = NavigationLocationProvider()
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic("com.mapbox.maps.MapboxLogger")
     }
 
     @Test
@@ -44,7 +57,7 @@ class NavigationLocationProviderTest {
         val location: Location = mockk {
             every { latitude } returns 10.0
             every { longitude } returns 20.0
-            every { bearing } returns 123f
+            every { bearing } returns 123.0
         }
         val keyPoints: List<Location> = emptyList()
         val latLngOptions: (ValueAnimator.() -> Unit) = mockk()
@@ -56,15 +69,40 @@ class NavigationLocationProviderTest {
             location,
             keyPoints,
             latLngOptions,
-            bearingOptions
+            bearingOptions,
         )
 
         val expectedPoints =
             arrayOf(Point.fromLngLat(location.longitude, location.latitude))
         verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = any()) }
-        val expectedBearings = doubleArrayOf(location.bearing.toDouble())
+        val expectedBearings = doubleArrayOf(location.bearing!!)
         verify(exactly = 1) {
             consumer.onBearingUpdated(*expectedBearings, options = bearingOptions)
+        }
+    }
+
+    @Test
+    fun `location consumers are notified of empty bearings`() {
+        val location: Location = mockk {
+            every { latitude } returns 10.0
+            every { longitude } returns 20.0
+            every { bearing } returns null
+        }
+        val keyPoints: List<Location> = emptyList()
+        val latLngOptions: (ValueAnimator.() -> Unit) = mockk()
+        val bearingOptions: (ValueAnimator.() -> Unit) = mockk()
+        val consumer: LocationConsumer = mockk(relaxUnitFun = true)
+
+        navigationLocationProvider.registerLocationConsumer(consumer)
+        navigationLocationProvider.changePosition(
+            location,
+            keyPoints,
+            latLngOptions,
+            bearingOptions,
+        )
+
+        verify(exactly = 0) {
+            consumer.onBearingUpdated(any(), any())
         }
     }
 
@@ -73,12 +111,12 @@ class NavigationLocationProviderTest {
         val location: Location = mockk {
             every { latitude } returns 10.0
             every { longitude } returns 20.0
-            every { bearing } returns 123f
+            every { bearing } returns 123.0
         }
         val keyPoint: Location = mockk {
             every { latitude } returns 30.0
             every { longitude } returns 40.0
-            every { bearing } returns 456f
+            every { bearing } returns 456.0
         }
         val keyPoints: List<Location> = listOf(keyPoint, location)
         val latLngOptions: (ValueAnimator.() -> Unit) = mockk()
@@ -90,7 +128,7 @@ class NavigationLocationProviderTest {
             location,
             keyPoints,
             latLngOptions,
-            bearingOptions
+            bearingOptions,
         )
 
         val expectedPoints = arrayOf(
@@ -99,8 +137,8 @@ class NavigationLocationProviderTest {
         )
         verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = any()) }
         val expectedBearings = doubleArrayOf(
-            keyPoint.bearing.toDouble(),
-            location.bearing.toDouble()
+            keyPoint.bearing!!,
+            location.bearing!!,
         )
         verify(exactly = 1) {
             consumer.onBearingUpdated(*expectedBearings, options = bearingOptions)
@@ -112,12 +150,12 @@ class NavigationLocationProviderTest {
         val location: Location = mockk {
             every { latitude } returns 10.0
             every { longitude } returns 20.0
-            every { bearing } returns 123f
+            every { bearing } returns 123.0
         }
         val keyPoint: Location = mockk {
             every { latitude } returns 30.0
             every { longitude } returns 40.0
-            every { bearing } returns 456f
+            every { bearing } returns 456.0
         }
         val keyPoints: List<Location> = listOf(keyPoint, location)
         val consumer: LocationConsumer = mockk(relaxUnitFun = true)
@@ -138,7 +176,7 @@ class NavigationLocationProviderTest {
 
         navigationLocationProvider.changePosition(
             location,
-            keyPoints
+            keyPoints,
         )
         navigationLocationProvider.registerLocationConsumer(consumer)
 
@@ -148,8 +186,8 @@ class NavigationLocationProviderTest {
         )
         verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = any()) }
         val expectedBearings = doubleArrayOf(
-            keyPoint.bearing.toDouble(),
-            location.bearing.toDouble()
+            keyPoint.bearing!!,
+            location.bearing!!,
         )
         verify(exactly = 1) {
             consumer.onBearingUpdated(*expectedBearings, options = any())
@@ -163,7 +201,7 @@ class NavigationLocationProviderTest {
         val location: Location = mockk {
             every { latitude } returns 10.0
             every { longitude } returns 20.0
-            every { bearing } returns 123f
+            every { bearing } returns 123.0
         }
         val keyPoints: List<Location> = emptyList()
         val latLngOptions: (ValueAnimator.() -> Unit) = mockk()
@@ -176,7 +214,7 @@ class NavigationLocationProviderTest {
             location,
             keyPoints,
             latLngOptions,
-            bearingOptions
+            bearingOptions,
         )
 
         verify(exactly = 0) { consumer.onLocationUpdated(any()) }

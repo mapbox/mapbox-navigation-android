@@ -7,5 +7,5 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.model
  */
 class SignboardError internal constructor(
     val errorMessage: String?,
-    val throwable: Throwable?
+    val throwable: Throwable?,
 )

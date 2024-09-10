@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param profileOptions options for each type of profile short message
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisProfileShortOptions private constructor(
+internal class AdasisProfileShortOptions private constructor(
     val options: AdasisConfigMessageOptions,
     val profileOptions: AdasisConfigProfileShortTypeOptions,
 ) {
@@ -69,14 +69,14 @@ class AdasisProfileShortOptions private constructor(
         /**
          * Common options for profile long message
          */
-        fun options(options: AdasisConfigMessageOptions) = apply {
+        fun options(options: AdasisConfigMessageOptions): Builder = apply {
             this.options = options
         }
 
         /**
          * Types options for each type of profile short message
          */
-        fun profileOptions(profileOptions: AdasisConfigProfileShortTypeOptions) = apply {
+        fun profileOptions(profileOptions: AdasisConfigProfileShortTypeOptions): Builder = apply {
             this.profileOptions = profileOptions
         }
 

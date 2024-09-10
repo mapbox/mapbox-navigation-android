@@ -74,35 +74,3 @@ package com.mapbox.navigation.ui.base.util {
 
 }
 
-package com.mapbox.navigation.ui.base.view {
-
-  @UiThread public final class MapboxExtendableButton extends android.widget.FrameLayout {
-    ctor public MapboxExtendableButton(android.content.Context context);
-    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs);
-    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxExtendableButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr, int defStyleRes);
-    method public androidx.constraintlayout.widget.ConstraintLayout getContainerView();
-    method public androidx.appcompat.widget.AppCompatImageView getIconImage();
-    method public androidx.appcompat.widget.AppCompatTextView getTextView();
-    method public void setState(com.mapbox.navigation.ui.base.view.MapboxExtendableButton.State state);
-    property public final androidx.constraintlayout.widget.ConstraintLayout containerView;
-    property public final androidx.appcompat.widget.AppCompatImageView iconImage;
-    property public final androidx.appcompat.widget.AppCompatTextView textView;
-  }
-
-  public static final class MapboxExtendableButton.State {
-    ctor public MapboxExtendableButton.State(@DrawableRes int icon, String? text = null, long duration = 0);
-    method public int component1();
-    method public String? component2();
-    method public long component3();
-    method public com.mapbox.navigation.ui.base.view.MapboxExtendableButton.State copy(@DrawableRes int icon, String? text, long duration);
-    method public long getDuration();
-    method public int getIcon();
-    method public String? getText();
-    property public final long duration;
-    property public final int icon;
-    property public final String? text;
-  }
-
-}
-

@@ -1,9 +1,9 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
 class RerouteOptionsTest : BuilderTest<RerouteOptions, RerouteOptions.Builder>() {
@@ -11,8 +11,11 @@ class RerouteOptionsTest : BuilderTest<RerouteOptions, RerouteOptions.Builder>()
     override fun getImplementationClass(): KClass<RerouteOptions> =
         RerouteOptions::class
 
-    override fun getFilledUpBuilder(): RerouteOptions.Builder = RerouteOptions.Builder()
-        .avoidManeuverSeconds(10)
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    override fun getFilledUpBuilder(): RerouteOptions.Builder =
+        RerouteOptions.Builder()
+            .avoidManeuverSeconds(10)
+            .rerouteStrategyForMapMatchedRoutes(NavigateToFinalDestination)
 
     @Test
     override fun trigger() {

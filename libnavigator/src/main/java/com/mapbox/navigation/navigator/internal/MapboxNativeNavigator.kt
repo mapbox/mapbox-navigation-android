@@ -1,5 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
+import androidx.annotation.RestrictTo
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
@@ -13,11 +14,13 @@ import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
-import com.mapbox.navigator.GraphAccessor
+import com.mapbox.navigator.GraphAccessorInterface
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.InputsServiceHandleInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
@@ -30,11 +33,13 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
+import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.UpdateExternalSensorDataCallback
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface MapboxNativeNavigator {
 
     /**
@@ -44,9 +49,15 @@ interface MapboxNativeNavigator {
         cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        accessToken: String,
-        router: RouterInterface,
+        eventsMetadataProvider: EventsMetadataInterface,
     )
+
+    /**
+     * Get router
+     *
+     * @return router [RouterInterface]
+     */
+    fun getRouter(): RouterInterface
 
     suspend fun resetRideSession()
 
@@ -78,7 +89,7 @@ interface MapboxNativeNavigator {
     ): Expected<String, SetRoutesResult>
 
     suspend fun setAlternativeRoutes(
-        routes: List<NavigationRoute>
+        routes: List<NavigationRoute>,
     ): List<RouteAlternative>
 
     /**
@@ -116,7 +127,7 @@ interface MapboxNativeNavigator {
     fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?)
 
     fun setNativeNavigatorRecreationObserver(
-        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver
+        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
     )
 
     /**
@@ -124,33 +135,15 @@ interface MapboxNativeNavigator {
      */
     fun unregisterAllObservers()
 
+    fun shutdown()
+
     // Predictive cache
 
     /**
      * Creates a Maps [PredictiveCacheController].
      *
      * @param tileStore Maps [TileStore]
-     * @param tileVariant Maps tileset
-     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
-     *
-     * @return [PredictiveCacheController]
-     */
-    @Deprecated(
-        "Use createMapsController(" +
-            "mapboxMap, tileStore, tilesetDescriptor, predictiveCacheLocationOptions" +
-            ") instead."
-    )
-    fun createMapsPredictiveCacheControllerTileVariant(
-        tileStore: TileStore,
-        tileVariant: String,
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
-    ): PredictiveCacheController
-
-    /**
-     * Creates a Maps [PredictiveCacheController].
-     *
-     * @param tileStore Maps [TileStore]
-     * @param tilesetDescriptor Maps tilesetDescriptor
+     * @param tilesetDescriptor Maps tilesetDescriptor [TilesetDescriptor]
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
      *
      * @return [PredictiveCacheController]
@@ -158,7 +151,22 @@ interface MapboxNativeNavigator {
     fun createMapsPredictiveCacheController(
         tileStore: TileStore,
         tilesetDescriptor: TilesetDescriptor,
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
+    ): PredictiveCacheController
+
+    /**
+     * Creates a Search [PredictiveCacheController].
+     *
+     * @param tileStore Search [TileStore]
+     * @param searchTilesetDescriptor Search tilesetDescriptor [TilesetDescriptor]
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    fun createSearchPredictiveCacheController(
+        tileStore: TileStore,
+        searchTilesetDescriptor: TilesetDescriptor,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
     ): PredictiveCacheController
 
     /**
@@ -170,7 +178,7 @@ interface MapboxNativeNavigator {
      * @return [PredictiveCacheController]
      */
     fun createNavigationPredictiveCacheController(
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
     ): PredictiveCacheController
 
     /**
@@ -192,9 +200,11 @@ interface MapboxNativeNavigator {
      */
     fun resetAdasisMessageCallback()
 
+    fun setUserLanguages(languages: List<String>)
+
     val routeAlternativesController: RouteAlternativesControllerInterface
 
-    val graphAccessor: GraphAccessor
+    val graphAccessor: GraphAccessorInterface
 
     val roadObjectsStore: RoadObjectsStore
 
@@ -203,4 +213,8 @@ interface MapboxNativeNavigator {
     val roadObjectMatcher: RoadObjectMatcher
 
     val experimental: Experimental
+
+    val inputsService: InputsServiceHandleInterface
+
+    val telemetry: Telemetry
 }

@@ -3,9 +3,7 @@ package com.mapbox.navigation.core.telemetry.events
 import android.graphics.Bitmap
 import android.util.Base64
 import com.mapbox.navigation.core.MapboxNavigation
-import java.io.ByteArrayOutputStream
-import kotlin.math.min
-import kotlin.math.roundToInt
+import com.mapbox.navigation.core.internal.utils.encode
 
 /**
  * Provides utilities for working with feedback
@@ -141,11 +139,6 @@ object FeedbackHelper {
         screenshot: Bitmap,
         options: BitmapEncodeOptions = BitmapEncodeOptions.Builder().build(),
     ): String {
-        val newWidth = min(screenshot.width, options.width)
-        val newHeight = (newWidth.toFloat() * screenshot.height / screenshot.width).roundToInt()
-        val scaled = Bitmap.createScaledBitmap(screenshot, newWidth, newHeight, true)
-        val stream = ByteArrayOutputStream()
-        scaled.compress(Bitmap.CompressFormat.JPEG, options.compressQuality, stream)
-        return Base64.encodeToString(stream.toByteArray(), Base64.DEFAULT)
+        return Base64.encodeToString(screenshot.encode(options), Base64.DEFAULT)
     }
 }

@@ -11,7 +11,7 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import java.util.concurrent.CopyOnWriteArraySet
 
 internal class ArrivalProgressObserver(
-    private val tripSession: TripSession
+    private val tripSession: TripSession,
 ) : RouteProgressObserver {
 
     private var arrivalController: ArrivalController = AutoArrivalController()
@@ -88,7 +88,7 @@ internal class ArrivalProgressObserver(
 
     private fun doOnWaypointArrival(
         routeProgress: RouteProgress,
-        routeLegProgress: RouteLegProgress
+        routeLegProgress: RouteLegProgress,
     ) {
         if (routeLegArrived != routeLegProgress.routeLeg) {
             routeLegArrived = routeLegProgress.routeLeg

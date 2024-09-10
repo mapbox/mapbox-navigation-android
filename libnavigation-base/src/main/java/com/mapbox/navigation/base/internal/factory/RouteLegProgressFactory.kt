@@ -22,7 +22,7 @@ object RouteLegProgressFactory {
      * @param routeLeg [RouteLeg] geometry
      * @param distanceTraveled Total distance traveled in meters along current leg
      * @param distanceRemaining The distance remaining in meters until the user reaches the end of the leg
-     * @param durationRemaining The duration remaining in seconds until the user reaches the end of the current step
+     * @param durationRemaining The duration remaining in seconds until the user reaches the end of the leg
      * @param fractionTraveled The fraction traveled along the current leg, this is a float value between 0 and 1 and
      * isn't guaranteed to reach 1 before the user reaches the next waypoint
      * @param currentStepProgress [RouteStepProgress] object with information about the particular step the user

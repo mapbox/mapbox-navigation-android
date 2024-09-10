@@ -1,12 +1,11 @@
 package com.mapbox.navigation.core.telemetry.events
 
-import android.location.Location
 import com.google.gson.Gson
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.internal.telemetry.toTelemetryLocations
-import com.mapbox.navigation.core.telemetry.LocationsCollector
+import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigator.UserFeedbackHandle
+import com.mapbox.navigator.UserFeedbackMetadata
 
 /**
  * It's the wrapper of [FeedbackMetadata] that collect locations after instance of
@@ -19,65 +18,21 @@ import com.mapbox.navigation.core.telemetry.LocationsCollector
  * - to collect as much data as possible preferably call [FeedbackMetadataWrapper.get] just before posting or storing feedback.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class FeedbackMetadataWrapper internal constructor(
-    private val sessionIdentifier: String,
-    private val driverModeIdentifier: String,
-    @FeedbackEvent.DriverMode private val driverMode: String,
-    private val driverModeStartTime: String,
-    private val rerouteCount: Int,
-    private val lastLocation: Point?,
-    private val locationEngineNameExternal: String,
-    private val percentTimeInPortrait: Int?,
-    private val percentTimeInForeground: Int?,
-    private val eventVersion: Int,
-    private val phoneState: PhoneState,
-    private val metricsDirectionsRoute: MetricsDirectionsRoute,
-    private val metricsRouteProgress: MetricsRouteProgress,
-    private val appMetadata: AppMetadata?,
-    private val locationsCollector: LocationsCollector,
+class FeedbackMetadataWrapper private constructor(
+    private val userFeedbackHandle: UserFeedbackHandle,
 ) {
-    private var bufferFlushed = false
-
-    private val locationsBefore = mutableListOf<Location>()
-    private val locationsAfter = mutableListOf<Location>()
-
-    private val locationsBufferListener =
-        LocationsCollector.LocationsCollectorListener { preEventLocations, postEventLocations ->
-            locationsBefore.addAll(preEventLocations)
-            locationsAfter.addAll(postEventLocations)
-            bufferFlushed = true
-        }
-
-    init {
-        locationsCollector.collectLocations(locationsBufferListener)
-    }
 
     /**
-     * Provide [FeedbackMetadata] with locations that were collected after creating instance of
-     * [FeedbackMetadataWrapper].
+     * Provides instance of [FeedbackMetadata]
      */
-    fun get(): FeedbackMetadata {
-        if (!bufferFlushed) {
-            locationsCollector.flushBufferFor(locationsBufferListener)
+    fun get(): FeedbackMetadata = FeedbackMetadata.create(userFeedbackHandle.metadata)
+
+    internal companion object {
+
+        @JvmSynthetic
+        fun create(userFeedbackHandle: UserFeedbackHandle): FeedbackMetadataWrapper {
+            return FeedbackMetadataWrapper(userFeedbackHandle)
         }
-        return FeedbackMetadata(
-            sessionIdentifier,
-            driverModeIdentifier,
-            driverMode,
-            driverModeStartTime,
-            rerouteCount,
-            locationsBefore.toTelemetryLocations(),
-            locationsAfter.toTelemetryLocations(),
-            lastLocation,
-            locationEngineNameExternal,
-            percentTimeInPortrait,
-            percentTimeInForeground,
-            eventVersion,
-            phoneState,
-            metricsDirectionsRoute,
-            metricsRouteProgress,
-            appMetadata,
-        )
     }
 }
 
@@ -90,42 +45,44 @@ class FeedbackMetadataWrapper internal constructor(
  * [FeedbackMetadata] that collect **locations after** call under the hood.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class FeedbackMetadata internal constructor(
-    internal val sessionIdentifier: String? = null,
-    internal val driverModeIdentifier: String? = null,
-    @FeedbackEvent.DriverMode internal val driverMode: String? = null,
-    internal val driverModeStartTime: String? = null,
-    internal val rerouteCount: Int = 0,
-    internal val locationsBeforeEvent: Array<TelemetryLocation>? = null,
-    internal val locationsAfterEvent: Array<TelemetryLocation>? = null,
-    internal val lastLocation: Point? = null,
-    internal val locationEngineNameExternal: String? = null,
-    internal val percentTimeInPortrait: Int? = null,
-    internal val percentTimeInForeground: Int? = null,
-    internal val eventVersion: Int,
-    internal val phoneState: PhoneState,
-    internal val metricsDirectionsRoute: MetricsDirectionsRoute,
-    internal val metricsRouteProgress: MetricsRouteProgress,
-    internal val appMetadata: AppMetadata? = null,
+class FeedbackMetadata private constructor(
+    internal val userFeedbackMetadata: UserFeedbackMetadata,
 ) {
 
     companion object {
+
+        private const val LOG_CATEGORY = "FeedbackMetadata"
+
+        @JvmSynthetic
+        internal fun create(userFeedbackMetadata: UserFeedbackMetadata): FeedbackMetadata {
+            return FeedbackMetadata(userFeedbackMetadata)
+        }
+
         /**
-         * Create a new instance of [FeedbackMetadata] from json.
-         *
-         * @throws Throwable if json is not a valid FeedbackMetadata
+         * Creates a new instance of [FeedbackMetadata] from json.
+         * Note that the internal structure of [FeedbackMetadata] can change at any time,
+         * so a [FeedbackMetadata] object converted to JSON in older versions of the SDK,
+         * might not be restored correctly. In such cases, null is returned.
          */
         @JvmStatic
         @ExperimentalPreviewMapboxNavigationAPI
         fun fromJson(json: String): FeedbackMetadata? =
-            Gson().fromJson(json, FeedbackMetadata::class.java)
+            try {
+                Gson().fromJson(json, FeedbackMetadata::class.java)
+            } catch (e: Exception) {
+                logE("Unable to create FeedbackMetadata: $e", LOG_CATEGORY)
+                null
+            }
     }
 
     /**
      * Serialize [FeedbackMetadata] to json string.
+     *
+     * Note that the internal structure of [FeedbackMetadata] can change at any time,
+     * so a [FeedbackMetadata] object converted to JSON in older versions of the SDK,
+     * might not be restored correctly using [fromJson].
      */
-    fun toJson(gson: Gson): String =
-        gson.toJson(this)
+    fun toJson(gson: Gson): String = gson.toJson(this)
 
     /**
      * Regenerate whenever a change is made
@@ -136,69 +93,20 @@ class FeedbackMetadata internal constructor(
 
         other as FeedbackMetadata
 
-        if (sessionIdentifier != other.sessionIdentifier) return false
-        if (driverModeIdentifier != other.driverModeIdentifier) return false
-        if (driverMode != other.driverMode) return false
-        if (driverModeStartTime != other.driverModeStartTime) return false
-        if (rerouteCount != other.rerouteCount) return false
-        if (!locationsBeforeEvent.contentEquals(other.locationsBeforeEvent)) return false
-        if (!locationsAfterEvent.contentEquals(other.locationsAfterEvent)) return false
-        if (lastLocation != other.lastLocation) return false
-        if (locationEngineNameExternal != other.locationEngineNameExternal) return false
-        if (percentTimeInPortrait != other.percentTimeInPortrait) return false
-        if (percentTimeInForeground != other.percentTimeInForeground) return false
-        if (eventVersion != other.eventVersion) return false
-        if (phoneState != other.phoneState) return false
-        if (metricsDirectionsRoute != other.metricsDirectionsRoute) return false
-        if (metricsRouteProgress != other.metricsRouteProgress) return false
-        if (appMetadata != other.appMetadata) return false
-
-        return true
+        return userFeedbackMetadata == other.userFeedbackMetadata
     }
 
     /**
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = sessionIdentifier.hashCode()
-        result = 31 * result + driverModeIdentifier.hashCode()
-        result = 31 * result + driverMode.hashCode()
-        result = 31 * result + driverModeStartTime.hashCode()
-        result = 31 * result + rerouteCount.hashCode()
-        result = 31 * result + locationsBeforeEvent.hashCode()
-        result = 31 * result + locationsAfterEvent.hashCode()
-        result = 31 * result + lastLocation.hashCode()
-        result = 31 * result + locationEngineNameExternal.hashCode()
-        result = 31 * result + percentTimeInPortrait.hashCode()
-        result = 31 * result + percentTimeInForeground.hashCode()
-        result = 31 * result + eventVersion.hashCode()
-        result = 31 * result + phoneState.hashCode()
-        result = 31 * result + metricsDirectionsRoute.hashCode()
-        result = 31 * result + metricsRouteProgress.hashCode()
-        result = 31 * result + appMetadata.hashCode()
-        return result
+        return userFeedbackMetadata.hashCode()
     }
 
     /**
-     * Regenerate whenever a change is made
+     * Returns a string representation of the object.
      */
-    override fun toString(): String =
-        "FeedbackMetadata(" +
-            "sessionIdentifier='$sessionIdentifier', " +
-            "driverModeIdentifier=$driverModeIdentifier, " +
-            "driverMode=$driverMode, " +
-            "driverModeStartTime=$driverModeStartTime, " +
-            "rerouteCount=$rerouteCount, " +
-            "locationsBeforeEvent=$locationsBeforeEvent, " +
-            "locationsAfterEvent=$locationsAfterEvent, " +
-            "lastLocation=$lastLocation, " +
-            "locationEngineNameExternal=$locationEngineNameExternal, " +
-            "percentTimeInPortrait=$percentTimeInPortrait, " +
-            "percentTimeInForeground=$percentTimeInForeground, " +
-            "eventVersion=$eventVersion, " +
-            "phoneState=$phoneState, " +
-            "metricsDirectionsRoute=$metricsDirectionsRoute, " +
-            "metricsRouteProgress=$metricsRouteProgress, " +
-            "appMetadata=$appMetadata" +
-            ")"
+    override fun toString(): String {
+        return "FeedbackMetadata(userFeedbackMetadata=$userFeedbackMetadata)"
+    }
 }

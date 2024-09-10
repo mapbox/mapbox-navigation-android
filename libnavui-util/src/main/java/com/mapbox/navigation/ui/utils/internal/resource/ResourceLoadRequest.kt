@@ -8,7 +8,7 @@ import com.mapbox.common.ResourceLoadFlags
  * behavior and [networkRestriction] that controls which networks may be used to load the resource.
  */
 class ResourceLoadRequest(
-    val url: String
+    val url: String,
 ) {
     /**
      * Various flags that control resource loading behavior.

@@ -2,8 +2,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
+apply from: file("../gradle/artifact-settings.gradle")
 apply from: "../gradle/ktlint.gradle"
 apply from: "../gradle/kdoc-settings.gradle"
+
+// for lint to correctly identify groupId
+group = project.ext.mapboxArtifactGroupId
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion

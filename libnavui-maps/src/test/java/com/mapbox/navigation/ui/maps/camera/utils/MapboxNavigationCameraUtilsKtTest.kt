@@ -19,7 +19,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = 10.0,
-            targetBearing = 0.0
+            targetBearing = 0.0,
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -31,7 +31,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = 0.0,
-            targetBearing = 10.0
+            targetBearing = 10.0,
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -43,7 +43,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = 1.0,
-            targetBearing = 359.5
+            targetBearing = 359.5,
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -55,7 +55,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = 359.5,
-            targetBearing = 0.0
+            targetBearing = 0.0,
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -67,7 +67,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = 359.5,
-            targetBearing = 1.0
+            targetBearing = 1.0,
         )
 
         assertEquals(expected, actual, 0.0000001)
@@ -79,7 +79,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = 50.0,
-            targetBearing = 110.0
+            targetBearing = 110.0,
         )
 
         assertEquals(expected, actual, 0.000001)
@@ -91,7 +91,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = -0.0,
-            targetBearing = 360.0
+            targetBearing = 360.0,
         )
 
         assertEquals(expected, actual, 0.000001)
@@ -103,7 +103,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = -0.0,
-            targetBearing = 0.0
+            targetBearing = 0.0,
         )
 
         assertEquals(expected, actual, 0.000001)
@@ -115,7 +115,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
         val actual = normalizeBearing(
             currentBearing = 27.254667247679752,
-            targetBearing = 0.0
+            targetBearing = 0.0,
         )
 
         assertEquals(expected, actual, 1E-14)
@@ -164,7 +164,7 @@ class MapboxNavigationCameraUtilsKtTest {
             ValueAnimator.ofFloat().apply {
                 startDelay = 0
                 duration = 1000
-            }
+            },
         )
         val expected = createAnimatorSet(animators).childAnimations
 
@@ -185,7 +185,7 @@ class MapboxNavigationCameraUtilsKtTest {
             ValueAnimator.ofFloat().apply {
                 startDelay = 0
                 duration = 1000
-            }
+            },
         )
         val expectedAnimators = listOf<Animator>(
             ValueAnimator.ofFloat().apply {
@@ -195,7 +195,7 @@ class MapboxNavigationCameraUtilsKtTest {
             ValueAnimator.ofFloat().apply {
                 startDelay = 0
                 duration = 500
-            }
+            },
         )
         val expected = createAnimatorSet(expectedAnimators).childAnimations
 

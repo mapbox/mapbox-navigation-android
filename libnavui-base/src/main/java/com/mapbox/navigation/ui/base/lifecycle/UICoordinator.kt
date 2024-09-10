@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
  * @property coroutineScope Defines a scope for new coroutine
  */
 abstract class UICoordinator<T : ViewGroup>(
-    private val viewGroup: T
+    private val viewGroup: T,
 ) : MapboxNavigationObserver {
 
     private var attachedObserver: MapboxNavigationObserver? = null

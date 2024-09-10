@@ -15,7 +15,7 @@ interface RoadGraphDataUpdateCallback {
      */
     fun onRoadGraphDataUpdateInfoAvailable(
         isUpdateAvailable: Boolean,
-        versionInfo: RoadGraphVersionInfo?
+        versionInfo: RoadGraphVersionInfo?,
     )
 }
 

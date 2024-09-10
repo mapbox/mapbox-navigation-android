@@ -23,7 +23,7 @@ object RoadObjectProvider {
     @Retention(AnnotationRetention.BINARY)
     @StringDef(
         MAPBOX,
-        CUSTOM
+        CUSTOM,
     )
     annotation class Type
 }

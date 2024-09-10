@@ -1,11 +1,13 @@
 root = true
 
 [*.{kt,kts}]
+ktlint_code_style=ktlint_official
 indent_style = space
 indent_size = 4
 continuation_indent_size=4
-ktlint_disabled_rules=trailing-comma-on-call-site,trailing-comma-on-declaration-site
 
+ij_kotlin_allow_trailing_comma=true
+ij_kotlin_allow_trailing_comma_on_call_site=true
 ij_kotlin_imports_layout=*,java.**,javax.**,kotlin.**,^
 
 insert_final_newline=true
@@ -14,10 +16,13 @@ insert_final_newline=true
 max_line_length=100
 
 [**/qa_test_app/**.kt]
-ktlint_disabled_rules=package-name,trailing-comma-on-call-site,trailing-comma-on-declaration-site
+ktlint_disabled_rules=package-name
 
 [**/test/**.kt]
 ktlint_ignore_back_ticked_identifier=true
 
 [**/instrumentation_tests/**.kt]
-ktlint_disabled_rules=package-name,filename,trailing-comma-on-call-site,trailing-comma-on-declaration-site
+ktlint_disabled_rules=package-name,filename
+
+[**/screenshot_tests/**.kt]
+ktlint_disabled_rules=package-name,filename

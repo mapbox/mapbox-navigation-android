@@ -9,7 +9,7 @@ import com.mapbox.navigation.ui.maps.guidance.restarea.api.MapboxRestAreaApi
  * @constructor
  */
 class MapboxRestAreaOptions private constructor(
-    val desiredGuideMapWidth: Int
+    val desiredGuideMapWidth: Int,
 ) {
 
     /**
@@ -70,7 +70,7 @@ class MapboxRestAreaOptions private constructor(
          */
         fun build(): MapboxRestAreaOptions {
             return MapboxRestAreaOptions(
-                desiredGuideMapWidth = desiredGuideMapWidth
+                desiredGuideMapWidth = desiredGuideMapWidth,
             )
         }
     }

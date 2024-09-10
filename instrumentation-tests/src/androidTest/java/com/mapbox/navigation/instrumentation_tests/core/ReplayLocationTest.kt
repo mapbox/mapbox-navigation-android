@@ -1,6 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
-import android.location.Location
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -8,14 +8,13 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.ApproximateCoordinates
-import com.mapbox.navigation.instrumentation_tests.utils.location.toReplayEventUpdateLocation
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.rawLocationUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.ApproximateCoordinates
+import com.mapbox.navigation.testing.utils.location.toReplayEventUpdateLocation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
@@ -34,18 +33,18 @@ class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
 
     private val realLocation = ApproximateCoordinates(0.9, 0.9, tolerance)
 
-    override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
-        latitude = realLocation.latitude
-        longitude = realLocation.longitude
-    }
+    override fun setupMockLocation(): android.location.Location =
+        mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = realLocation.latitude
+            longitude = realLocation.longitude
+        }
 
     @Before
     fun setUp() {
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .build()
+                    .build(),
             )
         }
     }
@@ -61,8 +60,8 @@ class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                     ApproximateCoordinates(
                         rawLocation.latitude,
                         rawLocation.longitude,
-                        tolerance
-                    )
+                        tolerance,
+                    ),
                 )
             }
 
@@ -75,14 +74,14 @@ class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             mockLocationUpdatesRule.generateLocationUpdate {
                 latitude = firstReplayApproximateLocation.latitude
                 longitude = firstReplayApproximateLocation.longitude
-            }
+            },
         )
         mapboxNavigation.rawLocationUpdates()
             .filter {
                 ApproximateCoordinates(
                     it.latitude,
                     it.longitude,
-                    tolerance
+                    tolerance,
                 ) == firstReplayApproximateLocation
             }
             .first()
@@ -104,7 +103,7 @@ class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
             mockLocationUpdatesRule.generateLocationUpdate {
                 latitude = secondReplayApproximateLocation.latitude
                 longitude = secondReplayApproximateLocation.longitude
-            }
+            },
         )
         mapboxNavigation.rawLocationUpdates()
             .filter {
@@ -115,7 +114,7 @@ class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         assertEquals(List(rawLocations.size) { secondReplayApproximateLocation }, rawLocations)
     }
 
-    private fun updateReplayLocation(location: Location) {
+    private fun updateReplayLocation(location: android.location.Location) {
         val events = listOf(location.toReplayEventUpdateLocation(0.0))
         mapboxNavigation.mapboxReplayer.run {
             stop()

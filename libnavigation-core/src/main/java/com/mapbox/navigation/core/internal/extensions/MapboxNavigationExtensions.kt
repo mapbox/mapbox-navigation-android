@@ -2,11 +2,9 @@
 
 package com.mapbox.navigation.core.internal.extensions
 
-import android.location.Location
 import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -17,8 +15,8 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedObserver
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
-import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
+import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
@@ -45,7 +43,7 @@ import kotlinx.coroutines.flow.channelFlow
  */
 @UiThread
 fun MapboxNavigation.registerHistoryRecordingStateChangeObserver(
-    observer: HistoryRecordingStateChangeObserver
+    observer: HistoryRecordingStateChangeObserver,
 ) {
     historyRecordingStateHandler.registerStateChangeObserver(observer)
 }
@@ -58,13 +56,16 @@ fun MapboxNavigation.registerHistoryRecordingStateChangeObserver(
  */
 @UiThread
 fun MapboxNavigation.unregisterHistoryRecordingStateChangeObserver(
-    observer: HistoryRecordingStateChangeObserver
+    observer: HistoryRecordingStateChangeObserver,
 ) {
     historyRecordingStateHandler.unregisterStateChangeObserver(observer)
 }
 
 fun MapboxNavigation.retrieveCopilotHistoryRecorder(): MapboxHistoryRecorder =
     copilotHistoryRecorder
+
+fun MapboxNavigation.retrieveCompositeHistoryRecorder(): MapboxHistoryRecorder =
+    compositeRecorder
 
 /**
  * TODO note that each of these creates a new subscription. A concern may be that we want to have
@@ -178,31 +179,40 @@ fun MapboxNavigation.flowNavigationSessionState(): Flow<NavigationSessionState> 
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun MapboxNavigation.flowRouteAlternativeObserver():
-    Flow<Pair<RouteProgress, List<NavigationRoute>>> =
-    callbackFlow {
-        val alternativesObserver = object : NavigationRouteAlternativesObserver {
-            override fun onRouteAlternatives(
-                routeProgress: RouteProgress,
-                alternatives: List<NavigationRoute>,
-                routerOrigin: RouterOrigin
-            ) {
-                trySend(
-                    element = Pair(routeProgress, alternatives)
-                )
-            }
-
-            override fun onRouteAlternativesError(error: RouteAlternativesError) {
-            }
-        }
-        registerRouteAlternativesObserver(alternativesObserver)
-        awaitClose { unregisterRouteAlternativesObserver(alternativesObserver) }
-    }
-
-@OptIn(ExperimentalCoroutinesApi::class)
 internal fun MapboxNavigation.flowSetNavigationRoutesStarted(): Flow<RoutesSetStartedParams> =
     callbackFlow {
         val observer = SetNavigationRoutesStartedObserver { trySend(it) }
         registerOnRoutesSetStartedObserver(observer)
         awaitClose { unregisterOnRoutesSetStartedObserver(observer) }
     }
+
+interface HistoryRecordingEnabledObserver {
+
+    fun onEnabled(historyRecorderHandle: MapboxHistoryRecorder)
+
+    fun onDisabled(historyRecorderHandle: MapboxHistoryRecorder)
+}
+
+fun MapboxNavigation.registerHistoryRecordingEnabledObserver(
+    observer: HistoryRecordingEnabledObserver,
+) {
+    registerHistoryRecordingEnabledObserver(observer)
+}
+
+fun MapboxNavigation.unregisterHistoryRecordingEnabledObserver(
+    observer: HistoryRecordingEnabledObserver,
+) {
+    unregisterHistoryRecordingEnabledObserver(observer)
+}
+
+fun MapboxNavigation.flowRerouteState(
+    onSubscription: () -> Unit = { },
+): Flow<RerouteState>? {
+    val rerouteController = getRerouteController() ?: return null
+    return callbackFlow {
+        val observer = RerouteController.RerouteStateObserver { trySend(it) }
+        rerouteController.registerRerouteStateObserver(observer)
+        onSubscription()
+        awaitClose { rerouteController.unregisterRerouteStateObserver(observer) }
+    }
+}

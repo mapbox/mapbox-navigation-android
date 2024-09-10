@@ -134,7 +134,7 @@ class ArrivalProgressObserverTest {
                     every { durationRemaining } returns 2.0
                     every { distanceRemaining } returns 8.0f
                 }
-            }
+            },
         )
 
         assertTrue(onNextRouteLegStartCalls.isCaptured)
@@ -170,7 +170,7 @@ class ArrivalProgressObserverTest {
                     every { durationRemaining } returns 2.0
                     every { distanceRemaining } returns 8.0f
                 }
-            }
+            },
         )
 
         assertFalse(onNextRouteLegStartCalls.isCaptured)
@@ -238,7 +238,7 @@ class ArrivalProgressObserverTest {
                         mockMultipleLegs()
                     }
                 }
-            }
+            },
         )
 
         assertTrue(onArrivalCalls.isCaptured)
@@ -332,7 +332,7 @@ class ArrivalProgressObserverTest {
                         mockMultipleLegs()
                     }
                 }
-            }
+            },
         )
 
         assertFalse(onArrivalCalls.isCaptured)
@@ -494,13 +494,13 @@ class ArrivalProgressObserverTest {
                 Point.fromLngLat(-122.444359, 37.736351),
                 Point.fromLngLat(-122.444481, 37.735916),
                 Point.fromLngLat(-122.444275, 37.735595),
-                Point.fromLngLat(-122.444375, 37.736141)
+                Point.fromLngLat(-122.444375, 37.736141),
             )
         }
         every { legs() } returns listOf(
             mockk(),
             mockk(),
-            mockk() // This route has three legs
+            mockk(), // This route has three legs
         )
     }
 }

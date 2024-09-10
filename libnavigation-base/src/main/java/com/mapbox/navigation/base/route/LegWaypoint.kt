@@ -47,7 +47,7 @@ class LegWaypoint internal constructor(
         AnnotationTarget.PROPERTY,
         AnnotationTarget.VALUE_PARAMETER,
         AnnotationTarget.FUNCTION,
-        AnnotationTarget.TYPE
+        AnnotationTarget.TYPE,
     )
     @Retention(AnnotationRetention.BINARY)
     @StringDef(REGULAR, EV_CHARGING_ADDED, EV_CHARGING_USER_PROVIDED)

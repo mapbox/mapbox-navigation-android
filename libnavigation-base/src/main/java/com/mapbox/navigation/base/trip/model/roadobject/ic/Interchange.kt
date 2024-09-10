@@ -26,7 +26,7 @@ class Interchange internal constructor(
     length,
     provider,
     isUrban,
-    nativeRoadObject
+    nativeRoadObject,
 ) {
 
     /**

@@ -1,28 +1,25 @@
 package com.mapbox.navigation.copilot
 
 import android.app.Application
-import android.content.pm.ApplicationInfo
+import android.content.Context
 import android.os.SystemClock
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.google.gson.GsonBuilder
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory
-import com.mapbox.common.UploadOptions
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.copyToAndRemove
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.delete
-import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.generateFilename
-import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.generateSessionId
-import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveNavNativeSdkVersion
-import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveNavSdkVersion
-import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveOwnerFrom
-import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.utcTimeNow
-import com.mapbox.navigation.copilot.internal.CopilotMetadata
+import com.mapbox.navigation.copilot.internal.CopilotSession
+import com.mapbox.navigation.copilot.internal.currentUtcTime
+import com.mapbox.navigation.copilot.internal.saveFilename
+import com.mapbox.navigation.copilot.work.HistoryUploadWorker
+import com.mapbox.navigation.copilot.work.PeriodicHistoryCleanupWorker
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
@@ -33,19 +30,19 @@ import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.retrieveCopilotHistoryRecorder
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
+import com.mapbox.navigation.core.internal.history.HistoryFiles
 import com.mapbox.navigation.core.internal.lifecycle.CarAppLifecycleOwner
-import com.mapbox.navigation.core.internal.telemetry.UserFeedback
-import com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback
-import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackCallback
-import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackCallback
+import com.mapbox.navigation.core.internal.telemetry.ExtendedUserFeedback
+import com.mapbox.navigation.core.internal.telemetry.UserFeedbackObserver
+import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackObserver
+import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.Locale
 
 /**
  * MapboxCopilot.
@@ -54,11 +51,12 @@ import java.util.Locale
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapboxCopilotImpl(
-    private val mapboxNavigation: MapboxNavigation
-) {
+    private val mapboxNavigation: MapboxNavigation,
+) : HistoryRecordingStateChangeObserver {
 
+    private val applicationContext: Context
+        get() = mapboxNavigation.navigationOptions.applicationContext
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
-    private var initRouteSerializationJob: Job? = null
     private val activeGuidanceHistoryEvents = mutableSetOf<HistoryEventDTO>()
     private val copilotHistoryRecorder = mapboxNavigation.retrieveCopilotHistoryRecorder()
     private var currentHistoryRecordingSessionState: HistoryRecordingSessionState = Idle
@@ -67,25 +65,17 @@ internal class MapboxCopilotImpl(
                 return
             }
             field = value
-            when (field) {
-                is ActiveGuidance -> {
-                    filterOutActiveGuidance(SEARCH_RESULTS_EVENT_NAME)
-                    filterOutActiveGuidance(SEARCH_RESULT_USED_EVENT_NAME)
-                }
-                else -> {
-                    // Do nothing
-                }
+            if (field is ActiveGuidance) {
+                filterOutActiveGuidance(SEARCH_RESULTS_EVENT_NAME)
+                filterOutActiveGuidance(SEARCH_RESULT_USED_EVENT_NAME)
             }
         }
     private var startSessionTime: Long = 0
-    private var appSessionId =
-        mapboxNavigation.navigationOptions.eventsAppMetadata?.sessionId ?: "_"
-    private var driveId = "_"
-    private var startedAt = ""
-    private var appUserId = mapboxNavigation.navigationOptions.eventsAppMetadata?.userId ?: "_"
-    private var endedAt = ""
-    private var driveMode = ""
-    private val foregroundBackgroundLifecycleObserver = object : DefaultLifecycleObserver() {
+    private var activeSession: CopilotSession = CopilotSession()
+    private val finishedSessions = mutableListOf<CopilotSession>()
+    private val filepaths = HistoryFiles(applicationContext)
+
+    private val appLifecycleObserver = object : DefaultLifecycleObserver {
         override fun onResume(owner: LifecycleOwner) {
             push(GoingToForegroundEvent)
         }
@@ -94,41 +84,27 @@ internal class MapboxCopilotImpl(
             push(GoingToBackgroundEvent)
         }
     }
-    private val accessToken = mapboxNavigation.navigationOptions.accessToken.orEmpty()
     private val deviceType = mapboxNavigation.navigationOptions.deviceProfile.deviceType
-
-    private val shouldSendHistoryOnlyWithFeedback =
-        mapboxNavigation.navigationOptions.copilotOptions.shouldSendHistoryOnlyWithFeedback
-    private val maxHistoryFileLengthMilliseconds =
-        mapboxNavigation.navigationOptions.copilotOptions.maxHistoryFileLengthMillis
-    private val maxHistoryFilesPerSession =
-        mapboxNavigation.navigationOptions.copilotOptions.maxHistoryFilesPerSession
-    private val maxTotalHistoryFilesSizePerSession =
-        mapboxNavigation.navigationOptions.copilotOptions.maxTotalHistoryFilesSizePerSession
-    private val shouldRecordFreeDriveHistories =
-        mapboxNavigation.navigationOptions.copilotOptions.shouldRecordFreeDriveHistories
+    private val copilotOptions
+        get() = mapboxNavigation.navigationOptions.copilotOptions
+    private val shouldSendHistoryOnlyWithFeedback
+        get() = copilotOptions.shouldSendHistoryOnlyWithFeedback
+    private val maxHistoryFileLengthMilliseconds
+        get() = copilotOptions.maxHistoryFileLengthMillis
+    private val maxHistoryFilesPerSession
+        get() = copilotOptions.maxHistoryFilesPerSession
+    private val maxTotalHistoryFilesSizePerSession
+        get() = copilotOptions.maxTotalHistoryFilesSizePerSession
+    private val shouldRecordFreeDriveHistories
+        get() = copilotOptions.shouldRecordFreeDriveHistories
 
     private var hasFeedback = false
-    private val userFeedbackCallback =
-        UserFeedbackCallback { userFeedback ->
+    private val userFeedbackObserver =
+        UserFeedbackObserver { userFeedback ->
             hasFeedback = true
             pushFeedbackEvent(userFeedback)
         }
-    private val historyRecordingStateChangeObserver = object : HistoryRecordingStateChangeObserver {
-        override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
-            if (isRecordingAllowed(state)) {
-                startRecordingHistory(state)
-            }
-        }
 
-        override fun onShouldStopRecording(state: HistoryRecordingSessionState) {
-            uploadHistory()
-        }
-
-        override fun onShouldCancelRecording(state: HistoryRecordingSessionState) {
-            cancelRecordingHistory()
-        }
-    }
     private var arrivedAtFinalDestination = false
     private val arrivalObserver = object : ArrivalObserver {
 
@@ -150,7 +126,6 @@ internal class MapboxCopilotImpl(
         MapboxNavigationApp.lifecycleOwner
     } else {
         CarAppLifecycleOwner().apply {
-            val applicationContext = mapboxNavigation.navigationOptions.applicationContext
             val application = applicationContext as Application
             attachAllActivities(application)
             appLifecycleOwnerCleanupAction = {
@@ -158,17 +133,33 @@ internal class MapboxCopilotImpl(
             }
         }
     }
-    private val historyFiles = mutableMapOf<File, CopilotMetadata>()
+
     private var restartRecordingHistoryJob: Job? = null
+
+    override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
+        if (isRecordingAllowed(state)) {
+            startRecordingHistory(state)
+        }
+    }
+
+    override fun onShouldStopRecording(state: HistoryRecordingSessionState) {
+        uploadRecording()
+    }
+
+    override fun onShouldCancelRecording(state: HistoryRecordingSessionState) {
+        cancelRecordingHistory()
+    }
 
     /**
      * start
      */
     fun start() {
-        registerUserFeedbackCallback(userFeedbackCallback)
-        appLifecycleOwner.lifecycle.addObserver(foregroundBackgroundLifecycleObserver)
-        mapboxNavigation.registerHistoryRecordingStateChangeObserver(
-            historyRecordingStateChangeObserver
+        mapboxNavigation.registerUserFeedbackObserver(userFeedbackObserver)
+        appLifecycleOwner.lifecycle.addObserver(appLifecycleObserver)
+        mapboxNavigation.registerHistoryRecordingStateChangeObserver(this)
+        PeriodicHistoryCleanupWorker.scheduleWork(
+            applicationContext,
+            filepaths.copilotAbsolutePath(),
         )
     }
 
@@ -176,13 +167,11 @@ internal class MapboxCopilotImpl(
      * stop
      */
     fun stop() {
-        unregisterUserFeedbackCallback(userFeedbackCallback)
-        appLifecycleOwner.lifecycle.removeObserver(foregroundBackgroundLifecycleObserver)
+        mapboxNavigation.unregisterUserFeedbackObserver(userFeedbackObserver)
+        appLifecycleOwner.lifecycle.removeObserver(appLifecycleObserver)
         appLifecycleOwnerCleanupAction()
-        mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(
-            historyRecordingStateChangeObserver
-        )
-        uploadHistory()
+        mapboxNavigation.unregisterHistoryRecordingStateChangeObserver(this)
+        uploadRecording()
     }
 
     /**
@@ -195,13 +184,16 @@ internal class MapboxCopilotImpl(
             is DriveEndsEvent, GoingToBackgroundEvent, GoingToForegroundEvent -> {
                 pushHistoryJson(eventType, eventJson)
             }
+
             is NavFeedbackSubmittedEvent -> {
                 pushOnFreeDriveOrActiveGuidance(eventType, eventJson)
             }
+
             is SearchResultsEvent -> {
                 addActiveGuidance(eventType, eventJson)
                 pushSearchResults(eventType, eventJson)
             }
+
             is SearchResultUsedEvent -> {
                 addActiveGuidance(eventType, eventJson)
             }
@@ -226,16 +218,19 @@ internal class MapboxCopilotImpl(
         }
     }
 
-    private fun pushHistoryJson(eventType: String, eventJson: String) {
-        copilotHistoryRecorder.pushHistory(eventType, eventJson)
-    }
+    private fun pushHistoryJson(eventType: String, eventJson: String) =
+        mainJobController.scope.launch {
+            // IMPORTANT! pushHistory calls must be executed from the thread owning
+            // the native HistoryRecorderHandleInterface instance
+            copilotHistoryRecorder.pushHistory(eventType, eventJson)
+        }
 
-    private fun pushFeedbackEvent(userFeedback: UserFeedback) {
+    private fun pushFeedbackEvent(userFeedback: ExtendedUserFeedback) {
         val lat = userFeedback.location.latitude()
         val lng = userFeedback.location.longitude()
         val feedbackId = userFeedback.feedbackId
-        val feedbackType = userFeedback.feedbackType
-        val feedbackSubType = userFeedback.feedbackSubType?.toHashSet().orEmpty()
+        val feedbackType = userFeedback.feedback.feedbackType
+        val feedbackSubType = userFeedback.feedback.feedbackSubTypes?.toHashSet().orEmpty()
         val feedbackEvent = NavFeedbackSubmitted(
             feedbackId,
             feedbackType,
@@ -246,32 +241,33 @@ internal class MapboxCopilotImpl(
     }
 
     private fun startRecordingHistory(
-        historyRecordingSessionState: HistoryRecordingSessionState
+        historyRecordingSessionState: HistoryRecordingSessionState,
     ) {
-        copilotHistoryRecorder.startRecording()
-        currentHistoryRecordingSessionState = historyRecordingSessionState
-        startSessionTime = SystemClock.elapsedRealtime()
-        startedAt = currentUtcTime()
-        driveId = historyRecordingSessionState.sessionId
-        driveMode = when (historyRecordingSessionState) {
+        val driveMode = when (historyRecordingSessionState) {
             is ActiveGuidance -> "active-guidance"
             is FreeDrive -> "free-drive"
             else -> throw IllegalArgumentException("Should not try and track idle state")
         }
+
+        val recording = copilotHistoryRecorder.startRecording().firstOrNull() ?: ""
+        currentHistoryRecordingSessionState = historyRecordingSessionState
+        startSessionTime = SystemClock.elapsedRealtime()
+        activeSession = CopilotSession.create(
+            navigationOptions = mapboxNavigation.navigationOptions,
+            driveId = historyRecordingSessionState.sessionId,
+            driveMode = driveMode,
+            recording = recording,
+        )
+        saveCopilotSession()
+
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
         restartRecordingHistoryJob = mainJobController.scope.launch {
             while (true) {
                 delay(maxHistoryFileLengthMilliseconds)
                 restartRecordingHistory()
+                saveCopilotSession()
             }
         }
-    }
-
-    private fun currentUtcTime(
-        format: String = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-        locale: Locale = Locale.US,
-    ): String {
-        return utcTimeNow(format, locale)
     }
 
     private fun toEventJson(event: EventDTO): String {
@@ -283,47 +279,37 @@ internal class MapboxCopilotImpl(
     }
 
     private fun restartRecordingHistory() {
-        endedAt = currentUtcTime()
-        val drive = buildNavigationSession()
+        val session = activeSession.copy(endedAt = currentUtcTime())
         copilotHistoryRecorder.stopRecording { historyFilePath ->
             historyFilePath ?: return@stopRecording
-            historyFiles[File(historyFilePath)] = drive
-            if (historyFiles.size == maxHistoryFilesPerSession) {
-                val firstFile = historyFiles.keys.first()
-                delete(firstFile)
-                historyFiles.remove(firstFile)
+            finishedSessions.add(session)
+            if (finishedSessions.size == maxHistoryFilesPerSession) {
+                val oldestSession = finishedSessions.removeAt(0)
+                delete(File(oldestSession.recording))
             }
-            limitTotalHistoryFilesSize(historyFiles)
+            limitTotalHistoryFilesSize(finishedSessions)
         }
-        copilotHistoryRecorder.startRecording()
-        startedAt = currentUtcTime()
+        val recording = copilotHistoryRecorder.startRecording().firstOrNull() ?: ""
+        // when restarting recording we inherit previous session info and just update start time
+        activeSession = activeSession.copy(
+            recording = recording,
+            startedAt = currentUtcTime(),
+        )
     }
 
-    private fun uploadHistory() {
+    private fun uploadRecording() {
         if (!isRecordingAllowed(currentHistoryRecordingSessionState)) {
             return
         }
         if (hasFeedback || !shouldSendHistoryOnlyWithFeedback) {
-            endedAt = currentUtcTime()
-            val diffTime = SystemClock.elapsedRealtime() - startSessionTime
+            val session = activeSession.copy(endedAt = currentUtcTime())
+
             pushOnActiveGuidance()
-            val driveEndsType = when {
-                arrivedAtFinalDestination -> when (deviceType) {
-                    DeviceType.HANDHELD -> DriveEndsType.Arrived
-                    DeviceType.AUTOMOBILE -> DriveEndsType.VehicleParked
-                }
-                appLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) -> {
-                    DriveEndsType.CanceledManually
-                }
-                else -> {
-                    DriveEndsType.ApplicationClosed
-                }
-            }
-            push(DriveEndsEvent(DriveEnds(driveEndsType.type, diffTime)))
-            val drive = buildNavigationSession()
-            val historyFilesCopy = historyFiles.toMutableMap()
-            stopRecording { historyFilePath ->
-                historyFilesCopy[File(historyFilePath)] = drive
+            pushDriveEndsEvent()
+
+            val historyFilesCopy = finishedSessions.toMutableList()
+            stopRecording {
+                historyFilesCopy.add(session)
                 limitTotalHistoryFilesSize(historyFilesCopy)
                 pushHistoryFiles(historyFilesCopy)
             }
@@ -333,114 +319,47 @@ internal class MapboxCopilotImpl(
     }
 
     private fun cancelRecordingHistory() {
-        for (historyFile in historyFiles.keys) {
-            delete(historyFile)
+        finishedSessions.forEach { session ->
+            delete(File(session.recording))
         }
         stopRecording { historyFilePath ->
             delete(File(historyFilePath))
+            deleteCopilotSession()
+            activeSession = CopilotSession()
         }
     }
 
-    private fun buildNavigationSession(): CopilotMetadata {
-        val context = mapboxNavigation.navigationOptions.applicationContext
-        return CopilotMetadata(
-            if (isAppDebuggable()) {
-                "mbx-debug"
-            } else {
-                "mbx-prod"
-            },
-            driveMode,
-            driveId,
-            startedAt,
-            endedAt,
-            retrieveNavSdkVersion(),
-            retrieveNavNativeSdkVersion(),
-            context.packageManager.getPackageInfo(
-                mapboxNavigation.navigationOptions.applicationContext.packageName,
-                0,
-            ).versionName,
-            appUserId,
-            appSessionId,
-        )
-    }
-
-    private fun isAppDebuggable(): Boolean {
-        val context = mapboxNavigation.navigationOptions.applicationContext
-        return context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
-    }
-
-    private fun limitTotalHistoryFilesSize(historyFiles: MutableMap<File, CopilotMetadata>) {
-        var total = historyFiles.keys.sumOf { HistoryAttachmentsUtils.size(it) }
+    private fun limitTotalHistoryFilesSize(historyFiles: MutableList<CopilotSession>) {
+        var total = historyFiles.sumOf { HistoryAttachmentsUtils.size(File(it.recording)) }
         while (total > maxTotalHistoryFilesSizePerSession) {
-            val firstFile = historyFiles.keys.first()
+            val oldestSession = historyFiles.removeAt(0)
+            val firstFile = File(oldestSession.recording)
             total -= HistoryAttachmentsUtils.size(firstFile)
             delete(firstFile)
-            historyFiles.remove(firstFile)
         }
     }
 
-    private fun pushHistoryFiles(historyFiles: Map<File, CopilotMetadata>) {
-        for ((historyFile, drive) in historyFiles) {
-            mainJobController.scope.launch {
-                pushHistoryFile(historyFile, drive)
-            }
+    private fun pushHistoryFiles(copilotSessions: List<CopilotSession>) {
+        copilotSessions.forEach { session ->
+            HistoryUploadWorker.uploadHistory(
+                context = applicationContext,
+                copilotSession = session,
+            )
         }
     }
 
-    private suspend fun pushHistoryFile(historyFile: File, drive: CopilotMetadata) {
-        val metadata = buildAttachmentMetadata(drive)
-        val uploadOptions = buildUploadOptions(historyFile, metadata)
-        HistoryUploadWorker.uploadHistory(
-            mapboxNavigation.navigationOptions.applicationContext,
-            drive,
-            uploadOptions,
-            metadata.sessionId,
-        )
+    private fun saveCopilotSession() = mainJobController.scope.launch(Dispatchers.IO) {
+        val file = File(filepaths.copilotAbsolutePath(), activeSession.saveFilename())
+        file.writeText(activeSession.toJson())
     }
 
-    private fun buildAttachmentMetadata(copilotMetadata: CopilotMetadata): AttachmentMetadata {
-        val filename = generateFilename(copilotMetadata)
-        val owner = retrieveOwnerFrom(accessToken)
-        val sessionId = generateSessionId(copilotMetadata, owner)
-        return AttachmentMetadata(
-            name = filename,
-            created = copilotMetadata.startedAt,
-            fileId = "",
-            format = GZ,
-            type = ZIP,
-            sessionId = sessionId,
-        )
-    }
-
-    private suspend fun buildUploadOptions(
-        from: File,
-        metadata: AttachmentMetadata,
-    ): UploadOptions {
-        val metadataList = arrayListOf(metadata)
-
-        // we have to leave it up to end users to ensure the filename in the metadata matches the actual name of the file
-        val to = copyToAndRemove(from, metadata.name)
-        var url = if (HistoryAttachmentsUtils.retrieveIsDebug()) {
-            STAGING_BASE_URL
-        } else {
-            PROD_BASE_URL
-        }
-        url += "/attachments/v1?access_token=$accessToken"
-
-        return UploadOptions(
-            to.absolutePath,
-            url,
-            HashMap(),
-            gson.toJson(metadataList),
-            MEDIA_TYPE_ZIP,
-        )
+    private fun deleteCopilotSession() = mainJobController.scope.launch(Dispatchers.IO) {
+        delete(File(filepaths.copilotAbsolutePath(), activeSession.saveFilename()))
     }
 
     private fun stopRecording(callback: (String) -> Unit) {
         restartRecordingHistoryJob?.cancel()
         restartRecordingHistoryJob = null
-        initRouteSerializationJob?.cancel()
-        initRouteSerializationJob = null
         copilotHistoryRecorder.stopRecording { historyFilePath ->
             historyFilePath ?: return@stopRecording
             callback(historyFilePath)
@@ -452,7 +371,7 @@ internal class MapboxCopilotImpl(
             activeGuidanceHistoryEvents.clear()
         }
         currentHistoryRecordingSessionState = Idle
-        historyFiles.clear()
+        finishedSessions.clear()
     }
 
     private fun addActiveGuidance(eventType: String, eventJson: String) {
@@ -465,16 +384,39 @@ internal class MapboxCopilotImpl(
         }
     }
 
+    private fun pushDriveEndsEvent() {
+        val diffTime = SystemClock.elapsedRealtime() - startSessionTime
+        val driveEndsType = when {
+            arrivedAtFinalDestination -> {
+                when (deviceType) {
+                    DeviceType.HANDHELD -> DriveEndsType.Arrived
+                    DeviceType.AUTOMOBILE -> DriveEndsType.VehicleParked
+                }
+            }
+
+            appLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) -> {
+                DriveEndsType.CanceledManually
+            }
+
+            else -> {
+                DriveEndsType.ApplicationClosed
+            }
+        }
+        push(DriveEndsEvent(DriveEnds(driveEndsType.type, diffTime)))
+    }
+
     private fun pushSearchResults(eventType: String, eventJson: String) {
         when (currentHistoryRecordingSessionState) {
             is ActiveGuidance -> {
                 // Will be pushed at the end of the session
             }
+
             is FreeDrive -> {
                 if (shouldRecordFreeDriveHistories) {
                     pushHistoryJson(eventType, eventJson)
                 }
             }
+
             is Idle -> {
                 // Do nothing as we're not recording
             }
@@ -495,7 +437,6 @@ internal class MapboxCopilotImpl(
         internal const val ZIP = "zip"
         internal const val MEDIA_TYPE_ZIP = "application/zip"
         internal const val LOG_CATEGORY = "MapboxCopilot"
-        private const val STAGING_BASE_URL = "https://api-events-staging.tilestream.net"
-        private const val PROD_BASE_URL = "https://events.mapbox.com"
+        internal const val PROD_BASE_URL = "https://events.mapbox.com"
     }
 }

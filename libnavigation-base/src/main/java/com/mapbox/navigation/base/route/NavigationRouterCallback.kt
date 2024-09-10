@@ -14,7 +14,7 @@ interface NavigationRouterCallback {
      * At least one route is always available in a successful response.
      * @param routerOrigin route origin
      */
-    fun onRoutesReady(routes: List<NavigationRoute>, routerOrigin: RouterOrigin)
+    fun onRoutesReady(routes: List<NavigationRoute>, @RouterOrigin routerOrigin: String)
 
     /**
      * Called whenever router fails.
@@ -31,5 +31,5 @@ interface NavigationRouterCallback {
      *
      * @param routeOptions the original request options
      */
-    fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin)
+    fun onCanceled(routeOptions: RouteOptions, @RouterOrigin routerOrigin: String)
 }

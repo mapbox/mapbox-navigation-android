@@ -30,7 +30,7 @@ class MapboxDistanceUtilTest {
             19312.1,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("12", result.distanceAsString)
@@ -46,7 +46,7 @@ class MapboxDistanceUtilTest {
             4828.03,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("3", result.distanceAsString)
@@ -62,7 +62,7 @@ class MapboxDistanceUtilTest {
             19312.1,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("12", result.distanceAsString)
@@ -78,7 +78,7 @@ class MapboxDistanceUtilTest {
             4828.03,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("3", result.distanceAsString)
@@ -94,7 +94,7 @@ class MapboxDistanceUtilTest {
             19312.1,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("19", result.distanceAsString)
@@ -110,7 +110,7 @@ class MapboxDistanceUtilTest {
             3000.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("3", result.distanceAsString)
@@ -126,7 +126,7 @@ class MapboxDistanceUtilTest {
             11000.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("11", result.distanceAsString)
@@ -142,7 +142,7 @@ class MapboxDistanceUtilTest {
             55.3,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -158,7 +158,7 @@ class MapboxDistanceUtilTest {
             0.0,
             Rounding.INCREMENT_FIVE,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("5", result.distanceAsString)
@@ -174,7 +174,7 @@ class MapboxDistanceUtilTest {
             999.999,
             Rounding.INCREMENT_FIVE,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("1000", result.distanceAsString)
@@ -190,7 +190,7 @@ class MapboxDistanceUtilTest {
             390.0,
             Rounding.INCREMENT_FIVE,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("390", result.distanceAsString)
@@ -206,7 +206,7 @@ class MapboxDistanceUtilTest {
             10.0,
             Rounding.INCREMENT_FIVE,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("30", result.distanceAsString)
@@ -222,7 +222,7 @@ class MapboxDistanceUtilTest {
             0.0,
             Rounding.INCREMENT_FIVE,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("5", result.distanceAsString)
@@ -237,7 +237,7 @@ class MapboxDistanceUtilTest {
             160.5,
             Rounding.INCREMENT_FIVE,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("525", result.distanceAsString)
@@ -253,7 +253,7 @@ class MapboxDistanceUtilTest {
             101.0,
             Rounding.INCREMENT_FIVE,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("110", result.distanceAsString)
@@ -269,7 +269,7 @@ class MapboxDistanceUtilTest {
             160.5,
             Rounding.INCREMENT_FIVE,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("175", result.distanceAsString)
@@ -285,7 +285,7 @@ class MapboxDistanceUtilTest {
             0.0,
             Rounding.INCREMENT_FIVE,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("5", result.distanceAsString)
@@ -302,7 +302,7 @@ class MapboxDistanceUtilTest {
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
             ctx,
-            Locale.JAPANESE
+            Locale.JAPANESE,
         )
 
         assertEquals("150", result.distanceAsString)
@@ -318,7 +318,7 @@ class MapboxDistanceUtilTest {
             1000.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("1", result.distanceAsString)
@@ -334,7 +334,7 @@ class MapboxDistanceUtilTest {
             1100.5,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("1.1", result.distanceAsString)
@@ -350,7 +350,7 @@ class MapboxDistanceUtilTest {
             2904.89,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("2.9", result.distanceAsString)
@@ -366,7 +366,7 @@ class MapboxDistanceUtilTest {
             1200.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("0.7", result.distanceAsString)
@@ -382,7 +382,7 @@ class MapboxDistanceUtilTest {
             4741.9,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("2.9", result.distanceAsString)
@@ -398,7 +398,7 @@ class MapboxDistanceUtilTest {
             161.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("0.1", result.distanceAsString)
@@ -414,7 +414,7 @@ class MapboxDistanceUtilTest {
             15000.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("9", result.distanceAsString)
@@ -430,7 +430,7 @@ class MapboxDistanceUtilTest {
             161.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("0.1", result.distanceAsString)
@@ -446,7 +446,7 @@ class MapboxDistanceUtilTest {
             4741.9,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("2.9", result.distanceAsString)
@@ -462,7 +462,7 @@ class MapboxDistanceUtilTest {
             -19312.1,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -478,7 +478,7 @@ class MapboxDistanceUtilTest {
             -353.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -494,7 +494,7 @@ class MapboxDistanceUtilTest {
             -54.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -510,7 +510,7 @@ class MapboxDistanceUtilTest {
             -19312.1,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -526,7 +526,7 @@ class MapboxDistanceUtilTest {
             -353.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -542,7 +542,7 @@ class MapboxDistanceUtilTest {
             -54.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.IMPERIAL,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -558,7 +558,7 @@ class MapboxDistanceUtilTest {
             -19312.1,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -574,7 +574,7 @@ class MapboxDistanceUtilTest {
             -353.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -590,7 +590,7 @@ class MapboxDistanceUtilTest {
             -54.0,
             Rounding.INCREMENT_FIFTY,
             UnitType.METRIC,
-            ctx
+            ctx,
         )
 
         assertEquals("50", result.distanceAsString)
@@ -604,7 +604,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             10.0,
             Rounding.INCREMENT_TEN,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(30.0, result, 0.0)
@@ -615,7 +615,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             0.0,
             Rounding.INCREMENT_TEN,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(10.0, result, 0.0)
@@ -626,7 +626,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             4741.9,
             Rounding.INCREMENT_TEN,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(2.94648, result, 0.00001)
@@ -638,7 +638,7 @@ class MapboxDistanceUtilTest {
             10.0,
             Rounding.INCREMENT_TEN,
             UnitType.IMPERIAL,
-            Locale.US
+            Locale.US,
         )
 
         assertEquals(30.0, result, 0.0)
@@ -650,7 +650,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             101.0,
             Rounding.INCREMENT_TEN,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(110.0, result, 0.0)
@@ -662,7 +662,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             0.0,
             Rounding.INCREMENT_TEN,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(10.0, result, 0.0)
@@ -674,7 +674,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             4741.9,
             Rounding.INCREMENT_TEN,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(2.94648, result, 0.00001)
@@ -686,7 +686,7 @@ class MapboxDistanceUtilTest {
             101.0,
             Rounding.INCREMENT_TEN,
             UnitType.IMPERIAL,
-            Locale("en", "GB")
+            Locale("en", "GB"),
         )
 
         assertEquals(110.0, result, 0.0)
@@ -697,7 +697,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -10.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -709,7 +709,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -10.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -720,7 +720,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             13000.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(8.0778255, result, 0.00001)
@@ -731,7 +731,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             161.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(0.10004, result, 0.000001)
@@ -742,7 +742,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             4741.9,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(2.94648, result, 0.00001)
@@ -754,7 +754,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             10456.3,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(6.49724, result, 0.00001)
@@ -766,7 +766,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             161.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(0.10004, result, 0.000001)
@@ -778,7 +778,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             4741.9,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(2.94648, result, 0.00001)
@@ -789,7 +789,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             4828.032,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(3.0, result, 0.00001)
@@ -800,7 +800,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             10800.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(6.7108112, result, 0.000001)
@@ -812,7 +812,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             10800.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(6.7108089, result, 0.00001)
@@ -824,7 +824,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             4828.032,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(3.0, result, 0.00001)
@@ -835,7 +835,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -15000.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -847,7 +847,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -15000.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -858,7 +858,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -1500.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -869,7 +869,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -1500.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -881,7 +881,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -1500.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -892,7 +892,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -150.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -903,7 +903,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -150.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -915,7 +915,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -150.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL
+            UnitType.IMPERIAL,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -926,7 +926,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             123.456,
             Rounding.INCREMENT_TEN,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(120.0, result, 0.0)
@@ -937,7 +937,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             0.0,
             Rounding.INCREMENT_TEN,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(10.0, result, 0.0)
@@ -948,7 +948,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             999.999,
             Rounding.INCREMENT_TEN,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(1000.0, result, 0.0)
@@ -959,7 +959,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -10.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(50.0, result, 0.0)
@@ -971,7 +971,7 @@ class MapboxDistanceUtilTest {
             123.456,
             Rounding.INCREMENT_TEN,
             UnitType.METRIC,
-            Locale.ENGLISH
+            Locale.ENGLISH,
         )
 
         assertEquals(120.0, result, 0.0)
@@ -982,7 +982,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             2367.354,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(2.367354, result, 0.00001)
@@ -993,7 +993,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             1000.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(1.0, result, 0.000001)
@@ -1004,7 +1004,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             2910.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(2.91, result, 0.00001)
@@ -1015,7 +1015,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             3000.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(3.0, result, 0.0)
@@ -1026,7 +1026,7 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             10800.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC
+            UnitType.METRIC,
         )
 
         assertEquals(10.8, result, 0.0)

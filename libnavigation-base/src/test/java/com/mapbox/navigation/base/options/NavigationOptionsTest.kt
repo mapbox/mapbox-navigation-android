@@ -2,8 +2,6 @@ package com.mapbox.navigation.base.options
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
@@ -11,13 +9,8 @@ import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -30,17 +23,6 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @Before
-    fun setup() {
-        mockkStatic(LocationEngineProvider::class)
-        every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
-    }
-
-    @After
-    fun teardown() {
-        unmockkStatic(LocationEngineProvider::class)
-    }
-
     override fun getImplementationClass(): KClass<NavigationOptions> = NavigationOptions::class
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -50,19 +32,10 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
         every { appContext.applicationContext } returns appContext
         every { context.applicationContext } returns appContext
         return NavigationOptions.Builder(context)
-            .accessToken("pk.123")
             .deviceProfile(mockk())
             .distanceFormatterOptions(mockk())
             .isDebugLoggingEnabled(true)
-            .locationEngine(mockk())
-            .locationEngineRequest(
-                LocationEngineRequest.Builder(1234L)
-                    .setMaxWaitTime(2345L)
-                    .setPriority(LocationEngineRequest.PRIORITY_LOW_POWER)
-                    .setFastestInterval(3456L)
-                    .setDisplacement(150.0f)
-                    .build()
-            )
+            .locationOptions(mockk())
             .navigatorPredictionMillis(1)
             .routingTilesOptions(mockk())
             .timeFormatType(1)
@@ -74,20 +47,18 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .historyRecorderOptions(
                 HistoryRecorderOptions.Builder()
                     .fileDirectory("history/path")
-                    .build()
+                    .build(),
             )
             .eventsAppMetadata(
                 EventsAppMetadata.Builder("name", "version")
-                    .build()
+                    .build(),
             )
             .enableSensors(true)
             .copilotOptions(
-                CopilotOptions.Builder().shouldSendHistoryOnlyWithFeedback(true).build()
+                CopilotOptions.Builder().shouldSendHistoryOnlyWithFeedback(true).build(),
             )
-            .longRoutesOptimisationOptions(
-                LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-                    20 * 1024
-                )
+            .trafficOverrideOptions(
+                TrafficOverrideOptions.Builder().isEnabled(true).build(),
             )
     }
 
@@ -102,6 +73,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
 
         assertEquals(options.timeFormatType, NONE_SPECIFIED)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
+        assertEquals(LocationOptions.Builder().build(), options.locationOptions)
         assertNotNull(options.routingTilesOptions)
     }
 
@@ -157,15 +129,5 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .build()
 
         assertEquals(options, otherOptions)
-    }
-
-    @Test
-    fun reuseChangedBuilder() {
-        val builder = NavigationOptions.Builder(context)
-        val options = builder.build()
-        builder.accessToken("pk.123")
-
-        assertNotEquals(options.toBuilder().build(), builder.build())
-        assertEquals(options.toBuilder().build(), options)
     }
 }

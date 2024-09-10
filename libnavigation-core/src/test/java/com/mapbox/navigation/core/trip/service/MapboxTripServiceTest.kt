@@ -153,7 +153,7 @@ class MapboxTripServiceTest {
 
         verify(exactly = 1) {
             tripNotification.updateNotification(
-                any<TripNotificationState.TripNotificationFreeState>()
+                any<TripNotificationState.TripNotificationFreeState>(),
             )
         }
     }

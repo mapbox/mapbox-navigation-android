@@ -61,7 +61,7 @@ class RouteArrowComponentTest {
     @Test
     fun `route progress test`() = coroutineRule.runBlockingTest {
         val expected = ExpectedFactory.createError<InvalidPointError, UpdateManeuverArrowValue>(
-            InvalidPointError("", null)
+            InvalidPointError("", null),
         )
         val routeProgressObserverSlot = slot<RouteProgressObserver>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
@@ -77,7 +77,7 @@ class RouteArrowComponentTest {
             mockMapWithStyleLoaded(mockStyle),
             routeArrowOptions,
             mockApi,
-            mockView
+            mockView,
         )
 
         sut.onAttached(mockMapboxNavigation)
@@ -103,14 +103,14 @@ class RouteArrowComponentTest {
             mockMapWithStyleLoaded(mockStyle),
             routeArrowOptions,
             mockApi,
-            mockView
+            mockView,
         )
 
         sut.onAttached(mockMapboxNavigation)
         routesObserverSlot.captured.onRoutesChanged(
             mockk {
                 every { navigationRoutes } returns emptyList()
-            }
+            },
         )
 
         verify { mockView.render(mockStyle, clearValue) }
@@ -129,7 +129,7 @@ class RouteArrowComponentTest {
             mockMapWithStyleLoaded(mockStyle),
             routeArrowOptions,
             mockApi,
-            mockView
+            mockView,
         )
 
         sut.onAttached(mockMapboxNavigation)

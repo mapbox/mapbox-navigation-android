@@ -34,7 +34,7 @@ class CacheHandleWrapperTest {
         verify(exactly = 1) {
             callback.onRoadGraphDataUpdateInfoAvailable(
                 expectedIsUpdateAvailable,
-                com.mapbox.navigation.core.RoadGraphVersionInfo(expectedDataset, expectedVersion)
+                com.mapbox.navigation.core.RoadGraphVersionInfo(expectedDataset, expectedVersion),
             )
         }
     }

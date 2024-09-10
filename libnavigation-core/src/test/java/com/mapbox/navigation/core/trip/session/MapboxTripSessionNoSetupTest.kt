@@ -1,26 +1,29 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.content.Context
-import android.location.Location
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
+import android.os.Looper
+import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.location.DeviceLocationProvider
+import com.mapbox.common.location.Location
+import com.mapbox.common.location.LocationProvider
+import com.mapbox.common.location.LocationProviderRequest
+import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
-import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.SetRoutes
-import com.mapbox.navigation.core.infra.TestLocationEngine
+import com.mapbox.navigation.core.infra.TestLocationProvider
 import com.mapbox.navigation.core.infra.recorders.BannerInstructionsObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.OffRouteObserverRecorder
-import com.mapbox.navigation.core.infra.recorders.RoadObjectsOnRouteObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.RouteProgressObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.VoiceInstructionsObserverRecorder
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_1
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_2
 import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
+import com.mapbox.navigation.core.utils.ThreadUtils
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -71,6 +74,19 @@ class MapboxTripSessionNoSetupTest {
     @Before
     fun setUp() {
         mockkObject(RoadObjectFactory)
+        mockkStatic(Looper::class)
+        mockkStatic(LocationServiceFactory::class)
+        every { LocationServiceFactory.getOrCreate() } returns mockk {
+            every {
+                getDeviceLocationProvider(any<LocationProviderRequest>())
+            } returns ExpectedFactory.createValue(mockk(relaxed = true))
+            every { setUserDefinedDeviceLocationProviderFactory(any()) } answers {}
+        }
+        every { Looper.getMainLooper() } returns mockk()
+        mockkObject(ThreadUtils)
+        every { ThreadUtils.prepareHandlerThread(any()) } returns mockk {
+            every { looper } returns mockk()
+        }
     }
 
     @After
@@ -85,22 +101,22 @@ class MapboxTripSessionNoSetupTest {
         val routeProgressObserver = RouteProgressObserverRecorder()
         val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
-        val locationEngine = TestLocationEngine.create()
+        val locationEngine = TestLocationProvider.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
-            locationEngine = locationEngine
+            locationProvider = locationEngine,
         )
         tripSession.start(true)
         tripSession.registerVoiceInstructionsObserver(voiceInstructionsObserver)
         tripSession.registerRouteProgressObserver(routeProgressObserver)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
         // act
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         locationEngine.updateLocation(
-            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
@@ -119,15 +135,15 @@ class MapboxTripSessionNoSetupTest {
         // arrange
         val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
-        val locationEngine = TestLocationEngine.create()
+        val locationEngine = TestLocationProvider.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
-            locationEngine = locationEngine
+            locationProvider = locationEngine,
         )
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         val routeProgressObserver = RouteProgressObserverRecorder()
@@ -136,7 +152,7 @@ class MapboxTripSessionNoSetupTest {
         val voiceInstructionsObserver = VoiceInstructionsObserverRecorder()
         tripSession.registerVoiceInstructionsObserver(voiceInstructionsObserver)
         locationEngine.updateLocation(
-            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
@@ -151,26 +167,26 @@ class MapboxTripSessionNoSetupTest {
         // arrange
         val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
-        val locationEngine = TestLocationEngine.create()
+        val locationEngine = TestLocationProvider.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
-            locationEngine = locationEngine
+            locationProvider = locationEngine,
         )
         val routeProgressObserver = RouteProgressObserverRecorder()
         tripSession.registerRouteProgressObserver(routeProgressObserver)
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
         locationEngine.updateLocation(
-            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
@@ -186,23 +202,23 @@ class MapboxTripSessionNoSetupTest {
         val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         coEvery { nativeNavigator.updateLegIndex(any()) } returns true
-        val locationEngine = TestLocationEngine.create()
+        val locationEngine = TestLocationProvider.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
-            locationEngine = locationEngine
+            locationProvider = locationEngine,
         )
         val routeProgressObserver = RouteProgressObserverRecorder()
         tripSession.registerRouteProgressObserver(routeProgressObserver)
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.updateLegIndex(1) { }
         locationEngine.updateLocation(
-            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
@@ -218,23 +234,23 @@ class MapboxTripSessionNoSetupTest {
         val nativeNavigator = createNativeNavigatorMock()
         coEvery { nativeNavigator.updateLegIndex(any()) } returns false
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
-        val locationEngine = TestLocationEngine.create()
+        val locationEngine = TestLocationProvider.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
-            locationEngine = locationEngine
+            locationProvider = locationEngine,
         )
         val routeProgressObserver = RouteProgressObserverRecorder()
         tripSession.registerRouteProgressObserver(routeProgressObserver)
         tripSession.start(true)
         tripSession.setRoutes(
             listOf(createNavigationRoute()),
-            SetRoutes.NewRoutes(0)
+            SetRoutes.NewRoutes(0),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.updateLegIndex(1) { }
         locationEngine.updateLocation(
-            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL),
         )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
@@ -250,26 +266,26 @@ class MapboxTripSessionNoSetupTest {
             // arrange
             val nativeNavigator = createNativeNavigatorMock()
             StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
-                nativeNavigator
+                nativeNavigator,
             )
-            val locationEngine = TestLocationEngine.create()
+            val locationEngine = TestLocationProvider.create()
             val tripSession = buildTripSession(
                 nativeNavigator = nativeNavigator,
-                locationEngine = locationEngine
+                locationProvider = locationEngine,
             )
             val voiceInstructionObserver = VoiceInstructionsObserverRecorder()
             tripSession.registerVoiceInstructionsObserver(voiceInstructionObserver)
             tripSession.start(true)
             tripSession.setRoutes(
                 listOf(createNavigationRoute()),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             locationEngine.updateLocation(
-                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1),
             )
             // act
             locationEngine.updateLocation(
-                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1),
             )
             // assert
             val newVoiceInstructions = voiceInstructionObserver.records
@@ -284,17 +300,17 @@ class MapboxTripSessionNoSetupTest {
             // arrange
             val nativeNavigator = createNativeNavigatorMock()
             val statusUpdateListeners = recordNavigatorObservers(nativeNavigator)
-            val locationEngine = TestLocationEngine.create()
+            val locationEngine = TestLocationProvider.create()
             val tripSession = buildTripSession(
                 nativeNavigator = nativeNavigator,
-                locationEngine = locationEngine
+                locationProvider = locationEngine,
             )
             val routeProgressRecorder = RouteProgressObserverRecorder()
             tripSession.registerRouteProgressObserver(routeProgressRecorder)
             tripSession.start(true)
             tripSession.setRoutes(
                 listOf(createNavigationRoute()),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             // act
             locationEngine.updateLocation(createLocation())
@@ -303,9 +319,9 @@ class MapboxTripSessionNoSetupTest {
                 createNavigationStatus(
                     bannerInstruction = createBannerInstruction(
                         index = 0,
-                        primary = createBannerSection()
-                    )
-                )
+                        primary = createBannerSection(),
+                    ),
+                ),
             )
 
             // assert
@@ -314,7 +330,7 @@ class MapboxTripSessionNoSetupTest {
                 .map { it.bannerInstructions?.distanceAlongGeometry() }
             assertEquals(
                 listOf(50.0),
-                bannerInstructions
+                bannerInstructions,
             )
         }
 
@@ -330,12 +346,12 @@ class MapboxTripSessionNoSetupTest {
             tripSession.start(false)
             tripSession.setRoutes(
                 listOf(createNavigationRoute()),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             // act
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.UNCONDITIONAL,
-                createNavigationStatus(nextWaypointIndex = 0, routeState = RouteState.OFF_ROUTE)
+                createNavigationStatus(nextWaypointIndex = 0, routeState = RouteState.OFF_ROUTE),
             )
             // assert
             val remainingWaypoints = tripSession.getRouteProgress()?.remainingWaypoints
@@ -344,14 +360,14 @@ class MapboxTripSessionNoSetupTest {
 
     @Test
     fun `location updates doesn't change state when trip session is stopped`() {
-        val testLocationEngine = TestLocationEngine.create()
+        val testLocationProvider = TestLocationProvider.create()
         val tripSession = buildTripSession(
-            locationEngine = testLocationEngine,
+            locationProvider = testLocationProvider,
         )
 
         tripSession.start(false)
         tripSession.stop()
-        testLocationEngine.updateLocation(createLocation())
+        testLocationProvider.updateLocation(createLocation())
 
         assertNull(tripSession.getRawLocation())
     }
@@ -359,12 +375,12 @@ class MapboxTripSessionNoSetupTest {
     @Test
     fun `trip session works with a synchronous location update`() {
         val testLocation = createLocation(latitude = 99.0)
-        val locationEngineMock = mockk<LocationEngine>(relaxed = true)
-        triggerLocationEngineUpdateOnSubscribe(locationEngineMock, testLocation)
+        val locationProviderMock = mockk<DeviceLocationProvider>(relaxed = true)
+        triggerLocationEngineUpdateOnSubscribe(locationProviderMock, testLocation)
         val nativeNavigator = createNativeNavigatorMock()
         triggerStatusUpdateOnEachLocationUpdate(nativeNavigator)
         val tripSession = buildTripSession(
-            locationEngine = locationEngineMock,
+            locationProvider = locationProviderMock,
             nativeNavigator = nativeNavigator,
         )
 
@@ -382,84 +398,43 @@ class MapboxTripSessionNoSetupTest {
             val routeProgressObserver = RouteProgressObserverRecorder()
             val nativeNavigator = createNativeNavigatorMock()
             StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
-                nativeNavigator
+                nativeNavigator,
             )
-            val locationEngine = TestLocationEngine.create()
+            val locationEngine = TestLocationProvider.create()
             val tripSession = buildTripSession(
                 nativeNavigator = nativeNavigator,
-                locationEngine = locationEngine
+                locationProvider = locationEngine,
             )
             tripSession.start(true)
             tripSession.registerRouteProgressObserver(routeProgressObserver)
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             coEvery {
                 nativeNavigator.setRoutes(failingRoute, any(), any(), any())
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             locationEngine.updateLocation(
-                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1),
             )
             locationEngine.updateLocation(
-                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL),
             )
             locationEngine.updateLocation(
-                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2)
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2),
             )
             // assert
             assertTrue(
                 routeProgressObserver.records
                     .takeLast(3)
-                    .all { it.navigationRoute == initialRoute }
+                    .all { it.navigationRoute == initialRoute },
             )
             assertEquals(initialRoute, tripSession.primaryRoute)
-        }
-
-    @Test
-    fun `session doesn't clear road objects on route if native routes update fails`() =
-        coroutineRule.runBlockingTest {
-            // arrange
-            val initialRoadObject = listOf(createMockUpcomingRoadObject())
-            val initialRoute = createNavigationRoute(
-                routeInfo = createMockRouteInfo(initialRoadObject)
-            )
-            val failingRoadObject = listOf(createMockUpcomingRoadObject())
-            val failingRoute = createNavigationRoute(
-                createDirectionsRoute(requestUuid = "fail"),
-                routeInfo = createMockRouteInfo(failingRoadObject)
-            )
-            val roadObjectsObserver = RoadObjectsOnRouteObserverRecorder()
-            val nativeNavigator = createNativeNavigatorMock()
-            StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
-                nativeNavigator
-            )
-            val locationEngine = TestLocationEngine.create()
-            val tripSession = buildTripSession(
-                nativeNavigator = nativeNavigator,
-                locationEngine = locationEngine
-            )
-            tripSession.start(true)
-            tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
-            // act
-            tripSession.setRoutes(
-                listOf(initialRoute),
-                SetRoutes.NewRoutes(0)
-            )
-            coEvery {
-                nativeNavigator.setRoutes(failingRoute, any(), any(), any())
-            } returns createSetRouteError()
-            tripSession.setRoutes(
-                listOf(failingRoute),
-                SetRoutes.NewRoutes(0)
-            )
-            // assert
-            assertEquals(initialRoadObject, roadObjectsObserver.records.last())
         }
 
     @Test
@@ -468,24 +443,24 @@ class MapboxTripSessionNoSetupTest {
             // arrange
             val initialRoute = createNavigationRoute()
             val failingRoute = createNavigationRoute(
-                createDirectionsRoute(requestUuid = "fail")
+                createDirectionsRoute(requestUuid = "fail"),
             )
             val observer = OffRouteObserverRecorder()
             val nativeNavigator = createNativeNavigatorMock()
             StatusWithOffRouteUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
-                nativeNavigator
+                nativeNavigator,
             )
-            val locationEngine = TestLocationEngine.create()
+            val locationEngine = TestLocationProvider.create()
             val tripSession = buildTripSession(
                 nativeNavigator = nativeNavigator,
-                locationEngine = locationEngine
+                locationProvider = locationEngine,
             )
             tripSession.start(true)
             tripSession.registerOffRouteObserver(observer)
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             locationEngine.updateLocation(createLocation())
             coEvery {
@@ -493,7 +468,7 @@ class MapboxTripSessionNoSetupTest {
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             // assert
             assertEquals(true, observer.records.last())
@@ -505,22 +480,22 @@ class MapboxTripSessionNoSetupTest {
             // arrange
             val initialRoute = createNavigationRoute()
             val failingRoute = createNavigationRoute(
-                createDirectionsRoute(requestUuid = "fail")
+                createDirectionsRoute(requestUuid = "fail"),
             )
             val nativeNavigator = createNativeNavigatorMock()
             StatusWithOffRouteUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
-                nativeNavigator
+                nativeNavigator,
             )
-            val locationEngine = TestLocationEngine.create()
+            val locationEngine = TestLocationProvider.create()
             val tripSession = buildTripSession(
                 nativeNavigator = nativeNavigator,
-                locationEngine = locationEngine
+                locationProvider = locationEngine,
             )
             tripSession.start(true)
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             locationEngine.updateLocation(createLocation())
             coEvery {
@@ -528,7 +503,7 @@ class MapboxTripSessionNoSetupTest {
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             // assert
             assertNotNull(tripSession.getRouteProgress())
@@ -544,12 +519,12 @@ class MapboxTripSessionNoSetupTest {
             val bannerInstructionObserver = BannerInstructionsObserverRecorder()
             val nativeNavigator = createNativeNavigatorMock()
             StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(
-                nativeNavigator
+                nativeNavigator,
             )
-            val locationEngine = TestLocationEngine.create()
+            val locationEngine = TestLocationProvider.create()
             val tripSession = buildTripSession(
                 nativeNavigator = nativeNavigator,
-                locationEngine = locationEngine
+                locationProvider = locationEngine,
             )
             tripSession.start(true)
             tripSession.registerVoiceInstructionsObserver(voiceInstructionObserver)
@@ -557,43 +532,38 @@ class MapboxTripSessionNoSetupTest {
             // act
             tripSession.setRoutes(
                 listOf(initialRoute),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             locationEngine.updateLocation(
-                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1),
             )
             coEvery {
                 nativeNavigator.setRoutes(failingRoute, any(), any(), any())
             } returns createSetRouteError()
             tripSession.setRoutes(
                 listOf(failingRoute),
-                SetRoutes.NewRoutes(0)
+                SetRoutes.NewRoutes(0),
             )
             locationEngine.updateLocation(
-                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1)
+                createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1),
             )
             // assert
             assertEquals(
                 tripSession.getRouteProgress()!!.voiceInstructions,
-                voiceInstructionObserver.records.last()
+                voiceInstructionObserver.records.last(),
             )
             assertEquals(1, bannerInstructionObserver.records.size)
             assertEquals(
                 tripSession.getRouteProgress()!!.bannerInstructions,
-                bannerInstructionObserver.records.last()
+                bannerInstructionObserver.records.last(),
             )
         }
 }
 
 private fun buildTripSession(
     nativeNavigator: MapboxNativeNavigator = createNativeNavigatorMock(),
-    locationEngine: LocationEngine = TestLocationEngine.create(),
-    context: Context = createMockContext()
+    locationProvider: DeviceLocationProvider = TestLocationProvider.create(),
 ): MapboxTripSession {
-    val navigationOptions = NavigationOptions.Builder(context)
-        .locationEngine(locationEngine)
-        .build()
-
     val tripService: TripService = mockk(relaxUnitFun = true) {
         every { hasServiceStarted() } returns false
     }
@@ -603,9 +573,14 @@ private fun buildTripSession(
     val threadController = spyk<ThreadController>()
     every { threadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
 
+    every { LocationServiceFactory.getOrCreate() } returns mockk {
+        every {
+            getDeviceLocationProvider(any<LocationProviderRequest>())
+        } returns ExpectedFactory.createValue(locationProvider)
+    }
     return MapboxTripSession(
         tripService,
-        TripSessionLocationEngine(navigationOptions),
+        TripSessionLocationEngine(LocationOptions.Builder().build()),
         nativeNavigator,
         threadController,
         eHorizonSubscriptionManager = mockk(relaxed = true),
@@ -631,43 +606,43 @@ object StatusWithVoiceInstructionUpdateUtil {
         val navigatorObservers = recordNavigatorObservers(nativeNavigator)
         coEvery {
             nativeNavigator.updateLocation(
-                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_1 }
+                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_1 },
             )
         } answers {
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.LOCATION_UPDATE,
                 createNavigationStatus(
                     location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("1")
-                )
+                    voiceInstruction = createVoiceInstruction("1"),
+                ),
             )
             true
         }
         coEvery {
             nativeNavigator.updateLocation(
-                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_NULL }
+                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_NULL },
             )
         } answers {
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.LOCATION_UPDATE,
                 createNavigationStatus(
                     location = firstArg(),
-                    voiceInstruction = null
-                )
+                    voiceInstruction = null,
+                ),
             )
             true
         }
         coEvery {
             nativeNavigator.updateLocation(
-                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_2 }
+                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_2 },
             )
         } answers {
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.LOCATION_UPDATE,
                 createNavigationStatus(
                     location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("2")
-                )
+                    voiceInstruction = createVoiceInstruction("2"),
+                ),
             )
             true
         }
@@ -680,7 +655,7 @@ object StatusWithOffRouteUpdateUtil {
         val navigatorObservers = recordNavigatorObservers(nativeNavigator)
         coEvery {
             nativeNavigator.updateLocation(
-                any()
+                any(),
             )
         } answers {
             navigatorObservers.onStatus(
@@ -688,8 +663,8 @@ object StatusWithOffRouteUpdateUtil {
                 createNavigationStatus(
                     location = firstArg(),
                     voiceInstruction = createVoiceInstruction("1"),
-                    routeState = RouteState.OFF_ROUTE
-                )
+                    routeState = RouteState.OFF_ROUTE,
+                ),
             )
             true
         }
@@ -705,7 +680,7 @@ private fun createNativeNavigatorMock(): MapboxNativeNavigator {
 }
 
 private fun recordNavigatorObservers(
-    nativeNavigator: MapboxNativeNavigator
+    nativeNavigator: MapboxNativeNavigator,
 ): List<NavigatorObserver> {
     val navigatorObservers = mutableListOf<NavigatorObserver>()
     every {
@@ -734,28 +709,27 @@ private fun triggerStatusUpdateOnEachLocationUpdate(
             NavigationStatusOrigin.LOCATION_UPDATE,
             createNavigationStatus(
                 location = firstArg(),
-                voiceInstruction = null
-            )
+                voiceInstruction = null,
+            ),
         )
         true
     }
 }
 
 private fun triggerLocationEngineUpdateOnSubscribe(
-    locationEngineMock: LocationEngine,
-    location: Location
+    locationProviderMock: LocationProvider,
+    location: Location,
 ) {
     every {
-        locationEngineMock.requestLocationUpdates(any(), any(), any())
+        locationProviderMock.addLocationObserver(any(), any())
     } answers {
-        secondArg<LocationEngineCallback<LocationEngineResult>>().onSuccess(
-            LocationEngineResult.create(location)
-        )
+        firstArg<com.mapbox.common.location.LocationObserver>()
+            .onLocationUpdateReceived(listOf(location))
     }
 }
 
 private fun createMockRouteInfo(
-    roadObjects: List<UpcomingRoadObject> = listOf(mockk())
+    roadObjects: List<UpcomingRoadObject> = listOf(mockk()),
 ): RouteInfo = mockk {
     every { alerts.toUpcomingRoadObjects() } returns roadObjects
 }

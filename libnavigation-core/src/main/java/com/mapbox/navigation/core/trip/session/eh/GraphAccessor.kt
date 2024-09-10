@@ -1,14 +1,12 @@
 package com.mapbox.navigation.core.trip.session.eh
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.EHorizonFactory
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPath
 import com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.adas.AdasEdgeAttributes
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 /**
@@ -56,7 +54,7 @@ class GraphAccessor internal constructor(
      */
     fun getPathShape(graphPath: EHorizonGraphPath): List<Point>? {
         return navigator.graphAccessor.getPathShape(
-            EHorizonFactory.buildNativeGraphPath(graphPath)
+            EHorizonFactory.buildNativeGraphPath(graphPath),
         )
     }
 
@@ -66,17 +64,7 @@ class GraphAccessor internal constructor(
      */
     fun getGraphPositionCoordinate(graphPosition: EHorizonGraphPosition): Point? {
         return navigator.graphAccessor.getPositionCoordinate(
-            EHorizonFactory.buildNativeGraphPosition(graphPosition)
+            EHorizonFactory.buildNativeGraphPosition(graphPosition),
         )
-    }
-
-    /**
-     * Returns ADAS data for a given Edge. If no ADAS data is available, returns null
-     */
-    @ExperimentalPreviewMapboxNavigationAPI
-    fun getAdasisEdgeAttributes(edgeId: Long): AdasEdgeAttributes? {
-        return navigator.graphAccessor.getAdasAttributes(edgeId)?.let {
-            AdasEdgeAttributes.createFromNativeObject(it)
-        }
     }
 }

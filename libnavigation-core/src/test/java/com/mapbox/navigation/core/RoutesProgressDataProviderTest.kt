@@ -12,6 +12,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.pauseDispatcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -46,14 +48,14 @@ class RoutesProgressDataProviderTest {
                 0,
                 altRouteGeometryIndex1,
                 altLegGeometryIndex1,
-                1
+                1,
             ),
             altId2 to RouteIndicesFactory.buildRouteIndices(
                 altLegIndex2,
                 1,
                 altRouteGeometryIndex2,
                 altLegGeometryIndex2,
-                2
+                2,
             ),
         )
     }
@@ -61,12 +63,12 @@ class RoutesProgressDataProviderTest {
         RouteProgressData(
             currentLegIndex,
             routeGeometryIndex,
-            legGeometryIndex
+            legGeometryIndex,
         ),
         mapOf(
             altId1 to RouteProgressData(altLegIndex1, altRouteGeometryIndex1, altLegGeometryIndex1),
             altId2 to RouteProgressData(altLegIndex2, altRouteGeometryIndex2, altLegGeometryIndex2),
-        )
+        ),
     )
 
     @Test
@@ -116,7 +118,7 @@ class RoutesProgressDataProviderTest {
         }
         val expected = RoutesProgressData(
             RouteProgressData(0, routeIndex, null),
-            emptyMap()
+            emptyMap(),
         )
 
         provider.onRouteProgressChanged(routeProgress)
@@ -152,9 +154,9 @@ class RoutesProgressDataProviderTest {
             RouteProgressData(
                 legIndex2,
                 routeGeometryIndex2,
-                legGeometryIndex2
+                legGeometryIndex2,
             ),
-            emptyMap()
+            emptyMap(),
         )
 
         provider.onRouteProgressChanged(routeProgress1)
@@ -191,9 +193,9 @@ class RoutesProgressDataProviderTest {
             RouteProgressData(
                 legIndex1,
                 routeGeometryIndex1,
-                legGeometryIndex1
+                legGeometryIndex1,
             ),
-            emptyMap()
+            emptyMap(),
         )
         provider.onRouteProgressChanged(routeProgress1)
 
@@ -233,9 +235,9 @@ class RoutesProgressDataProviderTest {
             RouteProgressData(
                 legIndex2,
                 routeGeometryIndex2,
-                legGeometryIndex2
+                legGeometryIndex2,
             ),
-            emptyMap()
+            emptyMap(),
         )
         provider.onRouteProgressChanged(routeProgress1)
 

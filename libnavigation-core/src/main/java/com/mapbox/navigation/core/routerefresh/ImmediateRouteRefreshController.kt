@@ -21,7 +21,7 @@ internal class ImmediateRouteRefreshController(
     @Throws(IllegalArgumentException::class)
     fun requestRoutesRefresh(
         routes: List<NavigationRoute>,
-        callback: (RoutesRefresherExecutorResult) -> Unit
+        callback: (RoutesRefresherExecutorResult) -> Unit,
     ) {
         if (routes.isEmpty()) {
             throw IllegalArgumentException("Routes to refresh should not be empty")
@@ -30,7 +30,7 @@ internal class ImmediateRouteRefreshController(
             val result = try {
                 routeRefresherExecutor.executeRoutesRefresh(
                     routes,
-                    startCallback = { stateHolder.onStarted() }
+                    startCallback = { stateHolder.onStarted() },
                 )
             } catch (ex: CancellationException) {
                 stateHolder.onCancel()
@@ -43,7 +43,7 @@ internal class ImmediateRouteRefreshController(
                     logW(
                         "Route refresh on-demand error: " +
                             "request is skipped as a newer one is available",
-                        RouteRefreshLog.LOG_CATEGORY
+                        RouteRefreshLog.LOG_CATEGORY,
                     )
                 }
                 is RoutesRefresherExecutorResult.Finished -> {

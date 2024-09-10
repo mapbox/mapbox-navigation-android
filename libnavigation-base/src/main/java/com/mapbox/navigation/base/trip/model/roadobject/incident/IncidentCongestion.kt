@@ -6,7 +6,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident
  * @param value quantitative descriptor of congestion. 0 to 100.
  */
 class IncidentCongestion internal constructor(
-    val value: Int?
+    val value: Int?,
 ) {
 
     /**

@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.trip.service
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -46,12 +47,15 @@ class ArtificialDriverTest {
                 mapboxNavigation.historyRecorder.startRecording()
                 val testRoute = getTestRoute()
                 val events = createArtificialLocationUpdates(testRoute)
-                val setRoutesResult = mapboxNavigation.navigator
-                    .setRoutes(testRoute, reason = SetRoutesReason.NEW_ROUTE)
+                val setRoutesResult = mapboxNavigation.navigator.setRoutes(
+                    testRoute,
+                    reason = SetRoutesReason.NEW_ROUTE,
+                )
                 assertTrue("result is $setRoutesResult", setRoutesResult.isValue)
                 val statusesTracking = async<List<NavigationStatus>> {
-                    mapboxNavigation.navigator
-                        .collectStatuses(untilRouteState = RouteState.COMPLETE)
+                    mapboxNavigation.navigator.collectStatuses(
+                        untilRouteState = RouteState.COMPLETE,
+                    )
                 }
 
                 for (location in events.map { it.location.mapToLocation() }) {
@@ -68,14 +72,14 @@ class ArtificialDriverTest {
                 assertTrue(
                     "${offRouteState.size} off-route states have been detected(" +
                         "more info in $historyFile): $offRouteState",
-                    offRouteState.isEmpty()
+                    offRouteState.isEmpty(),
                 )
             }
         }
 }
 
 private fun createArtificialLocationUpdates(
-    testRoute: NavigationRoute
+    testRoute: NavigationRoute,
 ): List<ReplayEventUpdateLocation> {
     val replayRouteMapper = ReplayRouteMapper()
     return replayRouteMapper
@@ -84,7 +88,7 @@ private fun createArtificialLocationUpdates(
 }
 
 private suspend fun MapboxNativeNavigator.collectStatuses(
-    untilRouteState: RouteState
+    untilRouteState: RouteState,
 ): MutableList<NavigationStatus> {
     val statues = mutableListOf<NavigationStatus>()
     statusUpdates()
@@ -96,7 +100,7 @@ private suspend fun MapboxNativeNavigator.collectStatuses(
 
 data class OnStatusUpdateParameters(
     val origin: NavigationStatusOrigin,
-    val status: NavigationStatus
+    val status: NavigationStatus,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -113,13 +117,12 @@ fun MapboxNativeNavigator.statusUpdates(): Flow<OnStatusUpdateParameters> {
 }
 
 private suspend fun withNavigators(
-    block: suspend (MapboxNavigation) -> Unit
+    block: suspend (MapboxNavigation) -> Unit,
 ) {
     val context = InstrumentationRegistry.getInstrumentation().targetContext
     val mapboxNavigation = MapboxNavigationProvider.create(
         NavigationOptions.Builder(context)
-            .accessToken(context.getString(R.string.mapbox_access_token))
-            .build()
+            .build(),
     )
     try {
         block(mapboxNavigation)
@@ -130,7 +133,7 @@ private suspend fun withNavigators(
 
 private fun getTestRoute(): NavigationRoute {
     val context = InstrumentationRegistry.getInstrumentation().targetContext
-    return NavigationRoute.create(
+    return createNavigationRouteForTest(
         directionsResponseJson = context.resources.openRawResource(R.raw.test_long_route)
             .readBytes().decodeToString(),
         routeRequestUrl = "https://api.mapbox.com/directions/v5/mapbox/driving/" +
@@ -141,6 +144,6 @@ private fun getTestRoute(): NavigationRoute {
             "&overview=full" +
             "&steps=true" +
             "&access_token=YOUR_MAPBOX_ACCESS_TOKEN",
-        routerOrigin = RouterOrigin.Custom()
+        routerOrigin = RouterOrigin.ONLINE,
     ).first()
 }

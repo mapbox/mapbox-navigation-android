@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.utils.internal.resource
 
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.Cancelable
@@ -17,6 +18,7 @@ import com.mapbox.common.ResourceLoadResultCallback
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
+import com.mapbox.navigation.testing.toDataRef
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -46,7 +48,7 @@ class DefaultResourceLoaderTest {
     @Test
     fun `load - should call TileStore loadResource`() {
         val loadRequest = ResourceLoadRequest(
-            "http://example.com/some-resource"
+            "http://example.com/some-resource",
         ).apply {
             flags = ResourceLoadFlags.SKIP_DATA_LOADING
             networkRestriction = NetworkRestriction.DISALLOW_ALL
@@ -58,7 +60,7 @@ class DefaultResourceLoaderTest {
                 capture(descriptionCapture),
                 capture(optionsCapture),
                 ofType(ResourceLoadProgressCallback::class),
-                ofType(ResourceLoadResultCallback::class)
+                ofType(ResourceLoadResultCallback::class),
             )
         } returns mockk()
 
@@ -76,7 +78,7 @@ class DefaultResourceLoaderTest {
         val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
         val loadProgress = ResourceLoadProgress(0, 0)
         val loadResult = ExpectedFactory.createValue<ResourceLoadError, ResourceLoadResult>(
-            Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND)
+            Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND),
         )
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
@@ -85,7 +87,7 @@ class DefaultResourceLoaderTest {
                 any(),
                 any(),
                 capture(progressCallbackCapture),
-                capture(resultCallbackCapture)
+                capture(resultCallbackCapture),
             )
         } answers {
             progressCallbackCapture.captured.run(loadProgress)
@@ -114,10 +116,10 @@ class DefaultResourceLoaderTest {
         val optionsCapture = slot<ResourceLoadOptions>()
         verify {
             mockTileStore.loadResource(
-                ResourceDescription(loadRequest.url, TileDataDomain.NAVIGATION),
+                ResourceDescription(TileDataDomain.NAVIGATION, loadRequest.url),
                 capture(optionsCapture),
                 any(),
-                any()
+                any(),
             )
         }
 
@@ -128,7 +130,7 @@ class DefaultResourceLoaderTest {
     @Test
     fun `cancel - should call Cancelable`() {
         val loadRequest = ResourceLoadRequest(
-            "http://example.com/some-resource"
+            "http://example.com/some-resource",
         ).apply {
             flags = ResourceLoadFlags.SKIP_DATA_LOADING
             networkRestriction = NetworkRestriction.DISALLOW_ALL
@@ -151,7 +153,7 @@ class DefaultResourceLoaderTest {
         val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
         val loadProgress = ResourceLoadProgress(0, 0)
         val loadResult = ExpectedFactory.createValue<ResourceLoadError, ResourceLoadResult>(
-            Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND)
+            Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND),
         )
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
@@ -160,7 +162,7 @@ class DefaultResourceLoaderTest {
                 any(),
                 any(),
                 capture(progressCallbackCapture),
-                capture(resultCallbackCapture)
+                capture(resultCallbackCapture),
             )
         } answers {
             progressCallbackCapture.captured.run(loadProgress)
@@ -193,7 +195,7 @@ class DefaultResourceLoaderTest {
         val loadRequest = ResourceLoadRequest("http://example.com/some-resource")
         val loadProgress = ResourceLoadProgress(0, 0)
         val loadResult = ExpectedFactory.createValue<ResourceLoadError, ResourceLoadResult>(
-            Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND)
+            Fixtures.resourceLoadResult(null, ResourceLoadStatus.NOT_FOUND),
         )
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
@@ -202,7 +204,7 @@ class DefaultResourceLoaderTest {
                 any(),
                 any(),
                 capture(progressCallbackCapture),
-                capture(resultCallbackCapture)
+                capture(resultCallbackCapture),
             )
         } answers {
             progressCallbackCapture.captured.run(loadProgress)
@@ -211,19 +213,23 @@ class DefaultResourceLoaderTest {
             stubCancelable()
         }
 
-        sut.registerObserver(object : ResourceLoadObserver {
-            override fun onStart(request: ResourceLoadRequest) = Unit
-            override fun onProgress(request: ResourceLoadRequest, progress: ResourceLoadProgress) =
-                Unit
+        sut.registerObserver(
+            object : ResourceLoadObserver {
+                override fun onStart(request: ResourceLoadRequest) = Unit
+                override fun onProgress(
+                    request: ResourceLoadRequest,
+                    progress: ResourceLoadProgress,
+                ) = Unit
 
-            override fun onFinish(
-                request: ResourceLoadRequest,
-                result: Expected<ResourceLoadError, ResourceLoadResult>
-            ) {
-                // This observer immediately unregisters itself after receiving loader result
-                sut.unregisterObserver(this)
-            }
-        })
+                override fun onFinish(
+                    request: ResourceLoadRequest,
+                    result: Expected<ResourceLoadError, ResourceLoadResult>,
+                ) {
+                    // This observer immediately unregisters itself after receiving loader result
+                    sut.unregisterObserver(this)
+                }
+            },
+        )
         sut.registerObserver(observer)
         sut.load(loadRequest, mockk(relaxed = true))
 
@@ -242,19 +248,20 @@ private class StubTileStore : TileStore(0) {
         description: ResourceDescription,
         options: ResourceLoadOptions,
         progressCallback: ResourceLoadProgressCallback,
-        resultCallback: ResourceLoadResultCallback
+        resultCallback: ResourceLoadResultCallback,
     ) = stubCancelable()
 }
 
 // stub Cancelable to avoid java.lang.UnsatisfiedLinkError
-private fun stubCancelable() = object : Cancelable(0) {
-    override fun cancel() = Unit
+private fun stubCancelable() = object : Cancelable {
+    override fun cancel() {
+    }
 }
 
 object Fixtures {
 
     fun resourceData(blob: ByteArray) = object : ResourceData(0) {
-        override fun getData(): ByteArray = blob
+        override fun getData(): DataRef = blob.toDataRef()
     }
 
     fun resourceLoadResult(
@@ -265,7 +272,9 @@ object Fixtures {
         expires: Date = Date(),
         totalBytes: Long = 0,
         transferredBytes: Long = 0,
-        contentType: String = "image/png"
+        contentType: String = "image/png",
+        etag: String = "",
+        belongsToGroup: Boolean = false,
     ): ResourceLoadResult {
         return ResourceLoadResult(
             data,
@@ -275,7 +284,9 @@ object Fixtures {
             expires,
             totalBytes,
             transferredBytes,
-            contentType
+            contentType,
+            etag,
+            belongsToGroup,
         )
     }
 }

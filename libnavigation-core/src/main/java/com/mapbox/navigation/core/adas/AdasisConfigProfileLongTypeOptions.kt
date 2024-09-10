@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param trafficSign if true, Traffic Sign type will be generated
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfigProfileLongTypeOptions private constructor(
+internal class AdasisConfigProfileLongTypeOptions private constructor(
     val lat: Boolean,
     val lon: Boolean,
     val trafficSign: Boolean,
@@ -81,21 +81,21 @@ class AdasisConfigProfileLongTypeOptions private constructor(
         /**
          * If true, latitude type will be generated
          */
-        fun lat(lat: Boolean) = apply {
+        fun lat(lat: Boolean): Builder = apply {
             this.lat = lat
         }
 
         /**
          * If true, longitude type will be generated
          */
-        fun lon(lon: Boolean) = apply {
+        fun lon(lon: Boolean): Builder = apply {
             this.lon = lon
         }
 
         /**
          * If true, Traffic Sign type will be generated
          */
-        fun trafficSign(trafficSign: Boolean) = apply {
+        fun trafficSign(trafficSign: Boolean): Builder = apply {
             this.trafficSign = trafficSign
         }
 

@@ -8,21 +8,24 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.TestSystemClock
 import com.mapbox.navigation.testing.factories.TestSDKRouteParser
 import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.Time
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class NavigationRouteIsExpiredTest {
 
     @get:Rule
@@ -30,18 +33,18 @@ class NavigationRouteIsExpiredTest {
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
-    private val responseTime = 12345L
+
+    @get:Rule
+    val clock = TestSystemClock()
 
     @Before
     fun setUp() {
-        mockkObject(Time.SystemClockImpl)
         mockkObject(ThreadController)
         every { ThreadController.DefaultDispatcher } returns Dispatchers.Main
     }
 
     @After
     fun tearDown() {
-        unmockkObject(Time.SystemClockImpl)
         unmockkObject(ThreadController)
     }
 
@@ -54,28 +57,28 @@ class NavigationRouteIsExpiredTest {
                 .coordinatesList(
                     listOf(
                         Point.fromLngLat(18.576644, 54.410361),
-                        Point.fromLngLat(18.576235, 54.412025)
-                    )
+                        Point.fromLngLat(18.576235, 54.412025),
+                    ),
                 )
                 .build().toUrl("").toString(),
-            RouterOrigin.Offboard,
-            responseTime,
-            TestSDKRouteParser()
-        )
+            RouterOrigin.ONLINE,
+            clock.elapsedMillis,
+            TestSDKRouteParser(),
+        ).routes
 
-        every { Time.SystemClockImpl.seconds() } returns responseTime + 9
+        clock.advanceTimeBy(9.seconds)
 
         assertFalse(routes[0].isExpired())
         assertFalse(routes[1].isExpired())
         assertFalse(routes[2].isExpired())
 
-        every { Time.SystemClockImpl.seconds() } returns responseTime + 11
+        clock.advanceTimeBy(2.seconds)
 
         assertTrue(routes[0].isExpired())
         assertFalse(routes[1].isExpired())
         assertFalse(routes[2].isExpired())
 
-        every { Time.SystemClockImpl.seconds() } returns responseTime + 16
+        clock.advanceTimeBy(5.seconds)
 
         assertTrue(routes[0].isExpired())
         assertFalse(routes[1].isExpired())

@@ -17,6 +17,6 @@ object RouteIndicesFactory {
         stepIndex,
         routeGeometryIndex,
         legGeometryIndex,
-        intersectionIndex
+        intersectionIndex,
     )
 }

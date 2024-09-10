@@ -19,7 +19,7 @@ class EHorizonGraphPath internal constructor(
     val edges: List<Long>,
     val percentAlongBegin: Double,
     val percentAlongEnd: Double,
-    val length: Double
+    val length: Double,
 ) {
 
     /**

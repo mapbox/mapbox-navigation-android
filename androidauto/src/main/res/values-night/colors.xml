@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--  colors to support backward UI compatibility, waiting for https://mapbox.atlassian.net/browse/NAVAND-1830  -->
+    <!-- The color used for elements displayed on top of your secondary colors -->
+    <color name="mapbox_primary_maneuver_text_color">#000000</color>
+    <color name="mapbox_exit_text_color">#F8F8F8</color>
+    <color name="mapbox_sub_maneuver_text_color">#FFFFFF</color>
+    <color name="mapbox_secondary_maneuver_text_color">#000000</color>
+
+</resources>

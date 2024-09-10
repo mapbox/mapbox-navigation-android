@@ -21,7 +21,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
  * [CameraAnimationsPlugin.removeCameraAnimationsLifecycleListener].
  */
 class NavigationBasicGesturesHandler(
-    private val navigationCamera: NavigationCamera
+    private val navigationCamera: NavigationCamera,
 ) : CameraAnimationsLifecycleListener {
 
     /**
@@ -30,7 +30,7 @@ class NavigationBasicGesturesHandler(
     override fun onAnimatorCancelling(
         type: CameraAnimatorType,
         animator: ValueAnimator,
-        owner: String?
+        owner: String?,
     ) {
         // no impl
     }
@@ -41,7 +41,7 @@ class NavigationBasicGesturesHandler(
     override fun onAnimatorEnding(
         type: CameraAnimatorType,
         animator: ValueAnimator,
-        owner: String?
+        owner: String?,
     ) {
         // no impl
     }
@@ -54,7 +54,7 @@ class NavigationBasicGesturesHandler(
         runningAnimator: ValueAnimator,
         runningAnimatorOwner: String?,
         newAnimator: ValueAnimator,
-        newAnimatorOwner: String?
+        newAnimatorOwner: String?,
     ) {
         // no impl
     }
@@ -65,7 +65,7 @@ class NavigationBasicGesturesHandler(
     override fun onAnimatorStarting(
         type: CameraAnimatorType,
         animator: ValueAnimator,
-        owner: String?
+        owner: String?,
     ) {
         if (owner != NAVIGATION_CAMERA_OWNER) {
             navigationCamera.requestNavigationCameraToIdle()

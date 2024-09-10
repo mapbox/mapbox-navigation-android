@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.trip.service
 
+import android.annotation.SuppressLint
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Notification
 import android.app.Service
 import android.content.Context
@@ -9,7 +11,7 @@ import androidx.annotation.CallSuper
 import androidx.core.app.ServiceCompat
 import com.mapbox.navigation.core.internal.dump.MapboxDumpHandler
 import com.mapbox.navigation.core.internal.dump.MapboxDumpRegistry
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.utils.internal.logE
 import java.io.FileDescriptor
 import java.io.PrintWriter
 
@@ -18,9 +20,24 @@ import java.io.PrintWriter
  */
 internal class NavigationNotificationService : Service() {
 
+    // Unknown types in catch blocks work fine on platforms where they are not defined.
+    @SuppressLint("NewApi")
     private val notificationDataObserver = NotificationDataObserver { notificationResponse ->
-        notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
-        startForeground(notificationResponse.notificationId, notificationResponse.notification)
+        try {
+            notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
+            startForeground(notificationResponse.notificationId, notificationResponse.notification)
+        } catch (e: ForegroundServiceStartNotAllowedException) {
+            // Even if startForeground is called in Activity.onResume callback there is a chance
+            // that the application will be moved to background when this RPC call reaches
+            // the ActivityManager on the OS side.
+            // There is a simple way to reproduce it:
+            // 1. Put a breakpoint on the line 26 with startForeground call above.
+            // 2. Start the app with the debugger attached.
+            // 3. When the app is suspended on that breakpoint, move the app to background
+            // 4. Wait for a few seconds
+            // 5. Continue execution
+            logE("ForegroundServiceStartNotAllowedException: ${e.message}")
+        }
     }
 
     /**
@@ -46,7 +63,6 @@ internal class NavigationNotificationService : Service() {
      * @return Int
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        MapboxNavigationTelemetry.setApplicationInstance(application)
         MapboxTripService.registerOneTimeNotificationDataObserver(notificationDataObserver)
         return START_STICKY
     }

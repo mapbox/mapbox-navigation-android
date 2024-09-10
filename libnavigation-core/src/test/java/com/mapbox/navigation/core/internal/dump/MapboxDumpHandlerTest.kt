@@ -74,10 +74,10 @@ class MapboxDumpHandlerTest {
         }
         every { MapboxDumpRegistry.getInterceptors("test_command") } returns listOf(
             interceptorOne,
-            interceptorThree
+            interceptorThree,
         )
         every { MapboxDumpRegistry.getInterceptors("not_called") } returns listOf(
-            interceptorTwo
+            interceptorTwo,
         )
 
         sut.handle(fd, writer, arrayOf("test_command"))
@@ -105,10 +105,10 @@ class MapboxDumpHandlerTest {
         }
         every { MapboxDumpRegistry.getInterceptors("system") } returns listOf(
             interceptorOne,
-            interceptorThree
+            interceptorThree,
         )
         every { MapboxDumpRegistry.getInterceptors("feature") } returns listOf(
-            interceptorTwo
+            interceptorTwo,
         )
 
         val args = arrayOf(
@@ -125,7 +125,7 @@ class MapboxDumpHandlerTest {
         val expectedFeature = listOf(
             "feature:longitude:-122.523667",
             "feature:latitude:37.975391",
-            "feature:replay:true"
+            "feature:replay:true",
         )
         verify {
             interceptorOne.intercept(any(), any(), expectedSystem)

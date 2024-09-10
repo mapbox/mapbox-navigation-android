@@ -31,7 +31,7 @@ class MapboxRestAreaGuideMapViewTest {
         val view = MapboxRestAreaGuideMapView(ctx)
         val sapaMap: Expected<RestAreaGuideMapError, RestAreaGuideMapValue> =
             ExpectedFactory.createError(
-                RestAreaGuideMapError("whatever", null)
+                RestAreaGuideMapError("whatever", null),
             )
         val expected = null
 

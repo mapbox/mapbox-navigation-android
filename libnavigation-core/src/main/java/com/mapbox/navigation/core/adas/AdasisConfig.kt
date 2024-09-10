@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param pathOptions ADASISv2 path level specific configurations
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfig private constructor(
+internal class AdasisConfig private constructor(
     val dataSendingConfig: AdasisDataSendingConfig,
     val pathOptions: AdasisConfigPathOptions,
 ) {
@@ -72,7 +72,7 @@ class AdasisConfig private constructor(
         /**
          * ADASISv2 path level specific configurations
          */
-        fun pathOptions(pathsOptions: AdasisConfigPathOptions) = apply {
+        fun pathOptions(pathsOptions: AdasisConfigPathOptions): Builder = apply {
             this.pathOptions = pathsOptions
         }
 

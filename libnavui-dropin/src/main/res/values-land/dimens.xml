@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Overview camera padding to ensure location puck and target pin are not clipped -->
-    <dimen name="mapbox_camera_overview_padding_v">30dp</dimen>
-    <dimen name="mapbox_camera_overview_padding_h">35dp</dimen>
-</resources>

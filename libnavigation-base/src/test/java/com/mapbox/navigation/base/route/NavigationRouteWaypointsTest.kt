@@ -6,8 +6,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import io.mockk.mockk
+import com.mapbox.navigation.testing.NativeRouteParserRule
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -17,8 +18,11 @@ class NavigationRouteWaypointsTest(
     private val waypointsPerRoute: Boolean?,
     private val responseWaypoints: List<DirectionsWaypoint>?,
     private val routeWaypoints: List<DirectionsWaypoint>?,
-    private val expectedWaypoints: List<DirectionsWaypoint>?
+    private val expectedWaypoints: List<DirectionsWaypoint>?,
 ) {
+
+    @get:Rule
+    val routeParserRule = NativeRouteParserRule()
 
     companion object {
 
@@ -29,13 +33,13 @@ class NavigationRouteWaypointsTest(
                 DirectionsWaypoint.builder()
                     .name("name1")
                     .rawLocation(doubleArrayOf(1.1, 2.2))
-                    .build()
+                    .build(),
             )
             val filledWaypoints2 = listOf(
                 DirectionsWaypoint.builder()
                     .name("name2")
                     .rawLocation(doubleArrayOf(1.1, 2.2))
-                    .build()
+                    .build(),
             )
             return listOf(
                 // #0
@@ -49,7 +53,7 @@ class NavigationRouteWaypointsTest(
                     true,
                     null,
                     emptyList<DirectionsWaypoint>(),
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
                 // #6
                 arrayOf(null, null, filledWaypoints1, null),
@@ -60,53 +64,53 @@ class NavigationRouteWaypointsTest(
                     null,
                     emptyList<DirectionsWaypoint>(),
                     null,
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
+                // #10
                 arrayOf(
                     false,
                     emptyList<DirectionsWaypoint>(),
                     null,
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
-
+                // #11
                 arrayOf(
                     true,
                     emptyList<DirectionsWaypoint>(),
                     null,
-                    // TODO: make expected result null when NN-731 is fixed
-                    emptyList<DirectionsWaypoint>()
+                    null,
                 ),
                 // #12
                 arrayOf(
                     null,
                     emptyList<DirectionsWaypoint>(),
                     emptyList<DirectionsWaypoint>(),
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
                 arrayOf(
                     false,
                     emptyList<DirectionsWaypoint>(),
                     emptyList<DirectionsWaypoint>(),
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
                 arrayOf(
                     true,
                     emptyList<DirectionsWaypoint>(),
                     emptyList<DirectionsWaypoint>(),
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
                 // #15
                 arrayOf(
                     null,
                     emptyList<DirectionsWaypoint>(),
                     filledWaypoints1,
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
                 arrayOf(
                     false,
                     emptyList<DirectionsWaypoint>(),
                     filledWaypoints1,
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
                 arrayOf(true, emptyList<DirectionsWaypoint>(), filledWaypoints1, filledWaypoints1),
                 // #18
@@ -116,8 +120,7 @@ class NavigationRouteWaypointsTest(
                     true,
                     filledWaypoints2,
                     null,
-                    // TODO: make expected result null when NN-731 is fixed
-                    filledWaypoints2
+                    null,
                 ),
                 // #21
                 arrayOf(null, filledWaypoints2, emptyList<DirectionsWaypoint>(), filledWaypoints2),
@@ -126,7 +129,7 @@ class NavigationRouteWaypointsTest(
                     true,
                     filledWaypoints2,
                     emptyList<DirectionsWaypoint>(),
-                    emptyList<DirectionsWaypoint>()
+                    emptyList<DirectionsWaypoint>(),
                 ),
                 // #24
                 arrayOf(null, filledWaypoints2, filledWaypoints1, filledWaypoints2),
@@ -138,7 +141,7 @@ class NavigationRouteWaypointsTest(
 
     @Test
     fun waypoints() {
-        val route = NavigationRoute(
+        val route = NavigationRoute.create(
             DirectionsResponse.builder()
                 .waypoints(responseWaypoints)
                 .routes(
@@ -147,30 +150,23 @@ class NavigationRouteWaypointsTest(
                             .distance(1.0)
                             .duration(2.9)
                             .waypoints(routeWaypoints)
-                            .build()
-                    )
+                            .build(),
+                    ),
                 )
                 .code("Ok")
                 .build(),
-            0,
             RouteOptions.builder()
                 .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .coordinatesList(
                     listOf(
                         Point.fromLngLat(1.1, 2.2),
-                        Point.fromLngLat(3.3, 4.4)
-                    )
+                        Point.fromLngLat(3.3, 4.4),
+                    ),
                 )
                 .waypointsPerRoute(waypointsPerRoute)
                 .build(),
-            DirectionsRoute.builder()
-                .distance(1.0)
-                .duration(2.9)
-                .waypoints(routeWaypoints)
-                .build(),
-            mockk(relaxed = true),
-            null
-        )
+            RouterOrigin.OFFLINE,
+        ).first()
         assertEquals(expectedWaypoints, route.waypoints)
     }
 }

@@ -11,6 +11,7 @@
     "type": "Point"
   },
   "locationEngineNameExternal": "com.mapbox.android.core.location.LocationEngineProxy",
+  "simulation": true,
   "locationsAfterEvent": [
     {
       "altitude": 0.0,

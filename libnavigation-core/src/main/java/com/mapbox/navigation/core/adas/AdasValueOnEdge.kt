@@ -13,7 +13,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param value Floating point value, e.g. curvature in 1/m or slope in degrees
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasValueOnEdge private constructor(
+internal class AdasValueOnEdge private constructor(
     val shapeIndex: Float,
     val percentAlong: Double,
     val value: Double,
@@ -61,7 +61,7 @@ class AdasValueOnEdge private constructor(
             AdasValueOnEdge(
                 shapeIndex = nativeObj.shapeIndex,
                 percentAlong = nativeObj.percentAlong,
-                value = nativeObj.value
+                value = nativeObj.value,
             )
     }
 }

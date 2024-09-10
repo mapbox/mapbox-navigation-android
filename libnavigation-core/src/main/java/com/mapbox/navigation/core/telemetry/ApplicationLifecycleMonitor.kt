@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
 internal class ApplicationLifecycleMonitor(
-    application: Application
+    application: Application,
 ) : Application.ActivityLifecycleCallbacks {
 
     companion object {

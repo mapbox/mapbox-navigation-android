@@ -3,13 +3,13 @@
 package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.nio.ByteBuffer
 
 private const val LOG_TAG = "RouteParsingManager"
+private const val RESPONSE_SIZE_TO_OPTIMIZE_BYTES = 20 * 1024 * 1024 // 20 MB
 
 sealed class AlternativesParsingResult<out T> {
     object NotActual : AlternativesParsingResult<Nothing>()
@@ -23,28 +23,20 @@ interface RouteParsingManager {
 
     suspend fun <T> parseRouteResponse(
         routeResponseInfo: RouteResponseInfo,
-        parsing: suspend (ParseArguments) -> T
+        parsing: suspend () -> T,
     ): T
 
     suspend fun <T> parseAlternatives(
         arguments: AlternativesInfo,
-        parsing: suspend (ParseArguments) -> T
+        parsing: suspend () -> T,
     ): AlternativesParsingResult<T>
 }
 
-fun createRouteParsingManager(
-    longRoutesOptimisationOptions: LongRoutesOptimisationOptions
-): RouteParsingManager {
-    return when (longRoutesOptimisationOptions) {
-        LongRoutesOptimisationOptions.NoOptimisations -> NotOptimisedRoutesParsingManager()
-        is LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes ->
-            OptimisedRoutesParsingManager(longRoutesOptimisationOptions)
-    }
+fun createRouteParsingManager(): RouteParsingManager {
+    return OptimisedRoutesParsingManager()
 }
 
-private class OptimisedRoutesParsingManager(
-    private val options: LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes
-) : RouteParsingManager {
+private class OptimisedRoutesParsingManager() : RouteParsingManager {
 
     private val mutex = Mutex()
 
@@ -56,27 +48,24 @@ private class OptimisedRoutesParsingManager(
 
     override suspend fun <T> parseRouteResponse(
         routeResponseInfo: RouteResponseInfo,
-        parsing: suspend (ParseArguments) -> T
+        parsing: suspend () -> T,
     ): T {
-        return if (routeResponseInfo.sizeBytes < options.responseToParseSizeBytes) {
-            parsing(ParseArguments(optimiseDirectionsResponseStructure = true))
+        return if (routeResponseInfo.sizeBytes < RESPONSE_SIZE_TO_OPTIMIZE_BYTES) {
+            parsing()
         } else {
             logD(LOG_TAG) { "Enqueuing routes parsing" }
             mutex.withLock {
                 prepareForParsing()
-                parsing(ParseArguments(optimiseDirectionsResponseStructure = true))
+                parsing()
             }
         }
     }
 
     override suspend fun <T> parseAlternatives(
         arguments: AlternativesInfo,
-        parsing: suspend (ParseArguments) -> T
+        parsing: suspend () -> T,
     ): AlternativesParsingResult<T> {
-        return if (arguments.userTriggeredAlternativesRefresh) {
-            logD(LOG_TAG) { "skipping parsing of immediate route alternatives response" }
-            AlternativesParsingResult.NotActual
-        } else if (mutex.isLocked) {
+        return if (mutex.isLocked) {
             logD(LOG_TAG) {
                 "skipping parsing of routes alternatives" +
                     " as a different route is being parsed already"
@@ -86,8 +75,8 @@ private class OptimisedRoutesParsingManager(
             AlternativesParsingResult.Parsed(
                 parseRouteResponse(
                     arguments.routeResponseInfo,
-                    parsing
-                )
+                    parsing,
+                ),
             )
         }
     }
@@ -103,39 +92,12 @@ private class OptimisedRoutesParsingManager(
     }
 }
 
-private class NotOptimisedRoutesParsingManager : RouteParsingManager {
-    override fun setPrepareForParsingAction(action: PrepareForParsingAction) {
-        // this implementation never triggers preparation
-    }
-
-    override suspend fun <T> parseRouteResponse(
-        routeResponseInfo: RouteResponseInfo,
-        parsing: suspend (ParseArguments) -> T
-    ): T {
-        return parsing(getParsingArgs())
-    }
-
-    override suspend fun <T> parseAlternatives(
-        arguments: AlternativesInfo,
-        parsing: suspend (ParseArguments) -> T
-    ): AlternativesParsingResult<T> {
-        return AlternativesParsingResult.Parsed(
-            parseRouteResponse(arguments.routeResponseInfo, parsing)
-        )
-    }
-
-    private fun getParsingArgs() = ParseArguments(
-        optimiseDirectionsResponseStructure = false
-    )
-}
-
 data class AlternativesInfo(
     val routeResponseInfo: RouteResponseInfo,
-    val userTriggeredAlternativesRefresh: Boolean
 )
 
 data class RouteResponseInfo(
-    val sizeBytes: Int
+    val sizeBytes: Int,
 ) {
     companion object {
         fun fromResponse(response: ByteBuffer) =
@@ -145,7 +107,3 @@ data class RouteResponseInfo(
             RouteResponseInfo(sizeBytes = responses.maxOf { it.capacity() })
     }
 }
-
-data class ParseArguments(
-    val optimiseDirectionsResponseStructure: Boolean
-)

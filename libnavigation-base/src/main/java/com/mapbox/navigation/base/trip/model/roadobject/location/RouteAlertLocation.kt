@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocat
  *
  */
 class RouteAlertLocation internal constructor(
-    shape: Geometry
+    shape: Geometry,
 ) : RoadObjectLocation(ROUTE_ALERT, shape) {
 
     /**

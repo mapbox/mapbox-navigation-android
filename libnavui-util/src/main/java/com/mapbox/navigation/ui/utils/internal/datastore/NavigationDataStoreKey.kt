@@ -12,7 +12,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
  */
 class NavigationDataStoreKey<T>(
     val preferenceKey: Preferences.Key<T>,
-    val defaultValue: T
+    val defaultValue: T,
 )
 
 fun booleanDataStoreKey(name: String, defaultValue: Boolean): NavigationDataStoreKey<Boolean> =

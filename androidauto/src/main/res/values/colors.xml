@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="mapbox_feedback_bottom_sheet_background">#F0F3F8</color>
+    <color name="mapbox_feedback_bottom_sheet_icon_primary">#2A4E7A</color>
+    <color name="mapbox_feedback_bottom_sheet_icon_secondary">#2B91FF</color>
+    <color name="mapbox_feedback_bottom_sheet_primary">#99143C6D</color>
+    <color name="mapbox_feedback_bottom_sheet_primary_text">#FFFFFF</color>
+    <color name="mapbox_feedback_bottom_sheet_secondary">#2B91FF</color>
+    <color name="mapbox_feedback_bottom_sheet_secondary_text">#273D56</color>
+    <color name="mapbox_feedback_bottom_sheet_tertiary">#CCE24A69</color>
+
+    <!--  colors to support backward UI compatibility, waiting for https://mapbox.atlassian.net/browse/NAVAND-1830  -->
+    <!-- The color used for elements displayed on top of your secondary colors -->
+    <color name="mapbox_primary_maneuver_text_color">#FFFFFF</color>
+    <color name="mapbox_exit_text_color">#3C3E3E</color>
+    <color name="mapbox_sub_maneuver_text_color">#000000</color>
+    <color name="mapbox_secondary_maneuver_text_color">#FFFFFF</color>
+</resources>

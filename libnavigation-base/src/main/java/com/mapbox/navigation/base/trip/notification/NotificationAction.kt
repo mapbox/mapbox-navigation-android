@@ -8,5 +8,5 @@ enum class NotificationAction {
     /**
      * Navigation has ended via a selection in the notification bar
      */
-    END_NAVIGATION
+    END_NAVIGATION,
 }

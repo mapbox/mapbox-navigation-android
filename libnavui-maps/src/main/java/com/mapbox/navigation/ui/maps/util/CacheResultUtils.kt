@@ -61,13 +61,13 @@ internal object CacheResultUtils {
 
     data class CacheResultKeyRouteTraffic<R>(
         val route: NavigationRoute,
-        val trafficProvider: (RouteLeg) -> List<String>?
+        val trafficProvider: (RouteLeg) -> List<String>?,
     ) :
         CacheResultCall<(NavigationRoute, (RouteLeg) -> List<String>?) -> R, R> {
 
         override fun invoke(f: (NavigationRoute, (RouteLeg) -> List<String>?) -> R) = f(
             route,
-            trafficProvider
+            trafficProvider,
         )
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -114,7 +114,7 @@ internal object CacheResultUtils {
 
             return listElementsAreEqual(
                 routeRoadClasses,
-                otherRoadClasses
+                otherRoadClasses,
             ) { roadClass1, roadClass2 ->
                 roadClass1 == roadClass2
             }
@@ -128,7 +128,7 @@ internal object CacheResultUtils {
                 if (
                     !listElementsAreEqual(
                         routeLeg.closures() ?: listOf(),
-                        other.directionsRoute.legs()?.get(index)?.closures() ?: listOf()
+                        other.directionsRoute.legs()?.get(index)?.closures() ?: listOf(),
                     ) { closure1, closure2 ->
                         closure1 == closure2
                     }
@@ -170,7 +170,7 @@ internal object CacheResultUtils {
                                             .legs()
                                             ?.get(index)
                                             ?.annotation()
-                                            ?.congestion() ?: listOf()
+                                            ?.congestion() ?: listOf(),
                                     ) { string1: String?, string2: String? -> string1 == string2 }
                                 }
                             }
@@ -189,7 +189,7 @@ internal object CacheResultUtils {
                                     listElementsAreEqual(
                                         routeLeg.annotation()?.congestionNumeric() ?: listOf(),
                                         other.directionsRoute.legs()?.get(index)?.annotation()
-                                            ?.congestionNumeric() ?: listOf()
+                                            ?.congestionNumeric() ?: listOf(),
                                     ) { item1: Int?, item2: Int? ->
                                         item1 == item2
                                     }
@@ -212,7 +212,7 @@ internal object CacheResultUtils {
             private val handler =
                 CacheResultHandler<((P1) -> R), CacheResultKey1<P1, R>, R>(
                     this@cacheResult,
-                    cache
+                    cache,
                 )
             override fun invoke(p1: P1) = handler(CacheResultKey1(p1))
         }
@@ -224,7 +224,7 @@ internal object CacheResultUtils {
             private val handler =
                 CacheResultHandler<((P1, P2) -> R), CacheResultKey2<P1, P2, R>, R>(
                     this@cacheResult,
-                    cache
+                    cache,
                 )
             override fun invoke(p1: P1, p2: P2) = handler(CacheResultKey2(p1, p2))
         }
@@ -235,70 +235,70 @@ internal object CacheResultUtils {
             private val handler =
                 CacheResultHandler<((P1) -> R), CacheResultKey1<P1, R>, R>(
                     this@cacheResult,
-                    cache
+                    cache,
                 )
             override fun invoke(p1: P1) = handler(CacheResultKey1(p1))
         }
     }
 
     fun <P1, P2, R> ((P1, P2) -> R).cacheResult(
-        cache: LruCache<CacheResultKey2<P1, P2, R>, R>
+        cache: LruCache<CacheResultKey2<P1, P2, R>, R>,
     ): (P1, P2) -> R {
         return object : (P1, P2) -> R {
             private val handler =
                 CacheResultHandler<((P1, P2) -> R), CacheResultKey2<P1, P2, R>, R>(
                     this@cacheResult,
-                    cache
+                    cache,
                 )
             override fun invoke(p1: P1, p2: P2) = handler(CacheResultKey2(p1, p2))
         }
     }
 
     fun <P1, P2, P3, R> ((P1, P2, P3) -> R).cacheResult(
-        cache: LruCache<CacheResultKey3<P1, P2, P3, R>, R>
+        cache: LruCache<CacheResultKey3<P1, P2, P3, R>, R>,
     ): (P1, P2, P3) -> R {
         return object : (P1, P2, P3) -> R {
             private val handler =
                 CacheResultHandler<((P1, P2, P3) -> R), CacheResultKey3<P1, P2, P3, R>, R>(
                     this@cacheResult,
-                    cache
+                    cache,
                 )
             override fun invoke(p1: P1, p2: P2, p3: P3) = handler(CacheResultKey3(p1, p2, p3))
         }
     }
 
     fun <R> ((NavigationRoute) -> R).cacheRouteResult(
-        cache: LruCache<CacheResultKeyRoute<R>, R>
+        cache: LruCache<CacheResultKeyRoute<R>, R>,
     ): (NavigationRoute) -> R {
         return object : (NavigationRoute) -> R {
             private val handler =
                 CacheResultHandler(
                     this@cacheRouteResult,
-                    cache
+                    cache,
                 )
             override fun invoke(route: NavigationRoute) = handler(CacheResultKeyRoute(route))
         }
     }
 
     fun <R> ((NavigationRoute, (RouteLeg) -> List<String>?) -> R).cacheRouteTrafficResult(
-        cache: LruCache<CacheResultKeyRouteTraffic<R>, R>
+        cache: LruCache<CacheResultKeyRouteTraffic<R>, R>,
     ): (NavigationRoute, (RouteLeg) -> List<String>?) -> R {
         return object : (NavigationRoute, (RouteLeg) -> List<String>?) -> R {
             private val handler =
                 CacheResultHandler(
                     this@cacheRouteTrafficResult,
-                    cache
+                    cache,
                 )
             override fun invoke(
                 route: NavigationRoute,
-                trafficProvider: (RouteLeg) -> List<String>?
+                trafficProvider: (RouteLeg) -> List<String>?,
             ) = handler(CacheResultKeyRouteTraffic(route, trafficProvider))
         }
     }
 
     private class CacheResultHandler<F, K : CacheResultCall<F, R>, R>(
         val f: F,
-        val cache: LruCache<K, R>
+        val cache: LruCache<K, R>,
     ) {
         operator fun invoke(k: K): R {
             synchronized(cache) {
@@ -314,7 +314,7 @@ internal object CacheResultUtils {
     private fun <T> listElementsAreEqual(
         first: List<T>,
         second: List<T>,
-        equalityFun: (T?, T?) -> Boolean
+        equalityFun: (T?, T?) -> Boolean,
     ): Boolean {
         if (first.size != second.size) {
             return false

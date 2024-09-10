@@ -17,5 +17,5 @@ internal data class ExtractedRouteData(
     val trafficCongestionIdentifier: String,
     val roadClass: String? = null,
     val legIndex: Int = 0,
-    val isLegOrigin: Boolean = false
+    val isLegOrigin: Boolean = false,
 )

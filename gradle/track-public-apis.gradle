@@ -1,5 +1,5 @@
 buildscript {
-    apply from: "../gradle/dependencies.gradle"
+    apply from: "$rootDir/gradle/dependencies.gradle"
 
     repositories {
         google()
@@ -14,7 +14,7 @@ buildscript {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply from: "../gradle/metalava-dependencies.gradle"
+apply from: "$rootDir/gradle/metalava-dependencies.gradle"
 
 android.libraryVariants.all { variant ->
     // TODO eliminate variants https://issuetracker.google.com/issues/62201427
@@ -39,8 +39,11 @@ android.libraryVariants.all { variant ->
                     '--api', 'api/current.txt'
             ]
             if (project.hasProperty('hidePackage')) {
-                args += '--hide-package'
-                args += hidePackage
+                def packages = hidePackage.split(',')
+                packages.each { pkg ->
+                    args += '--hide-package'
+                    args += pkg
+                }
             }
             if (project.hasProperty('hideId')) {
                 args += '--hide'
@@ -69,8 +72,11 @@ android.libraryVariants.all { variant ->
                     '--check-compatibility:api:released', 'api/current.txt'
             ]
             if (project.hasProperty('hidePackage')) {
-                args += '--hide-package'
-                args += hidePackage
+                def packages = hidePackage.split(',')
+                packages.each { pkg ->
+                    args += '--hide-package'
+                    args += pkg
+                }
             }
             if (project.hasProperty('hideId')) {
                 args += '--hide'

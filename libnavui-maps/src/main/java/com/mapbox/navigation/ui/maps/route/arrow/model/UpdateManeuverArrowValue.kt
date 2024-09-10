@@ -13,5 +13,5 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 class UpdateManeuverArrowValue internal constructor(
     val layerVisibilityModifications: List<Pair<String, Visibility>>,
     val arrowShaftFeature: Feature?,
-    val arrowHeadFeature: Feature?
+    val arrowHeadFeature: Feature?,
 )

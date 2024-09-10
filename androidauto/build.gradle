@@ -1,0 +1,79 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.dokka'
+}
+apply from: "$rootDir/gradle/ktlint.gradle"
+apply from: "$rootDir/gradle/track-public-apis.gradle"
+apply from: "$rootDir/gradle/jacoco.gradle"
+apply from: "$rootDir/gradle/publish.gradle"
+apply from: "$rootDir/gradle/kdoc-settings.gradle"
+apply from: file("$rootDir/gradle/artifact-settings.gradle")
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
+
+android {
+    namespace 'com.mapbox.navigation.ui.androidauto'
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        testApplicationId "com.mapbox.navigation.extensions.test"
+        minSdkVersion androidVersions.carMinSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+    }
+
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
+}
+
+dependencies {
+    implementation(project(':libnavigation-android'))
+    implementation(project(':libnavigation-util'))
+
+    api(dependenciesList.mapboxMapsAndroidAuto)
+    api dependenciesList.mapboxSearch
+
+    implementation dependenciesList.androidXCore
+    implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.glide
+
+    testImplementation(project(':libtesting-utils'))
+    testImplementation project(':libtesting-navigation-util')
+    testImplementation dependenciesList.androidXLifecycleTesting
+    apply from: "$rootDir/gradle/unit-testing-dependencies.gradle"
+    // instrumentation tests
+    androidTestImplementation project(':libtesting-ui')
+    androidTestImplementation dependenciesList.testRunner
+    androidTestImplementation dependenciesList.testRules
+    androidTestImplementation dependenciesList.androidxTestCore
+    androidTestImplementation dependenciesList.mockkAndroid
+    androidTestUtil dependenciesList.testOrchestrator
+}
+
+dokkaHtmlPartial {
+    outputDirectory.set(kdocPath)
+    moduleName.set("Android Auto Components")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(false) // TODO https://mapbox.atlassian.net/browse/NAVAND-2801
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.ui.androidauto.internal.*")
+                suppress.set(true)
+            }
+        }
+    }
+}

@@ -10,7 +10,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.reststop
 class Amenity internal constructor(
     @AmenityType.Type val type: String,
     val name: String?,
-    val brand: String?
+    val brand: String?,
 ) {
     /**
      * Indicates whether some other object is "equal to" this one.

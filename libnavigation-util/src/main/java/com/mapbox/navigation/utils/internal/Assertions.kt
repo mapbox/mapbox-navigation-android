@@ -11,3 +11,11 @@ inline fun assertDebug(value: Boolean, message: () -> Any) {
         logW { message().toString() }
     }
 }
+
+inline fun errorDebug(message: () -> Any) {
+    if (BuildConfig.DEBUG) {
+        error(message())
+    }
+
+    logW { message().toString() }
+}

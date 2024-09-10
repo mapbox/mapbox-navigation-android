@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
+import androidx.annotation.RestrictTo
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
@@ -8,9 +9,10 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import kotlinx.coroutines.flow.map
 
-internal class NavigationCameraComponent(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+class NavigationCameraComponent(
     val viewportDataSource: MapboxNavigationViewportDataSource,
-    val navigationCamera: NavigationCamera
+    val navigationCamera: NavigationCamera,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {

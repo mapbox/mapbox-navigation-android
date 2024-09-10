@@ -1,25 +1,20 @@
 package com.mapbox.navigation.core.reroute
 
 import androidx.annotation.UiThread
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.isRetryable
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 
 /**
- * Reroute controller allows changing the reroute logic externally. Use [MapboxNavigation.rerouteController]
- * to replace it.
+ * Provides API to trigger reroute and observe reroute state.
+ *
+ * @see [MapboxNavigation.getRerouteController] and [MapboxNavigation.setRerouteEnabled]
  */
 @UiThread
-interface RerouteController {
-
-    /**
-     * Reroute state
-     */
-    val state: RerouteState
+abstract class RerouteController internal constructor() {
 
     /**
      * Invoked whenever re-route is needed. For instance when a driver is off-route. Called just after
@@ -27,13 +22,12 @@ interface RerouteController {
      *
      * @see [OffRouteObserver]
      */
-    fun reroute(routesCallback: RoutesCallback)
+    abstract fun reroute(callback: RoutesCallback)
 
     /**
-     * Invoked when re-route is not needed anymore (for instance when driver returns to previous route).
-     * Might be ignored depending on [RerouteState] e.g. if a route has been fetched it does not make sense to interrupt re-routing
+     * Reroute state
      */
-    fun interrupt()
+    abstract val state: RerouteState
 
     /**
      * Add a RerouteStateObserver to collection and immediately invoke [rerouteStateObserver] with current
@@ -41,26 +35,26 @@ interface RerouteController {
      *
      * @return `true` if the element has been added, `false` if the element is already present in the collection.
      */
-    fun registerRerouteStateObserver(rerouteStateObserver: RerouteStateObserver): Boolean
+    abstract fun registerRerouteStateObserver(rerouteStateObserver: RerouteStateObserver): Boolean
 
     /**
      * Remove [rerouteStateObserver] from collection of observers.
      *
      * @return `true` if the element has been successfully removed; `false` if it was not present in the collection.
      */
-    fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteStateObserver): Boolean
+    abstract fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteStateObserver): Boolean
 
     /**
      * Route Callback is useful to set new route(s) on reroute event. Doing the same as
-     * [MapboxNavigation.setRoutes].
+     * [MapboxNavigation.setNavigationRoutes].
      */
     @UiThread
     fun interface RoutesCallback {
         /**
          * Called whenever new route(s) has been fetched.
-         * @see [MapboxNavigation.setRoutes]
+         * @see [MapboxNavigation.setNavigationRoutes]
          */
-        fun onNewRoutes(routes: List<DirectionsRoute>)
+        fun onNewRoutes(routes: List<NavigationRoute>, @RouterOrigin routerOrigin: String)
     }
 
     /**
@@ -88,36 +82,82 @@ sealed class RerouteState {
     /**
      * Reroute has been interrupted.
      *
-     * Might be invoked by:
-     * - [RerouteController.interrupt];
-     * - [MapboxNavigation.setRoutes];
-     * - [MapboxNavigation.requestRoutes];
+     * Might be triggered when:
+     * - [MapboxNavigation.setNavigationRoutes] called;
+     * - [MapboxNavigation.requestRoutes] called;
+     * - another reroute call [RerouteController.reroute];
+     * - when reroute has been disabled by [MapboxNavigation.setRerouteEnabled];
+     * - user is back to route, see [OffRouteObserver];
      * - from the SDK internally if another route request has been requested (only when using the default
      * implementation [MapboxRerouteController]).
-     *
      */
     object Interrupted : RerouteState()
 
     /**
      * Re-route request has failed.
      *
-     * You can [MapboxNavigation.requestRoutes] or [MapboxNavigation.setRoutes] with [RouteOptionsUpdater] to retry the request.
+     * You can call [RerouteController.reroute] to retry the request.
      *
      * @param message describes error
      * @param throwable optional throwable
      * @param reasons optional reasons for the failure
      */
-    data class Failed @JvmOverloads constructor(
+    class Failed internal constructor(
         val message: String,
-        val throwable: Throwable? = null,
-        val reasons: List<RouterFailure>? = null
+        val throwable: Throwable?,
+        val reasons: List<RouterFailure>?,
+        internal val preRouterReasons: List<PreRouterFailure>,
     ) : RerouteState() {
+
+        @JvmOverloads constructor(
+            message: String,
+            throwable: Throwable? = null,
+            reasons: List<RouterFailure>? = null,
+        ) : this(message, throwable, reasons, emptyList())
 
         /**
          * Indicates if it makes sense to retry for this type of failures.
          * If false, it doesn't make sense to retry route request
          */
-        val isRetryable get() = reasons.isRetryable
+        val isRetryable get() = reasons.isRetryable || preRouterReasons.any { it.isRetryable }
+
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Failed
+
+            if (message != other.message) return false
+            if (throwable != other.throwable) return false
+            if (preRouterReasons != other.preRouterReasons) return false
+            return reasons == other.reasons
+        }
+
+        /**
+         * Returns a hash code value for the object.
+         */
+        override fun hashCode(): Int {
+            var result = message.hashCode()
+            result = 31 * result + (throwable?.hashCode() ?: 0)
+            result = 31 * result + (reasons?.hashCode() ?: 0)
+            result = 31 * result + preRouterReasons.hashCode()
+            return result
+        }
+
+        /**
+         * Returns a string representation of the object.
+         */
+        override fun toString(): String {
+            return "Failed(" +
+                "message='$message', " +
+                "throwable=$throwable, " +
+                "reasons=$reasons, " +
+                "preRouterReasons=$preRouterReasons" +
+                ")"
+        }
     }
 
     /**
@@ -130,5 +170,32 @@ sealed class RerouteState {
      *
      * @param routerOrigin which router was used to fetch the route
      */
-    data class RouteFetched(val routerOrigin: RouterOrigin) : RerouteState()
+    class RouteFetched(@RouterOrigin val routerOrigin: String) : RerouteState() {
+
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as RouteFetched
+
+            return routerOrigin == other.routerOrigin
+        }
+
+        /**
+         * Returns a hash code value for the object.
+         */
+        override fun hashCode(): Int {
+            return routerOrigin.hashCode()
+        }
+
+        /**
+         * Returns a string representation of the object.
+         */
+        override fun toString(): String {
+            return "RouteFetched(routerOrigin='$routerOrigin')"
+        }
+    }
 }

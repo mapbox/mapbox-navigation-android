@@ -15,7 +15,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
  * @param options to build the [MapboxDistanceFormatter]
  */
 class MapboxDistanceFormatter(
-    val options: DistanceFormatterOptions
+    val options: DistanceFormatterOptions,
 ) : DistanceFormatter {
 
     /**
@@ -31,7 +31,7 @@ class MapboxDistanceFormatter(
             options.roundingIncrement,
             options.unitType,
             options.applicationContext,
-            options.locale
+            options.locale,
         ).run {
             getSpannableDistanceString(Pair(this.distanceAsString, this.distanceSuffix))
         }
@@ -46,7 +46,7 @@ class MapboxDistanceFormatter(
      * @return [SpannableString] with bolded distance and shrunken units
      */
     internal fun getSpannableDistanceString(
-        distanceAndSuffix: Pair<String, String>
+        distanceAndSuffix: Pair<String, String>,
     ): SpannableString {
         val spannableString =
             SpannableString("${distanceAndSuffix.first} ${distanceAndSuffix.second}")
@@ -55,13 +55,13 @@ class MapboxDistanceFormatter(
             StyleSpan(Typeface.BOLD),
             0,
             distanceAndSuffix.first.length,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
         )
         spannableString.setSpan(
             RelativeSizeSpan(0.75f),
             distanceAndSuffix.first.length + 1,
             spannableString.length,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
         )
 
         return spannableString

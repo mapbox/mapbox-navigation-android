@@ -49,9 +49,9 @@ class RoutesPreviewControllerTest {
                 uuid = "test",
                 routes = listOf(
                     createDirectionsRoute(),
-                    createDirectionsRoute()
-                )
-            )
+                    createDirectionsRoute(),
+                ),
+            ),
         )
         routesPreviewController.previewNavigationRoutes(testRoutes) {
             completed = true
@@ -98,9 +98,9 @@ class RoutesPreviewControllerTest {
                 uuid = "test",
                 routes = listOf(
                     createDirectionsRoute(),
-                    createDirectionsRoute()
-                )
-            )
+                    createDirectionsRoute(),
+                ),
+            ),
         )
         routesPreviewController.previewNavigationRoutes(testRoutes, primaryRouteIndex = 1)
 
@@ -145,7 +145,7 @@ class RoutesPreviewControllerTest {
 
         assertEquals(
             2, // one for set and one for cleanup
-            eventCount
+            eventCount,
         )
     }
 
@@ -161,14 +161,14 @@ class RoutesPreviewControllerTest {
                 uuid = "test",
                 routes = listOf(
                     createDirectionsRoute(),
-                    createDirectionsRoute()
-                )
-            )
+                    createDirectionsRoute(),
+                ),
+            ),
         )
         routesPreviewController.previewNavigationRoutes(testRoutes)
 
         routesPreviewController.changeRoutesPreviewPrimaryRoute(
-            previewUpdate!!.routesPreview!!.alternativesMetadata.first().navigationRoute
+            previewUpdate!!.routesPreview!!.alternativesMetadata.first().navigationRoute,
         )
 
         val result = previewUpdate!!.routesPreview
@@ -180,9 +180,9 @@ class RoutesPreviewControllerTest {
         assertEquals(
             listOf(
                 testRoutes[1],
-                testRoutes[0]
+                testRoutes[0],
             ),
-            result.routesList
+            result.routesList,
         )
         assertEquals(1, result.primaryRouteIndex)
     }
@@ -196,8 +196,8 @@ class RoutesPreviewControllerTest {
                     createDirectionsRoute(),
                     createDirectionsRoute(),
                     createDirectionsRoute(),
-                )
-            )
+                ),
+            ),
         )
         val waitHandle = CompletableDeferred<Unit>()
         val routesPreviewController = createRoutePreviewController(
@@ -206,7 +206,7 @@ class RoutesPreviewControllerTest {
                     waitHandle.await()
                 }
                 RouteDataParserStub().parse(it)
-            }
+            },
         )
         val previewedRoutesIds = mutableListOf<List<String>?>()
         routesPreviewController.registerRoutesPreviewObserver {
@@ -222,9 +222,9 @@ class RoutesPreviewControllerTest {
             listOf(
                 listOf("test#0", "test#1", "test#2"),
                 listOf("test#1", "test#0", "test#2"),
-                listOf("test#2", "test#0", "test#1")
+                listOf("test#2", "test#0", "test#1"),
             ),
-            previewedRoutesIds
+            previewedRoutesIds,
         )
     }
 
@@ -237,14 +237,14 @@ class RoutesPreviewControllerTest {
                     uuid = "test",
                     routes = listOf(
                         createDirectionsRoute(),
-                        createDirectionsRoute()
-                    )
-                )
-            )
+                        createDirectionsRoute(),
+                    ),
+                ),
+            ),
         )
 
         routesPreviewController.changeRoutesPreviewPrimaryRoute(
-            createNavigationRoutes().first()
+            createNavigationRoutes().first(),
         )
     }
 
@@ -253,7 +253,7 @@ class RoutesPreviewControllerTest {
         val routesPreviewController = createRoutePreviewController()
 
         routesPreviewController.changeRoutesPreviewPrimaryRoute(
-            createNavigationRoutes().first()
+            createNavigationRoutes().first(),
         )
     }
 
@@ -267,13 +267,13 @@ class RoutesPreviewControllerTest {
         routesPreviewController.unregisterRoutesPreviewObserver(observer)
         routesPreviewController.previewNavigationRoutes(
             createNavigationRoutes(
-                createDirectionsResponse(uuid = "test1")
-            )
+                createDirectionsResponse(uuid = "test1"),
+            ),
         )
         routesPreviewController.previewNavigationRoutes(
             createNavigationRoutes(
-                createDirectionsResponse(uuid = "test2")
-            )
+                createDirectionsResponse(uuid = "test2"),
+            ),
         )
 
         assertEquals(0, eventsCount)
@@ -293,13 +293,13 @@ class RoutesPreviewControllerTest {
         routesPreviewController.unregisterAllRoutesPreviewObservers()
         routesPreviewController.previewNavigationRoutes(
             createNavigationRoutes(
-                createDirectionsResponse(uuid = "test1")
-            )
+                createDirectionsResponse(uuid = "test1"),
+            ),
         )
         routesPreviewController.previewNavigationRoutes(
             createNavigationRoutes(
-                createDirectionsResponse(uuid = "test2")
-            )
+                createDirectionsResponse(uuid = "test2"),
+            ),
         )
 
         assertEquals(0, eventsCount)
@@ -317,9 +317,9 @@ class RoutesPreviewControllerTest {
                 uuid = "test",
                 routes = listOf(
                     createDirectionsRoute(),
-                    createDirectionsRoute()
-                )
-            )
+                    createDirectionsRoute(),
+                ),
+            ),
         )
         routesPreviewController.previewNavigationRoutes(testRoutes)
 
@@ -348,11 +348,11 @@ class RoutesPreviewControllerTest {
                         return mutableListOf(
                             mockk(relaxed = true) {
                                 every { route } returns testRoutes[1].nativeRoute()
-                            }
+                            },
                         )
                     }
                 }
-            }
+            },
         )
 
         routesPreviewController.previewNavigationRoutes(testRoutes)
@@ -362,7 +362,7 @@ class RoutesPreviewControllerTest {
         routesPreview!!
         assertEquals(
             listOf("valid#0"),
-            routesPreview.alternativesMetadata.map { it.navigationRoute.id }
+            routesPreview.alternativesMetadata.map { it.navigationRoute.id },
         )
         assertEquals(testRoutes, routesPreview.routesList)
         assertEquals(testRoutes, routesPreview.originalRoutesList)
@@ -377,9 +377,9 @@ class RoutesPreviewControllerTest {
                 uuid = "fast",
                 routes = listOf(
                     createDirectionsRoute(),
-                    createDirectionsRoute()
-                )
-            )
+                    createDirectionsRoute(),
+                ),
+            ),
         )
         val routesPreviewController = createRoutePreviewController(
             routesDataParser = {
@@ -387,7 +387,7 @@ class RoutesPreviewControllerTest {
                     slowWaitHandle.await()
                 }
                 RouteDataParserStub().parse(it)
-            }
+            },
         )
         val previewedRoutes = mutableListOf<List<String>?>()
         routesPreviewController.registerRoutesPreviewObserver {
@@ -403,9 +403,9 @@ class RoutesPreviewControllerTest {
             listOf(
                 listOf("slow#0"),
                 listOf("fast#0", "fast#1"),
-                null
+                null,
             ),
-            previewedRoutes
+            previewedRoutes,
         )
     }
 
@@ -416,9 +416,9 @@ class RoutesPreviewControllerTest {
                 uuid = "slow",
                 routes = listOf(
                     createDirectionsRoute(),
-                    createDirectionsRoute()
-                )
-            )
+                    createDirectionsRoute(),
+                ),
+            ),
         )
         val slowWaitHandle = CompletableDeferred<Unit>()
         val fast = createNavigationRoutes(
@@ -426,9 +426,9 @@ class RoutesPreviewControllerTest {
                 uuid = "fast",
                 routes = listOf(
                     createDirectionsRoute(),
-                    createDirectionsRoute()
-                )
-            )
+                    createDirectionsRoute(),
+                ),
+            ),
         )
         val routesPreviewController = createRoutePreviewController(
             routesDataParser = {
@@ -436,7 +436,7 @@ class RoutesPreviewControllerTest {
                     slowWaitHandle.await()
                 }
                 RouteDataParserStub().parse(it)
-            }
+            },
         )
         val previewedRoutes = mutableListOf<List<String>?>()
         routesPreviewController.registerRoutesPreviewObserver {
@@ -455,7 +455,7 @@ class RoutesPreviewControllerTest {
                 listOf("slow#0", "slow#1"),
                 listOf("fast#1", "fast#0"),
             ),
-            previewedRoutes
+            previewedRoutes,
         )
     }
 }

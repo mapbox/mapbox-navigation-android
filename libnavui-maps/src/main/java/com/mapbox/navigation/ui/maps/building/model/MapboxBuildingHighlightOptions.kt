@@ -11,7 +11,7 @@ import androidx.annotation.ColorInt
  */
 class MapboxBuildingHighlightOptions private constructor(
     val fillExtrusionColor: Int,
-    val fillExtrusionOpacity: Double
+    val fillExtrusionOpacity: Double,
 ) {
 
     /**
@@ -84,7 +84,7 @@ class MapboxBuildingHighlightOptions private constructor(
         fun build(): MapboxBuildingHighlightOptions {
             return MapboxBuildingHighlightOptions(
                 fillExtrusionColor = fillExtrusionColor,
-                fillExtrusionOpacity = fillExtrusionOpacity
+                fillExtrusionOpacity = fillExtrusionOpacity,
             )
         }
     }

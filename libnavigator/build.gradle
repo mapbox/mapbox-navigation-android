@@ -2,6 +2,10 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.jaredsburrows.license'
 apply from: "../gradle/ktlint.gradle"
+apply from: file("../gradle/artifact-settings.gradle")
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -48,6 +52,8 @@ dependencies {
     implementation dependenciesList.coroutinesCore
 
     testImplementation(project(':libtesting-utils'))
+    testImplementation project(':libtesting-navigation-util')
+
     apply from: "../gradle/unit-testing-dependencies.gradle"
     // instrumentation tests
     androidTestImplementation project(':libtesting-ui')

@@ -14,7 +14,7 @@ interface NavigationCameraStateTransition {
      */
     fun transitionToFollowing(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet
 
     /**
@@ -22,7 +22,7 @@ interface NavigationCameraStateTransition {
      */
     fun transitionToOverview(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet
 
     /**
@@ -30,7 +30,7 @@ interface NavigationCameraStateTransition {
      */
     fun updateFrameForFollowing(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet
 
     /**
@@ -38,6 +38,6 @@ interface NavigationCameraStateTransition {
      */
     fun updateFrameForOverview(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet
 }

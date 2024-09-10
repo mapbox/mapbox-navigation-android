@@ -1,6 +1,6 @@
 package com.mapbox.navigation.utils.internal
 
-import android.location.Location
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 
 fun Location.toPoint(): Point {

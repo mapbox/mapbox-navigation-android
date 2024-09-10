@@ -3,7 +3,9 @@ package com.mapbox.navigation.ui.maps.route.arrow.model
 import android.content.Context
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.model.FadingConfig
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -11,9 +13,11 @@ import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteArrowOptionsTest {
 
     private val ctx: Context = mockk()
@@ -69,6 +73,13 @@ class RouteArrowOptionsTest {
         val options = RouteArrowOptions.Builder(ctx).withAboveLayerId("someLayerId").build()
 
         assertEquals("someLayerId", options.aboveLayerId)
+    }
+
+    @Test
+    fun withSlotNameTest() {
+        val options = RouteArrowOptions.Builder(ctx).withSlotName("someSlotName").build()
+
+        assertEquals("someSlotName", options.slotName)
     }
 
     @Test
@@ -203,11 +214,51 @@ class RouteArrowOptionsTest {
     }
 
     @Test
+    fun defaultFadeOnHighZoomsConfig() {
+        val options = RouteArrowOptions.Builder(ctx).build()
+
+        assertNull(options.fadeOnHighZoomsConfig)
+    }
+
+    @Test
+    fun fadeOnHighZoomsConfigStartISLessThanFinish() {
+        val config = FadingConfig.Builder(16.0, 16.1).build()
+
+        val options = RouteArrowOptions.Builder(ctx).withFadeOnHighZoomsConfig(config).build()
+
+        assertEquals(config, options.fadeOnHighZoomsConfig)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun fadeOnHighZoomsConfigStartIsGreaterThanFinish() {
+        val config = FadingConfig.Builder(16.1, 16.0).build()
+
+        RouteArrowOptions.Builder(ctx).withFadeOnHighZoomsConfig(config).build()
+    }
+
+    @Test
+    fun fadeOnHighZoomsConfigStartIsEqualToFinish() {
+        val config = FadingConfig.Builder(16.0, 16.0).build()
+
+        val options = RouteArrowOptions.Builder(ctx).withFadeOnHighZoomsConfig(config).build()
+
+        assertEquals(config, options.fadeOnHighZoomsConfig)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun fadeOnHighZoomsConfigStartIsLessThan14() {
+        val config = FadingConfig.Builder(13.9, 14.1).build()
+
+        RouteArrowOptions.Builder(ctx).withFadeOnHighZoomsConfig(config).build()
+    }
+
+    @Test
     fun toBuilder() {
         val shaftExpression = mockk<Expression>()
         val shaftCasingExpression = mockk<Expression>()
         val headExpression = mockk<Expression>()
         val headCasingExpression = mockk<Expression>()
+        val fadingConfig = FadingConfig.Builder(16.0, 16.1).build()
 
         val options = RouteArrowOptions.Builder(ctx)
             .withArrowColor(1)
@@ -220,6 +271,7 @@ class RouteArrowOptionsTest {
             .withArrowShaftCasingScalingExpression(shaftCasingExpression)
             .withArrowheadScalingExpression(headExpression)
             .withArrowheadCasingScalingExpression(headCasingExpression)
+            .withFadeOnHighZoomsConfig(fadingConfig)
             .build()
             .toBuilder(ctx)
             .build()
@@ -234,5 +286,6 @@ class RouteArrowOptionsTest {
         assertEquals(shaftCasingExpression, options.arrowShaftCasingScaleExpression)
         assertEquals(headExpression, options.arrowHeadScaleExpression)
         assertEquals(headCasingExpression, options.arrowHeadCasingScaleExpression)
+        assertEquals(fadingConfig, options.fadeOnHighZoomsConfig)
     }
 }

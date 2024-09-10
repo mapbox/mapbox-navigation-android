@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.ExpectedFactory.createValue
@@ -10,11 +11,14 @@ import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
+import com.mapbox.navigation.base.internal.utils.toByteArray
+import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Date
 
@@ -128,7 +132,7 @@ class SignboardProcessorTest {
         val action = SignboardAction.ProcessSignboardResponse(response)
         val expected = SignboardResult.SignboardSvg.Failure(
             "Your token cannot access this " +
-                "resource, contact support"
+                "resource, contact support",
         )
 
         val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Failure
@@ -174,18 +178,20 @@ class SignboardProcessorTest {
             status = ResourceLoadStatus.AVAILABLE,
         )
         val response: Expected<ResourceLoadError, ResourceLoadResult> = createValue(loadResult)
-        val expected = SignboardResult.SignboardSvg.Success(blob)
+        val expected = SignboardResult.SignboardSvg.Success(blob.toDataRef())
         val action = SignboardAction.ProcessSignboardResponse(response)
 
         val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Success
 
-        assertEquals(expected.data, result.data)
+        val expectedBytes = expected.data.toByteArray()
+        val actualBytes = result.data.toByteArray()
+        assertTrue(expectedBytes.contentEquals(actualBytes))
     }
 
     @Test
     fun `process action signboard process bytearray to bitmap failure`() {
         val mockParser = mockk<SvgToBitmapParser>()
-        val mockData = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11)
+        val mockData = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11).toDataRef()
         val mockOptions = mockk<MapboxSignboardOptions>()
         val action = SignboardAction.ParseSvgToBitmap(mockData, mockParser, mockOptions)
         every {
@@ -224,7 +230,7 @@ class SignboardProcessorTest {
     }
 
     private fun resourceData(blob: ByteArray) = object : ResourceData(0) {
-        override fun getData(): ByteArray = blob
+        override fun getData(): DataRef = blob.toDataRef()
     }
 
     private fun resourceLoadResult(
@@ -235,7 +241,9 @@ class SignboardProcessorTest {
         expires: Date = Date(),
         totalBytes: Long = 0,
         transferredBytes: Long = 0,
-        contentType: String = "image/png"
+        contentType: String = "image/png",
+        etag: String = "",
+        belongsToGroup: Boolean = false,
     ): ResourceLoadResult {
         return ResourceLoadResult(
             data,
@@ -245,7 +253,9 @@ class SignboardProcessorTest {
             expires,
             totalBytes,
             transferredBytes,
-            contentType
+            contentType,
+            etag,
+            belongsToGroup,
         )
     }
 }

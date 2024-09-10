@@ -11,7 +11,7 @@ import kotlin.math.hypot
  */
 class ConstantVelocityInterpolator(
     startPoint: Point,
-    keyPoints: Array<Point>
+    keyPoints: Array<Point>,
 ) : TimeInterpolator {
 
     private val innerInterpolator: TimeInterpolator

@@ -4,13 +4,13 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class AdasisConfigTest : BuilderTest<AdasisConfig, AdasisConfig.Builder>() {
+internal class AdasisConfigTest : BuilderTest<AdasisConfig, AdasisConfig.Builder>() {
 
     override fun getImplementationClass() = AdasisConfig::class
 
     override fun getFilledUpBuilder(): AdasisConfig.Builder {
         val dataSending = AdasisDataSendingConfig.Builder(
-            AdasisMessageBinaryFormat.AdasisV2BigEndian
+            AdasisMessageBinaryFormat.AdasisV2BigEndian,
         )
             .messageIntervalMs(100)
             .messagesInPackage(200)
@@ -27,16 +27,16 @@ class AdasisConfigTest : BuilderTest<AdasisConfig, AdasisConfig.Builder>() {
 
         val pathOptions = AdasisConfigPathOptions.Builder()
             .stubOptions(
-                AdasisStubOptions.Builder().options(messageOptions).build()
+                AdasisStubOptions.Builder().options(messageOptions).build(),
             )
             .segmentOptions(
-                AdasisSegmentOptions.Builder().options(messageOptions).build()
+                AdasisSegmentOptions.Builder().options(messageOptions).build(),
             )
             .profileShortOptions(
-                AdasisProfileShortOptions.Builder().options(messageOptions).build()
+                AdasisProfileShortOptions.Builder().options(messageOptions).build(),
             )
             .profileLongOptions(
-                AdasisProfileLongOptions.Builder().options(messageOptions).build()
+                AdasisProfileLongOptions.Builder().options(messageOptions).build(),
             )
             .build()
 

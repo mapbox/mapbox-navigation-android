@@ -38,7 +38,7 @@ internal object ViewportDataSourceProcessor {
         distanceToCoalesceCompoundManeuvers: Double,
         distanceToFrameAfterManeuver: Double,
         route: DirectionsRoute,
-        completeRoutePoints: List<List<List<Point>>>
+        completeRoutePoints: List<List<List<Point>>>,
     ): List<List<List<Point>>> {
         if (!enabled) {
             return emptyList()
@@ -52,7 +52,7 @@ internal object ViewportDataSourceProcessor {
                 if (legSteps.size != stepsPoints.size) {
                     logE(
                         "Unable to calculate geometry after maneuvers. Invalid route.",
-                        LOG_CATEGORY
+                        LOG_CATEGORY,
                     )
                     return emptyList()
                 }
@@ -74,7 +74,7 @@ internal object ViewportDataSourceProcessor {
                         LineString.fromLngLats(stepsPoints[lastCompoundStepIndex + 1]),
                         0.0,
                         distanceToFrameAfterManeuver,
-                        TurfConstants.UNIT_METERS
+                        TurfConstants.UNIT_METERS,
                     ).coordinates()
                 }
                 compoundManeuverGeometryPoints + defaultGeometryPointsAfterManeuver
@@ -90,7 +90,7 @@ internal object ViewportDataSourceProcessor {
         enabled: Boolean,
         minimumMetersForIntersectionDensity: Double,
         route: DirectionsRoute,
-        completeRoutePoints: List<List<List<Point>>>
+        completeRoutePoints: List<List<List<Point>>>,
     ): List<List<Double>> {
         if (!enabled) {
             return emptyList()
@@ -125,7 +125,7 @@ internal object ViewportDataSourceProcessor {
     fun simplifyCompleteRoutePoints(
         enabled: Boolean,
         simplificationFactor: Int,
-        completeRoutePoints: List<List<List<Point>>>
+        completeRoutePoints: List<List<List<Point>>>,
     ): List<List<List<Point>>> {
         if (!enabled) {
             return completeRoutePoints
@@ -134,7 +134,7 @@ internal object ViewportDataSourceProcessor {
         if (simplificationFactor <= 0) {
             logE(
                 "overview simplification factor should be a positive integer",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             return completeRoutePoints
         }
@@ -154,7 +154,7 @@ internal object ViewportDataSourceProcessor {
      */
     fun slicePointsAtAngle(
         points: List<Point>,
-        maxAngleDifference: Double
+        maxAngleDifference: Double,
     ): List<Point> {
         if (points.size < 2) return points
         val outputCoordinates: MutableList<Point> = emptyList<Point>().toMutableList()
@@ -187,7 +187,7 @@ internal object ViewportDataSourceProcessor {
      */
     fun getPitchFallbackFromRouteProgress(
         routeProgress: RouteProgress,
-        followingFrameOptions: FollowingFrameOptions
+        followingFrameOptions: FollowingFrameOptions,
     ): Double {
         val currentStepProgress = routeProgress.currentLegProgress?.currentStepProgress
         val upcomingManeuverType = routeProgress.bannerInstructions?.primary()?.type()
@@ -215,7 +215,7 @@ internal object ViewportDataSourceProcessor {
         simplifiedCompleteRoutePoints: List<List<List<Point>>>,
         pointsToFrameOnCurrentStep: List<Point>,
         currentLegProgress: RouteLegProgress,
-        currentStepProgress: RouteStepProgress
+        currentStepProgress: RouteStepProgress,
     ): List<Point> {
         val currentLegPoints = if (simplifiedCompleteRoutePoints.isNotEmpty()) {
             simplifiedCompleteRoutePoints[currentLegProgress.legIndex]
@@ -225,7 +225,7 @@ internal object ViewportDataSourceProcessor {
         val remainingStepsAfterCurrentStep =
             if (currentStepProgress.stepIndex < currentLegPoints.size) {
                 currentLegPoints.slice(
-                    currentStepProgress.stepIndex + 1 until currentLegPoints.size - 1
+                    currentStepProgress.stepIndex + 1 until currentLegPoints.size - 1,
                 )
             } else {
                 emptyList()
@@ -233,7 +233,7 @@ internal object ViewportDataSourceProcessor {
         val remainingPointsAfterCurrentStep = remainingStepsAfterCurrentStep.flatten()
         return listOf(
             pointsToFrameOnCurrentStep,
-            remainingPointsAfterCurrentStep
+            remainingPointsAfterCurrentStep,
         ).flatten()
     }
 
@@ -245,7 +245,7 @@ internal object ViewportDataSourceProcessor {
     fun getMapAnchoredPaddingFromUserPadding(
         mapSize: Size,
         padding: EdgeInsets,
-        focalPoint: FollowingFrameOptions.FocalPoint
+        focalPoint: FollowingFrameOptions.FocalPoint,
     ): EdgeInsets {
         val verticalRange = 0f..mapSize.height
         val horizontalRange = 0f..mapSize.width
@@ -265,36 +265,37 @@ internal object ViewportDataSourceProcessor {
                         |padding: $padding
                         |Using an empty fallback padding instead: $padding
                     """.trimMargin(),
-                    LOG_CATEGORY
+                    LOG_CATEGORY,
                 )
                 return fallbackPadding
             }
         }
 
-        val (fx, fy) = focalPoint
-        val anchorPointX = (mapSize.width - padding.left - padding.right) * fx + padding.left
-        val anchorPointY = (mapSize.height - padding.top - padding.bottom) * fy + padding.top
+        val anchorPointX =
+            (mapSize.width - padding.left - padding.right) * focalPoint.x + padding.left
+        val anchorPointY =
+            (mapSize.height - padding.top - padding.bottom) * focalPoint.y + padding.top
 
         return EdgeInsets(
             anchorPointY,
             anchorPointX,
             mapSize.height - anchorPointY,
-            mapSize.width - anchorPointX
+            mapSize.width - anchorPointX,
         )
     }
 
     fun getScreenBoxForFraming(mapSize: Size, padding: EdgeInsets): ScreenBox {
         val topLeft = ScreenCoordinate(
             padding.left,
-            padding.top
+            padding.top,
         )
         val bottomRight = ScreenCoordinate(
             mapSize.width - padding.right,
-            mapSize.height - padding.bottom
+            mapSize.height - padding.bottom,
         )
         return ScreenBox(
             topLeft,
-            bottomRight
+            bottomRight,
         )
     }
 
@@ -306,7 +307,7 @@ internal object ViewportDataSourceProcessor {
         bearingDiffMax: Double,
         currentMapCameraBearing: Double,
         vehicleBearing: Double,
-        pointsForBearing: List<Point>
+        pointsForBearing: List<Point>,
     ): Double {
         if (!enabled) {
             return vehicleBearing

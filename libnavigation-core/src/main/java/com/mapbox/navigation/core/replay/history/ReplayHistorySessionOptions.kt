@@ -14,7 +14,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 class ReplayHistorySessionOptions private constructor(
     val filePath: String?,
     val replayHistoryMapper: ReplayHistoryMapper,
-    val enableSetRoute: Boolean
+    val enableSetRoute: Boolean,
 ) {
     /**
      * @return the builder that created the [ReplayHistorySessionOptions]
@@ -94,7 +94,7 @@ class ReplayHistorySessionOptions private constructor(
          * @param filePath absolute path to the history file.
          * @return [Builder]
          */
-        fun filePath(filePath: String?) = apply {
+        fun filePath(filePath: String?): Builder = apply {
             this.filePath = filePath
         }
 

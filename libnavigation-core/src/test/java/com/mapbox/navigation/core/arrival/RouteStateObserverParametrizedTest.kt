@@ -20,7 +20,7 @@ class RouteStateObserverParametrizedTest(
     private val routeProgressState: RouteProgressState,
     private val isStale: Boolean,
     private val nextLegStart: Boolean,
-    private val finalDestinationArrival: Boolean
+    private val finalDestinationArrival: Boolean,
 ) {
 
     companion object {
@@ -32,38 +32,38 @@ class RouteStateObserverParametrizedTest(
                 /*routeProgressState*/ RouteProgressState.UNCERTAIN,
                 /*isStale*/ false,
                 /*nextLegStart*/ false,
-                /*finalDestinationArrival*/ false
+                /*finalDestinationArrival*/ false,
             ),
             arrayOf(
                 /*routeProgressState*/ RouteProgressState.OFF_ROUTE,
                 /*isStale*/ false,
                 /*nextLegStart*/ false,
-                /*finalDestinationArrival*/ false
+                /*finalDestinationArrival*/ false,
             ),
             arrayOf(
                 /*routeProgressState*/ RouteProgressState.INITIALIZED,
                 /*isStale*/ false,
                 /*nextLegStart*/ false,
-                /*finalDestinationArrival*/ false
+                /*finalDestinationArrival*/ false,
             ),
             arrayOf(
                 /*routeProgressState*/ RouteProgressState.COMPLETE,
                 /*isStale*/ true,
                 /*nextLegStart*/ false,
-                /*finalDestinationArrival*/ false
+                /*finalDestinationArrival*/ false,
             ),
             arrayOf(
                 /*routeProgressState*/ RouteProgressState.COMPLETE,
                 /*isStale*/ false,
                 /*nextLegStart*/ true,
-                /*finalDestinationArrival*/ true
+                /*finalDestinationArrival*/ true,
             ),
             arrayOf(
                 /*routeProgressState*/ RouteProgressState.TRACKING,
                 /*isStale*/ false,
                 /*nextLegStart*/ false,
-                /*finalDestinationArrival*/ false
-            )
+                /*finalDestinationArrival*/ false,
+            ),
         )
     }
 
@@ -105,7 +105,7 @@ class RouteStateObserverParametrizedTest(
                     every { durationRemaining } returns 2.0
                     every { distanceRemaining } returns 8.0f
                 }
-            }
+            },
         )
 
         Assert.assertEquals(nextLegStart, onNextRouteLegStartCalls.isCaptured)
@@ -141,7 +141,7 @@ class RouteStateObserverParametrizedTest(
                     every { durationRemaining } returns 2.0
                     every { distanceRemaining } returns 8.0f
                 }
-            }
+            },
         )
 
         Assert.assertFalse(onNextRouteLegStartCalls.isCaptured)
@@ -154,13 +154,13 @@ class RouteStateObserverParametrizedTest(
                 Point.fromLngLat(-122.444359, 37.736351),
                 Point.fromLngLat(-122.444481, 37.735916),
                 Point.fromLngLat(-122.444275, 37.735595),
-                Point.fromLngLat(-122.444375, 37.736141)
+                Point.fromLngLat(-122.444375, 37.736141),
             )
         }
         every { legs() } returns listOf(
             mockk(),
             mockk(),
-            mockk() // This route has three legs
+            mockk(), // This route has three legs
         )
     }
 }

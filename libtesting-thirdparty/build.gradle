@@ -1,5 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply from: file("../gradle/testing-module-settings.gradle")
+
+group = project.ext.mapboxArtifactGroupId
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -21,4 +24,5 @@ dependencies {
     api dependenciesList.mapboxNavigator
     api dependenciesList.mapboxSdkDirectionsModels
     implementation dependenciesList.mockk
+    implementation dependenciesList.androidxTestJunit
 }

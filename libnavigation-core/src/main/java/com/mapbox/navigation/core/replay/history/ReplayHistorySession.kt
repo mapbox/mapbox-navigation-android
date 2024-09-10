@@ -125,7 +125,7 @@ class ReplayHistorySession : MapboxNavigationObserver {
     }
 
     private inline fun <T, R> Flow<T>.mapDistinct(
-        crossinline transform: suspend (value: T) -> R
+        crossinline transform: suspend (value: T) -> R,
     ): Flow<R> = map(transform).distinctUntilChanged()
 
     private fun isLastEventPlayed(events: List<ReplayEventBase>): Boolean {

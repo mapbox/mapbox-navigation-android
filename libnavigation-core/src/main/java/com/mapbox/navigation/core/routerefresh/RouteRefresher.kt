@@ -3,14 +3,15 @@ package com.mapbox.navigation.core.routerefresh
 import android.util.Log
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.isExpired
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
-import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.core.RoutesRefreshData
 import com.mapbox.navigation.core.RoutesRefreshDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils.withTimeoutOrDefault
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
@@ -63,7 +64,7 @@ internal class RouteRefresher(
     @Throws(IllegalArgumentException::class)
     suspend fun refresh(
         routes: List<NavigationRoute>,
-        routeRefreshTimeout: Long
+        routeRefreshTimeout: Long,
     ): RoutesRefresherResult {
         val routesRefreshData = routesRefreshDataProvider.getRoutesRefreshData(routes)
         val refreshedRoutes = refreshRoutes(routesRefreshData, routeRefreshTimeout)
@@ -81,22 +82,22 @@ internal class RouteRefresher(
                         routes[index + 1]
                     },
                     pair.second,
-                    refreshedRoutes[index + 1].status
+                    refreshedRoutes[index + 1].status,
                 )
             }
         return RoutesRefresherResult(
             RouteRefresherResult(
                 primaryRoute,
                 routesRefreshData.primaryRouteProgressData,
-                refreshedRoutes.first().status
+                refreshedRoutes.first().status,
             ),
-            alternativeRoutesRefresherResultData
+            alternativeRoutesRefresherResultData,
         )
     }
 
     private suspend fun refreshRoutes(
         routesData: RoutesRefreshData,
-        timeout: Long
+        timeout: Long,
     ): List<RouteRefresherResult<RouteProgressData?>> {
         return coroutineScope {
             routesData.allRoutesRefreshData.map { routeData ->
@@ -105,7 +106,7 @@ internal class RouteRefresher(
                     val timeoutDefault = RouteRefresherResult(
                         routeData.first,
                         routeProgressData,
-                        RouteRefresherStatus.FAILURE
+                        RouteRefresherStatus.FAILURE,
                     )
                     withTimeoutOrDefault(timeout, timeoutDefault) {
                         if (routeProgressData != null) {
@@ -115,12 +116,12 @@ internal class RouteRefresher(
                             Log.w(
                                 RouteRefreshLog.LOG_CATEGORY,
                                 "Can't refresh route ${routeData.first.id}: " +
-                                    "no route progress data for it"
+                                    "no route progress data for it",
                             )
                             RouteRefresherResult<RouteProgressData?>(
                                 routeData.first,
                                 routeProgressData,
-                                RouteRefresherStatus.FAILURE
+                                RouteRefresherStatus.FAILURE,
                             )
                         }
                     }
@@ -137,14 +138,14 @@ internal class RouteRefresher(
         if (validationResult is RouteRefreshValidator.RouteValidationResult.Invalid) {
             logI(
                 "route ${route.id} can't be refreshed because ${validationResult.reason}",
-                RouteRefreshLog.LOG_CATEGORY
+                RouteRefreshLog.LOG_CATEGORY,
             )
             return RouteRefresherResult(route, routeProgressData, RouteRefresherStatus.INVALID)
         }
         if (route.isExpired()) {
             logI(
                 "route ${route.id} will not be refreshed because it is invalidated",
-                RouteRefreshLog.LOG_CATEGORY
+                RouteRefreshLog.LOG_CATEGORY,
             )
             return RouteRefresherResult(route, routeProgressData, RouteRefresherStatus.INVALIDATED)
         }
@@ -152,14 +153,14 @@ internal class RouteRefresher(
             routeProgressData.legIndex,
             routeProgressData.routeGeometryIndex,
             routeProgressData.legGeometryIndex,
-            evRefreshDataProvider.get(route.routeOptions)
+            evRefreshDataProvider.get(route.routeOptions),
         )
         return when (val result = requestRouteRefresh(route, routeRefreshRequestData)) {
             is RouteRefreshResult.Fail -> {
                 logE(
                     "Route refresh error: ${result.error.message} " +
                         "throwable=${result.error.throwable}",
-                    RouteRefreshLog.LOG_CATEGORY
+                    RouteRefreshLog.LOG_CATEGORY,
                 )
                 val status = if (result.error.refreshTtl == 0) {
                     RouteRefresherStatus.INVALIDATED
@@ -171,12 +172,12 @@ internal class RouteRefresher(
             is RouteRefreshResult.Success -> {
                 logI(
                     "Received refreshed route ${result.route.id}",
-                    RouteRefreshLog.LOG_CATEGORY
+                    RouteRefreshLog.LOG_CATEGORY,
                 )
                 logRoutesDiff(
                     newRoute = result.route,
                     oldRoute = route,
-                    currentLegIndex = routeRefreshRequestData.legIndex
+                    currentLegIndex = routeRefreshRequestData.legIndex,
                 )
                 RouteRefresherResult(result.route, routeProgressData, RouteRefresherStatus.SUCCESS)
             }
@@ -185,7 +186,7 @@ internal class RouteRefresher(
 
     private suspend fun requestRouteRefresh(
         route: NavigationRoute,
-        routeRefreshRequestData: RouteRefreshRequestData
+        routeRefreshRequestData: RouteRefreshRequestData,
     ): RouteRefreshResult =
         suspendCancellableCoroutine { continuation ->
             val requestId = routeRefresh.requestRouteRefresh(
@@ -199,12 +200,12 @@ internal class RouteRefresher(
                     override fun onFailure(error: NavigationRouterRefreshError) {
                         continuation.resume(RouteRefreshResult.Fail(error))
                     }
-                }
+                },
             )
             continuation.invokeOnCancellation {
                 logI(
                     "Route refresh for route ${route.id} was cancelled after timeout",
-                    RouteRefreshLog.LOG_CATEGORY
+                    RouteRefreshLog.LOG_CATEGORY,
                 )
                 routeRefresh.cancelRouteRefreshRequest(requestId)
             }
@@ -223,7 +224,7 @@ internal class RouteRefresher(
         if (routeDiffs.isEmpty()) {
             logI(
                 "No changes in annotations for route ${newRoute.id}",
-                RouteRefreshLog.LOG_CATEGORY
+                RouteRefreshLog.LOG_CATEGORY,
             )
         } else {
             for (diff in routeDiffs) {

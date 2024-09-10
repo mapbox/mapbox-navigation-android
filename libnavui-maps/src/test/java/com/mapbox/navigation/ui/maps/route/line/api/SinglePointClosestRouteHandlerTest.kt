@@ -2,10 +2,12 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
-import com.mapbox.maps.QueryFeaturesCallback
+import com.mapbox.maps.QueriedRenderedFeature
+import com.mapbox.maps.QueryRenderedFeaturesCallback
+import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenCoordinate
 import io.mockk.every
 import io.mockk.mockk
@@ -13,7 +15,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -62,7 +64,7 @@ class SinglePointClosestRouteHandlerTest {
     }
 
     @Test
-    fun handle_error() = runBlockingTest {
+    fun handle_error() = runTest {
         mockMapAnswer(ExpectedFactory.createError("some error"))
         every {
             ClosestRouteUtils.getIndexOfFirstFeature(any(), any())
@@ -75,8 +77,8 @@ class SinglePointClosestRouteHandlerTest {
     }
 
     @Test
-    fun handle_success_indexIsNotFound() = runBlockingTest {
-        val queriedFeatures = listOf<QueriedFeature>(mockk(), mockk())
+    fun handle_success_indexIsNotFound() = runTest {
+        val queriedFeatures = listOf<QueriedRenderedFeature>(mockk(), mockk())
         mockMapAnswer(ExpectedFactory.createValue(queriedFeatures))
         every {
             ClosestRouteUtils.getIndexOfFirstFeature(any(), any())
@@ -89,8 +91,8 @@ class SinglePointClosestRouteHandlerTest {
     }
 
     @Test
-    fun handle_success_indexIsFound() = runBlockingTest {
-        val queriedFeatures = listOf<QueriedFeature>(mockk(), mockk())
+    fun handle_success_indexIsFound() = runTest {
+        val queriedFeatures = listOf<QueriedRenderedFeature>(mockk(), mockk())
         mockMapAnswer(ExpectedFactory.createValue(queriedFeatures))
         every {
             ClosestRouteUtils.getIndexOfFirstFeature(queriedFeatures, features)
@@ -101,15 +103,16 @@ class SinglePointClosestRouteHandlerTest {
         assertEquals(index, result.value!!)
     }
 
-    private fun mockMapAnswer(result: Expected<String, List<QueriedFeature>>) {
+    private fun mockMapAnswer(result: Expected<String, List<QueriedRenderedFeature>>) {
         every {
             map.queryRenderedFeatures(
-                clickPoint,
-                match { it.layerIds == layerIds && it.filter == null },
-                any()
+                match { it.isScreenCoordinate && it.screenCoordinate == clickPoint },
+                match<RenderedQueryOptions> { it.layerIds == layerIds && it.filter == null },
+                any(),
             )
         } answers {
-            thirdArg<QueryFeaturesCallback>().run(result)
+            thirdArg<QueryRenderedFeaturesCallback>().run(result)
+            Cancelable {}
         }
     }
 }

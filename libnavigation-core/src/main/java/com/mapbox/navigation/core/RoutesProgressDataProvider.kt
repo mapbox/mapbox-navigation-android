@@ -44,7 +44,7 @@ internal class RoutesProgressDataProvider : RouteProgressObserver {
             it.key to RouteProgressData(
                 it.value.legIndex,
                 it.value.routeGeometryIndex,
-                it.value.legGeometryIndex
+                it.value.legGeometryIndex,
             )
         }
         routesProgressData = RoutesProgressData(primary, alternatives).also {

@@ -16,7 +16,6 @@ class RoadFactoryTest {
 
         val road = RoadFactory.buildRoadObject(status)
 
-        Assert.assertEquals("roadName1", road.name)
         Assert.assertEquals("roadName1", road.components[0].text)
         Assert.assertEquals("roadName2", road.components[1].text)
     }
@@ -27,7 +26,6 @@ class RoadFactoryTest {
 
         val road = RoadFactory.buildRoadObject(status)
 
-        Assert.assertEquals("legacyUrl1", road.shieldUrl)
         Assert.assertEquals("legacyUrl1", road.components[0].imageBaseUrl)
         Assert.assertEquals("designUrl", road.components[0].shield?.baseUrl())
     }
@@ -38,7 +36,6 @@ class RoadFactoryTest {
 
         val road = RoadFactory.buildRoadObject(status)
 
-        Assert.assertEquals("shieldName", road.shieldName)
         Assert.assertEquals("shieldName", road.components[0].shield?.name())
     }
 
@@ -52,15 +49,15 @@ class RoadFactoryTest {
                     "designUrl",
                     "displayRef",
                     "shieldName",
-                    "color"
-                )
+                    "color",
+                ),
             ),
             com.mapbox.navigator.RoadName(
                 "roadName2",
                 "en",
                 null,
-                null
-            )
+                null,
+            ),
         )
     }
 }

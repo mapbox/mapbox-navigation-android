@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.maps.location
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.location.Location
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
@@ -26,6 +26,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  * locationComponent = mapView.location.apply {
  *     setLocationProvider(navigationLocationProvider)
  *     addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
+ *     puckBearingEnabled = true
  *     enabled = true
  * }
  * ```
@@ -92,7 +93,7 @@ class NavigationLocationProvider : LocationProvider {
                     },
                     bearingTransitionOptions = {
                         this.duration = 0
-                    }
+                    },
                 )
             }
         }
@@ -126,14 +127,14 @@ class NavigationLocationProvider : LocationProvider {
         location: Location,
         keyPoints: List<Location> = emptyList(),
         latLngTransitionOptions: (ValueAnimator.() -> Unit)? = null,
-        bearingTransitionOptions: (ValueAnimator.() -> Unit)? = null
+        bearingTransitionOptions: (ValueAnimator.() -> Unit)? = null,
     ) {
         locationConsumers.forEach {
             it.notifyLocationUpdates(
                 location,
                 keyPoints,
                 latLngTransitionOptions,
-                bearingTransitionOptions
+                bearingTransitionOptions,
             )
         }
         lastLocation = location
@@ -144,7 +145,7 @@ class NavigationLocationProvider : LocationProvider {
         location: Location,
         keyPoints: List<Location>,
         latLngTransitionOptions: (ValueAnimator.() -> Unit)? = null,
-        bearingTransitionOptions: (ValueAnimator.() -> Unit)? = null
+        bearingTransitionOptions: (ValueAnimator.() -> Unit)? = null,
     ) {
         val latLngUpdates = if (keyPoints.isNotEmpty()) {
             keyPoints.map { Point.fromLngLat(it.longitude, it.latitude) }.toTypedArray()
@@ -152,21 +153,23 @@ class NavigationLocationProvider : LocationProvider {
             arrayOf(Point.fromLngLat(location.longitude, location.latitude))
         }
         val bearingUpdates = if (keyPoints.isNotEmpty()) {
-            keyPoints.map { it.bearing.toDouble() }.toDoubleArray()
+            keyPoints.map { it.bearing }
         } else {
-            doubleArrayOf(location.bearing.toDouble())
-        }
+            listOf(location.bearing)
+        }.filterNotNull().toDoubleArray()
 
         this.onLocationUpdated(
             location = latLngUpdates,
-            options = locationAnimatorOptions(latLngUpdates, latLngTransitionOptions)
+            options = locationAnimatorOptions(latLngUpdates, latLngTransitionOptions),
         )
-        this.onBearingUpdated(bearing = bearingUpdates, options = bearingTransitionOptions)
+        if (bearingUpdates.isNotEmpty()) {
+            this.onBearingUpdated(bearing = bearingUpdates, options = bearingTransitionOptions)
+        }
     }
 
     private fun locationAnimatorOptions(
         keyPoints: Array<Point>,
-        clientOptions: (ValueAnimator.() -> Unit)?
+        clientOptions: (ValueAnimator.() -> Unit)?,
     ): (ValueAnimator.() -> Unit) {
         val evaluator = PuckAnimationEvaluator(keyPoints)
         return {

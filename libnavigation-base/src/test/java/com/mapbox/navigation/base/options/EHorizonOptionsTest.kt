@@ -21,7 +21,7 @@ class EHorizonOptionsTest : BuilderTest<EHorizonOptions, EHorizonOptions.Builder
                 .collectTunnels(false)
                 .collectBridges(false)
                 .collectRestrictedAreas(true)
-                .build()
+                .build(),
         )
 
     @Test
@@ -57,7 +57,7 @@ class EHorizonOptionsTest : BuilderTest<EHorizonOptions, EHorizonOptions.Builder
     fun `when negative minTimeDeltaBetweenUpdates passed exception is thrown`() {
         expectedException.expect(IllegalArgumentException::class.java)
         expectedException.expectMessage(
-            "EHorizonOptions.minTimeDeltaBetweenUpdates can't be negative."
+            "EHorizonOptions.minTimeDeltaBetweenUpdates can't be negative.",
         )
 
         buildEHorizonOptions(minTimeDeltaBetweenUpdates = NEGATIVE_DOUBLE)

@@ -133,7 +133,7 @@ class SvgUtilTest {
         val mockSignboard = Bitmap.createBitmap(
             mockWidth,
             mockHeight,
-            Bitmap.Config.ARGB_8888
+            Bitmap.Config.ARGB_8888,
         )
 
         val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight, "")
@@ -194,14 +194,14 @@ class SvgUtilTest {
             val mockSignboard = Bitmap.createBitmap(
                 mockWidth,
                 mockHeight,
-                Bitmap.Config.ARGB_8888
+                Bitmap.Config.ARGB_8888,
             )
 
             val actual = SvgUtil.renderAsBitmapWithWidth(
                 mockStream,
                 mockWidth,
                 "",
-                mockResolver
+                mockResolver,
             )
 
             assertEquals(mockSignboard.height, actual.height)
@@ -220,7 +220,7 @@ class SvgUtilTest {
                 mockStream,
                 mockWidth,
                 "",
-                mockResolver
+                mockResolver,
             )
 
             assertNotNull(actual)
@@ -238,7 +238,7 @@ class SvgUtilTest {
                     mockStream,
                     mockWidth,
                     "",
-                    mockResolver
+                    mockResolver,
                 )
             }
         }
@@ -255,7 +255,7 @@ class SvgUtilTest {
                     mockStream,
                     mockWidth,
                     "",
-                    mockResolver
+                    mockResolver,
                 )
             }
         }
@@ -272,7 +272,7 @@ class SvgUtilTest {
                     mockStream,
                     mockWidth,
                     "",
-                    mockResolver
+                    mockResolver,
                 )
             }
         }

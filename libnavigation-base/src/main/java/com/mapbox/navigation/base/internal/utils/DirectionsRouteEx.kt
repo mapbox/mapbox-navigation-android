@@ -48,7 +48,7 @@ internal fun List<com.mapbox.navigator.Waypoint>.mapToSdk(): List<Waypoint> =
             internalType = nativeWaypoint.type.mapToSdk(),
             name = nativeWaypoint.name,
             target = nativeWaypoint.target,
-            metadata = nativeWaypoint.metadata?.parseMetadata()
+            metadata = nativeWaypoint.metadata?.parseMetadata(),
         )
     }
 

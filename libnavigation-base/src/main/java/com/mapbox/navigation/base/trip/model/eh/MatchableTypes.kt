@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.trip.model.eh
 
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.utils.safeCompareTo
 
 /**
  * The record represents a piece of data which is required to match one OpenLR.
@@ -16,11 +17,47 @@ import com.mapbox.geojson.Point
  * @param openLRLocation road object location
  * @param openLRStandard standard used to encode openLRLocation
  */
-data class MatchableOpenLr(
+class MatchableOpenLr(
     val roadObjectId: String,
     val openLRLocation: String,
-    @OpenLRStandard.Type val openLRStandard: String
-)
+    @OpenLRStandard.Type val openLRStandard: String,
+) {
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MatchableOpenLr
+
+        if (roadObjectId != other.roadObjectId) return false
+        if (openLRLocation != other.openLRLocation) return false
+        return openLRStandard == other.openLRStandard
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = roadObjectId.hashCode()
+        result = 31 * result + openLRLocation.hashCode()
+        result = 31 * result + openLRStandard.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "MatchableOpenLr(" +
+            "roadObjectId='$roadObjectId', " +
+            "openLRLocation='$openLRLocation', " +
+            "openLRStandard='$openLRStandard'" +
+            ")"
+    }
+}
 
 /**
  * The record represents the raw data which could be matched to the road graph.
@@ -39,10 +76,40 @@ data class MatchableOpenLr(
  * @param roadObjectId unique id of the object
  * @param coordinates list of points representing the geometry
  */
-data class MatchableGeometry(
+class MatchableGeometry(
     val roadObjectId: String,
-    val coordinates: List<Point>
-)
+    val coordinates: List<Point>,
+) {
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MatchableGeometry
+
+        if (roadObjectId != other.roadObjectId) return false
+        return coordinates == other.coordinates
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = roadObjectId.hashCode()
+        result = 31 * result + coordinates.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "MatchableGeometry(roadObjectId='$roadObjectId', coordinates=$coordinates)"
+    }
+}
 
 /**
  * The record represents a raw point which could be matched to the road graph.
@@ -59,8 +126,40 @@ data class MatchableGeometry(
  * @param bearing optional bearing in degrees from the North.
  * Describes the direction of riding for the edge where provided point is going to be matched.
  */
-data class MatchablePoint(
+class MatchablePoint(
     val roadObjectId: String,
     val point: Point,
-    val bearing: Double? = null
-)
+    val bearing: Double? = null,
+) {
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MatchablePoint
+
+        if (roadObjectId != other.roadObjectId) return false
+        if (point != other.point) return false
+        return bearing.safeCompareTo(other.bearing)
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = roadObjectId.hashCode()
+        result = 31 * result + point.hashCode()
+        result = 31 * result + (bearing?.hashCode() ?: 0)
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "MatchablePoint(roadObjectId='$roadObjectId', point=$point, bearing=$bearing)"
+    }
+}

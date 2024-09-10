@@ -26,10 +26,10 @@ internal object MapboxFollowingCameraFramingStrategy : FollowingCameraFramingStr
     override fun getPointsToFrameOnCurrentStep(
         routeProgress: RouteProgress,
         followingFrameOptions: FollowingFrameOptions,
-        averageIntersectionDistancesOnRoute: List<List<Double>>
+        averageIntersectionDistancesOnRoute: List<List<Double>>,
     ): List<Point> = ifNonNull(
         routeProgress.currentLegProgress,
-        routeProgress.currentLegProgress?.currentStepProgress
+        routeProgress.currentLegProgress?.currentStepProgress,
     ) { currentLegProgress, currentStepProgress ->
         followingFrameOptions.intersectionDensityCalculation.run {
             getPointsToFrameOnCurrentStep(
@@ -37,7 +37,7 @@ internal object MapboxFollowingCameraFramingStrategy : FollowingCameraFramingStr
                 intersectionDensityAverageDistanceMultiplier = averageDistanceMultiplier,
                 averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
                 currentLegProgress = currentLegProgress,
-                currentStepProgress = currentStepProgress
+                currentStepProgress = currentStepProgress,
             )
         }
     } ?: emptyList()
@@ -48,17 +48,17 @@ internal object MapboxFollowingCameraFramingStrategy : FollowingCameraFramingStr
     override fun getPointsToFrameAfterCurrentManeuver(
         routeProgress: RouteProgress,
         followingFrameOptions: FollowingFrameOptions,
-        postManeuverFramingPoints: List<List<List<Point>>>
+        postManeuverFramingPoints: List<List<List<Point>>>,
     ): List<Point> = ifNonNull(
         routeProgress.currentLegProgress,
-        routeProgress.currentLegProgress?.currentStepProgress
+        routeProgress.currentLegProgress?.currentStepProgress,
     ) { currentLegProgress, currentStepProgress ->
         followingFrameOptions.frameGeometryAfterManeuver.run {
             getPointsToFrameAfterCurrentManeuver(
                 frameGeometryAfterManeuverEnabled = enabled,
                 generatedPostManeuverFramingPoints = postManeuverFramingPoints,
                 currentLegProgress = currentLegProgress,
-                currentStepProgress = currentStepProgress
+                currentStepProgress = currentStepProgress,
             )
         }
     } ?: emptyList()
@@ -68,7 +68,7 @@ internal object MapboxFollowingCameraFramingStrategy : FollowingCameraFramingStr
         intersectionDensityAverageDistanceMultiplier: Double,
         averageIntersectionDistancesOnRoute: List<List<Double>>,
         currentLegProgress: RouteLegProgress,
-        currentStepProgress: RouteStepProgress
+        currentStepProgress: RouteStepProgress,
     ): List<Point> {
         var distanceTraveledOnStepKM =
             currentStepProgress.distanceTraveled.metersToKilometers().coerceAtLeast(0.0)
@@ -99,11 +99,11 @@ internal object MapboxFollowingCameraFramingStrategy : FollowingCameraFramingStr
                 LineString.fromLngLats(currentStepFullPoints),
                 distanceTraveledOnStepKM,
                 lookaheadDistanceForZoom,
-                TurfConstants.UNIT_KILOMETERS
+                TurfConstants.UNIT_KILOMETERS,
             ).coordinates()
             ViewportDataSourceProcessor.slicePointsAtAngle(
                 lineSliceCoordinatesForLookaheadDistance,
-                maxAngleDifferenceForGeometrySlicing
+                maxAngleDifferenceForGeometrySlicing,
             )
         } catch (e: TurfException) {
             logE(e.message.toString(), LOG_CATEGORY)
@@ -115,7 +115,7 @@ internal object MapboxFollowingCameraFramingStrategy : FollowingCameraFramingStr
         frameGeometryAfterManeuverEnabled: Boolean,
         generatedPostManeuverFramingPoints: List<List<List<Point>>>,
         currentLegProgress: RouteLegProgress,
-        currentStepProgress: RouteStepProgress
+        currentStepProgress: RouteStepProgress,
     ): List<Point> {
         return if (
             frameGeometryAfterManeuverEnabled &&

@@ -1,4 +1,4 @@
-apply from: "../gradle/dependencies.gradle"
+apply from: "$rootDir/gradle/dependencies.gradle"
 
 configurations {
     ktlint
@@ -24,5 +24,9 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
     main = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
+
+    //Fix https://github.com/pinterest/ktlint/issues/1391
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
+
     args "-F", "src/**/*.kt"
 }

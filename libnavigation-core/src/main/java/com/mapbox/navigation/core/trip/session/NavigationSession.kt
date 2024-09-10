@@ -42,19 +42,19 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
     private fun updateState() {
         state = NavigationSessionUtils.getNewNavigationSessionState(
             isDriving = isDriving,
-            hasRoutes = hasRoutes
+            hasRoutes = hasRoutes,
         )
     }
 
     internal fun registerNavigationSessionStateObserver(
-        navigationSessionStateObserver: NavigationSessionStateObserver
+        navigationSessionStateObserver: NavigationSessionStateObserver,
     ) {
         stateObservers.add(navigationSessionStateObserver)
         navigationSessionStateObserver.onNavigationSessionStateChanged(state)
     }
 
     internal fun unregisterNavigationSessionStateObserver(
-        navigationSessionStateObserver: NavigationSessionStateObserver
+        navigationSessionStateObserver: NavigationSessionStateObserver,
     ) {
         stateObservers.remove(navigationSessionStateObserver)
     }
@@ -112,14 +112,68 @@ sealed class NavigationSessionState {
     /**
      * Free Drive state
      */
-    data class FreeDrive internal constructor(
-        override val sessionId: String
-    ) : NavigationSessionState()
+    class FreeDrive internal constructor(
+        override val sessionId: String,
+    ) : NavigationSessionState() {
+
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as FreeDrive
+
+            return sessionId == other.sessionId
+        }
+
+        /**
+         * Returns a hash code value for the object.
+         */
+        override fun hashCode(): Int {
+            return sessionId.hashCode()
+        }
+
+        /**
+         * Returns a string representation of the object.
+         */
+        override fun toString(): String {
+            return "FreeDrive(sessionId='$sessionId')"
+        }
+    }
 
     /**
      * Active Guidance state
      */
-    data class ActiveGuidance internal constructor(
-        override val sessionId: String
-    ) : NavigationSessionState()
+    class ActiveGuidance internal constructor(
+        override val sessionId: String,
+    ) : NavigationSessionState() {
+
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as ActiveGuidance
+
+            return sessionId == other.sessionId
+        }
+
+        /**
+         * Returns a hash code value for the object.
+         */
+        override fun hashCode(): Int {
+            return sessionId.hashCode()
+        }
+
+        /**
+         * Returns a string representation of the object.
+         */
+        override fun toString(): String {
+            return "ActiveGuidance(sessionId='$sessionId')"
+        }
+    }
 }

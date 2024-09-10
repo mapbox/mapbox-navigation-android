@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 
 /**
@@ -10,15 +9,4 @@ import com.mapbox.navigation.base.route.NavigationRoute
  */
 class ClosestRouteValue internal constructor(
     val navigationRoute: NavigationRoute,
-) {
-    /**
-     * The route found.
-     */
-    @Deprecated(
-        "use #navigationRoute instead",
-        ReplaceWith(
-            "navigationRoute.directionsRoute"
-        )
-    )
-    val route: DirectionsRoute = navigationRoute.directionsRoute
-}
+)

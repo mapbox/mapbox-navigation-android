@@ -27,7 +27,7 @@ internal class RouteRefresherResultProcessor(
             if (currentTime >= lastRefreshTimeMillis + staleDataTimeoutMillis) {
                 lastRefreshTimeMillis = currentTime
                 val newRoutesResult = expiringDataRemover.removeExpiringDataFromRoutesProgressData(
-                    result
+                    result,
                 )
                 stateHolder.onClearedExpired()
                 if (result != newRoutesResult) {

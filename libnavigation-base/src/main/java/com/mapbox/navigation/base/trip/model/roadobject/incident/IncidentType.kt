@@ -89,7 +89,7 @@ object IncidentType {
         PLANNED_EVENT,
         ROAD_CLOSURE,
         ROAD_HAZARD,
-        WEATHER
+        WEATHER,
     )
     annotation class Type
 }

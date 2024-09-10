@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.history.model
 
-import android.location.Location
+import com.mapbox.common.location.Location
 
 /**
  * Represents raw locations captured by and saved in history files.
@@ -10,7 +10,7 @@ import android.location.Location
  */
 class HistoryEventUpdateLocation internal constructor(
     override val eventTimestamp: Double,
-    val location: Location
+    val location: Location,
 ) : HistoryEvent {
 
     /**

@@ -40,7 +40,7 @@ class ImmediateRouteRefreshControllerTest {
         stateHolder,
         coroutineRule.createTestScope(),
         listener,
-        attemptListener
+        attemptListener,
     )
 
     @Test(expected = IllegalArgumentException::class)
@@ -81,7 +81,7 @@ class ImmediateRouteRefreshControllerTest {
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
         verify(exactly = 1) {
             clientCallback(
-                match { (it as RoutesRefresherExecutorResult.Finished).value == result }
+                match { (it as RoutesRefresherExecutorResult.Finished).value == result },
             )
         }
         verify(exactly = 0) { stateHolder.onCancel() }
@@ -128,7 +128,7 @@ class ImmediateRouteRefreshControllerTest {
         verify(exactly = 1) {
             logger.logW(
                 "Route refresh on-demand error: request is skipped as a newer one is available",
-                "RouteRefreshController"
+                "RouteRefreshController",
             )
         }
     }

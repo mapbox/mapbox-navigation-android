@@ -1,20 +1,21 @@
 package com.mapbox.navigation.core.directions.session
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
-import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
-import com.mapbox.navigation.base.route.NavigationRouterRefreshError
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.NavigationComponentProvider
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.internal.router.GetRouteSignature
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
+import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.mapToReason
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
+import com.mapbox.navigation.testing.factories.createNavigationRoute
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
@@ -22,7 +23,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.slot
-import io.mockk.unmockkObject
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -34,8 +34,9 @@ class MapboxDirectionsSessionTest {
 
     private lateinit var session: MapboxDirectionsSession
 
-    private val router: NavigationRouterV2 = mockk(relaxUnitFun = true)
+    private val router: Router = mockk(relaxUnitFun = true)
     private val routeOptions: RouteOptions = MapboxJavaObjectsFactory.routeOptions()
+    private val signature = mockk<GetRouteSignature>()
     private val routerCallback: NavigationRouterCallback = mockk(relaxUnitFun = true)
     private val routesRefreshRequestCallback: NavigationRouterRefreshCallback =
         mockk(relaxUnitFun = true)
@@ -58,7 +59,7 @@ class MapboxDirectionsSessionTest {
 
         val routeListener = slot<NavigationRouterCallback>()
         val refreshListener = slot<NavigationRouterRefreshCallback>()
-        every { router.getRoute(routeOptions, capture(routeListener)) } answers {
+        every { router.getRoute(routeOptions, signature, capture(routeListener)) } answers {
             routeCallback = routeListener.captured
             routeRequestId
         }
@@ -68,7 +69,6 @@ class MapboxDirectionsSessionTest {
             refreshCallback = refreshListener.captured
             routeRefreshRequestId
         }
-        every { route.routeOptions } returns routeOptions
         mockkObject(NavigationComponentProvider)
         every { routerCallback.onRoutesReady(any(), any()) } answers {
             this.value
@@ -84,8 +84,8 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun `route response - success`() {
-        val mockOrigin = mockk<RouterOrigin>()
-        session.requestRoutes(routeOptions, routerCallback)
+        val mockOrigin = RouterOrigin.ONLINE
+        session.requestRoutes(routeOptions, signature, routerCallback)
         routeCallback.onRoutesReady(routes, mockOrigin)
 
         verify(exactly = 1) { routerCallback.onRoutesReady(routes, mockOrigin) }
@@ -95,14 +95,14 @@ class MapboxDirectionsSessionTest {
     fun `route request returns id`() {
         assertEquals(
             1L,
-            session.requestRoutes(routeOptions, routerCallback)
+            session.requestRoutes(routeOptions, signature, routerCallback),
         )
     }
 
     @Test
     fun `route response - failure`() {
         val reasons: List<RouterFailure> = listOf(mockk())
-        session.requestRoutes(routeOptions, routerCallback)
+        session.requestRoutes(routeOptions, signature, routerCallback)
         routeCallback.onFailure(reasons, routeOptions)
 
         verify(exactly = 1) {
@@ -112,8 +112,8 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun `route response - canceled`() {
-        val mockOrigin = mockk<RouterOrigin>()
-        session.requestRoutes(routeOptions, routerCallback)
+        val mockOrigin = RouterOrigin.ONLINE
+        session.requestRoutes(routeOptions, signature, routerCallback)
         routeCallback.onCanceled(routeOptions, mockOrigin)
 
         verify(exactly = 1) {
@@ -136,8 +136,8 @@ class MapboxDirectionsSessionTest {
             session.requestRouteRefresh(
                 route,
                 routeRefreshRequestData,
-                routesRefreshRequestCallback
-            )
+                routesRefreshRequestCallback,
+            ),
         )
     }
 
@@ -154,14 +154,15 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun getRouteOptions() {
+        val testRoute = createNavigationRoute()
         session.setNavigationRoutesFinished(
             DirectionsSessionRoutes(
-                routes,
+                listOf(testRoute),
                 emptyList(),
-                SetRoutes.NewRoutes(0)
-            )
+                SetRoutes.NewRoutes(0),
+            ),
         )
-        assertEquals(routeOptions, session.getPrimaryRouteOptions())
+        assertEquals(testRoute.routeOptions, session.getPrimaryRouteOptions())
     }
 
     @Test
@@ -174,13 +175,13 @@ class MapboxDirectionsSessionTest {
             SetRoutes.RefreshRoutes(
                 mockk {
                     every { legIndex } returns 4
-                }
+                },
             ) to 4,
         )
 
         cases.forEach { (setRoutes, expectedInitialLegIndex) ->
             session.setNavigationRoutesFinished(
-                DirectionsSessionRoutes(routes, emptyList(), setRoutes)
+                DirectionsSessionRoutes(routes, emptyList(), setRoutes),
             )
 
             assertEquals(expectedInitialLegIndex, session.initialLegIndex)
@@ -219,7 +220,7 @@ class MapboxDirectionsSessionTest {
 
         session.registerSetNavigationRoutesFinishedObserver(observer)
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo)
+            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo),
         )
 
         verify(exactly = 1) { observer.onRoutesChanged(slot.captured) }
@@ -229,38 +230,9 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
-    fun `when route set, compatibility cache notified`() {
-        mockkObject(RouteCompatibilityCache)
-        session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo)
-        )
-
-        verify(exactly = 1) { RouteCompatibilityCache.setDirectionsSessionResult(routes) }
-        verify(exactly = 0) { RouteCompatibilityCache.cacheCreationResult(routes) }
-
-        unmockkObject(RouteCompatibilityCache)
-    }
-
-    @Test
-    fun `when route cleared, compatibility cache notified`() {
-        session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo)
-        )
-
-        mockkObject(RouteCompatibilityCache)
-        session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp)
-        )
-
-        verify(exactly = 1) { RouteCompatibilityCache.setDirectionsSessionResult(emptyList()) }
-
-        unmockkObject(RouteCompatibilityCache)
-    }
-
-    @Test
     fun `observer notified on subscribe with actual route data`() {
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, SetRoutes.NewRoutes(0))
+            DirectionsSessionRoutes(routes, ignoredRoutes, SetRoutes.NewRoutes(0)),
         )
         val slot = slot<RoutesUpdatedResult>()
         every { observer.onRoutesChanged(capture(slot)) } just runs
@@ -271,7 +243,7 @@ class MapboxDirectionsSessionTest {
         assertEquals(
             "Routes update reason",
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
-            slot.captured.reason
+            slot.captured.reason,
         )
         assertEquals("Routes", routes, slot.captured.navigationRoutes)
         assertEquals("Ignored routes", listOf(ignoredRoute), slot.captured.ignoredRoutes)
@@ -280,7 +252,7 @@ class MapboxDirectionsSessionTest {
     @Test
     fun `observer notified on subscribe with explicit empty route data`() {
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp)
+            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp),
         )
         val slot = slot<RoutesUpdatedResult>()
         every { observer.onRoutesChanged(capture(slot)) } just runs
@@ -291,12 +263,12 @@ class MapboxDirectionsSessionTest {
         assertEquals(
             "Routes update reason",
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
-            slot.captured.reason
+            slot.captured.reason,
         )
         assertEquals(
             "Routes",
             emptyList<NavigationRoute>(),
-            slot.captured.navigationRoutes
+            slot.captured.navigationRoutes,
         )
     }
 
@@ -317,26 +289,26 @@ class MapboxDirectionsSessionTest {
 
         session.registerSetNavigationRoutesFinishedObserver(observer)
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, SetRoutes.NewRoutes(0))
+            DirectionsSessionRoutes(routes, ignoredRoutes, SetRoutes.NewRoutes(0)),
         )
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp)
+            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp),
         )
 
         assertTrue("Number of onRoutesChanged invocations", slot.size == 2)
         assertEquals(
             "First routes update reason",
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
-            slot[0].reason
+            slot[0].reason,
         )
         assertEquals("First routes", routes, slot[0].navigationRoutes)
         assertEquals("First ignored routes", listOf(ignoredRoute), slot[0].ignoredRoutes)
         assertEquals(
             "Second routes update reason",
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
-            slot[1].reason
+            slot[1].reason,
         )
-        assertEquals("Second routes", emptyList<DirectionsRoute>(), slot[1].navigationRoutes)
+        assertEquals("Second routes", emptyList<NavigationRoute>(), slot[1].navigationRoutes)
         assertEquals("Second ignored routes", emptyList<IgnoredRoute>(), slot[1].ignoredRoutes)
     }
 
@@ -347,14 +319,14 @@ class MapboxDirectionsSessionTest {
 
         session.registerSetNavigationRoutesFinishedObserver(observer)
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp)
+            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp),
         )
 
         assertTrue("Number of onRoutesChanged invocations", slot.size == 1)
         assertEquals(
             "Routes update reason",
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
-            slot[0].reason
+            slot[0].reason,
         )
         assertEquals("Routes", emptyList<NavigationRoute>(), slot[0].navigationRoutes)
         assertEquals("Ignored routes", emptyList<IgnoredRoute>(), slot[0].ignoredRoutes)
@@ -363,13 +335,13 @@ class MapboxDirectionsSessionTest {
     @Test
     fun `when route cleared for the second first time, observer not notified`() {
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp)
+            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp),
         )
 
         session.registerSetNavigationRoutesFinishedObserver(observer)
         clearMocks(observer)
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp)
+            DirectionsSessionRoutes(emptyList(), emptyList(), SetRoutes.CleanUp),
         )
 
         verify(exactly = 0) {
@@ -384,16 +356,16 @@ class MapboxDirectionsSessionTest {
 
         session.registerSetNavigationRoutesFinishedObserver(observer)
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, SetRoutes.NewRoutes(0))
+            DirectionsSessionRoutes(routes, ignoredRoutes, SetRoutes.NewRoutes(0)),
         )
         val newRoutes: List<NavigationRoute> = listOf(
             mockk {
                 every { directionsRoute } returns mockk()
-            }
+            },
         )
         val newIgnoredRoutes = listOf(mockk<IgnoredRoute>(relaxed = true))
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(newRoutes, newIgnoredRoutes, SetRoutes.NewRoutes(0))
+            DirectionsSessionRoutes(newRoutes, newIgnoredRoutes, SetRoutes.NewRoutes(0)),
         )
 
         verify(exactly = 1) { observer.onRoutesChanged(slot.captured) }
@@ -404,9 +376,9 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun `setting a route does not impact ongoing route request`() {
-        session.requestRoutes(routeOptions, routerCallback)
+        session.requestRoutes(routeOptions, signature, routerCallback)
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo)
+            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo),
         )
         verify(exactly = 0) { router.cancelAll() }
     }
@@ -416,7 +388,7 @@ class MapboxDirectionsSessionTest {
         session.registerSetNavigationRoutesFinishedObserver(observer)
         session.unregisterAllSetNavigationRoutesFinishedObserver()
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo)
+            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo),
         )
 
         verify(exactly = 0) { observer.onRoutesChanged(any()) }
@@ -425,7 +397,7 @@ class MapboxDirectionsSessionTest {
     @Test
     fun `routes when routesUpdatedResult is null`() {
         session.setNavigationRoutesFinished(
-            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo)
+            DirectionsSessionRoutes(routes, ignoredRoutes, mockSetRoutesInfo),
         )
 
         assertEquals(routes, session.routes)

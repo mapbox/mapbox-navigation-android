@@ -11,7 +11,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param profileLongOptions Profile long message options
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisConfigPathOptions private constructor(
+internal class AdasisConfigPathOptions private constructor(
     val stubOptions: AdasisStubOptions,
     val segmentOptions: AdasisSegmentOptions,
     val profileShortOptions: AdasisProfileShortOptions,
@@ -89,28 +89,28 @@ class AdasisConfigPathOptions private constructor(
         /**
          * Stub message options
          */
-        fun stubOptions(stubOptions: AdasisStubOptions) = apply {
+        fun stubOptions(stubOptions: AdasisStubOptions): Builder = apply {
             this.stubOptions = stubOptions
         }
 
         /**
          * Segment message options
          */
-        fun segmentOptions(segmentOptions: AdasisSegmentOptions) = apply {
+        fun segmentOptions(segmentOptions: AdasisSegmentOptions): Builder = apply {
             this.segmentOptions = segmentOptions
         }
 
         /**
          * Profile short message options
          */
-        fun profileShortOptions(profileShortOptions: AdasisProfileShortOptions) = apply {
+        fun profileShortOptions(profileShortOptions: AdasisProfileShortOptions): Builder = apply {
             this.profileShortOptions = profileShortOptions
         }
 
         /**
          * ProfileLong Profile long message options
          */
-        fun profileLongOptions(profileLongOptions: AdasisProfileLongOptions) = apply {
+        fun profileLongOptions(profileLongOptions: AdasisProfileLongOptions): Builder = apply {
             this.profileLongOptions = profileLongOptions
         }
 

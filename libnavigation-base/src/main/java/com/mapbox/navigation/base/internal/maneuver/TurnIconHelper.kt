@@ -28,7 +28,7 @@ import kotlin.math.roundToInt
  * Shared Helper class that maps Maneuver to Icon.
  */
 class TurnIconHelper(
-    turnIconResources: BaseTurnIconResources
+    turnIconResources: BaseTurnIconResources,
 ) {
 
     private val defaultTurnIcon = icon(turnIconResources.turnIconTurnStraight)
@@ -165,7 +165,7 @@ class TurnIconHelper(
                 degrees,
                 drivingSide,
                 if (iconSpec.drivingSideFlippable) shouldFlipIcon(drivingSide) else false,
-                iconSpec.icon
+                iconSpec.icon,
             )
         }
     }

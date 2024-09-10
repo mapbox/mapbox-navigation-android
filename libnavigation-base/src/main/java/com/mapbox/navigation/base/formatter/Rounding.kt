@@ -50,7 +50,7 @@ object Rounding {
         INCREMENT_TEN,
         INCREMENT_TWENTY_FIVE,
         INCREMENT_FIFTY,
-        INCREMENT_ONE_HUNDRED
+        INCREMENT_ONE_HUNDRED,
     )
     annotation class Increment
 }

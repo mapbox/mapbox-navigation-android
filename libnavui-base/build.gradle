@@ -19,11 +19,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
-    buildFeatures {
-        viewBinding true
-    }
-
+    
     defaultConfig {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
@@ -41,12 +37,10 @@ dependencies {
     api project(':libnavigation-base')
     api project(':libnavigation-core')
     api project(":libnavui-util")
-    implementation project(":libnavui-resources")
     implementation dependenciesList.kotlinStdLib
     api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.androidXCore
     api dependenciesList.androidXAnnotation
-    api dependenciesList.viewBinding
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXConstraintLayout
 

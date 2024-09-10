@@ -5,10 +5,10 @@ import android.app.Application
 import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import com.mapbox.navigation.utils.internal.logI
 
 class CarAppLifecycleOwner : LifecycleOwner {
@@ -29,7 +29,7 @@ class CarAppLifecycleOwner : LifecycleOwner {
         .apply { currentState = Lifecycle.State.INITIALIZED }
 
     @VisibleForTesting
-    internal val startedReferenceCounter = object : DefaultLifecycleObserver() {
+    internal val startedReferenceCounter = object : DefaultLifecycleObserver {
         override fun onCreate(owner: LifecycleOwner) {
             if (!lifecycleCreated.add(owner)) return
             if (createdChangingConfiguration > 0) {
